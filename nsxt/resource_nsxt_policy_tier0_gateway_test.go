@@ -186,6 +186,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVrfSubnets(t *testing.T) {
 	// Also set vrf_transit_subnet. Needs NSX 4.1.0 or above.
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
+	forwardingUpTimer := "10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.1.0") },
@@ -195,13 +196,30 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVrfSubnets(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name),
+				Config: testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name, forwardingUpTimer),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.forwarding_up_timer", forwardingUpTimer),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+					resource.TestCheckResourceAttr(testResourceName, "internal_transit_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "vrf_transit_subnets.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0SubnetsMinimalistic(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					// connectivity default is ON, however timer default has changed in NSX 4.2, hence not validating it
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "internal_transit_subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "vrf_transit_subnets.#", "1"),
@@ -815,7 +833,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, name)
 }
 
-func testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name string) string {
+func testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name string, timer string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
@@ -830,6 +848,11 @@ resource "nsxt_policy_tier0_gateway" "test" {
   transit_subnets           = ["101.64.0.0/16"]
   vrf_transit_subnets       = ["103.64.0.0/28"]
 
+  advanced_config {
+    connectivity        = "ON"
+    forwarding_up_timer = %s
+  }
+
   tag {
     scope = "scope3"
     tag   = "tag3"
@@ -838,6 +861,15 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
+}`, name, timer)
+}
+
+func testAccNsxtPolicyTier0SubnetsMinimalistic(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name              = "%s"
+  failover_mode             = "NON_PREEMPTIVE"
+  ha_mode                   = "ACTIVE_STANDBY"
 }`, name)
 }
 

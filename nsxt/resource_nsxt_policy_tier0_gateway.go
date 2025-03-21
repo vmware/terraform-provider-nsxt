@@ -27,7 +27,8 @@ import (
 
 var haModeValues = []string{
 	model.Tier0_HA_MODE_ACTIVE,
-	model.Tier0_HA_MODE_STANDBY}
+	model.Tier0_HA_MODE_STANDBY,
+}
 
 var nsxtPolicyTier0GatewayBgpGracefulRestartModes = []string{
 	model.BgpGracefulRestartConfig_MODE_DISABLE,
@@ -37,6 +38,11 @@ var nsxtPolicyTier0GatewayBgpGracefulRestartModes = []string{
 
 var policyVRFRouteValues = []string{
 	model.VrfRouteTargets_ADDRESS_FAMILY_EVPN,
+}
+
+var tier0ConnectivityValues = []string{
+	model.Tier0AdvancedConfig_CONNECTIVITY_ON,
+	model.Tier0AdvancedConfig_CONNECTIVITY_OFF,
 }
 
 var policyBGPGracefulRestartTimerDefault = 180
@@ -141,6 +147,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Description: "Internal flag to indicate whether legacy redistribution config is used",
 				Computed:    true,
 			},
+			"advanced_config": getTier0AdvancedConfigSchema(),
 		},
 	}
 }
@@ -306,6 +313,33 @@ func getPolicyVRFConfigSchema() *schema.Schema {
 							},
 						},
 					},
+				},
+			},
+		},
+	}
+}
+
+func getTier0AdvancedConfigSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Advanced configuration",
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"connectivity": {
+					Type:         schema.TypeString,
+					Description:  "Connectivity configuration to manually connect Tier-0/Tier1 segment from corresponding gateway",
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validation.StringInSlice(tier0ConnectivityValues, false),
+				},
+				"forwarding_up_timer": {
+					Type:        schema.TypeInt,
+					Description: "Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established",
+					Optional:    true,
+					Computed:    true,
 				},
 			},
 		},
@@ -715,6 +749,42 @@ func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.Struct
 	return dataValue.(*data.StructValue), nil
 }
 
+func getTier0AdvancedConfigFromSchema(d *schema.ResourceData) *model.Tier0AdvancedConfig {
+	advancedConfigList := d.Get("advanced_config").([]interface{})
+
+	for _, config := range advancedConfigList {
+		if config == nil {
+			return nil
+		}
+		configMap := config.(map[string]interface{})
+		connectivity := configMap["connectivity"].(string)
+		forwardingUpTimer := int64(configMap["forwarding_up_timer"].(int))
+		obj := &model.Tier0AdvancedConfig{
+			ForwardingUpTimer: &forwardingUpTimer,
+		}
+
+		if len(connectivity) > 0 {
+			obj.Connectivity = &connectivity
+		}
+		return obj
+	}
+
+	return nil
+}
+
+func setTier0AdvancedConfigInSchema(d *schema.ResourceData, obj *model.Tier0AdvancedConfig) {
+	var advancedConfigList []map[string]interface{}
+
+	if obj != nil {
+		configMap := make(map[string]interface{})
+		configMap["connectivity"] = obj.Connectivity
+		configMap["forwarding_up_timer"] = obj.ForwardingUpTimer
+		advancedConfigList = append(advancedConfigList, configMap)
+	}
+
+	d.Set("advanced_config", advancedConfigList)
+}
+
 func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *schema.ResourceData, connector client.Connector, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
@@ -766,6 +836,11 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 
 	if util.NsxVersionHigherOrEqual("4.1.0") {
 		t0Struct.VrfTransitSubnets = vrfTransitSubnets
+	}
+
+	if util.NsxVersionHigherOrEqual("3.1.0") {
+		advancedConfig := getTier0AdvancedConfigFromSchema(d)
+		t0Struct.AdvancedConfig = advancedConfig
 	}
 
 	if len(d.Id()) > 0 {
@@ -1017,6 +1092,8 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return fmt.Errorf("Failed to get Tier0 %s ipv6 profiles: %v", *obj.Id, err)
 	}
+
+	setTier0AdvancedConfigInSchema(d, obj.AdvancedConfig)
 
 	if isGlobalManager {
 		err = setPolicyGatewayIntersiteConfigInSchema(d, obj.IntersiteConfig)
