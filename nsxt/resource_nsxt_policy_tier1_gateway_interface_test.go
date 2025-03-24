@@ -245,7 +245,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_updateGateway(t *testing.T) 
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
