@@ -541,6 +541,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_l7_access_profile":              resourceNsxtPolicyL7AccessProfile(),
 			"nsxt_policy_edge_transport_node":            resourceNsxtPolicyEdgeTransportNode(),
 			"nsxt_policy_edge_high_availability_profile": resourceNsxtPolicyEdgeHighAvailabilityProfile(),
+			"nsxt_policy_constraint":                     resourceNsxtPolicyConstraint(),
 		},
 
 		ConfigureFunc: providerConfigure,
