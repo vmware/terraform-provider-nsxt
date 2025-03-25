@@ -267,13 +267,14 @@ func testAccGetSessionContext() tf_api.SessionContext {
 }
 
 func testAccGetSessionProjectContext() tf_api.SessionContext {
-	clientType := testAccIsGlobalManager2()
 	projectID := os.Getenv("NSXT_PROJECT_ID")
-	vpcID := ""
-	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
+	if projectID != "" {
+		return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
+	}
+	return tf_api.SessionContext{ClientType: tf_api.Local}
 }
 
-func testAccGetProjectContext() tf_api.SessionContext {
+func testAccGetMultitenancyContext() tf_api.SessionContext {
 	projectID := os.Getenv("NSXT_PROJECT_ID")
 	return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
 }

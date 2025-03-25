@@ -156,7 +156,7 @@ func testAccNsxtVpcExists(displayName string, resourceName string) resource.Test
 			return fmt.Errorf("Policy Vpc resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtVpcExists(testAccGetProjectContext(), resourceID, connector)
+		exists, err := resourceNsxtVpcExists(testAccGetMultitenancyContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -177,7 +177,7 @@ func testAccNsxtVpcCheckDestroy(state *terraform.State, displayName string) erro
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtVpcExists(testAccGetProjectContext(), resourceID, connector)
+		exists, err := resourceNsxtVpcExists(testAccGetMultitenancyContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}
