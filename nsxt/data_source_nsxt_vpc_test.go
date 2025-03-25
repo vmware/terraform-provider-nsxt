@@ -56,7 +56,7 @@ func testAccDataSourceNsxtVPCCreate(name string) error {
 	}
 
 	ipBlockID := newUUID()
-	err = testAccDataSourceNsxtPolicyIPBlockCreate(testAccGetProjectContext(), name, ipBlockID, "192.168.240.0/24", true)
+	err = testAccDataSourceNsxtPolicyIPBlockCreate(testAccGetMultitenancyContext(), name, ipBlockID, "192.168.240.0/24", true)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func testAccDataSourceNsxtVPCDeleteByName(name string) error {
 			if err != nil {
 				return handleDeleteError("VPC", *objInList.Id, err)
 			}
-			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(testAccGetProjectContext(), name)
+			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(testAccGetMultitenancyContext(), name)
 		}
 	}
 	return fmt.Errorf("error while deleting VPC '%s': resource not found", name)

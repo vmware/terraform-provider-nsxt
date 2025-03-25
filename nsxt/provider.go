@@ -546,6 +546,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_high_availability_profile": resourceNsxtPolicyEdgeHighAvailabilityProfile(),
 			"nsxt_policy_edge_cluster":                   resourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_ip_block_quota":                 resourceNsxtPolicyIpBlockQuota(),
+			"nsxt_policy_constraint":                     resourceNsxtPolicyConstraint(),
 		},
 
 		ConfigureFunc: providerConfigure,
