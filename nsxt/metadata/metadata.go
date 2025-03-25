@@ -26,6 +26,11 @@ var StandardTypeIdentifier = TypeIdentifier{
 	APIFieldName: "type",
 }
 
+var ResourceTypeTypeIdentifier = TypeIdentifier{
+	SdkName:      "ResourceType",
+	APIFieldName: "resource_type",
+}
+
 const (
 	PolymorphicTypeFlatten = "flatten"
 	PolymorphicTypeNested  = "nested"

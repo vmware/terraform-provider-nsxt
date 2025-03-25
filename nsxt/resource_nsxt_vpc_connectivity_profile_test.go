@@ -140,7 +140,7 @@ func testAccNsxtVpcConnectivityProfileExists(resourceName string) resource.TestC
 			return fmt.Errorf("Policy VpcConnectivityProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtVpcConnectivityProfileExists(testAccGetProjectContext(), resourceID, connector)
+		exists, err := resourceNsxtVpcConnectivityProfileExists(testAccGetMultitenancyContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -161,7 +161,7 @@ func testAccNsxtVpcConnectivityProfileCheckDestroy(state *terraform.State, displ
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtVpcConnectivityProfileExists(testAccGetProjectContext(), resourceID, connector)
+		exists, err := resourceNsxtVpcConnectivityProfileExists(testAccGetMultitenancyContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}
