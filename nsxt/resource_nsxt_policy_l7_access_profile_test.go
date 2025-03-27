@@ -71,6 +71,7 @@ var accTestPolicyL7AccessProfileUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyL7AccessProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyL7AccessProfileBasic(t, false, func() {
 		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
 	})
 }
 
@@ -179,7 +180,7 @@ func TestAccResourceNsxtPolicyL7AccessProfile_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_l7_access_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL7AccessProfileCheckDestroy(state, name)
