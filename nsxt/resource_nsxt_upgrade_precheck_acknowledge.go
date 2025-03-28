@@ -137,8 +137,7 @@ func getAcknowledgedPrecheckIDs(m interface{}) ([]string, error) {
 		return result, err
 	}
 	for _, warning := range precheckWarnings {
-		acked := *warning.Acked
-		if acked {
+		if warning.Acked != nil && *warning.Acked {
 			result = append(result, *warning.Id)
 		}
 	}

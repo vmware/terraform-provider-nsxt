@@ -57,7 +57,7 @@ var (
 	// Default waiting setup in seconds
 	defaultUpgradeStatusCheckInterval   = 30
 	defaultUpgradeStatusCheckTimeout    = 3600
-	defaultUpgradeStatusCheckDelay      = 300
+	defaultUpgradeStatusCheckDelay      = 30
 	defaultUpgradeStatusCheckMaxRetries = 100
 )
 
