@@ -91,17 +91,17 @@ func isSingleIP(v string) bool {
 
 func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
 	v = strings.TrimSpace(v)
-	_, ipnet, err := net.ParseCIDR(v)
+	ip, ipnet, err := net.ParseCIDR(v)
 	if err != nil {
 		return false
 	}
 	if ipnet == nil {
 		return false
 	}
-	if isIP && (v == ipnet.String()) && !allowMaxPrefix {
+	if isIP && (ip.String() == ipnet.IP.String()) && !allowMaxPrefix {
 		return false
 	}
-	if !isIP && (v != ipnet.String()) {
+	if !isIP && (ip.String() != ipnet.IP.String()) {
 		return false
 	}
 
