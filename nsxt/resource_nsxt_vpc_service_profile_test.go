@@ -44,7 +44,7 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtVpcServiceProfileTemplate(true, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
@@ -67,7 +67,7 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				// add profiles
 				Config: testAccNsxtVpcServiceProfileTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
@@ -94,7 +94,7 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				// update values, no profiles
 				Config: testAccNsxtVpcServiceProfileTemplate(false, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
@@ -119,7 +119,7 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtVpcServiceProfileDhcpRelay(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -131,9 +131,9 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcServiceProfileMinimalistic(),
+				Config: testAccNsxtVpcServiceProfileMinimalistic(accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -158,7 +158,7 @@ func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcServiceProfileMinimalistic(),
+				Config: testAccNsxtVpcServiceProfileMinimalistic(getAccTestResourceName()),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -170,7 +170,7 @@ func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNsxtVpcServiceProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtVpcServiceProfileExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -310,13 +310,12 @@ resource "nsxt_vpc_service_profile" "test" {
 }`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["server_addresses"])
 }
 
-func testAccNsxtVpcServiceProfileMinimalistic() string {
+func testAccNsxtVpcServiceProfileMinimalistic(displayName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
   dhcp_config {
   }
-  
-}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"])
+}`, testAccNsxtProjectContext(), displayName)
 }
