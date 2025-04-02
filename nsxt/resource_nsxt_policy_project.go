@@ -78,6 +78,11 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
+			"quotas": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 			"default_security_profile": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -149,6 +154,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	vcFolder := d.Get("vc_folder").(bool)
 	extIpv4BlocksList := getStringListFromSchemaList(d, "external_ipv4_blocks")
 	tgwConnectionsList := getStringListFromSchemaList(d, "tgw_external_connections")
+	quotasList := getStringListFromSchemaList(d, "quotas")
 
 	obj := model.Project{
 		DisplayName:        &displayName,
@@ -170,6 +176,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		obj.TgwExternalConnections = tgwConnectionsList
 		obj.VcFolder = &vcFolder
+		obj.Limits = quotasList
 	}
 
 	if shortID != "" {
@@ -306,6 +313,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		d.Set("tgw_external_connections", obj.TgwExternalConnections)
 		d.Set("vc_folder", obj.VcFolder)
+		d.Set("quotas", obj.Limits)
 	}
 	return nil
 }

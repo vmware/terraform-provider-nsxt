@@ -18,7 +18,6 @@ resource "nsxt_policy_project" "test" {
   description         = "Terraform provisioned Project"
   short_id            = "test"
   tier0_gateway_paths = ["/infra/tier-0s/test"]
-
 }
 ```
 
@@ -42,6 +41,7 @@ The following arguments are supported:
   * `north_south_firewall` - (Required) North South firewall configuration.
     * `enabled` - (Required) This flag indicates whether north-south firewall (Gateway Firewall) is enabled. If set to false, then gateway firewall policies will not be enforced on the VPCs associated with this configuration.
 * `vc_folder` - (Optional) Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC. Defaults to `true`.
+* `quotas` - (Optional) List of policy paths for quota resources that are applicable to this project.
 
 ## Attributes Reference
 
