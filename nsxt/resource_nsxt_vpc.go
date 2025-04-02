@@ -115,6 +115,25 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 			OmitIfEmpty:  true,
 		},
 	},
+	"quotas": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "list",
+			SdkFieldName: "Limits",
+		},
+	},
 }
 
 // VPC resource needs dedicated importer since its path is VPC path,
