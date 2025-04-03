@@ -43,7 +43,7 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtVpcConnectivityProfileTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcConnectivityProfileExists(accTestVpcConnectivityProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcConnectivityProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileCreateAttributes["display_name"]),
@@ -63,7 +63,7 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtVpcConnectivityProfileTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcConnectivityProfileExists(accTestVpcConnectivityProfileUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcConnectivityProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileUpdateAttributes["display_name"]),
@@ -81,9 +81,9 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcConnectivityProfileMinimalistic(),
+				Config: testAccNsxtVpcConnectivityProfileMinimalistic(accTestVpcConnectivityProfileCreateAttributes["display_name"]),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcConnectivityProfileExists(accTestVpcConnectivityProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcConnectivityProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -110,7 +110,10 @@ func TestAccResourceNsxtVpcConnectivityProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcConnectivityProfileMinimalistic(),
+				// provide ramdom display name here, since this test runs in parallel with _basic test,
+				// which covers data source check. randomizing display name prevents multiple profiles
+				// with same name
+				Config: testAccNsxtVpcConnectivityProfileMinimalistic(getAccTestResourceName()),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -122,7 +125,7 @@ func TestAccResourceNsxtVpcConnectivityProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNsxtVpcConnectivityProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtVpcConnectivityProfileExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -215,12 +218,12 @@ data "nsxt_vpc_connectivity_profile" "test" {
 }`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["enable_default_snat"], attrMap["enable"], testAccNsxtProjectContext(), attrMap["display_name"])
 }
 
-func testAccNsxtVpcConnectivityProfileMinimalistic() string {
+func testAccNsxtVpcConnectivityProfileMinimalistic(displayName string) string {
 	return testAccNsxtVpcConnectivityProfilePrerequisite() + fmt.Sprintf(`
 resource "nsxt_vpc_connectivity_profile" "test" {
 %s
   display_name         = "%s"
   transit_gateway_path = data.nsxt_policy_transit_gateway.test.path
 
-}`, testAccNsxtProjectContext(), accTestVpcConnectivityProfileUpdateAttributes["display_name"])
+}`, testAccNsxtProjectContext(), displayName)
 }
