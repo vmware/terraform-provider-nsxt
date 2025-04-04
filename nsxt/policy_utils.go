@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"regexp"
 	"strings"
 	"time"
 
@@ -539,11 +538,7 @@ func isPolicyPath(policyPath string) bool {
 }
 
 func isValidID(id string) bool {
-	v, err := regexp.MatchString("^[0-9a-zA-Z_\\-]+$", id)
-	if err != nil {
-		return false
-	}
-	return v
+	return !strings.ContainsAny(id, "/&")
 }
 
 func getPolicyIDFromPath(path string) string {
