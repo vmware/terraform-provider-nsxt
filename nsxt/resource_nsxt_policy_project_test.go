@@ -483,15 +483,15 @@ resource "nsxt_policy_project" "test" {
 `
 
 func getBasicAttrMap(createFlow, includeT0GW bool) map[string]string {
-	var attrMap map[string]string
+	attrMap := make(map[string]string)
+	baseMap := accTestPolicyProjectUpdateAttributes
 	if createFlow {
-		attrMap = accTestPolicyProjectCreateAttributes
-	} else {
-		// do not pass short_id on update
-		attrMap = make(map[string]string)
-		attrMap["DisplayName"] = accTestPolicyProjectUpdateAttributes["DisplayName"]
-		attrMap["Description"] = accTestPolicyProjectUpdateAttributes["Description"]
+		baseMap = accTestPolicyProjectCreateAttributes
+		//do not pass short_id on update
+		attrMap["ShortId"] = baseMap["ShortId"]
 	}
+	attrMap["DisplayName"] = baseMap["DisplayName"]
+	attrMap["Description"] = baseMap["Description"]
 	if includeT0GW {
 		attrMap["T0GwPath"] = "data.nsxt_policy_tier0_gateway.test.path"
 	}
@@ -502,7 +502,7 @@ func getBasicAttrMap(createFlow, includeT0GW bool) map[string]string {
 func testAccNsxtPolicyProjectTemplate410(createFlow, includeT0GW bool) string {
 	attrMap := getBasicAttrMap(createFlow, includeT0GW)
 	buffer := new(bytes.Buffer)
-	tmpl, err := template.New("testAaccNsxtPolicyProject").Parse(templateData)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate410").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
@@ -520,7 +520,7 @@ func testAccNsxtPolicyProjectTemplate411(createFlow, includeT0GW, includeExterna
 	}
 	attrMap["SetIpBlockVisibility"] = "true"
 	buffer := new(bytes.Buffer)
-	tmpl, err := template.New("testAaccNsxtPolicyProject").Parse(templateData)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate411").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
@@ -539,7 +539,7 @@ func testAccNsxtPolicyProjectTemplate420(createFlow, includeT0GW, includeExterna
 	attrMap["SetIpBlockVisibility"] = "true"
 	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
 	buffer := new(bytes.Buffer)
-	tmpl, err := template.New("testAaccNsxtPolicyProject").Parse(templateData)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate420").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
@@ -559,7 +559,7 @@ func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExterna
 	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
 	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
 	buffer := new(bytes.Buffer)
-	tmpl, err := template.New("testAaccNsxtPolicyProject").Parse(templateData)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate900").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
