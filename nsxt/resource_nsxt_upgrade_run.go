@@ -57,8 +57,8 @@ var (
 	// Default waiting setup in seconds
 	defaultUpgradeStatusCheckInterval   = 30
 	defaultUpgradeStatusCheckTimeout    = 3600
-	defaultUpgradeStatusCheckDelay      = 300
-	defaultUpgradeStatusCheckMaxRetries = 100
+	defaultUpgradeStatusCheckDelay      = 30
+	defaultUpgradeStatusCheckMaxRetries = 150
 )
 
 var staticComponentUpgradeStatus = []string{
@@ -480,15 +480,11 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 			upgradeClientSet.PlanClient.Pause()
 		}
 		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
-		err = waitUpgradeForStatus(upgradeClientSet, &component, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
+		curStatus, err := waitUpgradeForStatus(upgradeClientSet, &component, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus, false)
 		if err != nil {
 			return err
 		}
-		status, err = getUpgradeStatus(upgradeClientSet.StatusClient, &component)
-		if err != nil {
-			return err
-		}
-		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+		if curStatus == model.ComponentUpgradeStatus_STATUS_SUCCESS {
 			return fmt.Errorf("unexpected status 'SUCCESS' for component '%s. Possibly there is a concurrent upgrade run'", component)
 		}
 
@@ -574,7 +570,11 @@ func getUpgradeStatus(statusClient upgrade.StatusSummaryClient, component *strin
 }
 
 // Wait component upgrade status to become target status. Using nil component for overall upgrade status.
-func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string, pending, target []string) error {
+func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string, pending, target []string, doDelay bool) (string, error) {
+	delay := time.Duration(0)
+	if doDelay {
+		delay = time.Duration(upgradeClientSet.Delay) * time.Second
+	}
 	stateConf := &resource.StateChangeConf{
 		Pending: pending,
 		Target:  target,
@@ -597,7 +597,7 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 		},
 		Timeout:        time.Duration(upgradeClientSet.Timeout) * time.Second,
 		PollInterval:   time.Duration(upgradeClientSet.Interval) * time.Second,
-		Delay:          time.Duration(upgradeClientSet.Delay) * time.Second,
+		Delay:          delay,
 		NotFoundChecks: upgradeClientSet.MaxRetries,
 	}
 	statusI, err := stateConf.WaitForState()
@@ -608,9 +608,13 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 			status := statusI.(*upgradeStatusAndDetail)
 			statusDetail = fmt.Sprintf(" Current status: %s. Details: %s", status.Status, status.Detail)
 		}
-		return fmt.Errorf("failed to wait Upgrade to be %s: %v. %s", target, err, statusDetail)
+		return "", fmt.Errorf("failed to wait Upgrade to be %s: %v. %s", target, err, statusDetail)
 	}
-	return nil
+	status := ""
+	if statusI != nil {
+		status = statusI.(*upgradeStatusAndDetail).Status
+	}
+	return status, nil
 }
 
 func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, component string, preResetGroupList model.UpgradeUnitGroupListResult, hasVLCM *bool) error {
@@ -825,10 +829,12 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		// there is a period that overall status is still IN_PROGRESS, which will prevent us to start the upgrade of next component.
 		// Wait here for the overall status become stable. Because there is potential upgrade triggered before, we wait here also
 		// for the first component for safety.
-		err = waitUpgradeForStatus(upgradeClientSet, nil, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
+		_, err = waitUpgradeForStatus(upgradeClientSet, nil, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus, false)
 		if err != nil {
 			return err
 		}
+
+		// Retrieve the component status - this is different from the general status which is fetched above
 		status, err = getUpgradeStatus(upgradeClientSet.StatusClient, &component)
 		if err != nil {
 			return err
@@ -880,9 +886,14 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		if err != nil {
 			return err
 		}
-		err = waitUpgradeForStatus(upgradeClientSet, &component, pendingStatus, targetStatus)
+		curStatus, err := waitUpgradeForStatus(upgradeClientSet, &component, pendingStatus, targetStatus, true)
 		if err != nil {
 			return err
+		}
+
+		if partialUpgradeMap[component] && curStatus == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+			log.Printf("[INFO] Upgrade of component %s is complete, pausing", component)
+			return nil
 		}
 		log.Print(completeLog)
 	}
