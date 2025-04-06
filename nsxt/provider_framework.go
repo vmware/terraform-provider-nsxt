@@ -607,6 +607,7 @@ func (n nsxtProvider) DataSources(ctx context.Context) []func() datasource.DataS
 func (n nsxtProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewPolicyIPDiscoveryProfileResource,
+		NewPolicyQOSProfileResource,
 	}
 }
 

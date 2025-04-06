@@ -70,7 +70,7 @@ func GetOrGenerateID2(ctx context.Context, client interface{}, nsxID types.Strin
 	}
 
 	if exists {
-		diag.AddError("Failed to add add resource", fmt.Sprintf("resource with id %s already exists", id))
+		diag.AddError("Failed to add resource", fmt.Sprintf("resource with id %s already exists", id))
 	}
 
 	return id
@@ -107,3 +107,8 @@ func NsxtPolicyPathResourceImporterHelper(ctx context.Context, request resource.
 	}
 	return ErrNotAPolicyPath
 }
+
+// func getFrameworkPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
+// 	tags, _ := getCustomizedPolicyTagsFromSchema(d, "tag")
+// 	return tags
+// }

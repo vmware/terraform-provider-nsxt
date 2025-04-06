@@ -5,6 +5,7 @@ package customtypes
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -36,7 +37,7 @@ func GetTagsSchema(required bool, forceNew bool) schema.ListNestedBlock {
 		planModifiers = []planmodifier.String{stringplanmodifier.RequiresReplace()}
 	}
 	return schema.ListNestedBlock{
-		Description: "Description for this resource",
+		Description: "Set of opaque identifiers meaningful to the user",
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"scope": schema.StringAttribute{
