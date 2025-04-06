@@ -19,6 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/customtypes"
@@ -411,6 +413,7 @@ func (r *PolicyQOSProfileResource) Delete(ctx context.Context, req resource.Dele
 func getFrameworkQosRateShaperSchema(index int) schema.ListNestedBlock {
 	scale := rateFrameworkShaperScales[index]
 	return schema.ListNestedBlock{
+		Validators: []validator.List{listvalidator.SizeAtMost(1)},
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"enabled": schema.BoolAttribute{
