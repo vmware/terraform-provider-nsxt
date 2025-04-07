@@ -8,7 +8,6 @@ BUILD_PATH=$$(go env GOPATH)
 default: build
 
 tools:
-	GO111MODULE=on go install -mod=mod github.com/client9/misspell/cmd/misspell
 	GO111MODULE=on go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45
 	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt
 
@@ -58,23 +57,18 @@ test-compile:
 
 website-lint:
 	@echo "==> Checking website against linters..."
-	@misspell -error -source=text website/ || (echo; \
-	    echo "Unexpected mispelling found in website files."; \
-	    echo "To automatically fix the misspelling, run 'make website-lint-fix' and commit the changes."; \
-	    exit 1)
-	@terrafmt diff ./website --check --pattern '*.markdown' --quiet || (echo; \
+	@terrafmt diff ./docs --check --pattern '*.md' --quiet || (echo; \
 	    echo "Unexpected differences in website HCL formatting."; \
-	    echo "To see the full differences, run: terrafmt diff ./website --pattern '*.markdown'"; \
+	    echo "To see the full differences, run: terrafmt diff ./docs --pattern '*.md'"; \
 	    echo "To automatically fix the formatting, run 'make website-lint-fix' and commit the changes."; \
 	    exit 1)
 
 website-lint-fix:
 	@echo "==> Applying automatic website linter fixes..."
-	@misspell -w -source=text website/
-	@terrafmt fmt ./website --pattern '*.markdown'
+	@terrafmt fmt ./docs --pattern '*.md'
 
 website-list-category:
-	@find . -name *.markdown | xargs grep subcategory | awk  -F '"' '{print $$2}' | sort | uniq
+	@find . -name *.md | xargs grep subcategory | awk  -F '"' '{print $$2}' | sort | uniq
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website-lint website-lint-fix tools
 
