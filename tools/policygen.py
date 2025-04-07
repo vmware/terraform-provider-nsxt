@@ -606,12 +606,12 @@ def main():
     if generate_data_source:
         spec = {TEMPLATE_DATA_SOURCE_FILE: "data_source_nsxt_policy_%s.go" % resource_lower,
                 TEMPLATE_DATA_SOURCE_TEST_FILE: "data_source_nsxt_policy_%s_test.go" % resource_lower,
-                TEMPLATE_DATA_SOURCE_DOC_FILE: "policy_%s.html.markdown" % resource_lower}
+                TEMPLATE_DATA_SOURCE_DOC_FILE: "policy_%s.md" % resource_lower}
 
     else:
         spec = {TEMPLATE_RESOURCE_FILE: "resource_nsxt_policy_%s.go" % resource_lower,
                 TEMPLATE_RESOURCE_TEST_FILE: "resource_nsxt_policy_%s_test.go" % resource_lower,
-                TEMPLATE_RESOURCE_DOC_FILE: "policy_%s.html.markdown" % resource_lower}
+                TEMPLATE_RESOURCE_DOC_FILE: "policy_%s.md" % resource_lower}
 
     for source, target in spec.items():
         print("Generating %s.." % target)
