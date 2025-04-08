@@ -117,6 +117,28 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtVpc_withID(t *testing.T) {
+	testResourceName := "nsxt_vpc.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcCheckDestroy(state, accTestVpcCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcWithID(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcCreateAttributes["short_id"]),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpc_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc.test"
@@ -260,6 +282,17 @@ resource "nsxt_vpc" "test" {
   # TODO - remove when default profiles are supported
   vpc_service_profile      = nsxt_vpc_service_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["display_name"], accTestVpcUpdateAttributes["short_id"])
+}
+
+func testAccNsxtVpcWithID() string {
+	return testAccNsxtVpcPrerequisites() + fmt.Sprintf(`
+resource "nsxt_vpc" "test" {
+  %s
+
+  nsx_id       = "test.%s"
+  display_name = "%s"
+  short_id     = "%s"
+}`, testAccNsxtProjectContext(), accTestVpcCreateAttributes["display_name"], accTestVpcCreateAttributes["display_name"], accTestVpcCreateAttributes["short_id"])
 }
 
 // We use short_id as nsx_id to make sure NSX populates the short_id correctly
