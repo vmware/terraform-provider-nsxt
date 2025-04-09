@@ -7,7 +7,7 @@ description: A policy Edge Node data source.
 
 # nsxt_policy_edge_node
 
-This data source provides information about policy edge nodes configured on NSX.
+This data source provides information about policy edge nodes configured within a cluster, on NSX.
 
 This data source is applicable to NSX Global Manager and NSX Policy Manager.
 
