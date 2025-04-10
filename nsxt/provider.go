@@ -344,6 +344,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_distributed_vlan_connection":                dataSourceNsxtPolicyDistributedVlanConnection(),
 			"nsxt_policy_services":                                   dataSourceNsxtPolicyServices(),
 			"nsxt_policy_groups":                                     dataSourceNsxtPolicyGroups(),
+			"nsxt_policy_edge_transport_node":                        dataSourceNsxtPolicyEdgeTransportNode(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
