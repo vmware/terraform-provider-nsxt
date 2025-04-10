@@ -192,6 +192,11 @@ When the ESXi software is not upgraded, the finalization stage will fail. There 
 the NSX management plane, the Edge appliances and the NSX bits on the ESXi hosts, and postpone the ESXi OS upgrade to 
 a later time.
 
+### Upgrading Global Manager
+
+NSX Global Manager upgrade is similar to Local Manager. Yet, Global Manager has no Edge or Host components and therefore
+Doesn't allow the configuration of these in upgrade groups in the `nsxt_upgrade_run` resource.
+
 ### Post upgrade checks
 
 Upgrade post check data sources can be used to examine the results of the edge and host upgrades, to conclude if the 
