@@ -608,6 +608,7 @@ func (n nsxtProvider) Resources(ctx context.Context) []func() resource.Resource 
 	return []func() resource.Resource{
 		NewPolicyIPDiscoveryProfileResource,
 		NewPolicyQOSProfileResource,
+		NewPolicyIntrusionServiceProfileResource,
 	}
 }
 
