@@ -26,7 +26,7 @@ Providers listed on the Terraform Registry can be automatically downloaded when 
 terraform {
   required_providers {
     nsxt = {
-      source  = "vmware/nsxt"
+      source = "vmware/nsxt"
     }
   }
   required_version = ">= x.y.z"
@@ -267,7 +267,6 @@ on linux_amd64
 + provider local/vmware/nsxt x.y.z
 ```
 
-[hashicorp]: https://www.hashicorp.com/
 [releases]: https://github.com/vmware/terraform-provider-nsxt/releases
 [terraform-provider-versioning]: https://developer.hashicorp.com/terraform/language/providers/configuration#version-provider-versions
 [terraform-registry]: https://registry.terraform.io

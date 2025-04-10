@@ -27,10 +27,10 @@ locations of certain pre-created resources that some tests require.
 Minimum Environment Variable:
 
 ```sh
-$ export NSXT_MANAGER_HOST="nsx-01.example.com"
-$ export NSXT_USERNAME="admin"
-$ export NSXT_PASSWORD="VMw@re123!VMw@re123!"
-$ export NSXT_ALLOW_UNVERIFIED_SSL=true
+export NSXT_MANAGER_HOST="nsx-01.example.com"
+export NSXT_USERNAME="admin"
+export NSXT_PASSWORD="VMw@re123!VMw@re123!"
+export NSXT_ALLOW_UNVERIFIED_SSL=true
 ```
 
 ## Running the Acceptance Tests
@@ -38,7 +38,7 @@ $ export NSXT_ALLOW_UNVERIFIED_SSL=true
 You can run the acceptance tests by running:
 
 ```sh
-$ make testacc
+make testacc
 ```
 
 If you want to run against a specific set of tests, run `make testacc` with the
