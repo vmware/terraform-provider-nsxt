@@ -626,8 +626,9 @@ func setFrameworkIdsProfileCriteriaInSchema(state policyIntrusionServiceProfileM
 	var schemaList []map[string][]attr.Value
 	converter := bindings.NewTypeConverter()
 	criteriaMap := make(map[string][]attr.Value)
-	var dataValues []attr.Value
+
 	for i, item := range criteriaList {
+		dataValues := []attr.Value{}
 		// Odd elements are AND operators - ignoring them
 		if i%2 == 1 {
 			continue
