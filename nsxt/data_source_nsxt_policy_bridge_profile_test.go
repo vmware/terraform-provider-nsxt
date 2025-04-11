@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	ep "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -52,8 +52,8 @@ func getEdgeClusterPath() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error during test client initialization: %v", err)
 	}
-	client := nsx.NewEdgeClustersClient(connector)
-	clusterList, err := client.List(nil, nil, nil, nil, nil)
+	client := enforcement_points.NewEdgeClustersClient(connector)
+	clusterList, err := client.List(defaultSite, defaultEnforcementPoint, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("error during edge cluster list retrieval: %v", err)
 	}
