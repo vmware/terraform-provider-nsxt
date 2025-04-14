@@ -32,7 +32,7 @@ resource "nsxt_policy_edge_transport_node" "test" {
       dhcp_v4 = true
     }
     ip_assignment {
-      static_v6 {
+      static_ipv6 {
         default_gateway = "2001:0000:130F:0000:0000:09C0:876A:1"
         management_port_subnet {
           ip_addresses  = ["2001:0000:130F:0000:0000:09C0:876A:130B"]
