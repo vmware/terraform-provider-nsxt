@@ -12,7 +12,7 @@ This data source provides information about the realization of a transport node 
 ## Example Usage
 
 ```hcl
-resource "nsxt_transport_node" "test" {
+resource "nsxt_edge_transport_node" "test" {
   description  = "Terraform-deployed edge node"
   display_name = "tf_edge_node"
   standard_host_switch {
@@ -52,7 +52,7 @@ resource "nsxt_transport_node" "test" {
 }
 
 data "nsxt_transport_node_realization" "test" {
-  id      = nsxt_transport_node.test.id
+  id      = nsxt_edge_transport_node.test.id
   timeout = 60
 }
 ```
