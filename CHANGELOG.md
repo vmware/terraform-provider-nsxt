@@ -1,4 +1,49 @@
-## 3.8.0 (December 31, 2020)
+## 3.8.1 (April 14, 2025)
+
+BUG FIXES:
+
+* Ease validation on context ids to allow most special characters in project name ([#1592](https://github.com/vmware/terraform-provider-nsxt/pull/1592))
+* Fix IPv6 CIDR validation in various resources. Earlier valid IPv6 CIDRs were rejected ([#1586](https://github.com/vmware/terraform-provider-nsxt/pull/1586))
+* Fix upgrade pause issue, where upgrade process doesn't pause after finishing component upgrade ([#1585](https://github.com/vmware/terraform-provider-nsxt/pull/1585))
+* Support "&" special character with search by display name in data sources ([#1574](https://github.com/vmware/terraform-provider-nsxt/pull/1574))
+* `resource/nsxt_policy_site`: Add support for NSX versions < 4.1.0 ([#1573](https://github.com/vmware/terraform-provider-nsxt/pull/1573))
+* `resource/nsxt_policy_tier0_gateway`:  Add support for `advanced_config`, this enables configuration of `forwarding_up_timer` attribute, which is necessary to work around change of default in this attribute that NSX introduced with 4.2.0 - see discussion on [#1555](https://github.com/vmware/terraform-provider-nsxt/issues/1555) ([#1568](https://github.com/vmware/terraform-provider-nsxt/pull/1568))
+* `resource/nsxt_policy_group`: Force group recreation if `group_type` is modified ([#1557](https://github.com/vmware/terraform-provider-nsxt/pull/1557))
+* Fix crash in provider when empty block is specified in various resources ([#1552](https://github.com/vmware/terraform-provider-nsxt/pull/1552))
+* Validate retry configuration in provider ([#1547](https://github.com/vmware/terraform-provider-nsxt/pull/1547))
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Allow changing gateway configuration to `Distributed Only` by removing `edge_cluster_path` ([#1538](https://github.com/vmware/terraform-provider-nsxt/pull/1538))
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Avoid recreating gateway when `locale_service` configuration is changed ([#1517](https://github.com/vmware/terraform-provider-nsxt/pull/1517))
+* `resource/nsxt_compute_manager`: Fix non-empty diff caused by sensitive data in configuration ([#1506](https://github.com/vmware/terraform-provider-nsxt/pull/1506))
+
+IMPROVEMENTS:
+
+* `resource/nsxt_policy_lb_pool`: Improve validation for `snat` block ([#1562](https://github.com/vmware/terraform-provider-nsxt/pull/1562))
+* `resource/nsxt_policy_intrusion_service_profile`: Support `SUSPICIOUS` value for `severities` attribute ([#1561](https://github.com/vmware/terraform-provider-nsxt/pull/1561))
+* `resource/nsxt_policy_tier1_gateway`: Improve validation for `ha_mode` attribute - `NONE` can not be specified if `edge_cluster_path` is set ([#1559](https://github.com/vmware/terraform-provider-nsxt/pull/1559))
+* `resource/nsxt_upgrade_run`: Allow user to specify `max_retries` to control polling for upgrade coordinator status ([#1546](https://github.com/vmware/terraform-provider-nsxt/pull/1546))
+* `resource/nsxt_upgrade_run`: Fix crash in upgrade error flow ([#1543](https://github.com/vmware/terraform-provider-nsxt/pull/1543))
+* `resource/nsxt_upgrade_run`: Improve messaging with parallel upgrade ([#1531](https://github.com/vmware/terraform-provider-nsxt/pull/1531))
+* `resource/nsxt_edge_transport_node`, `resource/nsxt_policy_host_transport_node`, `resource/nsxt_policy_host_transport_node_profile`: Expose type-specific attributes for host switch profiles: `uplink_profile`, `vtep_ha_profile` instead of generic `host_switch_profile` attribute, which is now deprecated. This change fixes non-empty diff issue when one type of profile is auto-assigned by NSX ([#1527](https://github.com/vmware/terraform-provider-nsxt/pull/1527))
+* `resource/nsxt_edge_transport_node`, `resource/nsxt_policy_host_transport_node`, `resource/nsxt_policy_host_transport_node_profile`: Support IPv6 in management subnet ([#1524](https://github.com/vmware/terraform-provider-nsxt/pull/1524))
+* `resource/nsxt_edge_transport_node`, `resource/nsxt_policy_host_transport_node`, `resource/nsxt_policy_host_transport_node_profile`: Support IPv6 in data path configuration ([#1498](https://github.com/vmware/terraform-provider-nsxt/pull/1498))
+
+EXPERIMENTAL FEATURES:
+
+* `data/nsxt_policy_tags`
+
+FEATURES:
+
+* `resource/nsxt_policy_lb_cookie_persistence_profile`
+* `resource/nsxt_policy_lb_source_ip_persistence_profile`
+* `resource/nsxt_policy_lb_generic_persistence_profile`
+* `resource/nsxt_policy_lb_fast_tcp_application_profile`
+* `resource/nsxt_policy_lb_fast_udp_application_profile`
+* `resource/nsxt_policy_lb_server_ssl_profile`
+* `resource/nsxt_policy_l7_access_profile`
+* `resource/nsxt_policy_share`
+* `resource/nsxt_policy_shared_resource`
+
+## 3.8.0 (December 31, 2024)
 
 BUG FIXES:
 
