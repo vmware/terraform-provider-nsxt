@@ -6,10 +6,10 @@ package nsxt
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -33,10 +33,10 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource              = &PolicyIntrusionServiceProfileResource{}
-	_ resource.ResourceWithConfigure = &PolicyIntrusionServiceProfileResource{}
-	// _ resource.ResourceWithConfigValidators = &PolicyIntrusionServiceProfileResource{}
-	// TODO: revert this
+	_ resource.Resource                     = &PolicyIntrusionServiceProfileResource{}
+	_ resource.ResourceWithConfigure        = &PolicyIntrusionServiceProfileResource{}
+	_ resource.ResourceWithConfigValidators = &PolicyIntrusionServiceProfileResource{}
+
 	idsFrameworkProfileSeverityValues = []string{
 		model.IdsProfile_PROFILE_SEVERITY_MEDIUM,
 		model.IdsProfile_PROFILE_SEVERITY_HIGH,
@@ -44,7 +44,6 @@ var (
 		model.IdsProfile_PROFILE_SEVERITY_CRITICAL,
 		model.IdsProfile_PROFILE_SEVERITY_SUSPICIOUS,
 	}
-	// idsFrameworkProfileSeverityValues = []string{"CRITICAL", "HIGH", "MEDIUM", "LOW", "SUSPICIOUS"}
 )
 
 type policyIntrusionServiceProfileModel struct {
@@ -109,8 +108,17 @@ func (r *PolicyIntrusionServiceProfileResource) Schema(_ context.Context, _ reso
 	}
 }
 
-// func (r *PolicyIntrusionServiceProfileResource) ConfigValidators() resource.ConfigValidator {
-// }
+func (r *PolicyIntrusionServiceProfileResource) ConfigValidators(context context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.AtLeastOneOf(
+			path.MatchRoot("criteria").AtAnyListIndex().AtName("attack_types"),
+			path.MatchRoot("criteria").AtAnyListIndex().AtName("attack_targets"),
+			path.MatchRoot("criteria").AtAnyListIndex().AtName("cvss"),
+			path.MatchRoot("criteria").AtAnyListIndex().AtName("products_affected"),
+		),
+	}
+}
+
 func getFrameworkIdsProfileSignatureSchema() schema.SetNestedBlock {
 	return schema.SetNestedBlock{
 		NestedObject: schema.NestedBlockObject{
@@ -135,13 +143,6 @@ func getFrameworkIdsProfileSignatureSchema() schema.SetNestedBlock {
 
 func getFrameworkIdsProfileCriteriaSchema() schema.ListNestedBlock {
 	return schema.ListNestedBlock{
-		// Optional: true,
-		// Validators: []validator.List{listvalidator.AtLeastOneOf(
-		// 	path.MatchRoot("criteria").AtName("attack_types"),
-		// 	path.MatchRoot("criteria").AtMapKey("attack_targets"),
-		// 	path.MatchRoot("criteria").AtMapKey("cvss"),
-		// 	path.MatchRoot("criteria").AtMapKey("products_affected"),
-		// )},
 		NestedObject: schema.NestedBlockObject{
 			Attributes: map[string]schema.Attribute{
 				"attack_types": schema.SetAttribute{
@@ -172,7 +173,6 @@ func getFrameworkIdsProfileCriteriaSchema() schema.ListNestedBlock {
 func getFrameworkIdsProfileSignaturesFromSchema(ctx context.Context, config policyIntrusionServiceProfileModel) ([]model.IdsProfileLocalSignature, error) {
 	var result []model.IdsProfileLocalSignature
 
-	// signatures := d.Get("overridden_signature").(*schema.Set).List()
 	signatures := config.OverriddenSignature.Elements()
 	// if len(signatures) == 0 {
 	// 	return result, fmt.Errorf("No signatures provided")
@@ -236,32 +236,12 @@ func buildFrameworkIdsProfileCriteriaOperator() (*data.StructValue, error) {
 	return dataValue.(*data.StructValue), nil
 }
 
-func serializeCriteriaData(criteriaData map[string][]string, shaperStr string) error {
-	data := make(map[string]interface{})
-	err := json.Unmarshal([]byte(shaperStr), &data)
-	if err != nil {
-		return fmt.Errorf("Unable to parse shaperData :%v", err)
-	}
-
-	for k, v := range data {
-		l := []string{}
-		for _, i := range v.([]interface{}) {
-			l = append(l, i.(string))
-		}
-		if len(l) > 0 {
-			criteriaData[k] = l
-		}
-	}
-	return nil
-}
-
 func serializeCriteriaData1(val attr.Value) (map[string][]string, error) {
-	// Check if value is null or unknown
+
 	if val.IsNull() || val.IsUnknown() {
 		return nil, nil
 	}
 
-	// Assert value is Object
 	objVal, ok := val.(types.Object)
 	if !ok {
 		return nil, fmt.Errorf("expected Object type")
@@ -274,7 +254,6 @@ func serializeCriteriaData1(val attr.Value) (map[string][]string, error) {
 			continue
 		}
 
-		// Expect each field to be a Set of strings
 		setVal, ok := attrVal.(types.Set)
 		if !ok {
 			return nil, fmt.Errorf("expected Set type for key %q", key)
@@ -309,11 +288,11 @@ func getFrameworkIdsProfileCriteriaFromSchema(ctx context.Context, config policy
 		return []*data.StructValue{}, diag
 	}
 	var attackTypes []string
-	if criteriaData["attack_types"] != nil {
+	if len(criteriaData["attack_types"]) > 0 {
 		attackTypes = criteriaData["attack_types"]
 	}
 	var attackTargets []string
-	if criteriaData["attack_targets"] != nil {
+	if len(criteriaData["attack_targets"]) > 0 {
 		attackTargets = criteriaData["attack_targets"]
 	}
 	var cvss []string
@@ -321,7 +300,7 @@ func getFrameworkIdsProfileCriteriaFromSchema(ctx context.Context, config policy
 		cvss = criteriaData["cvss"]
 	}
 	var productsAffected []string
-	if criteriaData["products_affected"] != nil {
+	if len(criteriaData["products_affected"]) > 0 {
 		productsAffected = criteriaData["products_affected"]
 	}
 
@@ -427,7 +406,6 @@ func resourceFrameworkNsxtPolicyIntrusionServiceProfileExists(sessionContext utl
 }
 
 // Create creates the resource and sets the initial Terraform state.
-// Create a new resource.
 func (r *PolicyIntrusionServiceProfileResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var config policyIntrusionServiceProfileModel
@@ -570,7 +548,7 @@ func setFrameworkIdsProfileSeverities(state policyIntrusionServiceProfileModel, 
 	return basetypes.NewSetValue(types.StringType, elements)
 }
 
-func convertMapListToListValue(input []map[string][]attr.Value) (types.List, diag.Diagnostics) {
+func convertCriteriaMapListToListValue(input []map[string][]attr.Value) (types.List, diag.Diagnostics) {
 	// Define the object type that matches your schema
 	criteriaObjectType := types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -621,7 +599,6 @@ func convertMapListToListValue(input []map[string][]attr.Value) (types.List, dia
 	return listValue, diag
 }
 
-// TODO: revist
 func setFrameworkIdsProfileCriteriaInSchema(state policyIntrusionServiceProfileModel, criteriaList []*data.StructValue, diag diag.Diagnostics) (basetypes.ListValue, diag.Diagnostics) {
 	var schemaList []map[string][]attr.Value
 	converter := bindings.NewTypeConverter()
@@ -665,7 +642,7 @@ func setFrameworkIdsProfileCriteriaInSchema(state policyIntrusionServiceProfileM
 	if len(criteriaMap) > 0 {
 		schemaList = append(schemaList, criteriaMap)
 	}
-	return convertMapListToListValue(schemaList)
+	return convertCriteriaMapListToListValue(schemaList)
 }
 
 // Update updates the resource and sets the updated Terraform state on success.

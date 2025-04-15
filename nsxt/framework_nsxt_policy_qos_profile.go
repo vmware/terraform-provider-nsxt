@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -32,16 +33,17 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_                                        resource.Resource              = &PolicyQOSProfileResource{}
-	_                                        resource.ResourceWithConfigure = &PolicyQOSProfileResource{}
-	rateFrameworkShaperScales                                               = []string{"mbps", "kbps", "mbps"}
-	ingressFrameworkRateShaperIndex                                         = 0
-	ingressFrameworkBroadcastRateShaperIndex                                = 1
-	egressFrameworkRateShaperIndex                                          = 2
-	frameworkRateShaperSchemaKeys                                           = []string{"ingress_rate_shaper", "ingress_broadcast_rate_shaper", "egress_rate_shaper"}
-	frameworkRateShaperScales                                               = []string{"mbps", "kbps", "mbps"}
-	frameworkRateShaperResourceTypes                                        = []string{"IngressRateShaper", "IngressBroadcastRateShaper", "EgressRateShaper"}
-	frameworkRateLimiterResourceTypes                                       = []string{
+	_                                        resource.Resource                     = &PolicyQOSProfileResource{}
+	_                                        resource.ResourceWithConfigure        = &PolicyQOSProfileResource{}
+	_                                        resource.ResourceWithConfigValidators = &PolicyQOSProfileResource{}
+	rateFrameworkShaperScales                                                      = []string{"mbps", "kbps", "mbps"}
+	ingressFrameworkRateShaperIndex                                                = 0
+	ingressFrameworkBroadcastRateShaperIndex                                       = 1
+	egressFrameworkRateShaperIndex                                                 = 2
+	frameworkRateShaperSchemaKeys                                                  = []string{"ingress_rate_shaper", "ingress_broadcast_rate_shaper", "egress_rate_shaper"}
+	frameworkRateShaperScales                                                      = []string{"mbps", "kbps", "mbps"}
+	frameworkRateShaperResourceTypes                                               = []string{"IngressRateShaper", "IngressBroadcastRateShaper", "EgressRateShaper"}
+	frameworkRateLimiterResourceTypes                                              = []string{
 		model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER,
 		model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER,
 		model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER,
@@ -122,6 +124,16 @@ func (r *PolicyQOSProfileResource) Schema(_ context.Context, _ resource.SchemaRe
 			"ingress_broadcast_rate_shaper": getFrameworkQosRateShaperSchema(ingressFrameworkBroadcastRateShaperIndex),
 			"egress_rate_shaper":            getFrameworkQosRateShaperSchema(egressFrameworkRateShaperIndex),
 		},
+	}
+}
+
+func (r *PolicyQOSProfileResource) ConfigValidators(context context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.AtLeastOneOf(
+			path.MatchRoot("ingress_rate_shaper"),
+			path.MatchRoot("ingress_broadcast_rate_shaper"),
+			path.MatchRoot("egress_rate_shaper"),
+		),
 	}
 }
 

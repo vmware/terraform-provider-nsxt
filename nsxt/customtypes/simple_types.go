@@ -56,7 +56,7 @@ func GetContextSchema() schema.SingleNestedBlock {
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Description:   "Id of the project which the resource belongs to.",
-				Required:      true,
+				Optional:      true,
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				Validators:    []validator.String{stringvalidator.LengthAtLeast(1)},
 			},
