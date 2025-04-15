@@ -312,6 +312,7 @@ func (r *PolicyIPDiscoveryProfileResource) Update(ctx context.Context, request r
 	client := infra.NewIpDiscoveryProfilesClient(GetSessionContext(ctx, r.client, state.Context, response.Diagnostics), connector)
 	if client == nil {
 		response.Diagnostics.AddError(fmt.Sprintf("Error Updating IPDiscoveryProfile %s", id), policyResourceNotSupportedError().Error())
+		return
 	}
 
 	// Create the resource using PATCH

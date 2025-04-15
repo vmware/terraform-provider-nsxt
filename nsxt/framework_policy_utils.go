@@ -84,7 +84,7 @@ func NsxtPolicyPathResourceImporter(ctx context.Context, request resource.Import
 		response.Diagnostics.AddError("Resource import failed", err.Error())
 		return
 	}
-	return
+	// return
 }
 
 func NsxtPolicyPathResourceImporterHelper(ctx context.Context, request resource.ImportStateRequest, response *resource.ImportStateResponse) error {

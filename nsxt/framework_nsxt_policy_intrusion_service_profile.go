@@ -191,7 +191,7 @@ func getFrameworkIdsProfileSignaturesFromSchema(ctx context.Context, config poli
 		var dataMap (map[string]interface{})
 		err := serializeShaperData(&dataMap, item.String())
 		if err != nil {
-
+			return []model.IdsProfileLocalSignature{}, fmt.Errorf("Error parsing the profile signature data")
 		}
 		action := dataMap["action"].(string)
 		enabled := dataMap["enabled"].(bool)
@@ -434,7 +434,7 @@ func (r *PolicyIntrusionServiceProfileResource) Create(ctx context.Context, req 
 	if diags.HasError() {
 		resp.Diagnostics.AddError(
 			"getFrameworkIdsProfileCriteriaFromSchema",
-			fmt.Sprintf("Failed in getFrameworkIdsProfileCriteriaFromSchema"),
+			"Failed in getFrameworkIdsProfileCriteriaFromSchema",
 		)
 		return
 	}
@@ -673,7 +673,7 @@ func (r *PolicyIntrusionServiceProfileResource) Update(ctx context.Context, req 
 	if diags.HasError() {
 		resp.Diagnostics.AddError(
 			"getFrameworkIdsProfileCriteriaFromSchema",
-			fmt.Sprintf("Failed in getFrameworkIdsProfileCriteriaFromSchema"),
+			"Failed in getFrameworkIdsProfileCriteriaFromSchema",
 		)
 		return
 	}

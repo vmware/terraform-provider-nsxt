@@ -40,9 +40,7 @@ var (
 	ingressFrameworkRateShaperIndex                                                = 0
 	ingressFrameworkBroadcastRateShaperIndex                                       = 1
 	egressFrameworkRateShaperIndex                                                 = 2
-	frameworkRateShaperSchemaKeys                                                  = []string{"ingress_rate_shaper", "ingress_broadcast_rate_shaper", "egress_rate_shaper"}
 	frameworkRateShaperScales                                                      = []string{"mbps", "kbps", "mbps"}
-	frameworkRateShaperResourceTypes                                               = []string{"IngressRateShaper", "IngressBroadcastRateShaper", "EgressRateShaper"}
 	frameworkRateLimiterResourceTypes                                              = []string{
 		model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER,
 		model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER,
@@ -51,7 +49,6 @@ var (
 )
 
 var frameworkRateShaperSchemaNames []basetypes.ListValue
-var frameworkRateShaperSchemaNamesPtr []*basetypes.ListValue
 
 type policyQOSProfileModel struct {
 	NsxID                      types.String `tfsdk:"nsx_id"`
@@ -482,7 +479,7 @@ func getFrameworkPolicyQosRateShaperFromSchema(ctx context.Context, config polic
 		var serShaperData map[string]interface{}
 		err := serializeShaperData(&serShaperData, shaperData.String())
 		if err != nil {
-
+			return nil, fmt.Errorf("Error parsing the shaper data")
 		}
 
 		enabled := serShaperData["enabled"].(bool)
