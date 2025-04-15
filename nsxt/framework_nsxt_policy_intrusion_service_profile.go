@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -43,6 +44,11 @@ var (
 		model.IdsProfile_PROFILE_SEVERITY_LOW,
 		model.IdsProfile_PROFILE_SEVERITY_CRITICAL,
 		model.IdsProfile_PROFILE_SEVERITY_SUSPICIOUS,
+	}
+	idsFrameworkProfileSignatureActionValues = []string{
+		model.IdsProfileLocalSignature_ACTION_ALERT,
+		model.IdsProfileLocalSignature_ACTION_DROP,
+		model.IdsProfileLocalSignature_ACTION_REJECT,
 	}
 )
 
@@ -139,6 +145,11 @@ func getFrameworkIdsProfileSignatureSchema() schema.SetNestedBlock {
 				"action": schema.StringAttribute{
 					Description: "This will take precedence over IDS signature action",
 					Optional:    true,
+					Computed:    true,
+					Default:     stringdefault.StaticString(model.IdsProfileLocalSignature_ACTION_ALERT),
+					Validators: []validator.String{
+						stringvalidator.OneOf(idsFrameworkProfileSignatureActionValues...),
+					},
 				},
 			},
 		},
@@ -531,7 +542,11 @@ func (r *PolicyIntrusionServiceProfileResource) Read(ctx context.Context, req re
 		return
 	}
 	state.Severities, diags = setFrameworkIdsProfileSeverities(state, obj.ProfileSeverity)
-
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	state.OverriddenSignature, diags = setFrameworkIdsProfileSignatureInSchema(state, obj.OverriddenSignatures)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -542,6 +557,39 @@ func (r *PolicyIntrusionServiceProfileResource) Read(ctx context.Context, req re
 	if resp.Diagnostics.HasError() {
 		return
 	}
+}
+
+func setFrameworkIdsProfileSignatureInSchema(state policyIntrusionServiceProfileModel, overriddenSignatures []model.IdsProfileLocalSignature) (basetypes.SetValue, diag.Diagnostics) {
+	var signatureListOfMaps []map[string]attr.Value
+	for _, profile := range overriddenSignatures {
+		signatureMap := make(map[string]attr.Value)
+		signatureMap["action"] = types.StringValue(*profile.Action)
+		signatureMap["enabled"] = types.BoolValue(*profile.Enable)
+		signatureMap["signature_id"] = types.StringValue(*profile.SignatureId)
+
+		signatureListOfMaps = append(signatureListOfMaps, signatureMap)
+	}
+	objectType := types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"action":       types.StringType,
+			"enabled":      types.BoolType,
+			"signature_id": types.StringType,
+			// Add all expected keys and their types
+		},
+	}
+	var signaturesList []attr.Value
+	var diag diag.Diagnostics
+	for _, item := range signatureListOfMaps {
+		obj, d := types.ObjectValue(objectType.AttrTypes, item)
+		diag.Append(d...)
+		if diag.HasError() {
+			return types.Set{}, diag
+		}
+		signaturesList = append(signaturesList, obj)
+	}
+	sigSet, d := types.SetValue(objectType, signaturesList)
+	diag.Append(d...)
+	return sigSet, diag
 }
 
 func setFrameworkIdsProfileSeverities(state policyIntrusionServiceProfileModel, severities []string) (basetypes.SetValue, diag.Diagnostics) {
