@@ -134,6 +134,10 @@ func (r *PolicyQOSProfileResource) ConfigValidators(context context.Context) []r
 			path.MatchRoot("ingress_broadcast_rate_shaper"),
 			path.MatchRoot("egress_rate_shaper"),
 		),
+		resourcevalidator.RequiredTogether(
+			path.MatchRoot("context"),
+			path.MatchRoot("context").AtName("project_id"),
+		),
 	}
 }
 

@@ -116,6 +116,10 @@ func (r *PolicyIntrusionServiceProfileResource) ConfigValidators(context context
 			path.MatchRoot("criteria").AtAnyListIndex().AtName("cvss"),
 			path.MatchRoot("criteria").AtAnyListIndex().AtName("products_affected"),
 		),
+		resourcevalidator.RequiredTogether(
+			path.MatchRoot("context"),
+			path.MatchRoot("context").AtName("project_id"),
+		),
 	}
 }
 
