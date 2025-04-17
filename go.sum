@@ -159,8 +159,8 @@ github.com/vmware/vsphere-automation-sdk-go/lib v0.8.0 h1:u1SXOTM6D4Ygb3jeidj2Rd
 github.com/vmware/vsphere-automation-sdk-go/lib v0.8.0/go.mod h1:8d5JTwjpM/Z03n/IZb0fwmXkJNWvWwuLXBqoakqYio4=
 github.com/vmware/vsphere-automation-sdk-go/runtime v0.8.0 h1:KnDIX9LY0nru7iMQTg0sy9vChhyorPo5OdASM2MaAcI=
 github.com/vmware/vsphere-automation-sdk-go/runtime v0.8.0/go.mod h1:DzLetYAmw1+vj7bqElRWEpuy40WYE/woL3alsymYa/c=
-github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20241118070726-666c7cd6e466 h1:gq2ciROVmpEmUIZpAe6Hbs2FJymCMPpxvfitJMh8MvQ=
-github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20241118070726-666c7cd6e466/go.mod h1:upLH9b9zpG86P0wwO4+gREf0lBXr8gYcs7P1FRZ9n30=
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20250505203514-00ded2f7e53c h1:GwV52LBEUhDk4JDrfXCoLfvGvqDGgzy2kJB6tSgC8qM=
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20250505203514-00ded2f7e53c/go.mod h1:C3JVOHRVLrGBQ8kTWAiGYlRz5UQC5qAcTdt3tvA+5P0=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466 h1:SYBECpviZBcp/cUHKTDPQP7CSQb0lUfPPOClpGOFH44=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466/go.mod h1:gcEvyczWPFMZX2gkBiBVpOwvUGSNXSpxU19Sx9aiouY=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.6.1-0.20241118070726-666c7cd6e466 h1:yXUKHP/XDGp7Wrcbfl5BHV1VreCNPHRLUj2RQ5qDEmE=
