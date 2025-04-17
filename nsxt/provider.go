@@ -966,6 +966,14 @@ func newLogRequestProcessor() *logRequestProcessor {
 }
 
 func (processor logRequestProcessor) Process(req *http.Request) error {
+
+	filter := os.Getenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER")
+	if filter != "" {
+		// Only log for requests that match URL filter
+		if !strings.Contains(req.URL.Path, filter) {
+			return nil
+		}
+	}
 	reqDump, err := httputil.DumpRequestOut(req, true)
 	if err != nil {
 		log.Fatal(err)
@@ -988,8 +996,16 @@ func newLogResponseAcceptor() *logResponseAcceptor {
 	return &logResponseAcceptor{}
 }
 
-func (processor logResponseAcceptor) Accept(req *http.Response) {
-	dumpResponse, err := httputil.DumpResponse(req, true)
+func (processor logResponseAcceptor) Accept(resp *http.Response) {
+	filter := os.Getenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER")
+	if filter != "" && resp.Request != nil {
+		// Only log for requests that match URI filter
+		if !strings.Contains(resp.Request.URL.Path, filter) {
+			return
+		}
+	}
+
+	dumpResponse, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		log.Fatal(err)
 	}
