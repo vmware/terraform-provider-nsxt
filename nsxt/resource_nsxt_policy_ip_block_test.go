@@ -42,6 +42,86 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_block.test"
+	cidr := "192.168.1.0/24"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPBlockCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPBlockCreateV910Template(name, cidr, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "range_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPBlock_v910_migrate(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_block.test"
+	cidr := "192.168.1.0/24"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPBlockCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNSXPolicyIPBlockCreateV910Template(name, cidr, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "range_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyIPBlock_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIPBlockBasic(t, false, false, func() {
 		testAccPreCheck(t)
@@ -250,6 +330,36 @@ resource "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
   cidr         = "%s"
+%s
+}`, context, displayName, cidr, visibility)
+}
+
+func testAccNSXPolicyIPBlockCreateV910Template(displayName string, cidr string, withContext, withVisibility bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
+	visibility := ""
+	if withVisibility {
+		visibility = "  visibility   = \"EXTERNAL\""
+	}
+
+	return fmt.Sprintf(`
+resource "nsxt_policy_ip_block" "test" {
+%s
+  display_name = "%s"
+  cidr_list    = ["%s"]
+  reserved_ips {
+    start = "192.168.1.10"
+    end   = "192.168.1.11"
+  }
+
+  range_list {
+    start = "192.168.2.20"
+    end   = "192.168.2.39"
+  }
+
 %s
 }`, context, displayName, cidr, visibility)
 }

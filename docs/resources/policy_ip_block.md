@@ -30,6 +30,26 @@ resource "nsxt_policy_ip_block" "block1" {
 }
 ```
 
+## Example Usage - CIDR List
+
+```hcl
+resource "nsxt_policy_ip_block" "block1" {
+  display_name = "ip-block1"
+  cidr_list    = ["192.168.1.0/24"]
+  visibility   = "PRIVATE"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  tag {
+    scope = "env"
+    tag   = "test"
+  }
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl
@@ -63,7 +83,14 @@ The following arguments are supported:
 
 * `display_name` - (Required) The display name for the IP Block.
 * `description` - (Optional) Description of the resource.
-* `cidr` - (Required) Network address and the prefix length which will be associated with a layer-2 broadcast domain.
+* `cidr` - (Optional) Network address and the prefix length which will be associated with a layer-2 broadcast domain. This attribute is deprecated for NSX 9.1.0 onwards.
+* `cidr_list` - (Optional) Array of contiguous IP address spaces represented by network address and prefix length. This attribute is supported with NSX 9.1.0 onwards.
+* `range_list` - (Optional) Represents list of IP address ranges in the form of start and end IPs. This attribute is supported with NSX 9.1.0 onwards.
+  * `start` - (Required) The start IP address for the allocation range.
+  * `end` - (Required) The end IP address for the allocation range.
+* `reserved_ips` - (Optional) Represents list of reserved IP address in the form of start and end IPs. This attribute is supported with NSX 9.1.0 onwards.
+  * `start` - (Required) The start IP address for the allocation range.
+  * `end` - (Required) The end IP address for the allocation range.
 * `visibility` - (Optional) Visibility of the IP Block. Valid options are `PRIVATE`, `EXTERNAL` or unset. Visibility cannot be changed once the block is associated with other resources.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP Block.

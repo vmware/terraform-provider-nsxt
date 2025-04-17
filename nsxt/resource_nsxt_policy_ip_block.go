@@ -46,8 +46,9 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validateCidr(),
+				Deprecated:   "Use cidr_list attribute instead, for v9.1 and above",
 			},
 			"visibility": {
 				Type:         schema.TypeString,
@@ -55,6 +56,18 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(visibilityTypes, false),
 			},
+			"cidr_list": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Array of contiguous IP address spaces represented by network address and prefix length",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateCidr(),
+				},
+				ConflictsWith: []string{"cidr"},
+			},
+			"range_list":   getAllocationRangeListSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
+			"reserved_ips": getAllocationRangeListSchema(false, "Represents list of reserved IP address in the form of start and end IPs"),
 		},
 	}
 }
@@ -100,9 +113,20 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("nsx_id", block.Id)
 	d.Set("path", block.Path)
 	d.Set("revision", block.Revision)
-	d.Set("cidr", block.Cidr)
 	if util.NsxVersionHigherOrEqual("4.2.0") {
 		d.Set("visibility", block.Visibility)
+	}
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		if len(d.Get("cidr_list").([]interface{})) > 0 {
+			d.Set("cidr_list", block.CidrList)
+		}
+		d.Set("range_list", setAllocationRangeListInSchema(block.RangeList))
+		d.Set("reserved_ips", setAllocationRangeListInSchema(block.ReservedIps))
+		if block.Cidr != nil {
+			d.Set("cidr", block.Cidr)
+		}
+	} else {
+		d.Set("cidr", block.Cidr)
 	}
 
 	return nil
@@ -125,16 +149,26 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	cidr := d.Get("cidr").(string)
 	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
+	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
+	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
 		DisplayName: &displayName,
 		Description: &description,
-		Cidr:        &cidr,
 		Tags:        tags,
 	}
 	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrList) > 0 {
+		obj.CidrList = cidrList
+		obj.RangeList = rangeList
+		obj.ReservedIps = reservedIPs
+	} else {
+		obj.Cidr = &cidr
+	}
+
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IP Block with ID %s", id)
 	err = client.Patch(id, obj)
@@ -166,17 +200,26 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	visibility := d.Get("visibility").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
+	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
+	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
 		Id:          &id,
 		DisplayName: &displayName,
 		Description: &description,
-		Cidr:        &cidr,
 		Tags:        tags,
 		Revision:    &revision,
 	}
 	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
+	}
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrList) > 0 {
+		obj.CidrList = cidrList
+		obj.RangeList = rangeList
+		obj.ReservedIps = reservedIPs
+	} else {
+		obj.Cidr = &cidr
 	}
 
 	_, err := client.Update(id, obj)
