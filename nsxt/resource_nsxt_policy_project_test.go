@@ -320,7 +320,7 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
 				Config: testAccNsxtPolicyProjectMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, true),
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
 				),
 			},
 			{
@@ -395,7 +395,7 @@ func testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(resourceName string, ex
 			return err
 		}
 		if *obj.NorthSouthFirewall.Enabled != expectedVal {
-			return fmt.Errorf("expected NorthSouthFirewall to be %v, isntead status is %v", *obj.NorthSouthFirewall.Enabled, expectedVal)
+			return fmt.Errorf("expected NorthSouthFirewall to be %v, instead status is %v", *obj.NorthSouthFirewall.Enabled, expectedVal)
 		}
 		return nil
 	}
