@@ -16,7 +16,7 @@ This resource is applicable to NSX Policy Manager.
 resource "nsxt_policy_edge_cluster" "test" {
   display_name              = "test"
   description               = "Terraform provisioned PolicyEdgeCluster"
-  edge_cluster_profile_path = data.nsxt_policy_edge_cluster_profile.path
+  edge_cluster_profile_path = nsxt_policy_edge_high_availability_profile.path
   password_managed_by_vcf   = true
 }
 ```
