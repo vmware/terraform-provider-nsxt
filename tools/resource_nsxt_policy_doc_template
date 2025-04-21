@@ -1,6 +1,5 @@
 ---
 subcategory: "FIXME"
-layout: "nsxt"
 page_title: "NSXT: nsxt_policy_<!resource_lower!>"
 description: A resource to configure a <!RESOURCE!>.
 ---
@@ -43,9 +42,9 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/cli/import
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
-```
+```shell
 terraform import nsxt_policy_<!resource_lower!>.test UUID
 ```
 

@@ -519,7 +519,7 @@ def main():
         write_delete_func(f, resource, attrs, api_section)
 
     # write the documentation file
-    with open("%s.html.markdown" % resource_lower, 'w') as f:
+    with open("%s.md" % resource_lower, 'w') as f:
         write_doc_header(f, resource_lower)
         write_doc_example(f, resource_lower, attrs)
         write_arguments_reference(f, resource_lower, attrs)
