@@ -293,12 +293,7 @@ resource "nsxt_policy_ip_address_allocation" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-%s
-  path = nsxt_policy_ip_address_allocation.test.path
-}`, context, attrMap["display_name"], attrMap["description"], attrMap["allocation_ip"], context)
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["allocation_ip"])
 }
 
 func testAccNsxtPolicyIPAddressAllocationAnyFreeIPTemplate(createFlow bool) string {
@@ -320,10 +315,6 @@ resource "nsxt_policy_ip_address_allocation" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_ip_address_allocation.test.path
 }`, attrMap["display_name"], attrMap["description"])
 }
 
@@ -348,6 +339,7 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     end   = "12.12.12.20"
   }
 }
+
 data "nsxt_policy_realization_info" "subnet_realization" {
   path = nsxt_policy_ip_pool_static_subnet.test.path
 }`, context, accTestPolicyIPAddressAllocationPoolName, context, accTestPolicyIPAddressAllocationSubnetName)
