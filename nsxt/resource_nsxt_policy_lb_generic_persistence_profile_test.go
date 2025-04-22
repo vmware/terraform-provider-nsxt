@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 var accTestPolicyLBGenericPersistenceProfileCreateAttributes = map[string]string{
@@ -143,7 +143,7 @@ resource "nsxt_policy_lb_generic_persistence_profile" "test" {
 
   persistence_shared = %s
   timeout            = %s
-  
+
   ha_persistence_mirroring_enabled = %s
 
   tag {

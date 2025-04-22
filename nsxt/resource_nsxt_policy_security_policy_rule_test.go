@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccResourceNsxtPolicySecurityPolicyRule_basic(t *testing.T) {
@@ -289,7 +289,7 @@ resource "nsxt_policy_security_policy_rule" "%s" {
   service_entries {
     igmp_entry {
     }
-    
+
     l4_port_set_entry {
       protocol          = "TCP"
       destination_ports = [ "443" ]

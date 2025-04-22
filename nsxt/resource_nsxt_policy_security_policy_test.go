@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
@@ -968,7 +968,7 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 
 		rule {
 		  display_name          = "rule2"
-		  source_groups         = [nsxt_policy_group.group1.path]			
+		  source_groups         = [nsxt_policy_group.group1.path]
 		  destination_groups    = ["%s"]
 	          services              = [nsxt_policy_service.icmp.path]
 		  action                = "ALLOW"
@@ -992,7 +992,7 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 
 		rule {
 		  display_name          = "rule5"
-		  source_groups         = ["%s"]			
+		  source_groups         = ["%s"]
 		  destination_groups    = [nsxt_policy_group.group2.path]
 		  services              = [nsxt_policy_service.icmp.path]
 		  action                = "ALLOW"
