@@ -60,7 +60,6 @@ func dataSourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m int
 		return err
 	}
 	t0GwList := []model.Tier0{}
-	converter = bindings.NewTypeConverter()
 	for _, obj := range gwObjList {
 		dataValue, errors := converter.ConvertToGolang(obj, model.Tier0BindingType())
 		if len(errors) > 0 {
