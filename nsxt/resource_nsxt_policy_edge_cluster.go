@@ -66,7 +66,7 @@ var policyEdgeClusterSchema = map[string]*metadata.ExtendedSchema{
 	"edge_cluster_profile_path": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
-			Optional:     true,
+			Required:     true,
 			ValidateFunc: validatePolicyPath(),
 		},
 		Metadata: metadata.Metadata{

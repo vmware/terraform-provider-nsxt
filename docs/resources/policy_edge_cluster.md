@@ -32,7 +32,7 @@ The following arguments are supported:
 * `site_path` - (Optional) The path of the site which the Host Transport Node belongs to. `path` field of the existing `nsxt_policy_site` can be used here. Defaults to default site path.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Host Transport Node. Defaults to default enforcement point.
 * `inter_site_forwarding_enabled` - (Optional) Inter site forwarding is enabled if true.
-* `edge_cluster_profile_path` - (Optional) Path of edge cluster high availability profile.
+* `edge_cluster_profile_path` - (Required) Path of edge cluster high availability profile.
 * `allocation_rule` - Allocation rules for auto placement.
   * `action_based_on_failure_domain_enabled` - (Optional) Auto place TIER1 logical routers, DHCP and MDProxy contexts on two edge nodes (active and standby) from different failure domains.
 * `policy_edge_node` - (Optional) Policy Edge Cluster Member.
