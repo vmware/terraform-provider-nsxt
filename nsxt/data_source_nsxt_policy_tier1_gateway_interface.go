@@ -10,32 +10,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	// t0interface "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 )
 
-func dataSourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
+func dataSourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtPolicyTier0GatewayInterfaceRead,
-
+		Read: dataSourceNsxtPolicyTier1GatewayInterfaceRead,
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
-			"t0_gateway_name": {
+			"t1_gateway_name": {
 				Type:        schema.TypeString,
-				Description: "The name of the Tier0 gateway where the interface is linked",
+				Description: "The name of the Tier1 gateway where the interface is linked",
 				Required:    true,
 			},
 			"path": getPathSchema(),
-			"edge_cluster_path": {
-				Type:        schema.TypeString,
-				Description: "The path of the edge cluster connected to the Tier0 gateway linked to this interface",
-				Optional:    true,
-				Computed:    true,
-			},
 			"segment_path": {
 				Type:        schema.TypeString,
-				Description: "The path of the edge cluster connected to the Tier0 gateway linked to this interface",
+				Description: "The path of the edge cluster connected to the Tier1 gateway linked to this interface",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -43,32 +35,32 @@ func dataSourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
 	interfaceName := d.Get("display_name").(string)
 	interfaceId := d.Get("id").(string)
-	t0Gw := d.Get("t0_gateway_name").(string)
+	t1Gw := d.Get("t1_gateway_name").(string)
 
-	// Get the T0 gateway ID as in some case the gw name and the id are different
-	t0GwObj := GenericResourceData{
-		DisplayName: t0Gw,
+	// Get the T1 gateway ID as in some case the gw name and the id are different
+	t1GwObj := GenericResourceData{
+		DisplayName: t1Gw,
 		Id:          "",
 	}
-	gwObjList, err := t0GwObj.policyGenericDataSourceResourceRead(connector, getSessionContext(d, m), "Tier0", nil)
+	gwObjList, err := t1GwObj.policyGenericDataSourceResourceRead(connector, getSessionContext(d, m), "Tier1", nil)
 	if err != nil {
 		return err
 	}
-	t0GwList := []model.Tier0{}
+	t1GwList := []model.Tier1{}
 	converter = bindings.NewTypeConverter()
 	for _, obj := range gwObjList {
-		dataValue, errors := converter.ConvertToGolang(obj, model.Tier0BindingType())
+		dataValue, errors := converter.ConvertToGolang(obj, model.Tier1BindingType())
 		if len(errors) > 0 {
 			return errors[0]
 		}
-		curGw := dataValue.(model.Tier0)
-		if *curGw.DisplayName == t0Gw {
-			t0GwList = append(t0GwList, dataValue.(model.Tier0))
+		curGw := dataValue.(model.Tier1)
+		if *curGw.DisplayName == t1Gw {
+			t1GwList = append(t1GwList, dataValue.(model.Tier1))
 		}
 	}
 
@@ -77,32 +69,26 @@ func dataSourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m int
 		DisplayName: interfaceName,
 		Id:          interfaceId,
 	}
-	interfaceObjList, err := interfaceObj.policyGenericDataSourceResourceRead(connector, getSessionContext(d, m), "Tier0Interface", nil)
+	interfaceObjList, err := interfaceObj.policyGenericDataSourceResourceRead(connector, getSessionContext(d, m), "Tier1Interface", nil)
 	if err != nil {
 		return err
 	}
 
 	isOp := false
 	for _, obj := range interfaceObjList {
-		dataValue, errors := converter.ConvertToGolang(obj, model.Tier0InterfaceBindingType())
+		dataValue, errors := converter.ConvertToGolang(obj, model.Tier1InterfaceBindingType())
 		if len(errors) > 0 {
 			return errors[0]
 		}
-		currInt := dataValue.(model.Tier0Interface)
+		currInt := dataValue.(model.Tier1Interface)
 		isT0, gwID, _, _ := parseGatewayInterfacePolicyPath(*currInt.Path)
 
-		if isT0 && gwID == *t0GwList[0].Id {
+		if !isT0 && gwID == *t1GwList[0].Id {
 			isOp = true
 			if currInt.Path != nil {
 				err := d.Set("path", *currInt.Path)
 				if err != nil {
 					return fmt.Errorf("Error while setting interface path : %v", err)
-				}
-			}
-			if currInt.EdgePath != nil {
-				err = d.Set("edge_cluster_path", *currInt.EdgePath)
-				if err != nil {
-					return fmt.Errorf("Error while setting the interface edge cluster path : %v", err)
 				}
 			}
 			if currInt.Description != nil {
@@ -122,8 +108,7 @@ func dataSourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m int
 		}
 	}
 	if !isOp {
-		return fmt.Errorf("The T0 gateway %s doesn't have a linked interface with name %s.", t0Gw, interfaceName)
+		return fmt.Errorf("The T1 gateway %s doesn't have a linked interface with name %s.", t1Gw, interfaceName)
 	}
 	return nil
-
 }
