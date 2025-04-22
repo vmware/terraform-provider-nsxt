@@ -324,25 +324,29 @@ func resourceNsxtPolicyEdgeClusterUpdate(d *schema.ResourceData, m interface{}) 
 
 	converter := bindings.NewTypeConverter()
 	var allocationRules []model.AllocationRule
-	allocRules := d.Get("allocation_rules").([]interface{})
-	for _, r := range allocRules {
-		rule := r.(map[string]interface{})
-		var allocRule model.AllocationRule
-		if rule["action_based_on_failure_domain_enabled"].(bool) {
-			enabled := true
-			fdRule := model.AllocationBasedOnFailureDomain{
-				Enabled:    &enabled,
-				ActionType: model.AllocationRuleAction_ACTION_TYPE_ALLOCATIONBASEDONFAILUREDOMAIN,
-			}
-			dataValue, errs := converter.ConvertToVapi(fdRule, model.AllocationBasedOnFailureDomainBindingType())
-			if errs != nil {
-				return handleCreateError("PolicyEdgeCluster", id, errs[0])
-			}
-			allocRule = model.AllocationRule{
-				Action: dataValue.(*data.StructValue),
+	allocRules := d.Get("allocation_rules")
+	if allocRules != nil {
+		for _, r := range allocRules.([]interface{}) {
+			if r != nil {
+				rule := r.(map[string]interface{})
+				var allocRule model.AllocationRule
+				if rule["action_based_on_failure_domain_enabled"].(bool) {
+					enabled := true
+					fdRule := model.AllocationBasedOnFailureDomain{
+						Enabled:    &enabled,
+						ActionType: model.AllocationRuleAction_ACTION_TYPE_ALLOCATIONBASEDONFAILUREDOMAIN,
+					}
+					dataValue, errs := converter.ConvertToVapi(fdRule, model.AllocationBasedOnFailureDomainBindingType())
+					if errs != nil {
+						return handleCreateError("PolicyEdgeCluster", id, errs[0])
+					}
+					allocRule = model.AllocationRule{
+						Action: dataValue.(*data.StructValue),
+					}
+				}
+				allocationRules = append(allocationRules, allocRule)
 			}
 		}
-		allocationRules = append(allocationRules, allocRule)
 	}
 
 	obj := model.PolicyEdgeCluster{
