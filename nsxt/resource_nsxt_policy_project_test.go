@@ -11,8 +11,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
