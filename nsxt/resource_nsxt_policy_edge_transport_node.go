@@ -1583,49 +1583,51 @@ func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface
 	}
 
 	var switches []interface{}
-	for _, switc := range obj.SwitchSpec.Switches {
-		sw := make(map[string]interface{})
-		if len(switc.OverlayTransportZonePaths) > 0 {
-			sw["overlay_transport_zone_path"] = switc.OverlayTransportZonePaths[0]
-		}
-
-		var pnics []interface{}
-		for _, pnic := range switc.Pnics {
-			p := make(map[string]interface{})
-			if pnic.DatapathNetworkId != nil {
-				p["datapath_network_id"] = pnic.DatapathNetworkId
+	if obj.SwitchSpec != nil && obj.SwitchSpec.Switches != nil {
+		for _, switc := range obj.SwitchSpec.Switches {
+			sw := make(map[string]interface{})
+			if len(switc.OverlayTransportZonePaths) > 0 {
+				sw["overlay_transport_zone_path"] = switc.OverlayTransportZonePaths[0]
 			}
-			p["device_name"] = pnic.DeviceName
-			p["uplink_name"] = pnic.UplinkName
 
-			pnics = append(pnics, p)
-		}
-		sw["pnic"] = pnics
+			var pnics []interface{}
+			for _, pnic := range switc.Pnics {
+				p := make(map[string]interface{})
+				if pnic.DatapathNetworkId != nil {
+					p["datapath_network_id"] = pnic.DatapathNetworkId
+				}
+				p["device_name"] = pnic.DeviceName
+				p["uplink_name"] = pnic.UplinkName
 
-		for _, pp := range switc.ProfilePaths {
-			if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_UPLINKHOSTSWITCHPROFILE {
-				sw["uplink_host_switch_profile_path"] = pp.Value
-			} else if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_LLDPHOSTSWITCHPROFILE {
-				sw["lldp_host_switch_profile_path"] = pp.Value
+				pnics = append(pnics, p)
 			}
-		}
+			sw["pnic"] = pnics
 
-		sw["switch_name"] = switc.SwitchName
-		var tunnelEndpoints []interface{}
-		for _, tep := range switc.TunnelEndpoints {
-			t := make(map[string]interface{})
-			t["ip_assignment"], err = setPolicyIPAssignmentsInSchema(tep.IpAssignmentSpecs)
-			if err != nil {
-				return err
+			for _, pp := range switc.ProfilePaths {
+				if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_UPLINKHOSTSWITCHPROFILE {
+					sw["uplink_host_switch_profile_path"] = pp.Value
+				} else if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_LLDPHOSTSWITCHPROFILE {
+					sw["lldp_host_switch_profile_path"] = pp.Value
+				}
 			}
-			t["vlan"] = tep.Vlan
 
-			tunnelEndpoints = append(tunnelEndpoints, t)
+			sw["switch_name"] = switc.SwitchName
+			var tunnelEndpoints []interface{}
+			for _, tep := range switc.TunnelEndpoints {
+				t := make(map[string]interface{})
+				t["ip_assignment"], err = setPolicyIPAssignmentsInSchema(tep.IpAssignmentSpecs)
+				if err != nil {
+					return err
+				}
+				t["vlan"] = tep.Vlan
+
+				tunnelEndpoints = append(tunnelEndpoints, t)
+			}
+			sw["tunnel_endpoint"] = tunnelEndpoints
+			d.Set("vlan_transport_zone_paths", switc.VlanTransportZonePaths)
+
+			switches = append(switches, sw)
 		}
-		sw["tunnel_endpoint"] = tunnelEndpoints
-		d.Set("vlan_transport_zone_paths", switc.VlanTransportZonePaths)
-
-		switches = append(switches, sw)
 	}
 	d.Set("switch", switches)
 
