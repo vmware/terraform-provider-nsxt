@@ -97,7 +97,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 func CreateRealization() string {
-	return fmt.Sprint(`
+	return `
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway_interface.test.path
   depends_on = [nsxt_policy_tier0_gateway_interface.test]
@@ -107,5 +107,5 @@ data "nsxt_policy_gateway_interface_realization" "gw_realization" {
   gateway_path = nsxt_policy_tier0_gateway_interface.test.path
   depends_on = [nsxt_policy_tier0_gateway_interface.test]
 }
-`)
+`
 }
