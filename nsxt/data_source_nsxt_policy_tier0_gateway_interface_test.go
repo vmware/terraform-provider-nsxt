@@ -22,7 +22,7 @@ func TestAccDataSourceNsxtPolicyTier0GatewayInterface_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0InterfaceTemplate(interfaceName, gatewayName, transportZoneName, interfaceDescription),
+				Config: testAccNsxtPolicyTier0InterfaceDataSourceTemplate(interfaceName, gatewayName, transportZoneName, interfaceDescription),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", interfaceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", interfaceDescription),
@@ -34,7 +34,7 @@ func TestAccDataSourceNsxtPolicyTier0GatewayInterface_basic(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyTier0InterfaceTemplate(interfaceName string, gatewayName string, transportZoneName string, interfaceDescription string) string {
+func testAccNsxtPolicyTier0InterfaceDataSourceTemplate(interfaceName string, gatewayName string, transportZoneName string, interfaceDescription string) string {
 	return CreateT0Gateway(gatewayName) + CreateSegment(transportZoneName) + CreateT0GatewayInterface(interfaceName, interfaceDescription) + fmt.Sprintf(`
 
 data "nsxt_policy_tier0_gateway_interface" "sample" {
