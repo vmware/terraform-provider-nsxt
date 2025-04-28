@@ -6,7 +6,6 @@ package nsxt
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"log"
 )
 
 var ipDiscoveryProfilePathExample = getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")
