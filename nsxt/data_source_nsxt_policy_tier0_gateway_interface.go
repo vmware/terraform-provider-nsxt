@@ -98,7 +98,9 @@ func dataSourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m int
 					return fmt.Errorf("Error while setting interface path : %v", err)
 				}
 			}
-			if currInt.EdgePath != nil {
+			if isPolicyGlobalManager(m) {
+				d.Set("edge_cluster_path", "")
+			} else if currInt.EdgePath != nil {
 				err = d.Set("edge_cluster_path", *currInt.EdgePath)
 				if err != nil {
 					return fmt.Errorf("Error while setting the interface edge cluster path : %v", err)
