@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
-	ep "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -104,7 +103,7 @@ func testAccDataSourceNsxtPolicyBridgeProfileCreate(name string) error {
 	} else if !isNotFoundError(err) {
 		return err
 	}
-	client := ep.NewEdgeBridgeProfilesClient(connector)
+	client := enforcement_points.NewEdgeBridgeProfilesClient(connector)
 	err = client.Patch(defaultSite, defaultEnforcementPoint, id, obj)
 
 	if err != nil {
@@ -124,7 +123,7 @@ func testAccDataSourceNsxtPolicyBridgeProfileDeleteByName(name string) error {
 	if err != nil {
 		return nil
 	}
-	client := ep.NewEdgeBridgeProfilesClient(connector)
+	client := enforcement_points.NewEdgeBridgeProfilesClient(connector)
 	err = client.Delete(defaultSite, defaultEnforcementPoint, objID)
 	if err != nil {
 		return fmt.Errorf("Error during Bridge Profile deletion: %v", err)
