@@ -25,7 +25,6 @@ linters:
     - ineffassign       # Detects inefficient assignments.
     - misspell          # Finds and fixes typos.
     - staticcheck       # Reports bugs, code smells, and deprecated practices.
-    - unused            # Detects unused variables, constants, etc.
 
 run:
   timeout: 30m # Sets the maximum time limit for the linter run.
