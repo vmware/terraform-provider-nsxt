@@ -64,12 +64,10 @@ resource "nsxt_policy_edge_transport_node" "test" {
 }
 
 # Wait for realization of the Edge transport node
-data "nsxt_policy_realization_info" "info" {
-  path        = nsxt_policy_edge_transport_node.test.path
-  timeout     = 1200
-  entity_type = "RealizedEdgeTransportNode"
+data "nsxt_policy_edge_transport_node_realization" "info" {
+  path    = nsxt_policy_edge_transport_node.test.path
+  timeout = 1200
 }
-
 ```
 
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are
