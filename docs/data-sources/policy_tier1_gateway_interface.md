@@ -6,7 +6,7 @@ description: A policy Tier-1 gateway interface data source.
 
 # nsxt_policy_tier1_gateway_interface
 
-This data source provides information about policy Tier-1 gateways configured on NSX.
+This data source provides information about policy Tier-1 gateway interface configured on NSX.
 
 This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
