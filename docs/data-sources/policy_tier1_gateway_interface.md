@@ -14,7 +14,7 @@ This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC
 
 ```hcl
 data "nsxt_policy_tier1_gateway_interface" "tier1_gw_interface" {
-  display_name = "tier1-gw-interface"
+  display_name    = "tier1-gw-interface"
   t1_gateway_name = "tier1-gw"
 }
 ```
