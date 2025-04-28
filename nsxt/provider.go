@@ -347,6 +347,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_groups":                                     dataSourceNsxtPolicyGroups(),
 			"nsxt_policy_edge_transport_node":                        dataSourceNsxtPolicyEdgeTransportNode(),
 			"nsxt_policy_edge_high_availability_profile":             dataSourceNsxtPolicyEdgeHighAvailabilityProfile(),
+			"nsxt_policy_edge_transport_node_realization":            dataSourceNsxtPolicyEdgeTransportNodeRealization(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
