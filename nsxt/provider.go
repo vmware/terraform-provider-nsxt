@@ -278,6 +278,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_high_availability_profile":             dataSourceNsxtPolicyEdgeHighAvailabilityProfile(),
 			"nsxt_policy_edge_node":                                  dataSourceNsxtPolicyEdgeNode(),
 			"nsxt_policy_edge_transport_node":                        dataSourceNsxtPolicyEdgeTransportNode(),
+			"nsxt_policy_edge_transport_node_realization":            dataSourceNsxtPolicyEdgeTransportNodeRealization(),
 			"nsxt_policy_gateway_connection":                         dataSourceNsxtPolicyGatewayConnection(),
 			"nsxt_policy_gateway_dns_forwarder":                      dataSourceNsxtPolicyGatewayDNSForwarder(),
 			"nsxt_policy_gateway_flood_protection_profile":           dataSourceNsxtPolicyGatewayFloodProtectionProfile(),
