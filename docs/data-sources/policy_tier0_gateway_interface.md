@@ -6,7 +6,7 @@ description: A policy Tier-0 gateway interface data source.
 
 # nsxt_policy_tier0_gateway_interface
 
-This data source provides information about policy Tier-0 gateways configured on NSX.
+This data source provides information about policy Tier-0 gateway interface configured on NSX.
 
 This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
