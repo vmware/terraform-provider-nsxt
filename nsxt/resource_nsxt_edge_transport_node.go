@@ -1882,7 +1882,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 							return err
 						}
 					}
-					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
+					if tnpsc.HostSwitchConfigOption.Ipv6AssignmentSpec != nil {
 						hsCfgOpt["ipv6_assignment"], err = setIPv6AssignmentInSchema(tnpsc.HostSwitchConfigOption.Ipv6AssignmentSpec)
 						if err != nil {
 							return err
