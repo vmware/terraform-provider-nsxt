@@ -125,6 +125,37 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		return handleCreateError("IPAddressAllocation", id, err)
 	}
 
+	if allocationIP == "" {
+		// Wait for actual IP allocation
+		log.Printf("[DEBUG] Waiting for realization of IP Address for IP Allocation with ID %s", id)
+
+		obj, err := client.Get(poolID, id)
+		if err != nil {
+			return err
+		}
+
+		timeout := d.Get("timeout").(int)
+		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, *obj.Path, timeout)
+		entity, err := stateConf.WaitForState()
+		if err != nil {
+			// Clean up NSX allocation
+			resourceNsxtPolicyIPAddressAllocationDelete(d, m)
+			return err
+		}
+		realizedResource := entity.(model.GenericPolicyRealizedResource)
+		for _, attr := range realizedResource.ExtendedAttributes {
+			if *attr.Key == "allocation_ip" {
+				d.SetId(id)
+				d.Set("nsx_id", id)
+				d.Set("allocation_ip", attr.Values[0])
+				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
+			}
+		}
+		// Clean up NSX allocation
+		resourceNsxtPolicyIPAddressAllocationDelete(d, m)
+		return fmt.Errorf("Failed to get realized IP for path %s", d.Get("path"))
+	}
+
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -158,25 +189,8 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 	d.Set("revision", obj.Revision)
 	d.Set("pool_path", obj.ParentPath)
 
-	d.Set("allocation_ip", obj.AllocationIp)
-
-	if d.Get("allocation_ip").(string) == "" {
-		timeout := d.Get("timeout").(int)
-		log.Printf("[DEBUG] Waiting for realization of IP Address for IP Allocation with ID %s", id)
-
-		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, d.Get("path").(string), timeout)
-		entity, err := stateConf.WaitForState()
-		if err != nil {
-			return err
-		}
-		realizedResource := entity.(model.GenericPolicyRealizedResource)
-		for _, attr := range realizedResource.ExtendedAttributes {
-			if *attr.Key == "allocation_ip" {
-				d.Set("allocation_ip", attr.Values[0])
-				return nil
-			}
-		}
-		return fmt.Errorf("Failed to get realized IP for path %s", d.Get("path"))
+	if obj.AllocationIp != nil {
+		d.Set("allocation_ip", obj.AllocationIp)
 	}
 
 	return nil
