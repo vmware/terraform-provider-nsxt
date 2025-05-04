@@ -30,6 +30,6 @@ data "nsxt_policy_tier0_gateway_interface" "tier0_gw_interface" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-* `edge_cluster_path` - The path of the Edge cluster where this Tier-0 gateway is placed. This attribute is not set for NSX Global Manager, where gateway can spawn across multiple sites.
+* `edge_cluster_path` - The path of the Edge cluster where this Tier-0 gateway is placed. This attribute is not set for NSX Global Manager, where gateway can span across multiple sites.
 * `path` - The NSX path of the policy resource.
 * `segment_path` - Policy path for segment which is connected to this Tier0 Gateway
