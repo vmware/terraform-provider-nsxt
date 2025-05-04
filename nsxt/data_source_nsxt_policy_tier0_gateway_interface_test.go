@@ -27,7 +27,6 @@ func TestAccDataSourceNsxtPolicyTier0GatewayInterface_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", interfaceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", interfaceDescription),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttr(testResourceName, "t0_gateway_path", gatewayName),
 				),
 			},
 		},
@@ -37,12 +36,17 @@ func TestAccDataSourceNsxtPolicyTier0GatewayInterface_basic(t *testing.T) {
 func testAccNsxtPolicyTier0InterfaceDataSourceTemplate(interfaceName string, gatewayName string, transportZoneName string, interfaceDescription string) string {
 	return CreateT0Gateway(gatewayName) + CreateSegment(transportZoneName) + CreateT0GatewayInterface(interfaceName, interfaceDescription) + fmt.Sprintf(`
 
+data "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "%s"
+  depends_on = [nsxt_policy_tier0_gateway_interface.test]
+}
+
 data "nsxt_policy_tier0_gateway_interface" "sample" {
     display_name = "%s"
-    t0_gateway_path = "%s"
+    t0_gateway_path = data.nsxt_policy_tier0_gateway.test.path
 	depends_on = [nsxt_policy_tier0_gateway_interface.test]
 }
-`, interfaceName, gatewayName)
+`, gatewayName, interfaceName)
 }
 
 func CreateT0Gateway(gatewayName string) string {

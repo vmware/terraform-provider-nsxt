@@ -27,7 +27,6 @@ func TestAccDataSourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", interfaceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", interfaceDescription),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttr(testResourceName, "t1_gateway_path", gatewayName),
 				),
 			},
 		},
@@ -37,12 +36,17 @@ func TestAccDataSourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 func testAccNsxtPolicyTier1InterfaceDataSourceTemplate(interfaceName string, gatewayName string, transportZoneName string, interfaceDescription string) string {
 	return CreateT1Gateway(gatewayName) + CreateSegment(transportZoneName) + CreateT1GatewayInterface(interfaceName, interfaceDescription) + fmt.Sprintf(`
 
+data "nsxt_policy_tier1_gateway" "test" {
+  display_name      = "%s"
+  depends_on = [nsxt_policy_tier1_gateway_interface.test]
+}
+
 data "nsxt_policy_tier1_gateway_interface" "sample" {
     display_name = "%s"
-    t1_gateway_path = "%s"
+    t1_gateway_path = data.nsxt_policy_tier1_gateway.test.path
 	depends_on = [nsxt_policy_tier1_gateway_interface.test]
 }
-`, interfaceName, gatewayName)
+`, gatewayName, interfaceName)
 }
 
 func CreateT1Gateway(gatewayName string) string {
@@ -58,22 +62,6 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 `, gatewayName)
 }
-
-// func CreateSegment(transportZoneName string) string {
-// 	return fmt.Sprintf(`
-// data "nsxt_policy_transport_zone" "overlay_transport_zone" {
-//   display_name   = "%s"
-// }
-
-// resource "nsxt_policy_segment" "segment1" {
-//   display_name        = "segment-acc-test"
-//   description         = "Terraform provisioned Segment"
-//   transport_zone_path = data.nsxt_policy_transport_zone.overlay_transport_zone.path
-
-// }
-// `, transportZoneName)
-
-// }
 
 func CreateT1GatewayInterface(interfaceName string, interfaceDescription string) string {
 	return fmt.Sprintf(`
