@@ -38,8 +38,6 @@ func dataSourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 func dataSourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
-	// interfaceName := d.Get("display_name").(string)
-	// interfaceId := d.Get("id").(string)
 	t1Gw := d.Get("t1_gateway_path").(string)
 	query := make(map[string]string)
 	query["parent_path"] = t1Gw + "/locale-services/*"
@@ -54,11 +52,6 @@ func dataSourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m int
 	}
 
 	currGwInterface := dataValue.(model.Tier1Interface)
-	// return fmt.Errorf("debugggggg : %v\n%v", t1Gw, *currGwInterface.ParentPath)
-	// isT0, _, _, _ := parseGatewayInterfacePolicyPath(*currInt.Path)
-
-	// if !isT0 {
-	// isOp = true
 	if currGwInterface.Path != nil {
 		err := d.Set("path", *currGwInterface.Path)
 		if err != nil {
@@ -78,11 +71,5 @@ func dataSourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m int
 		}
 	}
 	d.SetId(newUUID())
-
-	// }
-
-	// if !isOp {
-	// 	return fmt.Errorf("The T1 gateway %s doesn't have a linked interface with name %s.", t1Gw, interfaceName)
-	// }
 	return nil
 }
