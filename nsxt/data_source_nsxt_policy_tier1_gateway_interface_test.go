@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", interfaceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", interfaceDescription),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttr(testResourceName, "t1_gateway_name", gatewayName),
+					resource.TestCheckResourceAttr(testResourceName, "t1_gateway_path", gatewayName),
 				),
 			},
 		},
@@ -39,7 +39,7 @@ func testAccNsxtPolicyTier1InterfaceDataSourceTemplate(interfaceName string, gat
 
 data "nsxt_policy_tier1_gateway_interface" "sample" {
     display_name = "%s"
-    t1_gateway_name = "%s"
+    t1_gateway_path = "%s"
 	depends_on = [nsxt_policy_tier1_gateway_interface.test]
 }
 `, interfaceName, gatewayName)
