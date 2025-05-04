@@ -8,14 +8,14 @@ description: A policy Tier-1 gateway interface data source.
 
 This data source provides information about policy Tier-1 gateway interface configured on NSX.
 
-This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
+This data source is applicable to NSX Policy Manager and NSX Global Manager.
 
 ## Example Usage
 
 ```hcl
 data "nsxt_policy_tier1_gateway_interface" "tier1_gw_interface" {
   display_name    = "tier1-gw-interface"
-  t1_gateway_name = "tier1-gw"
+  t1_gateway_path = "tier1-gw"
 }
 ```
 
@@ -23,7 +23,7 @@ data "nsxt_policy_tier1_gateway_interface" "tier1_gw_interface" {
 
 * `id` - (Optional) The ID of Tier-1 gateway to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Tier-1 gateway interface to retrieve.
-* `t1_gateway_name` - (Optional) The Tier-1 gateway to retrieve to which the interface should be linked to.
+* `t1_gateway_path` - (Optional) The Tier-1 gateway to retrieve to which the interface should be linked to.
 
 ## Attributes Reference
 
