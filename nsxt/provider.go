@@ -416,6 +416,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_bgp_config":                                   resourceNsxtPolicyBgpConfig(),
 			"nsxt_policy_bgp_neighbor":                                 resourceNsxtPolicyBgpNeighbor(),
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
+			"nsxt_policy_connectivity_policy":                          resourceNsxtPolicyConnectivityPolicy(),
 			"nsxt_policy_constraint":                                   resourceNsxtPolicyConstraint(),
 			"nsxt_policy_context_profile":                              resourceNsxtPolicyContextProfile(),
 			"nsxt_policy_context_profile_custom_attribute":             resourceNsxtPolicyContextProfileCustomAttribute(),
