@@ -380,7 +380,7 @@ func resourceNsxtPolicyEdgeClusterDelete(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 	client := enforcement_points.NewEdgeClustersClient(connector)
-	err = client.Delete(siteID, epID, id)
+	err = client.Delete(siteID, epID, id, nil)
 
 	if err != nil {
 		return handleDeleteError("PolicyEdgeCluster", id, err)
