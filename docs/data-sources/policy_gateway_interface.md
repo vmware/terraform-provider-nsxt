@@ -14,11 +14,11 @@ This data source is applicable to NSX Policy Manager and NSX Global Manager.
 
 ```hcl
 data "nsxt_policy_tier0_gateway" "t0_gw" {
-  display_name      = "t0Gateway"
+  display_name = "t0Gateway"
 }
 
 data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
-  display_name    = "gw-interface1"
+  display_name = "gw-interface1"
   gateway_path = data.nsxt_policy_tier0_gateway.t0_gw.path
 }
 ```
@@ -27,11 +27,11 @@ data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
 
 ```hcl
 data "nsxt_policy_tier1_gateway" "t1_gw" {
-  display_name      = "t1Gateway"
+  display_name = "t1Gateway"
 }
 
 data "nsxt_policy_gateway_interface" "tier1_gw_interface" {
-  display_name    = "gw-interface2"
+  display_name = "gw-interface2"
   gateway_path = data.nsxt_policy_tier1_gateway.t1_gw.path
 }
 ```

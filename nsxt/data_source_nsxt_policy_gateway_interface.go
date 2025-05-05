@@ -52,6 +52,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	var description *string
 	var segmentPath *string
 	var errors []error
+	var id *string
 	t0Gw := d.Get("gateway_path").(string)
 	query := make(map[string]string)
 	query["parent_path"] = t0Gw + "/locale-services/*"
@@ -75,12 +76,14 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 		edgePath = currGwInterface.EdgePath
 		description = currGwInterface.Description
 		segmentPath = currGwInterface.SegmentPath
+		id = currGwInterface.Id
 	} else {
 		dataValue, errors = converter.ConvertToGolang(obj, model.Tier1InterfaceBindingType())
 		currGwInterface := dataValue.(model.Tier1Interface)
 		path = currGwInterface.Path
 		description = currGwInterface.Description
 		segmentPath = currGwInterface.SegmentPath
+		id = currGwInterface.Id
 	}
 	if len(errors) > 0 {
 		return errors[0]
@@ -111,7 +114,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 			return fmt.Errorf("Error while setting the segment connected to the interface : %v", err)
 		}
 	}
-	d.SetId(newUUID())
+	d.SetId(*id)
 	return nil
 }
 
