@@ -57,7 +57,6 @@ func resourceNsxtPolicyLBPool() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"active_monitor_path"},
 			},
-			"active_monitor_path": getPolicyPathSchemaExtended(false, false, "Active healthcheck is disabled by default and can be enabled using this setting", "This attribute is deprecated, please use active_monitor_paths", []string{"active_monitor_paths"}),
 			"algorithm": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(lbPoolAlgorithmValues, false),
@@ -444,10 +443,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
 	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
-	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
-		activeMonitorPath := d.Get("active_monitor_path").(string)
-		activeMonitorPaths = []string{activeMonitorPath}
-	}
+
 	algorithm := d.Get("algorithm").(string)
 	memberGroup := getPolicyPoolMemberGroupFromSchema(d)
 	members := getPolicyPoolMembersFromSchema(d)
@@ -505,16 +501,10 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 		return handleReadError(d, "LBPool", id, err)
 	}
 
-	if _, ok := d.GetOk("active_monitor_path"); ok {
-		// deprecated value was set
-		if obj.ActiveMonitorPaths != nil {
-			d.Set("active_monitor_path", obj.ActiveMonitorPaths[0])
-		}
-	} else {
-		// resource uses lists attribute (non-deprecated) or attribute
-		// not specified. In this case set non-deprecated attr in state
-		d.Set("active_monitor_paths", obj.ActiveMonitorPaths)
-	}
+	// resource uses lists attribute (non-deprecated) or attribute
+	// not specified. In this case set non-deprecated attr in state
+	d.Set("active_monitor_paths", obj.ActiveMonitorPaths)
+
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -570,10 +560,7 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	tags := getPolicyTagsFromSchema(d)
 
 	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
-	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
-		activeMonitorPath := d.Get("active_monitor_path").(string)
-		activeMonitorPaths = []string{activeMonitorPath}
-	}
+
 	algorithm := d.Get("algorithm").(string)
 	memberGroup := getPolicyPoolMemberGroupFromSchema(d)
 	members := getPolicyPoolMembersFromSchema(d)
