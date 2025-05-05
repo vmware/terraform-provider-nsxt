@@ -39,7 +39,7 @@ data "nsxt_policy_gateway_interface" "tier1_gw_interface" {
 ## Argument Reference
 
 * `display_name` - (Required) The Display Name prefix of the gateway interface to retrieve.
-* `gateway_path` - (Required) The path of the gateway to retrieve which the interface should be linked to.
+* `gateway_path` - (Required) The path of the gateway to retrieve, where the interface should be linked to.
 
 ## Attributes Reference
 
