@@ -149,18 +149,14 @@ func resourceNsxtPolicyL2VpnServiceRead(d *schema.ResourceData, m interface{}) e
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2VpnService ID")
 	}
-	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
+	gatewayPath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
 		return nil
 	}
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-	if err != nil && gatewayPath == "" {
-		return err
-	}
-	if localeServiceID == "" {
-		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-	}
-	obj, err := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, id, isPolicyGlobalManager(m))
+
+	isT0, gwID := parseGatewayPolicyPath(gatewayPath)
+
+	obj, err := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, "", id, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleReadError(d, "L2VpnService", id, err)
 	}
@@ -181,23 +177,19 @@ func resourceNsxtPolicyL2VpnServiceRead(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicyL2VpnServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
+	gatewayPath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
 		return nil
 	}
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-	if err != nil && gatewayPath == "" {
-		return err
-	}
-	if localeServiceID == "" {
-		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-	}
+
+	isT0, gwID := parseGatewayPolicyPath(gatewayPath)
+
 	isGlobalManager := isPolicyGlobalManager(m)
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
 	} else {
-		_, err := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, id, isGlobalManager)
+		_, err := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, "", id, isGlobalManager)
 		if err == nil {
 			return fmt.Errorf("L2VpnService with nsx_id '%s' already exists", id)
 		} else if !isNotFoundError(err) {
@@ -229,7 +221,7 @@ func resourceNsxtPolicyL2VpnServiceCreate(d *schema.ResourceData, m interface{})
 		l2VpnService.EncapIpPool = encapIPPool
 	}
 
-	err = patchNsxtPolicyL2VpnService(connector, gwID, localeServiceID, l2VpnService, isT0)
+	err = patchNsxtPolicyL2VpnService(connector, gwID, "", l2VpnService, isT0)
 	if err != nil {
 		return handleCreateError("L2VpnService", id, err)
 	}
@@ -245,17 +237,12 @@ func resourceNsxtPolicyL2VpnServiceUpdate(d *schema.ResourceData, m interface{})
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2 VPN Service ID")
 	}
-	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
+	gatewayPath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
 		return nil
 	}
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-	if err != nil && gatewayPath == "" {
-		return err
-	}
-	if localeServiceID == "" {
-		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-	}
+
+	isT0, gwID := parseGatewayPolicyPath(gatewayPath)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -284,7 +271,7 @@ func resourceNsxtPolicyL2VpnServiceUpdate(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[INFO] Updating L2VpnService with ID %s", id)
-	err = patchNsxtPolicyL2VpnService(connector, gwID, localeServiceID, l2VpnService, isT0)
+	err = patchNsxtPolicyL2VpnService(connector, gwID, "", l2VpnService, isT0)
 	if err != nil {
 		return handleUpdateError("L2VpnService", id, err)
 	}
@@ -299,19 +286,14 @@ func resourceNsxtPolicyL2VpnServiceDelete(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining L2 VPN Service ID")
 	}
 
-	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
+	gatewayPath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
 		return nil
 	}
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-	if err != nil && gatewayPath == "" {
-		return err
-	}
-	if localeServiceID == "" {
-		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-	}
 
-	err = deleteNsxtPolicyL2VpnService(getPolicyConnector(m), gwID, localeServiceID, isT0, id)
+	isT0, gwID := parseGatewayPolicyPath(gatewayPath)
+
+	err = deleteNsxtPolicyL2VpnService(getPolicyConnector(m), gwID, "", isT0, id)
 	if err != nil {
 		return handleDeleteError("L2VpnService", id, err)
 	}
