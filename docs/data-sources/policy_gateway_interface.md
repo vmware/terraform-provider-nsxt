@@ -1,7 +1,7 @@
 ---
 subcategory: "Gateways and Routing"
-page_title: "NSXT: policy_tier0_gateway_interface"
-description: A policy Tier-0 gateway interface data source.
+page_title: "NSXT: policy_gateway_interface"
+description: Policy Tier-0 & Tier-1 gateway interface data source.
 ---
 
 # nsxt_policy_gateway_interface
