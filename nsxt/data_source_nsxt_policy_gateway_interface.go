@@ -1,0 +1,127 @@
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
+
+package nsxt
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+)
+
+func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceNsxtPolicyGatewayInterfaceRead,
+
+		Schema: map[string]*schema.Schema{
+			"id":           getDataSourceIDSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
+			"description":  getDataSourceDescriptionSchema(),
+			"gateway_path": {
+				Type:        schema.TypeString,
+				Description: "The name of the gateway to which interface is linked",
+				Required:    true,
+			},
+			"path": getPathSchema(),
+			"edge_cluster_path": {
+				Type:        schema.TypeString,
+				Description: "The path of the edge cluster connected to the gateway linked to this interface. This is exported only for Tier0 gateways",
+				Optional:    true,
+				Computed:    false,
+			},
+			"segment_path": {
+				Type:        schema.TypeString,
+				Description: "Policy path for segment to be connected with the Gateway.",
+				Optional:    true,
+				Computed:    true,
+			},
+		},
+	}
+}
+
+func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	converter := bindings.NewTypeConverter()
+	var dataValue interface{}
+	var path *string
+	var edgePath *string
+	var description *string
+	var segmentPath *string
+	var errors []error
+	t0Gw := d.Get("gateway_path").(string)
+	query := make(map[string]string)
+	query["parent_path"] = t0Gw + "/locale-services/*"
+	isT0, err := isT0(t0Gw)
+	if err != nil {
+		return err
+	}
+	searchStr := "Tier1Interface"
+	if isT0 {
+		searchStr = "Tier0Interface"
+	}
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), searchStr, query)
+	if err != nil {
+		return err
+	}
+
+	if isT0 {
+		dataValue, errors = converter.ConvertToGolang(obj, model.Tier0InterfaceBindingType())
+		currGwInterface := dataValue.(model.Tier0Interface)
+		path = currGwInterface.Path
+		edgePath = currGwInterface.EdgePath
+		description = currGwInterface.Description
+		segmentPath = currGwInterface.SegmentPath
+	} else {
+		dataValue, errors = converter.ConvertToGolang(obj, model.Tier1InterfaceBindingType())
+		currGwInterface := dataValue.(model.Tier1Interface)
+		path = currGwInterface.Path
+		description = currGwInterface.Description
+		segmentPath = currGwInterface.SegmentPath
+	}
+	if len(errors) > 0 {
+		return errors[0]
+	}
+
+	if path != nil {
+		err := d.Set("path", *path)
+		if err != nil {
+			return fmt.Errorf("Error while setting interface path : %v", err)
+		}
+	}
+	if isT0 && edgePath != nil {
+		err = d.Set("edge_cluster_path", *edgePath)
+		if err != nil {
+			return fmt.Errorf("Error while setting the interface edge cluster path : %v", err)
+		}
+	}
+
+	if description != nil {
+		err = d.Set("description", *description)
+		if err != nil {
+			return fmt.Errorf("Error while setting the interface description : %v", err)
+		}
+	}
+	if segmentPath != nil {
+		err = d.Set("segment_path", *segmentPath)
+		if err != nil {
+			return fmt.Errorf("Error while setting the segment connected to the interface : %v", err)
+		}
+	}
+	d.SetId(newUUID())
+	return nil
+}
+
+func isT0(t0Gw string) (bool, error) {
+	segs := strings.Split(t0Gw, "/")
+	if len(segs) < 3 {
+		return false, fmt.Errorf("Not a valid gateway path")
+	}
+	if segs[len(segs)-2] == "tier-0s" {
+		return true, nil
+	}
+	return false, nil
+}
