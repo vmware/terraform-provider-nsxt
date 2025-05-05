@@ -35,6 +35,7 @@ func TestAccResourceNsxtPolicyEdgeHighAvailabilityProfile_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -100,6 +101,7 @@ func TestAccResourceNsxtPolicyEdgeHighAvailabilityProfile_importBasic(t *testing
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,

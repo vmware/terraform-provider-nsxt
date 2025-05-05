@@ -206,6 +206,9 @@ func resourceNsxtPolicyIpBlockQuotaCreate(d *schema.ResourceData, m interface{})
 	log.Printf("[INFO] Creating IpBlockQuota with ID %s", id)
 
 	client := clientLayer.NewLimitsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return fmt.Errorf("error creating IpBlockQuota with ID %s - operation is not supported with this backend", id)
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("IpBlockQuota", id, err)
