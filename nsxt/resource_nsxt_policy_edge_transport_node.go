@@ -366,6 +366,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 								Type:         schema.TypeString,
 								ValidateFunc: validateSingleIP(),
 							},
+							Default: []string{},
 						},
 						"enable_ssh": {
 							Type:        schema.TypeBool,
