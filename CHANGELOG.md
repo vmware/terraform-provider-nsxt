@@ -2,7 +2,7 @@
 
 BUG FIXES:
 
-* `resource/nsxt_policy_host_transport_node_profile`: Fix ip assignment block in transport_node_profile_sub_config ([#1634](https://github.com/vmware/terraform-provider-nsxt/pull/1634))
+* `resource/nsxt_policy_host_transport_node_profile`: Fix IP assignment block in `transport_node_profile_sub_config`. ([#1634](https://github.com/vmware/terraform-provider-nsxt/pull/1634))
 
 ## 3.8.1 (April 29, 2025)
 
