@@ -1,6 +1,5 @@
 ---
 subcategory: "Fabric"
-layout: "nsxt"
 page_title: "NSXT: nsxt_policy_edge_transport_node"
 description: An Edge transport node data source.
 ---
