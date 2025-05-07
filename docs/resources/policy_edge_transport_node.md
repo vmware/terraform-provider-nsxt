@@ -187,6 +187,8 @@ The following arguments are supported:
   * `storage_id` - (Required) Storage/datastore identifier in the specified vcenter server.
   * `compute_manager_id` - (Required) Vsphere compute identifier for identifying the vcenter server.
 
+~> **NOTE:** `credentials` block and `allow_ssh_root_login` attribute cannot be modified after the resource is initially applied. To update credentials, use the Edge appliance CLI.
+
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
