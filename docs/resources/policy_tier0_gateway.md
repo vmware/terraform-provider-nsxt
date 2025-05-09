@@ -141,7 +141,7 @@ The following arguments are supported:
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
   * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
   * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
-  * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
+  * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is applicable to VRF-Lite Gateway with NSX 4.2.1 and above, when `multi_vrf_inter_sr` is enabled on parent gateway.
   * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is optional for VRF-Lite Gateways, and is required otherwise.
   * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
   * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.
@@ -172,6 +172,8 @@ The following arguments are supported:
     * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
 * `advanced_config` - (Optional) Advanced gateway configuration
   * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
+* `multi_vrf_inter_sr` - (Optional) Flag to control multi VRF inter SR. This is one time toggle flag and can't be disabled once enabled. Supported with NSX 4.2.1 and above.
+* `enable_rd_per_edge` - (Optional) Flag to enable distinct route distinguisher per edge node. Supported with NSX 4.2.0 and above.
 
 ## Attributes Reference
 
