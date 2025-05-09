@@ -51,11 +51,10 @@ func resourceNsxtPolicyLBPool() *schema.Resource {
 			"member":       getPoolMembersSchema(),
 			"member_group": getPolicyPoolMemberGroupSchema(),
 			"active_monitor_paths": {
-				Type:          schema.TypeList,
-				Description:   "Used by the load balancer to initiate new connections to the servers to check their health. Active healthchecks are deactivated by default and can be activated using this setting",
-				Elem:          getPolicyPathSchemaSimple(),
-				Optional:      true,
-				ConflictsWith: []string{"active_monitor_path"},
+				Type:        schema.TypeList,
+				Description: "Used by the load balancer to initiate new connections to the servers to check their health. Active healthchecks are deactivated by default and can be activated using this setting",
+				Elem:        getPolicyPathSchemaSimple(),
+				Optional:    true,
 			},
 			"algorithm": {
 				Type:         schema.TypeString,
