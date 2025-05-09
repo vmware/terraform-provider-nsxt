@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 var accTestPolicyVpcServiceProfileCreateAttributes = map[string]string{
@@ -306,7 +306,7 @@ resource "nsxt_vpc_service_profile" "test" {
       server_addresses = ["%s"]
     }
   }
-  
+
 }`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["server_addresses"])
 }
 

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
@@ -956,10 +956,10 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 
 		rule {
 		  display_name          = "rule2"
-		  source_groups         = [nsxt_policy_group.group1.path]			
+		  source_groups         = [nsxt_policy_group.group1.path]
 		  destination_groups    = ["%s"]
 		  services              = [nsxt_policy_service.icmp.path]
-		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
 		  action                = "ALLOW"
 	        }
 
@@ -968,7 +968,7 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 		  source_groups         = [nsxt_policy_group.group1.path]
 		  destination_groups    = ["%s"]
 		  services              = [nsxt_policy_service.icmp.path]
-		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
 		  action                = "ALLOW"
 		}
 
@@ -977,25 +977,25 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 		  source_groups         = ["%s"]
 		  destination_groups    = [nsxt_policy_group.group2.path]
 		  services              = [nsxt_policy_service.icmp.path]
-		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]		  
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
 		  action                = "ALLOW"
 		}
-  
+
 		rule {
 		  display_name          = "rule5"
-		  source_groups         = ["%s"]			
+		  source_groups         = ["%s"]
 		  destination_groups    = [nsxt_policy_group.group2.path]
 		  services              = [nsxt_policy_service.icmp.path]
-		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
 		  action                = "ALLOW"
 		}
-  
+
 		rule {
 		  display_name          = "rule6"
 		  source_groups         = ["%s"]
 		  destination_groups    = [nsxt_policy_group.group2.path]
 		  services              = [nsxt_policy_service.icmp.path]
-		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
 	          action                = "ALLOW"
 		  service_entries {
 		    algorithm_entry {
