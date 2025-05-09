@@ -447,7 +447,6 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Optional:    true,
 					Computed:    true,
 				},
-				"host_switch_profile": getHostSwitchProfileIDsSchema(),
 				"uplink_profile": {
 					Type:        schema.TypeString,
 					Description: "Host switch uplink profile",
@@ -538,7 +537,6 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 										Optional:    true,
 										Description: "The host switch id. This ID will be used to reference a host switch",
 									},
-									"host_switch_profile": getHostSwitchProfileIDsSchema(),
 									"uplink_profile": {
 										Type:        schema.TypeString,
 										Description: "Host switch uplink profile",
