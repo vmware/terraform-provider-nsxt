@@ -138,6 +138,10 @@ func logAPIError(message string, err error) error {
 	return err
 }
 
+func IsNotFoundError(err error) bool {
+	return isNotFoundError(err)
+}
+
 func isNotFoundError(err error) bool {
 	if _, ok := err.(errors.NotFound); ok {
 		return true
