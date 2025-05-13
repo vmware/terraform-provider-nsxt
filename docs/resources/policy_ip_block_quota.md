@@ -42,11 +42,13 @@ resource "nsxt_policy_ip_block_quota" "small" {
   description  = "terraform provisioned quota"
 
   quota {
-    ip_block_paths = [nsxt_policy_ip_block.dev.path]
+    ip_block_paths        = [nsxt_policy_ip_block.dev.path]
+    ip_block_visibility   = "EXTERNAL"
+    ip_block_address_type = "IPV6"
 
-    single_ip_cidrs = 4
+    single_ip_cidrs = -1
     other_cidrs {
-      mask        = "/28"
+      mask        = "/64"
       total_count = 4
     }
   }
@@ -63,8 +65,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `quota` - (Required) Quota specification
   * `ip_block_paths` - (Required) List of IP blocks that this quota applies to.
-  * `ip_block_address_type` - (Optional) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be speficied within the same quota.
-  * `ip_block_visibility` - (Optional) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
+  * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be speficied within the same quota.
+  * `ip_block_visibility` - (Required) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
   * `single_ip_cidrs` - (Optional) Quota for single IP CIDRs allowed. Default is -1 (unlimited). 
   * `other_cidrs` - (Required) Quota for other cidrs
     * `mask` - (Optional) Largest mask size that is allowed, format: `/[size]`
