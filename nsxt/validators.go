@@ -422,6 +422,25 @@ func validateID() schema.SchemaValidateFunc {
 	}
 }
 
+func validateProjectID(allowDefault bool) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !allowDefault && v == "default" {
+			es = append(es, fmt.Errorf("for creation in default project context, do not use a context block"))
+		}
+		if !isValidID(v) {
+			es = append(es, fmt.Errorf("invalid ID atrribute: %s", v))
+		}
+
+		return
+	}
+}
+
 func validateVLANId(i interface{}, k string) (s []string, es []error) {
 	var vlan int
 	vlan, ok := i.(int)
