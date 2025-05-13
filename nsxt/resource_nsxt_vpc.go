@@ -31,7 +31,7 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(true, false, false)),
+	"context":      metadata.GetExtendedSchema(getContextSchemaExtended(true, false, false, true)),
 	"private_ips": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
