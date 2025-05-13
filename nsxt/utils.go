@@ -690,13 +690,17 @@ func handlePagination(lister func(*paginationInfo) error) (int64, error) {
 }
 
 func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
+	return getContextSchemaExtended(isRequired, isComputed, isVPC, false)
+}
+
+func getContextSchemaExtended(isRequired, isComputed, isVPC, allowDefaultProject bool) *schema.Schema {
 	elemSchema := map[string]*schema.Schema{
 		"project_id": {
 			Type:         schema.TypeString,
 			Description:  "Id of the project which the resource belongs to.",
 			Required:     true,
 			ForceNew:     true,
-			ValidateFunc: validateID(),
+			ValidateFunc: validateProjectID(allowDefaultProject),
 		},
 	}
 	if isVPC {

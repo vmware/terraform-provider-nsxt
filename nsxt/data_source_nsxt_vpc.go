@@ -18,7 +18,7 @@ func dataSourceNsxtVPC() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false, false),
+			"context":      getContextSchemaExtended(true, false, false, true),
 			"short_id": {
 				Type:     schema.TypeString,
 				Optional: true,
