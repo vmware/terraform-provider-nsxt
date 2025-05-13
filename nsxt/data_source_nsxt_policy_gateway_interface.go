@@ -37,7 +37,7 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Policy path for segment to be connected with the Gateway.",
 				Optional:    true,
-				Computed:    true,
+				Computed:    false,
 			},
 		},
 	}
@@ -88,32 +88,16 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	if len(errors) > 0 {
 		return errors[0]
 	}
-
-	if path != nil {
-		err := d.Set("path", *path)
-		if err != nil {
-			return fmt.Errorf("Error while setting interface path : %v", err)
-		}
-	}
+	d.Set("path", *path)
 	if isT0 && edgePath != nil {
 		err = d.Set("edge_cluster_path", *edgePath)
 		if err != nil {
 			return fmt.Errorf("Error while setting the interface edge cluster path : %v", err)
 		}
 	}
+	d.Set("description", *description)
+	d.Set("segment_path", *segmentPath)
 
-	if description != nil {
-		err = d.Set("description", *description)
-		if err != nil {
-			return fmt.Errorf("Error while setting the interface description : %v", err)
-		}
-	}
-	if segmentPath != nil {
-		err = d.Set("segment_path", *segmentPath)
-		if err != nil {
-			return fmt.Errorf("Error while setting the segment connected to the interface : %v", err)
-		}
-	}
 	d.SetId(*id)
 	return nil
 }
