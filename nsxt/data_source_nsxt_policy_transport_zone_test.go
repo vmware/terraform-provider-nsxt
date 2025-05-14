@@ -18,7 +18,7 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccNSXGlobalManagerSitePrecheck(t)
+			testAccOnlyLocalManager(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -30,6 +30,32 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
 					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
+					resource.TestCheckResourceAttr(testResourceName, "transport_type", "VLAN_BACKED"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyTransportZone_globalManager(t *testing.T) {
+	transportZoneName := getVlanTransportZoneName()
+	testResourceName := "data.nsxt_policy_transport_zone.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
+			testAccNSXGlobalManagerSitePrecheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyTransportZoneReadTemplate(transportZoneName, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
 					resource.TestCheckResourceAttr(testResourceName, "transport_type", "VLAN_BACKED"),
 				),
 			},
