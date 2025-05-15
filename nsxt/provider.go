@@ -851,10 +851,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		host = fmt.Sprintf("https://%s", host)
 	}
 
-	securityContextNeeded := true
-	if clientAuthDefined && !clients.CommonConfig.RemoteAuth {
-		securityContextNeeded = false
-	}
+	securityContextNeeded := !(clientAuthDefined && !clients.CommonConfig.RemoteAuth)
+
 	if securityContextNeeded {
 		securityCtx, err := getConfiguredSecurityContext(clients, vmcInfo, username, password)
 		if err != nil {
