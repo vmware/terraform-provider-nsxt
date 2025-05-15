@@ -19,7 +19,7 @@ var accTestPolicyLBPoolCreateAttributes = map[string]string{
 	"algorithm":               "IP_HASH",
 	"min_active_members":      "2",
 	"tcp_multiplexing_number": "2",
-	"active_monitor_path":     "/infra/lb-monitor-profiles/default-icmp-lb-monitor",
+	"active_monitor_paths":    "/infra/lb-monitor-profiles/default-icmp-lb-monitor",
 }
 
 var accTestPolicyLBPoolUpdateAttributes = map[string]string{
@@ -61,8 +61,6 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member.1.ip_address", "5.5.5.3"),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", accTestPolicyLBPoolCreateAttributes["min_active_members"]),
 					resource.TestCheckResourceAttr(testResourceName, "tcp_multiplexing_number", accTestPolicyLBPoolCreateAttributes["tcp_multiplexing_number"]),
-					// In the 1st step we use the deprecated string attribute
-					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", "/infra/lb-monitor-profiles/default-icmp-lb-monitor"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -90,7 +88,6 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					// In the 2nd step we switch to the current list attribute
 					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.0", "/infra/lb-monitor-profiles/default-http-lb-monitor"),
-					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", ""),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -116,7 +113,6 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tcp_multiplexing_number", accTestPolicyLBPoolUpdateAttributes["tcp_multiplexing_number"]),
 					// This step clears active_monitor_paths
 					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", ""),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -311,10 +307,6 @@ func testAccNsxtPolicyLBPoolMemberTemplate(createFlow bool) string {
 	// Use either current or deprecated attribute for active monitors
 	if attrMap["active_monitor_paths"] != "" {
 		monitorPaths = fmt.Sprintf("active_monitor_paths = [\"%s\"]", attrMap["active_monitor_paths"])
-	} else {
-		if attrMap["active_monitor_path"] != "" {
-			monitorPaths = fmt.Sprintf("active_monitor_path = \"%s\"", attrMap["active_monitor_path"])
-		}
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_lb_pool" "test" {
