@@ -277,13 +277,14 @@ func setIdsProfileCriteriaInSchema(criteriaList []*data.StructValue, d *schema.R
 		}
 
 		criteria := dataValue.(model.IdsProfileFilterCriteria)
-		if *criteria.FilterName == model.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TYPE {
+		switch *criteria.FilterName {
+		case model.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TYPE:
 			criteriaMap["attack_types"] = criteria.FilterValue
-		} else if *criteria.FilterName == model.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TARGET {
+		case model.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TARGET:
 			criteriaMap["attack_targets"] = criteria.FilterValue
-		} else if *criteria.FilterName == model.IdsProfileFilterCriteria_FILTER_NAME_CVSS {
+		case model.IdsProfileFilterCriteria_FILTER_NAME_CVSS:
 			criteriaMap["cvss"] = criteria.FilterValue
-		} else if *criteria.FilterName == model.IdsProfileFilterCriteria_FILTER_NAME_PRODUCT_AFFECTED {
+		case model.IdsProfileFilterCriteria_FILTER_NAME_PRODUCT_AFFECTED:
 			criteriaMap["products_affected"] = criteria.FilterValue
 		}
 	}

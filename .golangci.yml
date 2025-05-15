@@ -52,7 +52,7 @@ linters:
       # TODO: Setting temporary exclusions.
       - linters:
           - staticcheck
-        text: QF1001|QF1003
+        text: QF1001
       - linters:
           - staticcheck
         text: ST1005

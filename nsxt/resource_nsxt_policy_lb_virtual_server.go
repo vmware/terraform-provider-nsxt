@@ -1023,68 +1023,69 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 			basicType, _ := converter.ConvertToGolang(action, model.LBRuleActionBindingType())
 			actionType := basicType.(model.LBRuleAction).Type_
 
-			if actionType == model.LBRuleAction_TYPE_LBCONNECTIONDROPACTION {
+			switch actionType {
+			case model.LBRuleAction_TYPE_LBCONNECTIONDROPACTION:
 				actionElem["_dummy"] = "dummy_value_to_indicate_presence_of_section"
 				connectionDropActionList = append(connectionDropActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBSELECTPOOLACTION {
+			case model.LBRuleAction_TYPE_LBSELECTPOOLACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBSelectPoolActionBindingType())
 				actionElem["pool_id"] = specificType.(model.LBSelectPoolAction).PoolId
 				selectPoolActionList = append(selectPoolActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREDIRECTACTION {
+			case model.LBRuleAction_TYPE_LBHTTPREDIRECTACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRedirectActionBindingType())
 				actionElem["redirect_status"] = specificType.(model.LBHttpRedirectAction).RedirectStatus
 				actionElem["redirect_url"] = specificType.(model.LBHttpRedirectAction).RedirectUrl
 				httpRedirectActionList = append(httpRedirectActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTURIREWRITEACTION {
+			case model.LBRuleAction_TYPE_LBHTTPREQUESTURIREWRITEACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestUriRewriteActionBindingType())
 				actionElem["uri"] = specificType.(model.LBHttpRequestUriRewriteAction).Uri
 				actionElem["uri_arguments"] = specificType.(model.LBHttpRequestUriRewriteAction).UriArguments
 				httpRequestURIRewriteActionList = append(httpRequestURIRewriteActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERREWRITEACTION {
+			case model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERREWRITEACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestHeaderRewriteActionBindingType())
 				actionElem["header_name"] = specificType.(model.LBHttpRequestHeaderRewriteAction).HeaderName
 				actionElem["header_value"] = specificType.(model.LBHttpRequestHeaderRewriteAction).HeaderValue
 				httpRequestHeaderRewriteActionList = append(httpRequestHeaderRewriteActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREJECTACTION {
+			case model.LBRuleAction_TYPE_LBHTTPREJECTACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRejectActionBindingType())
 				actionElem["reply_message"] = specificType.(model.LBHttpRejectAction).ReplyMessage
 				actionElem["reply_status"] = specificType.(model.LBHttpRejectAction).ReplyStatus
 				httpRejectActionList = append(httpRejectActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERREWRITEACTION {
+			case model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERREWRITEACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpResponseHeaderRewriteActionBindingType())
 				actionElem["header_name"] = specificType.(model.LBHttpResponseHeaderRewriteAction).HeaderName
 				actionElem["header_value"] = specificType.(model.LBHttpResponseHeaderRewriteAction).HeaderValue
 				httpResponseHeaderRewriteActionList = append(httpResponseHeaderRewriteActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERDELETEACTION {
+			case model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERDELETEACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestHeaderDeleteActionBindingType())
 				actionElem["header_name"] = specificType.(model.LBHttpRequestHeaderDeleteAction).HeaderName
 				httpRequestHeaderDeleteActionList = append(httpRequestHeaderDeleteActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERDELETEACTION {
+			case model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERDELETEACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBHttpResponseHeaderDeleteActionBindingType())
 				actionElem["header_name"] = specificType.(model.LBHttpResponseHeaderDeleteAction).HeaderName
 				httpResponseHeaderDeleteActionList = append(httpResponseHeaderDeleteActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEASSIGNMENTACTION {
+			case model.LBRuleAction_TYPE_LBVARIABLEASSIGNMENTACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBVariableAssignmentActionBindingType())
 				actionElem["variable_name"] = specificType.(model.LBVariableAssignmentAction).VariableName
 				actionElem["variable_value"] = specificType.(model.LBVariableAssignmentAction).VariableValue
 				variableAssignmentActionList = append(variableAssignmentActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCEONACTION {
+			case model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCEONACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBVariablePersistenceOnActionBindingType())
 				actionElem["persistence_profile_path"] = specificType.(model.LBVariablePersistenceOnAction).PersistenceProfilePath
 				actionElem["variable_hash_enabled"] = specificType.(model.LBVariablePersistenceOnAction).VariableHashEnabled
 				actionElem["variable_name"] = specificType.(model.LBVariablePersistenceOnAction).VariableName
 				variablePersistenceOnActionList = append(variablePersistenceOnActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCELEARNACTION {
+			case model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCELEARNACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBVariablePersistenceLearnActionBindingType())
 				actionElem["persistence_profile_path"] = specificType.(model.LBVariablePersistenceLearnAction).PersistenceProfilePath
 				actionElem["variable_hash_enabled"] = specificType.(model.LBVariablePersistenceLearnAction).VariableHashEnabled
 				actionElem["variable_name"] = specificType.(model.LBVariablePersistenceLearnAction).VariableName
 				variablePersistenceLearnActionList = append(variablePersistenceLearnActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBSSLMODESELECTIONACTION {
+			case model.LBRuleAction_TYPE_LBSSLMODESELECTIONACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBSslModeSelectionActionBindingType())
 				actionElem["ssl_mode"] = specificType.(model.LBSslModeSelectionAction).SslMode
 				sslModeSelectionActionList = append(sslModeSelectionActionList, actionElem)
-			} else if actionType == model.LBRuleAction_TYPE_LBJWTAUTHACTION {
+			case model.LBRuleAction_TYPE_LBJWTAUTHACTION:
 				specificType, _ := converter.ConvertToGolang(action, model.LBJwtAuthActionBindingType())
 				actionElem["pass_jwt_to_pool"] = specificType.(model.LBJwtAuthAction).PassJwtToPool
 				actionElem["realm"] = specificType.(model.LBJwtAuthAction).Realm
@@ -1096,12 +1097,13 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				basicKeyType, _ := converter.ConvertToGolang(key, model.LBJwtKeyBindingType())
 				keyType := basicKeyType.(model.LBJwtKey).Type_
 
-				if keyType == model.LBJwtKey_TYPE_LBJWTCERTIFICATEKEY {
+				switch keyType {
+				case model.LBJwtKey_TYPE_LBJWTCERTIFICATEKEY:
 					specificKeyType, _ := converter.ConvertToGolang(key, model.LBJwtCertificateKeyBindingType())
 					keyElem["certificate_path"] = specificKeyType.(model.LBJwtCertificateKey).CertificatePath
-				} else if keyType == model.LBJwtKey_TYPE_LBJWTSYMMETRICKEY {
+				case model.LBJwtKey_TYPE_LBJWTSYMMETRICKEY:
 					keyElem["symmetric_key"] = "dummy"
-				} else if keyType == model.LBJwtKey_TYPE_LBJWTPUBLICKEY {
+				case model.LBJwtKey_TYPE_LBJWTPUBLICKEY:
 					specificKeyType, _ := converter.ConvertToGolang(key, model.LBJwtPublicKeyBindingType())
 					keyElem["public_key_content"] = specificKeyType.(model.LBJwtPublicKey).PublicKeyContent
 				}
@@ -1162,21 +1164,22 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 			basicType, _ := converter.ConvertToGolang(condition, model.LBRuleConditionBindingType())
 			conditionType := basicType.(model.LBRuleCondition).Type_
 
-			if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTBODYCONDITION {
+			switch conditionType {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTBODYCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestBodyConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestBodyCondition).CaseSensitive
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestBodyCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpRequestBodyCondition).MatchType
 				conditionElem["body_value"] = specificType.(model.LBHttpRequestBodyCondition).BodyValue
 				httpRequestBodyConditionList = append(httpRequestBodyConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTURICONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTURICONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestUriConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestUriCondition).CaseSensitive
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestUriCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpRequestUriCondition).MatchType
 				conditionElem["uri"] = specificType.(model.LBHttpRequestUriCondition).Uri
 				httpRequestURIConditionList = append(httpRequestURIConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTHEADERCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTHEADERCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestHeaderConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestHeaderCondition).CaseSensitive
 				conditionElem["header_name"] = specificType.(model.LBHttpRequestHeaderCondition).HeaderName
@@ -1184,24 +1187,24 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestHeaderCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpRequestHeaderCondition).MatchType
 				httpRequestHeaderConditionList = append(httpRequestHeaderConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTMETHODCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTMETHODCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestMethodConditionBindingType())
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestMethodCondition).Inverse
 				conditionElem["method"] = specificType.(model.LBHttpRequestMethodCondition).Method
 				httpRequestMethodConditionList = append(httpRequestMethodConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTURIARGUMENTSCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTURIARGUMENTSCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestUriArgumentsConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestUriArgumentsCondition).CaseSensitive
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestUriArgumentsCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpRequestUriArgumentsCondition).MatchType
 				conditionElem["uri_arguments"] = specificType.(model.LBHttpRequestUriArgumentsCondition).UriArguments
 				httpRequestURIArgumentsConditionList = append(httpRequestURIArgumentsConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTVERSIONCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTVERSIONCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestVersionConditionBindingType())
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestVersionCondition).Inverse
 				conditionElem["version"] = specificType.(model.LBHttpRequestVersionCondition).Version
 				httpRequestVersionConditionList = append(httpRequestVersionConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTCOOKIECONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPREQUESTCOOKIECONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestCookieConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestCookieCondition).CaseSensitive
 				conditionElem["cookie_name"] = specificType.(model.LBHttpRequestCookieCondition).CookieName
@@ -1209,7 +1212,7 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				conditionElem["inverse"] = specificType.(model.LBHttpRequestCookieCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpRequestCookieCondition).MatchType
 				httpRequestCookieConditionList = append(httpRequestCookieConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPRESPONSEHEADERCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPRESPONSEHEADERCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpResponseHeaderConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBHttpResponseHeaderCondition).CaseSensitive
 				conditionElem["header_name"] = specificType.(model.LBHttpResponseHeaderCondition).HeaderName
@@ -1217,18 +1220,18 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				conditionElem["inverse"] = specificType.(model.LBHttpResponseHeaderCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBHttpResponseHeaderCondition).MatchType
 				httpResponseHeaderConditionList = append(httpResponseHeaderConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBTCPHEADERCONDITION {
+			case model.LBRuleCondition_TYPE_LBTCPHEADERCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBTcpHeaderConditionBindingType())
 				conditionElem["inverse"] = specificType.(model.LBTcpHeaderCondition).Inverse
 				conditionElem["source_port"] = specificType.(model.LBTcpHeaderCondition).SourcePort
 				tcpHeaderConditionList = append(tcpHeaderConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBIPHEADERCONDITION {
+			case model.LBRuleCondition_TYPE_LBIPHEADERCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBIpHeaderConditionBindingType())
 				conditionElem["group_path"] = specificType.(model.LBIpHeaderCondition).GroupPath
 				conditionElem["inverse"] = specificType.(model.LBIpHeaderCondition).Inverse
 				conditionElem["source_address"] = specificType.(model.LBIpHeaderCondition).SourceAddress
 				ipHeaderConditionList = append(ipHeaderConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBVARIABLECONDITION {
+			case model.LBRuleCondition_TYPE_LBVARIABLECONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBVariableConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBVariableCondition).CaseSensitive
 				conditionElem["inverse"] = specificType.(model.LBVariableCondition).Inverse
@@ -1236,14 +1239,14 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				conditionElem["variable_name"] = specificType.(model.LBVariableCondition).VariableName
 				conditionElem["variable_value"] = specificType.(model.LBVariableCondition).VariableValue
 				variableConditionList = append(variableConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBSSLSNICONDITION {
+			case model.LBRuleCondition_TYPE_LBSSLSNICONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBSslSniConditionBindingType())
 				conditionElem["case_sensitive"] = specificType.(model.LBSslSniCondition).CaseSensitive
 				conditionElem["inverse"] = specificType.(model.LBSslSniCondition).Inverse
 				conditionElem["match_type"] = specificType.(model.LBSslSniCondition).MatchType
 				conditionElem["sni"] = specificType.(model.LBSslSniCondition).Sni
 				sslSniConditionList = append(sslSniConditionList, conditionElem)
-			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPSSLCONDITION {
+			case model.LBRuleCondition_TYPE_LBHTTPSSLCONDITION:
 				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpSslConditionBindingType())
 				conditionElem["inverse"] = specificType.(model.LBHttpSslCondition).Inverse
 				conditionElem["session_reused"] = specificType.(model.LBHttpSslCondition).SessionReused
