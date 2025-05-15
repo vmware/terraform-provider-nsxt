@@ -349,17 +349,11 @@ func testAccNsxtPolicyL2VpnServiceCheckDestroy(state *terraform.State, displayNa
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		localeServicePath := rs.Primary.Attributes["locale_service_path"]
 		gatewayPath := rs.Primary.Attributes["gateway_path"]
-		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-		if localeServiceID == "" {
-			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-		}
-		if err != nil && gatewayPath == "" {
-			return nil
-		}
 
-		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+		isT0, gwID := parseGatewayPolicyPath(gatewayPath)
+
+		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, "", resourceID, testAccIsGlobalManager())
 		if err1 == nil {
 			return fmt.Errorf("Policy L2VpnService %s still exists", displayName)
 		}
