@@ -58,11 +58,12 @@ func extractGatewayIDLocaleServiceID(parentPath string) (string, string, string,
 	// 2: /infra/tier-0s/{tier0-id}/locale-services/{locale-services-id}
 	parentPathList := strings.Split(parentPath, "/")
 	for i := 0; i < len(parentPathList)-1; i++ {
-		if parentPathList[i] == "tier-0s" {
+		switch parentPathList[i] {
+		case "tier-0s":
 			tier0ID = parentPathList[i+1]
-		} else if parentPathList[i] == "tier-1s" {
+		case "tier-1s":
 			tier1ID = parentPathList[i+1]
-		} else if parentPathList[i] == "locale-services" {
+		case "locale-services":
 			localeServiceID = parentPathList[i+1]
 		}
 	}

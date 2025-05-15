@@ -211,7 +211,8 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 
 	var dataValue data.DataValue
 	var errs []error
-	if serverType == activeDirectoryType {
+	switch serverType {
+	case activeDirectoryType:
 		obj := nsxModel.ActiveDirectoryIdentitySource{
 			Description:            &description,
 			Revision:               &revision,
@@ -223,7 +224,7 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 			ResourceType:           nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE,
 		}
 		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.ActiveDirectoryIdentitySourceBindingType())
-	} else if serverType == openLdapType {
+	case openLdapType:
 		obj := nsxModel.OpenLdapIdentitySource{
 			Description:            &description,
 			Revision:               &revision,
@@ -306,11 +307,12 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 	ldapObj := obj.(nsxModel.LdapIdentitySource)
 	resourceType := ldapObj.ResourceType
 	var dServerType string
-	if resourceType == nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE {
+	switch resourceType {
+	case nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE:
 		dServerType = activeDirectoryType
-	} else if resourceType == nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE {
+	case nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE:
 		dServerType = openLdapType
-	} else {
+	default:
 		return fmt.Errorf("unrecognized LdapIdentitySource Resource Type %s", resourceType)
 	}
 
