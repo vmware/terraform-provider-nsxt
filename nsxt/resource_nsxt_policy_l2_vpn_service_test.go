@@ -300,14 +300,12 @@ func testAccNsxtPolicyL2VpnServiceImporterGetID(s *terraform.State) (string, err
 	if resourceID == "" {
 		return "", fmt.Errorf("Policy L2VpnService resource ID not set in resources")
 	}
-	localeServicePath := rs.Primary.Attributes["locale_service_path"]
+
 	gatewayPath := rs.Primary.Attributes["gateway_path"]
-	if gatewayPath == "" && localeServicePath == "" {
+	if gatewayPath == "" {
 		return "", fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
 	}
-	if localeServicePath != "" {
-		return fmt.Sprintf("%s/l2vpn-services/%s", localeServicePath, resourceID), nil
-	}
+
 	return fmt.Sprintf("%s/l2vpn-services/%s", gatewayPath, resourceID), nil
 }
 
@@ -326,19 +324,14 @@ func testAccNsxtPolicyL2VpnServiceExists(displayName string, resourceName string
 			return fmt.Errorf("Policy L2VpnService resource ID not set in resources")
 		}
 
-		localeServicePath := rs.Primary.Attributes["locale_service_path"]
 		gatewayPath := rs.Primary.Attributes["gateway_path"]
-		if gatewayPath == "" && localeServicePath == "" {
+		if gatewayPath == "" {
 			return fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
 		}
-		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-		if localeServiceID == "" {
-			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
-		}
-		if err != nil && gatewayPath == "" {
-			return fmt.Errorf("Invalid locale service path %s", localeServicePath)
-		}
-		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+
+		isT0, gwID := parseGatewayPolicyPath(gatewayPath)
+
+		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, "", resourceID, testAccIsGlobalManager())
 		if err1 != nil {
 			return fmt.Errorf("Policy L2VpnService %s does not exist", displayName)
 		}
