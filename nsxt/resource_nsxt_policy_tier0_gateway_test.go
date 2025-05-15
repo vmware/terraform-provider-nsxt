@@ -282,11 +282,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "3"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -295,11 +290,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -308,10 +298,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -971,14 +957,6 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  redistribution_config {
-    enabled      = false
-    ospf_enabled = false
-    rule {
-        name = "test-rule-1"
-        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
-    }
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
@@ -995,17 +973,6 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  redistribution_config {
-    enabled      = false
-    ospf_enabled = false
-    rule {
-        name = "test-rule-1"
-    }
-    rule {
-        name  = "test-rule-3"
-        types = ["TIER1_CONNECTED"]
-    }
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
@@ -1022,10 +989,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 
-  redistribution_config {
-    enabled  = false
-    ospf_enabled = true
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {

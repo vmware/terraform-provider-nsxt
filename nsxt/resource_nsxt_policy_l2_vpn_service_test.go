@@ -47,11 +47,10 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceMinimalistic(false),
+				Config: testAccNsxtPolicyL2VpnServiceMinimalistic(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -59,12 +58,11 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateAttributes["enable_hub"]),
 					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateAttributes["mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
@@ -76,12 +74,11 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, false, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceUpdateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceUpdateAttributes["enable_hub"]),
 					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceUpdateAttributes["mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
@@ -110,12 +107,11 @@ func TestAccResourceNsxtPolicyL2VpnService_updateFromlocaleServicePathToGatewayP
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateAttributes["enable_hub"]),
 					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateAttributes["mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
@@ -218,12 +214,11 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, true, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateClientModeAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateClientModeAttributes["enable_hub"]),
 					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateClientModeAttributes["mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
@@ -283,7 +278,7 @@ func TestAccResourceNsxtPolicyL2VpnService_Import(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, true),
 			},
 			{
 				ResourceName:      resourceName,
