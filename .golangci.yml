@@ -57,9 +57,6 @@ linters:
         text: QF1004
       - linters:
           - staticcheck
-        text: QF1007
-      - linters:
-          - staticcheck
         text: QF1011
       - linters:
           - staticcheck
