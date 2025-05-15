@@ -251,9 +251,10 @@ func basicIntSchema(sdkName string, optional, omitIfEmpty bool) *ExtendedSchema 
 func basicStructSchema(t string) schema.Schema {
 	schemaType := schema.TypeList
 	maxItems := 0
-	if t == "set" {
+	switch t {
+	case "set":
 		schemaType = schema.TypeSet
-	} else if t == "struct" {
+	case "struct":
 		maxItems = 1
 	}
 	return schema.Schema{

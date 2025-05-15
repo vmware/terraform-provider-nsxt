@@ -188,11 +188,12 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	var natPass bool
-	if *natRule.FirewallMatch == model.NatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS {
+	switch *natRule.FirewallMatch {
+	case model.NatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS:
 		natPass = false
-	} else if *natRule.FirewallMatch == model.NatRule_FIREWALL_MATCH_BYPASS {
+	case model.NatRule_FIREWALL_MATCH_BYPASS:
 		natPass = true
-	} else {
+	default:
 		return fmt.Errorf("could not determine nat_pass value from firewall_match attribute value %s", *natRule.FirewallMatch)
 	}
 

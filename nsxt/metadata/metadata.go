@@ -211,7 +211,8 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			metadataTraceLogger("%s adding polymorphic slice %+v to key %s", ctx, nestedVal, key)
 			continue
 		}
-		if item.Metadata.SchemaType == "struct" {
+		switch item.Metadata.SchemaType {
+		case "struct":
 			nestedObj := elem.FieldByName(item.Metadata.SdkFieldName)
 			nestedSchema := make(map[string]interface{})
 			childElem := item.Schema.Elem.(*ExtendedResource)
@@ -226,7 +227,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			} else {
 				d.Set(key, nestedSlice)
 			}
-		} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+		case "list", "set":
 			if _, ok := item.Schema.Elem.(*ExtendedSchema); ok {
 				// List of string, bool, int
 				nestedSlice := elem.FieldByName(item.Metadata.SdkFieldName)
@@ -254,7 +255,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					d.Set(key, nestedSlice)
 				}
 			}
-		} else {
+		default:
 			if len(parent) > 0 {
 				metadataTraceLogger("%s assigning nested value %+v to %s",
 					ctx, elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
@@ -465,13 +466,14 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 
 func getItemListForSchemaToStruct(d *schema.ResourceData, schemaType, key, parent string, parentMap map[string]interface{}) []interface{} {
 	var itemList []interface{}
-	if schemaType == "list" || schemaType == "struct" {
+	switch schemaType {
+	case "list", "struct":
 		if len(parent) > 0 {
 			itemList = parentMap[key].([]interface{})
 		} else {
 			itemList = d.Get(key).([]interface{})
 		}
-	} else if schemaType == "set" {
+	case "set":
 		if len(parent) > 0 {
 			itemList = parentMap[key].(*schema.Set).List()
 		} else {
@@ -643,16 +645,17 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 		}
 	}
 
-	if item.Metadata.SchemaType == "struct" {
+	switch item.Metadata.SchemaType {
+	case "struct":
 		elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(dv[0]))
-	} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+	case "list", "set":
 		sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
 		sliceElem.Set(
 			reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(&data.StructValue{})), len(dv), len(dv)))
 		for i, v := range dv {
 			sliceElem.Index(i).Set(reflect.ValueOf(v))
 		}
-	} else {
+	default:
 		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
 		logger.Printf("[ERROR] %v", err)
 		return
@@ -744,7 +747,8 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 			ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
 	}
 
-	if item.Metadata.SchemaType == "struct" {
+	switch item.Metadata.SchemaType {
+	case "struct":
 		if rSlice.Len() == 0 {
 			return
 		}
@@ -755,14 +759,14 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 			return
 		}
 		structElem.Set(rSlice.Index(0))
-	} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+	case "list", "set":
 		sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
 		if sliceElem.IsZero() {
 			sliceElem.Set(rSlice)
 		} else {
 			sliceElem.Set(reflect.AppendSlice(sliceElem, rSlice))
 		}
-	} else {
+	default:
 		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
 		logger.Printf("[ERROR] %v", err)
 		return

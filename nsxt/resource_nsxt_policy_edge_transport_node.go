@@ -1604,9 +1604,10 @@ func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface
 			sw["pnic"] = pnics
 
 			for _, pp := range switc.ProfilePaths {
-				if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_UPLINKHOSTSWITCHPROFILE {
+				switch *pp.Key {
+				case model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_UPLINKHOSTSWITCHPROFILE:
 					sw["uplink_host_switch_profile_path"] = pp.Value
-				} else if *pp.Key == model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_LLDPHOSTSWITCHPROFILE {
+				case model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_LLDPHOSTSWITCHPROFILE:
 					sw["lldp_host_switch_profile_path"] = pp.Value
 				}
 			}

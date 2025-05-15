@@ -99,9 +99,10 @@ type testPolyListStruct struct {
 func testPolyStructNestedSchema(t string) map[string]*schema.Schema {
 	schemaType := schema.TypeList
 	maxItems := 0
-	if t == "set" {
+	switch t {
+	case "set":
 		schemaType = schema.TypeSet
-	} else if t == "struct" {
+	case "struct":
 		maxItems = 1
 	}
 
@@ -155,9 +156,10 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 
 	schemaType := schema.TypeList
 	maxItems := 0
-	if t == "set" {
+	switch t {
+	case "set":
 		schemaType = schema.TypeSet
-	} else if t == "struct" {
+	case "struct":
 		maxItems = 1
 	}
 	return map[string]*ExtendedSchema{
@@ -540,9 +542,10 @@ func TestNestedSchemaToPolyStruct(t *testing.T) {
 func testPolyStructFlattenSchema(t string) map[string]*schema.Schema {
 	schemaType := schema.TypeList
 	maxItems := 0
-	if t == "set" {
+	switch t {
+	case "set":
 		schemaType = schema.TypeSet
-	} else if t == "struct" {
+	case "struct":
 		maxItems = 1
 	}
 	return map[string]*schema.Schema{
@@ -584,9 +587,10 @@ func testPolyStructFlattenExtSchema(t, sdkName string) map[string]*ExtendedSchem
 	}
 	schemaType := schema.TypeList
 	maxItems := 0
-	if t == "set" {
+	switch t {
+	case "set":
 		schemaType = schema.TypeSet
-	} else if t == "struct" {
+	case "struct":
 		maxItems = 1
 	}
 	return map[string]*ExtendedSchema{
