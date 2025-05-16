@@ -198,7 +198,7 @@ func testAccNsxtPolicyLBClientSslProfileTemplate(createFlow bool) string {
 
 func testAccNsxtPolicyLBClientSslProfileMinimalistic() string {
 	return fmt.Sprintf(`
-   resource "nsxt_policy_lb_client_ssl_profile" "test" {
-	 display_name = "%s"
-   }`, accTestPolicyLBClientSslProfileUpdateAttributes["display_name"])
+resource "nsxt_policy_lb_client_ssl_profile" "test" {
+  display_name = "%s"
+}`, accTestPolicyLBClientSslProfileUpdateAttributes["display_name"])
 }

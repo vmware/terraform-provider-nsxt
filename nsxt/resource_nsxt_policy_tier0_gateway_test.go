@@ -654,8 +654,8 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 
 resource "nsxt_policy_dhcp_relay" "test" {
-  display_name      = "terraform-dhcp-relay"
-  server_addresses  = ["88.9.9.2"]
+  display_name     = "terraform-dhcp-relay"
+  server_addresses = ["88.9.9.2"]
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
@@ -676,8 +676,8 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 
 resource "nsxt_policy_dhcp_relay" "test" {
-  display_name      = "terraform-dhcp-relay"
-  server_addresses  = ["88.9.9.2"]
+  display_name     = "terraform-dhcp-relay"
+  server_addresses = ["88.9.9.2"]
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
@@ -767,17 +767,17 @@ resource "nsxt_policy_tier0_gateway" "test" {
 func testAccNsxtPolicyTier0CreateWithLocaleTemplate(name string) string {
 	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "node1" {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-    member_index      = 0
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  member_index      = 0
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name              = "%s"
-  failover_mode             = "PREEMPTIVE"
-  ha_mode                   = "ACTIVE_STANDBY"
+  display_name  = "%s"
+  failover_mode = "PREEMPTIVE"
+  ha_mode       = "ACTIVE_STANDBY"
 
   locale_service {
-    nsx_id = "%s"
+    nsx_id               = "%s"
     edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
     preferred_edge_paths = [data.nsxt_policy_edge_node.node1.path]
   }
@@ -789,17 +789,17 @@ resource "nsxt_policy_tier0_gateway" "test" {
 func testAccNsxtPolicyTier0UpdateWithLocaleTemplate(name string) string {
 	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "node1" {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-    member_index      = 1
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  member_index      = 1
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name              = "%s"
-  failover_mode             = "PREEMPTIVE"
-  ha_mode                   = "ACTIVE_STANDBY"
+  display_name  = "%s"
+  failover_mode = "PREEMPTIVE"
+  ha_mode       = "ACTIVE_STANDBY"
 
   locale_service {
-    nsx_id = "%s"
+    nsx_id               = "%s"
     edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
     preferred_edge_paths = [data.nsxt_policy_edge_node.node1.path]
   }
@@ -811,16 +811,16 @@ resource "nsxt_policy_tier0_gateway" "test" {
 func testAccNsxtPolicyTier0SubnetsTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name              = "%s"
-  description               = "Acceptance Test"
-  failover_mode             = "NON_PREEMPTIVE"
-  default_rule_logging      = "false"
-  enable_firewall           = "true"
-  force_whitelisting        = "true"
-  ha_mode                   = "ACTIVE_STANDBY"
-  ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
-  internal_transit_subnets  = ["102.64.0.0/16"]
-  transit_subnets           = ["101.64.0.0/16"]
+  display_name             = "%s"
+  description              = "Acceptance Test"
+  failover_mode            = "NON_PREEMPTIVE"
+  default_rule_logging     = "false"
+  enable_firewall          = "true"
+  force_whitelisting       = "true"
+  ha_mode                  = "ACTIVE_STANDBY"
+  ipv6_dad_profile_path    = "/infra/ipv6-dad-profiles/default"
+  internal_transit_subnets = ["102.64.0.0/16"]
+  transit_subnets          = ["101.64.0.0/16"]
 
   tag {
     scope = "scope3"
@@ -867,9 +867,9 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyTier0SubnetsMinimalistic(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name              = "%s"
-  failover_mode             = "NON_PREEMPTIVE"
-  ha_mode                   = "ACTIVE_STANDBY"
+  display_name  = "%s"
+  failover_mode = "NON_PREEMPTIVE"
+  ha_mode       = "ACTIVE_STANDBY"
 }`, name)
 }
 
@@ -894,9 +894,9 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bo
 	if withBGP {
 		bgpConfig = `
 resource "nsxt_policy_bgp_config" "test" {
-	  gateway_path = nsxt_policy_tier0_gateway.test.path
-	  enabled      = true
-	  ecmp         = true
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  enabled      = true
+  ecmp         = true
 }`
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + fmt.Sprintf(`
@@ -981,8 +981,8 @@ resource "nsxt_policy_tier0_gateway" "test" {
     enabled      = false
     ospf_enabled = false
     rule {
-        name = "test-rule-1"
-        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+      name  = "test-rule-1"
+      types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
     }
   }
 }
@@ -1005,11 +1005,11 @@ resource "nsxt_policy_tier0_gateway" "test" {
     enabled      = false
     ospf_enabled = false
     rule {
-        name = "test-rule-1"
+      name = "test-rule-1"
     }
     rule {
-        name  = "test-rule-3"
-        types = ["TIER1_CONNECTED"]
+      name  = "test-rule-3"
+      types = ["TIER1_CONNECTED"]
     }
   }
 }
@@ -1029,7 +1029,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 
   redistribution_config {
-    enabled  = false
+    enabled      = false
     ospf_enabled = true
   }
 }

@@ -664,10 +664,10 @@ resource "nsxt_policy_gateway_prefix_list" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
-  	action  = "DENY"
-  	ge      = "20"
-  	le      = "23"
-  	network = "4.4.0.0/20"
+    action  = "DENY"
+    ge      = "20"
+    le      = "23"
+    network = "4.4.0.0/20"
   }
 }
 
@@ -684,8 +684,8 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   }
 
   route_filtering {
-    address_family  = "IPV4"
-    in_route_filter = nsxt_policy_gateway_prefix_list.test.path
+    address_family   = "IPV4"
+    in_route_filter  = nsxt_policy_gateway_prefix_list.test.path
     out_route_filter = nsxt_policy_gateway_prefix_list.test.path
   }
 }`, getEdgeClusterName())
@@ -766,13 +766,13 @@ resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "Acceptance Test"
   vlan_ids            = [11]
   subnet {
-      cidr = "10.2.2.2/24"
+    cidr = "10.2.2.2/24"
   }
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "terraformt0gw"
-  description       = "Acceptance Test"
+  display_name = "terraformt0gw"
+  description  = "Acceptance Test"
   locale_service {
     edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   }
@@ -789,13 +789,13 @@ resource "nsxt_policy_bgp_config" "test" {
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "test" {
-  display_name   = "terraformt0gwintf"
-  type           = "EXTERNAL"
-  description    = "Acceptance Test"
-  gateway_path   = nsxt_policy_tier0_gateway.test.path
-  segment_path   = nsxt_policy_vlan_segment.test.path
-  subnets        = ["12.12.12.1/24"]
-  site_path      = data.nsxt_policy_site.test.path
+  display_name = "terraformt0gwintf"
+  type         = "EXTERNAL"
+  description  = "Acceptance Test"
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  segment_path = nsxt_policy_vlan_segment.test.path
+  subnets      = ["12.12.12.1/24"]
+  site_path    = data.nsxt_policy_site.test.path
 }
 
 resource "nsxt_policy_bgp_neighbor" "test" {

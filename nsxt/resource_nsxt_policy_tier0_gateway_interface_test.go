@@ -723,7 +723,7 @@ func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
 	if testAccIsGlobalManager() {
 		return `
 data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier0_gateway_interface.test.path
+  path      = nsxt_policy_tier0_gateway_interface.test.path
   site_path = data.nsxt_policy_site.test.path
 }
 

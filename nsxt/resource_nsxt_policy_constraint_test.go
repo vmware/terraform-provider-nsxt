@@ -215,7 +215,7 @@ func testAccNsxtPolicyConstraintTemplate(createFlow bool) string {
 resource "nsxt_policy_constraint" "test" {
   display_name = "%s"
   description  = "%s"
-  message = "%s"
+  message      = "%s"
 
   target {
     path_prefix = nsxt_policy_project.test.path

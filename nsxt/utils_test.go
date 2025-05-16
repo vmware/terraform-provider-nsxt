@@ -651,17 +651,17 @@ resource "nsxt_policy_tier0_gateway" "test" {
 func testAccNsxtPolicyTier1WithEdgeClusterForVPN() string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-	display_name = "%s"
-	description  = "Acceptance Test"
-	ha_mode = "ACTIVE_STANDBY"
+  display_name = "%s"
+  description  = "Acceptance Test"
+  ha_mode      = "ACTIVE_STANDBY"
 }
 resource "nsxt_policy_tier1_gateway" "test" {
-	description               = "Acceptance Test"
-	display_name              = "%s"
-	locale_service {
-		edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-	}
-	tier0_path                = nsxt_policy_tier0_gateway.test.path
+  description  = "Acceptance Test"
+  display_name = "%s"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  }
+  tier0_path = nsxt_policy_tier0_gateway.test.path
 }`, testAccNsxtPolicyVPNGatewayHelperName, testAccNsxtPolicyVPNGatewayHelperName)
 }
 

@@ -36,7 +36,7 @@ func TestAccDataSourceNsxtPolicyEdgeHighAvailabilityProfile_basic(t *testing.T) 
 func testAccNSXEdgeHighAvailabilityProfileReadTemplate() string {
 	return testAccNsxtPolicyEdgeHighAvailabilityProfileMinimalistic() + `
 data "nsxt_policy_edge_high_availability_profile" "test" {
-  display_name = nsxt_policy_edge_high_availability_profile.test.display_name 
+  display_name = nsxt_policy_edge_high_availability_profile.test.display_name
 
   depends_on = [nsxt_policy_edge_high_availability_profile.test]
 }`

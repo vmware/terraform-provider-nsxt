@@ -37,6 +37,6 @@ func TestAccDataSourceNsxtManagerClusterNode_basic(t *testing.T) {
 func testAccNsxtPolicyManagerClusterNodeReadTemplate() string {
 	return fmt.Sprintf(`
 data "nsxt_manager_cluster_node" "test" {
-	display_name = "%s"
+  display_name = "%s"
 }`, getTestManagerClusterNode())
 }

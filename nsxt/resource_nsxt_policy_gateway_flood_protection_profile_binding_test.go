@@ -281,7 +281,7 @@ data "nsxt_policy_edge_node" "en_site1" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "test"
+  display_name = "test"
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.ec_site1.path
     preferred_edge_paths = [data.nsxt_policy_edge_node.en_site1.path]

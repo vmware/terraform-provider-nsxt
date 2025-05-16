@@ -181,9 +181,9 @@ func testAccNsxtPolicyGatewayConnectionTemplate(createFlow bool) string {
 	}
 	return testAccNsxtPolicyGatewayConnectionPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_gateway_connection" "test" {
-  display_name = "%s"
-  description  = "%s"
-  tier0_path = nsxt_policy_tier0_gateway.test.path
+  display_name     = "%s"
+  description      = "%s"
+  tier0_path       = nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["%s"]
 
   tag {
@@ -193,9 +193,9 @@ resource "nsxt_policy_gateway_connection" "test" {
 }
 
 data "nsxt_policy_gateway_connection" "test" {
-  tier0_path = nsxt_policy_tier0_gateway.test.path
+  tier0_path   = nsxt_policy_tier0_gateway.test.path
   display_name = "%s"
-  depends_on = [nsxt_policy_gateway_connection.test]
+  depends_on   = [nsxt_policy_gateway_connection.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["display_name"])
 }
 
@@ -208,6 +208,6 @@ resource "nsxt_policy_gateway_connection" "test" {
 
 data "nsxt_policy_gateway_connection" "test" {
   display_name = "%s"
-  depends_on = [nsxt_policy_gateway_connection.test]
+  depends_on   = [nsxt_policy_gateway_connection.test]
 }`, accTestPolicyGatewayConnectionUpdateAttributes["display_name"], accTestPolicyGatewayConnectionUpdateAttributes["display_name"])
 }
