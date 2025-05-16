@@ -407,7 +407,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyLBPoolMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
-    display_name = "lb-test"
+  display_name = "lb-test"
 }
 
 resource "nsxt_policy_lb_pool" "test" {

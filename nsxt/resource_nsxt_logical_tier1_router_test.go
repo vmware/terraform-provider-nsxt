@@ -176,7 +176,7 @@ resource "nsxt_logical_tier1_router" "test" {
 func testAccNSXLogicalTier1RouterUpdateTemplate(name string, failoverMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_tier1_router" "test" {

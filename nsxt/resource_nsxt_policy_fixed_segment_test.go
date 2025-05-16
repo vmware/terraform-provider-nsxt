@@ -440,15 +440,16 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test2"
-  domain_name         = "tftest2.org"
-  overlay_id          = 1011
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test2"
+  domain_name       = "tftest2.org"
+  overlay_id        = 1011
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "22.22.22.1/24"
+    cidr = "22.22.22.1/24"
   }
 
   tag {
@@ -466,6 +467,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
   description      = "Acceptance Test"
@@ -474,10 +476,10 @@ resource "nsxt_policy_fixed_segment" "test" {
   overlay_id       = 1011
   vlan_ids         = ["101", "102"]
 
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -496,6 +498,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
   description      = "Acceptance Test"
@@ -504,10 +507,10 @@ resource "nsxt_policy_fixed_segment" "test" {
   overlay_id       = 1011
   vlan_ids         = ["101-104"]
 
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {

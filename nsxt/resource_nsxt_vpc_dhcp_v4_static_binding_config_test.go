@@ -265,7 +265,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic() string {
 	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   display_name = "%s"
-  parent_path = nsxt_vpc_subnet.test.path
+  parent_path  = nsxt_vpc_subnet.test.path
   ip_address   = "%s"
   mac_address  = "%s"
 }`, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"], attrMap["ip_address"], attrMap["mac_address"])

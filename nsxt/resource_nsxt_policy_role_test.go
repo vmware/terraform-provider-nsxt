@@ -162,20 +162,20 @@ func testAccNsxtPolicyRoleCreate(role string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role" "test_role" {
   display_name = "%s"
-  description = "%s"
-  role = "%s"
+  description  = "%s"
+  role         = "%s"
   feature {
-    feature = "policy_grouping"
+    feature    = "policy_grouping"
     permission = "read"
   }
 
   feature {
-    feature = "vm_vm_info"
+    feature    = "vm_vm_info"
     permission = "read"
   }
 
   feature {
-    feature = "policy_services"
+    feature    = "policy_services"
     permission = "read"
   }
 }`, attrMap["display_name"], attrMap["description"], role)
@@ -186,15 +186,15 @@ func testAccNsxtPolicyRoleUpdate(role string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role" "test_role" {
   display_name = "%s"
-  description = "%s"
-  role = "%s"
+  description  = "%s"
+  role         = "%s"
   feature {
-    feature = "policy_grouping"
+    feature    = "policy_grouping"
     permission = "crud"
   }
 
   feature {
-    feature = "vm_vm_info"
+    feature    = "vm_vm_info"
     permission = "crud"
   }
 }`, attrMap["display_name"], attrMap["description"], role)

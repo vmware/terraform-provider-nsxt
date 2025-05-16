@@ -136,7 +136,7 @@ func testAccNSXLbSourceIPPersistenceProfileBasicTemplate(name string, timeout st
 	return fmt.Sprintf(`
 resource "nsxt_lb_source_ip_persistence_profile" "test" {
   display_name             = "%s"
-  description             = "test description"
+  description              = "test description"
   persistence_shared       = "true"
   ha_persistence_mirroring = "true"
   purge_when_full          = "false"

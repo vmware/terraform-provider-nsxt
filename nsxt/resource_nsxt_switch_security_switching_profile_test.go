@@ -182,7 +182,7 @@ resource "nsxt_switch_security_switching_profile" "test" {
 func testAccNSXSwitchSecuritySwitchingProfileEmptyTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_switch_security_switching_profile" "test" {
-  display_name          = "%s"
+  display_name = "%s"
 }
 `, name)
 }

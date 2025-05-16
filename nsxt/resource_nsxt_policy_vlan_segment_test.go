@@ -523,14 +523,15 @@ resource "nsxt_policy_vlan_segment" "test" {
 func testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name string, cidr string) string {
 	return fmt.Sprintf(`
 
+
 resource "nsxt_policy_vlan_segment" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  domain_name         = "tftest.org"
-  vlan_ids            = ["101"]
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain_name  = "tftest.org"
+  vlan_ids     = ["101"]
 
   subnet {
-     cidr = "%s"
+    cidr = "%s"
   }
 }
 `, name, cidr)

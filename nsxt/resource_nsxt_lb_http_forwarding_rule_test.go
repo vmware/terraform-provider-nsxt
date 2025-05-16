@@ -292,7 +292,7 @@ resource "nsxt_lb_http_forwarding_rule" "test" {
   }
 
   http_reject_action {
-    reply_status = "500"
+    reply_status  = "500"
     reply_message = "rejected"
   }
 }

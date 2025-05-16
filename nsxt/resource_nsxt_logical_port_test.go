@@ -232,7 +232,7 @@ resource "nsxt_logical_port" "test" {
   logical_switch_id = "${nsxt_logical_switch.test.id}"
 
   tag {
-  	scope = "scope1"
+    scope = "scope1"
     tag   = "tag1"
   }
 }`, portName)
@@ -290,9 +290,9 @@ func testAccNSXLogicalPortCreateNSGroup() string {
 	return `
 resource "nsxt_ns_group" "test" {
   membership_criteria {
-      target_type = "LogicalPort"
-      scope       = "scope1"
-      tag         = "tag1"
+    target_type = "LogicalPort"
+    scope       = "scope1"
+    tag         = "tag1"
   }
 }`
 }
