@@ -553,7 +553,7 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 		return "", fmt.Errorf("Error during test client initialization: %v", err1)
 	}
 
-	resultValues, err2 := listPolicyResourcesByNameAndType(connector, testAccGetSessionContext(), objName, resourceType, nil)
+	resultValues, err2 := listPolicyResourcesByNameAndType(connector, testAccGetSessionContext(), objName, resourceType, nil, false)
 	if err2 != nil {
 		return "", err2
 	}
