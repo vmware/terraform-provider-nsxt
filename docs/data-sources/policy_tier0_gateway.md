@@ -30,3 +30,4 @@ In addition to arguments listed above, the following attributes are exported:
 * `description` - The description of the resource.
 * `edge_cluster_path` - The path of the Edge cluster where this Tier-0 gateway is placed. This attribute is not set for NSX Global Manager, where gateway can spawn across multiple sites.
 * `path` - The NSX path of the policy resource.
+* `isGlobal` - Set to true to get global objects from the local NSX manager.
