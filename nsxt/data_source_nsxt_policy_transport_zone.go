@@ -114,7 +114,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 			return handleDataSourceReadError(d, "TransportZone", objID, err)
 		}
 		obj = objGet
-	} else if objName == "" && !(isDefault && transportType != "") {
+	} else if objName == "" && (!isDefault || transportType == "") {
 		return fmt.Errorf("please specify id, display_name or is_default and transport_type in order to identify Transport Zone")
 	} else {
 		// Get by full name/prefix
