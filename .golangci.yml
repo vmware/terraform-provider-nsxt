@@ -57,9 +57,6 @@ linters:
         text: QF1007
       - linters:
           - staticcheck
-        text: QF1011
-      - linters:
-          - staticcheck
         text: ST1005
     paths:
       - third_party$
