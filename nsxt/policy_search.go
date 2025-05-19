@@ -146,7 +146,7 @@ func escapeSpecialCharacters(str string) string {
 	}
 	for _, chr := range specials {
 		strchr := string(chr)
-		str = strings.Replace(str, strchr, "\\"+strchr, -1)
+		str = strings.ReplaceAll(str, strchr, "\\"+strchr)
 	}
 
 	return str

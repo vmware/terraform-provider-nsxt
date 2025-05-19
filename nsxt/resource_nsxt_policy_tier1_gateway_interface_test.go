@@ -565,7 +565,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
 }
 
 func testAccNextPolicyTier1InterfaceRealizationTemplate() string {
-	return strings.Replace(testAccNsxtPolicyTier0InterfaceRealizationTemplate(), "tier0", "tier1", -1)
+	return strings.ReplaceAll(testAccNsxtPolicyTier0InterfaceRealizationTemplate(), "tier0", "tier1")
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(name string, subnet string) string {
