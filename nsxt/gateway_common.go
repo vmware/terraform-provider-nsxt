@@ -656,10 +656,7 @@ func parseGatewayInterfacePolicyPath(path string) (bool, string, string, string)
 		return false, "", "", ""
 	}
 
-	isT0 := true
-	if segs[2] != "tier-0s" {
-		isT0 = false
-	}
+	isT0 := (segs[2] == "tier-0s")
 
 	gwID := segs[3]
 	localeServiceID := segs[5]
