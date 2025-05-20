@@ -148,12 +148,12 @@ func testAccNSXEdgeHighAvailabilityProfileCheckDestroy(state *terraform.State, d
 func testAccNSXEdgeHighAvailabilityProfileCreateTemplate(displayName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_edge_high_availability_profile" "test" {
-    description  = "Terraform test edge high availability profile"
-    display_name = "%s"
-    tag {
-    	scope = "scope1"
-        tag   = "tag1"
-    }
+  description  = "Terraform test edge high availability profile"
+  display_name = "%s"
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }
 `, displayName)
 }

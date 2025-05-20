@@ -138,7 +138,7 @@ resource "nsxt_ip_protocol_ns_service" "srv1" {
 resource "nsxt_l4_port_set_ns_service" "srv2" {
   display_name      = "test_l4_service"
   protocol          = "TCP"
-  destination_ports = [ "8080" ]
+  destination_ports = ["8080"]
 }`
 }
 

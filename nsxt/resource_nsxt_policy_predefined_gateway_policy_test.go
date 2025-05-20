@@ -161,8 +161,9 @@ func testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() string {
 
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "predefined-gw-policy-test"
+  display_name = "predefined-gw-policy-test"
   %s
 }
 
@@ -177,9 +178,10 @@ func testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy() string 
 	context := testAccNsxtPolicyMultitenancyContext()
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
-  display_name      = "predefined-gw-policy-test"
+  display_name = "predefined-gw-policy-test"
   %s
 }
 
@@ -214,13 +216,13 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
 func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description string, action string, label string, tags string) string {
 	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_predefined_gateway_policy" "test" {
-  path        = data.nsxt_policy_gateway_policy.test.path
+  path = data.nsxt_policy_gateway_policy.test.path
   default_rule {
-    scope        = nsxt_policy_tier0_gateway.test.path
-    description  = "%s"
-    action       = "%s"
-    log_label    = "%s"
-    logged       = true
+    scope       = nsxt_policy_tier0_gateway.test.path
+    description = "%s"
+    action      = "%s"
+    log_label   = "%s"
+    logged      = true
     %s
   }
 }`, description, action, label, tags)

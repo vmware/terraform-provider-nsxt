@@ -215,6 +215,7 @@ func testAccNsxtPolicyEvpnTunnelEndpointBasic(createFlow bool) string {
 
 	return testAccEvpnTunnelEndpointPrerequisites() + fmt.Sprintf(`
 
+
 resource "nsxt_policy_evpn_tunnel_endpoint" "test" {
   display_name = "%s"
   description  = "%s"
@@ -222,8 +223,8 @@ resource "nsxt_policy_evpn_tunnel_endpoint" "test" {
   external_interface_path = nsxt_policy_tier0_gateway_interface.test.path
   edge_node_path          = data.nsxt_policy_edge_node.test.path
 
-  local_address  = "%s"
-  mtu            = %s
+  local_address = "%s"
+  mtu           = %s
 
   tag {
     scope = "scope1"

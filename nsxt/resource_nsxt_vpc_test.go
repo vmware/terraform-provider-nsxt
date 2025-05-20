@@ -280,7 +280,7 @@ resource "nsxt_vpc" "test" {
   display_name = "%s"
   short_id     = "%s"
   # TODO - remove when default profiles are supported
-  vpc_service_profile      = nsxt_vpc_service_profile.test.path
+  vpc_service_profile = nsxt_vpc_service_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["display_name"], accTestVpcUpdateAttributes["short_id"])
 }
 
@@ -300,9 +300,9 @@ func testAccNsxtVpcMinimalisticNoShortId() string {
 	return testAccNsxtVpcPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc" "test" {
   %s
-  nsx_id = "%s"
+  nsx_id       = "%s"
   display_name = "%s"
   # TODO - remove when default profiles are supported
-  vpc_service_profile      = nsxt_vpc_service_profile.test.path
+  vpc_service_profile = nsxt_vpc_service_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["short_id"], accTestVpcUpdateAttributes["display_name"])
 }

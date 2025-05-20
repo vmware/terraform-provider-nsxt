@@ -136,8 +136,8 @@ data "nsxt_policy_site" "test" {
 }
 
 data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  site_path = data.nsxt_policy_site.test.path
+  display_name   = "%s"
+  site_path      = data.nsxt_policy_site.test.path
   transport_type = "VLAN_BACKED"
 }`, getTestSiteName(), transportZoneName)
 }

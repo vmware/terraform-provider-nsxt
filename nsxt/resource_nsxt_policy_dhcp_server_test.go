@@ -207,13 +207,14 @@ func testAccNsxtPolicyDhcpServerCreateTemplate(withContext bool) string {
 
 	return defsSpec + fmt.Sprintf(`
 
+
 resource "nsxt_policy_dhcp_server" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
+  display_name      = "%s"
+  description       = "%s"
   edge_cluster_path = %s
-  lease_time = %s
-  server_addresses = ["110.64.0.1/16"]
+  lease_time        = %s
+  server_addresses  = ["110.64.0.1/16"]
 
   tag {
     scope = "scope1"
@@ -244,11 +245,11 @@ func testAccNsxtPolicyDhcpServerUpdateTemplate(withContext bool) string {
 	return defsSpec + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
+  display_name      = "%s"
+  description       = "%s"
   edge_cluster_path = %s
-  lease_time = %s
-  server_addresses = ["2001::1234:abcd:ffff:c0a8:101/64", "110.64.0.1/16"]
+  lease_time        = %s
+  server_addresses  = ["2001::1234:abcd:ffff:c0a8:101/64", "110.64.0.1/16"]
 
   tag {
     scope = "scope1"
@@ -266,7 +267,7 @@ func testAccNsxtPolicyDhcpServerMinimalistic(withContext bool) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
 %s
-  display_name = "%s"
+  display_name     = "%s"
   server_addresses = ["110.64.0.1/16"]
 }
 `, context, accTestPolicyDhcpServerUpdateAttributes["display_name"])

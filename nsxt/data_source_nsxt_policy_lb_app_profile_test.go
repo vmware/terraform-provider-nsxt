@@ -128,7 +128,7 @@ func testAccDataSourceNsxtPolicyLBAppProfileDeleteByName(name string) error {
 func testAccNsxtPolicyLBAppProfileReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_lb_app_profile" "test" {
-  type = "TCP"
+  type         = "TCP"
   display_name = "%s"
 }`, name)
 }

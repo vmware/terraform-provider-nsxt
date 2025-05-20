@@ -131,12 +131,12 @@ func testAccNSXEtherServiceCheckDestroy(state *terraform.State, displayName stri
 func testAccNSXEtherServiceCreateTemplate(serviceName string, etherType int) string {
 	return fmt.Sprintf(`
 resource "nsxt_ether_type_ns_service" "test" {
-    description = "ether service"
-    display_name = "%s"
-    ether_type = "%d"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description  = "ether service"
+  display_name = "%s"
+  ether_type   = "%d"
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, etherType)
 }

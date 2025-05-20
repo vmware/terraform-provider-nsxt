@@ -211,19 +211,19 @@ resource "nsxt_policy_lb_http_monitor_profile" "test" {
   description  = "%s"
   request_body = "%s"
 
-  request_method = "%s"
-  request_url = "%s"
-  request_version = "%s"
-  response_body = "%s"
+  request_method        = "%s"
+  request_url           = "%s"
+  request_version       = "%s"
+  response_body         = "%s"
   response_status_codes = [%s]
-  fall_count = %s
-  interval = %s
-  monitor_port = %s
-  rise_count = %s
-  timeout = %s
+  fall_count            = %s
+  interval              = %s
+  monitor_port          = %s
+  rise_count            = %s
+  timeout               = %s
 
   request_header {
-    name = "%s"
+    name  = "%s"
     value = "%s"
   }
 

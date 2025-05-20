@@ -241,15 +241,15 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileBindingTemplate(createFlow, w
 	return testAccNsxtPolicyGatewayFloodProtectionProfileBindingDeps(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_flood_protection_profile_binding" "%s" {
 %s
- display_name = "%s"
- description  = "%s"
- profile_path = nsxt_policy_gateway_flood_protection_profile.%s.path
- parent_path = %s
+  display_name = "%s"
+  description  = "%s"
+  profile_path = nsxt_policy_gateway_flood_protection_profile.%s.path
+  parent_path  = %s
 
- tag {
-   scope = "scope1"
-   tag   = "tag1"
- }
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }
 `, resourceName, context, name, attrMap["description"], attrMap["profile_res_name"], attrMap["parent_path"])
 }
@@ -262,7 +262,7 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileBindingDeps(withContext bool)
 		parentDeps = fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
-  display_name             = "test"
+  display_name = "test"
 }
 `, context)
 	} else if testAccIsGlobalManager() {
@@ -281,7 +281,7 @@ data "nsxt_policy_edge_node" "en_site1" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "test"
+  display_name = "test"
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.ec_site1.path
     preferred_edge_paths = [data.nsxt_policy_edge_node.en_site1.path]
@@ -309,24 +309,24 @@ resource "nsxt_policy_tier1_gateway" "test" {
 	return parentDeps + fmt.Sprintf(`
 resource "nsxt_policy_gateway_flood_protection_profile" "test1" {
 %s
-  display_name = "gfpp1"
-  description  = "Acceptance Test"
-  icmp_active_flow_limit = 3
-  other_active_conn_limit = 3
+  display_name             = "gfpp1"
+  description              = "Acceptance Test"
+  icmp_active_flow_limit   = 3
+  other_active_conn_limit  = 3
   tcp_half_open_conn_limit = 3
-  udp_active_flow_limit = 3
-  nat_active_conn_limit = 3
+  udp_active_flow_limit    = 3
+  nat_active_conn_limit    = 3
 }
 
 resource "nsxt_policy_gateway_flood_protection_profile" "test2" {
 %s
-  display_name = "gfpp2"
-  description  = "Acceptance Test"
-  icmp_active_flow_limit = 4
-  other_active_conn_limit = 4
+  display_name             = "gfpp2"
+  description              = "Acceptance Test"
+  icmp_active_flow_limit   = 4
+  other_active_conn_limit  = 4
   tcp_half_open_conn_limit = 4
-  udp_active_flow_limit = 4
-  nat_active_conn_limit = 4
+  udp_active_flow_limit    = 4
+  nat_active_conn_limit    = 4
 }
 `, context, context)
 }

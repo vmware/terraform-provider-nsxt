@@ -821,11 +821,11 @@ resource "nsxt_policy_service" "test" {
   description  = "Acceptance Test"
 
   icmp_entry {
-	display_name = "%s"
-	description  = "Entry"
-	icmp_type    = "%s"
-	icmp_code    = "%s"
-	protocol     = "%s"
+    display_name = "%s"
+    description  = "Entry"
+    icmp_type    = "%s"
+    icmp_code    = "%s"
+    protocol     = "%s"
   }
 
   tag {
@@ -847,10 +847,10 @@ resource "nsxt_policy_service" "test" {
   description  = "Acceptance Test"
 
   icmp_entry {
-	display_name = "%s"
-	description  = "Entry"
-	icmp_type    = "%s"
-	protocol     = "%s"
+    display_name = "%s"
+    description  = "Entry"
+    icmp_type    = "%s"
+    protocol     = "%s"
   }
 
   tag {
@@ -891,10 +891,10 @@ resource "nsxt_policy_service" "test" {
   description  = "Acceptance Test"
 
   icmp_entry {
-	description  = "Entry"
-	icmp_type    = "%s"
-	icmp_code    = "%s"
-	protocol     = "%s"
+    description = "Entry"
+    icmp_type   = "%s"
+    icmp_code   = "%s"
+    protocol    = "%s"
   }
 
   tag {
@@ -945,15 +945,15 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyL4PortSetTypeServiceCreateTemplate(serviceName string, protocol string, port string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
-  description       = "l4 service"
-  display_name      = "%s"
+  description  = "l4 service"
+  display_name = "%s"
 
   l4_port_set_entry {
     display_name      = "%s"
     description       = "Entry"
     protocol          = "%s"
-    destination_ports = [ "%s" ]
-    source_ports      = [ "100", "200-300" ]
+    destination_ports = ["%s"]
+    source_ports      = ["100", "200-300"]
   }
 
   tag {
@@ -966,21 +966,21 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyL4PortSetTypeServiceUpdateTemplate(serviceName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
-  description       = "updated l4 service"
-  display_name      = "%s"
+  description  = "updated l4 service"
+  display_name = "%s"
 
   l4_port_set_entry {
     display_name      = "entry-1"
     description       = "Entry-1"
     protocol          = "TCP"
-    destination_ports = [ "100" ]
+    destination_ports = ["100"]
   }
 
   l4_port_set_entry {
     display_name      = "entry-2"
     description       = "Entry-2"
     protocol          = "UDP"
-    destination_ports = [ "101" ]
+    destination_ports = ["101"]
   }
 
   tag {
@@ -998,14 +998,14 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyMixedServiceCreateTemplate(serviceName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
-  description       = "mixed services"
-  display_name      = "%s"
+  description  = "mixed services"
+  display_name = "%s"
 
   l4_port_set_entry {
     display_name      = "entry-1"
     description       = "Entry-1"
     protocol          = "TCP"
-    destination_ports = [ "80" ]
+    destination_ports = ["80"]
   }
 
   icmp_entry {
@@ -1084,11 +1084,11 @@ resource "nsxt_policy_service" "test" {
   display_name = "%s"
 
   algorithm_entry {
-    display_name      = "%s"
-    description       = "Entry-1"
-    algorithm         = "%s"
-    source_ports      = ["%s"]
-    destination_port  = "%s"
+    display_name     = "%s"
+    description      = "Entry-1"
+    algorithm        = "%s"
+    source_ports     = ["%s"]
+    destination_port = "%s"
   }
 
   tag {
@@ -1107,7 +1107,7 @@ resource "nsxt_policy_service" "test" {
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path = "%s"
+    nested_service_path = "%s"
   }
 
   tag {
@@ -1125,13 +1125,13 @@ func testAccNsxtPolicyNestedServiceUpdateTemplate(serviceName string, nestedServ
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path	= "%s"
+    nested_service_path = "%s"
   }
 
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-2"
-	nested_service_path = "%s"
+    nested_service_path = "%s"
   }
 
   tag {
@@ -1157,7 +1157,7 @@ func testAccNsxtPolicyNestedServiceMixedTemplate(serviceName string, nestedServi
     display_name      = "entry-2"
     description       = "Entry-2"
     protocol          = "TCP"
-    destination_ports = [ "443" ]
+    destination_ports = ["443"]
   }
 
   tag {

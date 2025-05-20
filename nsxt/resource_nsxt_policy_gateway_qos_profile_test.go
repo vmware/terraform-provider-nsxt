@@ -165,11 +165,11 @@ func testAccNsxtPolicyGatewayQosProfileTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_gateway_qos_profile" "test" {
-  display_name = "%s"
-  description  = "%s"
-  burst_size = %s
+  display_name        = "%s"
+  description         = "%s"
+  burst_size          = %s
   committed_bandwidth = %s
-  excess_action = "%s"
+  excess_action       = "%s"
 
   tag {
     scope = "scope1"

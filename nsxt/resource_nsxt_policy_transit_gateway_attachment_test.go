@@ -164,14 +164,14 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 resource "nsxt_policy_gateway_connection" "test" {
-  display_name      = "%s"
-  tier0_path = nsxt_policy_tier0_gateway.test.path
+  display_name     = "%s"
+  tier0_path       = nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["192.168.240.0/24"]
 }
 
 resource "nsxt_policy_project" "test" {
-  display_name      = "%s"
-  tier0_gateway_paths = [nsxt_policy_tier0_gateway.test.path]
+  display_name             = "%s"
+  tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
   tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
@@ -186,10 +186,10 @@ data "nsxt_policy_transit_gateway" "test" {
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "test" {
-  parent_path  = data.nsxt_policy_transit_gateway.test.path
+  parent_path     = data.nsxt_policy_transit_gateway.test.path
   connection_path = nsxt_policy_gateway_connection.test.path
-  display_name = "%s"
-  description  = "%s"
+  display_name    = "%s"
+  description     = "%s"
 
   tag {
     scope = "scope1"

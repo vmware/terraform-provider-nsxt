@@ -301,7 +301,7 @@ resource "nsxt_vpc_subnet" "test" {
   description  = "%s"
 
   ip_addresses = ["%s"]
-  access_mode = "%s"
+  access_mode  = "%s"
   dhcp_config {
     mode = "DHCP_DEACTIVATED"
   }
@@ -336,14 +336,14 @@ resource "nsxt_vpc_subnet" "test" {
     dhcp_server_additional_config {
       options {
         option121 {
-	  static_route {
-	    network  = "2.1.1.0/24"
-	    next_hop = "2.3.1.3"
-	  }
+          static_route {
+            network  = "2.1.1.0/24"
+            next_hop = "2.3.1.3"
+          }
         }
         other {
-	  code   = "119"
-	  values = ["abc", "def"]
+          code   = "119"
+          values = ["abc", "def"]
         }
       }
     }
@@ -380,7 +380,7 @@ resource "nsxt_vpc_subnet" "test" {
   description  = "%s"
   ip_addresses = ["%s"]
 
-  access_mode      = "Public"
+  access_mode = "Public"
 
   dhcp_config {
     mode = "DHCP_SERVER"
@@ -388,14 +388,14 @@ resource "nsxt_vpc_subnet" "test" {
     dhcp_server_additional_config {
       options {
         option121 {
-	  static_route {
-	    network  = "2.1.1.0/24"
-	    next_hop = "2.3.1.3"
-	  }
+          static_route {
+            network  = "2.1.1.0/24"
+            next_hop = "2.3.1.3"
+          }
         }
         other {
-	  code   = "119"
-	  values = ["abc", "def"]
+          code   = "119"
+          values = ["abc", "def"]
         }
       }
       reserved_ip_ranges = ["%s"]

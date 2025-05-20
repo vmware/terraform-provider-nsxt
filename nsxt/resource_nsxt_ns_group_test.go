@@ -332,16 +332,16 @@ resource "nsxt_logical_switch" "test" {
 
 resource "nsxt_ns_group" "test" {
   display_name = "%s"
-  description = "Acceptance Test Update"
+  description  = "Acceptance Test Update"
 
   membership_criteria {
-	target_type = "LogicalSwitch"
+    target_type = "LogicalSwitch"
     scope       = "XXX"
   }
 
   member {
     target_type = "LogicalSwitch"
-    value = "${nsxt_logical_switch.test.id}"
+    value       = "${nsxt_logical_switch.test.id}"
   }
 }`, tzName, testAccNsxtNSGroupHelperName, name)
 }

@@ -48,7 +48,7 @@ resource "nsxt_policy_segment" "segment1" {
     tag   = "%s"
   }
   tag {
-    tag   = "%s"
+    tag = "%s"
   }
 
 }
@@ -58,7 +58,7 @@ data "nsxt_policy_transport_zone" "overlay_transport_zone" {
 }
 
 data "nsxt_policy_tags" "tags" {
-  scope = "scope-test"
+  scope      = "scope-test"
   depends_on = [nsxt_policy_segment.segment1]
 }
 
@@ -67,22 +67,23 @@ output "nsxt_tags" {
 }
 
 data "nsxt_policy_tags" "emptytags" {
-  scope = ""
+  scope      = ""
   depends_on = [nsxt_policy_segment.segment1]
 }
 
 output "empty_nsxt_tags" {
-  value = join("--",data.nsxt_policy_tags.emptytags.items)
+  value = join("--", data.nsxt_policy_tags.emptytags.items)
 }
 
 data "nsxt_policy_tags" "wildcardscope" {
-  scope = "*test"
+  scope      = "*test"
   depends_on = [nsxt_policy_segment.segment1]
 }
 
 output "wildcard_nsxt_tags" {
   value = data.nsxt_policy_tags.wildcardscope.items[0]
 }
+
 
 `, tagName, emptyScopeTag, transportZone)
 }

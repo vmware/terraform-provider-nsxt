@@ -237,7 +237,7 @@ resource "nsxt_policy_spoof_guard_profile" "test" {
   display_name = "%s"
 }
 
-resource "nsxt_policy_segment_security_profile" "test"{
+resource "nsxt_policy_segment_security_profile" "test" {
   %s
   display_name = "%s"
 }
@@ -274,7 +274,7 @@ resource "nsxt_vpc_service_profile" "test" {
   dhcp_config {
     dhcp_server_config {
       ntp_servers = ["%s"]
-      lease_time = %s
+      lease_time  = %s
 
       dns_client_config {
         dns_server_ips = ["%s"]
@@ -306,7 +306,7 @@ resource "nsxt_vpc_service_profile" "test" {
       server_addresses = ["%s"]
     }
   }
-  
+
 }`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["server_addresses"])
 }
 

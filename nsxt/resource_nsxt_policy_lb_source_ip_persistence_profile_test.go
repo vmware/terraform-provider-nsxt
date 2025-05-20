@@ -148,7 +148,7 @@ resource "nsxt_policy_lb_source_ip_persistence_profile" "test" {
   persistence_shared = %s
   purge              = "%s"
   timeout            = %s
-  
+
   ha_persistence_mirroring_enabled = %s
 
   tag {

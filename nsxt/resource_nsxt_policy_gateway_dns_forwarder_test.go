@@ -268,7 +268,7 @@ data "nsxt_policy_gateway_dns_forwarder" "test" {
   display_name = "%s"
 
   gateway_path = nsxt_policy_tier%d_gateway.test.path
-  depends_on = [nsxt_policy_gateway_dns_forwarder.test]
+  depends_on   = [nsxt_policy_gateway_dns_forwarder.test]
 }
 `, context, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"], context, attrMap["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
 }
@@ -286,7 +286,7 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   gateway_path = nsxt_policy_tier%d_gateway.test.path
   listener_ip  = "78.2.1.12"
 
-  default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
+  default_forwarder_zone_path = nsxt_policy_dns_forwarder_zone.default.path
 }
 `, context, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
 }
