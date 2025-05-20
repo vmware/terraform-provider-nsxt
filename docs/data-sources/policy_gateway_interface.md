@@ -23,6 +23,23 @@ data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
 }
 ```
 
+## Tier0 gateway interface example with service path
+```hcl
+data "nsxt_policy_tier0_gateway" "t0_gw" {
+  display_name = "t0Gateway"
+}
+
+data "nsxt_policy_gateway_locale_service" "test" {
+  gateway_path = data.nsxt_policy_tier0_gateway.t0_gw.path
+}
+
+data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
+  display_name = "gw-interface1"
+  service_path = data.nsxt_policy_gateway_locale_service.test.path
+}
+```
+
+
 ## Tier1 gateway interface example
 
 ```hcl
@@ -39,7 +56,8 @@ data "nsxt_policy_gateway_interface" "tier1_gw_interface" {
 ## Argument Reference
 
 * `display_name` - (Required) The Display Name prefix of the gateway interface to retrieve.
-* `gateway_path` - (Required) The path of the gateway to retrieve, where the interface should be linked to.
+* `gateway_path` - (Optional) The path of the gateway where the interface should be linked to.
+* `service_path` - (Optional) The name of the locale service of the gateway to which interface is linked. Either service_path or gateway_path should be provided.
 
 ## Attributes Reference
 

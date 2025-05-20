@@ -24,7 +24,14 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 			"gateway_path": {
 				Type:        schema.TypeString,
 				Description: "The name of the gateway to which interface is linked",
-				Required:    true,
+				// Required:    true,
+				Optional: true,
+			},
+			"service_path": {
+				Type:        schema.TypeString,
+				Description: "The name of the locale service of the gateway to which interface is linked",
+				Optional:    true,
+				// ValidateFunc: validation. .All(),
 			},
 			"path": getPathSchema(),
 			"edge_cluster_path": {
@@ -54,9 +61,23 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	var errors []error
 	var id *string
 	t0Gw := d.Get("gateway_path").(string)
+	servicePath := d.Get("service_path").(string)
+	if t0Gw == "" && servicePath == "" {
+		return fmt.Errorf("One of gateway_path or service_path should be set")
+	}
 	query := make(map[string]string)
-	query["parent_path"] = t0Gw + "/locale-services/*"
-	isT0, err := isT0(t0Gw)
+	if servicePath != "" {
+		query["parent_path"] = servicePath
+	} else {
+		query["parent_path"] = t0Gw + "/locale-services/*"
+	}
+	var isT0 bool
+	var err error
+	if servicePath != "" {
+		isT0, err = isT0Gw(servicePath)
+	} else {
+		isT0, err = isT0Gw(t0Gw)
+	}
 	if err != nil {
 		return err
 	}
@@ -102,12 +123,12 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	return nil
 }
 
-func isT0(t0Gw string) (bool, error) {
-	segs := strings.Split(t0Gw, "/")
+func isT0Gw(path string) (bool, error) {
+	segs := strings.Split(path, "/")
 	if len(segs) < 3 {
 		return false, fmt.Errorf("Not a valid gateway path")
 	}
-	if segs[len(segs)-2] == "tier-0s" {
+	if (len(segs) > 4 && segs[len(segs)-4] == "tier-0s") || segs[len(segs)-2] == "tier-0s" {
 		return true, nil
 	}
 	return false, nil
