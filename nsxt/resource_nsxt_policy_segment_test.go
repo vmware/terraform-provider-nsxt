@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 var testPolicySegmentHelper1Name = getAccTestResourceName()
@@ -752,7 +752,7 @@ resource "nsxt_policy_segment" "test" {
     scope = "color"
     tag   = "blue"
   }
- 
+
   tag {
     scope = "rack"
     tag   = "7"
