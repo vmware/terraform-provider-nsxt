@@ -172,9 +172,9 @@ resource "nsxt_logical_router_link_port_on_tier1" "test" {
 func testAccNSXLogicalRouterLinkPortOnTier1UpdateTemplate(name string, tier0RouterName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterLinkPortOnTier1PreconditionsTemplate(tier0RouterName, edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier1" "test" {
-  display_name                 = "%s"
-  description                  = "Acceptance Test Update"
-  logical_router_id            = "${nsxt_logical_tier1_router.test.id}"
+  display_name                  = "%s"
+  description                   = "Acceptance Test Update"
+  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
   linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
 
   tag {

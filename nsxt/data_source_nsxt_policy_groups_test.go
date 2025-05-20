@@ -65,9 +65,9 @@ data "nsxt_policy_groups" "test" {
 }
 
 locals {
-// Get id from path
+  // Get id from path
   path_split = split("/", data.nsxt_policy_groups.test.items["%s"])
-  group_id = element(local.path_split, length(local.path_split) - 1)
+  group_id   = element(local.path_split, length(local.path_split) - 1)
 }
 
 data "nsxt_policy_group" "test" {

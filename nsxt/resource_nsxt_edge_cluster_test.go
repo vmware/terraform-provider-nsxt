@@ -133,12 +133,12 @@ func testAccNSXEdgeClusterCheckDestroy(state *terraform.State, displayName strin
 func testAccNSXEdgeClusterCreateTemplate(displayName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_edge_cluster" "test" {
-    description  = "Terraform test edge cluster"
-    display_name = "%s"
-    tag {
-    	scope = "scope1"
-        tag   = "tag1"
-    }
+  description  = "Terraform test edge cluster"
+  display_name = "%s"
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }
 `, displayName)
 }

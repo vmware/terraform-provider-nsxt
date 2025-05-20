@@ -202,7 +202,7 @@ resource "nsxt_policy_shared_resource" "test" {
   display_name = "%s"
   description  = "%s"
 
-  share_path   = nsxt_policy_share.test.path
+  share_path = nsxt_policy_share.test.path
   resource_object {
     resource_path = data.nsxt_policy_context_profile.test.path
   }
@@ -225,7 +225,7 @@ resource "nsxt_policy_shared_resource" "test" {
   display_name = "%s"
   description  = "%s"
 
-  share_path   = nsxt_policy_share.test.path
+  share_path = nsxt_policy_share.test.path
   resource_object {
     resource_path = data.nsxt_policy_context_profile.test.path
   }

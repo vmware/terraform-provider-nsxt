@@ -651,17 +651,17 @@ resource "nsxt_policy_tier0_gateway" "test" {
 func testAccNsxtPolicyTier1WithEdgeClusterForVPN() string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-	display_name = "%s"
-	description  = "Acceptance Test"
-	ha_mode = "ACTIVE_STANDBY"
+  display_name = "%s"
+  description  = "Acceptance Test"
+  ha_mode      = "ACTIVE_STANDBY"
 }
 resource "nsxt_policy_tier1_gateway" "test" {
-	description               = "Acceptance Test"
-	display_name              = "%s"
-	locale_service {
-		edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-	}
-	tier0_path                = nsxt_policy_tier0_gateway.test.path
+  description  = "Acceptance Test"
+  display_name = "%s"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  }
+  tier0_path = nsxt_policy_tier0_gateway.test.path
 }`, testAccNsxtPolicyVPNGatewayHelperName, testAccNsxtPolicyVPNGatewayHelperName)
 }
 
@@ -858,7 +858,7 @@ resource "nsxt_policy_share" "test" {
 resource "nsxt_policy_shared_resource" "test" {
   display_name = "%s"
 
-  share_path   = nsxt_policy_share.test.path
+  share_path = nsxt_policy_share.test.path
   resource_object {
     resource_path    = %s
     include_children = true

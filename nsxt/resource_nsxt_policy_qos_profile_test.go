@@ -279,7 +279,7 @@ func testAccNSXPolicyQosProfileEmptyTemplate(name string, withContext bool) stri
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
 %s
-  display_name     = "%s"
+  display_name = "%s"
 }
 `, context, name)
 }

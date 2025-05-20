@@ -320,9 +320,9 @@ func testAccNsxtPolicyLBPoolMemberTemplate(createFlow bool) string {
 resource "nsxt_policy_lb_pool" "test" {
   display_name = "%s"
   description  = "%s"
-  algorithm = "%s"
+  algorithm    = "%s"
   %s
-  min_active_members = %s
+  min_active_members      = %s
   tcp_multiplexing_number = %s
   %s
 
@@ -341,22 +341,22 @@ func testAccNsxtPolicyLBPoolGroupTemplate() string {
 	attrMap := accTestPolicyLBPoolUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
-    display_name = "lb-test"
+  display_name = "lb-test"
 }
 
 resource "nsxt_policy_lb_pool" "test" {
-  display_name = "%s"
-  description  = "%s"
-  algorithm = "%s"
-  min_active_members = %s
+  display_name            = "%s"
+  description             = "%s"
+  algorithm               = "%s"
+  min_active_members      = %s
   tcp_multiplexing_number = %s
 
   member_group {
-      group_path       = nsxt_policy_group.test.path
-      allow_ipv4       = false
-      allow_ipv6       = true
-      max_ip_list_size = 10
-      port             = 888
+    group_path       = nsxt_policy_group.test.path
+    allow_ipv4       = false
+    allow_ipv6       = true
+    max_ip_list_size = 10
+    port             = 888
   }
 
   tag {
@@ -380,7 +380,7 @@ ip_pool_addresses = ["1.1.1.60-1.1.1.82", "1.1.2.0/24", "3.3.3.3"]
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
-    display_name = "lb-test"
+  display_name = "lb-test"
 }
 
 resource "nsxt_policy_lb_pool" "test" {
@@ -388,13 +388,13 @@ resource "nsxt_policy_lb_pool" "test" {
   description  = "%s"
 
   member_group {
-      allow_ipv4 = true
-      allow_ipv6 = false
-      group_path = nsxt_policy_group.test.path
+    allow_ipv4 = true
+    allow_ipv6 = false
+    group_path = nsxt_policy_group.test.path
   }
 
   snat {
-      type = "%s"
+    type = "%s"
       %s
   }
 }
@@ -407,7 +407,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyLBPoolMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
-    display_name = "lb-test"
+  display_name = "lb-test"
 }
 
 resource "nsxt_policy_lb_pool" "test" {

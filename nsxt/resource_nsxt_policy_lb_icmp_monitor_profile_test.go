@@ -175,11 +175,11 @@ func testAccNsxtPolicyLBIcmpMonitorProfileTemplate(createFlow bool) string {
 resource "nsxt_policy_lb_icmp_monitor_profile" "test" {
   display_name = "%s"
   description  = "%s"
-  data_length = %s
-  fall_count = %s
-  interval = %s
-  rise_count = %s
-  timeout = %s
+  data_length  = %s
+  fall_count   = %s
+  interval     = %s
+  rise_count   = %s
+  timeout      = %s
 
   tag {
     scope = "scope1"

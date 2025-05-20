@@ -167,11 +167,11 @@ resource "nsxt_policy_service" "test" {
   description  = "Acceptance Test"
 
   icmp_entry {
-	display_name = "%s"
-	description  = "Entry"
-	icmp_type    = "3"
-	icmp_code    = "1"
-	protocol     = "ICMPv4"
+    display_name = "%s"
+    description  = "Entry"
+    icmp_type    = "3"
+    icmp_code    = "1"
+    protocol     = "ICMPv4"
   }
 
   tag {

@@ -304,7 +304,7 @@ resource "nsxt_logical_switch" "%s" {
   vlan              = "%s"
 
   address_binding {
-    ip_address = "1.1.1.1"
+    ip_address  = "1.1.1.1"
     mac_address = "00:11:22:33:44:55"
   }
 

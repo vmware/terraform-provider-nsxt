@@ -133,7 +133,7 @@ resource "nsxt_l4_port_set_ns_service" "test" {
   description       = "l4 service"
   display_name      = "%s"
   protocol          = "%s"
-  destination_ports = [ "%s" ]
+  destination_ports = ["%s"]
 
   tag {
     scope = "scope1"

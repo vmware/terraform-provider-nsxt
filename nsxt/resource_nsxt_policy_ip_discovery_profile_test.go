@@ -250,19 +250,19 @@ func testAccNsxtPolicyIPDiscoveryProfileTemplate(createFlow, withContext bool) s
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
-  arp_nd_binding_timeout = %s
+  display_name                   = "%s"
+  description                    = "%s"
+  arp_nd_binding_timeout         = %s
   duplicate_ip_detection_enabled = %s
-  arp_binding_limit = %s
-  arp_snooping_enabled = %s
-  dhcp_snooping_enabled = %s
-  vmtools_enabled = %s
-  dhcp_snooping_v6_enabled = %s
-  nd_snooping_enabled = %s
-  nd_snooping_limit = %s
-  vmtools_v6_enabled = %s
-  tofu_enabled = %s
+  arp_binding_limit              = %s
+  arp_snooping_enabled           = %s
+  dhcp_snooping_enabled          = %s
+  vmtools_enabled                = %s
+  dhcp_snooping_v6_enabled       = %s
+  nd_snooping_enabled            = %s
+  nd_snooping_limit              = %s
+  vmtools_v6_enabled             = %s
+  tofu_enabled                   = %s
   tag {
     scope = "scope1"
     tag   = "tag1"

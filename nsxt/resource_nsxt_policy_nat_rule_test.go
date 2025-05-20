@@ -532,11 +532,11 @@ func testAccNsxtPolicyNATRuleTier0MinimalCreateTemplate(name, sourceNet, transla
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
-  display_name         = "%s"
-  gateway_path         = nsxt_policy_tier0_gateway.test.path
-  action               = "%s"
-  source_networks      = ["%s"]
-  translated_networks  = ["%s"]
+  display_name        = "%s"
+  gateway_path        = nsxt_policy_tier0_gateway.test.path
+  action              = "%s"
+  source_networks     = ["%s"]
+  translated_networks = ["%s"]
 }
 `, name, model.PolicyNatRule_ACTION_REFLEXIVE, sourceNet, translatedNet)
 }
@@ -549,15 +549,15 @@ data "nsxt_policy_service" "test" {
 }
 
 resource "nsxt_policy_nat_rule" "test" {
-  display_name          = "%s"
-  type                  = "%s"
-  description           = "Acceptance Test"
-  gateway_path          = nsxt_policy_tier1_gateway.test.path
-  action                = "%s"
-  source_networks       = ["%s"]
-  destination_networks  = ["%s"]
-  translated_networks   = ["44.11.11.2"]
-  service               = data.nsxt_policy_service.test.path
+  display_name         = "%s"
+  type                 = "%s"
+  description          = "Acceptance Test"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
+  action               = "%s"
+  source_networks      = ["%s"]
+  destination_networks = ["%s"]
+  translated_networks  = ["44.11.11.2"]
+  service              = data.nsxt_policy_service.test.path
 }
 `, name, natType, action, srcIP, dstIP)
 }
@@ -575,16 +575,16 @@ data "nsxt_policy_service" "test" {
 
 resource "nsxt_policy_nat_rule" "test" {
 %s
-  display_name          = "%s"
-  description           = "Acceptance Test"
-  gateway_path          = nsxt_policy_tier1_gateway.test.path
-  action                = "%s"
-  source_networks       = ["%s"]
-  destination_networks  = ["%s"]
-  translated_networks   = ["%s"]
-  logging               = false
-  firewall_match        = "%s"
-  service               = data.nsxt_policy_service.test.path
+  display_name         = "%s"
+  description          = "Acceptance Test"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
+  action               = "%s"
+  source_networks      = ["%s"]
+  destination_networks = ["%s"]
+  translated_networks  = ["%s"]
+  logging              = false
+  firewall_match       = "%s"
+  service              = data.nsxt_policy_service.test.path
 
   tag {
     scope = "scope1"
@@ -646,15 +646,15 @@ func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name stri
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
 %s
-  display_name          = "%s"
-  description           = "Acceptance Test"
-  gateway_path          = nsxt_policy_tier1_gateway.test.path
-  action                = "%s"
-  source_networks       = ["%s", "%s"]
-  destination_networks  = ["%s"]
-  translated_networks   = ["%s"]
-  logging               = false
-  firewall_match        = "%s"
+  display_name         = "%s"
+  description          = "Acceptance Test"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
+  action               = "%s"
+  source_networks      = ["%s", "%s"]
+  destination_networks = ["%s"]
+  translated_networks  = ["%s"]
+  logging              = false
+  firewall_match       = "%s"
 
   tag {
     scope = "scope1"
@@ -707,15 +707,15 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 resource "nsxt_policy_nat_rule" "test" {
-  display_name          = "%s"
-  description           = "Acceptance Test"
-  gateway_path          = nsxt_policy_tier0_gateway.test.path
-  action                = "%s"
-  source_networks       = ["%s"]
-  translated_networks   = ["%s"]
-  logging               = false
-  firewall_match        = "%s"
-  scope                 = [nsxt_policy_tier0_gateway_interface.test[1].path, nsxt_policy_tier0_gateway_interface.test[0].path]
+  display_name        = "%s"
+  description         = "Acceptance Test"
+  gateway_path        = nsxt_policy_tier0_gateway.test.path
+  action              = "%s"
+  source_networks     = ["%s"]
+  translated_networks = ["%s"]
+  logging             = false
+  firewall_match      = "%s"
+  scope               = [nsxt_policy_tier0_gateway_interface.test[1].path, nsxt_policy_tier0_gateway_interface.test[0].path]
 
   tag {
     scope = "scope1"
@@ -728,31 +728,32 @@ resource "nsxt_policy_nat_rule" "test" {
   }
 }
 
+
 `, interfaceSite, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
 
 func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action string, sourceNet string, destNet string) string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, false) + fmt.Sprintf(`
-	resource "nsxt_policy_nat_rule" "test" {
-	  display_name          = "%s"
-	  description           = "Acceptance Test"
-	  gateway_path          = nsxt_policy_tier1_gateway.test.path
-	  action                = "%s"
-	  source_networks       = ["%s"]
-	  destination_networks  = ["%s"]
-	  logging               = false
-	  firewall_match        = "%s"
+resource "nsxt_policy_nat_rule" "test" {
+  display_name         = "%s"
+  description          = "Acceptance Test"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
+  action               = "%s"
+  source_networks      = ["%s"]
+  destination_networks = ["%s"]
+  logging              = false
+  firewall_match       = "%s"
 
-	  tag {
-		scope = "scope1"
-		tag   = "tag1"
-	  }
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 
-	  tag {
-		scope = "scope2"
-		tag   = "tag2"
-	  }
-	}
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
 	`, name, action, sourceNet, destNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }

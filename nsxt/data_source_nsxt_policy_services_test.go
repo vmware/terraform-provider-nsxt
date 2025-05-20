@@ -56,7 +56,7 @@ data "nsxt_policy_services" "test" {
 }
 
 locals {
-// Get id from path
+  // Get id from path
   path_split = split("/", data.nsxt_policy_services.test.items["%s"])
   service_id = element(local.path_split, length(local.path_split) - 1)
 }

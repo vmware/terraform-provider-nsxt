@@ -300,7 +300,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingMinimalistic(isFixed, withContext bool)
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, true, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_v6_static_binding" "test" {
 %s
-  segment_path    = %s.test.path
+  segment_path = %s.test.path
   display_name = "%s"
   mac_address  = "%s"
 }`, context, testAccNsxtPolicyGetSegmentResourceName(isFixed), attrMap["display_name"], attrMap["mac_address"])

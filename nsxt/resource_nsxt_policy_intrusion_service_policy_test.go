@@ -388,12 +388,12 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   }
 
   rule {
-    display_name = "%s"
-    direction    = "%s"
-    ip_version   = "%s"
-    log_label    = "%s"
+    display_name  = "%s"
+    direction     = "%s"
+    ip_version    = "%s"
+    log_label     = "%s"
     source_groups = [nsxt_policy_group.test.path]
-    ids_profiles = ["%s"]
+    ids_profiles  = ["%s"]
 
     tag {
       scope = "color"
@@ -414,18 +414,18 @@ resource "nsxt_policy_group" "group2" {
 }
 
 resource "nsxt_policy_service" "icmp" {
-    display_name = "security-policy-test-icmp"
-    icmp_entry {
-        protocol = "ICMPv4"
-    }
+  display_name = "security-policy-test-icmp"
+  icmp_entry {
+    protocol = "ICMPv4"
+  }
 }
 
 resource "nsxt_policy_service" "tcp778" {
-    display_name = "security-policy-test-tcp"
-    l4_port_set_entry {
-        protocol          = "TCP"
-        destination_ports = [ "778" ]
-    }
+  display_name = "security-policy-test-tcp"
+  l4_port_set_entry {
+    protocol          = "TCP"
+    destination_ports = ["778"]
+  }
 }`
 }
 

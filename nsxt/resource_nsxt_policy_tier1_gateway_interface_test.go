@@ -490,7 +490,7 @@ func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu str
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }
 
@@ -523,7 +523,7 @@ func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string, wit
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }
 
@@ -575,7 +575,7 @@ data "nsxt_policy_ipv6_ndra_profile" "default" {
 }
 
 resource "nsxt_policy_tier1_gateway" "test" {
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }
 
@@ -599,14 +599,14 @@ func testAccNsxtPolicyTier1InterfaceUpdateGatewayTemplate(name string, useLocale
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }
 
 resource "nsxt_policy_tier1_gateway_interface" "test" {
-  display_name           = "%s"
-  gateway_path           = nsxt_policy_tier1_gateway.test.path
-  segment_path           = nsxt_policy_vlan_segment.test.path
-  subnets                = ["10.192.12.2/24", "1002::3:3/64"]
+  display_name = "%s"
+  gateway_path = nsxt_policy_tier1_gateway.test.path
+  segment_path = nsxt_policy_vlan_segment.test.path
+  subnets      = ["10.192.12.2/24", "1002::3:3/64"]
 }`, nsxtPolicyTier1GatewayName, edgeCluster, name)
 }

@@ -248,23 +248,23 @@ func testAccNsxtPolicyRoleBindingCreate(user, userType, identType, overwrite, de
 
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role_binding" "test" {
-    display_name         = "%s"
-    description          = "%s"
-    name                 = "%s"
-    type                 = "%s"
-    overwrite_local_user = %s
+  display_name         = "%s"
+  description          = "%s"
+  name                 = "%s"
+  type                 = "%s"
+  overwrite_local_user = %s
     %s
     %s
 
-    roles_for_path {
-        path  = "/"
-        roles = ["network_engineer"]
-    }
+  roles_for_path {
+    path  = "/"
+    roles = ["network_engineer"]
+  }
 
-    roles_for_path {
-        path  = "/orgs/default"
-        roles = ["org_admin"]
-    }
+  roles_for_path {
+    path  = "/orgs/default"
+    roles = ["org_admin"]
+  }
 }`, attrMap["display_name"], attrMap["description"], user, userType, overwrite, identLine, dependsOnLine)
 }
 
@@ -279,17 +279,17 @@ func testAccNsxtPolicyRoleBindingUpdate(user, userType, identType, overwrite, de
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role_binding" "test" {
-    display_name         = "%s"
-    description          = "%s"
-    name                 = "%s"
-    type                 = "%s"
-    overwrite_local_user = %s
+  display_name         = "%s"
+  description          = "%s"
+  name                 = "%s"
+  type                 = "%s"
+  overwrite_local_user = %s
     %s
     %s
 
-    roles_for_path {
-        path  = "/"
-        roles = ["security_engineer"]
-    }
+  roles_for_path {
+    path  = "/"
+    roles = ["security_engineer"]
+  }
 }`, attrMap["display_name"], attrMap["description"], user, userType, overwrite, identLine, dependsOnLine)
 }

@@ -182,7 +182,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 
   intersite_config {
-    primary_site_path = data.nsxt_policy_site.site1.path
+    primary_site_path   = data.nsxt_policy_site.site1.path
     fallback_site_paths = [data.nsxt_policy_site.site2.path]
     %s
   }

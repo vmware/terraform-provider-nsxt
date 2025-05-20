@@ -392,25 +392,25 @@ func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool, use
 	}
 	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
-	  resource "nsxt_policy_l2_vpn_service" "test" {
-		display_name                   = "%s"
-		description                    = "%s"
+resource "nsxt_policy_l2_vpn_service" "test" {
+  display_name = "%s"
+  description  = "%s"
 		%s
-		enable_hub                     = "%s"
-		mode               			   = "%s"
-		encap_ip_pool 				   = ["%s"]
-		tag {
-		  scope = "scope1"
-		  tag   = "tag1"
-		}
-	  }`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enable_hub"], attrMap["mode"], attrMap["encap_ip_pool"])
+  enable_hub    = "%s"
+  mode          = "%s"
+  encap_ip_pool = ["%s"]
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enable_hub"], attrMap["mode"], attrMap["encap_ip_pool"])
 }
 
 func testAccNsxtPolicyL2VpnServiceMinimalistic(useGatewayPath bool) string {
 	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
-	  resource "nsxt_policy_l2_vpn_service" "test" {
-		display_name          = "%s"
+resource "nsxt_policy_l2_vpn_service" "test" {
+  display_name = "%s"
 		%s
-	  }`, accTestPolicyL2VpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
+}`, accTestPolicyL2VpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
 }

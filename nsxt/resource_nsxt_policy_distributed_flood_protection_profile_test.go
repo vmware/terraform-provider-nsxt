@@ -229,14 +229,14 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileTemplate(createFlow, with
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_flood_protection_profile" "%s" {
 %s
-  display_name = "%s"
-  description  = "%s"
-  icmp_active_flow_limit = %s
-  other_active_conn_limit = %s
+  display_name             = "%s"
+  description              = "%s"
+  icmp_active_flow_limit   = %s
+  other_active_conn_limit  = %s
   tcp_half_open_conn_limit = %s
-  udp_active_flow_limit = %s
-  enable_rst_spoofing = %s
-  enable_syncache = %s
+  udp_active_flow_limit    = %s
+  enable_rst_spoofing      = %s
+  enable_syncache          = %s
 
   tag {
     scope = "scope1"
@@ -247,7 +247,7 @@ resource "nsxt_policy_distributed_flood_protection_profile" "%s" {
 data "nsxt_policy_distributed_flood_protection_profile" "%s" {
 %s
   display_name = "%s"
-  depends_on = [nsxt_policy_distributed_flood_protection_profile.%s]
+  depends_on   = [nsxt_policy_distributed_flood_protection_profile.%s]
 }`, resourceName, context, name, attrMap["description"], attrMap["icmp_active_flow_limit"], attrMap["other_active_conn_limit"], attrMap["tcp_half_open_conn_limit"], attrMap["udp_active_flow_limit"], attrMap["enable_rst_spoofing"], attrMap["enable_syncache"], resourceName, context, name, resourceName)
 }
 

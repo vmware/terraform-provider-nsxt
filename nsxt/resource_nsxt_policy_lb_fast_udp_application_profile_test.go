@@ -132,9 +132,9 @@ func testAccNsxtPolicyLBFastUdpApplicationProfileTemplate(createFlow bool) strin
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_lb_fast_udp_application_profile" "test" {
-  display_name  = "%s"
-  description   = "%s"
-  idle_timeout  = %s
+  display_name = "%s"
+  description  = "%s"
+  idle_timeout = %s
 
   flow_mirroring_enabled = %s
 

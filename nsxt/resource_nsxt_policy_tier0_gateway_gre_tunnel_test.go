@@ -126,16 +126,16 @@ data "nsxt_policy_gateway_locale_service" "test" {
 }
 
 resource "nsxt_policy_tier0_gateway_gre_tunnel" "test" {
-  display_name = "%s"
-  description  = "Acceptance test GRE tunnel"
+  display_name        = "%s"
+  description         = "Acceptance test GRE tunnel"
   locale_service_path = data.nsxt_policy_gateway_locale_service.test.path
   destination_address = "192.168.221.221"
   tunnel_address {
     source_address = nsxt_policy_tier0_gateway_interface.test.ip_addresses[0]
-    edge_path = data.nsxt_policy_edge_node.EN.path
+    edge_path      = data.nsxt_policy_edge_node.EN.path
     tunnel_interface_subnet {
-       ip_addresses = ["192.168.243.243"]
-       prefix_len = 24
+      ip_addresses = ["192.168.243.243"]
+      prefix_len   = 24
     }
   }
   tunnel_keepalive {

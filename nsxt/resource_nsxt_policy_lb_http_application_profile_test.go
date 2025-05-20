@@ -193,18 +193,18 @@ func testAccNsxtPolicyLBHttpApplicationProfileTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_lb_http_application_profile" "test" {
-  display_name = "%s"
-  description  = "%s"
-  http_redirect_to = "%s"
+  display_name           = "%s"
+  description            = "%s"
+  http_redirect_to       = "%s"
   http_redirect_to_https = %s
-  idle_timeout = %s
-  request_body_size = %s
-  request_header_size = %s
-  response_buffering = %s
-  response_header_size = %s
-  response_timeout = %s
-  server_keep_alive = %s
-  x_forwarded_for = "%s"
+  idle_timeout           = %s
+  request_body_size      = %s
+  request_header_size    = %s
+  response_buffering     = %s
+  response_header_size   = %s
+  response_timeout       = %s
+  server_keep_alive      = %s
+  x_forwarded_for        = "%s"
 
   tag {
     scope = "scope1"

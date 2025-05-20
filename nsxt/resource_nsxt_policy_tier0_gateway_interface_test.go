@@ -687,10 +687,10 @@ func testAccNsxtPolicyGatewayInterfaceDeps(vlans string, withContext bool) strin
 resource "nsxt_policy_vlan_segment" "test" {
 %s
   %s
-  display_name        = "interface_test"
-  vlan_ids            = [%s]
+  display_name = "interface_test"
+  vlan_ids     = [%s]
   subnet {
-      cidr = "10.2.2.2/24"
+    cidr = "10.2.2.2/24"
   }
 }`, context, tzSpec, vlans)
 }
@@ -723,7 +723,7 @@ func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
 	if testAccIsGlobalManager() {
 		return `
 data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier0_gateway_interface.test.path
+  path      = nsxt_policy_tier0_gateway_interface.test.path
   site_path = data.nsxt_policy_site.test.path
 }
 
@@ -744,9 +744,10 @@ data "nsxt_policy_gateway_interface_realization" "gw_realization" {
 func testAccNsxtPolicyTier0InterfaceServiceTemplate(name string, subnet string, mtu string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -771,8 +772,8 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 func testAccNsxtPolicyTier0InterfaceThinTemplate(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -795,8 +796,8 @@ resource "nsxt_policy_dhcp_relay" "test" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -821,8 +822,8 @@ data "nsxt_policy_ipv6_ndra_profile" "default" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -873,8 +874,8 @@ data "nsxt_policy_edge_node" "EN" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -911,10 +912,10 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "test" {
-  display_name   = "%s"
-  gateway_path   = nsxt_policy_tier0_gateway.test.path
-  segment_path   = nsxt_policy_vlan_segment.test.path
-  subnets        = ["10.192.12.2/24", "1002::3:3/64"]
-  type           = "EXTERNAL"
+  display_name = "%s"
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  segment_path = nsxt_policy_vlan_segment.test.path
+  subnets      = ["10.192.12.2/24", "1002::3:3/64"]
+  type         = "EXTERNAL"
 }`, nsxtPolicyTier1GatewayName, edgeCluster, name)
 }

@@ -200,10 +200,10 @@ func testAccNsxtPolicyEdgeHighAvailabilityProfileTemplate(createFlow bool) strin
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_edge_high_availability_profile" "test" {
-  display_name = "%s"
-  description  = "%s"
-  bfd_probe_interval = %s
-  bfd_allowed_hops = %s
+  display_name              = "%s"
+  description               = "%s"
+  bfd_probe_interval        = %s
+  bfd_allowed_hops          = %s
   bfd_declare_dead_multiple = %s
   standby_relocation_config {
     standby_relocation_threshold = %s

@@ -289,15 +289,15 @@ resource "nsxt_policy_security_policy_rule" "%s" {
   service_entries {
     igmp_entry {
     }
-    
+
     l4_port_set_entry {
       protocol          = "TCP"
-      destination_ports = [ "443" ]
+      destination_ports = ["443"]
     }
 
     l4_port_set_entry {
       protocol          = "TCP"
-      destination_ports = [ "80" ]
+      destination_ports = ["80"]
     }
   }
 

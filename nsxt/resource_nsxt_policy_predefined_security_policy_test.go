@@ -215,10 +215,10 @@ func testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(description string, ac
 resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
   default_rule {
-    description  = "%s"
-    action       = "%s"
-    log_label    = "%s"
-    logged       = true
+    description = "%s"
+    action      = "%s"
+    log_label   = "%s"
+    logged      = true
     %s
   }
 }`, description, action, label, tags)
@@ -230,11 +230,11 @@ resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 
   rule {
-      display_name  = "rule2"
-      source_groups = [nsxt_policy_group.group2.path]
-      log_label     = "group2"
-      action        = "ALLOW"
-      disabled      = true
+    display_name  = "rule2"
+    source_groups = [nsxt_policy_group.group2.path]
+    log_label     = "group2"
+    action        = "ALLOW"
+    disabled      = true
   }
 }`
 }
@@ -245,17 +245,17 @@ resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 
   rule {
-      display_name  = "rule1"
-      source_groups = [nsxt_policy_group.group1.path]
-      log_label     = "group1"
-      action        = "DROP"
+    display_name  = "rule1"
+    source_groups = [nsxt_policy_group.group1.path]
+    log_label     = "group1"
+    action        = "DROP"
   }
   rule {
-      display_name  = "rule2"
-      source_groups = [nsxt_policy_group.group2.path]
-      log_label     = "group2"
-      action        = "ALLOW"
-      disabled      = false
+    display_name  = "rule2"
+    source_groups = [nsxt_policy_group.group2.path]
+    log_label     = "group2"
+    action        = "ALLOW"
+    disabled      = false
   }
 }`
 }
@@ -266,14 +266,14 @@ resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 
   rule {
-      display_name  = "rule2"
-      source_groups = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
-      log_label     = "group2"
-      action        = "ALLOW"
+    display_name  = "rule2"
+    source_groups = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
+    log_label     = "group2"
+    action        = "ALLOW"
   }
 
   default_rule {
-      action = "REJECT"
+    action = "REJECT"
   }
 }`
 }

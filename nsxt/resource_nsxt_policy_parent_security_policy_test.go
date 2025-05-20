@@ -150,7 +150,7 @@ resource "nsxt_policy_parent_security_policy" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
-  domain = "default"
+  domain          = "default"
   category        = "Application"
   locked          = %s
   sequence_number = %s

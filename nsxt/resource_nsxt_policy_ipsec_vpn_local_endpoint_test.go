@@ -174,22 +174,22 @@ var accTestPolicyIPSecVpnServiceTestName = getAccTestResourceName()
 
 func testAccNsxtPolicyIPSecVpnLocalEndpointPrerequisite() string {
 	return fmt.Sprintf(`
-   data "nsxt_policy_edge_cluster" "test" {
-	 display_name = "%s"
-   }
-   resource "nsxt_policy_tier0_gateway" "test" {
-	 display_name      = "%s"
-	 ha_mode           = "ACTIVE_STANDBY"
-	 edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-   }
-   data "nsxt_policy_gateway_locale_service" "test" {
-	 gateway_path = nsxt_policy_tier0_gateway.test.path
-	 display_name = "default"
-   }
-   resource "nsxt_policy_ipsec_vpn_service" "test" {
-	 display_name        = "%s"
-	 locale_service_path = data.nsxt_policy_gateway_locale_service.test.path
-   }`, getEdgeClusterName(), accTestPolicyIPSecVpnGatewayTestName, accTestPolicyIPSecVpnServiceTestName)
+data "nsxt_policy_edge_cluster" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "%s"
+  ha_mode           = "ACTIVE_STANDBY"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+data "nsxt_policy_gateway_locale_service" "test" {
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  display_name = "default"
+}
+resource "nsxt_policy_ipsec_vpn_service" "test" {
+  display_name        = "%s"
+  locale_service_path = data.nsxt_policy_gateway_locale_service.test.path
+}`, getEdgeClusterName(), accTestPolicyIPSecVpnGatewayTestName, accTestPolicyIPSecVpnServiceTestName)
 }
 
 func testAccNsxtPolicyIPSecVpnLocalEndpointTemplate(createFlow bool) string {
@@ -200,24 +200,24 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointTemplate(createFlow bool) string {
 		attrMap = accTestPolicyIPSecVpnLocalEndpointUpdateAttributes
 	}
 	return testAccNsxtPolicyIPSecVpnLocalEndpointPrerequisite() + fmt.Sprintf(`
-   resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
-	 service_path = nsxt_policy_ipsec_vpn_service.test.path
-	 display_name = "%s"
-	 description  = "%s"
-	 local_address = "%s"
-	 local_id = "%s"
-	 tag {
-	   scope = "scope1"
-	   tag   = "tag1"
-	 }
-   }`, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
+resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+  service_path  = nsxt_policy_ipsec_vpn_service.test.path
+  display_name  = "%s"
+  description   = "%s"
+  local_address = "%s"
+  local_id      = "%s"
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
 }
 
 func testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic() string {
 	return testAccNsxtPolicyIPSecVpnLocalEndpointPrerequisite() + fmt.Sprintf(`
-   resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
-	 service_path  = nsxt_policy_ipsec_vpn_service.test.path
-	 display_name  = "%s"
-	 local_address = "%s"
-   }`, accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
+resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+  service_path  = nsxt_policy_ipsec_vpn_service.test.path
+  display_name  = "%s"
+  local_address = "%s"
+}`, accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
 }
