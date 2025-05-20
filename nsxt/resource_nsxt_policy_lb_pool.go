@@ -377,13 +377,14 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 
 	snatType := basicType.(model.LBSnatTranslation).Type_
 
-	if snatType == model.LBSnatDisabled__TYPE_IDENTIFIER {
+	switch snatType {
+	case model.LBSnatDisabled__TYPE_IDENTIFIER:
 		elem["type"] = "DISABLED"
 		elem["ip_pool_addresses"] = nil
-	} else if snatType == model.LBSnatAutoMap__TYPE_IDENTIFIER {
+	case model.LBSnatAutoMap__TYPE_IDENTIFIER:
 		elem["type"] = "AUTOMAP"
 		elem["ip_pool_addresses"] = nil
-	} else {
+	default:
 		if snatType != model.LBSnatIpPool__TYPE_IDENTIFIER {
 			return fmt.Errorf("Unrecognized Snat Translation type %s", snatType)
 		}

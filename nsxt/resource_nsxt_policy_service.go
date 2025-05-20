@@ -596,7 +596,8 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			return errs[0]
 		}
 
-		if resourceType == model.ServiceEntry_RESOURCE_TYPE_ICMPTYPESERVICEENTRY {
+		switch resourceType {
+		case model.ServiceEntry_RESOURCE_TYPE_ICMPTYPESERVICEENTRY:
 			icmpEntry, errs := converter.ConvertToGolang(entry, model.ICMPTypeServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -617,7 +618,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			}
 			elem["protocol"] = serviceEntry.Protocol
 			icmpEntriesList = append(icmpEntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_L4PORTSETSERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_L4PORTSETSERVICEENTRY:
 			l4Entry, errs := converter.ConvertToGolang(entry, model.L4PortSetServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -630,7 +631,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["source_ports"] = serviceEntry.SourcePorts
 			elem["protocol"] = serviceEntry.L4Protocol
 			l4EntriesList = append(l4EntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_ETHERTYPESERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_ETHERTYPESERVICEENTRY:
 			etherEntry, errs := converter.ConvertToGolang(entry, model.EtherTypeServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -641,7 +642,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["description"] = serviceEntry.Description
 			elem["ether_type"] = serviceEntry.EtherType
 			etherEntriesList = append(etherEntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_IPPROTOCOLSERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_IPPROTOCOLSERVICEENTRY:
 			ipProtEntry, errs := converter.ConvertToGolang(entry, model.IPProtocolServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -652,7 +653,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["description"] = serviceEntry.Description
 			elem["protocol"] = serviceEntry.ProtocolNumber
 			ipProtEntriesList = append(ipProtEntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_ALGTYPESERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_ALGTYPESERVICEENTRY:
 			algEntry, errs := converter.ConvertToGolang(entry, model.ALGTypeServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -665,7 +666,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["destination_port"] = serviceEntry.DestinationPorts[0]
 			elem["source_ports"] = serviceEntry.SourcePorts
 			algEntriesList = append(algEntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_IGMPTYPESERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_IGMPTYPESERVICEENTRY:
 			igmpEntry, errs := converter.ConvertToGolang(entry, model.IGMPTypeServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -675,7 +676,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			igmpEntriesList = append(igmpEntriesList, elem)
-		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY {
+		case model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY:
 			nestedEntry, errs := converter.ConvertToGolang(entry, model.NestedServiceServiceEntryBindingType())
 			if errs != nil {
 				return errs[0]
@@ -687,7 +688,7 @@ func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue
 			elem["nested_service_path"] = serviceEntry.NestedServicePath
 			nestedServiceEntriesList = append(nestedServiceEntriesList, elem)
 
-		} else {
+		default:
 			return fmt.Errorf("Unrecognized Service Entry Type %s", resourceType)
 		}
 	}
