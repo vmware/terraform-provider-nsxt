@@ -99,7 +99,7 @@ var policyEdgeClusterSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"policy_edge_node": {
 		Schema: schema.Schema{
-			Type: schema.TypeList,
+			Type: schema.TypeSet,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
 					"edge_transport_node_path": {
@@ -130,7 +130,7 @@ var policyEdgeClusterSchema = map[string]*metadata.ExtendedSchema{
 			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:   "list",
+			SchemaType:   "set",
 			SdkFieldName: "PolicyEdgeNodes",
 			ReflectType:  reflect.TypeOf(model.PolicyEdgeClusterMember{}),
 		},
