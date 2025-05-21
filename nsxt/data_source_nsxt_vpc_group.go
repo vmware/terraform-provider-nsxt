@@ -17,7 +17,7 @@ func dataSourceNsxtVpcGroup() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false, true),
+			"context":      getContextSchemaExtended(true, false, true, true),
 		},
 	}
 }
