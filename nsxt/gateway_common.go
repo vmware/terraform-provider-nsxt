@@ -443,7 +443,8 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 }
 
 func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector client.Connector, enforceRevision bool) error {
-	if context.ClientType == utl.Global {
+	switch context.ClientType {
+	case utl.Global:
 		infraClient := global_policy.NewGlobalInfraClient(connector)
 		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
 		if err != nil {
@@ -451,7 +452,7 @@ func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector cli
 		}
 
 		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
-	} else if context.ClientType == utl.VPC {
+	case utl.VPC:
 		context = utl.SessionContext{
 			ClientType: utl.Multitenancy,
 			ProjectID:  context.ProjectID,
@@ -656,10 +657,7 @@ func parseGatewayInterfacePolicyPath(path string) (bool, string, string, string)
 		return false, "", "", ""
 	}
 
-	isT0 := true
-	if segs[2] != "tier-0s" {
-		isT0 = false
-	}
+	isT0 := (segs[2] == "tier-0s")
 
 	gwID := segs[3]
 	localeServiceID := segs[5]

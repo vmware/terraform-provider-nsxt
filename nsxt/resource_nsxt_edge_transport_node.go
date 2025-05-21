@@ -1492,13 +1492,14 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, m interface{}, nodeType
 		var isMigratePNics bool
 		var uplinks []mpmodel.VdsUplink
 		var cpuConfig []mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch
-		if nodeType == nodeTypeHost {
+		switch nodeType {
+		case nodeTypeHost:
 			cpuConfig = getCPUConfigFromSchema(swData["cpu_config"].([]interface{}))
 			hostSwitchMode = swData["host_switch_mode"].(string)
 			hostSwitchType = mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_VDS
 			isMigratePNics = swData["is_migrate_pnics"].(bool)
 			uplinks = getUplinksFromSchema(swData["uplink"].([]interface{}))
-		} else if nodeType == nodeTypeEdge {
+		case nodeTypeEdge:
 			hostSwitchMode = mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD
 			hostSwitchType = mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_NVDS
 		}

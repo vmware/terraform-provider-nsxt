@@ -584,7 +584,7 @@ data "nsxt_policy_site" "test" {
 
 func testAccAdjustPolicyInfraConfig(config string) string {
 	if testAccIsGlobalManager() {
-		return strings.Replace(config, "/infra/", "/global-infra/", -1)
+		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
 	}
 
 	return config

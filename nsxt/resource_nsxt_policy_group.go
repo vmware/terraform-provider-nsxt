@@ -78,7 +78,9 @@ var externalMemberTypeValues = []string{
 	model.ExternalIDExpression_MEMBER_TYPE_VIRTUALMACHINE,
 	model.ExternalIDExpression_MEMBER_TYPE_VIRTUALNETWORKINTERFACE,
 	model.ExternalIDExpression_MEMBER_TYPE_CLOUDNATIVESERVICEINSTANCE,
-	model.ExternalIDExpression_MEMBER_TYPE_PHYSICALSERVER,
+	"PhysicalServer", // This value is gone from SDK in 9.1
+	model.ExternalIDExpression_MEMBER_TYPE_BAREMETALSERVER,
+	model.ExternalIDExpression_MEMBER_TYPE_BAREMETALSERVERINTERFACE,
 }
 
 var groupTypeValues = []string{
@@ -540,31 +542,32 @@ func buildGroupExpressionDataFromType(expressionType string, datum interface{}) 
 	if datum == nil {
 		return nil, fmt.Errorf("Empty set is not supported for expression type: %v", expressionType)
 	}
-	if expressionType == "condition" {
+	switch expressionType {
+	case "condition":
 		data, err := buildGroupConditionData(datum)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	} else if expressionType == "ipaddress_expression" {
+	case "ipaddress_expression":
 		data, err := buildGroupIPAddressData(datum)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	} else if expressionType == "path_expression" {
+	case "path_expression":
 		data, err := buildGroupMemberPathData(datum)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	} else if expressionType == "macaddress_expression" {
+	case "macaddress_expression":
 		data, err := buildGroupMacAddressData(datum)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
-	} else if expressionType == "external_id_expression" {
+	case "external_id_expression":
 		data, err := buildGroupExternalIDExpressionData(datum)
 		if err != nil {
 			return nil, err
@@ -662,7 +665,8 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 		}
 		expStruct := expData.(model.Expression)
 
-		if expStruct.ResourceType == model.Expression_RESOURCE_TYPE_CONJUNCTIONOPERATOR {
+		switch expStruct.ResourceType {
+		case model.Expression_RESOURCE_TYPE_CONJUNCTIONOPERATOR:
 			log.Printf("[DEBUG] Parsing conjunction operator")
 			conjData, errors := converter.ConvertToGolang(expression, model.ConjunctionOperatorBindingType())
 			if len(errors) > 0 {
@@ -672,7 +676,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			var conjMap = make(map[string]interface{})
 			conjMap["operator"] = conjStruct.ConjunctionOperator
 			parsedConjunctions = append(parsedConjunctions, conjMap)
-		} else if expStruct.ResourceType == model.IPAddressExpression__TYPE_IDENTIFIER {
+		case model.IPAddressExpression__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing ipaddress expression")
 			ipData, errors := converter.ConvertToGolang(expression, model.IPAddressExpressionBindingType())
 			if len(errors) > 0 {
@@ -686,7 +690,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			addrList = append(addrList, addrMap)
 			ipMap["ipaddress_expression"] = addrList
 			parsedCriteria = append(parsedCriteria, ipMap)
-		} else if expStruct.ResourceType == model.PathExpression__TYPE_IDENTIFIER {
+		case model.PathExpression__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing path expression")
 			pathData, errors := converter.ConvertToGolang(expression, model.PathExpressionBindingType())
 			if len(errors) > 0 {
@@ -700,7 +704,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			pathList = append(pathList, pathMap)
 			exprMap["path_expression"] = pathList
 			parsedCriteria = append(parsedCriteria, exprMap)
-		} else if expStruct.ResourceType == model.MACAddressExpression__TYPE_IDENTIFIER {
+		case model.MACAddressExpression__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing mac address expression")
 			macData, errors := converter.ConvertToGolang(expression, model.MACAddressExpressionBindingType())
 			if len(errors) > 0 {
@@ -714,7 +718,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			addrList = append(addrList, addrMap)
 			macMap["macaddress_expression"] = addrList
 			parsedCriteria = append(parsedCriteria, macMap)
-		} else if expStruct.ResourceType == model.ExternalIDExpression__TYPE_IDENTIFIER {
+		case model.ExternalIDExpression__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing external id expression")
 			extIDData, errors := converter.ConvertToGolang(expression, model.ExternalIDExpressionBindingType())
 			if len(errors) > 0 {
@@ -729,7 +733,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			idList = append(idList, extIDMap)
 			idMap["external_id_expression"] = idList
 			parsedCriteria = append(parsedCriteria, idMap)
-		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
+		case model.Condition__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing condition")
 			condMap, err := groupConditionDataToMap(expression)
 			if err != nil {
@@ -740,7 +744,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			criteriaMap := make(map[string]interface{})
 			criteriaMap["condition"] = condList
 			parsedCriteria = append(parsedCriteria, criteriaMap)
-		} else if expStruct.ResourceType == model.NestedExpression__TYPE_IDENTIFIER {
+		case model.NestedExpression__TYPE_IDENTIFIER:
 			log.Printf("[DEBUG] Parsing nested expression")
 			nestedData, errors := converter.ConvertToGolang(expression, model.NestedExpressionBindingType())
 			if len(errors) > 0 {
@@ -765,7 +769,7 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			criteriaMap := make(map[string]interface{})
 			criteriaMap["condition"] = criteriaList
 			parsedCriteria = append(parsedCriteria, criteriaMap)
-		} else {
+		default:
 			return nil, nil, fmt.Errorf("Unsupported criteria type: %v", expStruct.ResourceType)
 		}
 	}

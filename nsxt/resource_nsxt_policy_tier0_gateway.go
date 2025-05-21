@@ -148,6 +148,18 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Computed:    true,
 			},
 			"advanced_config": getTier0AdvancedConfigSchema(),
+			"enable_rd_per_edge": {
+				Type:        schema.TypeBool,
+				Description: "Enable distinct route distinguisher per edge node",
+				Optional:    true,
+				Default:     false,
+			},
+			"multi_vrf_inter_sr": {
+				Type:        schema.TypeBool,
+				Description: "Flag to control multi VRF inter SR. This is one time toggle flag and can't be disabled once enabled",
+				Optional:    true,
+				Default:     false,
+			},
 		},
 	}
 }
@@ -674,10 +686,12 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 			log.Printf("[WARNING] BGP graceful restart settings are not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
 	} else {
-		routeStruct.InterSrIbgp = &interSrIbgp
-		routeStruct.LocalAsNum = &localAsNum
 		routeStruct.MultipathRelax = &multipathRelax
 		routeStruct.GracefulRestartConfig = &restartConfigStruct
+	}
+
+	if !isVrf || util.NsxVersionHigherOrEqual("4.2.1") {
+		routeStruct.InterSrIbgp = &interSrIbgp
 	}
 
 	return routeStruct
@@ -811,6 +825,8 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	if rdAdminAddress == "" {
 		rdAdminField = nil
 	}
+	multiVrfInterSr := d.Get("multi_vrf_inter_sr").(bool)
+	enableRdPerEdge := d.Get("enable_rd_per_edge").(bool)
 
 	t0Type := "Tier0"
 	t0Struct := model.Tier0{
@@ -841,6 +857,14 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	if util.NsxVersionHigherOrEqual("3.1.0") {
 		advancedConfig := getTier0AdvancedConfigFromSchema(d)
 		t0Struct.AdvancedConfig = advancedConfig
+	}
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		t0Struct.EnableRdPerEdge = &enableRdPerEdge
+	}
+
+	if util.NsxVersionHigherOrEqual("4.2.1") {
+		t0Struct.MultiVrfInterSrRouting = &multiVrfInterSr
 	}
 
 	if len(d.Id()) > 0 {
@@ -1006,6 +1030,9 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("vrf_transit_subnets", obj.VrfTransitSubnets)
 	d.Set("revision", obj.Revision)
+	d.Set("multi_vrf_inter_sr", obj.MultiVrfInterSrRouting)
+	d.Set("enable_rd_per_edge", obj.EnableRdPerEdge)
+
 	if util.NsxVersionHigherOrEqual("3.0.0") {
 		d.Set("rd_admin_address", obj.RdAdminField)
 	}
