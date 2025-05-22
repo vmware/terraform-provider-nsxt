@@ -24,14 +24,12 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 			"gateway_path": {
 				Type:        schema.TypeString,
 				Description: "The name of the gateway to which interface is linked",
-				// Required:    true,
-				Optional: true,
+				Optional:    true,
 			},
 			"service_path": {
 				Type:        schema.TypeString,
 				Description: "The name of the locale service of the gateway to which interface is linked",
 				Optional:    true,
-				// ValidateFunc: validation. .All(),
 			},
 			"path": getPathSchema(),
 			"edge_cluster_path": {
