@@ -96,13 +96,6 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
-			"force_whitelisting": {
-				Type:        schema.TypeBool,
-				Description: "Force whitelisting",
-				Default:     false,
-				Optional:    true,
-				Deprecated:  "Use nsxt_policy_predefined_gateway_policy resource to control default action",
-			},
 			"tier0_path": {
 				Type:         schema.TypeString,
 				Description:  "The path of the connected Tier0",
@@ -401,7 +394,6 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	defaultRuleLogging := d.Get("default_rule_logging").(bool)
 	disableFirewall := !d.Get("enable_firewall").(bool)
 	enableStandbyRelocation := d.Get("enable_standby_relocation").(bool)
-	forceWhitelisting := d.Get("force_whitelisting").(bool)
 	tier0Path := d.Get("tier0_path").(string)
 	routeAdvertisementTypes := getStringListFromSchemaSet(d, "route_advertisement_types")
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
@@ -425,7 +417,6 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		DefaultRuleLogging:      &defaultRuleLogging,
 		DisableFirewall:         &disableFirewall,
 		EnableStandbyRelocation: &enableStandbyRelocation,
-		ForceWhitelisting:       &forceWhitelisting,
 		RouteAdvertisementTypes: routeAdvertisementTypes,
 		RouteAdvertisementRules: routeAdvertisementRules,
 		Ipv6ProfilePaths:        ipv6ProfilePaths,
@@ -608,7 +599,6 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("default_rule_logging", obj.DefaultRuleLogging)
 	d.Set("enable_firewall", !(*obj.DisableFirewall))
 	d.Set("enable_standby_relocation", obj.EnableStandbyRelocation)
-	d.Set("force_whitelisting", obj.ForceWhitelisting)
 	if util.NsxVersionHigherOrEqual("3.2.0") {
 		if obj.HaMode == nil {
 			d.Set("ha_mode", "NONE")

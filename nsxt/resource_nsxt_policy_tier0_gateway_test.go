@@ -36,7 +36,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_STANDBY"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", "192.168.0.2"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
@@ -54,7 +53,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
 					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
@@ -284,11 +282,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "3"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -297,11 +290,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -310,10 +298,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -746,7 +730,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   failover_mode             = "%s"
   default_rule_logging      = "true"
   enable_firewall           = "false"
-  force_whitelisting        = "false"
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
@@ -776,7 +759,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   failover_mode             = "%s"
   default_rule_logging      = "false"
   enable_firewall           = "true"
-  force_whitelisting        = "true"
   ha_mode                   = "ACTIVE_ACTIVE"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
@@ -864,7 +846,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   failover_mode             = "NON_PREEMPTIVE"
   default_rule_logging      = "false"
   enable_firewall           = "true"
-  force_whitelisting        = "true"
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   internal_transit_subnets  = ["102.64.0.0/16"]
@@ -889,7 +870,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   failover_mode             = "NON_PREEMPTIVE"
   default_rule_logging      = "false"
   enable_firewall           = "true"
-  force_whitelisting        = "true"
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   internal_transit_subnets  = ["102.64.0.0/16"]
@@ -1056,14 +1036,6 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  redistribution_config {
-    enabled      = false
-    ospf_enabled = false
-    rule {
-        name = "test-rule-1"
-        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
-    }
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
@@ -1080,17 +1052,6 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  redistribution_config {
-    enabled      = false
-    ospf_enabled = false
-    rule {
-        name = "test-rule-1"
-    }
-    rule {
-        name  = "test-rule-3"
-        types = ["TIER1_CONNECTED"]
-    }
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
@@ -1107,10 +1068,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 
-  redistribution_config {
-    enabled  = false
-    ospf_enabled = true
-  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
