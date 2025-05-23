@@ -17,7 +17,7 @@ func dataSourceNsxtVpcServiceProfile() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false, false),
+			"context":      getContextSchemaExtended(true, false, false, true),
 		},
 	}
 }

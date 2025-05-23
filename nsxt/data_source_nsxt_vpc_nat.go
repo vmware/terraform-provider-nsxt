@@ -33,7 +33,7 @@ func dataSourceNsxtVpcNat() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false, true),
+			"context":      getContextSchemaExtended(true, false, true, true),
 		},
 	}
 }

@@ -362,7 +362,7 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(isVPC, false, isVPC),
+		"context":      getContextSchemaExtended(isVPC, false, isVPC, isVPC),
 		"domain":       getDomainNameSchema(),
 		"category": {
 			Type:         schema.TypeString,

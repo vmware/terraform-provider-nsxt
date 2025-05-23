@@ -26,7 +26,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false, false),
+			"context":      getContextSchemaExtended(false, false, false, true),
 			"domain":       getDataSourceDomainNameSchema(),
 			"is_default": {
 				Type:        schema.TypeBool,
