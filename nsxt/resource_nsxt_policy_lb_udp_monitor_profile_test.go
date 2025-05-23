@@ -202,6 +202,8 @@ func testAccNsxtPolicyLBUdpMonitorProfileMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_lb_udp_monitor_profile" "test" {
   display_name = "%s"
+  receive = "%s"
+  send = "%s"
 
-}`, accTestPolicyLBUdpMonitorProfileUpdateAttributes["display_name"])
+}`, accTestPolicyLBUdpMonitorProfileUpdateAttributes["display_name"], accTestPolicyLBUdpMonitorProfileUpdateAttributes["receive"], accTestPolicyLBUdpMonitorProfileUpdateAttributes["send"])
 }
