@@ -273,11 +273,11 @@ resource "nsxt_dhcp_server_profile" "PRF" {
 }
 
 resource "nsxt_logical_dhcp_server" "DS" {
-    display_name     = "Acceptance Test"
-    description      = "Acceptance Test"
-    dhcp_profile_id  = "${nsxt_dhcp_server_profile.PRF.id}"
-    dhcp_server_ip   = "1.1.1.10/24"
-    gateway_ip       = "1.1.1.1"
+  display_name    = "Acceptance Test"
+  description     = "Acceptance Test"
+  dhcp_profile_id = "${nsxt_dhcp_server_profile.PRF.id}"
+  dhcp_server_ip  = "1.1.1.10/24"
+  gateway_ip      = "1.1.1.1"
 }`, edgeClusterName)
 }
 
@@ -298,13 +298,13 @@ resource "nsxt_dhcp_server_ip_pool" "test" {
   }
 
   dhcp_generic_option {
-    code = "119"
+    code   = "119"
     values = ["abc"]
   }
 
   ip_range {
-      start = "1.1.1.20"
-      end   = "1.1.1.40"
+    start = "1.1.1.20"
+    end   = "1.1.1.40"
   }
 
   tag {
@@ -321,13 +321,13 @@ resource "nsxt_dhcp_server_ip_pool" "test" {
   logical_dhcp_server_id = "${nsxt_logical_dhcp_server.DS.id}"
 
   ip_range {
-      start = "%s"
-      end   = "%s"
+    start = "%s"
+    end   = "%s"
   }
 
   ip_range {
-      start = "%s"
-      end   = "%s"
+    start = "%s"
+    end   = "%s"
   }
 
 }`, name, start1, end1, start2, end2)

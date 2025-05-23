@@ -293,20 +293,20 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 func testAccNsxtTransitGatewayNatRuleSnatTemplate(name string, translatedNetwork string) string {
 	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
-  parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
-  display_name        = "%s"
-  translated_network  = "%s"
-  action              = "SNAT"
+  parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
+  display_name       = "%s"
+  translated_network = "%s"
+  action             = "SNAT"
 }`, name, translatedNetwork)
 }
 
 func testAccNsxtTransitGatewayNatRuleReflexiveTemplate(name string, sourceIP string, translatedNetwork string) string {
 	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
-  parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
-  display_name        = "%s"
-  source_network      = "%s"
-  translated_network  = "%s"
-  action              = "REFLEXIVE"
+  parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
+  display_name       = "%s"
+  source_network     = "%s"
+  translated_network = "%s"
+  action             = "REFLEXIVE"
 }`, name, sourceIP, translatedNetwork)
 }

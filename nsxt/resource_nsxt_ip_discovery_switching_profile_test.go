@@ -158,7 +158,7 @@ resource "nsxt_ip_discovery_switching_profile" "test" {
 func testAccNSXIpDiscoverySwitchingProfileEmptyTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_discovery_switching_profile" "test" {
-  display_name          = "%s"
+  display_name = "%s"
 }
 `, name)
 }
@@ -166,7 +166,7 @@ resource "nsxt_ip_discovery_switching_profile" "test" {
 func testAccNSXIpDiscoverySwitchingProfileCreateTemplateTrivial(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_discovery_switching_profile" "test" {
-  display_name          = "%s"
+  display_name = "%s"
 }
 `, name)
 }

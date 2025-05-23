@@ -895,8 +895,8 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
-	}
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
   }
 
   tag {
@@ -924,18 +924,18 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.2.1.1", "232.2.2.2"]
-	}
+      ip_addresses = ["111.2.1.1", "232.2.2.2"]
+    }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.3", "222.2.2.4"]
-	}
+      ip_addresses = ["111.1.1.3", "222.2.2.4"]
+    }
   }
 }
 `, siteName, name)
@@ -956,8 +956,8 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
-	}
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
   }
 
   tag {
@@ -981,18 +981,18 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
-	}
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.3", "222.2.2.3"]
-	}
+      ip_addresses = ["111.1.1.3", "222.2.2.3"]
+    }
   }
 
   tag {
@@ -1016,7 +1016,7 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     external_id_expression {
-      member_type = "VirtualMachine"
+      member_type  = "VirtualMachine"
       external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
     }
   }
@@ -1042,18 +1042,18 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     external_id_expression {
-      member_type = "VirtualMachine"
+      member_type  = "VirtualMachine"
       external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
     }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     external_id_expression {
-      member_type = "VirtualNetworkInterface"
+      member_type  = "VirtualNetworkInterface"
       external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
     }
   }
@@ -1086,7 +1086,7 @@ func testNsxtGlobalPolicyGroupPathsTransportZone() string {
 data "nsxt_policy_site" "test" {
   display_name = "%s"
 }
-data "nsxt_policy_transport_zone" "test"{
+data "nsxt_policy_transport_zone" "test" {
   site_path      = data.nsxt_policy_site.test.path
   transport_type = "OVERLAY_STANDARD"
   is_default     = true
@@ -1140,18 +1140,18 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1-111.1.1.10", "222.2.2.0/24"]
-	}
+      ip_addresses = ["111.1.1.1-111.1.1.10", "222.2.2.0/24"]
+    }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.2.4", "222.2.3.4"]
-	}
+      ip_addresses = ["111.1.2.4", "222.2.3.4"]
+    }
   }
 
   tag {
@@ -1325,7 +1325,7 @@ resource "nsxt_policy_group" "test" {
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
@@ -1344,13 +1344,13 @@ resource "nsxt_policy_group" "test" {
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.4", "222.2.2.4"]
-	}
+      ip_addresses = ["111.1.1.4", "222.2.2.4"]
+    }
   }
 
   tag {
@@ -1383,7 +1383,7 @@ resource "nsxt_policy_group" "test" {
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
@@ -1425,7 +1425,7 @@ resource "nsxt_policy_group" "test" {
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
@@ -1492,9 +1492,9 @@ resource "nsxt_policy_group" "test" {
 
   extended_criteria {
     identity_group {
-          distinguished_name             = "test-dn-update"
-          domain_base_distinguished_name = "test-dbdn-update"
-          sid                            = "test-sid"
+      distinguished_name             = "test-dn-update"
+      domain_base_distinguished_name = "test-dbdn-update"
+      sid                            = "test-sid"
     }
   }
 }
@@ -1509,15 +1509,15 @@ resource "nsxt_policy_group" "test" {
 
   extended_criteria {
     identity_group {
-          distinguished_name             = "test-dn-1"
-          domain_base_distinguished_name = "test-dbdn-1"
-          sid                            = "test-sid-1"
+      distinguished_name             = "test-dn-1"
+      domain_base_distinguished_name = "test-dbdn-1"
+      sid                            = "test-sid-1"
     }
 
     identity_group {
-          distinguished_name             = "test-dn-2"
-          domain_base_distinguished_name = "test-dbdn-2"
-          sid                            = "test-sid-2"
+      distinguished_name             = "test-dn-2"
+      domain_base_distinguished_name = "test-dbdn-2"
+      sid                            = "test-sid-2"
     }
   }
 }
@@ -1542,8 +1542,8 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
-	}
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
   }
 
   tag {
@@ -1586,18 +1586,18 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.2.1.1", "232.2.2.2"]
-	}
+      ip_addresses = ["111.2.1.1", "232.2.2.2"]
+    }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.3", "222.2.2.4"]
-	}
+      ip_addresses = ["111.1.1.3", "222.2.2.4"]
+    }
   }
 }
 `, name)

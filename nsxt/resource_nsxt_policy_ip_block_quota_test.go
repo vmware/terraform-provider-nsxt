@@ -227,7 +227,7 @@ resource "nsxt_policy_ip_block_quota" "test" {
     ip_block_paths        = [nsxt_policy_ip_block.%s.path]
     ip_block_visibility   = "%s"
     ip_block_address_type = "%s"
-    
+
     single_ip_cidrs = %s
     other_cidrs {
       mask        = "%s"

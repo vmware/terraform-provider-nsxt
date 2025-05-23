@@ -792,11 +792,11 @@ func testAccNsxtPolicySecurityPolicyWithEthernetRule(name string, direction stri
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
-  display_name    = "%s"
-  description     = "Acceptance Test"
-  category        = "Ethernet"
-  locked          = false
-  stateful        = false
+  display_name = "%s"
+  description  = "Acceptance Test"
+  category     = "Ethernet"
+  locked       = false
+  stateful     = false
 
   tag {
     scope = "color"
@@ -834,10 +834,10 @@ resource "nsxt_policy_security_policy" "test" {
   }
 
   rule {
-    display_name = "%s"
-    direction    = "%s"
-    ip_version   = "%s"
-    log_label    = "%s"
+    display_name  = "%s"
+    direction     = "%s"
+    ip_version    = "%s"
+    log_label     = "%s"
     source_groups = [nsxt_policy_group.test.path]
 
     tag {
@@ -860,18 +860,18 @@ resource "nsxt_policy_group" "group2" {
 }
 
 resource "nsxt_policy_service" "icmp" {
-    display_name = "security-policy-test-icmp"
-    icmp_entry {
-        protocol = "ICMPv4"
-    }
+  display_name = "security-policy-test-icmp"
+  icmp_entry {
+    protocol = "ICMPv4"
+  }
 }
 
 resource "nsxt_policy_service" "tcp778" {
-    display_name = "security-policy-test-tcp"
-    l4_port_set_entry {
-        protocol          = "TCP"
-        destination_ports = [ "778" ]
-    }
+  display_name = "security-policy-test-tcp"
+  l4_port_set_entry {
+    protocol          = "TCP"
+    destination_ports = ["778"]
+  }
 }`
 }
 
@@ -944,78 +944,78 @@ resource "nsxt_policy_security_policy" "test" {
 
 func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, destCidr string, destIPRange string, sourceIP string, sourceCidr string, sourceIPRange string) string {
 	return testAccNsxtPolicySecurityPolicyDeps() + fmt.Sprintf(`
-	resource "nsxt_policy_security_policy" "test" {
-		display_name    = "%s"
-		description     = "Acceptance Test"
-		category        = "Application"
-		sequence_number = 3
-		locked          = false
-		stateful        = true
-		tcp_strict      = false
+resource "nsxt_policy_security_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "Application"
+  sequence_number = 3
+  locked          = false
+  stateful        = true
+  tcp_strict      = false
 
-		tag {
-		  scope = "color"
-		  tag   = "orange"
-		}
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
 
-		rule {
-		  display_name          = "rule1"
-		  source_groups         = [nsxt_policy_group.group1.path]
-		  destination_groups    = ["%s"]
-		  services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
-		}
+  rule {
+    display_name       = "rule1"
+    source_groups      = [nsxt_policy_group.group1.path]
+    destination_groups = ["%s"]
+    services           = [nsxt_policy_service.icmp.path]
+    action             = "ALLOW"
+  }
 
-		rule {
-		  display_name          = "rule2"
-		  source_groups         = [nsxt_policy_group.group1.path]			
-		  destination_groups    = ["%s"]
-	          services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
-		}
+  rule {
+    display_name       = "rule2"
+    source_groups      = [nsxt_policy_group.group1.path]
+    destination_groups = ["%s"]
+    services           = [nsxt_policy_service.icmp.path]
+    action             = "ALLOW"
+  }
 
-		rule {
-		  display_name          = "rule3"
-		  source_groups         = [nsxt_policy_group.group1.path]
-		  destination_groups    = ["%s"]
-		  services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
-		  sequence_number       = 50
-		}
-		rule {
-		  display_name          = "rule4"
-		  source_groups         = ["%s"]
-		  destination_groups    = [nsxt_policy_group.group2.path]
-		  services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
-		}
+  rule {
+    display_name       = "rule3"
+    source_groups      = [nsxt_policy_group.group1.path]
+    destination_groups = ["%s"]
+    services           = [nsxt_policy_service.icmp.path]
+    action             = "ALLOW"
+    sequence_number    = 50
+  }
+  rule {
+    display_name       = "rule4"
+    source_groups      = ["%s"]
+    destination_groups = [nsxt_policy_group.group2.path]
+    services           = [nsxt_policy_service.icmp.path]
+    action             = "ALLOW"
+  }
 
-		rule {
-		  display_name          = "rule5"
-		  source_groups         = ["%s"]			
-		  destination_groups    = [nsxt_policy_group.group2.path]
-		  services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
-		  sequence_number       = 105
-                }
+  rule {
+    display_name       = "rule5"
+    source_groups      = ["%s"]
+    destination_groups = [nsxt_policy_group.group2.path]
+    services           = [nsxt_policy_service.icmp.path]
+    action             = "ALLOW"
+    sequence_number    = 105
+  }
 
-		rule {
-		  display_name          = "rule6"
-		  source_groups         = ["%s"]
-		  destination_groups    = [nsxt_policy_group.group2.path]
-		  service_entries {
-		    icmp_entry {
-			display_name = "test"
-			icmp_type    = "3"
-			protocol     = "ICMPv4"
-		    }
-		    l4_port_set_entry {
-			protocol          = "TCP"
-			destination_ports = ["8000-8080"]
-		    }
-		  }
-		  action                = "ALLOW"
-		}
+  rule {
+    display_name       = "rule6"
+    source_groups      = ["%s"]
+    destination_groups = [nsxt_policy_group.group2.path]
+    service_entries {
+      icmp_entry {
+        display_name = "test"
+        icmp_type    = "3"
+        protocol     = "ICMPv4"
+      }
+      l4_port_set_entry {
+        protocol          = "TCP"
+        destination_ports = ["8000-8080"]
+      }
+    }
+    action = "ALLOW"
+  }
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
 

@@ -291,20 +291,20 @@ resource "nsxt_vpc_nat_rule" "test" {
 func testAccNsxtVpcNatRuleSnatTemplate(name string) string {
 	return testAccNsxtVpcNatRulePrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_nat_rule" "test" {
-  parent_path         = data.nsxt_vpc_nat.test.path
-  display_name        = "%s"
-  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
-  action              = "SNAT"
+  parent_path        = data.nsxt_vpc_nat.test.path
+  display_name       = "%s"
+  translated_network = nsxt_vpc_ip_address_allocation.test.allocation_ips
+  action             = "SNAT"
 }`, name)
 }
 
 func testAccNsxtVpcNatRuleReflexiveTemplate(name string, sourceIP string) string {
 	return testAccNsxtVpcNatRulePrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_nat_rule" "test" {
-  parent_path         = data.nsxt_vpc_nat.test.path
-  display_name        = "%s"
-  source_network      = "%s"
-  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
-  action              = "REFLEXIVE"
+  parent_path        = data.nsxt_vpc_nat.test.path
+  display_name       = "%s"
+  source_network     = "%s"
+  translated_network = nsxt_vpc_ip_address_allocation.test.allocation_ips
+  action             = "REFLEXIVE"
 }`, name, sourceIP)
 }

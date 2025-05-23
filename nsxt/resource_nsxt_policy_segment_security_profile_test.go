@@ -249,17 +249,17 @@ func testAccNsxtPolicySegmentSecurityProfileTemplate(createFlow, withContext boo
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
-  bpdu_filter_allow = ["%s"]
-  bpdu_filter_enable = %s
-  dhcp_client_block_enabled = %s
+  display_name                 = "%s"
+  description                  = "%s"
+  bpdu_filter_allow            = ["%s"]
+  bpdu_filter_enable           = %s
+  dhcp_client_block_enabled    = %s
   dhcp_client_block_v6_enabled = %s
-  dhcp_server_block_enabled = %s
+  dhcp_server_block_enabled    = %s
   dhcp_server_block_v6_enabled = %s
   non_ip_traffic_block_enabled = %s
-  ra_guard_enabled = %s
-  rate_limits_enabled = %s
+  ra_guard_enabled             = %s
+  rate_limits_enabled          = %s
 
   rate_limit {
     rx_broadcast = %s

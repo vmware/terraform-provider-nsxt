@@ -197,9 +197,9 @@ func testAccNsxtVpcStaticRoutesMinimalistic() string {
 resource "nsxt_vpc_static_route" "test" {
 %s
   display_name = "%s"
-  network = "%s"
+  network      = "%s"
   next_hop {
-    ip_address     = "%s"
+    ip_address = "%s"
   }
 }`, testAccNsxtPolicyMultitenancyContext(), accTestStaticRoutesUpdateAttributes["display_name"], accTestStaticRoutesUpdateAttributes["network"], accTestStaticRoutesUpdateAttributes["ip_address"])
 }

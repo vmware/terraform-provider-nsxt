@@ -180,25 +180,25 @@ func testAccNsxtPolicyLBClientSslProfileTemplate(createFlow bool) string {
 		attrMap = accTestPolicyLBClientSslProfileUpdateAttributes
 	}
 	return fmt.Sprintf(`
-   resource "nsxt_policy_lb_client_ssl_profile" "test" {
-	 display_name = "%s"
-	 description  = "%s"
-	 cipher_group_label = "%s"
-	 ciphers = ["%s"]
-	 prefer_server_ciphers = %s
-	 protocols = ["%s"]
-	 session_cache_enabled = %s
-	 session_cache_timeout = %s
-	 tag {
-	   scope = "scope1"
-	   tag   = "tag1"
-	 }
-   }`, attrMap["display_name"], attrMap["description"], attrMap["cipher_group_label"], attrMap["ciphers"], attrMap["prefer_server_ciphers"], attrMap["protocols"], attrMap["session_cache_enabled"], attrMap["session_cache_timeout"])
+resource "nsxt_policy_lb_client_ssl_profile" "test" {
+  display_name          = "%s"
+  description           = "%s"
+  cipher_group_label    = "%s"
+  ciphers               = ["%s"]
+  prefer_server_ciphers = %s
+  protocols             = ["%s"]
+  session_cache_enabled = %s
+  session_cache_timeout = %s
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"], attrMap["cipher_group_label"], attrMap["ciphers"], attrMap["prefer_server_ciphers"], attrMap["protocols"], attrMap["session_cache_enabled"], attrMap["session_cache_timeout"])
 }
 
 func testAccNsxtPolicyLBClientSslProfileMinimalistic() string {
 	return fmt.Sprintf(`
-   resource "nsxt_policy_lb_client_ssl_profile" "test" {
-	 display_name = "%s"
-   }`, accTestPolicyLBClientSslProfileUpdateAttributes["display_name"])
+resource "nsxt_policy_lb_client_ssl_profile" "test" {
+  display_name = "%s"
+}`, accTestPolicyLBClientSslProfileUpdateAttributes["display_name"])
 }

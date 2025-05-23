@@ -222,26 +222,26 @@ resource "nsxt_policy_lb_https_monitor_profile" "test" {
   request_body = "%s"
 
 
-  request_method = "%s"
-  request_url = "%s"
-  request_version = "%s"
-  response_body = "%s"
+  request_method        = "%s"
+  request_url           = "%s"
+  request_version       = "%s"
+  response_body         = "%s"
   response_status_codes = [%s]
 
   request_header {
-    name = "%s"
+    name  = "%s"
     value = "%s"
   }
 
-  fall_count = %s
-  interval = %s
+  fall_count   = %s
+  interval     = %s
   monitor_port = %s
-  rise_count = %s
-  timeout = %s
+  rise_count   = %s
+  timeout      = %s
 
   server_ssl {
     certificate_chain_depth = %s
-    server_auth = "%s"
+    server_auth             = "%s"
   }
 
   tag {

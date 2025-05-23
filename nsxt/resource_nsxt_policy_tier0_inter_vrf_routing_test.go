@@ -113,18 +113,18 @@ func testAccNsxtPolicyTier0InterVRFRoutingTemplate(name, subnets string) string 
 resource "nsxt_policy_tier0_inter_vrf_routing" "test" {
   display_name = "%s"
   gateway_path = nsxt_policy_tier0_gateway.parent.path
-  target_path = nsxt_policy_tier0_gateway.test.path
+  target_path  = nsxt_policy_tier0_gateway.test.path
 
   bgp_route_leaking {
     address_family = "IPV4"
   }
   static_route_advertisement {
     advertisement_rule {
-      name = "test"
-      action = "PERMIT"
-      prefix_operator = "GE"
+      name                      = "test"
+      action                    = "PERMIT"
+      prefix_operator           = "GE"
       route_advertisement_types = ["TIER0_CONNECTED", "TIER0_NAT"]
-      subnets = %s
+      subnets                   = %s
     }
     in_filter_prefix_list = [
       join("/", [nsxt_policy_tier0_gateway.parent.path, "prefix-lists/IPSEC_LOCAL_IP"]),

@@ -196,16 +196,16 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingTemplate(createFlo
 	return testAccNsxtPolicyDistributedFloodProtectionProfileBindingDeps(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_distributed_flood_protection_profile_binding" "%s" {
 %s
- display_name = "%s"
- description  = "%s"
- profile_path    = nsxt_policy_distributed_flood_protection_profile.%s.path
- group_path      = nsxt_policy_group.test.path
- sequence_number = %s
+  display_name    = "%s"
+  description     = "%s"
+  profile_path    = nsxt_policy_distributed_flood_protection_profile.%s.path
+  group_path      = nsxt_policy_group.test.path
+  sequence_number = %s
 
- tag {
-   scope = "scope1"
-   tag   = "tag1"
- }
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }
 `, resourceName, context, name, attrMap["description"], attrMap["profile_res_name"], attrMap["seq_num"])
 }
@@ -233,26 +233,26 @@ resource "nsxt_policy_group" "test" {
 
 resource "nsxt_policy_distributed_flood_protection_profile" "test1" {
 %s
-  display_name = "dfpp1"
-  description  = "Acceptance Test"
-  icmp_active_flow_limit = 3
-  other_active_conn_limit = 3
+  display_name             = "dfpp1"
+  description              = "Acceptance Test"
+  icmp_active_flow_limit   = 3
+  other_active_conn_limit  = 3
   tcp_half_open_conn_limit = 3
-  udp_active_flow_limit = 3
-  enable_rst_spoofing = false
-  enable_syncache = false
+  udp_active_flow_limit    = 3
+  enable_rst_spoofing      = false
+  enable_syncache          = false
 }
 
 resource "nsxt_policy_distributed_flood_protection_profile" "test2" {
 %s
-  display_name = "dfpp2"
-  description  = "Acceptance Test"
-  icmp_active_flow_limit = 4
-  other_active_conn_limit = 4
+  display_name             = "dfpp2"
+  description              = "Acceptance Test"
+  icmp_active_flow_limit   = 4
+  other_active_conn_limit  = 4
   tcp_half_open_conn_limit = 4
-  udp_active_flow_limit = 4
-  enable_rst_spoofing = false
-  enable_syncache = false
+  udp_active_flow_limit    = 4
+  enable_rst_spoofing      = false
+  enable_syncache          = false
 }
 `, context, context, context)
 }

@@ -165,7 +165,7 @@ resource "nsxt_switch_security_switching_profile" "test" {
   bpdu_filter_whitelist = ["01:80:c2:00:00:01"]
 
   rate_limits {
-    enabled = true
+    enabled      = true
     rx_broadcast = %s
     rx_multicast = %s
     tx_broadcast = %s
@@ -182,7 +182,7 @@ resource "nsxt_switch_security_switching_profile" "test" {
 func testAccNSXSwitchSecuritySwitchingProfileEmptyTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_switch_security_switching_profile" "test" {
-  display_name          = "%s"
+  display_name = "%s"
 }
 `, name)
 }

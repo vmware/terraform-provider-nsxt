@@ -189,12 +189,12 @@ func testAccNodeUserCreate(username string) string {
 	attrMap := accTestNodeUserCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_node_user" "test" {
-  active = %s
-  full_name = "%s"
-  password = "%s"
-  username = "%s"
+  active                    = %s
+  full_name                 = "%s"
+  password                  = "%s"
+  username                  = "%s"
   password_change_frequency = %s
-  password_change_warning = %s
+  password_change_warning   = %s
 }`, attrMap["active"], attrMap["full_name"], attrMap["password"], username, attrMap["password_change_frequency"], attrMap["password_change_warning"])
 }
 
@@ -202,11 +202,11 @@ func testAccNodeUserUpdate(username, password string) string {
 	attrMap := accTestNodeUserUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_node_user" "test" {
-  active = %s
-  full_name = "%s"
-  password = "%s"
-  username = "%s"
+  active                    = %s
+  full_name                 = "%s"
+  password                  = "%s"
+  username                  = "%s"
   password_change_frequency = %s
-  password_change_warning = %s
+  password_change_warning   = %s
 }`, attrMap["active"], attrMap["full_name"], password, username, attrMap["password_change_frequency"], attrMap["password_change_warning"])
 }

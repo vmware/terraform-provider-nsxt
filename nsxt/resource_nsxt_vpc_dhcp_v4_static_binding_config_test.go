@@ -206,7 +206,7 @@ resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "test-subnet"
   ip_addresses = ["192.168.240.0/26"]
-  access_mode = "Isolated"
+  access_mode  = "Isolated"
   dhcp_config {
     mode = "DHCP_SERVER"
     dhcp_server_additional_config {
@@ -226,28 +226,28 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool) stri
 	}
 	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
-  parent_path = nsxt_vpc_subnet.test.path
-  display_name = "%s"
-  description  = "%s"
+  parent_path     = nsxt_vpc_subnet.test.path
+  display_name    = "%s"
+  description     = "%s"
   gateway_address = "%s"
-  host_name = "%s"
-  mac_address = "%s"
-  lease_time = %s
-  ip_address = "%s"
+  host_name       = "%s"
+  mac_address     = "%s"
+  lease_time      = %s
+  ip_address      = "%s"
 
   options {
     option121 {
       static_route {
         next_hop = "%s"
-        network = "%s"
+        network  = "%s"
       }
       static_route {
         next_hop = "%s"
-        network = "%s"
+        network  = "%s"
       }
     }
     other {
-      code = %s
+      code   = %s
       values = ["%s"]
     }
   }
@@ -265,7 +265,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic() string {
 	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   display_name = "%s"
-  parent_path = nsxt_vpc_subnet.test.path
+  parent_path  = nsxt_vpc_subnet.test.path
   ip_address   = "%s"
   mac_address  = "%s"
 }`, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"], attrMap["ip_address"], attrMap["mac_address"])

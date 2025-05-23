@@ -277,16 +277,16 @@ func testAccNsxtPolicyStaticRouteCheckDestroy(state *terraform.State, displayNam
 func testAccNsxtPolicyStaticRouteTier0CreateTemplate(name string, network string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "t0test" {
-  display_name              = "terraform-t0-gw"
-  description               = "Acceptance Test"
+  display_name = "terraform-t0-gw"
+  description  = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  gateway_path        = "${nsxt_policy_tier0_gateway.t0test.path}"
-  network             = "%s"
+  display_name = "%s"
+  description  = "Acceptance Test"
+  gateway_path = "${nsxt_policy_tier0_gateway.t0test.path}"
+  network      = "%s"
   next_hop {
     ip_address = "9.10.10.1"
   }
@@ -306,16 +306,16 @@ resource "nsxt_policy_static_route" "test" {
 func testAccNsxtPolicyStaticRouteMultipleHopsTier0CreateTemplate(name string, network string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "t0test" {
-  display_name              = "terraform-t0-gw"
-  description               = "Acceptance Test"
+  display_name = "terraform-t0-gw"
+  description  = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test"
+  display_name = "%s"
+  description  = "Acceptance Test"
   gateway_path = "${nsxt_policy_tier0_gateway.t0test.path}"
-  network             = "%s"
+  network      = "%s"
   next_hop {
     ip_address = "9.10.10.1"
   }
@@ -346,17 +346,17 @@ func testAccNsxtPolicyStaticRouteTier1CreateTemplate(name string, network string
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
 %s
-  display_name              = "%s"
-  description               = "Acceptance Test"
+  display_name = "%s"
+  description  = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  gateway_path        = "${nsxt_policy_tier1_gateway.t1test.path}"
-  network             = "%s"
+  display_name = "%s"
+  description  = "Acceptance Test"
+  gateway_path = "${nsxt_policy_tier1_gateway.t1test.path}"
+  network      = "%s"
   next_hop {
     ip_address = "9.10.10.1"
   }
@@ -382,17 +382,17 @@ func testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(name string, ne
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
 %s
-  display_name              = "%s"
-  description               = "Acceptance Test"
+  display_name = "%s"
+  description  = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  gateway_path        = "${nsxt_policy_tier1_gateway.t1test.path}"
-  network             = "%s"
+  display_name = "%s"
+  description  = "Acceptance Test"
+  gateway_path = "${nsxt_policy_tier1_gateway.t1test.path}"
+  network      = "%s"
   next_hop {
     ip_address = "9.10.10.1"
   }

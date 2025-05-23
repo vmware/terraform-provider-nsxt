@@ -58,23 +58,23 @@ func TestAccDataSourceNsxtPolicyL2VpnService_withGateway(t *testing.T) {
 
 func testAccNsxtPolicyL2VpnServiceReadTemplate(name string) string {
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
-   resource "nsxt_policy_l2_vpn_service" "test" {
-	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
-   }`, name) + `
-   data "nsxt_policy_l2_vpn_service" "test" {
-	 display_name = nsxt_policy_l2_vpn_service.test.display_name
-   }`
+resource "nsxt_policy_l2_vpn_service" "test" {
+  display_name        = "%s"
+  locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
+}`, name) + `
+data "nsxt_policy_l2_vpn_service" "test" {
+  display_name = nsxt_policy_l2_vpn_service.test.display_name
+}`
 }
 
 func testAccNsxtPolicyL2VpnServiceReadTemplateWithGateway(name string) string {
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
-   resource "nsxt_policy_l2_vpn_service" "test" {
-	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
-   }`, name) + `
-   data "nsxt_policy_l2_vpn_service" "test" {
-	 display_name = nsxt_policy_l2_vpn_service.test.display_name
-	 gateway_path = nsxt_policy_tier0_gateway.test.path
-   }`
+resource "nsxt_policy_l2_vpn_service" "test" {
+  display_name        = "%s"
+  locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
+}`, name) + `
+data "nsxt_policy_l2_vpn_service" "test" {
+  display_name = nsxt_policy_l2_vpn_service.test.display_name
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+}`
 }

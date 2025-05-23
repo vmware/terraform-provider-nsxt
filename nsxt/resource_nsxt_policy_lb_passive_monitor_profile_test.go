@@ -163,8 +163,8 @@ func testAccNsxtPolicyLBPassiveMonitorProfileTemplate(createFlow bool) string {
 resource "nsxt_policy_lb_passive_monitor_profile" "test" {
   display_name = "%s"
   description  = "%s"
-  max_fails = %s
-  timeout = %s
+  max_fails    = %s
+  timeout      = %s
 
   tag {
     scope = "scope1"

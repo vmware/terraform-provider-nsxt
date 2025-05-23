@@ -209,7 +209,7 @@ func testAccNSXPolicyRedistributionConfigImporterGetID(s *terraform.State) (stri
 func testAccNsxtPolicyGatewayRedistributionPrerequisites() string {
 	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }`, testAccNsxtPolicyGatewayRedistributionHelperName, testAccNsxtPolicyTier0EdgeClusterTemplate())
 }
@@ -231,9 +231,9 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
   bgp_enabled  = false
   ospf_enabled = true
   rule {
-      name  = "test-rule-1"
-      types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
-      ospf  = true
+    name  = "test-rule-1"
+    types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+    ospf  = true
   }
 }`, getAccTestSitePathConfig())
 }
@@ -247,14 +247,14 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
   bgp_enabled  = true
   ospf_enabled = false
   rule {
-      name  = "test-rule-1"
-      types = ["TIER1_CONNECTED"]
-      bgp   = false
-      ospf  = true
+    name  = "test-rule-1"
+    types = ["TIER1_CONNECTED"]
+    bgp   = false
+    ospf  = true
   }
   rule {
-      name  = "test-rule-2"
-      types = ["TIER1_LB_VIP"]
+    name  = "test-rule-2"
+    types = ["TIER1_LB_VIP"]
   }
 }`, getAccTestSitePathConfig())
 }
@@ -279,9 +279,9 @@ resource "nsxt_policy_gateway_redistribution_config" "prod" {
   bgp_enabled  = false
   ospf_enabled = true
   rule {
-      name  = "test-rule-1"
-      types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
-      ospf  = true
+    name  = "test-rule-1"
+    types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+    ospf  = true
   }
 }`, getAccTestSitePathConfig())
 }

@@ -215,9 +215,9 @@ data "nsxt_policy_site" "test" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-  path = data.%s.policy_resource.path
+  path        = data.%s.policy_resource.path
   entity_type = "%s"
-  site_path = data.nsxt_policy_site.test.path
+  site_path   = data.nsxt_policy_site.test.path
 }`, resourceDataType, resourceName, site, resourceDataType, entityType)
 }
 
@@ -271,7 +271,7 @@ data "%s" "policy_resource" {
 
 data "nsxt_policy_realization_info" "realization_info" {
 %s
-  path = data.%s.policy_resource.path
+  path        = data.%s.policy_resource.path
   entity_type = "%s"
 }`, resourceDataType, context, resourceName, context, resourceDataType, entityType)
 }
@@ -289,7 +289,7 @@ resource "%s" "policy_resource" {
 
 data "nsxt_policy_realization_info" "realization_info" {
 %s
-  path = %s.policy_resource.path
+  path        = %s.policy_resource.path
   entity_type = "%s"
 }`, resourceType, context, resourceName, context, resourceType, entityType)
 }

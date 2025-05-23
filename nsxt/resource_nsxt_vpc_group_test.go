@@ -123,17 +123,17 @@ resource "nsxt_vpc_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
     }
   }
 
   conjunction {
-	operator = "OR"
+    operator = "OR"
   }
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["122.1.1.1"]
+      ip_addresses = ["122.1.1.1"]
     }
   }
 
@@ -167,7 +167,7 @@ resource "nsxt_vpc_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["122.1.1.1"]
+      ip_addresses = ["122.1.1.1"]
     }
   }
 }

@@ -156,9 +156,9 @@ func testAccNsxtPolicyEvpnTenantCheckDestroy(state *terraform.State, displayName
 
 func testAccNsxtPolicyEvpnTenantPrerequisites() string {
 	return testAccNsxtPolicyVniPoolConfigReadTemplate() + fmt.Sprintf(`
-    data "nsxt_policy_transport_zone" "test" {
-      display_name = "%s"
-    }
+data "nsxt_policy_transport_zone" "test" {
+  display_name = "%s"
+}
     `, getOverlayTransportZoneName())
 }
 

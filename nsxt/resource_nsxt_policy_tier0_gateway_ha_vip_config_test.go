@@ -221,12 +221,13 @@ func testAccNsxtPolicyTier0HAVipConfigSiteTemplate() string {
 func testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name string, enabled string, subnet1 string, subnet2 string, vipSubnet string) string {
 	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_vlan_segment" "test1" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   display_name        = "interface_test1"
   vlan_ids            = [11]
   subnet {
-      cidr = "10.2.2.2/24"
+    cidr = "10.2.2.2/24"
   }
 }
 
@@ -235,7 +236,7 @@ resource "nsxt_policy_vlan_segment" "test2" {
   display_name        = "interface_test2"
   vlan_ids            = [11]
   subnet {
-      cidr = "10.2.2.2/24"
+    cidr = "10.2.2.2/24"
   }
 }
 
@@ -250,8 +251,8 @@ data "nsxt_policy_edge_node" "EN1" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
+  display_name = "%s"
+  ha_mode      = "ACTIVE_STANDBY"
   %s
 }
 
@@ -277,15 +278,15 @@ resource "nsxt_policy_tier0_gateway_interface" "test2" {
   subnets        = ["%s"]
   urpf_mode      = "STRICT"
   %s
-  depends_on     = ["nsxt_policy_tier0_gateway_interface.test1"]
+  depends_on = ["nsxt_policy_tier0_gateway_interface.test1"]
 }
 
 resource "nsxt_policy_tier0_gateway_ha_vip_config" "test" {
-	config {
-		enabled                  = %s
-		external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
-		vip_subnets              = ["%s"]
-	}
+  config {
+    enabled                  = %s
+    external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
+    vip_subnets              = ["%s"]
+  }
 }`, tier0Name, testAccNsxtPolicyLocaleServiceECTemplate(),
 		subnet1, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(),
 		subnet2, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(), enabled, vipSubnet)

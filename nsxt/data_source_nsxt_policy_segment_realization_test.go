@@ -80,7 +80,7 @@ data "nsxt_policy_transport_zone" "test" {
 %s
 resource "%s" "test" {
 %s
-  display_name        = "terra-test"
+  display_name = "terra-test"
   %s
   %s
 }

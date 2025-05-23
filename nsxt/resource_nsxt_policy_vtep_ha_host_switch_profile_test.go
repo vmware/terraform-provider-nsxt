@@ -182,13 +182,13 @@ func testAccNsxtVtepHAHostSwitchProfileTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vtep_ha_host_switch_profile" "test" {
-  display_name = "%s"
-  description  = "%s"
-  auto_recovery = "%s"
+  display_name               = "%s"
+  description                = "%s"
+  auto_recovery              = "%s"
   auto_recovery_initial_wait = "%s"
-  auto_recovery_max_backoff = "%s"
-  enabled = "%s"
-  failover_timeout = "%s"
+  auto_recovery_max_backoff  = "%s"
+  enabled                    = "%s"
+  failover_timeout           = "%s"
 
   tag {
     scope = "scope1"
@@ -197,7 +197,7 @@ resource "nsxt_policy_vtep_ha_host_switch_profile" "test" {
 }
 data "nsxt_policy_vtep_ha_host_switch_profile" "test" {
   display_name = "%s"
-  depends_on = [nsxt_policy_vtep_ha_host_switch_profile.test]
+  depends_on   = [nsxt_policy_vtep_ha_host_switch_profile.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["auto_recovery"], attrMap["auto_recovery_initial_wait"], attrMap["auto_recovery_max_backoff"], attrMap["enabled"], attrMap["failover_timeout"], attrMap["display_name"])
 }
 
