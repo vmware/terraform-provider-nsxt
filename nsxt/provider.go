@@ -547,10 +547,66 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_cluster":                   resourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_ip_block_quota":                 resourceNsxtPolicyIpBlockQuota(),
 			"nsxt_policy_constraint":                     resourceNsxtPolicyConstraint(),
+			"nsxt_test":                                  resourceNsxtTest(),
 		},
 
 		ConfigureFunc: providerConfigure,
 	}
+}
+
+func resourceNsxtTest() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceNsxtDummyCreate,
+		Read:   resourceNsxtDummy,
+		Update: resourceNsxtDummy,
+		Delete: resourceNsxtDummy,
+		Schema: map[string]*schema.Schema{
+			"test_computed": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"test_string": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"test_list": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"test_struct_list": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"test_string": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"test_list": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func resourceNsxtDummyCreate(d *schema.ResourceData, m interface{}) error {
+	d.SetId(newUUID())
+	d.Set("test_computed", "some stuff")
+	return nil
+}
+
+func resourceNsxtDummy(d *schema.ResourceData, m interface{}) error {
+	return nil
 }
 
 func isVMCCredentialSet(d *schema.ResourceData) bool {
