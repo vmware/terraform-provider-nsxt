@@ -501,6 +501,54 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0Gateway_withMultiVRF(t *testing.T) {
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+	testParentResourceName := "nsxt_policy_tier0_gateway.parent"
+	testBgpResourceName := "nsxt_policy_bgp_config.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0WithMultiVRFTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "vrf_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vrf_config.0.gateway_path"),
+					resource.TestCheckResourceAttr(testParentResourceName, "multi_vrf_inter_sr", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testBgpResourceName, "inter_sr_ibgp", "true"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0WithMultiVRFTemplate(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "vrf_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vrf_config.0.gateway_path"),
+					resource.TestCheckResourceAttr(testParentResourceName, "multi_vrf_inter_sr", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", ""),
+					resource.TestCheckResourceAttr(testBgpResourceName, "inter_sr_ibgp", "false"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0WithVRFTearDown(),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0Gateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
@@ -944,6 +992,37 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
 }`, name, routeTargets, rdAdminAddress, name, bgpConfig)
+}
+
+func testAccNsxtPolicyTier0WithMultiVRFTemplate(name string, boolFlag bool) string {
+	boolFlagString := "false"
+	if boolFlag {
+		boolFlagString = "true"
+	}
+
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "parent" {
+  display_name       = "parent-%s"
+  ha_mode            = "ACTIVE_ACTIVE"
+  edge_cluster_path  = data.nsxt_policy_edge_cluster.EC.path
+  multi_vrf_inter_sr = true
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  edge_cluster_path  = data.nsxt_policy_edge_cluster.EC.path
+  
+  vrf_config {
+    gateway_path = nsxt_policy_tier0_gateway.parent.path
+
+  }
+}
+resource "nsxt_policy_bgp_config" "test" {
+  gateway_path  = nsxt_policy_tier0_gateway.test.path
+  inter_sr_ibgp = %s
+  enabled       = true
+  ecmp          = true
+}`, name, name, boolFlagString)
 }
 
 func testAccNsxtPolicyTier0WithVRFTearDown() string {
