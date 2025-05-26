@@ -64,7 +64,7 @@ The following arguments are supported:
 * `display_name` - (Required) The display name for the IP Block.
 * `description` - (Optional) Description of the resource.
 * `quota` - (Required) Quota specification
-  * `ip_block_paths` - (Required) List of IP blocks that this quota applies to.
+  * `ip_block_paths` - (Optional) List of IP blocks that this quota applies to.
   * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be speficied within the same quota.
   * `ip_block_visibility` - (Required) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
   * `single_ip_cidrs` - (Optional) Quota for single IP CIDRs allowed. Default is -1 (unlimited). 
