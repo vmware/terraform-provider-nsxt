@@ -40,7 +40,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 			"local_address": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"certificate_path": getPolicyPathSchema(false, false, "Policy path referencing site certificate"),
 			"local_id": {

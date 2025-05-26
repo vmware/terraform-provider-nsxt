@@ -26,6 +26,20 @@ var accTestPolicyIPSecVpnLocalEndpointUpdateAttributes = map[string]string{
 	"local_id":      "test-update",
 }
 
+var accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes = map[string]string{
+	"display_name":  getAccTestResourceName(),
+	"description":   "terraform created",
+	"local_address": "2001:db8:85a3::8a2e:370:7314",
+	"local_id":      "test-create",
+}
+
+var accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes = map[string]string{
+	"display_name":  getAccTestResourceName(),
+	"description":   "terraform updated",
+	"local_address": "2001:db8:85a3::8a2e:370:7344",
+	"local_id":      "test-update",
+}
+
 var testAccPolicyVPNLocalEndpointResourceName = "nsxt_policy_ipsec_vpn_local_endpoint.test"
 
 func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_basic(t *testing.T) {
@@ -220,4 +234,112 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic() string {
 	 display_name  = "%s"
 	 local_address = "%s"
    }`, accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnLocalEndpointIPV6_basic(t *testing.T) {
+	testResourceName := testAccPolicyVPNLocalEndpointResourceName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Template(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "local_address", accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["local_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "local_id", accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["local_id"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Template(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "local_address", accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["local_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "local_id", accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["local_id"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Minimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Prerequisite() string {
+	return fmt.Sprintf(`
+   data "nsxt_policy_edge_cluster" "test" {
+	 display_name = "%s"
+   }
+   resource "nsxt_policy_tier0_gateway" "test" {
+	 display_name      = "%s"
+	 ha_mode           = "ACTIVE_STANDBY"
+	 edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+   }
+   data "nsxt_policy_gateway_locale_service" "test" {
+	 gateway_path = nsxt_policy_tier0_gateway.test.path
+	 display_name = "default"
+   }
+   resource "nsxt_policy_ipsec_vpn_service" "test" {
+	 display_name        = "%s"
+	 gateway_path = nsxt_policy_tier0_gateway.test.path
+   }`, getEdgeClusterName(), accTestPolicyIPSecVpnGatewayTestName, accTestPolicyIPSecVpnServiceTestName)
+}
+
+func testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Template(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyIPSecVpnLocalEndpointIPv6CreateAttributes
+	} else {
+		attrMap = accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes
+	}
+	return testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Prerequisite() + fmt.Sprintf(`
+   resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+	 service_path = nsxt_policy_ipsec_vpn_service.test.path
+	 display_name = "%s"
+	 description  = "%s"
+	 local_address = "%s"
+	 local_id = "%s"
+	 tag {
+	   scope = "scope1"
+	   tag   = "tag1"
+	 }
+   }`, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
+}
+
+func testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Minimalistic() string {
+	return testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Prerequisite() + fmt.Sprintf(`
+   resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+	 service_path  = nsxt_policy_ipsec_vpn_service.test.path
+	 display_name  = "%s"
+	 local_address = "%s"
+   }`, accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
 }
