@@ -173,6 +173,9 @@ resource "nsxt_policy_project" "test" {
   display_name      = "%s"
   tier0_gateway_paths = [nsxt_policy_tier0_gateway.test.path]
   tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
 }
 
 data "nsxt_policy_transit_gateway" "test" {
