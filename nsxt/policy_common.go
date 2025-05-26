@@ -362,7 +362,7 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(isVPC, false, isVPC),
+		"context":      getContextSchemaExtended(isVPC, false, isVPC, isVPC),
 		"domain":       getDomainNameSchema(),
 		"category": {
 			Type:         schema.TypeString,
@@ -753,6 +753,33 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 			},
 		},
 	}
+}
+
+func getAllocationRangeListFromSchema(allocRanges []interface{}) []model.IpPoolRange {
+	var poolRanges []model.IpPoolRange
+	for _, allocRange := range allocRanges {
+		allocMap := allocRange.(map[string]interface{})
+		start := allocMap["start"].(string)
+		end := allocMap["end"].(string)
+		ipRange := model.IpPoolRange{
+			Start: &start,
+			End:   &end,
+		}
+		poolRanges = append(poolRanges, ipRange)
+	}
+	return poolRanges
+}
+
+func setAllocationRangeListInSchema(allocRanges []model.IpPoolRange) []map[string]interface{} {
+	var allocations []map[string]interface{}
+	for _, allocRange := range allocRanges {
+		allocMap := make(map[string]interface{})
+		allocMap["start"] = allocRange.Start
+		allocMap["end"] = allocRange.End
+		allocations = append(allocations, allocMap)
+	}
+
+	return allocations
 }
 
 func localManagerOnlyError() error {

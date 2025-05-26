@@ -1,0 +1,26 @@
+---
+name: golangci-lint
+description: Runs golangci-lint with configurable timeout and arguments.
+inputs:
+  timeout:
+    description: Timeout
+    required: false
+    default: 10m
+  args:
+    description: Arguments
+    required: false
+    default: --issues-exit-code=1
+  only-new-issues:
+    description: Only New Issues
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Run Linters
+      uses: golangci/golangci-lint-action@1481404843c368bc19ca9406f87d6e0fc97bdcfd # v7.0.0
+      with:
+        version: latest
+        args: ${{ inputs.args }} --timeout=${{ inputs.timeout }}
+        only-new-issues: ${{ inputs.only-new-issues }}

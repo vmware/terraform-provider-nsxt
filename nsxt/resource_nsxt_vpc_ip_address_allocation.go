@@ -37,7 +37,7 @@ var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(true, false, true)),
+	"context":      metadata.GetExtendedSchema(getContextSchemaExtended(true, false, true, true)),
 	"allocation_ips": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,

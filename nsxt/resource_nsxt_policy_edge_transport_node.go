@@ -1704,7 +1704,7 @@ func resourceNsxtPolicyEdgeTransportNodeDelete(d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] Deleting PolicyEdgeTransportNode with ID %s", id)
-	err = client.Delete(siteID, epID, id)
+	err = client.Delete(siteID, epID, id, nil)
 	if err != nil {
 		return handleDeleteError("EdgeTransportNode", id, err)
 	}

@@ -1,0 +1,32 @@
+---
+name: Setup Go
+description: Sets up Go environment with optional dependency installation and caching.
+inputs:
+  go-version-file:
+    description: Path to go.mod
+    required: false
+    default: go.mod
+  cache:
+    description: Cache Go Modules
+    required: false
+    default: 'true'
+  install-deps:
+    description: Install Go Dependencies
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Go
+      id: go-setup
+      uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      with:
+        go-version-file: ${{ inputs.go-version-file }}
+        cache: ${{ inputs.cache }}
+    - name: Install Dependencies
+      if: inputs.install-deps == 'true'
+      shell: bash
+      run: |
+        go get .
+        go mod tidy

@@ -46,7 +46,6 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
-
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \
@@ -56,21 +55,21 @@ test-compile:
 	go test -c $(TEST) $(TESTARGS)
 
 website-lint:
-	@echo "==> Checking website against linters..."
+	@echo "==> Checking HCL formatting for docs..."
 	@terrafmt diff ./docs --check --pattern '*.md' --quiet || (echo; \
-	    echo "Unexpected differences in website HCL formatting."; \
+	    echo "Unexpected differences in HCL formatting for docs."; \
 	    echo "To see the full differences, run: terrafmt diff ./docs --pattern '*.md'"; \
-	    echo "To automatically fix the formatting, run 'make website-lint-fix' and commit the changes."; \
+	    echo "To automatically fix the formatting, run 'make docs-lint-fix' and commit the changes."; \
 	    exit 1)
 
-website-lint-fix:
-	@echo "==> Applying automatic website linter fixes..."
+docs-lint-fix:
+	@echo "==> Applying HCL formatting for docs..."
 	@terrafmt fmt ./docs --pattern '*.md'
 
-website-list-category:
+docs-list-category:
 	@find . -name *.md | xargs grep subcategory | awk  -F '"' '{print $$2}' | sort | uniq
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website-lint website-lint-fix tools
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile docs-lint docs-lint-fix tools
 
 api-wrapper:
 	@echo "==> Generating API wrappers..."
