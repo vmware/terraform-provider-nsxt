@@ -97,8 +97,7 @@ var policyEdgeHighAvailabilityProfileSchema = map[string]*metadata.ExtendedSchem
 					"standby_relocation_threshold": {
 						Schema: schema.Schema{
 							Type:     schema.TypeInt,
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "int",
