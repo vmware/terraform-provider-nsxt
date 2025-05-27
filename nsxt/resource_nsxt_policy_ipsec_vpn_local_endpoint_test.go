@@ -240,7 +240,7 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpointIPV6_basic(t *testing.T) {
 	testResourceName := testAccPolicyVPNLocalEndpointResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "4.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, accTestPolicyIPSecVpnLocalEndpointIPv6UpdateAttributes["display_name"])

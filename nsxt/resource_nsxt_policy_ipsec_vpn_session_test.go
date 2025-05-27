@@ -987,7 +987,7 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionIPv6PolicyBased_basic(t *testing.T)
 	testResourceName := testAccIPSecVpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "4.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["display_name"])
