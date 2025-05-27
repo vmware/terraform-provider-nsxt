@@ -5,6 +5,7 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -59,6 +60,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 				Optional: true,
 			},
 		},
+		CustomizeDiff: validateIPv6LocaleServiceConflict,
 	}
 }
 
@@ -352,4 +354,17 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	d.Set("service_path", s[0])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func validateIPv6LocaleServiceConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	localAddr := diff.Get("local_address").(string)
+	servicePath := diff.Get("service_path").(string)
+	_, errors := validation.IsIPv6Address(localAddr, "local_address")
+
+	log.Printf("[DEBUG] local_address: %s, service_path: %s, isIPv6: %t", localAddr, servicePath, errors)
+
+	if len(errors) == 0 && strings.Contains(servicePath, "locale-services") { //its an IPv6 address
+		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
+	}
+	return nil
 }
