@@ -127,6 +127,16 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"tgw_transit_subnets": {
+				Type:        schema.TypeList,
+				Description: "Transit Gateway transit subnets in CIDR format",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateCidr(),
+				},
+				Optional: true,
+				Computed: true,
+			},
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":  getIPv6DadPathSchema(),
 			"edge_cluster_path":      getPolicyEdgeClusterPathSchema(),
@@ -817,6 +827,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	internalSubnets := interfaceListToStringList(d.Get("internal_transit_subnets").([]interface{}))
 	transitSubnets := interfaceListToStringList(d.Get("transit_subnets").([]interface{}))
 	vrfTransitSubnets := interfaceListToStringList(d.Get("vrf_transit_subnets").([]interface{}))
+	tgwTransitSubnets := interfaceListToStringList(d.Get("tgw_transit_subnets").([]interface{}))
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	vrfConfig := getPolicyVRFConfigFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
@@ -865,6 +876,10 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 
 	if util.NsxVersionHigherOrEqual("4.2.1") {
 		t0Struct.MultiVrfInterSrRouting = &multiVrfInterSr
+	}
+
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		t0Struct.TgwTransitSubnets = tgwTransitSubnets
 	}
 
 	if len(d.Id()) > 0 {
@@ -1029,6 +1044,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("vrf_transit_subnets", obj.VrfTransitSubnets)
+	d.Set("tgw_transit_subnets", obj.TgwTransitSubnets)
 	d.Set("revision", obj.Revision)
 	d.Set("multi_vrf_inter_sr", obj.MultiVrfInterSrRouting)
 	d.Set("enable_rd_per_edge", obj.EnableRdPerEdge)
