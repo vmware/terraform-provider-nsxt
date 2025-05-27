@@ -92,8 +92,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	objID := d.Get("id").(string)
 	isGlobal := false
 	if isGlobalRaw, ok := d.GetOk("is_global"); ok {
-		isGlobal, ok = isGlobalRaw.(bool)
-
+		isGlobal, _ = isGlobalRaw.(bool)
 	}
 	var err error
 	var resultValues []*data.StructValue
