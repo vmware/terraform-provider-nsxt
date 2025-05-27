@@ -45,12 +45,11 @@ func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, false),
+				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnServiceCreateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnServiceCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyIPSecVpnServiceCreateAttributes["ha_sync"]),
 					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyIPSecVpnServiceCreateAttributes["ike_log_level"]),
@@ -65,12 +64,11 @@ func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(false, false),
+				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(false, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnServiceUpdateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnServiceUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyIPSecVpnServiceUpdateAttributes["ha_sync"]),
 					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyIPSecVpnServiceUpdateAttributes["ike_log_level"]),
@@ -85,11 +83,10 @@ func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceMinimalistic(false),
+				Config: testAccNsxtPolicyIPSecVpnServiceMinimalistic(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -182,12 +179,11 @@ func TestAccResourceNsxtPolicyIPSecVpnService_updateFromlocaleServicePathToGatew
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, false),
+				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnServiceCreateAttributes["description"]),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnServiceCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyIPSecVpnServiceCreateAttributes["ha_sync"]),
 					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyIPSecVpnServiceCreateAttributes["ike_log_level"]),
@@ -236,7 +232,7 @@ func TestAccResourceNsxtPolicyIPSecVpnService_Import(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, false),
+				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, true),
 			},
 			{
 				ResourceName:      resourceName,

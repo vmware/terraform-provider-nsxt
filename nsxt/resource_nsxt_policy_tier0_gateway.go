@@ -79,13 +79,6 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Default:     true,
 				Optional:    true,
 			},
-			"force_whitelisting": {
-				Type:        schema.TypeBool,
-				Description: "Force whitelisting",
-				Default:     false,
-				Optional:    true,
-				Deprecated:  "Use nsxt_policy_predefined_gateway_policy resource to control default action",
-			},
 			"ha_mode": {
 				Type:         schema.TypeString,
 				Description:  "High-availability Mode for Tier-0",
@@ -135,7 +128,6 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"vrf_config":             getPolicyVRFConfigSchema(),
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
 			"intersite_config":       getGatewayIntersiteConfigSchema(),
-			"redistribution_config":  getRedistributionConfigSchema(),
 			"rd_admin_address": {
 				Type:         schema.TypeString,
 				Description:  "Route distinguisher administrator address",
@@ -719,9 +711,6 @@ func initImplicitTier0GatewayLocaleService(context utl.SessionContext, d *schema
 		}
 	}
 
-	redistributionConfigs := d.Get("redistribution_config").([]interface{})
-	setLocaleServiceRedistributionConfig(redistributionConfigs, serviceStruct)
-
 	serviceStruct.EdgeClusterPath = &edgeClusterPath
 	if len(children) > 0 {
 		serviceStruct.Children = children
@@ -811,7 +800,6 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	failoverMode := d.Get("failover_mode").(string)
 	defaultRuleLogging := d.Get("default_rule_logging").(bool)
 	disableFirewall := !d.Get("enable_firewall").(bool)
-	forceWhitelisting := d.Get("force_whitelisting").(bool)
 	haMode := d.Get("ha_mode").(string)
 	revision := int64(d.Get("revision").(int))
 	internalSubnets := interfaceListToStringList(d.Get("internal_transit_subnets").([]interface{}))
@@ -836,7 +824,6 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		FailoverMode:           &failoverMode,
 		DefaultRuleLogging:     &defaultRuleLogging,
 		DisableFirewall:        &disableFirewall,
-		ForceWhitelisting:      &forceWhitelisting,
 		Ipv6ProfilePaths:       ipv6ProfilePaths,
 		HaMode:                 &haMode,
 		InternalTransitSubnets: internalSubnets,
@@ -896,7 +883,6 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	}
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
-	_, redistributionSet := d.GetOk("redistribution_config")
 	// The user can either define locale_service (GL or LM) or edge_cluster_path (LM only)
 	if d.HasChange("locale_service") && edgeClusterPath == "" {
 		// Update locale services only if configuration changed
@@ -908,7 +894,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 			gwChildren = append(gwChildren, localeServices...)
 		}
 	} else if !isGlobalManager {
-		localeServiceNeeded := (len(lsChildren) > 0 || edgeClusterPath != "" || redistributionSet)
+		localeServiceNeeded := (len(lsChildren) > 0 || edgeClusterPath != "")
 		// Local Manager
 		if localeServiceNeeded {
 			if d.Get("edge_cluster_path") == "" && (len(bgpConfig) > 0) {
@@ -1025,7 +1011,6 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("default_rule_logging", obj.DefaultRuleLogging)
 	d.Set("enable_firewall", !(*obj.DisableFirewall))
 	d.Set("ha_mode", obj.HaMode)
-	d.Set("force_whitelisting", obj.ForceWhitelisting)
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("vrf_transit_subnets", obj.VrfTransitSubnets)
@@ -1060,7 +1045,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	// map of nsx IDs that was provided in locale_services in intent
 	nsxIDMap := getAttrKeyMapFromSchemaSet(intentServices, "nsx_id")
 	if len(localeServices) > 0 {
-		for i, service := range localeServices {
+		for _, service := range localeServices {
 			if shouldSetLS {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
@@ -1076,13 +1061,6 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				if _, ok := nsxIDMap[*service.Id]; ok {
 					cfgMap["nsx_id"] = service.Id
 				}
-				redistributionConfigs := getLocaleServiceRedistributionConfig(&localeServices[i])
-				if d.Get("redistribution_set").(bool) {
-					// redistribution_config is deprecated and should be
-					// assigned only if actively set by customer
-					// (Computed flag does not work for sub-clauses)
-					cfgMap["redistribution_config"] = redistributionConfigs
-				}
 
 				services = append(services, cfgMap)
 
@@ -1094,10 +1072,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 						return handleReadError(d, "BGP Configuration for T0", id, err)
 					}
 
-					redistributionConfigs := getLocaleServiceRedistributionConfig(&localeServices[i])
-					if d.Get("redistribution_set").(bool) {
-						d.Set("redistribution_config", redistributionConfigs)
-					} else {
+					if !d.Get("redistribution_set").(bool) {
 						// convert from null to false during import for consistency
 						d.Set("redistribution_set", false)
 					}

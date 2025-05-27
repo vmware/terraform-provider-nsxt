@@ -48,7 +48,6 @@ func testAccResourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, 
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
@@ -70,7 +69,6 @@ func testAccResourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, 
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
@@ -92,7 +90,6 @@ func testAccResourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, 
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
@@ -130,7 +127,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
@@ -153,7 +149,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
@@ -177,7 +172,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
@@ -587,7 +581,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   default_rule_logging      = "true"
   enable_firewall           = "false"
   enable_standby_relocation = "true"
-  force_whitelisting        = "false"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
@@ -624,7 +617,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
@@ -656,7 +648,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
@@ -685,7 +676,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   default_rule_logging      = "true"
   enable_firewall           = "false"
   enable_standby_relocation = "true"
-  force_whitelisting        = "false"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
 
