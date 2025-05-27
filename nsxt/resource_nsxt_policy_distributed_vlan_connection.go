@@ -34,6 +34,7 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "VlanId",
 		},
 	},
+	"subnet_exclusive_config": metadata.GetExtendedSchema(subnetExclusiveConfigSchema()),
 	"gateway_addresses": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
@@ -53,6 +54,49 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "GatewayAddresses",
 		},
 	},
+}
+
+func subnetExclusiveConfigSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Subnet exclusive config",
+		Optional:    true,
+		ForceNew:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"ip_block_path": {
+					Type:        schema.TypeString,
+					Description: "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
+					Optional:    true,
+					ForceNew:    true,
+				},
+				"vlan_extension": vlanExtensionSchema(),
+			},
+		},
+	}
+
+}
+
+func vlanExtensionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
+		Optional:    true,
+		ForceNew:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"vpc_gateway_connection_enable": {
+					Type:        schema.TypeBool,
+					Description: "This configuration controls whether the VLAN extension subnet connects to the VPC gateway.",
+					Optional:    true,
+					ForceNew:    true,
+				},
+			},
+		},
+	}
+
 }
 
 const distributedVlanConnectionPathExample = "/infra/distributed-vlan-connections/[connection]"
@@ -102,6 +146,28 @@ func resourceNsxtPolicyDistributedVlanConnectionCreate(d *schema.ResourceData, m
 		DisplayName: &displayName,
 		Description: &description,
 		Tags:        tags,
+	}
+
+	subnetExclusiveConfig := model.SubnetExclusiveConfig{}
+	subnetExclusiveConfigArgUnparsed := d.Get("subnet_exclusive_config").([]interface{})
+	if len(subnetExclusiveConfigArgUnparsed) > 0 || subnetExclusiveConfigArgUnparsed[0] != nil {
+		tempSubnetExclusiveConfig, mapExists := subnetExclusiveConfigArgUnparsed[0].(map[string]interface{})
+		if ipBlockPath, ok := tempSubnetExclusiveConfig["ip_block_path"]; mapExists && ok {
+			ipBlockPathStr := ipBlockPath.(string)
+			subnetExclusiveConfig.IpBlockPath = &ipBlockPathStr
+		}
+		if vlanExtensionSet, ok := tempSubnetExclusiveConfig["vlan_extension"]; ok && len(vlanExtensionSet.([]interface{})) > 0 {
+			vlanExtension := vlanExtensionSet.([]interface{})[0]
+			if vpcGatewayConnectionEnableMap, ok := vlanExtension.(map[string]interface{}); ok {
+				vpcGatewayConnectionEnable, BoolVarExists := vpcGatewayConnectionEnableMap["vpc_gateway_connection_enable"]
+				if vpcGatewayConnectionEnablePtr, ok := vpcGatewayConnectionEnable.(bool); BoolVarExists && ok {
+					subnetExclusiveConfig.VlanExtension = &model.VlanExtension{
+						VpcGatewayConnectionEnable: &vpcGatewayConnectionEnablePtr,
+					}
+				}
+			}
+		}
+		obj.SubnetExclusiveConfig = &subnetExclusiveConfig
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -169,7 +235,27 @@ func resourceNsxtPolicyDistributedVlanConnectionUpdate(d *schema.ResourceData, m
 		Tags:        tags,
 		Revision:    &revision,
 	}
-
+	subnetExclusiveConfig := model.SubnetExclusiveConfig{}
+	subnetExclusiveConfigArgUnparsed := d.Get("subnet_exclusive_config").([]interface{})
+	if len(subnetExclusiveConfigArgUnparsed) > 0 || subnetExclusiveConfigArgUnparsed[0] != nil {
+		tempSubnetExclusiveConfig, mapExists := subnetExclusiveConfigArgUnparsed[0].(map[string]interface{})
+		if ipBlockPath, ok := tempSubnetExclusiveConfig["ip_block_path"]; mapExists && ok {
+			ipBlockPathStr := ipBlockPath.(string)
+			subnetExclusiveConfig.IpBlockPath = &ipBlockPathStr
+		}
+		if vlanExtensionSet, ok := tempSubnetExclusiveConfig["vlan_extension"]; ok && len(vlanExtensionSet.([]interface{})) > 0 {
+			vlanExtension := vlanExtensionSet.([]interface{})[0]
+			if vpcGatewayConnectionEnableMap, ok := vlanExtension.(map[string]interface{}); ok {
+				vpcGatewayConnectionEnable, BoolVarExists := vpcGatewayConnectionEnableMap["vpc_gateway_connection_enable"]
+				if vpcGatewayConnectionEnablePtr, ok := vpcGatewayConnectionEnable.(bool); BoolVarExists && ok {
+					subnetExclusiveConfig.VlanExtension = &model.VlanExtension{
+						VpcGatewayConnectionEnable: &vpcGatewayConnectionEnablePtr,
+					}
+				}
+			}
+		}
+		obj.SubnetExclusiveConfig = &subnetExclusiveConfig
+	}
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, distributedVlanConnectionSchema, "", nil); err != nil {
 		return err
