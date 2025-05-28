@@ -86,7 +86,7 @@ func getPolicyEdgeClusterPathSchema() *schema.Schema {
 }
 
 func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
-	nodeConficts := []string{}
+	var nodeConficts []string
 	if isTier1 {
 		// for Tier1, enable_standby_relocation can not be enabled if
 		// preferred nodes are specified
