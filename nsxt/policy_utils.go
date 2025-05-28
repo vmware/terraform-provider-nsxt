@@ -31,7 +31,7 @@ var ErrUnexpectedPolicyPath = errors.New("unexpected policy path")
 var ErrEmptyImportID = errors.New("import identifier cannot be empty")
 
 func isSpaceString(s string) bool {
-	return (strings.TrimSpace(s) == "")
+	return strings.TrimSpace(s) == ""
 }
 
 func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker func(utl.SessionContext, string, client.Connector) (bool, error)) (string, error) {

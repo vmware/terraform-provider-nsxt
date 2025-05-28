@@ -249,7 +249,7 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 	minRetryInterval := c.CommonConfig.MinRetryInterval
 	maxRetryInterval := c.CommonConfig.MaxRetryInterval
 	maxRetries := c.CommonConfig.MaxRetries
-	var hostIPs []string
+	hostIPs := []string{}
 	for i := 0; i < maxRetries; i++ {
 		clusterConfig, err := client.Get()
 		if err != nil {

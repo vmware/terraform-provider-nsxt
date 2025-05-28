@@ -1287,7 +1287,7 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 
 		// Optional argument, only set it if we get anything back
 		if conditionCount > 0 {
-			conditionElem := make((map[string]interface{}))
+			conditionElem := make(map[string]interface{})
 			conditionElem["http_request_body"] = httpRequestBodyConditionList
 			conditionElem["http_request_uri"] = httpRequestURIConditionList
 			conditionElem["http_request_header"] = httpRequestHeaderConditionList

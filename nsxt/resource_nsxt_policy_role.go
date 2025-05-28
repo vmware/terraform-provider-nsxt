@@ -16,7 +16,7 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var featurePermissionTypes = [](string){
+var featurePermissionTypes = []string{
 	nsxModel.FeaturePermission_PERMISSION_CRUD,
 	nsxModel.FeaturePermission_PERMISSION_READ,
 	nsxModel.FeaturePermission_PERMISSION_EXECUTE,
