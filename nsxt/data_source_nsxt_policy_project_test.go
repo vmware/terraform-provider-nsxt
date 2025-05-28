@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	orgs "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
 )
 
 func TestAccDataSourceNsxtPolicyProject_basic(t *testing.T) {
