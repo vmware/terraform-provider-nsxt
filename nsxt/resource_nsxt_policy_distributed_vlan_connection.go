@@ -68,7 +68,7 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 				"ip_block_path": {
 					Type:        schema.TypeString,
 					Description: "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
-					Optional:    true,
+					Required:    true,
 					ForceNew:    true,
 				},
 				"vlan_extension": vlanExtensionSchema(),
@@ -90,7 +90,7 @@ func vlanExtensionSchema() *schema.Schema {
 				"vpc_gateway_connection_enable": {
 					Type:        schema.TypeBool,
 					Description: "This configuration controls whether the VLAN extension subnet connects to the VPC gateway.",
-					Optional:    true,
+					Required:    true,
 					ForceNew:    true,
 				},
 			},
