@@ -489,19 +489,17 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 	}
 
 	pathSegs := strings.Split(importID, "/")
-	if len(pathSegs) < 2 {
-		return nil, fmt.Errorf("invalid policy path %s", importID)
-	}
 	if strings.Contains(pathSegs[1], "infra") {
 		d.SetId(pathSegs[len(pathSegs)-1])
-	} else if len(pathSegs) < 5 {
-		return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
 	} else if pathSegs[1] == "orgs" && pathSegs[3] == "projects" {
+		if len(pathSegs) < 5 {
+			return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
+		}
 		// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
 		// assigned into the context as well
 		ctxMap := make(map[string]interface{})
 		ctxMap["project_id"] = pathSegs[4]
-		if len(pathSegs) > 5 && pathSegs[5] == "vpcs" {
+		if pathSegs[5] == "vpcs" {
 			ctxMap["vpc_id"] = pathSegs[6]
 		}
 		d.Set("context", []interface{}{ctxMap})
