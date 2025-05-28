@@ -246,8 +246,8 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 	connector := getPolicyConnector(m)
 	client := nsx.NewClusterClient(connector)
 	c := m.(nsxtClients)
-	min := c.CommonConfig.MinRetryInterval
-	max := c.CommonConfig.MaxRetryInterval
+	minRetryInterval := c.CommonConfig.MinRetryInterval
+	maxRetryInterval := c.CommonConfig.MaxRetryInterval
 	maxRetries := c.CommonConfig.MaxRetries
 	hostIPs := []string{}
 	for i := 0; i < maxRetries; i++ {
@@ -271,7 +271,7 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 			certSha256Thumbprint := *apiListenAddr.CertificateSha256Thumbprint
 			return clusterID, certSha256Thumbprint, hostIPs, nil
 		}
-		interval := (rand.Intn(max-min) + min)
+		interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 		log.Printf("[DEBUG]: Waited %d ms before retrying getting API Listen Address, attempt %d", interval, i+1)
 	}
