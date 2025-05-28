@@ -369,12 +369,12 @@ func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string, wit
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  connectivity_path = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 }
 `, context, name)
@@ -387,16 +387,17 @@ func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string, with
 	}
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  domain_name         = "tftest.org"
-  overlay_id          = 1011
-  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  domain_name       = "tftest.org"
+  overlay_id        = 1011
+  connectivity_path = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -415,14 +416,14 @@ func testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName string, name string
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test2"
-  domain_name         = "tftest2.org"
-  overlay_id          = 1011
-  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test2"
+  domain_name       = "tftest2.org"
+  overlay_id        = 1011
+  connectivity_path = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "22.22.22.1/24"
+    cidr = "22.22.22.1/24"
   }
 
   tag {
@@ -440,15 +441,16 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test2"
-  domain_name         = "tftest2.org"
-  overlay_id          = 1011
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test2"
+  domain_name       = "tftest2.org"
+  overlay_id        = 1011
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "22.22.22.1/24"
+    cidr = "22.22.22.1/24"
   }
 
   tag {
@@ -466,6 +468,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
   description      = "Acceptance Test"
@@ -474,10 +477,10 @@ resource "nsxt_policy_fixed_segment" "test" {
   overlay_id       = 1011
   vlan_ids         = ["101", "102"]
 
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -496,6 +499,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
   description      = "Acceptance Test"
@@ -504,10 +508,10 @@ resource "nsxt_policy_fixed_segment" "test" {
   overlay_id       = 1011
   vlan_ids         = ["101-104"]
 
-  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
+  connectivity_path = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -527,6 +531,7 @@ func testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName string, name string, d
 	return testAccNsxtPolicySegmentDeps(tzName, false) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_dhcp_server" "test" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   display_name      = "segment-test"
@@ -540,40 +545,40 @@ resource "nsxt_policy_fixed_segment" "test" {
   subnet {
     cidr = "12.12.2.1/24"
     dhcp_v4_config {
-        lease_time     = %s
-        server_address = "12.12.2.2/24"
-        dns_servers    = ["%s"]
-        dhcp_option_121 {
-          network  = "2.1.1.0/24"
-          next_hop = "2.3.1.3"
-        }
-        dhcp_option_121 {
-          network  = "3.1.1.0/24"
-          next_hop = "3.3.1.3"
-        }
-        dhcp_generic_option {
-          code   = "119"
-          values = ["abc", "def"]
-        }
+      lease_time     = %s
+      server_address = "12.12.2.2/24"
+      dns_servers    = ["%s"]
+      dhcp_option_121 {
+        network  = "2.1.1.0/24"
+        next_hop = "2.3.1.3"
+      }
+      dhcp_option_121 {
+        network  = "3.1.1.0/24"
+        next_hop = "3.3.1.3"
+      }
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc", "def"]
+      }
     }
   }
 
   subnet {
     cidr = "4012::1/64"
     dhcp_v6_config {
-        server_address = "4012::2/64"
-        lease_time     = %s
-        preferred_time = %s
-        dns_servers    = ["%s"]
-        sntp_servers   = ["3001::1", "3001::2"]
-        excluded_range {
-            start = "4012::400"
-            end   = "4012::500"
-        }
-        excluded_range {
-            start = "4012::a00"
-            end   = "4012::b00"
-        }
+      server_address = "4012::2/64"
+      lease_time     = %s
+      preferred_time = %s
+      dns_servers    = ["%s"]
+      sntp_servers   = ["3001::1", "3001::2"]
+      excluded_range {
+        start = "4012::400"
+        end   = "4012::500"
+      }
+      excluded_range {
+        start = "4012::a00"
+        end   = "4012::b00"
+      }
     }
   }
 

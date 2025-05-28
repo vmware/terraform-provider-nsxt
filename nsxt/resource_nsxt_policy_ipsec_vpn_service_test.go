@@ -342,23 +342,23 @@ func testAccNsxtPolicyIPSecVpnServiceTemplate(createFlow bool, useGatewayPath bo
 	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
-	display_name                   = "%s"
-	description                    = "%s"
+  display_name = "%s"
+  description  = "%s"
 	%s
-	enabled                        = "%s"
-	ha_sync                        = "%s"
-	ike_log_level                  = "%s"
-	bypass_rule {
-		sources                    = ["%s"]
-		destinations               = ["%s"]
-		action                     = "%s"
-	}
+  enabled       = "%s"
+  ha_sync       = "%s"
+  ike_log_level = "%s"
+  bypass_rule {
+    sources      = ["%s"]
+    destinations = ["%s"]
+    action       = "%s"
+  }
 
-	tag {
-	scope = "scope1"
-	tag   = "tag1"
-	}
-   }`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
 }
 
 func getGatewayOrLocaleServicePath(useGatewayPath bool, isT0 bool) string {
@@ -378,8 +378,8 @@ func getGatewayOrLocaleServicePath(useGatewayPath bool, isT0 bool) string {
 func testAccNsxtPolicyIPSecVpnServiceMinimalistic(useGatewayPath bool) string {
 	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
-   resource "nsxt_policy_ipsec_vpn_service" "test" {
-	 display_name          = "%s"
+resource "nsxt_policy_ipsec_vpn_service" "test" {
+  display_name = "%s"
 	 %s
-   }`, accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
+}`, accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
 }

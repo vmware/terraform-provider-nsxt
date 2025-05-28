@@ -145,12 +145,12 @@ func testAccNsxtPolicyFirewallExcludeListMemberCheckDestroy(state *terraform.Sta
 func testAccNsxtPolicyFirewallExcludeListMemberTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "%s" {
-  nsx_id = "%s"
+  nsx_id       = "%s"
   display_name = "%s"
   description  = "Acceptance Test"
 }
 resource "nsxt_policy_firewall_exclude_list_member" "%s" {
-	member = nsxt_policy_group.%s.path
+  member = nsxt_policy_group.%s.path
 }
 `, name, name, name, name, name)
 }

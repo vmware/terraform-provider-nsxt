@@ -604,13 +604,13 @@ func testAccNsxtPolicySegmentImportTemplate(tzName string, name string, withCont
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  connectivity_path = nsxt_policy_tier1_gateway.tier1ForSegments.path
   %s
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 }
 `, context, name, tzSetting)
@@ -618,6 +618,7 @@ resource "nsxt_policy_segment" "test" {
 
 func testAccNsxtPolicySegmentBasicTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+
 
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
@@ -628,7 +629,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -642,6 +643,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentIgnoreTagsCreateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   overlay_id          = 1011
@@ -649,7 +651,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -673,6 +675,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentIgnoreTagsUpdate1Template(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   overlay_id          = 1011
@@ -680,7 +683,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -708,6 +711,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentIgnoreTagsUpdate2Template(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   overlay_id          = 1011
@@ -715,7 +719,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -738,6 +742,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentIgnoreTagsUpdate3Template(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   overlay_id          = 1011
@@ -745,14 +750,14 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
     scope = "color"
     tag   = "blue"
   }
- 
+
   tag {
     scope = "rack"
     tag   = "7"
@@ -764,6 +769,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentBasicUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test2"
@@ -773,7 +779,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "22.22.22.1/24"
+    cidr = "22.22.22.1/24"
   }
 
   tag {
@@ -791,6 +797,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test2"
@@ -800,7 +807,7 @@ resource "nsxt_policy_segment" "test" {
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
-     cidr = "22.22.22.1/24"
+    cidr = "22.22.22.1/24"
   }
 
   tag {
@@ -818,24 +825,25 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentWithProfileDeps(tzName string) string {
 	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 data "nsxt_policy_qos_profile" "test" {
-    display_name = "%s"
+  display_name = "%s"
 }
 
 data "nsxt_policy_segment_security_profile" "test" {
-    display_name = "default-segment-security-profile"
+  display_name = "default-segment-security-profile"
 }
 
 data "nsxt_policy_spoofguard_profile" "test" {
-    display_name = "default-spoofguard-profile"
+  display_name = "default-spoofguard-profile"
 }
 
 data "nsxt_policy_ip_discovery_profile" "test" {
-    display_name = "default-ip-discovery-profile"
+  display_name = "default-ip-discovery-profile"
 }
 
 data "nsxt_policy_mac_discovery_profile" "test" {
-    display_name = "default-mac-discovery-profile"
+  display_name = "default-mac-discovery-profile"
 }
+
 
 `, testAccSegmentQosProfileName)
 }
@@ -862,6 +870,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -872,8 +881,8 @@ resource "nsxt_policy_segment" "test" {
   }
 
   discovery_profile {
-    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.test.path
-    mac_discovery_profile_path   = data.nsxt_policy_mac_discovery_profile.test.path
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.test.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.test.path
   }
 }
 `, name)
@@ -925,6 +934,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentBasicAdvConfigTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
@@ -935,7 +945,7 @@ resource "nsxt_policy_segment" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -955,6 +965,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_segment" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
@@ -965,7 +976,7 @@ resource "nsxt_policy_segment" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
-     cidr = "12.12.2.1/24"
+    cidr = "12.12.2.1/24"
   }
 
   tag {
@@ -1000,6 +1011,7 @@ func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsSer
 	return testAccNsxtPolicySegmentDeps(tzName, false) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
+
 resource "nsxt_policy_dhcp_server" "test" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   display_name      = "segment-test"
@@ -1013,40 +1025,40 @@ resource "nsxt_policy_segment" "test" {
   subnet {
     cidr = "12.12.2.1/24"
     dhcp_v4_config {
-        lease_time     = %s
-        server_address = "12.12.2.2/24"
-        dns_servers    = ["%s"]
-        dhcp_option_121 {
-          network  = "2.1.1.0/24"
-          next_hop = "2.3.1.3"
-        }
-        dhcp_option_121 {
-          network  = "3.1.1.0/24"
-          next_hop = "3.3.1.3"
-        }
-        dhcp_generic_option {
-          code   = "119"
-          values = ["abc", "def"]
-        }
+      lease_time     = %s
+      server_address = "12.12.2.2/24"
+      dns_servers    = ["%s"]
+      dhcp_option_121 {
+        network  = "2.1.1.0/24"
+        next_hop = "2.3.1.3"
+      }
+      dhcp_option_121 {
+        network  = "3.1.1.0/24"
+        next_hop = "3.3.1.3"
+      }
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc", "def"]
+      }
     }
   }
 
   subnet {
     cidr = "4012::1/64"
     dhcp_v6_config {
-        server_address = "4012::2/64"
-        lease_time     = %s
-        preferred_time = %s
-        dns_servers    = ["%s"]
-        sntp_servers   = ["3001::1", "3001::2"]
-        excluded_range {
-            start = "4012::400"
-            end   = "4012::500"
-        }
-        excluded_range {
-            start = "4012::a00"
-            end   = "4012::b00"
-        }
+      server_address = "4012::2/64"
+      lease_time     = %s
+      preferred_time = %s
+      dns_servers    = ["%s"]
+      sntp_servers   = ["3001::1", "3001::2"]
+      excluded_range {
+        start = "4012::400"
+        end   = "4012::500"
+      }
+      excluded_range {
+        start = "4012::a00"
+        end   = "4012::b00"
+      }
     }
   }
 
@@ -1063,22 +1075,23 @@ func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string, w
 	}
 	return fmt.Sprintf(`
 
+
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
 %s
-  display_name              = "terraform-segment-test"
-  failover_mode             = "NON_PREEMPTIVE"
+  display_name  = "terraform-segment-test"
+  failover_mode = "NON_PREEMPTIVE"
 }
 
 resource "nsxt_policy_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  domain_name         = "tftest.org"
-  overlay_id          = 1011
-  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  domain_name       = "tftest.org"
+  overlay_id        = 1011
+  connectivity_path = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
-     cidr = "%s"
+    cidr = "%s"
   }
 }
 `, context, context, name, cidr)

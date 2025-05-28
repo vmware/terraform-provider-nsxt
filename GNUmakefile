@@ -54,8 +54,16 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-website-lint:
-	@echo "==> Checking HCL formatting for docs..."
+test-hcl:
+	@echo "==> Checking HCL formatting in tests..."
+	@terrafmt diff ./nsxt --check --pattern '*_test.go' --quiet || (echo; \
+	    echo "Unexpected differences in HCL formatting for tests."; \
+	    echo "To see the full differences, run: terrafmt diff ./nsxt --pattern '*_test.go'"; \
+	    echo "To automatically fix the formatting, run 'make test-hcl-fix' and commit the changes."; \
+	    exit 1)
+
+docs-lint:
+	@echo "==> Applying HCL formatting for docs..."
 	@terrafmt diff ./docs --check --pattern '*.md' --quiet || (echo; \
 	    echo "Unexpected differences in HCL formatting for docs."; \
 	    echo "To see the full differences, run: terrafmt diff ./docs --pattern '*.md'"; \
@@ -63,7 +71,7 @@ website-lint:
 	    exit 1)
 
 docs-lint-fix:
-	@echo "==> Applying HCL formatting for docs..."
+	@echo "==> Applying HCL formatting to docs..."
 	@terrafmt fmt ./docs --pattern '*.md'
 
 docs-list-category:

@@ -195,7 +195,7 @@ resource "nsxt_logical_tier0_router" "test" {
 func testAccNSXLogicalTier0RouterUpdateTemplate(name string, haMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_tier0_router" "test" {

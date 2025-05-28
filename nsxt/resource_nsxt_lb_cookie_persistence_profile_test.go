@@ -243,11 +243,11 @@ resource "nsxt_lb_cookie_persistence_profile" "test" {
   cookie_mode        = "INSERT"
 
   insert_mode_params {
-  	cookie_domain      = "%s"
-  	cookie_path        = "%s"
-  	cookie_expiry_type = "SESSION_COOKIE_TIME"
-  	max_idle_time      = "1000"
-  	max_life_time      = "2000"
+    cookie_domain      = "%s"
+    cookie_path        = "%s"
+    cookie_expiry_type = "SESSION_COOKIE_TIME"
+    max_idle_time      = "1000"
+    max_life_time      = "2000"
   }
 
   tag {

@@ -150,10 +150,10 @@ resource "nsxt_mac_management_switching_profile" "test" {
   mac_change_allowed = "%s"
 
   mac_learning {
-  	enabled                  = "%s"
-  	limit                    = "%s"
-  	limit_policy             = "%s"
-  	unicast_flooding_allowed = "%s"
+    enabled                  = "%s"
+    limit                    = "%s"
+    limit_policy             = "%s"
+    unicast_flooding_allowed = "%s"
   }
 
   tag {
@@ -167,7 +167,7 @@ resource "nsxt_mac_management_switching_profile" "test" {
 func testAccNSXMacManagementSwitchingProfileBasicTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_mac_management_switching_profile" "test" {
-  display_name       = "%s"
+  display_name = "%s"
 }
 `, name)
 }

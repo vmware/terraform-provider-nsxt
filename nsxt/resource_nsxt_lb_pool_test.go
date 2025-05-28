@@ -372,7 +372,7 @@ resource "nsxt_lb_pool" "test" {
   min_active_members = "%s"
 
   snat_translation {
-  	type = "%s"
+    type = "%s"
   }
 
   tag {
@@ -386,13 +386,13 @@ resource "nsxt_lb_pool" "test" {
 func testAccNSXLbPoolUpdateTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Updated Acceptance Test"
-  min_active_members    = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Updated Acceptance Test"
+  min_active_members = "%s"
 
   snat_translation {
-  	type = "%s"
+    type = "%s"
   }
 
   tag {
@@ -437,8 +437,8 @@ resource "nsxt_lb_pool" "test" {
 func testAccNSXLbPoolUpdateWithMonitorsTemplate(name string) string {
 	return testAccNSXLbPoolMonitorsTemplate() + fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name       = "%s"
-  description        = "Updated Acceptance Test"
+  display_name = "%s"
+  description  = "Updated Acceptance Test"
 }
 `, name)
 }
@@ -452,8 +452,8 @@ resource "nsxt_lb_pool" "test" {
   min_active_members = "%s"
 
   snat_translation {
-  	type          = "%s"
-  	ip            = "%s"
+    type = "%s"
+    ip   = "%s"
   }
 
   tag {
@@ -473,8 +473,8 @@ resource "nsxt_lb_pool" "test" {
   min_active_members = "%s"
 
   snat_translation {
-  	type          = "%s"
-  	ip            = "%s"
+    type = "%s"
+    ip   = "%s"
   }
 
   tag {
@@ -506,7 +506,7 @@ resource "nsxt_lb_pool" "test" {
   min_active_members = "%s"
 
   snat_translation {
-  	type = "%s"
+    type = "%s"
   }
 
   tag {
@@ -530,13 +530,13 @@ resource "nsxt_lb_pool" "test" {
 func testAccNSXLbPoolUpdateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Updated Acceptance Test"
-  min_active_members    = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Updated Acceptance Test"
+  min_active_members = "%s"
 
   snat_translation {
-  	type = "%s"
+    type = "%s"
   }
 
   tag {
@@ -577,9 +577,9 @@ resource "nsxt_ns_group" "grp1" {
 }
 
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Acceptance Test"
+  display_name = "%s"
+  algorithm    = "%s"
+  description  = "Acceptance Test"
 
   member_group {
     ip_version_filter  = "IPV4"
@@ -603,9 +603,9 @@ resource "nsxt_ns_group" "grp1" {
 }
 
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Updated Acceptance Test"
+  display_name = "%s"
+  algorithm    = "%s"
+  description  = "Updated Acceptance Test"
 
   member_group {
     ip_version_filter  = "IPV6"

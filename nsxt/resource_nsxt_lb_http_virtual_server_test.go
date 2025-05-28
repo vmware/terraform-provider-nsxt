@@ -362,7 +362,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "rule2" {
 resource "nsxt_lb_http_request_rewrite_rule" "rule3" {
   display_name = "%s"
   uri_condition {
-    uri = "html"
+    uri        = "html"
     match_type = "ENDS_WITH"
   }
 

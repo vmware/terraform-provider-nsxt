@@ -258,8 +258,8 @@ resource "nsxt_lb_http_response_rewrite_rule" "test" {
   match_strategy = "ANY"
 
   response_header_condition {
-    name = "NAME1"
-    value = "VALUE1"
+    name       = "NAME1"
+    value      = "VALUE1"
     match_type = "EQUALS"
   }
 

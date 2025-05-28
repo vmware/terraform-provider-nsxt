@@ -287,38 +287,38 @@ func testAccNsxtPolicyL7AccessProfileTemplate(createFlow bool, withContext bool)
 	return fmt.Sprintf(`
 resource "nsxt_policy_l7_access_profile" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
+  display_name          = "%s"
+  description           = "%s"
   default_action_logged = %s
-  default_action = "%s"
+  default_action        = "%s"
 
   l7_access_entry {
     nsx_id = "%s"
     action = "%s"
 
     attribute {
-      key = "%s"
-      values = ["%s"]
+      key              = "%s"
+      values           = ["%s"]
       attribute_source = "%s"
 
       sub_attribute {
-        key = "%s"
+        key    = "%s"
         values = ["%s"]
       }
     }
 
-    disabled = %s
-    logged = "%s"
+    disabled        = %s
+    logged          = "%s"
     sequence_number = "%s"
   }
 
   l7_access_entry {
-     display_name = "%s"
-     action = "%s"
+    display_name = "%s"
+    action       = "%s"
 
     attribute {
-      key = "%s"
-      values = ["%s"]
+      key              = "%s"
+      values           = ["%s"]
       attribute_source = "%s"
     }
     sequence_number = "%s"
@@ -344,16 +344,16 @@ func testAccNsxtPolicyL7AccessProfileMinimalistic(withContext bool) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_l7_access_profile" "test" {
 %s
-  display_name = "%s"
+  display_name   = "%s"
   default_action = "ALLOW"
 
   l7_access_entry {
-     display_name = "%s"
-     action = "%s"
+    display_name = "%s"
+    action       = "%s"
 
     attribute {
-      key = "%s"
-      values = ["%s"]
+      key              = "%s"
+      values           = ["%s"]
       attribute_source = "%s"
     }
     sequence_number = "%s"

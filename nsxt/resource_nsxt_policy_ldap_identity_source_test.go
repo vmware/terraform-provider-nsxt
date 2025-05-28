@@ -173,28 +173,28 @@ func testAccNsxtPolicyLdapIdentitySourceCreate(serverType, domainName, baseDn, b
 	attrMap := accTestPolicyLdapIdentitySourceCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
-    nsx_id       = "%s"
-    description  = "%s"
-    type         = "%s"
-    domain_name  = "%s"
-    base_dn      = "%s"
+  nsx_id      = "%s"
+  description = "%s"
+  type        = "%s"
+  domain_name = "%s"
+  base_dn     = "%s"
 
-    ldap_server {
-        bind_identity = "%s"
-        password      = "%s"
-        url           = "%s"
-        certificates  = [
-            <<-EOT
+  ldap_server {
+    bind_identity = "%s"
+    password      = "%s"
+    url           = "%s"
+    certificates = [
+      <<-EOT
 %s
             EOT
-            ,
-        ]
-    }
+      ,
+    ]
+  }
 
-    tag {
-        scope = "scope1"
-        tag = "tag1"
-    }
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
 }
 
@@ -202,22 +202,22 @@ func testAccNsxtPolicyLdapIdentitySourceUpdate(serverType, domainName, baseDn, b
 	attrMap := accTestPolicyLdapIdentitySourceUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
-    nsx_id       = "%s"
-    description  = "%s"
-    type         = "%s"
-    domain_name  = "%s"
-    base_dn      = "%s"
+  nsx_id      = "%s"
+  description = "%s"
+  type        = "%s"
+  domain_name = "%s"
+  base_dn     = "%s"
 
-    ldap_server {
-        bind_identity = "%s"
-        password      = "%s"
-        url           = "%s"
-        certificates  = [
-            <<-EOT
+  ldap_server {
+    bind_identity = "%s"
+    password      = "%s"
+    url           = "%s"
+    certificates = [
+      <<-EOT
 %s
             EOT
-            ,
-        ]
-    }
+      ,
+    ]
+  }
 }`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
 }

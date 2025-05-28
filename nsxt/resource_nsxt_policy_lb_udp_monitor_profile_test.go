@@ -183,13 +183,13 @@ func testAccNsxtPolicyLBUdpMonitorProfileTemplate(createFlow bool) string {
 resource "nsxt_policy_lb_udp_monitor_profile" "test" {
   display_name = "%s"
   description  = "%s"
-  receive = "%s"
-  send = "%s"
-  fall_count = %s
-  interval = %s
+  receive      = "%s"
+  send         = "%s"
+  fall_count   = %s
+  interval     = %s
   monitor_port = %s
-  rise_count = %s
-  timeout = %s
+  rise_count   = %s
+  timeout      = %s
 
   tag {
     scope = "scope1"

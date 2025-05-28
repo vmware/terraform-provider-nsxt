@@ -154,7 +154,7 @@ resource "nsxt_policy_vni_pool" "test" {
   description  = "%s"
 
   start = %s
-  end = %s
+  end   = %s
 
   tag {
     scope = "scope1"
@@ -171,6 +171,6 @@ resource "nsxt_policy_vni_pool" "test" {
   description  = "%s"
 
   start = %s
-  end = %s
+  end   = %s
 }`, attrMap["display_name"], attrMap["description"], attrMap["start"], attrMap["end"])
 }

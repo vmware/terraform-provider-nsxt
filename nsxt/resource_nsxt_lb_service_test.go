@@ -247,6 +247,7 @@ resource "nsxt_lb_service" "test" {
 func testAccNSXLbServiceCreateTemplateWithServers(name string, logLevel string) string {
 	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
 
+
 resource "nsxt_lb_fast_tcp_application_profile" "test" {
   display_name = "lb service test"
 }
@@ -255,13 +256,13 @@ resource "nsxt_lb_fast_udp_application_profile" "test" {
   display_name = "lb service test"
 }
 
-resource "nsxt_lb_tcp_virtual_server" "test"{
+resource "nsxt_lb_tcp_virtual_server" "test" {
   application_profile_id = "${nsxt_lb_fast_tcp_application_profile.test.id}"
   ip_address             = "1.1.1.2"
   ports                  = ["7887"]
 }
 
-resource "nsxt_lb_udp_virtual_server" "test"{
+resource "nsxt_lb_udp_virtual_server" "test" {
   application_profile_id = "${nsxt_lb_fast_udp_application_profile.test.id}"
   ip_address             = "1.1.1.2"
   ports                  = ["7888"]

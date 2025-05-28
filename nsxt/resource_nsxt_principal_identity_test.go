@@ -145,16 +145,16 @@ func testAccNsxtPrincipalIdentityCreate(certPem string) string {
 	attrMap := accTestPrincipalIdentityCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_principal_identity" "test" {
-    certificate_pem = <<-EOT
+  certificate_pem = <<-EOT
 %s
     EOT
-    is_protected    = %s
-    name            = "%s"
-    node_id         = "%s"
+  is_protected    = %s
+  name            = "%s"
+  node_id         = "%s"
 
-    roles_for_path {
-        path  = "%s"
-        roles = ["%s"]
-    }
+  roles_for_path {
+    path  = "%s"
+    roles = ["%s"]
+  }
 }`, certPem, attrMap["is_protected"], attrMap["name"], attrMap["node_id"], attrMap["role_path"], attrMap["role"])
 }

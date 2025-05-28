@@ -193,8 +193,8 @@ func testAccNsxtVpcConnectivityProfileTemplate(createFlow bool) string {
 	return testAccNsxtVpcConnectivityProfilePrerequisite() + fmt.Sprintf(`
 resource "nsxt_vpc_connectivity_profile" "test" {
 %s
-  display_name = "%s"
-  description  = "%s"
+  display_name         = "%s"
+  description          = "%s"
   transit_gateway_path = data.nsxt_policy_transit_gateway.test.path
 
   service_gateway {

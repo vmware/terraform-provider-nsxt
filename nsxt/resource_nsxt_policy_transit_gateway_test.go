@@ -187,7 +187,7 @@ resource "nsxt_policy_transit_gateway" "test" {
 data "nsxt_policy_transit_gateway" "test" {
 %s
   display_name = "%s"
-  depends_on = [nsxt_policy_transit_gateway.test]
+  depends_on   = [nsxt_policy_transit_gateway.test]
 }`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
 		testAccNsxtProjectContext(), attrMap["display_name"])
 }

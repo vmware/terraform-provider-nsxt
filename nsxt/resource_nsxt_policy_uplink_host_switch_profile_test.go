@@ -278,26 +278,26 @@ resource "nsxt_policy_uplink_host_switch_profile" "test" {
   }
   teaming {
     active {
-	  uplink_name = "%s"
-	  uplink_type = "%s"
-    }
-    standby {
-	  uplink_name = "%s"
-	  uplink_type = "%s"
-    }
-    policy        = "%s"
-  }
-  named_teaming {
-    active {
-  	  uplink_name = "%s"
-	  uplink_type = "%s"
+      uplink_name = "%s"
+      uplink_type = "%s"
     }
     standby {
       uplink_name = "%s"
-	  uplink_type = "%s"
+      uplink_type = "%s"
     }
-    policy        = "%s"
-    name          = "%s"
+    policy = "%s"
+  }
+  named_teaming {
+    active {
+      uplink_name = "%s"
+      uplink_type = "%s"
+    }
+    standby {
+      uplink_name = "%s"
+      uplink_type = "%s"
+    }
+    policy = "%s"
+    name   = "%s"
   }
 
   tag {
@@ -308,7 +308,7 @@ resource "nsxt_policy_uplink_host_switch_profile" "test" {
 
 data "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
-  depends_on = [nsxt_policy_uplink_host_switch_profile.test]
+  depends_on   = [nsxt_policy_uplink_host_switch_profile.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["mtu"], attrMap["transport_vlan"], attrMap["overlay_encap"], attrMap["lag_name"], attrMap["lag_load_balance_algorithm"], attrMap["lag_mode"], attrMap["lag_number_of_uplinks"], attrMap["lag_timeout_type"], attrMap["teaming_al_uplink_name"], attrMap["teaming_al_uplink_type"], attrMap["teaming_sl_uplink_name"], attrMap["teaming_sl_uplink_type"], attrMap["teaming_policy"], attrMap["named_teaming_al_uplink_name"], attrMap["named_teaming_al_uplink_type"], attrMap["named_teaming_sl_uplink_name"], attrMap["named_teaming_sl_uplink_type"], attrMap["named_teaming_policy"], attrMap["named_teaming_name"], attrMap["display_name"])
 }
 

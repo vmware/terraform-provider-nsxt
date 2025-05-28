@@ -763,8 +763,8 @@ func testAccNsxtPolicyLBVirtualServerTemplate(createFlow bool) string {
 		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
 	}
 	return fmt.Sprintf(`
-data "nsxt_policy_lb_app_profile" "default_tcp"{
-  type = "TCP"
+data "nsxt_policy_lb_app_profile" "default_tcp" {
+  type         = "TCP"
   display_name = "default-tcp-lb-app-profile"
 }
 
@@ -809,17 +809,17 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyLBVirtualServerMinimalistic() string {
 	attrMap := accTestPolicyLBVirtualServerCreateAttributes
 	return fmt.Sprintf(`
-data "nsxt_policy_lb_app_profile" "default_http"{
-    type = "HTTP"
-	display_name = "default-http-lb-app-profile"
+data "nsxt_policy_lb_app_profile" "default_http" {
+  type         = "HTTP"
+  display_name = "default-http-lb-app-profile"
 }
 
 resource "nsxt_policy_lb_pool" "pool" {
-    display_name = "terraform-vs-test-pool"
+  display_name = "terraform-vs-test-pool"
 }
 
 resource "nsxt_policy_lb_pool" "sorry_pool" {
-    display_name = "terraform-vs-test-sorry-pool"
+  display_name = "terraform-vs-test-sorry-pool"
 }
 
 resource "nsxt_policy_lb_virtual_server" "test" {
@@ -847,19 +847,19 @@ func testAccNsxtPolicyLBVirtualServerSSLTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_certificate" "test" {
-    display_name = "%s"
+  display_name = "%s"
 }
-data "nsxt_policy_lb_app_profile" "default_tcp"{
-    type = "TCP"
-	display_name = "default-tcp-lb-app-profile"
+data "nsxt_policy_lb_app_profile" "default_tcp" {
+  type         = "TCP"
+  display_name = "default-tcp-lb-app-profile"
 }
 
 data "nsxt_policy_lb_client_ssl_profile" "default" {
-     display_name = "default-balanced-client-ssl-profile"
+  display_name = "default-balanced-client-ssl-profile"
 }
 
 data "nsxt_policy_lb_server_ssl_profile" "default" {
-     display_name = "default-balanced-server-ssl-profile"
+  display_name = "default-balanced-server-ssl-profile"
 }
 
 resource "nsxt_policy_lb_virtual_server" "test" {
@@ -868,16 +868,16 @@ resource "nsxt_policy_lb_virtual_server" "test" {
   ip_address               = "%s"
   ports                    = ["%s"]
   client_ssl {
-      client_auth              = "IGNORE"
-      certificate_chain_depth  = %s
-      ssl_profile_path         = data.nsxt_policy_lb_client_ssl_profile.default.path
-      default_certificate_path = data.nsxt_policy_certificate.test.path
+    client_auth              = "IGNORE"
+    certificate_chain_depth  = %s
+    ssl_profile_path         = data.nsxt_policy_lb_client_ssl_profile.default.path
+    default_certificate_path = data.nsxt_policy_certificate.test.path
   }
 
   server_ssl {
-      server_auth             = "IGNORE"
-      certificate_chain_depth = %s
-      ssl_profile_path        = data.nsxt_policy_lb_server_ssl_profile.default.path
+    server_auth             = "IGNORE"
+    certificate_chain_depth = %s
+    ssl_profile_path        = data.nsxt_policy_lb_server_ssl_profile.default.path
   }
 }`, getTestCertificateName(false), attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["certificate_chain_depth"], attrMap["certificate_chain_depth"])
 }
@@ -890,8 +890,8 @@ func testAccNsxtPolicyLBVirtualServerWithAccessList(createFlow bool) string {
 		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
 	}
 	return fmt.Sprintf(`
-data "nsxt_policy_lb_app_profile" "default_tcp"{
-  type = "TCP"
+data "nsxt_policy_lb_app_profile" "default_tcp" {
+  type         = "TCP"
   display_name = "default-tcp-lb-app-profile"
 }
 
@@ -918,9 +918,9 @@ resource "nsxt_policy_lb_virtual_server" "test" {
   persistence_profile_path   = data.nsxt_policy_lb_persistence_profile.default.path
   log_significant_event_only = %s
   access_list_control {
-      action     = "%s"
-      enabled    = %s
-      group_path = nsxt_policy_group.group1.path
+    action     = "%s"
+    enabled    = %s
+    group_path = nsxt_policy_group.group1.path
   }
 }
 
@@ -937,8 +937,8 @@ func testAccNsxtPolicyLBVirtualServerUdp(createFlow bool) string {
 		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
 	}
 	return fmt.Sprintf(`
-data "nsxt_policy_lb_app_profile" "default_udp"{
-  type = "UDP"
+data "nsxt_policy_lb_app_profile" "default_udp" {
+  type         = "UDP"
   display_name = "default-udp-lb-app-profile"
 }
 
@@ -975,8 +975,8 @@ func testAccNsxtPolicyLBVirtualServerWithRules(createFlow bool) string {
 		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
 	}
 	return fmt.Sprintf(`
-data "nsxt_policy_lb_app_profile" "default_http"{
-  type = "HTTP"
+data "nsxt_policy_lb_app_profile" "default_http" {
+  type         = "HTTP"
   display_name = "default-http-lb-app-profile"
 }
 
@@ -1000,258 +1000,258 @@ resource "nsxt_policy_lb_virtual_server" "test" {
   display_name             = "%s"
   application_profile_path = data.nsxt_policy_lb_app_profile.default_http.path
   ip_address               = "%s"
-  ports                    = [ "80" ]
-  pool_path                  = nsxt_policy_lb_pool.pool.path
+  ports                    = ["80"]
+  pool_path                = nsxt_policy_lb_pool.pool.path
 
   rule {
-	display_name = "connection_drop_test"
-	action {
-	  connection_drop {}
-	}
+    display_name = "connection_drop_test"
+    action {
+      connection_drop {}
+    }
   }
   rule {
-	display_name = "http_redirect_test"
-	action {
-	  http_redirect {
-            redirect_status = "301"
-            redirect_url = "dummy"
-	  }
-	  http_redirect {
-            redirect_status = "302"
-            redirect_url = "other_dummy"
-	  }
-	}
-	condition {
-	  http_request_body {
-  	    body_value = "xyz"
-	    match_type = "REGEX"
-	  }
-	}
+    display_name = "http_redirect_test"
+    action {
+      http_redirect {
+        redirect_status = "301"
+        redirect_url    = "dummy"
+      }
+      http_redirect {
+        redirect_status = "302"
+        redirect_url    = "other_dummy"
+      }
+    }
+    condition {
+      http_request_body {
+        body_value = "xyz"
+        match_type = "REGEX"
+      }
+    }
   }
   rule {
-	display_name = "http_reject_test"
-	action {
-	  http_reject {
-  	    reply_status = "404"
-	  }
-	  http_reject {
-  	    reply_status = "400"
-	  }
-	}
-	condition {
-	  http_request_cookie {
-            cookie_name = "is"
-	    cookie_value = "brownie"
-	    match_type = "REGEX"
-	  }
-	}
+    display_name = "http_reject_test"
+    action {
+      http_reject {
+        reply_status = "404"
+      }
+      http_reject {
+        reply_status = "400"
+      }
+    }
+    condition {
+      http_request_cookie {
+        cookie_name  = "is"
+        cookie_value = "brownie"
+        match_type   = "REGEX"
+      }
+    }
   }
   rule {
-	display_name = "http_request_header_delete_test"
-	phase = "HTTP_REQUEST_REWRITE"
-	action {
-	  http_request_header_delete {
-	    header_name = "clever"
-	  }
-	  http_request_header_delete {
-	    header_name = "smart"
-	  }
-	}
-	condition {
-	  http_request_header {
-	    header_name = "my_head"
-	    header_value = "has_hair"
-	    match_type = "REGEX"
-	  }
-	}
+    display_name = "http_request_header_delete_test"
+    phase        = "HTTP_REQUEST_REWRITE"
+    action {
+      http_request_header_delete {
+        header_name = "clever"
+      }
+      http_request_header_delete {
+        header_name = "smart"
+      }
+    }
+    condition {
+      http_request_header {
+        header_name  = "my_head"
+        header_value = "has_hair"
+        match_type   = "REGEX"
+      }
+    }
   }
   rule {
-	display_name = "http_request_header_rewrite_test"
-	phase = "HTTP_REQUEST_REWRITE"
-	action {
-	  http_request_header_rewrite {
-	    header_name = "clever"
-	    header_value = "and"
-	  }
-	  http_request_header_rewrite {
-	    header_name = "smart"
-	    header_value = "!"
-	  }
-	}
-	condition {
-	  http_request_uri_arguments {
-	    uri_arguments = "foo=bar"
-	    match_type = "REGEX"
-	  }
-	  http_request_uri {
-	    uri = "xyz"
-	    match_type = "REGEX"
-	  }
-	}
+    display_name = "http_request_header_rewrite_test"
+    phase        = "HTTP_REQUEST_REWRITE"
+    action {
+      http_request_header_rewrite {
+        header_name  = "clever"
+        header_value = "and"
+      }
+      http_request_header_rewrite {
+        header_name  = "smart"
+        header_value = "!"
+      }
+    }
+    condition {
+      http_request_uri_arguments {
+        uri_arguments = "foo=bar"
+        match_type    = "REGEX"
+      }
+      http_request_uri {
+        uri        = "xyz"
+        match_type = "REGEX"
+      }
+    }
   }
   rule {
-	display_name = "http_request_uri_rewrite_test"
-	phase = "HTTP_REQUEST_REWRITE"
-	action {
-	  http_request_uri_rewrite {
-	    uri = "uri_test"
-	  }
-	  http_request_uri_rewrite {
-            uri = "uri_test2"
-	    uri_arguments = "foo=bar"
-	  }
-	}
-	condition {
-	  http_request_version {
-	    version = "HTTP_VERSION_1_0"
-	  }
-	}
+    display_name = "http_request_uri_rewrite_test"
+    phase        = "HTTP_REQUEST_REWRITE"
+    action {
+      http_request_uri_rewrite {
+        uri = "uri_test"
+      }
+      http_request_uri_rewrite {
+        uri           = "uri_test2"
+        uri_arguments = "foo=bar"
+      }
+    }
+    condition {
+      http_request_version {
+        version = "HTTP_VERSION_1_0"
+      }
+    }
   }
   rule {
-	display_name = "http_response_header_delete_test"
-	phase = "HTTP_RESPONSE_REWRITE"
-	action {
-	  http_response_header_delete {
-	    header_name = "clever"
-          }
-          http_response_header_delete {
-	    header_name = "smart"
-          }
-	}
-	condition {
-	  http_response_header {
-	    header_name = "clever"
-	    header_value = "smart"
-	    match_type = "REGEX"
-	  }
-	}
+    display_name = "http_response_header_delete_test"
+    phase        = "HTTP_RESPONSE_REWRITE"
+    action {
+      http_response_header_delete {
+        header_name = "clever"
+      }
+      http_response_header_delete {
+        header_name = "smart"
+      }
+    }
+    condition {
+      http_response_header {
+        header_name  = "clever"
+        header_value = "smart"
+        match_type   = "REGEX"
+      }
+    }
   }
   rule {
-	display_name = "http_response_header_rewrite_test"
-	phase = "HTTP_RESPONSE_REWRITE"
-	action {
-	  http_response_header_rewrite {
-	    header_name = "clever"
-	    header_value = "and"
-	  }
-	  http_response_header_rewrite {
-	    header_name = "smart"
-	    header_value = "!"
-	  }
-	}
-	condition {
-	  ip_header {
-	    source_address = "1.1.1.1"
-	  }
-	}
+    display_name = "http_response_header_rewrite_test"
+    phase        = "HTTP_RESPONSE_REWRITE"
+    action {
+      http_response_header_rewrite {
+        header_name  = "clever"
+        header_value = "and"
+      }
+      http_response_header_rewrite {
+        header_name  = "smart"
+        header_value = "!"
+      }
+    }
+    condition {
+      ip_header {
+        source_address = "1.1.1.1"
+      }
+    }
   }
   rule {
-	display_name = "select_pool_test"
-	phase = "HTTP_FORWARDING"
-	action {
-	  select_pool {
-            pool_id = nsxt_policy_lb_pool.pool.path
-	  }
-	}
-        condition {
-	  ssl_sni {
-	    match_type = "REGEX"
-	    sni = "HELO"
-	  }
-	}
+    display_name = "select_pool_test"
+    phase        = "HTTP_FORWARDING"
+    action {
+      select_pool {
+        pool_id = nsxt_policy_lb_pool.pool.path
+      }
+    }
+    condition {
+      ssl_sni {
+        match_type = "REGEX"
+        sni        = "HELO"
+      }
+    }
   }
   rule {
-	display_name = "variable_assignment_test"
-	phase = "HTTP_ACCESS"
-	action {
-	  variable_assignment {
-            variable_name = "foo"
-	    variable_value = "bar"
-	  }
-	}
-	condition {
-	  variable {
-	    variable_name = "my_var"
-	    variable_value = "my_value"
-	    match_type = "REGEX"
-	  }
-	  tcp_header {
-		source_port = "80"
-	  }
-	}
+    display_name = "variable_assignment_test"
+    phase        = "HTTP_ACCESS"
+    action {
+      variable_assignment {
+        variable_name  = "foo"
+        variable_value = "bar"
+      }
+    }
+    condition {
+      variable {
+        variable_name  = "my_var"
+        variable_value = "my_value"
+        match_type     = "REGEX"
+      }
+      tcp_header {
+        source_port = "80"
+      }
+    }
   }
   rule {
-	display_name = "variable_persistence_learn_test"
-	phase = "HTTP_RESPONSE_REWRITE"
-	action {
-	  variable_persistence_learn {
-            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
-	    variable_hash_enabled = true
-	    variable_name = "my_name"
-	  }
-	}
-	condition {
-	  http_ssl {
-	    session_reused = "IGNORE"
-	    used_protocol = "TLS_V1_2"
-	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-	    client_certificate_issuer_dn {
-		  issuer_dn = "something"
-		  match_type = "REGEX"
-	    }
-	    client_certificate_subject_dn {
-		  subject_dn = "something"
-		  match_type = "REGEX"
-	    }
-	    client_supported_ssl_ciphers = [ "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" ]
-	  }
-	}
+    display_name = "variable_persistence_learn_test"
+    phase        = "HTTP_RESPONSE_REWRITE"
+    action {
+      variable_persistence_learn {
+        persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+        variable_hash_enabled    = true
+        variable_name            = "my_name"
+      }
+    }
+    condition {
+      http_ssl {
+        session_reused  = "IGNORE"
+        used_protocol   = "TLS_V1_2"
+        used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        client_certificate_issuer_dn {
+          issuer_dn  = "something"
+          match_type = "REGEX"
+        }
+        client_certificate_subject_dn {
+          subject_dn = "something"
+          match_type = "REGEX"
+        }
+        client_supported_ssl_ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
+      }
+    }
   }
   rule {
-	display_name = "variable_persistence_learn_minimal_test"
-	phase = "HTTP_RESPONSE_REWRITE"
-	action {
-	  variable_persistence_learn {
-            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
-	    variable_name = "my_name"
-	  }
-	}
-	condition {
-	  http_ssl {
-	    used_protocol = "TLS_V1_2"
-	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-	  }
-	}
+    display_name = "variable_persistence_learn_minimal_test"
+    phase        = "HTTP_RESPONSE_REWRITE"
+    action {
+      variable_persistence_learn {
+        persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+        variable_name            = "my_name"
+      }
+    }
+    condition {
+      http_ssl {
+        used_protocol   = "TLS_V1_2"
+        used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+      }
+    }
   }
   rule {
-	display_name = "variable_persistence_on_test"
-	phase = "HTTP_FORWARDING"
-	action {
-	  variable_persistence_on {
-            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
-	    variable_hash_enabled = false
-	    variable_name = "my_name"
-	  }
-	}
+    display_name = "variable_persistence_on_test"
+    phase        = "HTTP_FORWARDING"
+    action {
+      variable_persistence_on {
+        persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+        variable_hash_enabled    = false
+        variable_name            = "my_name"
+      }
+    }
   }
   rule {
-	display_name = "jwt_auth_test"
-	phase = "HTTP_ACCESS"
-	action {
-	  jwt_auth {
-	    key {
-	  	  // one of ...
-		  public_key_content = "xxx"
-		  //certificate_path = "/path/to/cert"
-		  // this one only indicates presence, the value is discarded
-		  //symmetric_key = "dummy_value"
-	    }
-	    pass_jwt_to_pool = true
-	    realm = "realm"
-	    // only one token allowed currently
-	    tokens = [ "a" ]
-	  }
-	}
+    display_name = "jwt_auth_test"
+    phase        = "HTTP_ACCESS"
+    action {
+      jwt_auth {
+        key {
+          // one of ...
+          public_key_content = "xxx"
+          //certificate_path = "/path/to/cert"
+          // this one only indicates presence, the value is discarded
+          //symmetric_key = "dummy_value"
+        }
+        pass_jwt_to_pool = true
+        realm            = "realm"
+        // only one token allowed currently
+        tokens = ["a"]
+      }
+    }
   }
 }
 

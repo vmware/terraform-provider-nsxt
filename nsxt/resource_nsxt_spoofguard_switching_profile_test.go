@@ -149,7 +149,7 @@ resource "nsxt_spoofguard_switching_profile" "test" {
 func testAccNSXSpoofGuardSwitchingProfileEmptyTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_spoofguard_switching_profile" "test" {
-  display_name                      = "%s"
+  display_name = "%s"
 }
 `, name)
 }

@@ -177,8 +177,8 @@ func testAccNsxtPolicyTransportZoneCreate() string {
 	attrMap := accTestPolicyTransportZoneCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  description  = "%s"
+  display_name   = "%s"
+  description    = "%s"
   transport_type = "%s"
 
   tag {
@@ -192,8 +192,8 @@ func testAccNsxtPolicyTransportZoneUpdate() string {
 	attrMap := accTestPolicyTransportZoneUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  description  = "%s"
+  display_name   = "%s"
+  description    = "%s"
   transport_type = "%s"
 }`, attrMap["display_name"], attrMap["description"], attrMap["transport_type"])
 }
