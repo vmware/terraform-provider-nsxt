@@ -267,6 +267,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_service":                                    dataSourceNsxtPolicyService(),
 			"nsxt_policy_realization_info":                           dataSourceNsxtPolicyRealizationInfo(),
 			"nsxt_policy_segment_realization":                        dataSourceNsxtPolicySegmentRealization(),
+			"nsxt_policy_gateway_interface":                          dataSourceNsxtPolicyGatewayInterface(),
 			"nsxt_policy_transport_zone":                             dataSourceNsxtPolicyTransportZone(),
 			"nsxt_policy_ip_discovery_profile":                       dataSourceNsxtPolicyIPDiscoveryProfile(),
 			"nsxt_policy_spoofguard_profile":                         dataSourceNsxtPolicySpoofGuardProfile(),
