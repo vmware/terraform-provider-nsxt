@@ -61,7 +61,7 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 		Type:        schema.TypeList,
 		Description: "Subnet exclusive config",
 		Optional:    true,
-		ForceNew:    true,
+		ForceNew:    false,
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -69,7 +69,7 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
 					Required:    true,
-					ForceNew:    true,
+					ForceNew:    false,
 				},
 				"vlan_extension": vlanExtensionSchema(),
 			},
@@ -83,7 +83,7 @@ func vlanExtensionSchema() *schema.Schema {
 		Type:        schema.TypeList,
 		Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
 		Optional:    true,
-		ForceNew:    true,
+		ForceNew:    false,
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -91,7 +91,7 @@ func vlanExtensionSchema() *schema.Schema {
 					Type:        schema.TypeBool,
 					Description: "This configuration controls whether the VLAN extension subnet connects to the VPC gateway.",
 					Required:    true,
-					ForceNew:    true,
+					ForceNew:    false,
 				},
 			},
 		},
@@ -150,7 +150,7 @@ func resourceNsxtPolicyDistributedVlanConnectionCreate(d *schema.ResourceData, m
 
 	subnetExclusiveConfig := model.SubnetExclusiveConfig{}
 	subnetExclusiveConfigArgUnparsed := d.Get("subnet_exclusive_config").([]interface{})
-	if len(subnetExclusiveConfigArgUnparsed) > 0 || subnetExclusiveConfigArgUnparsed[0] != nil {
+	if len(subnetExclusiveConfigArgUnparsed) > 0 && subnetExclusiveConfigArgUnparsed[0] != nil {
 		tempSubnetExclusiveConfig, mapExists := subnetExclusiveConfigArgUnparsed[0].(map[string]interface{})
 		if ipBlockPath, ok := tempSubnetExclusiveConfig["ip_block_path"]; mapExists && ok {
 			ipBlockPathStr := ipBlockPath.(string)
@@ -209,9 +209,24 @@ func resourceNsxtPolicyDistributedVlanConnectionRead(d *schema.ResourceData, m i
 	d.Set("description", obj.Description)
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
-
+	if obj.SubnetExclusiveConfig != nil {
+		setSubnetExclusiveConfig(d, obj.SubnetExclusiveConfig)
+	}
 	elem := reflect.ValueOf(&obj).Elem()
 	return metadata.StructToSchema(elem, d, distributedVlanConnectionSchema, "", nil)
+}
+
+func setSubnetExclusiveConfig(d *schema.ResourceData, subnetExclusiveConfig *model.SubnetExclusiveConfig) {
+	subnetExclusiveConfigMap := make(map[string]interface{})
+	if subnetExclusiveConfig.IpBlockPath != nil {
+		subnetExclusiveConfigMap["ip_block_path"] = subnetExclusiveConfig.IpBlockPath
+	}
+	if subnetExclusiveConfig.VlanExtension.VpcGatewayConnectionEnable != nil {
+		subnetExclusiveConfigMap["vlan_extension"] = map[string]*bool{
+			"vpc_gateway_connection_enable": subnetExclusiveConfig.VlanExtension.VpcGatewayConnectionEnable,
+		}
+	}
+	d.Set("subnet_exclusive_config", subnetExclusiveConfigMap)
 }
 
 func resourceNsxtPolicyDistributedVlanConnectionUpdate(d *schema.ResourceData, m interface{}) error {
@@ -237,7 +252,7 @@ func resourceNsxtPolicyDistributedVlanConnectionUpdate(d *schema.ResourceData, m
 	}
 	subnetExclusiveConfig := model.SubnetExclusiveConfig{}
 	subnetExclusiveConfigArgUnparsed := d.Get("subnet_exclusive_config").([]interface{})
-	if len(subnetExclusiveConfigArgUnparsed) > 0 || subnetExclusiveConfigArgUnparsed[0] != nil {
+	if len(subnetExclusiveConfigArgUnparsed) > 0 && subnetExclusiveConfigArgUnparsed[0] != nil {
 		tempSubnetExclusiveConfig, mapExists := subnetExclusiveConfigArgUnparsed[0].(map[string]interface{})
 		if ipBlockPath, ok := tempSubnetExclusiveConfig["ip_block_path"]; mapExists && ok {
 			ipBlockPathStr := ipBlockPath.(string)
