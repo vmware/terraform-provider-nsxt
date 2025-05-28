@@ -107,15 +107,15 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	if len(errors) > 0 {
 		return errors[0]
 	}
-	d.Set("path", *path)
+	d.Set("path", path)
 	if isT0 && edgePath != nil {
-		err = d.Set("edge_cluster_path", *edgePath)
+		err = d.Set("edge_cluster_path", edgePath)
 		if err != nil {
 			return fmt.Errorf("Error while setting the interface edge cluster path : %v", err)
 		}
 	}
-	d.Set("description", *description)
-	d.Set("segment_path", *segmentPath)
+	d.Set("description", description)
+	d.Set("segment_path", segmentPath)
 
 	d.SetId(*id)
 	return nil
