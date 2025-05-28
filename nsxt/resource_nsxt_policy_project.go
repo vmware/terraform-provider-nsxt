@@ -38,21 +38,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"site_info": {
-				Type: schema.TypeList,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"edge_cluster_paths": {
-							Type:     schema.TypeList,
-							Elem:     getElemPolicyPathSchemaWithFlags(false, false, false),
-							Optional: true,
-						},
-						"site_path": getElemPolicyPathSchemaWithFlags(true, true, false),
-					},
-				},
-				Optional: true,
-				Computed: true,
-			},
+			"site_info": getResourceSiteInfoSchema(),
 			"tier0_gateway_paths": {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
@@ -113,6 +99,42 @@ func resourceNsxtPolicyProject() *schema.Resource {
 	}
 }
 
+func getResourceSiteInfoSchema() *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeList,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"edge_cluster_paths": {
+					Type:     schema.TypeList,
+					Elem:     getElemPolicyPathSchema(),
+					Optional: true,
+				},
+				"site_path": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+				},
+				"transport_zone_paths": {
+					Type:     schema.TypeList,
+					Elem:     getElemPolicyPathSchema(),
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+				},
+				"service_cluster_paths": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					Optional: true,
+				},
+			},
+		},
+		Optional: true,
+		Computed: true,
+	}
+}
+
 func resourceNsxtPolicyProjectExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	client := infra.NewProjectsClient(connector)
@@ -138,14 +160,17 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	var siteInfos []model.SiteInfo
 	for _, item := range siteInfosList {
 		data := item.(map[string]interface{})
-		var edgeClusterPaths []string
-		for _, ecp := range data["edge_cluster_paths"].([]interface{}) {
-			edgeClusterPaths = append(edgeClusterPaths, ecp.(string))
-		}
+		edgeClusterPaths := interface2StringList(data["edge_cluster_paths"].([]interface{}))
 		sitePath := data["site_path"].(string)
 		obj := model.SiteInfo{
 			EdgeClusterPaths: edgeClusterPaths,
 			SitePath:         &sitePath,
+		}
+		if util.NsxVersionHigherOrEqual("9.1.0") {
+			tzPaths := interface2StringList(data["transport_zone_paths"].([]interface{}))
+			serviceClusterPaths := interface2StringList(data["service_cluster_paths"].([]interface{}))
+			obj.TransportZonePaths = tzPaths
+			obj.ServiceClusterPaths = serviceClusterPaths
 		}
 		siteInfos = append(siteInfos, obj)
 	}
@@ -293,6 +318,8 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		data := make(map[string]interface{})
 		data["edge_cluster_paths"] = item.EdgeClusterPaths
 		data["site_path"] = item.SitePath
+		data["transport_zone_paths"] = item.TransportZonePaths
+		data["service_cluster_paths"] = item.ServiceClusterPaths
 		siteInfosList = append(siteInfosList, data)
 	}
 	d.Set("site_info", siteInfosList)

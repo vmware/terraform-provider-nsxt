@@ -90,6 +90,13 @@ func runChecksNsx900(testResourceName string, expectedValues map[string]string) 
 	)
 }
 
+func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(testResourceName, "site_info.0.transport_zone_paths.#", expectedValues["transport_zone_paths_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+	)
+}
+
 func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	siteCount := getExpectedSiteInfoCount(t)
@@ -303,6 +310,35 @@ func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
+	testResourceName := "nsxt_policy_project.test"
+	expectedValues := map[string]string{
+		"transport_zone_paths_count": "1",
+		"site_count":                 "1",
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyProjectTemplate910(),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx910(testResourceName, expectedValues),
+				),
+			},
+		},
+	})
+}
+
+
 func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	resource.ParallelTest(t, resource.TestCase{
@@ -459,6 +495,10 @@ data "nsxt_policy_tier0_gateway" "test" {
   display_name = "{{.T0Name}}"
 }
 
+data "nsxt_policy_transport_zone" "test" {
+  display_name = "{{.TransportZone}}"
+}
+
 resource "nsxt_policy_ip_block" "test_ip_block" {
   display_name = "test_ip_block"
   cidr         = "10.20.0.0/16"
@@ -481,6 +521,7 @@ resource "nsxt_policy_project" "test" {
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
+    {{if .TransportZonePaths}}transport_zone_paths = {{.TransportZonePaths}}{{end}}
   }
   tag {
     scope = "scope1"
@@ -568,6 +609,25 @@ func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExterna
 	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate900").Parse(templateData)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(buffer, attrMap)
+	if err != nil {
+		panic(err)
+	}
+	return buffer.String()
+}
+
+func testAccNsxtPolicyProjectTemplate910() string {
+	attrMap := getBasicAttrMap(true, true)
+	attrMap["SetIpBlockVisibility"] = "true"
+	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(true)
+	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
+	attrMap["TransportZonePaths"] = "[data.nsxt_policy_transport_zone.test.path]"
+	attrMap["TransportZone"] = getOverlayTransportZoneName()
+	buffer := new(bytes.Buffer)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate910").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
