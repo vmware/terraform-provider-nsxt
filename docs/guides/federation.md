@@ -1,16 +1,16 @@
 ---
-page_title: "VMware NSX-T Terraform Provider support for Federation (Global Manager)"
+page_title: "Support for NSX Federation"
 description: |-
-  The VMware NSX-T Terraform Provider support for Federation (Global Manager)
+  Support for NSX Federation
 ---
 
-# Terraform Provider for NSX-T extension for Federation
+# Support for NSX Federation
 
-The NSX Terraform Resources and Data Sources are now extended to support Federation (Global Manager). More information on Federation that was introduced in NSX-T 3.0 can be found on the [NSX-T Product Page for Federation](https://docs.vmware.com/en/VMware-NSX-T-Data-Center/3.0/administration/GUID-D5B6DC79-6733-44A7-8072-50221CF2122A.html)
+The provider includes support NSX Federation (Global Manager).
 
-Documentation on the NSX platform can be found on the [NSX Documentation Page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+For more information on NSX, refer to the [NSX documentation](https://techdocs.broadcom.com/us/en/vmware-cis/nsx.html).
 
-## Basic Authentication with Federation
+## Basic Authentication with NSX Federation
 
 ```hcl
 provider "nsxt" {
@@ -21,9 +21,9 @@ provider "nsxt" {
 }
 ```
 
-**NOTE:** Authentication with the Global Manager uses the same NSX-T Terraform provider but uses a `global_manager = true` flag for identification.
+~> **NOTE:**  Authentication with the Global Manager uses the same NSX Terraform provider but uses a `global_manager = true` flag for identification.
 
-**NOTE:** In order to use both Global Manager and Local Manager within same configuration, please use [Provider Aliasing] (<https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-configurations>).
+~> **NOTE:**  In order to use both Global Manager and Local Manager within same configuration, please use [Provider Aliasing] (<https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-configurations>).
 
 ## Using Resources and Data Sources
 
@@ -33,9 +33,9 @@ For example, consider the resource nsxt_policy_tier0_gateway. While the same res
 
 Remember to check out the documentation for the resource you are interested in for such differences.
 
-**NOTE:** Only Policy resources are available to use with Federation.
+~> **NOTE:**  Only Policy resources are available to use with Federation.
 
-## Available Resources for use with NSX-T Federation
+## Available Resources for use with NSX Federation
 
 The following Resources are available to use with Federation:
 
@@ -51,7 +51,7 @@ The following Resources are available to use with Federation:
 * Gateway Policy [nsxt_policy_gateway_policy](https://www.terraform.io/docs/providers/nsxt/r/policy_gateway_policy)
 * NAT Rule [nsxt_policy_nat_rule](https://www.terraform.io/docs/providers/nsxt/r/policy_nat_rule)
 
-## Available Data Sources for use with NSX-T Federation
+## Available Data Sources for use with NSX Federation
 
 The following Data Sources are available to use with Federation:
 
