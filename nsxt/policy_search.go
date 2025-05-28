@@ -90,6 +90,10 @@ func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Conne
 func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
+	isGlobal := false
+	if isGlobalRaw, ok := d.GetOk("is_global"); ok {
+		isGlobal, _ = isGlobalRaw.(bool)
+	}
 	var err error
 	var resultValues []*data.StructValue
 	additionalQueryString := buildQueryStringFromMap(additionalQuery)
@@ -102,10 +106,10 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 			// TODO: consider switching all searches to nsx id
 			resultValues, err = listPolicyResourcesByNsxID(connector, context, &objID, &additionalQueryString)
 		} else {
-			resultValues, err = listPolicyResourcesByID(connector, context, &objID, &additionalQueryString)
+			resultValues, err = listPolicyResourcesByID(connector, context, &objID, &additionalQueryString, isGlobal)
 		}
 	} else {
-		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString)
+		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString, isGlobal)
 	}
 	if err != nil {
 		return nil, err
@@ -114,11 +118,12 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+// globalFlag argument is an optional
+func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
 	switch context.ClientType {
 	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Multitenancy, utl.VPC:
@@ -152,11 +157,11 @@ func escapeSpecialCharacters(str string) string {
 	return str
 }
 
-func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	switch context.ClientType {
 	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Multitenancy, utl.VPC:
@@ -170,7 +175,7 @@ func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionC
 	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	switch context.ClientType {
 	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), false)
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Multitenancy, utl.VPC:
@@ -235,10 +240,13 @@ func searchLM(connector client.Connector, query string) ([]*data.StructValue, er
 	}
 }
 
-func searchLMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
+func searchLMPolicyResources(connector client.Connector, query string, isGlobal bool) ([]*data.StructValue, error) {
 	// Make sure global objects are not found (path needs to start with infra)
-	query = query + " AND path:\\/infra*"
-
+	if isGlobal {
+		query = query + " AND path:\\/global-infra*"
+	} else {
+		query = query + " AND path:\\/infra*"
+	}
 	return searchLM(connector, query)
 }
 
