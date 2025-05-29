@@ -723,13 +723,13 @@ data "nsxt_transport_zone" "tz" {
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name                = "test"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.ec.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.ec.id
   enable_router_advertisement = true
 }
 
 resource "nsxt_logical_switch" "test" {
   display_name      = "test"
-  transport_zone_id = "${data.nsxt_transport_zone.tz.id}"
+  transport_zone_id = data.nsxt_transport_zone.tz.id
 }
 
 resource "nsxt_logical_port" "test" {

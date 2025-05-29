@@ -219,7 +219,7 @@ resource "nsxt_logical_switch" "test" {
   display_name      = "test-nsx-switch"
   admin_state       = "UP"
   replication_mode  = "MTEP"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
 }`, transportZoneName)
 }
 
@@ -270,8 +270,8 @@ resource "nsxt_logical_port" "test" {
   logical_switch_id = "${nsxt_logical_switch.test.id}"
 
   switching_profile_id {
-    key   = "${data.nsxt_switching_profile.test1.resource_type}"
-    value = "${data.nsxt_switching_profile.test1.id}"
+    key   = data.nsxt_switching_profile.test1.resource_type
+    value = data.nsxt_switching_profile.test1.id
   }
 }`, profileName, portName)
 }

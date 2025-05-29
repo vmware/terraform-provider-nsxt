@@ -254,9 +254,9 @@ resource "nsxt_lb_https_monitor" "test" {
   description             = "test description"
   display_name            = "%s"
   server_auth             = "REQUIRED"
-  server_auth_ca_ids      = ["${data.nsxt_certificate.ca.id}"]
+  server_auth_ca_ids      = [data.nsxt_certificate.ca.id]
   certificate_chain_depth = 2
-  client_certificate_id   = "${data.nsxt_certificate.client.id}"
+  client_certificate_id   = data.nsxt_certificate.client.id
   protocols               = ["TLS_V1_2"]
   ciphers                 = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
 }

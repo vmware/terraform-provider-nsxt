@@ -178,7 +178,7 @@ resource "nsxt_logical_tier0_router" "test" {
   display_name           = "%s"
   description            = "Acceptance Test"
   high_availability_mode = "%s"
-  edge_cluster_id        = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id        = data.nsxt_edge_cluster.EC.id
 
   tag {
     scope = "scope1"
@@ -202,7 +202,7 @@ resource "nsxt_logical_tier0_router" "test" {
   display_name           = "%s"
   description            = "Acceptance Test Update"
   high_availability_mode = "%s"
-  edge_cluster_id        = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id        = data.nsxt_edge_cluster.EC.id
 
   tag {
     scope = "scope3"

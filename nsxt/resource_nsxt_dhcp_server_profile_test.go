@@ -138,7 +138,7 @@ data "nsxt_edge_cluster" "EC" {
 resource "nsxt_dhcp_server_profile" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.EC.id
   edge_cluster_member_indexes = [0]
 
   tag {
@@ -157,7 +157,7 @@ data "nsxt_edge_cluster" "EC" {
 resource "nsxt_dhcp_server_profile" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test Update"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.EC.id
   edge_cluster_member_indexes = [0]
   tag {
     scope = "scope1"

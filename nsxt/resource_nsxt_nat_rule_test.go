@@ -281,7 +281,7 @@ data "nsxt_edge_cluster" "EC" {
 
 resource "nsxt_logical_tier1_router" "rtr1" {
   display_name    = "tier1_router"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }`, edgeClusterName)
 }
 

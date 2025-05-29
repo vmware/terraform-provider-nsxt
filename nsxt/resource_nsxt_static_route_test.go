@@ -186,7 +186,7 @@ data "nsxt_edge_cluster" "EC" {
 
 resource "nsxt_logical_%s_router" "rtr1" {
   display_name    = "static route test"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }
 
 data "nsxt_transport_zone" "tz1" {
@@ -198,7 +198,7 @@ resource "nsxt_logical_switch" "ls1" {
   admin_state       = "UP"
   replication_mode  = "MTEP"
   vlan              = "0"
-  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+  transport_zone_id = data.nsxt_transport_zone.tz1.id
 }
 
 resource "nsxt_logical_port" "port1" {

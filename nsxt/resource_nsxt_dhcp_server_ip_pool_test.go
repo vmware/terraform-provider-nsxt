@@ -269,7 +269,7 @@ data "nsxt_edge_cluster" "EC" {
 }
 
 resource "nsxt_dhcp_server_profile" "PRF" {
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }
 
 resource "nsxt_logical_dhcp_server" "DS" {

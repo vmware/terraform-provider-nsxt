@@ -160,7 +160,7 @@ data "nsxt_ip_pool" "acceptance_test" {
 }
 
 resource "nsxt_ip_pool_allocation_ip_address" "test" {
-  ip_pool_id = "${data.nsxt_ip_pool.acceptance_test.id}"
+  ip_pool_id = data.nsxt_ip_pool.acceptance_test.id
 }`, getIPPoolName())
 }
 
