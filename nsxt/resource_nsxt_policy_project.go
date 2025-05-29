@@ -109,6 +109,40 @@ func resourceNsxtPolicyProject() *schema.Resource {
 					},
 				},
 			},
+			"vpc_deployment_scope": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Project Vpc network Deployment Scope",
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"default_span": {
+							Type:         schema.TypeString,
+							Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
+							ValidateFunc: validatePolicyPath(),
+							Optional:     true,
+						},
+						"non_default_spans": {
+							Type:        schema.TypeList,
+							Description: "PolicyPaths of NetworkSpan object",
+							Optional:    true,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validatePolicyPath(),
+							},
+						},
+						"zone_external_ids": {
+							Type:        schema.TypeList,
+							Description: "An array of Zone object's external IDs",
+							Optional:    true,
+							MinItems:    1,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -181,6 +215,22 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 	if shortID != "" {
 		obj.ShortId = &shortID
+	}
+
+	vdsIntface, ok := d.GetOk("vpc_deployment_scope")
+	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 {
+		// There should be just one object here
+		vds := vdsIntface.([]interface{})[0].(map[string]interface{})
+		defaultSpan := vds["default_span"].(string)
+		nonDefaultSpans := interfaceListToStringList(vds["non_default_spans"].([]interface{}))
+		zoneExternalIds := interfaceListToStringList(vds["zone_external_ids"].([]interface{}))
+
+		vpcDeploymentScope := model.VpcDeploymentScope{
+			DefaultSpan:     &defaultSpan,
+			NonDefaultSpans: nonDefaultSpans,
+			ZoneExternalIds: zoneExternalIds,
+		}
+		obj.VpcDeploymentScope = &vpcDeploymentScope
 	}
 
 	log.Printf("[INFO] Patching Project with ID %s", id)
@@ -314,6 +364,14 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("tgw_external_connections", obj.TgwExternalConnections)
 		d.Set("vc_folder", obj.VcFolder)
 		d.Set("quotas", obj.Limits)
+	}
+
+	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
+		deploymentScope := make(map[string]interface{})
+		deploymentScope["default_span"] = obj.VpcDeploymentScope.DefaultSpan
+		deploymentScope["non_default_spans"] = stringList2Interface(obj.VpcDeploymentScope.NonDefaultSpans)
+		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
+		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})
 	}
 	return nil
 }
