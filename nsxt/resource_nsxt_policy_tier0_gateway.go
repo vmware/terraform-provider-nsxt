@@ -908,7 +908,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 			gwChildren = append(gwChildren, localeServices...)
 		}
 	} else if !isGlobalManager {
-		localeServiceNeeded := (len(lsChildren) > 0 || edgeClusterPath != "" || redistributionSet)
+		localeServiceNeeded := len(lsChildren) > 0 || edgeClusterPath != "" || redistributionSet
 		// Local Manager
 		if localeServiceNeeded {
 			if d.Get("edge_cluster_path") == "" && (len(bgpConfig) > 0) {

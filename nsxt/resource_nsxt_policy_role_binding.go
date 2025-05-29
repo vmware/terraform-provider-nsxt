@@ -15,13 +15,13 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var roleBindingUserTypes = [](string){
+var roleBindingUserTypes = []string{
 	nsxModel.RoleBinding_TYPE_LOCAL_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_GROUP,
 }
 
-var roleBindingIdentitySourceTypes = [](string){
+var roleBindingIdentitySourceTypes = []string{
 	nsxModel.RoleBinding_IDENTITY_SOURCE_TYPE_VIDM,
 	nsxModel.RoleBinding_IDENTITY_SOURCE_TYPE_LDAP,
 	nsxModel.RoleBinding_IDENTITY_SOURCE_TYPE_OIDC,

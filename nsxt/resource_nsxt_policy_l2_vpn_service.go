@@ -138,7 +138,7 @@ func resourceNsxtPolicyL2VpnServiceImport(d *schema.ResourceData, m interface{})
 	if len(s) != 8 && len(s) != 6 {
 		return nil, err
 	}
-	useLocaleService := (len(s) == 8)
+	useLocaleService := len(s) == 8
 	d.SetId(s[len(s)-1])
 	s = strings.Split(importID, "/l2vpn-services/")
 	if len(s) != 2 {
