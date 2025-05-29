@@ -154,7 +154,7 @@ func getDataSourceDomainNameSchema() *schema.Schema {
 func getPolicyGatewayPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
-		Description:  "The NSX-T Policy path to the Tier0 or Tier1 Gateway for this resource",
+		Description:  "The NSX Policy path to the Tier0 or Tier1 Gateway for this resource",
 		Required:     true,
 		ValidateFunc: validatePolicyPath(),
 		ForceNew:     true,

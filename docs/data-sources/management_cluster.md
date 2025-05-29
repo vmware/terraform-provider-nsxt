@@ -1,12 +1,12 @@
 ---
 subcategory: "Manager"
 page_title: "NSXT: management_cluster"
-description: A NSX-T management cluster data source.
+description: A NSX management cluster data source.
 ---
 
 # nsxt_management_cluster
 
-This data source provides information about the NSX-T management cluster.
+This data source provides information about the NSX management cluster.
 
 ## Example Usage
 
