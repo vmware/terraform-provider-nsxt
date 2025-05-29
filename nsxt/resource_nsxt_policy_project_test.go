@@ -72,21 +72,25 @@ func runChecksNsx410(testResourceName string, attributes map[string]string, expe
 func runChecksNsx411(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "external_ipv4_blocks.#", expectedValues["ip_block_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 	)
 }
 
 func runChecksNsx420(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "activate_default_dfw_rules", expectedValues["activate_default_dfw_rules"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 	)
 }
 
 func runChecksNsx900(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "tgw_external_connections.#", expectedValues["tgw_ext_conn_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+	)
+}
+
+func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.#", expectedValues["vpc_deployment_scope_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.default_span"),
 	)
 }
 
@@ -273,6 +277,7 @@ func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
+			testAccNSXVersionLessThan(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -342,6 +347,63 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 				Config: testAccNsxtPolicyProjectDefaultSecurityPolicy(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
+	testResourceName := "nsxt_policy_project.test"
+	siteCount := getExpectedSiteInfoCount(t)
+	expectedValuesStep1 := map[string]string{
+		"t0_count":                   "1",
+		"ip_block_count":             "1",
+		"tgw_ext_conn_count":         "1",
+		"vpc_deployment_scope_count": "1",
+		"activate_default_dfw_rules": "true",
+		"site_count":                 siteCount,
+	}
+	expectedValuesStep2 := map[string]string{
+		"t0_count":                   "1",
+		"ip_block_count":             "0",
+		"tgw_ext_conn_count":         "1",
+		"vpc_deployment_scope_count": "1",
+		"activate_default_dfw_rules": "false",
+		"site_count":                 siteCount,
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
+		},
+		Steps: []resource.TestStep{
+			{
+				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
+				Config: testAccNsxtPolicyProjectTemplate910(true, true, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx410(testResourceName, accTestPolicyProjectCreateAttributes, expectedValuesStep1),
+					runChecksNsx411(testResourceName, expectedValuesStep1),
+					runChecksNsx420(testResourceName, expectedValuesStep1),
+					runChecksNsx900(testResourceName, expectedValuesStep1),
+					runChecksNsx910(testResourceName, expectedValuesStep1),
+				),
+			},
+			{
+				// Update: Set T0, Ext GW connection, No Ext IPv4 Block, disable default DFW
+				Config: testAccNsxtPolicyProjectTemplate910(false, true, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
+					runChecksNsx411(testResourceName, expectedValuesStep2),
+					runChecksNsx420(testResourceName, expectedValuesStep2),
+					runChecksNsx900(testResourceName, expectedValuesStep2),
+					runChecksNsx910(testResourceName, expectedValuesStep2),
 				),
 			},
 		},
@@ -471,6 +533,11 @@ resource "nsxt_policy_ip_block" "test_ip_block" {
   aggregate_routes = ["192.168.240.0/24"]
 }{{end}}
 
+{{if .PolicyNetworkSpan}}resource "nsxt_policy_network_span" "netspan" {
+  display_name = "test_span"
+  exclusive    = true
+}{{end}}
+
 resource "nsxt_policy_project" "test" {
   display_name               = "{{.DisplayName}}"
   description                = "{{.Description}}"
@@ -479,6 +546,9 @@ resource "nsxt_policy_project" "test" {
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
+  {{if .PolicyNetworkSpan}}vpc_deployment_scope {
+    default_span = {{.PolicyNetworkSpan}}
+  }{{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
   }
@@ -568,6 +638,27 @@ func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExterna
 	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate900").Parse(templateData)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(buffer, attrMap)
+	if err != nil {
+		panic(err)
+	}
+	return buffer.String()
+}
+
+func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
+	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	if includeExternalIPv4Block {
+		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
+	}
+	attrMap["SetIpBlockVisibility"] = "true"
+	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
+	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
+	attrMap["PolicyNetworkSpan"] = "nsxt_policy_network_span.netspan.path"
+	buffer := new(bytes.Buffer)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate910").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}
