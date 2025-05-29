@@ -175,10 +175,18 @@ func testAccNsxtVtepHAHostSwitchProfileCheckDestroy(state *terraform.State, disp
 
 func testAccNsxtVtepHAHostSwitchProfileTemplate(createFlow bool) string {
 	var attrMap map[string]string
+	var dataSource string
+
 	if createFlow {
 		attrMap = accTestVtepHAHostSwitchProfileCreateAttributes
+		dataSource = fmt.Sprintf(`
+data "nsxt_policy_vtep_ha_host_switch_profile" "test" {
+  display_name = "%s"
+  depends_on   = [nsxt_policy_vtep_ha_host_switch_profile.test]
+}`, attrMap["display_name"])
 	} else {
 		attrMap = accTestVtepHAHostSwitchProfileUpdateAttributes
+
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vtep_ha_host_switch_profile" "test" {
@@ -195,10 +203,8 @@ resource "nsxt_policy_vtep_ha_host_switch_profile" "test" {
     tag   = "tag1"
   }
 }
-data "nsxt_policy_vtep_ha_host_switch_profile" "test" {
-  display_name = "%s"
-  depends_on   = [nsxt_policy_vtep_ha_host_switch_profile.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["auto_recovery"], attrMap["auto_recovery_initial_wait"], attrMap["auto_recovery_max_backoff"], attrMap["enabled"], attrMap["failover_timeout"], attrMap["display_name"])
+%s
+`, attrMap["display_name"], attrMap["description"], attrMap["auto_recovery"], attrMap["auto_recovery_initial_wait"], attrMap["auto_recovery_max_backoff"], attrMap["enabled"], attrMap["failover_timeout"], dataSource)
 }
 
 func testAccNsxtVtepHAHostSwitchProfileMinimalistic() string {
