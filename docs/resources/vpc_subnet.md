@@ -66,6 +66,7 @@ The following arguments are supported:
     * `config_pair` - (Required)
       * `key` - (Required) key for vendor-specific configuration
       * `value` - (Required) value for vendor-specific configuration
+  * `enable_vlan_extension` - (Optional) Enabling VLAN connection for the subnet. The user must configure the exclusive external IP block for this subnet. The IP block should also be configured under a distributed VLAN connection. The default value for this will be false.
 * `dhcp_config` - (Optional) DHCP configuration block
   * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`.
        Default is `DHCP_DEACTIVATED`
