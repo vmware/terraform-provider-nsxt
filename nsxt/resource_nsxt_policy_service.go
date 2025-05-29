@@ -260,7 +260,7 @@ func setServiceEntryListInSchemaOrMap(d interface{}, attrName string, entries []
 
 func getServiceEntriesFromSchema(d interface{}) ([]*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	serviceEntries := []*data.StructValue{}
+	var serviceEntries []*data.StructValue
 
 	// ICMP Type service entries
 	icmpEntries := getServiceEntryListFromSchemaOrMap(d, "icmp_entry")

@@ -189,7 +189,7 @@ func resourceNsxtQosSwitchingProfileCreate(d *schema.ResourceData, m interface{}
 		dscpTrusted = "TRUSTED"
 	}
 	dscpPriority := int32(d.Get("dscp_priority").(int))
-	shapers := []manager.QosBaseRateShaper{}
+	var shapers []manager.QosBaseRateShaper
 	for index := ingressRateShaperIndex; index <= egressRateShaperIndex; index++ {
 
 		shaper := getQosRateShaperFromSchema(d, index)
@@ -284,7 +284,7 @@ func resourceNsxtQosSwitchingProfileUpdate(d *schema.ResourceData, m interface{}
 		dscpTrusted = "TRUSTED"
 	}
 	dscpPriority := int32(d.Get("dscp_priority").(int))
-	shapers := []manager.QosBaseRateShaper{}
+	var shapers []manager.QosBaseRateShaper
 	for index := ingressRateShaperIndex; index <= egressRateShaperIndex; index++ {
 		shaper := getQosRateShaperFromSchema(d, index)
 		if shaper != nil {

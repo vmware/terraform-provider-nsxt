@@ -29,7 +29,7 @@ func testCatStructBindingType() vapiBindings_.BindingType {
 	fieldNameMap["name"] = "Name"
 	fields["type"] = vapiBindings_.NewStringType()
 	fieldNameMap["type"] = "Type"
-	var validators = []vapiBindings_.Validator{}
+	var validators []vapiBindings_.Validator
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.cat", fields,
 		reflect.TypeOf(testCatStruct{}), fieldNameMap, validators)
 }
@@ -66,7 +66,7 @@ func testCoffeeStructBindingType() vapiBindings_.BindingType {
 	fieldNameMap["name"] = "Name"
 	fields["type"] = vapiBindings_.NewStringType()
 	fieldNameMap["type"] = "Type"
-	var validators = []vapiBindings_.Validator{}
+	var validators []vapiBindings_.Validator
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.coffee", fields,
 		reflect.TypeOf(testCoffeeStruct{}), fieldNameMap, validators)
 }
