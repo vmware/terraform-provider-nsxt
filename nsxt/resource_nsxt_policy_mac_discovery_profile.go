@@ -125,7 +125,7 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-var macDiscoveryProfileExamplePath string = getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")
+var macDiscoveryProfileExamplePath = getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")
 
 func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 	return &schema.Resource{
