@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -717,6 +718,36 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtGlobalPolicyGroup_vpc(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupTemplateWithVpc(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
 				),
 			},
 		},
@@ -1623,4 +1654,26 @@ resource "nsxt_policy_group" "test" {
     }
   }
 }`, name)
+}
+
+func testAccNsxtPolicyGroupTemplateWithVpc(name string) string {
+	return fmt.Sprintf(`
+data "nsxt_vpc" "test" {
+  %s
+  id = "%s"
+}
+
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "Vpc"
+      operator    = "EQUALS"
+      value       = data.nsxt_vpc.test.display_name
+    }
+  }
+}
+`, testAccNsxtProjectContext(), os.Getenv("NSXT_VPC_ID"), name)
 }
