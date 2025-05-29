@@ -17,6 +17,8 @@ components exclusively. Therefore, concurrent changess to upgrade components via
 from v3.2.3 to v4.1.1 the Terraform state file should be retained until the upgrade is completed. Then, if the same plan
 is used later on to upgrade from v4.1.1 to v4.2.0, the Terraform state file should be deleted prior to applying the plan.
 
+**NOTE:** For details concerning specific NSX version, and limitations concerning supported scenarios and limitations, please review the [NSX upgrade guide](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-2/upgrade-guide/nsx-t-upgrade-guide.html).
+
 ## Upgrade process steps
 
 ### Preparation for upgrade

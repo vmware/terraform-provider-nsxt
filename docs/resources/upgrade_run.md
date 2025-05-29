@@ -21,6 +21,8 @@ details, please check NSX admin guide.
 If upgrade post-checks are configured to be run, it will trigger the upgrade post-check.
 Please use data source `nsxt_upgrade_postcheck` to retrieve results of upgrade post-checks.
 
+**NOTE:** For details concerning specific NSX version, and limitations concerning supported scenarios and limitations, please review the [NSX upgrade guide](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-2/upgrade-guide/nsx-t-upgrade-guide.html).
+
 ## Example Usage
 
 ```hcl
