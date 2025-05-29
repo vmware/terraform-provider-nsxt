@@ -32,7 +32,7 @@ func resourceNsxtPolicyEvpnTunnelEndpoint() *schema.Resource {
 			"description":             getDescriptionSchema(),
 			"revision":                getRevisionSchema(),
 			"tag":                     getTagsSchema(),
-			"external_interface_path": getPolicyPathSchema(true, true, "Path External Interfaceon Tier0 Gateway"),
+			"external_interface_path": getPolicyPathSchema(true, true, "Path External Interface on Tier0 Gateway"),
 			"edge_node_path":          getPolicyPathSchema(true, false, "Edge Node Path"),
 			"local_address": {
 				Type:         schema.TypeString,

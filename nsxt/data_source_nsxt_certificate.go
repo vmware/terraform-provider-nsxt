@@ -40,7 +40,7 @@ func dataSourceNsxtCertificate() *schema.Resource {
 }
 
 func dataSourceNsxtCertificateRead(d *schema.ResourceData, m interface{}) error {
-	// Read cerificate by name or id
+	// Read certificate by name or id
 	nsxClient := m.(nsxtClients).NsxtClient
 	if nsxClient == nil {
 		return dataSourceNotSupportedError()

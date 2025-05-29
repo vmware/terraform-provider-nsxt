@@ -260,7 +260,7 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	// From 9.0.0 onwards CreateServiceAccount can not be false
-	// so we can effetively ignore this field
+	// so we can effectively ignore this field
 	if util.NsxVersionLower("9.0.0") {
 		obj.CreateServiceAccount = &createServiceAccount
 	}
@@ -545,7 +545,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	// From 9.0.0 onwards CreateServiceAccount can not be false
-	// so we can effetively ignore this field
+	// so we can effectively ignore this field
 	if util.NsxVersionLower("9.0.0") {
 		obj.CreateServiceAccount = &createServiceAccount
 	}

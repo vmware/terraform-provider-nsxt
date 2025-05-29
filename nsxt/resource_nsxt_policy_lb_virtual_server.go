@@ -155,7 +155,7 @@ func resourceNsxtPolicyLBVirtualServer() *schema.Resource {
 			},
 			"log_significant_event_only": {
 				Type:        schema.TypeBool,
-				Description: "Flag to log significant events in access log, if access log is enabed",
+				Description: "Flag to log significant events in access log, if access log is enabled",
 				Optional:    true,
 				Default:     false,
 			},
@@ -228,7 +228,7 @@ func getPolicyLbServerSSLBindingSchema() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(lbServerSSLModeValues, false),
 				Default:      model.LBServerSslProfileBinding_SERVER_AUTH_AUTO_APPLY,
 			},
-			"client_certificate_path": getPolicyPathSchema(false, false, "Client certificat path for client authentication"),
+			"client_certificate_path": getPolicyPathSchema(false, false, "Client certificate path for client authentication"),
 			"certificate_chain_depth": {
 				Type:         schema.TypeInt,
 				Description:  "Certificate chain depth",
@@ -1450,7 +1450,7 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 				conditionData := condition.(map[string]interface{})
 				var fields = make(map[string]data.DataValue)
 				fields["type"] = data.NewStringValue(model.LBRuleCondition_TYPE_LBHTTPSSLCONDITION)
-				// Not actually a list but that's what the Schems says
+				// Not actually a list but that's what the Schema says
 				for _, issuerDn := range conditionData["client_certificate_issuer_dn"].(*schema.Set).List() {
 					issuerDnData := issuerDn.(map[string]interface{})
 					var issuerDnFields = make(map[string]data.DataValue)
@@ -1465,7 +1465,7 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 					}
 					fields["client_certificate_issuer_dn"] = data.NewStructValue("", issuerDnFields)
 				}
-				// Not actually a list but that's what the Schems says
+				// Not actually a list but that's what the Schema says
 				for _, subjectDn := range conditionData["client_certificate_subject_dn"].(*schema.Set).List() {
 					subjectDnData := subjectDn.(map[string]interface{})
 					var subjectDnFields = make(map[string]data.DataValue)

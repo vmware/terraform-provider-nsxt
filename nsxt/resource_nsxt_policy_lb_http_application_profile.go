@@ -21,7 +21,7 @@ var lBHttpProfileXForwardedForValues = []string{
 	model.LBHttpProfile_X_FORWARDED_FOR_INSERT,
 }
 
-var lbHttpApplucationProfilePathExample = "/infra/lb-app-profiles/[profile]"
+var lbHttpApplicationProfilePathExample = "/infra/lb-app-profiles/[profile]"
 
 func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 	return &schema.Resource{
@@ -30,7 +30,7 @@ func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBHttpApplicationProfileUpdate,
 		Delete: resourceNsxtPolicyLBHttpApplicationProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathOrIDResourceImporter(lbHttpApplucationProfilePathExample),
+			State: getPolicyPathOrIDResourceImporter(lbHttpApplicationProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -100,7 +100,7 @@ func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(lBHttpProfileXForwardedForValues, false),
 				Optional:     true,
-				Description:  "When X-Forwareded-For is configured, X-Forwarded-Proto and X-Forwarded-Port information is added automatically into request header",
+				Description:  "When X-Forwarded-For is configured, X-Forwarded-Proto and X-Forwarded-Port information is added automatically into request header",
 			},
 		},
 	}

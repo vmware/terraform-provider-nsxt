@@ -25,12 +25,12 @@ var DefaultIPv4VirtualAddress = "0.0.0.0"
 
 var DefaultIPv6VirtualAddress = "::"
 
-func resourceNsxtClusterVirualIP() *schema.Resource {
+func resourceNsxtClusterVirtualIP() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtClusterVirualIPCreate,
-		Read:   resourceNsxtClusterVirualIPRead,
-		Update: resourceNsxtClusterVirualIPUpdate,
-		Delete: resourceNsxtClusterVirualIPDelete,
+		Create: resourceNsxtClusterVirtualIPCreate,
+		Read:   resourceNsxtClusterVirtualIPRead,
+		Update: resourceNsxtClusterVirtualIPUpdate,
+		Delete: resourceNsxtClusterVirtualIPDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -60,7 +60,7 @@ func resourceNsxtClusterVirualIP() *schema.Resource {
 	}
 }
 
-func resourceNsxtClusterVirualIPCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtClusterVirtualIPCreate(d *schema.ResourceData, m interface{}) error {
 	// Create and update workflow are mostly the same for virtual IP resource
 	// except that create workflow sets the ID of this resource
 	id := d.Id()
@@ -72,10 +72,10 @@ func resourceNsxtClusterVirualIPCreate(d *schema.ResourceData, m interface{}) er
 		return handleCreateError("ClusterVirtualIP", id, err)
 	}
 	d.SetId(id)
-	return resourceNsxtClusterVirualIPRead(d, m)
+	return resourceNsxtClusterVirtualIPRead(d, m)
 }
 
-func resourceNsxtClusterVirualIPRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtClusterVirtualIPRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")
@@ -120,16 +120,16 @@ func setClusterVirtualIP(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNsxtClusterVirualIPUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtClusterVirtualIPUpdate(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	err := setClusterVirtualIP(d, m)
 	if err != nil {
 		return handleUpdateError("ClusterVirtualIP", id, err)
 	}
-	return resourceNsxtClusterVirualIPRead(d, m)
+	return resourceNsxtClusterVirtualIPRead(d, m)
 }
 
-func resourceNsxtClusterVirualIPDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtClusterVirtualIPDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")

@@ -51,7 +51,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 			"tag": getTagsSchema(),
 			"port": {
 				Type:        schema.TypeList,
-				Description: "Tag specificiation for corresponding segment port",
+				Description: "Tag specification for corresponding segment port",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

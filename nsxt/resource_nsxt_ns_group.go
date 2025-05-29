@@ -102,7 +102,7 @@ func resourceNsxtNsGroup() *schema.Resource {
 
 func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTagExpression {
 	criteriaList := d.Get("membership_criteria").([]interface{})
-	var expresionList []manager.NsGroupTagExpression
+	var expressionList []manager.NsGroupTagExpression
 	for _, criteria := range criteriaList {
 		data := criteria.(map[string]interface{})
 		elem := manager.NsGroupTagExpression{
@@ -113,13 +113,13 @@ func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTa
 			TagOp:        data["tag_op"].(string),
 			TargetType:   data["target_type"].(string),
 		}
-		expresionList = append(expresionList, elem)
+		expressionList = append(expressionList, elem)
 	}
-	return expresionList
+	return expressionList
 }
 
 func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias []manager.NsGroupTagExpression) error {
-	var expresionList []map[string]interface{}
+	var expressionList []map[string]interface{}
 	for _, criteria := range membershipCriterias {
 		elem := make(map[string]interface{})
 		elem["scope"] = criteria.Scope
@@ -127,15 +127,15 @@ func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias [
 		elem["tag"] = criteria.Tag
 		elem["tag_op"] = criteria.TagOp
 		elem["target_type"] = criteria.TargetType
-		expresionList = append(expresionList, elem)
+		expressionList = append(expressionList, elem)
 	}
-	err := d.Set("membership_criteria", expresionList)
+	err := d.Set("membership_criteria", expressionList)
 	return err
 }
 
 func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpression {
 	members := d.Get("member").(*schema.Set).List()
-	var expresionList []manager.NsGroupSimpleExpression
+	var expressionList []manager.NsGroupSimpleExpression
 	for _, member := range members {
 		data := member.(map[string]interface{})
 		elem := manager.NsGroupSimpleExpression{
@@ -145,20 +145,20 @@ func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpress
 			TargetType:     data["target_type"].(string),
 			Value:          data["value"].(string),
 		}
-		expresionList = append(expresionList, elem)
+		expressionList = append(expressionList, elem)
 	}
-	return expresionList
+	return expressionList
 }
 
 func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleExpression) error {
-	var expresionList []map[string]interface{}
+	var expressionList []map[string]interface{}
 	for _, member := range members {
 		elem := make(map[string]interface{})
 		elem["target_type"] = member.TargetType
 		elem["value"] = member.Value
-		expresionList = append(expresionList, elem)
+		expressionList = append(expressionList, elem)
 	}
-	err := d.Set("member", expresionList)
+	err := d.Set("member", expressionList)
 	return err
 }
 

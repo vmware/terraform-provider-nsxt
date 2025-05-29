@@ -61,7 +61,7 @@ The following arguments are supported:
     * `as_path_prepend` - (Optional) Autonomous System (AS) path prepend to influence route selection.
     * `community` - (Optional) BGP regular or large community for matching routes.
     * `local_preference` - (Optional) Local preference indicates the degree of preference for one BGP route over other BGP routes.
-    * `med` - (Optional) Multi Exit Descriminator (lower value is preferred over higher value).
+    * `med` - (Optional) Multi Exit Discriminator (lower value is preferred over higher value).
     * `prefer_global_v6_next_hop` - (Optional)  Indicator whether to prefer IPv6 global address over link-local as the next hop.
     * `weight` - (Optional) Weight is used to select a route when multiple routes are available to the same network.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.

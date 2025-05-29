@@ -44,7 +44,7 @@ The following Resources are available to use with VMConAWS:
 * Gateway QoS Profile: [nsxt_policy_gateway_qos_profile](https://www.terraform.io/docs/providers/nsxt/r/policy_gateway_qos_profile)
 * IDS Policy: [nsxt_policy_intrusion_service_policy](https://www.terraform.io/docs/providers/nsxt/r/policy_intrusion_service_policy)
 * IDS Profile: [nsxt_policy_intrusion_service_profile](https://www.terraform.io/docs/providers/nsxt/r/policy_intrusion_service_profile)
-* DNS Forwarder Zone: [nsxt_policy_dns_porwarder_zone](https://www.terraform.io/docs/providers/nsxt/r/policy_dns_forwarder_zone)
+* DNS Forwarder Zone: [nsxt_policy_dns_forwarder_zone](https://www.terraform.io/docs/providers/nsxt/r/policy_dns_forwarder_zone)
 * Gateway DNS Forwarder: [nsxt_policy_gateway_dns_forwarder](https://www.terraform.io/docs/providers/nsxt/r/policy_gateway_dns_forwarder)
 * IPSec VPN DPD Profile: [nsxt_policy_ipsec_vpn_dpd_profile](https://www.terraform.io/docs/providers/nsxt/r/policy_ipsec_vpn_dpd_profile)
 * IPSec VPN IKE Profile: [nsxt_policy_ipsec_vpn_ike_profile](https://www.terraform.io/docs/providers/nsxt/r/policy_ipsec_vpn_ike_profile)

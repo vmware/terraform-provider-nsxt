@@ -109,7 +109,7 @@ var constraintSchema = map[string]*metadata.ExtendedSchema{
 						Schema: schema.Schema{
 							Type:             schema.TypeString,
 							Required:         true,
-							DiffSuppressFunc: pathPreffixDiffSupress,
+							DiffSuppressFunc: pathPrefixDiffSupress,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
@@ -159,7 +159,7 @@ func addTrailingSlash(s string) string {
 	return s + "/"
 }
 
-func pathPreffixDiffSupress(k, oldVal, newVal string, d *schema.ResourceData) bool {
+func pathPrefixDiffSupress(k, oldVal, newVal string, d *schema.ResourceData) bool {
 	return addTrailingSlash(oldVal) == addTrailingSlash(newVal)
 }
 

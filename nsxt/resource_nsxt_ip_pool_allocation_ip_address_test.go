@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	// how long to wait for updated allocation IP address list (to check destroyment)
+	// waitSeconds defines the duration, in seconds, to wait for specific operations to complete.
 	waitSeconds = 150
 )
 
