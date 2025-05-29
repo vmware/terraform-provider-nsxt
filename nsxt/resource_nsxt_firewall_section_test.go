@@ -381,7 +381,7 @@ func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("")
+	tos := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
@@ -407,7 +407,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	tags := singleTag
-	tos := string("")
+	tos := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
