@@ -1,63 +1,61 @@
 ---
-page_title: "Provider: NSXT"
+page_title: "Terraform Provider for VMware NSX"
 sidebar_current: "docs-nsxt-index"
 description: |-
-  The VMware NSX Terraform Provider
+  Terraform Provider for VMware NSX
 ---
 
-# The NSX Terraform Provider
+<img src="https://github.com/vmware/terraform-provider-nsxt/blob/master/docs/images/icon-color.svg" alt="VMware NSX" width="150">
 
-The NSX Terraform provider gives the NSX administrator a way to automate NSX to
-provide virtualized networking and security services using both ESXi and KVM
-based hypervisor hosts as well as container networking and security.
+# Terraform Provider for VMware NSX
 
-More information on NSX can be found on the [NSX Product
-Page](https://www.vmware.com/products/nsx.html)
+The Terraform Provider for VMware NSX is a plugin for Terraform that allows you
+to interact with VMware NSX.
 
-Documentation on the NSX platform can be found on the [NSX Documentation
-Page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+For more information on NSX, refer to the [NSX documentation](https://techdocs.broadcom.com/us/en/vmware-cis/nsx.html).
 
-Please use the navigation to the left to read about available data sources and
+Use the navigation to the left to read about the available data sources and
 resources.
 
-## Basic Configuration of the NSX Terraform Provider
+## Basic Configuration
 
-In order to use the NSX Terraform provider you must first configure the
-provider to communicate with the VMware NSX manager. The NSX manager is the
-system which serves the NSX REST API and provides a way to configure the
-desired state of the NSX system. The configuration of the NSX provider requires
-the IP address, hostname, or FQDN of the NSX manager.
+To use the provider, you must first configure it to communicate with an NSX
+Manager. NSX Manager serves the NSX REST API and provides a way to configure the
+desired state of the NSX system. The provider configuration requires the FQDN,
+IP address, or hostname of the NSX Manager.
 
-The NSX provider offers several ways to authenticate to the NSX manager.
-Credentials can be provided statically or provided as environment variables. In
-addition, client certificates can be used for authentication. For
-authentication with certificates Terraform will require a certificate file and
-private key file in PEM format. To use client certificates the client
-certificate needs to be registered with NSX manager prior to invoking
-Terraform.
+The provider offers several authentication methods for connecting to an NSX Manager:
 
-The provider also can accept both signed and self-signed server certificates.
-It is recommended that in production environments you only use certificates
-signed by a certificate authority. NSX ships by default with a self-signed
-server certificates as the hostname of the NSX manager is not known until the
-NSX administrator determines what name or IP to use.
+1. **Static credentials** - Username and password provided directly in the provider configuration.
+2. **Environment variables** - Credentials sourced from environment variables.
+3. **Client certificates** - Certificate-based authentication using PEM format files.
+
+When using client certificate authentication, Terraform requires both a
+certificate file and private key file in PEM format. The client certificate must be
+registered with the NSX Manager before running Terraform.
+
+The provider can accept both signed and self-signed certificates. For production
+environments, it is strongly recommended to use certificates signed by a
+certificate authority. NSX Manager ships with self-signed certificates by default
+since the hostname is not predetermined and must be configured by the NSX
+administrator.
 
 Setting the `allow_unverified_ssl` parameter to `true` will direct the
-Terraform client to skip server certificate verification. This is not
-recommended in production deployments as it is recommended that you use trusted
-connection using certificates signed by a certificate authority.
+Terraform to skip server certificate verification. This is not recommended in
+production deployments as it is recommended that you use trusted connection
+using certificates signed by a certificate authority.
 
 With the `ca_file` parameter you can also specify a file that contains your
 certificate authority certificate in PEM format to verify certificates with a
 certificate authority.
 
-There are also a number of other parameters that can be set to tune how the
-provider connects to the NSX REST API. It is recommended you leave these to the
-defaults unless you experience issues in which case they can be tuned to
-optimize the system in your environment.
+Additional parameters are available to tune how the provider connects to the NSX
+REST API. It is recommended to use the default values unless you experience
+connectivity issues, in which case these parameters can be adjusted to optimize
+performance for your environment.
 
-Note that with terraform 0.14 onwards, `terraform` block should be added to your
-configuration:
+Note that with Terraform 0.14 onwards, a `terraform` block should be added to
+your configuration:
 
 ```hcl
 terraform {
@@ -86,7 +84,7 @@ provider "nsxt" {
 
 ### Example of Setting Environment Variables
 
-```
+```shell
 export NSXT_MANAGER_HOST="192.168.110.41"
 export NSXT_USERNAME="admin"
 export NSXT_PASSWORD="default"
@@ -101,7 +99,6 @@ provider "nsxt" {
   client_auth_key_file  = "mykey.pem"
   allow_unverified_ssl  = true
 }
-
 ```
 
 ### Example with Certificate Authority Certificate
@@ -113,7 +110,6 @@ provider "nsxt" {
   password = "qwerty"
   ca_file  = "myca.pem"
 }
-
 ```
 
 ### VMC Environment Example
@@ -127,7 +123,6 @@ provider "nsxt" {
   allow_unverified_ssl = true
   enforcement_point    = "vmc-enforcementpoint"
 }
-
 ```
 
 ### VMC PCI Compliant Environment Example
@@ -141,7 +136,6 @@ provider "nsxt" {
   allow_unverified_ssl = true
   enforcement_point    = "vmc-enforcementpoint"
 }
-
 ```
 
 ### Policy Global Manager Example
@@ -156,19 +150,18 @@ provider "nsxt" {
   retry_min_delay = 500
   retry_max_delay = 1000
 }
-
 ```
 
 ## Argument Reference
 
 The following arguments are used to configure the provider:
 
-* `host` - (Required) The host name or IP address of the NSX manager. Can also
+* `host` - (Required) The host name or IP address of the NSX Manager. Can also
   be specified with the `NSXT_MANAGER_HOST` environment variable. Do not include
   `http://` or `https://` in the host.
-* `username` - (Required) The user name to connect to the NSX manager as. Can
+* `username` - (Required) The user name to connect to the NSX Manager as. Can
   also be specified with the `NSXT_USERNAME` environment variable.
-* `password` - (Required) The password for the NSX manager user. Can also be
+* `password` - (Required) The password for the NSX Manager user. Can also be
   specified with the `NSXT_PASSWORD` environment variable.
 * `client_auth_cert_file` - (Optional) The path to a certificate file for client
   certificate authorization. Can also be specified with the
@@ -228,7 +221,7 @@ The following arguments are used to configure the provider:
   calling VMware Cloud Services APIs. Can not be specified together with `vmc_token`.
   Note that only subset of policy resources are supported with VMC environment.
 * `vmc_auth_host` - (Optional) URL for VMC authorization service that is used
-  to obtain short-lived token for NSX manager access. Defaults to VMC
+  to obtain short-lived token for NSX Manager access. Defaults to VMC
   console authorization URL.
 * `vmc_auth_mode` - (Optional) VMC authorization mode, that determines what HTTP
   header is used for authorization. Accepted values are `Default`, `Bearer`, `Basic`.
@@ -239,37 +232,36 @@ The following arguments are used to configure the provider:
   For on-prem deployments, this setting should not be specified.
 * `global_manager` - (Optional) True if this is a global manager endpoint.
   False by default.
-* `license_keys` - (Optional) List of NSX-T license keys. License keys are applied
+* `license_keys` - (Optional) List of NSX license keys. License keys are applied
   during plan or apply commands. Note that the provider will not remove license keys if
   those are removed from provider config - please clean up licenses manually.
 * `on_demand_connection` - (Optional) Avoid verification on NSX connectivity on provider
   startup. Instead, initialize the connection on demand. This setting can not be turned on
-  for VMC environments, and is not supported with deprecated NSX manager resources and
-  data sources. Note - this setting is useful when NSX manager is not yet available at
+  for VMC environments, and is not supported with deprecated NSX Manager resources and
+  data sources. Note - this setting is useful when NSX Manager is not yet available at
   time of provider evaluation, and not recommended to be turned on otherwise.
 
 ## NSX Logical Networking
 
-This release of the NSX-T Terraform Provider extends to cover NSX-T declarative
-API called Policy. This API aims to simplify the consumption of logical objects
-and offer additional capabilities.The NSX-T Terraform Provider covers most of NSX
-functionality.
-While you can still build topologies from the imperative API and existing config files
-will continue to work, the recommendation
-is to build logical topologies from the declarative API(Policy Objects).The resources
-and data sources using the policy API have _policy_ in their name.
-For more details on the NSX-T Policy API usage, please refer to NSX-T documentation.
+This provider supports the declarative policy API, which aims to simplify the
+consumption of logical objects and offer additional capabilities.
 
-The existing data sources and resources are still available to consume but using
-the new Policy based data sources and resources are recommended.
+While you can still build topologies using the imperative API and existing
+configuration files will continue to work, it is recommended to build logical
+topologies using the declarative API (Policy Objects). Resources and data
+sources that use the policy API have `_policy_` in their name.
+
+For more details on NSX Policy API usage, please refer to the NSX documentation.
+
+The existing data sources and resources are still available; however, using the
+policy-based data sources and resources is recommended.
 
 ### Logical Networking and Security Example Usage
 
-The following example demonstrates using the NSX Terraform provider to create
-Tier-1 Gateways, Segments, DHCP Service, Static and Dynamic Groups, Firewall
-rules and tags the VMs
+The following example demonstrates using the provider to create Tier-1 Gateways,
+Segments, DHCP Services, Static and Dynamic Groups, Firewall rules, and VM tags.
 
-#### Example variables.tf File
+#### Example `variables.tf` File
 
 This file allows you to define some variables that can be reused in multiple
 .tf files.
@@ -280,7 +272,7 @@ variable "nsx_username" {}
 variable "nsx_password" {}
 ```
 
-#### Example terraform.tfvars File
+#### Example `terraform.tfvars` File
 
 This file allows you to set some variables that can be reused in multiple .tf
 files.
@@ -291,7 +283,7 @@ nsx_username = "admin"
 nsx_password = "default"
 ```
 
-#### Example nsx.tf file
+#### Example `nsx.tf` file
 
 ```hcl
 ################################################################################
@@ -333,10 +325,9 @@ nsx_password = "default"
 #
 ################################################################################
 
-
 #
 # The first step is to configure the VMware NSX provider to connect to the NSX
-# REST API running on the NSX manager.
+# REST API running on the NSX Manager.
 #
 provider "nsxt" {
   host                  = var.nsx_manager
@@ -361,11 +352,11 @@ variable "nsx_tag" {
   default = "terraform-demo"
 }
 
-
 #
 # This part of the example shows some data sources we will need to refer to
 # later in the .tf file. They include the transport zone, tier 0 router and
 # edge cluster.
+#
 # There Tier-0 (T0) Gateway is considered a "provider" router that is pre-created
 # by the NSX Admin. A T0 Gateway is used for north/south connectivity between
 # the logical networking space and the physical networking space. Many Tier1
@@ -644,7 +635,6 @@ data "nsxt_policy_service" "ssh" {
   display_name = "SSH"
 }
 
-
 #
 # In this section, we have example to create Firewall sections and rules
 # All rules in this section will be applied to VMs that are part of the
@@ -806,7 +796,6 @@ data "nsxt_policy_vm" "db_vm" {
   display_name = "db-vm"
 }
 
-
 # Assign the right tags to the VMs so that they get included in the
 # dynamic groups created above
 resource "nsxt_policy_vm_tags" "web_vm_tag" {
@@ -844,9 +833,6 @@ resource "nsxt_policy_vm_tags" "db_vm_tag" {
     tag   = var.nsx_tag
   }
 }
-
-
-
 ```
 
 In order to be able to connect VMs to the newly created logical switch a new
