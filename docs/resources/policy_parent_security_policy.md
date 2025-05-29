@@ -137,7 +137,7 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the Security Policy.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 
 ## Importing

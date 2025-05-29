@@ -45,7 +45,7 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the IP block subnet.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `allocation_range` - A collection of IPv4 IP ranges used for IP allocation.
 * `cidr` - Represents the size or number of IP addresses in the subnet. All subnets of the same block must have the same size, which must be a power of 2.
 

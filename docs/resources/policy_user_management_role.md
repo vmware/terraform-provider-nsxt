@@ -45,7 +45,7 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the resource.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `feature` - The permissions for features in the list will also have the following attributes exported:
   * `feature_description` - Description of the feature.
   * `feature_name` - Name of the feature.

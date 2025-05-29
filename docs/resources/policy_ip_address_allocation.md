@@ -99,7 +99,7 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the Allocation.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `allocation_ip` - If the `allocation_ip` is not specified in the resource, any free IP is allocated and its value is exported on this attribute.
 

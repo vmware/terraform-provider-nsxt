@@ -701,7 +701,7 @@ BUG FIXES:
 
 NOTES:
 
-* The provider is extended to support NSX-T policy API. Policy API is intended to be primary consumption for NSX-T logical constructs, thus users are encouraged to use new data sources/resources, with _policy_ in the name.
+* The provider is extended to support NSX Policy API. Policy API is intended to be primary consumption for NSX logical constructs, thus users are encouraged to use new data sources/resources, with _policy_ in the name.
 
 FEATURES:
 * **New Data Source**: `nsxt_policy_certificate`

@@ -239,7 +239,7 @@ The following arguments are used to configure the provider:
   For on-prem deployments, this setting should not be specified.
 * `global_manager` - (Optional) True if this is a global manager endpoint.
   False by default.
-* `license_keys` - (Optional) List of NSX-T license keys. License keys are applied
+* `license_keys` - (Optional) List of NSX license keys. License keys are applied
   during plan or apply commands. Note that the provider will not remove license keys if
   those are removed from provider config - please clean up licenses manually.
 * `on_demand_connection` - (Optional) Avoid verification on NSX connectivity on provider
@@ -250,15 +250,15 @@ The following arguments are used to configure the provider:
 
 ## NSX Logical Networking
 
-This release of the NSX-T Terraform Provider extends to cover NSX-T declarative
+This release of the NSX Terraform Provider extends to cover NSX declarative
 API called Policy. This API aims to simplify the consumption of logical objects
-and offer additional capabilities.The NSX-T Terraform Provider covers most of NSX
+and offer additional capabilities.The NSXTerraform Provider covers most of NSX
 functionality.
 While you can still build topologies from the imperative API and existing config files
 will continue to work, the recommendation
-is to build logical topologies from the declarative API(Policy Objects).The resources
+is to build logical topologies from the declarative API (Policy Objects). The resources
 and data sources using the policy API have _policy_ in their name.
-For more details on the NSX-T Policy API usage, please refer to NSX-T documentation.
+For more details on the NSX Policy API usage, please refer to NSXdocumentation.
 
 The existing data sources and resources are still available to consume but using
 the new Policy based data sources and resources are recommended.

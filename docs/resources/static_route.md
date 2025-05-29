@@ -49,7 +49,7 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the static route.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `next_hop` additional arguments:
   * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
   * `blackhole_action` - Action to be taken on matching packets for NULL routes.
