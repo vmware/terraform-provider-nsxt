@@ -20,7 +20,7 @@ import (
 // package level logger to include log.Lshortfile context
 var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
 
-// common way NSX API defines polymorphic type
+// StandardTypeIdentifier is a common NSX API defines a polymorphic type.
 var StandardTypeIdentifier = TypeIdentifier{
 	SdkName:      "Type_",
 	APIFieldName: "type",
