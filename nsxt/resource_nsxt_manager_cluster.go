@@ -443,7 +443,7 @@ func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("node") {
-		// CHanges to attributes other than "node" should be ignored
+		// Changes to attributes other than "node" should be ignored
 		return nil
 	}
 	id := d.Id()

@@ -44,7 +44,7 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 			"gateway_path": getPolicyPathSchema(false, true, "Policy path for the gateway."),
 			"locale_service_path": {
 				Type:         schema.TypeString,
-				Description:  "Polciy path for the locale service.",
+				Description:  "Policy path for the locale service.",
 				Optional:     true,
 				ForceNew:     true,
 				Deprecated:   "Use gateway_path instead.",

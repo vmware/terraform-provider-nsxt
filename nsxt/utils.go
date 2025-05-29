@@ -589,7 +589,7 @@ func initNSXVersion(connector client.Connector) error {
 }
 
 func initNSXVersionVMC(clients interface{}) {
-	// TODO: find a ireliable way to retrieve NSX version on VMC
+	// TODO: find a reliable way to retrieve NSX version on VMC
 	// For now, we need to determine whether the deployment is 3.0.0 and up, or below
 	// For this purpose, we fire indicator search API (introduced in 3.0.0)
 	util.NsxVersion = "3.0.0"

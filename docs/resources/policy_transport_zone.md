@@ -44,7 +44,7 @@ resource "nsxt_policy_transport_zone" "vlan_transport_zone" {
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `transport_type` - (Required) Transport type of requested Transport Zone, one of `OVERLAY_STANDARD`, `OVERLAY_ENS`, `OVERLAY_BACKED`, `VLAN_BACKED` and `UNKNOWN`.
 * `is_default` - (Optional) Set this Transport Zone as the default zone of given `transport_type`. Default value is `false`. When setting a Transport Zone with `is_default`: `true`, no existing Transport Zone of same `transport_type` should be set as default.
-* `uplink_teaming_policy_names` - (Optional) The names of switching uplink teaming policies that all transport nodes in this transport zone support. Uplinkin teaming policies are only valid for `VLAN_BACKED` transport zones.
+* `uplink_teaming_policy_names` - (Optional) The names of switching uplink teaming policies that all transport nodes in this transport zone support. Uplink teaming policies are only valid for `VLAN_BACKED` transport zones.
 * `site_path` - (Optional) The path of the site which the Transport Zone belongs to. `path` field of the existing `nsxt_policy_site` can be used here.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Transport Zone.
 

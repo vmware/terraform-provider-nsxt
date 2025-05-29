@@ -1052,7 +1052,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 	var services []map[string]interface{}
 	intentServices, shouldSetLS := d.GetOk("locale_service")
-	// decide if we should set locale_service or edge_cluser_path
+	// decide if we should set locale_service or edge_cluster_path
 	// for GM, it is always locale_service; for LM, config dependent
 	if isGlobalManager {
 		shouldSetLS = true

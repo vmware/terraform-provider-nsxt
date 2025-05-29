@@ -353,7 +353,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			// Ensure alphabetical order for organization and readability.
 			"nsxt_algorithm_type_ns_service":                           removedResourceWrapper(resourceNsxtAlgorithmTypeNsService, "nsxt_algorithm_type_ns_service"),
-			"nsxt_cluster_virtual_ip":                                  resourceNsxtClusterVirualIP(),
+			"nsxt_cluster_virtual_ip":                                  resourceNsxtClusterVirtualIP(),
 			"nsxt_compute_manager":                                     resourceNsxtComputeManager(),
 			"nsxt_dhcp_relay_profile":                                  removedResourceWrapper(resourceNsxtDhcpRelayProfile, "nsxt_dhcp_relay_profile"),
 			"nsxt_dhcp_relay_service":                                  removedResourceWrapper(resourceNsxtDhcpRelayService, "nsxt_dhcp_relay_service"),

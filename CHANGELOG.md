@@ -435,7 +435,7 @@ BUG FIXES:
 IMPROVEMENTS:
 
 * Include object scope (LM or GM) in policy search for data sources. This improvement would narrow down object search to scope relevant to current backend, for example, Global Manager objects will not show up in data source query on Local Manager([#755](https://github.com/vmware/terraform-provider-nsxt/pull/755))
-* (Exterimental) Support `locale_service` configuration on Local Manager. This offers more flexibility to specify locale configuration such as edge cluster, preferred node, redistribution, and should not be used together with `edge_cluster_path` argument. Previsouly this clause was only supported on Global Manager([#764](https://github.com/vmware/terraform-provider-nsxt/pull/764))
+* (Experimental) Support `locale_service` configuration on Local Manager. This offers more flexibility to specify locale configuration such as edge cluster, preferred node, redistribution, and should not be used together with `edge_cluster_path` argument. Previously this clause was only supported on Global Manager([#764](https://github.com/vmware/terraform-provider-nsxt/pull/764))
 
 ## 3.2.7 (May 12, 2022)
 
@@ -485,7 +485,7 @@ EXPERIMENTAL FEATURES:
 IMPROVEMENTS:
 
 * `resource/nsxt_policy_gateway_redistribution_config`: Add `bgp` and `ospf` markers to redistribution rules([#673](https://github.com/vmware/terraform-provider-nsxt/pull/673))
-* Introduce retries in selected resources to avoid most common deletion syncronization issues. This measure is temporary until provider-wide retry is implemented with SDK enhancement ([#681](https://github.com/vmware/terraform-provider-nsxt/pull/681), [#686](https://github.com/vmware/terraform-provider-nsxt/pull/686), [#687](https://github.com/vmware/terraform-provider-nsxt/pull/687))
+* Introduce retries in selected resources to avoid most common deletion synchronization issues. This measure is temporary until provider-wide retry is implemented with SDK enhancement ([#681](https://github.com/vmware/terraform-provider-nsxt/pull/681), [#686](https://github.com/vmware/terraform-provider-nsxt/pull/686), [#687](https://github.com/vmware/terraform-provider-nsxt/pull/687))
 
 NSX 3.2.0 NOTES:
 
@@ -594,7 +594,7 @@ IMPROVEMENTS:
 
 * New provider attributes `client_auth_cert`, `client_auth_key` to allow passing these values as string rather than a file ([#524](https://github.com/vmware/terraform-provider-nsxt/pull/524))
 * Allow Bearer token authorization type for VMC deployments (Experimental). This behavior is configured by setting new provider attribute `vmc_auth_mode` to `Bearer` ([#539](https://github.com/vmware/terraform-provider-nsxt/pull/539))
-* Complete Global Manager support for data sources (T1 Gateway, IPv6 Profiles, Ceritificate)
+* Complete Global Manager support for data sources (T1 Gateway, IPv6 Profiles, Certificate)
 * `resource/nsxt_policy_tier1_gateway`: Enhance T0 Gateway resource with `rd_admin_address` attribute ([#503](https://github.com/vmware/terraform-provider-nsxt/pull/503))
 * `resource/nsxt_policy_predefined_gateway_policy`: Add Importer for this resource to match user expectations in case predefined rules exist. Documentation was also extended to cover import and no-import usage ([#527](https://github.com/vmware/terraform-provider-nsxt/pull/527))
 
@@ -603,7 +603,7 @@ BUG FIXES:
 * Allow maximum subnet length in Gateway Interface validation ([#528](https://github.com/vmware/terraform-provider-nsxt/pull/528))
 * Make sure policy data sources ignore deleted objects ([#516](https://github.com/vmware/terraform-provider-nsxt/pull/516))
 * `resource/nsxt_policy_segment`: Allow configuration of segment on Global Manager without transport zone ([#513](https://github.com/vmware/terraform-provider-nsxt/pull/513)).
-* Determine major NSX version behind VMC deployment, thus making 3.0.0 features (such as segment DHCP) available for VMC. This requires a more robust solution in futire ([#531](https://github.com/vmware/terraform-provider-nsxt/pull/531)).
+* Determine major NSX version behind VMC deployment, thus making 3.0.0 features (such as segment DHCP) available for VMC. This requires a more robust solution in the future ([#531](https://github.com/vmware/terraform-provider-nsxt/pull/531)).
 
 ## 3.1.0 (October 20, 2020)
 
@@ -628,7 +628,7 @@ EXPERIMENTAL FEATURES:
 IMPROVEMENTS:
 
 * Allow specifying `vlan_ids` for overlay segments ([#462](https://github.com/vmware/terraform-provider-nsxt/pull/462))
-* Allow specifying NSX license via provider attribute. Note: the lisence is not considered part of configuration, and is applied at plan time! ([#423](https://github.com/vmware/terraform-provider-nsxt/pull/423))
+* Allow specifying NSX license via provider attribute. Note: the licence is not considered part of configuration, and is applied at plan time! ([#423](https://github.com/vmware/terraform-provider-nsxt/pull/423))
 
 BUG FIXES:
 
@@ -662,7 +662,7 @@ IMPROVEMENTS:
 * Improve provider host validation and allow schema to be specified ([#413](https://github.com/vmware/terraform-provider-nsxt/pull/413))
 * `resource/nsxt_policy_vm_tags`: Support tagging specific logical port on the VM, based on segment path ([#406](https://github.com/vmware/terraform-provider-nsxt/pull/406))
 * `resource/nsxt_policy_group`: Support MAC address criteria ([#388](https://github.com/vmware/terraform-provider-nsxt/pull/388))
-* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support assigning custome segment profiles ([#384](https://github.com/vmware/terraform-provider-nsxt/pull/384))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support assigning custom segment profiles ([#384](https://github.com/vmware/terraform-provider-nsxt/pull/384))
 * `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Wait for VM ports to be deleted before proceeding with segment delete. This avoids potential dependency error on deletion ([#311](https://github.com/vmware/terraform-provider-nsxt/pull/311))
 * `resource/nsxt_policy_vlan_segment`: Allow specifying vlan range ([#342](https://github.com/vmware/terraform-provider-nsxt/pull/342))
 * `resource/nsxt_policy_tier0_gateway`: Support assigning custom segment profiles ([#363](https://github.com/vmware/terraform-provider-nsxt/pull/363))
@@ -701,7 +701,7 @@ BUG FIXES:
 
 NOTES:
 
-* The provider is extended to support NSX-T policy API. Policy API is intended to be primary consumtion for NSX-T logical constructs, thus users are encouraged to use new data sources/resources, with _policy_ in the name.
+* The provider is extended to support NSX-T policy API. Policy API is intended to be primary consumption for NSX-T logical constructs, thus users are encouraged to use new data sources/resources, with _policy_ in the name.
 
 FEATURES:
 * **New Data Source**: `nsxt_policy_certificate`
@@ -781,7 +781,7 @@ BUG FIXES:
 * `resource/nsxt_ip_set`: Allow force-deletion of IPSet even if its referenced in ns groups.
 * `resource/nsxt_logical_router_downlink_port`: Fix crash that happened during import with specific configuration ([#193](https://github.com/vmware/terraform-provider-nsxt/pull/193))
 * `resource/nsxt_logical_router_link_port_on_tier1`: Fix crash that happened during import with specific configuration ([#193](https://github.com/vmware/terraform-provider-nsxt/pull/193))
-* `resource/nsxt_*_switching_profile`: Fix update error that occured in some cases due to omitted revision ([#201](https://github.com/vmware/terraform-provider-nsxt/pull/201))
+* `resource/nsxt_*_switching_profile`: Fix update error that occurred in some cases due to omitted revision ([#201](https://github.com/vmware/terraform-provider-nsxt/pull/201))
 * `resource/nsxt_logical_switch`: On delete operation, detach logical switch in order to avoid possible dependency errors ([#202](https://github.com/vmware/terraform-provider-nsxt/pull/202))
 
 ## 1.1.1 (August 05, 2019)
@@ -807,7 +807,7 @@ BUG FIXES:
 * `resource/nsxt_nat_rule`: Fix deletion of NAT rule that was due to a platform bug in versions 2.4 and below ([#166](https://github.com/vmware/terraform-provider-nsxt/pull/166)).
 * `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156](https://github.com/vmware/terraform-provider-nsxt/pull/156))
 * `resource/nsxt_firewall_section`: Prevent re-creation of rules by retaining rule ids ([#154](https://github.com/vmware/terraform-provider-nsxt/pull/154))
-* `resource/nsxt_nat_rule`: Allow setting rule_priority ([#182](https://github.com/te    rraform-providers/terraform-provider-nsxt/pull/182))
+* `resource/nsxt_nat_rule`: Allow setting rule_priority ([#182](https://github.com/terraform-providers/terraform-provider-nsxt/pull/182))
 
 ## 1.1.0 (February 22, 2019)
 

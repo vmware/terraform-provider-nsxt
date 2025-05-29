@@ -184,7 +184,7 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 	connectionInitiationMode := d.Get("connection_initiation_mode").(string)
 	authenticationMode := d.Get("authentication_mode").(string)
 	complianceSuite := d.Get("compliance_suite").(string)
-	prefixLengh := int64(d.Get("prefix_length").(int))
+	prefixLength := int64(d.Get("prefix_length").(int))
 	enabled := d.Get("enabled").(bool)
 	direction := d.Get("direction").(string)
 	mss := int64(d.Get("max_segment_size").(int))
@@ -193,13 +193,13 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 	if resourceType == routeBasedIPSecVpnSession {
 		tunnelInterface := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
 
-		if len(tunnelInterface) == 0 || prefixLengh == 0 {
+		if len(tunnelInterface) == 0 || prefixLength == 0 {
 			return nil, fmt.Errorf("ip_addresses and prefix_length need to be specified for Route Based VPN session")
 		}
 		var ipSubnets []model.TunnelInterfaceIPSubnet
 		ipSubnet := model.TunnelInterfaceIPSubnet{
 			IpAddresses:  tunnelInterface,
-			PrefixLength: &prefixLengh,
+			PrefixLength: &prefixLength,
 		}
 		ipSubnets = append(ipSubnets, ipSubnet)
 		var vtiList []model.IPSecVpnTunnelInterface

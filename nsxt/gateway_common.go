@@ -86,11 +86,11 @@ func getPolicyEdgeClusterPathSchema() *schema.Schema {
 }
 
 func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
-	var nodeConficts []string
+	var nodeConflicts []string
 	if isTier1 {
 		// for Tier1, enable_standby_relocation can not be enabled if
 		// preferred nodes are specified
-		nodeConficts = append(nodeConficts, "enable_standby_relocation")
+		nodeConflicts = append(nodeConflicts, "enable_standby_relocation")
 	}
 
 	elemSchema := map[string]*schema.Schema{
@@ -106,7 +106,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 			Description:   "Paths of specific edge nodes",
 			Optional:      true,
 			Elem:          getElemPolicyPathSchema(),
-			ConflictsWith: nodeConficts,
+			ConflictsWith: nodeConflicts,
 		},
 		"redistribution_config": getRedistributionConfigSchema(),
 		"path":                  getPathSchema(),

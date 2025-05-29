@@ -77,7 +77,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 			},
 			"dhcp_snooping_v6_enabled": {
 				Type:        schema.TypeBool,
-				Description: "Is DHCP snoping v6 enabled or not",
+				Description: "Is DHCP snooping v6 enabled or not",
 				Optional:    true,
 				Default:     false,
 			},

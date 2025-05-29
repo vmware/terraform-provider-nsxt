@@ -270,16 +270,16 @@ func setFailureDomainAllocationInSchema(d *schema.ResourceData, allocationRules 
 }
 
 func setMemberListInSchema(d *schema.ResourceData, members []model.EdgeClusterMember) error {
-	var expresionList []map[string]interface{}
+	var expressionList []map[string]interface{}
 	for _, member := range members {
 		elem := make(map[string]interface{})
 		elem["description"] = member.Description
 		elem["display_name"] = member.DisplayName
 		elem["member_index"] = member.MemberIndex
 		elem["transport_node_id"] = member.TransportNodeId
-		expresionList = append(expresionList, elem)
+		expressionList = append(expressionList, elem)
 	}
-	return d.Set("member", expresionList)
+	return d.Set("member", expressionList)
 }
 
 func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error {

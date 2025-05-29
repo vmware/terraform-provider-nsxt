@@ -25,7 +25,7 @@ var L2VpnSessionTCPSegmentClampingDirection = []string{
 	model.L2TcpMaxSegmentSizeClamping_DIRECTION_BOTH,
 }
 
-var L2VpnTunnelEncapsulationProtocal = []string{
+var L2VpnTunnelEncapsulationProtocol = []string{
 	model.L2VPNTunnelEncapsulation_PROTOCOL_GRE,
 }
 
@@ -90,7 +90,7 @@ func resourceNsxtPolicyL2VPNSession() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Encapsulation protocol used by the tunnel.",
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(L2VpnTunnelEncapsulationProtocal, false),
+				ValidateFunc: validation.StringInSlice(L2VpnTunnelEncapsulationProtocol, false),
 			},
 		},
 	}
