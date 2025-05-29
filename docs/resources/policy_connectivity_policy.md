@@ -48,7 +48,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/cli/import
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```
 terraform import nsxt_policy_connectivity_policy.test PATH
