@@ -1,19 +1,21 @@
 ---
-page_title: "VMware NSX Terraform Provider NSX upgrade support"
+page_title: "Support for NSX Upgrades"
 description: |-
-  VMware NSX Terraform Provider NSX upgrade support
+  Support for NSX Upgrades
 ---
 
-# NSX Provider for NSX Upgrade
+# Support for NSX Upgrades
 
-NSX Terraform Provider offers support for [upgrading NSX components](https://docs.vmware.com/en/VMware-NSX/4.1/upgrade/GUID-E04242D7-EF09-4601-8906-3FA77FBB06BD.html).
+The provider includes support for upgrading NSX components](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-1/upgrade-guide.html).
 
 The provider support consists of several resources and data sources which can perform a complete upgrade cycle.
-The NSX Terraform provider support upgrades for NSX on ESX hosts, NSX Edge appliances, and NSX manager appliances.
 
-**NOTE:** The upgrade process using the Terraform NSXT provider assumes that the Terraform NSX provider uses NSX upgrade
-components exclusively. Therefore, concurrent changess to upgrade components via other means, e.g. UI, might fail the process.
-**NOTE:** The NSX upgrade process should start each upgrade with a clean state. So whenever an upgrade is executed, e.g.
+The provider supports upgrades for NSX on ESX hosts, NSX Edge appliances, and NSX Manager appliances.
+
+~> **NOTE:** The upgrade process using the provider assumes that only the provider is used to upgrade NSX components.
+Therefore, concurrent changes to upgrade components via other means, e.g. UI, might fail the process.
+
+~> **NOTE:** The NSX upgrade process should start each upgrade with a clean state. So whenever an upgrade is executed, e.g.
 from v3.2.3 to v4.1.1 the Terraform state file should be retained until the upgrade is completed. Then, if the same plan
 is used later on to upgrade from v4.1.1 to v4.2.0, the Terraform state file should be deleted prior to applying the plan.
 
@@ -27,7 +29,7 @@ Upgrade preparation consists of several actions, and is performed using [nsxt_up
 * Acceptance of the user agreement.
 * Reporting of failed pre-checks.
 
-**NOTE:** Only one `nsxt_upgrade_prepare` resource should be used in the upgrade plan.
+~> **NOTE:** Only one `nsxt_upgrade_prepare` resource should be used in the upgrade plan.
 
 ```hcl
 resource "nsxt_upgrade_prepare" "prepare_res" {
@@ -37,8 +39,9 @@ resource "nsxt_upgrade_prepare" "prepare_res" {
 }
 ```
 
-**NOTE:** Acceptance of the license agreement is required to initiate the upgrade process.
-**NOTE:** Precheck bundle is usable only while upgrading a NSX manager of version v4.1.1 and above.
+~> **NOTE:** Acceptance of the license agreement is required to initiate the upgrade process.
+
+~> **NOTE:** Precheck bundle is usable only while upgrading a NSX manager of version v4.1.1 and above.
 
 ### Checking the readiness for upgrade
 
@@ -107,7 +110,7 @@ In the example below, host_group `HostWithDifferentSettings` will use different 
 group configuration is initiated with the `nsxt_upgrade_run` while the other groups in this example are predefined and
 consumed using the data sources `nsxt_edge_upgrade_group` and `nsxt_host_upgrade_group`.
 
-**NOTE:** Only one `nsxt_upgrade_run` resource should be used in the upgrade plan.
+~> **NOTE:** Only one `nsxt_upgrade_run` resource should be used in the upgrade plan.
 
 ```hcl
 data "nsxt_policy_host_transport_node" "host_transport_node1" {

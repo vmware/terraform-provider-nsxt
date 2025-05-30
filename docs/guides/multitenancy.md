@@ -1,14 +1,14 @@
 ---
-page_title: "VMware NSX Terraform Provider support for Multi-tenancy"
+page_title: "Support for NSX Multi-tenancy"
 description: |-
-  The VMware NSX Terraform Provider support for Multi-tenancy
+  Support for NSX Multi-tenancy
 ---
 
-# NSX Provider for NSX Multi-tenancy
+# Support for NSX Multi-tenancy
 
-NSX Terraform Provider offers support for NSX [multi-tenancy feature](https://docs.vmware.com/en/VMware-NSX/4.1/administration/GUID-52180BC5-A1AB-4BC2-B1CE-666292505317.html).
+The provider includes support for [NSX Multi-tenancy](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-1/administration-guide/nsx-multi-tenancy.html).
 
-## NSX Multi-Tenancy
+## NSX Multi-tenancy
 
 NSX introduced a new construct called Project in order to offer tenancy by isolating security and networking objects across tenants in a single NSX deployment.
 
@@ -20,7 +20,7 @@ NSX also introduced NSX VPCs, offering a second level of tenancy and cloud consu
 
 NSX Project objects can be created and referenced with the `nsxt_policy_project` [resource](../resources/policy_project.md) and [data source](../data-sources/policy_project.md).
 
-For example, an NSX multi-tenancy Project could be created as below:
+For example, an NSX Multi-tenancy Project could be created as below:
 
 ```hcl
 resource "nsxt_policy_project" "test" {
