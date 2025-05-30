@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 const removeOnDestroyDefault = true
@@ -101,6 +103,15 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Description: "Indicate whether NSX service should be removed from hypervisors during resource deletion",
 				Default:     removeOnDestroyDefault,
 			},
+			"network_span_paths": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Network Span paths associated with the cluster",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+			},
 		},
 	}
 }
@@ -165,6 +176,10 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		TransportNodeProfileId: &transportNodeProfileID,
 		SubClusterConfig:       subClusterConfigs,
 	}
+	networkSitePaths := getStringListFromSchemaList(d, "network_span_paths")
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(networkSitePaths) > 0 {
+		obj.NetworkSpanPaths = networkSitePaths
+	}
 
 	if !isCreate {
 		revision := int64(d.Get("revision").(int))
@@ -206,7 +221,6 @@ func resourceNsxtPolicyHostTransportNodeCollectionCreate(d *schema.ResourceData,
 	if err != nil {
 		return handleCreateError("HostTransportNodeCollection", id, err)
 	}
-
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -256,6 +270,11 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 		d.Set("sub_cluster_config", sccList)
 	}
 	d.Set("transport_node_profile_path", obj.TransportNodeProfileId)
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		if len(d.Get("network_span_paths").([]interface{})) > 0 {
+			d.Set("network_span_paths", obj.NetworkSpanPaths)
+		}
+	}
 	return nil
 }
 
