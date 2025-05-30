@@ -127,13 +127,13 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.",
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"peer_address": {
 				Type:         schema.TypeString,
 				Description:  "Public IPV4 address of the remote device terminating the VPN connection.",
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"service_path": getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"),
 			"ip_addresses": {
