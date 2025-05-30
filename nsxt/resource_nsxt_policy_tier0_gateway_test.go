@@ -182,6 +182,29 @@ func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0Gateway_withTgwSubnets(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccNSXVersion(t, "9.1.0"); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0TgwSubnetsTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "tgw_transit_subnets.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0Gateway_withVrfSubnets(t *testing.T) {
 	// Also set vrf_transit_subnet. Needs NSX 4.1.0 or above.
 	name := getAccTestResourceName()
@@ -878,6 +901,16 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
+}`, name)
+}
+
+func testAccNsxtPolicyTier0TgwSubnetsTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name         = "%s"
+  failover_mode        = "NON_PREEMPTIVE"
+  ha_mode              = "ACTIVE_STANDBY"
+  tgw_transit_subnets  = ["101.64.0.0/16"]
 }`, name)
 }
 

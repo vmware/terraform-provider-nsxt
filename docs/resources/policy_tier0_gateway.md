@@ -174,6 +174,7 @@ The following arguments are supported:
   * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
 * `multi_vrf_inter_sr` - (Optional) Flag to control multi VRF inter SR. This is one time toggle flag and can't be disabled once enabled. Supported with NSX 4.2.1 and above.
 * `enable_rd_per_edge` - (Optional) Flag to enable distinct route distinguisher per edge node. Supported with NSX 4.2.0 and above.
+* `tgw_transit_subnets` - (Optional) Subnets that are used to assign addresses to logical links connecting default T0/VRF and transit gateway.
 
 ## Attributes Reference
 
