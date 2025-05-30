@@ -89,7 +89,7 @@ The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 The Terraform Provider for VMware NSX is available under the [Mozilla Public License, version 2.0][provider-license] license.
 
 [golang-install]: https://golang.org/doc/install
-[product-documentation]: https://docs.vmware.com/en/VMware-NSX/index.html
+[product-documentation]: https://techdocs.broadcom.com/us/en/vmware-cis/nsx.html
 [product-lifecycle]: https://support.broadcom.com/group/ecx/productlifecycle
 [provider-contributing]: CONTRIBUTING.md
 [provider-discussions]: https://github.com/vmware/terraform-provider-nsxt/discussions
