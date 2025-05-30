@@ -43,10 +43,6 @@ linters:
         text: SA4004|SA1019|GetOkExists
       # Exclude specific gosec rules to suppress warnings about issues deemed acceptable.
       - linters:
-          - staticcheck
-        text: SA4004|SA1019|GetOkExists
-      # Exclude specific gosec rules to suppress warnings about issues deemed acceptable.
-      - linters:
           - gosec
         text: G402|G404|G115
       # TODO: Setting temporary exclusions.
