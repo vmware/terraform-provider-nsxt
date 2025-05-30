@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var bgpConfigPathExample = getMultitenancyPathExample("/infra/tier-0s/[gateway]/locale-services/[service]/bgp")
 
 func resourceNsxtPolicyBgpConfig() *schema.Resource {
 	bgpSchema := getPolicyBGPConfigSchema()
@@ -28,9 +31,32 @@ func resourceNsxtPolicyBgpConfig() *schema.Resource {
 		Read:   resourceNsxtPolicyBgpConfigRead,
 		Update: resourceNsxtPolicyBgpConfigUpdate,
 		Delete: resourceNsxtPolicyBgpConfigDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtPolicyBgpConfigImporter,
+		},
 
 		Schema: bgpSchema,
 	}
+}
+
+func resourceNsxtPolicyBgpConfigImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	parents, pathErr := parseStandardPolicyPathVerifySize(importID, 2, bgpConfigPathExample)
+	if pathErr != nil {
+		return nil, pathErr
+	}
+
+	tokens := strings.Split(importID, "/locale-services/")
+	if len(tokens) < 2 {
+		return nil, fmt.Errorf("Invalid BGP policy path %s; expected format: %s", importID, bgpConfigPathExample)
+	}
+
+	d.Set("gateway_path", tokens[0])
+	d.Set("gateway_id", parents[0])
+	d.Set("locale_service_id", parents[1])
+	d.SetId(newUUID())
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) error {
