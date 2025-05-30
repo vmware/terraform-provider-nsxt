@@ -139,7 +139,7 @@ func testAccNSXLogicalRouterLinkPortOnTier0CreateTemplate(name string, tier0Rout
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
   display_name      = "%s"
   description       = "Acceptance Test"
-  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.tier0rtr.id
 
   tag {
     scope = "scope1"
@@ -158,7 +158,7 @@ func testAccNSXLogicalRouterLinkPortOnTier0UpdateTemplate(name string, tier0Rout
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
   display_name      = "%s"
   description       = "Acceptance Test Update"
-  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.tier0rtr.id
 
   tag {
     scope = "scope3"

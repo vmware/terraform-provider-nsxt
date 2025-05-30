@@ -249,7 +249,7 @@ resource "nsxt_logical_switch" "ls1" {
   admin_state       = "UP"
   replication_mode  = "MTEP"
   vlan              = "0"
-  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+  transport_zone_id = data.nsxt_transport_zone.tz1.id
 }
 
 resource "nsxt_logical_port" "port1" {
@@ -265,7 +265,7 @@ data "nsxt_edge_cluster" "ec" {
 
 resource "nsxt_logical_tier1_router" "rtr1" {
   display_name    = "test_router"
-  edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.ec.id
 }`, transportZoneName, getTier0RouterName(), edgeClusterName)
 }
 
@@ -320,7 +320,7 @@ resource "nsxt_logical_switch" "ls1" {
   replication_mode  = ""
   admin_state       = "UP"
   vlan              = "1"
-  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+  transport_zone_id = data.nsxt_transport_zone.tz1.id
 }
 
 resource "nsxt_logical_port" "port1" {
@@ -336,7 +336,7 @@ data "nsxt_edge_cluster" "ec" {
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name    = "test_router"
-  edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.ec.id
 }
 
 resource "nsxt_logical_router_centralized_service_port" "test" {

@@ -327,7 +327,7 @@ resource "nsxt_logical_switch" "test" {
   display_name      = "%s"
   admin_state       = "DOWN"
   replication_mode  = "MTEP"
-  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+  transport_zone_id = data.nsxt_transport_zone.tz1.id
 }
 
 resource "nsxt_ns_group" "test" {
