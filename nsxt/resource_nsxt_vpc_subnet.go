@@ -202,6 +202,12 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 							ReflectType:  reflect.TypeOf(model.StaticIpAllocation{}),
 						},
 					},
+					"enable_vlan_extension": metadata.GetExtendedSchema(&schema.Schema{
+						Type:        schema.TypeBool,
+						Default:     false,
+						Optional:    true,
+						Description: "Enabling VLAN connection for the subnet. The user must configure the exclusive external IP block for this subnet. The IP block should also be configured under a distributed VLAN connection. The default value for this will be false.",
+					}),
 				},
 			},
 			Optional: true,
@@ -486,13 +492,28 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-
+	advancedConfig := d.Get("advanced_config")
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
 		Tags:        tags,
 	}
+	var subnetAdvancedConfigObj model.SubnetAdvancedConfig
+	if advancedConfigUnparsed, ok := advancedConfig.([]interface{}); ok {
+		if len(advancedConfigUnparsed) > 0 && advancedConfigUnparsed[0] != nil {
+			subnetAdvancedConfig, mapExists := advancedConfigUnparsed[0].(map[string]interface{})
+			if enableVlanExtensionUnparsed, ok := subnetAdvancedConfig["enable_vlan_extension"]; mapExists && ok {
+				// TODO: Get the other arguments under advanced configs as well if needed
 
+				if enableVlanExtension, ok := enableVlanExtensionUnparsed.(bool); ok {
+					subnetAdvancedConfigObj = model.SubnetAdvancedConfig{
+						EnableVlanExtension: &enableVlanExtension,
+					}
+				}
+			}
+		}
+	}
+	obj.AdvancedConfig = &subnetAdvancedConfigObj
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
@@ -560,9 +581,18 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	// Depending on subnet type, this attribute might not be sent back by NSX
 	// If not provided by NSX, the next line will explicitly assign empty list to ip_blocks
 	d.Set("ip_blocks", obj.IpBlocks)
+	setVPCSubnetAdvancedConfig(d, obj.AdvancedConfig)
 
 	elem := reflect.ValueOf(&obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcSubnetSchema, "", nil)
+}
+
+func setVPCSubnetAdvancedConfig(d *schema.ResourceData, advancedConfig *model.SubnetAdvancedConfig) {
+	advancedConfigMap := make(map[string]interface{})
+	advancedConfigMap["enable_vlan_extension"] = advancedConfig.EnableVlanExtension
+	// TODO: Set the other arguments under advanced configs as well if needed
+
+	d.Set("advanced_config", advancedConfigMap)
 }
 
 func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
@@ -581,6 +611,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
+	advancedConfig := d.Get("advanced_config")
 	tags := getPolicyTagsFromSchema(d)
 
 	revision := int64(d.Get("revision").(int))
@@ -591,7 +622,22 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		Tags:        tags,
 		Revision:    &revision,
 	}
+	var subnetAdvancedConfigObj model.SubnetAdvancedConfig
+	if advancedConfigUnparsed, ok := advancedConfig.([]interface{}); ok {
+		if len(advancedConfigUnparsed) > 0 && advancedConfigUnparsed[0] != nil {
+			subnetAdvancedConfig, mapExists := advancedConfigUnparsed[0].(map[string]interface{})
+			if enableVlanExtensionUnparsed, ok := subnetAdvancedConfig["enable_vlan_extension"]; mapExists && ok {
+				// TODO: Set the other arguments under advanced configs as well if needed
 
+				if enableVlanExtension, ok := enableVlanExtensionUnparsed.(bool); ok {
+					subnetAdvancedConfigObj = model.SubnetAdvancedConfig{
+						EnableVlanExtension: &enableVlanExtension,
+					}
+				}
+			}
+		}
+	}
+	obj.AdvancedConfig = &subnetAdvancedConfigObj
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
