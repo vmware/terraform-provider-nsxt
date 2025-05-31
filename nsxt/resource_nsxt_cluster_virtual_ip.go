@@ -16,11 +16,6 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-var ClusterVirtualIPForceType = []string{
-	nsxModel.ClusterVirtualIpProperties_FORCE_TRUE,
-	nsxModel.ClusterVirtualIpProperties_FORCE_FALSE,
-}
-
 var DefaultIPv4VirtualAddress = "0.0.0.0"
 
 var DefaultIPv6VirtualAddress = "::"
