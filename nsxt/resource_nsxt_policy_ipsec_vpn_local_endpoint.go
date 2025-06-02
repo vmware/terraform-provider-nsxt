@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -60,6 +61,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 				Optional: true,
 			},
 		},
+
 		CustomizeDiff: validateIPv6LocaleServiceConflict,
 	}
 }
@@ -359,11 +361,13 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 func validateIPv6LocaleServiceConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	localAddr := diff.Get("local_address").(string)
 	servicePath := diff.Get("service_path").(string)
-	_, errors := validation.IsIPv6Address(localAddr, "local_address")
+	ip := net.ParseIP(localAddr)
+	isIPv6 := ip != nil && strings.Contains(localAddr, ":") && ip.To4() == nil
+	isLocaleService := strings.Contains(servicePath, "/locale-services/")
 
-	log.Printf("[DEBUG] local_address: %s, service_path: %s, isIPv6: %t", localAddr, servicePath, errors)
+	log.Printf("[DEBUG] validateIPv6LocaleServiceConflict: local_address=%s, service_path=%s, isIPv6=%t", localAddr, servicePath, isIPv6)
 
-	if len(errors) == 0 && strings.Contains(servicePath, "locale-services") { //its an IPv6 address
+	if isIPv6 && isLocaleService { //its an IPv6 address
 		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
 	}
 	return nil

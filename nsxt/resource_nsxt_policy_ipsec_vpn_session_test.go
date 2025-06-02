@@ -92,6 +92,36 @@ var accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes = map[string]str
 	"action":                     "PROTECT",
 }
 
+var accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes = map[string]string{
+	"display_name":               ipsecVpnResourceName,
+	"description":                "terraform created",
+	"enabled":                    "true",
+	"vpn_type":                   "RouteBased",
+	"authentication_mode":        "PSK",
+	"compliance_suite":           "NONE",
+	"ip_addresses":               "2607:f0d0:1002:51::4",
+	"prefix_length":              "24",
+	"peer_address":               "2001:db8:0:1::1",
+	"peer_id":                    "2001:db8:0:1::1",
+	"psk":                        "secret1",
+	"connection_initiation_mode": "RESPOND_ONLY",
+}
+
+var accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes = map[string]string{
+	"display_name":               ipsecVpnResourceName,
+	"description":                "terraform updated",
+	"enabled":                    "false",
+	"vpn_type":                   "RouteBased",
+	"authentication_mode":        "PSK",
+	"compliance_suite":           "NONE",
+	"ip_addresses":               "2607:f0d0:1002:52::5",
+	"prefix_length":              "24",
+	"peer_address":               "2001:db8:0:2::1",
+	"peer_id":                    "2001:db8:0:2::1",
+	"psk":                        "secret2",
+	"connection_initiation_mode": "ON_DEMAND",
+}
+
 var accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes = map[string]string{
 	"display_name":               getAccTestResourceName(),
 	"description":                "terraform updated",
@@ -869,6 +899,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 			attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
 }
 
+// Ipv6 test cases
 func testAccNsxtPolicyIPSecVpnSessionPolicyBasedIPv6Template(createFlow bool, isT0 bool) string {
 	var attrMap map[string]string
 	if createFlow {
@@ -932,7 +963,7 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 	service_path  = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
 	display_name  = "%s"
-	local_address = "fd12:3456:787a::1"
+	local_address = "fd12:3456:767a::1"
 	}
 	`, ipsecVpnResourceName)
 	}
@@ -948,7 +979,7 @@ resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
 		vpnServiceTemplate = fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
 	display_name          = "%s"
-    gateway_path  = nsxt_policy_tier0_gateway.test.path
+    gateway_path  = nsxt_policy_tier1_gateway.test.path
 	}
 `, ipsecVpnResourceName)
 	}
@@ -983,7 +1014,7 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
 `, ipsecVpnResourceName, ipsecVpnResourceName, ipsecVpnResourceName)
 }
 
-func TestAccResourceNsxtPolicyIPSecVpnSessionIPv6PolicyBased_basic(t *testing.T) {
+func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBasedIPv6_basic(t *testing.T) {
 	testResourceName := testAccIPSecVpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
@@ -1053,6 +1084,304 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionIPv6PolicyBased_basic(t *testing.T)
 			},
 			{
 				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBasedIPv6_tier1(t *testing.T) {
+	testResourceName := testAccIPSecVpnSessionResourceName
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "4.1.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionPolicyBasedIPv6Template(true, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["connection_initiation_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.sources.0", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destinations.0", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", accTestPolicyIPSecVpnSessionPolicyBasedIPv6CreateAttributes["action"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionPolicyBasedIPv6Template(false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["connection_initiation_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.sources.0", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destinations.0", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes["action"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(false),
+			},
+		},
+	})
+}
+
+// Route based IPv6 test cases
+func testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(createFlow bool, isT0 bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes
+	} else {
+		attrMap = accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes
+	}
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0, false) +
+		fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_session" "test" {
+	display_name               = "%s"
+	description                = "%s"
+	ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
+	tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
+	dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+	local_endpoint_path        = nsxt_policy_ipsec_vpn_local_endpoint.test.path
+	enabled                    = "%s"
+	service_path               = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
+	vpn_type                   = "%s"
+	authentication_mode        = "%s"
+	compliance_suite           = "%s"
+	ip_addresses               = ["%s"]
+	prefix_length              = "%s"
+	peer_address               = "%s"
+	peer_id                    = "%s"
+	psk                        = "%s"
+	connection_initiation_mode = "%s"
+
+	tag {
+	  scope = "scope1"
+	  tag   = "tag1"
+	}
+}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
+			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["peer_address"], attrMap["peer_id"], attrMap["psk"], attrMap["connection_initiation_mode"])
+}
+
+func testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Minimalistic() string {
+	attrMap := accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes
+	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
+		testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(true, false) +
+		fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_session" "test" {
+	display_name        = "%s"
+	tunnel_profile_path = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
+	local_endpoint_path = nsxt_policy_ipsec_vpn_local_endpoint.test.path
+	service_path        = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
+	vpn_type            = "%s"
+	peer_address        = "%s"
+	peer_id             = "%s"
+	ip_addresses        = ["%s"]
+	prefix_length       = %s
+	psk                 = "%s"
+}`, attrMap["display_name"], attrMap["vpn_type"], attrMap["peer_address"], attrMap["peer_id"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["psk"])
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBasedIPv6_basic(t *testing.T) {
+
+	testResourceName := testAccIPSecVpnSessionResourceName
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "4.1.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(true, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["connection_initiation_mode"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(false, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["connection_initiation_mode"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Minimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", "INITIATOR"),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnSessionIPv6RouteBased_tier1(t *testing.T) {
+	testResourceName := testAccIPSecVpnSessionResourceName
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "4.1.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(true, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes["connection_initiation_mode"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["compliance_suite"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes["connection_initiation_mode"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(false),
 			},
 		},
 	})

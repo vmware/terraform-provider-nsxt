@@ -5,8 +5,10 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -131,7 +133,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 			},
 			"peer_address": {
 				Type:         schema.TypeString,
-				Description:  "Public IPV4 address of the remote device terminating the VPN connection.",
+				Description:  "Public IPv4/v6 address of the remote device terminating the VPN connection.",
 				Required:     true,
 				ValidateFunc: validation.IsIPAddress,
 			},
@@ -165,6 +167,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				Computed:    true,
 			},
 		},
+		CustomizeDiff: validateIPv6LocaleConflict,
 	}
 }
 
@@ -765,4 +768,19 @@ func nsxtVpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.Re
 	d.Set("service_path", s[0])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func validateIPv6LocaleConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	peerAddr := diff.Get("peer_address").(string)
+	servicePath := diff.Get("service_path").(string)
+	ip := net.ParseIP(peerAddr)
+	isIPv6 := ip != nil && strings.Contains(peerAddr, ":") && ip.To4() == nil
+	isLocaleService := strings.Contains(servicePath, "/locale-services/")
+
+	log.Printf("[DEBUG] validateIPv6LocaleConflict: peer_address=%s, service_path=%s, isIPv6=%t", peerAddr, servicePath, isIPv6)
+
+	if isIPv6 && isLocaleService { //its an IPv6 address
+		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
+	}
+	return nil
 }
