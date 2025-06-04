@@ -22,14 +22,16 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"gateway_path": {
-				Type:        schema.TypeString,
-				Description: "The name of the gateway to which interface is linked",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "The name of the gateway to which interface is linked",
+				Optional:     true,
+				ValidateFunc: validateGatewayPolicypath(),
 			},
 			"service_path": {
-				Type:        schema.TypeString,
-				Description: "The name of the locale service of the gateway to which interface is linked",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "The name of the locale service of the gateway to which interface is linked",
+				Optional:     true,
+				ValidateFunc: validateLocaleServicePolicyPath(),
 			},
 			"path": getPathSchema(),
 			"edge_cluster_path": {
@@ -130,4 +132,39 @@ func isT0Gw(path string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func validateLocaleServicePolicyPath() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		_, _, _, err := parseLocaleServicePolicyPath(v)
+		if err != nil {
+			es = append(es, fmt.Errorf("Invalid LocaleService path : %v", err.Error()))
+		}
+		return
+	}
+}
+
+func validateGatewayPolicypath() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		gwPath, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		segs := strings.Split(gwPath, "/")
+		if len(segs) < 3 {
+			es = append(es, fmt.Errorf("Invalid Gateway path"))
+			return
+		}
+		if segs[len(segs)-2] != "tier-0s" && segs[len(segs)-2] != "tier-1s" {
+			es = append(es, fmt.Errorf("Invalid Gateway path"))
+			return
+		}
+		return
+	}
 }
