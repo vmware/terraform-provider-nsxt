@@ -28,7 +28,7 @@ func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway.test"
 	testDataSourceName := "nsxt_policy_transit_gateway.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
@@ -82,6 +82,67 @@ func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTransitGateway_withSpan(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
+	testDataSourceName := "nsxt_policy_transit_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithSpanTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayCreateAttributes["transit_subnets"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttr(testResourceName, "span.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "span.0.cluster_based_span.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "span.0.cluster_based_span.0.span_path"),
+
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithSpanTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayUpdateAttributes["transit_subnets"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttr(testResourceName, "span.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "span.0.cluster_based_span.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "span.0.cluster_based_span.0.span_path"),
+
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 				),
 			},
 		},
@@ -178,6 +239,44 @@ resource "nsxt_policy_transit_gateway" "test" {
   description     = "%s"
   transit_subnets = ["%s"]
 
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_transit_gateway" "test" {
+%s
+  display_name = "%s"
+  depends_on   = [nsxt_policy_transit_gateway.test]
+}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
+		testAccNsxtProjectContext(), attrMap["display_name"])
+}
+
+func testAccNsxtPolicyTransitGatewayWithSpanTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestTransitGatewayCreateAttributes
+	} else {
+		attrMap = accTestTransitGatewayUpdateAttributes
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_network_span" "netspan" {
+  display_name = "test_span"
+  exclusive    = true
+}
+
+resource "nsxt_policy_transit_gateway" "test" {
+%s
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  span {
+    cluster_based_span {
+      span_path = nsxt_policy_network_span.netspan.path
+    }
+  }
   tag {
     scope = "scope1"
     tag   = "tag1"
