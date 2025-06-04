@@ -87,58 +87,58 @@ In addition to arguments listed above, the following attributes are exported:
 * `path` - The NSX path of the policy resource.
 
 
-## Target resource types
+## Target Resource Types
 
-|Object|project + VPC|project only|VPC only|
-|------|-------------|------------|--------|
-|Group|Group|Infra.Domain.Group|Org.Project.Vpc.Group|
-|Service||Infra.Service||
-|Service Entry||Infra.Service.ServiceEntry||
-|TLS Certificate||Infra.TlsCertificate||
-|TLS CRL||Infra.TlsCrl||
-|All Firewall Rules|Rule|||
-|Security Policy|SecurityPolicy|Infra.Domain.SecurityPolicy|Org.Project.Vpc.SecurityPolicy|
-|Security Policy Rule|SecurityPolicy.Rule|Infra.Domain.SecurityPolicy.Rule|Org.Project.Vpc.SecurityPolicy.Rule|
-|Gateway Policy|SecurityPolicy|Infra.Domain.SecurityPolicy|Org.Project.Vpc.SecurityPolicy|
-|Gateway Policy Rule|GatewayPolicy.Rule|Infra.Domain.GatewayPolicy.Rule|Org.Project.Vpc.GatewayPolicy.Rule|
-|IDS Security Policy||Infra.Domain.IdsPolicy||
-|IDS Security Policy Rule||Infra.Domain.IdsPolicy.Rule||
-|Session Timer Profile||Infra.PolicyFirewallSessionTimerProfile||
-|Flood Protection Profile||Infra.FloodProtectionProfile||
-|DNS Security Profile||Infra.DnsSecurityProfile||
-|Context Profile||Infra.PolicyContextProfile||
-|l7 Access Profile||Infra.L7AccessProfile||
-|Tier1 Gateway||Infra.Tier1||
-|Segment||Infra.Segment||
-|Segment Port||Infra.Segment.SegmentPort||
-|Subnet|||Org.Project.Vpc.Subnet|
-|Subnet Port|||Org.Project.Vpc.Subnet.SubnetPort|
-|Segment Security Profile||Infra.SegmentSecurityProfile||
-|Segment QoS Profile||Infra.QosProfile||
-|Segment IP Discovery Profile||Infra.IpDiscoveryProfile||
-|Segment MAC Discovery Profile||Infra.MacDiscoveryProfile||
-|Segment Spoof Guard Profile||Infra.SpoofGuardProfile||
-|IPv6 NDRA Profile||Infra.Ipv6NdraProfile||
-|IPv6 DAD Profile||Infra.Ipv6DadProfile||
-|Gateway QoS Profile||Infra.GatewayQosProfile||
-|Static Routes|StaticRoutes|Infra.Tier1.StaticRoutes|Org.Project.Vpc.StaticRoutes|
-|NAT Rule|NatRule|Infra.Tier1.PolicyNat.PolicyNatRule|Org.Project.Vpc.PolicyNat.PolicyNatRule|
-|DNS Forwarder Zone||Infra.PolicyDnsForwarderZone||
-|DNS Forwarder||Infra.Tier1.PolicyDnsForwarder||
-|IP Address Block||Infra.IpAddressBlock||
-|IP Address Pool||Infra.IpAddressPool||
-|IP Address Pool Subnet||Infra.IpAddressPool.IpAddressPoolSubnet||
-|IP Address Allocation||Infra.IpAddressPool.IpAddressAllocation||
-|DHCP Server Config||Infra.DhcpServerConfig||
-|IPSec VPN Service||Infra.Tier1.IPSecVpnService||
-|IPSec VPN Session||Infra.Tier1.IPSecVpnService.IPSecVpnSession||
-|IPSec VPN Local Endpoint||Infra.Tier1.IPSecVpnService.IPSecVpnLocalEndpoint||
-|IPSec VPN Tunnel Profile||Infra.IPSecVpnTunnelProfile||
-|IPSec VPN IKE Profile||Infra.IPSecVpnIkeProfile||
-|IPSec VPN DPD Profile||Infra.IPSecVpnDpdProfile||
-|L2 VPN Service||Infra.Tier1.L2VpnService||
-|L2 VPN Session||Infra.Tier1.L2VpnService.L2VpnSession||
-|VPC||Org.Project.Vpc||
+| Object                        | Project + VPC       | Project Only                                      | VPC Only                                |
+|-------------------------------|---------------------|---------------------------------------------------|-----------------------------------------|
+| Group                         | Group               | Infra.Domain.Group                                | Org.Project.Vpc.Group                   |
+| Service                       |                     | Infra.Service                                     |                                         |
+| Service Entry                 |                     | Infra.Service.ServiceEntry                        |                                         |
+| TLS Certificate               |                     | Infra.TlsCertificate                              |                                         |
+| TLS CRL                       |                     | Infra.TlsCrl                                      |                                         |
+| All Firewall Rules            | Rule                |                                                   |                                         |
+| Security Policy               | SecurityPolicy      | Infra.Domain.SecurityPolicy                       | Org.Project.Vpc.SecurityPolicy          |
+| Security Policy Rule          | SecurityPolicy.Rule | Infra.Domain.SecurityPolicy.Rule                  | Org.Project.Vpc.SecurityPolicy.Rule     |
+| Gateway Policy                | SecurityPolicy      | Infra.Domain.SecurityPolicy                       | Org.Project.Vpc.SecurityPolicy          |
+| Gateway Policy Rule           | GatewayPolicy.Rule  | Infra.Domain.GatewayPolicy.Rule                   | Org.Project.Vpc.GatewayPolicy.Rule      |
+| IDS Security Policy           |                     | Infra.Domain.IdsPolicy                            |                                         |
+| IDS Security Policy Rule      |                     | Infra.Domain.IdsPolicy.Rule                       |                                         |
+| Session Timer Profile         |                     | Infra.PolicyFirewallSessionTimerProfile           |                                         |
+| Flood Protection Profile      |                     | Infra.FloodProtectionProfile                      |                                         |
+| DNS Security Profile          |                     | Infra.DnsSecurityProfile                          |                                         |
+| Context Profile               |                     | Infra.PolicyContextProfile                        |                                         |
+| l7 Access Profile             |                     | Infra.L7AccessProfile                             |                                         |
+| Tier1 Gateway                 |                     | Infra.Tier1                                       |                                         |
+| Segment                       |                     | Infra.Segment                                     |                                         |
+| Segment Port                  |                     | Infra.Segment.SegmentPort                         |                                         |
+| Subnet                        |                     |                                                   | Org.Project.Vpc.Subnet                  |
+| Subnet Port                   |                     |                                                   | Org.Project.Vpc.Subnet.SubnetPort       |
+| Segment Security Profile      |                     | Infra.SegmentSecurityProfile                      |                                         |
+| Segment QoS Profile           |                     | Infra.QosProfile                                  |                                         |
+| Segment IP Discovery Profile  |                     | Infra.IpDiscoveryProfile                          |                                         |
+| Segment MAC Discovery Profile |                     | Infra.MacDiscoveryProfile                         |                                         |
+| Segment Spoof Guard Profile   |                     | Infra.SpoofGuardProfile                           |                                         |
+| IPv6 NDRA Profile             |                     | Infra.Ipv6NdraProfile                             |                                         |
+| IPv6 DAD Profile              |                     | Infra.Ipv6DadProfile                              |                                         |
+| Gateway QoS Profile           |                     | Infra.GatewayQosProfile                           |                                         |
+| Static Routes                 | StaticRoutes        | Infra.Tier1.StaticRoutes                          | Org.Project.Vpc.StaticRoutes            |
+| NAT Rule                      | NatRule             | Infra.Tier1.PolicyNat.PolicyNatRule               | Org.Project.Vpc.PolicyNat.PolicyNatRule |
+| DNS Forwarder Zone            |                     | Infra.PolicyDnsForwarderZone                      |                                         |
+| DNS Forwarder                 |                     | Infra.Tier1.PolicyDnsForwarder                    |                                         |
+| IP Address Block              |                     | Infra.IpAddressBlock                              |                                         |
+| IP Address Pool               |                     | Infra.IpAddressPool                               |                                         |
+| IP Address Pool Subnet        |                     | Infra.IpAddressPool.IpAddressPoolSubnet           |                                         |
+| IP Address Allocation         |                     | Infra.IpAddressPool.IpAddressAllocation           |                                         |
+| DHCP Server Config            |                     | Infra.DhcpServerConfig                            |                                         |
+| IPSec VPN Service             |                     | Infra.Tier1.IPSecVpnService                       |                                         |
+| IPSec VPN Session             |                     | Infra.Tier1.IPSecVpnService.IPSecVpnSession       |                                         |
+| IPSec VPN Local Endpoint      |                     | Infra.Tier1.IPSecVpnService.IPSecVpnLocalEndpoint |                                         |
+| IPSec VPN Tunnel Profile      |                     | Infra.IPSecVpnTunnelProfile                       |                                         |
+| IPSec VPN IKE Profile         |                     | Infra.IPSecVpnIkeProfile                          |                                         |
+| IPSec VPN DPD Profile         |                     | Infra.IPSecVpnDpdProfile                          |                                         |
+| L2 VPN Service                |                     | Infra.Tier1.L2VpnService                          |                                         |
+| L2 VPN Session                |                     | Infra.Tier1.L2VpnService.L2VpnSession             |                                         |
+| VPC                           |                     | Org.Project.Vpc                                   |                                         |
 
 
 ## Importing
