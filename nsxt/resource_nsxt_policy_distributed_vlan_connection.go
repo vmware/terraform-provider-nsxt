@@ -38,7 +38,6 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 		Schema: *subnetExclusiveConfigSchema(),
 		Metadata: metadata.Metadata{
 			IntroducedInVersion: "9.1.0",
-			Skip:                false,
 			SchemaType:          "struct",
 			SdkFieldName:        "SubnetExclusiveConfig",
 			ReflectType:         reflect.TypeOf(model.SubnetExclusiveConfig{}),
@@ -76,14 +75,14 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 			Schema: map[string]*metadata.ExtendedSchema{
 				"ip_block_path": {
 					Schema: schema.Schema{
-						Type:        schema.TypeString,
-						Optional:    true,
-						Description: "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
+						Type:         schema.TypeString,
+						Optional:     true,
+						Description:  "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
+						ValidateFunc: validatePolicyPath(),
 					},
 					Metadata: metadata.Metadata{
 						SchemaType:   "string",
 						SdkFieldName: "IpBlockPath",
-						Skip:         false,
 					},
 				},
 				"vlan_extension": vlanExtensionSchema(),
@@ -112,7 +111,6 @@ func vlanExtensionSchema() *metadata.ExtendedSchema {
 						Metadata: metadata.Metadata{
 							SchemaType:   "bool",
 							SdkFieldName: "VpcGatewayConnectionEnable",
-							Skip:         false,
 						},
 					},
 				},
