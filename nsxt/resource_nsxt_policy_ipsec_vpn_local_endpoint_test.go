@@ -305,12 +305,12 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointIPv6Prerequisite() string {
 	 edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
    }
    data "nsxt_policy_gateway_locale_service" "test" {
-	 gateway_path = nsxt_policy_tier0_gateway.test.path
-	 display_name = "default"
+	 gateway_path  = nsxt_policy_tier0_gateway.test.path
+	 display_name  = "default"
    }
    resource "nsxt_policy_ipsec_vpn_service" "test" {
-	 display_name        = "%s"
-	 gateway_path = nsxt_policy_tier0_gateway.test.path
+	 display_name  = "%s"
+	 gateway_path  = nsxt_policy_tier0_gateway.test.path
    }`, getEdgeClusterName(), accTestPolicyIPSecVpnGatewayTestName, accTestPolicyIPSecVpnServiceTestName)
 }
 
