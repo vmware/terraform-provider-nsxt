@@ -114,6 +114,38 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 	})
 }
 
+func TestAccResourceNsxtPolicyDistributedVlanConnectionWithVlanExtension(t *testing.T) {
+	testResourceName := "nsxt_policy_distributed_vlan_connection.big_corp_vlan"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDistributedVlanConnectionCheckDestroy(state, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyDistributedVlanConnectionExists(accTestPolicyDistributedVlanConnectionCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDistributedVlanConnectionCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "subnet_exclusive_config.0.ip_block_path"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.0.vlan_extension.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.0.vlan_extension.0.vpc_gateway_connection_enable", "true"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyDistributedVlanConnectionExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -201,4 +233,31 @@ data "nsxt_policy_distributed_vlan_connection" "test" {
 
   depends_on = [nsxt_policy_distributed_vlan_connection.test]
 }`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+}
+
+func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
+	attrMap := accTestPolicyDistributedVlanConnectionCreateAttributes
+	return fmt.Sprintf(`
+
+resource "nsxt_policy_ip_block" "big_corp_vlan" {
+  description         = "IP block for big corp extended subnet test"
+  display_name        = "%s"
+  cidr_list           = ["10.66.66.0/24"]
+  visibility          = "EXTERNAL"
+  is_subnet_exclusive = true
+}
+
+resource "nsxt_policy_distributed_vlan_connection" "big_corp_vlan" {
+  display_name      = "%s"
+  description       = "%s"
+  gateway_addresses = ["%s"]
+  vlan_id           = %s
+  subnet_exclusive_config {
+    vlan_extension  {
+      vpc_gateway_connection_enable = true
+    }
+    ip_block_path   = nsxt_policy_ip_block.big_corp_vlan.path
+  }
+}
+`, attrMap["display_name"], attrMap["display_name"], attrMap["description"], attrMap["gateway_addresses"], attrMap["vlan_id"])
 }
