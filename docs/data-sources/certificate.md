@@ -8,7 +8,7 @@ description: A certificate data source.
 
 This data source provides information about various types of certificates imported into NSX trust management.
 
-This data source is applicable to NSX-T Policy Manager.
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
