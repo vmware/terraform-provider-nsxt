@@ -57,6 +57,11 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Required:    true,
 				Description: "Compute collection id",
 			},
+			"enable_nsx_on_dvpg": {
+				Type:        schema.TypeBool,
+				Required:    false,
+				Description: "If this is set to true, NSX on DVPG will be enabled on the Transport Node Collection.",
+			},
 			"sub_cluster_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -134,6 +139,7 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
 
+	enableNsxOnDvpg := d.Get("enable_nsx_on_dvpg").(bool)
 	computeCollectionID := d.Get("compute_collection_id").(string)
 	transportNodeProfileID := d.Get("transport_node_profile_path").(string)
 	var subClusterConfigs []model.SubClusterConfig
@@ -164,6 +170,7 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		ComputeCollectionId:    &computeCollectionID,
 		TransportNodeProfileId: &transportNodeProfileID,
 		SubClusterConfig:       subClusterConfigs,
+		EnableNsxOnDvpg:        &enableNsxOnDvpg,
 	}
 
 	if !isCreate {
@@ -234,6 +241,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("compute_collection_id", obj.ComputeCollectionId)
+	d.Set("enable_nsx_on_dvpg", obj.EnableNsxOnDvpg)
 	if obj.SubClusterConfig != nil {
 		var sccList []map[string]interface{}
 		for _, cfg := range obj.SubClusterConfig {
