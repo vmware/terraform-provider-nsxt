@@ -1,10 +1,10 @@
 ---
-subcategory: "FIXME"
-page_title: "NSXT: nsxt_policy_transit_gateway_static_routes"
+subcategory: "staticRoutes"
+page_title: "NSXT: nsxt_policy_transit_gateway_static_route"
 description: A resource to configure a StaticRoutes.
 ---
 
-# nsxt_policy_transit_gateway_static_routes
+# nsxt_policy_transit_gateway_static_route
 
 This resource provides a method for the management of a transit gateway StaticRoutes.
 
@@ -24,11 +24,11 @@ data "nsxt_policy_transit_gateway" "tgw1" {
   display_name = "TGW1"
 }
 
-resource "nsxt_policy_transit_gateway_static_routes" "test" {
-  display_name           = "test"
-  description            = "Terraform provisioned StaticRoutes for transit gateway"
-  parent_path            = data.nsxt_policy_transit_gateway.tgw1.path
-  enabled_on_secondary   = false
+resource "nsxt_policy_transit_gateway_static_route" "test" {
+  display_name         = "test"
+  description          = "Terraform provisioned StaticRoutes for transit gateway"
+  parent_path          = data.nsxt_policy_transit_gateway.tgw1.path
+  enabled_on_secondary = false
 }
 
 ```
@@ -62,7 +62,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_transit_gateway_static_routes.test PATH
+terraform import nsxt_policy_transit_gateway_static_route.test PATH
 ```
 
 The above command imports StaticRoutes named `test` with the NSX path `PATH`.
