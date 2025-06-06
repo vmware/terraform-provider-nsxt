@@ -172,9 +172,11 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		obj.CidrList = cidrList
 		obj.RangeList = rangeList
 		obj.ReservedIps = reservedIPs
-		obj.IsSubnetExclusive = &isSubnetExclusive
 	} else {
 		obj.Cidr = &cidr
+	}
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		obj.IsSubnetExclusive = &isSubnetExclusive
 	}
 
 	// Create the resource using PATCH
