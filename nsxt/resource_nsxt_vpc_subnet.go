@@ -202,6 +202,17 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 							ReflectType:  reflect.TypeOf(model.StaticIpAllocation{}),
 						},
 					},
+					"enable_vlan_extension": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							IntroducedInVersion: "9.1.0",
+							SchemaType:          "bool",
+							SdkFieldName:        "EnableVlanExtension",
+						},
+					},
 				},
 			},
 			Optional: true,
@@ -486,13 +497,11 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
 		Tags:        tags,
 	}
-
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
@@ -591,7 +600,6 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		Tags:        tags,
 		Revision:    &revision,
 	}
-
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
