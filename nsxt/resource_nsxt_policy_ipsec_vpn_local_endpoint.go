@@ -359,15 +359,19 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 }
 
 func validateIPv6LocaleServiceConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	localAddr := diff.Get("local_address").(string)
+	return validateIPv6WithLocaleService(diff, "local_address", "validateIPv6LocaleServiceConflict")
+}
+
+func validateIPv6WithLocaleService(diff *schema.ResourceDiff, fieldName, logPrefix string) error {
+	address := diff.Get(fieldName).(string)
 	servicePath := diff.Get("service_path").(string)
-	ip := net.ParseIP(localAddr)
-	isIPv6 := ip != nil && strings.Contains(localAddr, ":") && ip.To4() == nil
+	ip := net.ParseIP(address)
+	isIPv6 := ip != nil && strings.Contains(address, ":") && ip.To4() == nil
 	isLocaleService := strings.Contains(servicePath, "/locale-services/")
 
-	log.Printf("[DEBUG] validateIPv6LocaleServiceConflict: local_address=%s, service_path=%s, isIPv6=%t", localAddr, servicePath, isIPv6)
+	log.Printf("[DEBUG] %s: %s=%s, service_path=%s, isIPv6=%t", logPrefix, fieldName, address, servicePath, isIPv6)
 
-	if isIPv6 && isLocaleService { //its an IPv6 address
+	if isIPv6 && isLocaleService {
 		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
 	}
 	return nil
