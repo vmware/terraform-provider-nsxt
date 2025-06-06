@@ -158,11 +158,11 @@ func validateGatewayPolicyPath() schema.SchemaValidateFunc {
 		}
 		segs := strings.Split(gwPath, "/")
 		if len(segs) < 3 {
-			es = append(es, fmt.Errorf("Invalid Gateway path :", gwPath))
+			es = append(es, fmt.Errorf("Invalid Gateway path : %s", gwPath))
 			return
 		}
 		if segs[len(segs)-2] != "tier-0s" && segs[len(segs)-2] != "tier-1s" {
-			es = append(es, fmt.Errorf("Invalid Gateway path :", gwPath))
+			es = append(es, fmt.Errorf("Invalid Gateway path : %s", gwPath))
 			return
 		}
 		return
