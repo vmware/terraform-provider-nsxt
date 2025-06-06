@@ -30,7 +30,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `local_address` - (Required) Local IPv4 IP address.
+* `local_address` - (Required) Local IPv4/v6 IP address.
 * `local_id` - (Optional) Local id for the local endpoint.
 * `certificate_path` - (Optional) Policy path referencing site certificate.
 * `trust_ca_paths` - (Optional) List of trust ca certificate paths.
