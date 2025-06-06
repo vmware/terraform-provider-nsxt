@@ -1,5 +1,5 @@
 ---
-subcategory: "staticRoutes"
+subcategory: "beta"
 page_title: "NSXT: nsxt_policy_transit_gateway_static_route"
 description: A resource to configure a StaticRoutes.
 ---
@@ -29,6 +29,19 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
   description          = "Terraform provisioned StaticRoutes for transit gateway"
   parent_path          = data.nsxt_policy_transit_gateway.tgw1.path
   enabled_on_secondary = false
+  network              = "3.3.3.0/24"
+  next_hop = [
+    {
+      ip_address     = "192.168.1.1"
+      admin_distance = 10
+      scope          = ["/infra/sites/default/enforcement-points/default/edge-clusters/edge-cluster-1"]
+    },
+    {
+      ip_address     = "192.168.1.2"
+      admin_distance = 5
+      scope          = []
+    }
+  ]
 }
 
 ```
