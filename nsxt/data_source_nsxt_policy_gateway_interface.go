@@ -143,7 +143,7 @@ func validateLocaleServicePolicyPath() schema.SchemaValidateFunc {
 		}
 		_, _, _, err := parseLocaleServicePolicyPath(v)
 		if err != nil {
-			es = append(es, fmt.Errorf("Invalid LocaleService path : %v", err.Error()))
+			es = append(es, fmt.Errorf("Invalid LocaleService path %s: %v", v, err.Error()))
 		}
 		return
 	}
@@ -158,11 +158,11 @@ func validateGatewayPolicyPath() schema.SchemaValidateFunc {
 		}
 		segs := strings.Split(gwPath, "/")
 		if len(segs) < 3 {
-			es = append(es, fmt.Errorf("Invalid Gateway path"))
+			es = append(es, fmt.Errorf("Invalid Gateway path :", gwPath))
 			return
 		}
 		if segs[len(segs)-2] != "tier-0s" && segs[len(segs)-2] != "tier-1s" {
-			es = append(es, fmt.Errorf("Invalid Gateway path"))
+			es = append(es, fmt.Errorf("Invalid Gateway path :", gwPath))
 			return
 		}
 		return
