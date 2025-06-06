@@ -25,7 +25,7 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The name of the gateway to which interface is linked",
 				Optional:     true,
-				ValidateFunc: validateGatewayPolicypath(),
+				ValidateFunc: validateGatewayPolicyPath(),
 			},
 			"service_path": {
 				Type:         schema.TypeString,
@@ -149,7 +149,7 @@ func validateLocaleServicePolicyPath() schema.SchemaValidateFunc {
 	}
 }
 
-func validateGatewayPolicypath() schema.SchemaValidateFunc {
+func validateGatewayPolicyPath() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		gwPath, ok := i.(string)
 		if !ok {
