@@ -165,7 +165,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		obj.CidrList = cidrList
 		obj.RangeList = rangeList
 		obj.ReservedIps = reservedIPs
-	} else {
+	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
 
@@ -218,7 +218,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		obj.CidrList = cidrList
 		obj.RangeList = rangeList
 		obj.ReservedIps = reservedIPs
-	} else {
+	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
 
