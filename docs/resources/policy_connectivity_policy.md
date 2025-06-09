@@ -31,7 +31,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `parent_path` - (Required) Path of parent transit gateway.
 * `group_path` - (Required) Path of group that the policy is applied to.
-* `connectivity_scope` - (Optional) Either `COMMUNITY` or `ISOLATED`. Default is `ISOLATED`.
+* `connectivity_scope` - (Optional) Either `COMMUNITY`, `ISOLATED` or `PROMISCUOUS`. Default is `COMMUNITY`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 
