@@ -48,7 +48,6 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Optional:     true,
 				ValidateFunc: validateCidr(),
-				Deprecated:   "Use cidr_list attribute instead, for v9.1 and above",
 			},
 			"visibility": {
 				Type:         schema.TypeString,
