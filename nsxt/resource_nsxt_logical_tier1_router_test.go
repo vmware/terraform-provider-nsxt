@@ -153,7 +153,7 @@ resource "nsxt_logical_tier1_router" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test"
   failover_mode               = "%s"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.EC.id
   enable_router_advertisement = "true"
   advertise_connected_routes  = "true"
   advertise_static_routes     = "true"
@@ -176,14 +176,14 @@ resource "nsxt_logical_tier1_router" "test" {
 func testAccNSXLogicalTier1RouterUpdateTemplate(name string, failoverMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test Update"
   failover_mode               = "%s"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.EC.id
   enable_router_advertisement = "false"
   advertise_connected_routes  = "true"
   advertise_static_routes     = "false"

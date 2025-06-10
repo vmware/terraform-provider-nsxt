@@ -347,7 +347,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 			"advanced_configuration": getKeyValuePairListSchema(),
 			"appliance_config": {
 				Type:        schema.TypeList,
-				Description: "Applicance configuration",
+				Description: "Appliance configuration",
 				MaxItems:    1,
 				Optional:    true,
 				Elem: &schema.Resource{
@@ -751,16 +751,16 @@ func getCredentialsFromSchema(creds interface{}) *model.PolicyEdgeTransportNodeC
 	return &obj
 }
 
-func getPolicyIPAssignmentsFromSchema(iIPAssments interface{}) ([]*data.StructValue, error) {
-	if iIPAssments == nil {
+func getPolicyIPAssignmentsFromSchema(iIPAssignments interface{}) ([]*data.StructValue, error) {
+	if iIPAssignments == nil {
 		return nil, nil
 	}
 
 	var iPAssignments []*data.StructValue
 	converter := bindings.NewTypeConverter()
 
-	for _, iIPAssment := range iIPAssments.([]interface{}) {
-		iPAssignment := iIPAssment.(map[string]interface{})
+	for _, iia := range iIPAssignments.([]interface{}) {
+		iPAssignment := iia.(map[string]interface{})
 
 		// Handle auto_conf assignments
 		iAutoConf := iPAssignment["auto_conf"]

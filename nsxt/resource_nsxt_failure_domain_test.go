@@ -163,8 +163,8 @@ func testAccNsxtFailureDomainTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 resource "nsxt_failure_domain" "test" {
-  display_name = "%s"
-  description  = "%s"
+  display_name            = "%s"
+  description             = "%s"
   preferred_edge_services = "%s"
   tag {
     scope = "scope1"
@@ -174,7 +174,7 @@ resource "nsxt_failure_domain" "test" {
 
 data "nsxt_failure_domain" "test" {
   display_name = "%s"
-  depends_on = [nsxt_failure_domain.test]
+  depends_on   = [nsxt_failure_domain.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["preferred_edge_services"], attrMap["display_name"])
 }
 

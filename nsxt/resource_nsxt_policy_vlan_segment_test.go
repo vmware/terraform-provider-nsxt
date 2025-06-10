@@ -339,9 +339,9 @@ func testAccNsxtPolicyVlanSegmentImportTemplate(name string, withContext bool) s
 	s := fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  vlan_ids            = ["101"]
+  display_name = "%s"
+  description  = "Acceptance Test"
+  vlan_ids     = ["101"]
   %s
 }
 `, context, name, tzSetting)
@@ -362,13 +362,14 @@ func testAccNsxtPolicyVlanSegmentBasicTemplate(name string, withContext bool) st
 	}
 	return deps + fmt.Sprintf(`
 
+
 resource "nsxt_policy_vlan_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test"
+  display_name = "%s"
+  description  = "Acceptance Test"
   %s
-  domain_name         = "tftest.org"
-  vlan_ids            = ["101"]
+  domain_name = "tftest.org"
+  vlan_ids    = ["101"]
 
   tag {
     scope = "color"
@@ -389,13 +390,14 @@ func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string, withContext bo
 	}
 	return deps + fmt.Sprintf(`
 
+
 resource "nsxt_policy_vlan_segment" "test" {
 %s
-  display_name        = "%s"
-  description         = "Acceptance Test2"
+  display_name = "%s"
+  description  = "Acceptance Test2"
   %s
-  domain_name         = "tftest2.org"
-  vlan_ids            = ["101", "104-110"]
+  domain_name = "tftest2.org"
+  vlan_ids    = ["101", "104-110"]
 
   tag {
     scope = "color"
@@ -460,6 +462,7 @@ resource "nsxt_policy_vlan_segment" "test" {
 func testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
 	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
 
+
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
 }
@@ -477,40 +480,40 @@ resource "nsxt_policy_vlan_segment" "test" {
   subnet {
     cidr = "12.12.2.1/24"
     dhcp_v4_config {
-        server_address = "12.12.2.2/24"
-        lease_time     = %s
-        dns_servers    = ["%s"]
-        dhcp_option_121 {
-          network  = "2.1.1.0/24"
-          next_hop = "2.3.1.3"
-        }
-        dhcp_option_121 {
-          network  = "3.1.1.0/24"
-          next_hop = "3.3.1.3"
-        }
-        dhcp_generic_option {
-          code   = "119"
-          values = ["abc", "def"]
-        }
+      server_address = "12.12.2.2/24"
+      lease_time     = %s
+      dns_servers    = ["%s"]
+      dhcp_option_121 {
+        network  = "2.1.1.0/24"
+        next_hop = "2.3.1.3"
+      }
+      dhcp_option_121 {
+        network  = "3.1.1.0/24"
+        next_hop = "3.3.1.3"
+      }
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc", "def"]
+      }
     }
   }
 
   subnet {
     cidr = "4012::1/64"
     dhcp_v6_config {
-        server_address = "4012::2/64"
-        lease_time     = %s
-        preferred_time = %s
-        dns_servers    = ["%s"]
-        sntp_servers   = ["3001::1", "3001::2"]
-        excluded_range {
-            start = "4012::400"
-            end   = "4012::500"
-        }
-        excluded_range {
-            start = "4012::a00"
-            end   = "4012::b00"
-        }
+      server_address = "4012::2/64"
+      lease_time     = %s
+      preferred_time = %s
+      dns_servers    = ["%s"]
+      sntp_servers   = ["3001::1", "3001::2"]
+      excluded_range {
+        start = "4012::400"
+        end   = "4012::500"
+      }
+      excluded_range {
+        start = "4012::a00"
+        end   = "4012::b00"
+      }
     }
   }
 
@@ -523,14 +526,15 @@ resource "nsxt_policy_vlan_segment" "test" {
 func testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name string, cidr string) string {
 	return fmt.Sprintf(`
 
+
 resource "nsxt_policy_vlan_segment" "test" {
-  display_name        = "%s"
-  description         = "Acceptance Test"
-  domain_name         = "tftest.org"
-  vlan_ids            = ["101"]
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain_name  = "tftest.org"
+  vlan_ids     = ["101"]
 
   subnet {
-     cidr = "%s"
+    cidr = "%s"
   }
 }
 `, name, cidr)

@@ -54,7 +54,7 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 			},
 			"ip_address": {
 				Type:         schema.TypeString,
-				Description:  "IP assigned to host. The IP address must belong to the subnetconfigured on segment",
+				Description:  "IP assigned to host. The IP address must belong to the subnet configured on segment",
 				ValidateFunc: validation.IsIPv4Address,
 				Required:     true,
 			},

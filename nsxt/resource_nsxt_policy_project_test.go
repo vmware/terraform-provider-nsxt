@@ -451,6 +451,10 @@ func testAccNsxtPolicyProjectCheckDestroy(state *terraform.State, displayName st
 
 // TODO: Visibility should not be set for 410 tests (attribute exists, different enum values since 411)
 var templateData = `
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "{{.ClusterName}}"
+}
+
 data "nsxt_policy_tier0_gateway" "test" {
   display_name = "{{.T0Name}}"
 }
@@ -475,6 +479,9 @@ resource "nsxt_policy_project" "test" {
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
+  }
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -496,6 +503,7 @@ func getBasicAttrMap(createFlow, includeT0GW bool) map[string]string {
 		attrMap["T0GwPath"] = "data.nsxt_policy_tier0_gateway.test.path"
 	}
 	attrMap["T0Name"] = getTier0RouterName()
+	attrMap["ClusterName"] = getEdgeClusterName()
 	return attrMap
 }
 

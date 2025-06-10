@@ -180,7 +180,7 @@ resource "nsxt_vlan_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "UP"
   description       = "Acceptance Test"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
   vlan              = "%s"
 
   tag {
@@ -200,7 +200,7 @@ resource "nsxt_vlan_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "DOWN"
   description       = "Acceptance Test Update"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
   vlan              = "%s"
 
   tag {
@@ -228,12 +228,12 @@ data "nsxt_switching_profile" "test1" {
 resource "nsxt_vlan_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "UP"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
   vlan              = 1
 
   switching_profile_id {
-    key   = "${data.nsxt_switching_profile.test1.resource_type}"
-    value = "${data.nsxt_switching_profile.test1.id}"
+    key   = data.nsxt_switching_profile.test1.resource_type
+    value = data.nsxt_switching_profile.test1.id
   }
 }`, transportZoneName, profileName, resourceName, switchName)
 }
@@ -248,7 +248,7 @@ data "nsxt_transport_zone" "TZ1" {
 resource "nsxt_vlan_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "UP"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
   vlan              = 1
 }`, transportZoneName, resourceName, switchUpdateName)
 }
@@ -267,9 +267,9 @@ resource "nsxt_vlan_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "UP"
   description       = "Acceptance Test"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  transport_zone_id = data.nsxt_transport_zone.TZ1.id
   vlan              = "%s"
-  mac_pool_id       = "${data.nsxt_mac_pool.MAC1.id}"
+  mac_pool_id       = data.nsxt_mac_pool.MAC1.id
 
   tag {
     scope = "scope1"

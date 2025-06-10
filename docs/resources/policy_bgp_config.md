@@ -78,4 +78,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-Since BGP config is autocreated by the backend, and terraform create is de-facto an update, importing the resource is not useful and thus not supported.
+Since BGP config is auto-created by the backend, and terraform create is de-facto an update, importing the resource is not useful and thus not supported.

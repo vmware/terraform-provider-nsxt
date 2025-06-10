@@ -33,7 +33,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `site_path` - (Optional) The path of the site which the Edge Transport Node belongs to. `path` field of the existing `nsxt_policy_site` can be used here. Defaults to default site path.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Edge Transport Node. Defaults to default enforcement point.
-* `bfd_probe_interval` - (Optional) The time interval (in millisec) between probe packets for heartbeat purpose. Default: 500.
+* `bfd_probe_interval` - (Optional) The time interval (in millisecond) between probe packets for heartbeat purpose. Default: 500.
 * `bfd_allowed_hops` - (Optional) Value of BFD allowed hops. Default: 255.
 * `bfd_declare_dead_multiple` - (Optional) Number of times a packet is missed before BFD declares the neighbor down. Default: 3.
 * `standby_relocation_config` - (Optional) Stand by relocation flag.

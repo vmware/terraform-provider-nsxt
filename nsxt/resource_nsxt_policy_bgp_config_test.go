@@ -138,7 +138,7 @@ resource "nsxt_policy_bgp_config" "test" {
 
 
 data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path      = nsxt_policy_bgp_config.test.path
+  path = nsxt_policy_bgp_config.test.path
   %s
 }`, attrMap["enabled"], attrMap["inter_sr_ibgp"], attrMap["local_as_num"], attrMap["multipath_relax"], attrMap["prefix"], attrMap["summary_only"], attrMap["graceful_restart_mode"], attrMap["graceful_restart_timer"], attrMap["graceful_restart_stale_route_timer"], extraConfig, extraConfig)
 }
@@ -156,7 +156,7 @@ resource "nsxt_policy_bgp_config" "test" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-  path      = nsxt_policy_bgp_config.test.path
+  path = nsxt_policy_bgp_config.test.path
   %s
 }`, extraConfig, extraConfig)
 }

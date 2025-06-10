@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	// how long to wait for updated allocation IP address list (to check destroyment)
+	// waitSeconds defines the duration, in seconds, to wait for specific operations to complete.
 	waitSeconds = 150
 )
 
@@ -160,7 +160,7 @@ data "nsxt_ip_pool" "acceptance_test" {
 }
 
 resource "nsxt_ip_pool_allocation_ip_address" "test" {
-  ip_pool_id = "${data.nsxt_ip_pool.acceptance_test.id}"
+  ip_pool_id = data.nsxt_ip_pool.acceptance_test.id
 }`, getIPPoolName())
 }
 

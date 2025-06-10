@@ -116,7 +116,7 @@ The following arguments are supported:
 * `advanced_configuration` - (Optional) Array of additional specific properties for advanced or cloud-specific deployments in key-value format.
   * `key` - (Required) Key.
   * `value` - (Required) Value.
-* `appliance_config` - (Optional) Applicance configuration.
+* `appliance_config` - (Optional) Appliance configuration.
   * `allow_ssh_root_login` (Optional) Allow root SSH logins.
   * `dns_servers` - (Optional) DNS servers.
   * `enable_ssh` - (Optional) Enable SSH.

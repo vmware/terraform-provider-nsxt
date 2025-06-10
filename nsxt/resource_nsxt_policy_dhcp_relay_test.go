@@ -200,7 +200,7 @@ func testAccNsxtPolicyDhcpRelayConfigTemplate(createFlow bool, withContext bool)
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_relay" "test" {
 %s
-  display_name      = "%s"
+  display_name     = "%s"
   description      = "%s"
   server_addresses = %s
 

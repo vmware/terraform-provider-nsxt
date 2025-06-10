@@ -49,7 +49,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
 terraform import nsxt_policy_l2_vpn_session.test UUID

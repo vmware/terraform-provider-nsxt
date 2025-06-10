@@ -56,7 +56,7 @@ func resourceNsxtSpoofGuardSwitchingProfileCreate(d *schema.ResourceData, m inte
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	whiteListProviders := []string{}
+	var whiteListProviders []string
 	if d.Get("address_binding_whitelist_enabled").(bool) {
 		whiteListProviders = append(whiteListProviders, "LPORT_BINDINGS")
 	}
@@ -131,7 +131,7 @@ func resourceNsxtSpoofGuardSwitchingProfileUpdate(d *schema.ResourceData, m inte
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
-	whiteListProviders := []string{}
+	var whiteListProviders []string
 	if d.Get("address_binding_whitelist_enabled").(bool) {
 		whiteListProviders = append(whiteListProviders, "LPORT_BINDINGS")
 	}

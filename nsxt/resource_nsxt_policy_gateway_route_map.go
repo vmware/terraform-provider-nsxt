@@ -123,7 +123,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "A lower Multi exit descriminator (MED) is preferred over a higher value",
+							Description: "A lower Multi exit discriminator (MED) is preferred over a higher value",
 						},
 						"prefer_global_v6_next_hop": {
 							Type:        schema.TypeBool,

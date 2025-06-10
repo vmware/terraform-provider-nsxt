@@ -324,6 +324,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_tags":                                       dataSourceNsxtTags(),
 			"nsxt_policy_tier0_gateway":                              dataSourceNsxtPolicyTier0Gateway(),
 			"nsxt_policy_tier1_gateway":                              dataSourceNsxtPolicyTier1Gateway(),
+			"nsxt_policy_gateway_interface":                          dataSourceNsxtPolicyGatewayInterface(),
 			"nsxt_policy_transit_gateway":                            dataSourceNsxtPolicyTransitGateway(),
 			"nsxt_policy_transit_gateway_nat":                        dataSourceNsxtPolicyTransitGatewayNat(),
 			"nsxt_policy_transport_zone":                             dataSourceNsxtPolicyTransportZone(),
@@ -352,7 +353,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			// Ensure alphabetical order for organization and readability.
 			"nsxt_algorithm_type_ns_service":                           removedResourceWrapper(resourceNsxtAlgorithmTypeNsService, "nsxt_algorithm_type_ns_service"),
-			"nsxt_cluster_virtual_ip":                                  resourceNsxtClusterVirualIP(),
+			"nsxt_cluster_virtual_ip":                                  resourceNsxtClusterVirtualIP(),
 			"nsxt_compute_manager":                                     resourceNsxtComputeManager(),
 			"nsxt_dhcp_relay_profile":                                  removedResourceWrapper(resourceNsxtDhcpRelayProfile, "nsxt_dhcp_relay_profile"),
 			"nsxt_dhcp_relay_service":                                  removedResourceWrapper(resourceNsxtDhcpRelayService, "nsxt_dhcp_relay_service"),
@@ -415,6 +416,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_bgp_config":                                   resourceNsxtPolicyBgpConfig(),
 			"nsxt_policy_bgp_neighbor":                                 resourceNsxtPolicyBgpNeighbor(),
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
+			"nsxt_policy_connectivity_policy":                          resourceNsxtPolicyConnectivityPolicy(),
 			"nsxt_policy_constraint":                                   resourceNsxtPolicyConstraint(),
 			"nsxt_policy_context_profile":                              resourceNsxtPolicyContextProfile(),
 			"nsxt_policy_context_profile_custom_attribute":             resourceNsxtPolicyContextProfileCustomAttribute(),
@@ -1192,10 +1194,10 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 			return false
 		}
 
-		min := c.CommonConfig.MinRetryInterval
-		max := c.CommonConfig.MaxRetryInterval
-		if max > 0 {
-			interval := (rand.Intn(max-min) + min)
+		minRetryInterval := c.CommonConfig.MinRetryInterval
+		maxRetryInterval := c.CommonConfig.MaxRetryInterval
+		if maxRetryInterval > 0 {
+			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
 			time.Sleep(time.Duration(interval) * time.Millisecond)
 			log.Printf("[DEBUG]: Waited %d ms before retrying", interval)
 		}

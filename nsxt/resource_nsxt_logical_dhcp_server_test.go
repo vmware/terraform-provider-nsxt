@@ -212,7 +212,7 @@ data "nsxt_edge_cluster" "EC" {
 }
 
 resource "nsxt_dhcp_server_profile" "PRF" {
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }`, edgeClusterName)
 }
 
@@ -233,7 +233,7 @@ resource "nsxt_logical_dhcp_server" "test" {
   }
 
   dhcp_generic_option {
-    code = "119"
+    code   = "119"
     values = ["abc"]
   }
 
@@ -247,8 +247,8 @@ resource "nsxt_logical_dhcp_server" "test" {
 func testAccNSXLogicalDhcpServerUpdateTemplate(edgeClusterName string, updatedName string, ip1 string, ip2 string, ip3 string, ip4 string, ip5 string) string {
 	return testAccNSXDhcpServerProfileCreateForServerTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_dhcp_server" "test" {
-  display_name                = "%s"
-  description                 = "Acceptance Test Update"
+  display_name     = "%s"
+  description      = "Acceptance Test Update"
   dhcp_profile_id  = "${nsxt_dhcp_server_profile.PRF.id}"
   dhcp_server_ip   = "%s"
   gateway_ip       = "%s"
@@ -266,7 +266,7 @@ resource "nsxt_logical_dhcp_server" "test" {
   }
 
   dhcp_generic_option {
-    code = "119"
+    code   = "119"
     values = ["abc", "def"]
   }
 

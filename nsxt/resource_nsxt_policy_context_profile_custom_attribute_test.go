@@ -140,7 +140,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attri
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile_custom_attribute" "test" {
 %s
-  key = "%s"
+  key       = "%s"
   attribute = "%s"
 }`, context, key, attribute)
 }

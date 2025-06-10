@@ -87,13 +87,13 @@ data "nsxt_edge_cluster" "EC" {
 
 resource "nsxt_dhcp_server_profile" "test" {
   display_name    = "dhcp_server"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }
 resource "nsxt_logical_dhcp_server" "test" {
-  display_name     = "server1"
-  dhcp_profile_id  = "${nsxt_dhcp_server_profile.test.id}"
-  dhcp_server_ip   = "1.1.1.1/24"
-  gateway_ip       = "1.1.1.2"
+  display_name    = "server1"
+  dhcp_profile_id = "${nsxt_dhcp_server_profile.test.id}"
+  dhcp_server_ip  = "1.1.1.1/24"
+  gateway_ip      = "1.1.1.2"
 }`, edgeClusterName)
 }
 
@@ -107,7 +107,7 @@ resource "nsxt_logical_dhcp_port" "test" {
   dhcp_server_id    = "${nsxt_logical_dhcp_server.test.id}"
 
   tag {
-  	scope = "scope1"
+    scope = "scope1"
     tag   = "tag1"
   }
 }`, portName)

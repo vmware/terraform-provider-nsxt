@@ -197,10 +197,10 @@ resource "nsxt_policy_gateway_prefix_list" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
-  	action  = "%s"
-  	ge      = "%s"
-  	le      = "%s"
-  	network = "%s"
+    action  = "%s"
+    ge      = "%s"
+    le      = "%s"
+    network = "%s"
   }
 
   tag {
@@ -213,7 +213,7 @@ data "nsxt_policy_gateway_prefix_list" "test" {
   display_name = "%s"
 
   gateway_path = nsxt_policy_tier0_gateway.test.path
-  depends_on = [nsxt_policy_gateway_prefix_list.test]
+  depends_on   = [nsxt_policy_gateway_prefix_list.test]
 }
 `, name, action, ge, le, network, name)
 }
@@ -227,14 +227,14 @@ resource "nsxt_policy_gateway_prefix_list" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
-  	action  = "%s"
-  	ge      = "%s"
-  	le      = "%s"
-  	network = "%s"
+    action  = "%s"
+    ge      = "%s"
+    le      = "%s"
+    network = "%s"
   }
 
   prefix {
-  	action  = "%s"
+    action = "%s"
   }
 
   tag {

@@ -50,7 +50,7 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 			"tag":          getTagsSchema(),
 			"bgp_path":     getPolicyPathSchema(true, true, "Policy path to the BGP for this neighbor"),
 			"allow_as_in": {
-				Description: "Flag to enable allowas_in option for BGP neighbor",
+				Description: "Flag to enable allow_as_in option for BGP neighbor",
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,

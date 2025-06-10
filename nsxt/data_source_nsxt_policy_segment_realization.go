@@ -104,7 +104,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// Adding a short sleep here prevents vsphere provider from erroring out
 	time.Sleep(1 * time.Second)
 
-	// We need to fetch network name to use in vpshere provider. However, state API does not
+	// We need to fetch network name to use in vSphere provider. However, state API does not
 	// return it in details yet. For now, we'll use segment display name, since its always
 	// translates to network name
 	segClient := infra.NewSegmentsClient(context, connector)

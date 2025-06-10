@@ -219,7 +219,7 @@ func validateSingleIPOrHostName() schema.SchemaValidateFunc {
 
 func isValidStringUint(value string, bits int) bool {
 	_, err := strconv.ParseUint(value, 10, bits)
-	return (err == nil)
+	return err == nil
 }
 
 func isValidASN(value string) bool {

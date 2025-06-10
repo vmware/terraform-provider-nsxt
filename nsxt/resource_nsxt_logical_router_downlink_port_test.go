@@ -202,11 +202,11 @@ data "nsxt_transport_zone" "tz1" {
 }
 
 resource "nsxt_logical_switch" "ls1" {
-  display_name     = "downlink_test_switch"
-  admin_state      = "UP"
-  replication_mode = "MTEP"
-  vlan             = "0"
-  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+  display_name      = "downlink_test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  vlan              = "0"
+  transport_zone_id = data.nsxt_transport_zone.tz1.id
 }
 
 resource "nsxt_logical_port" "port1" {
@@ -222,7 +222,7 @@ data "nsxt_edge_cluster" "ec" {
 
 resource "nsxt_logical_tier1_router" "rtr1" {
   display_name    = "downlink_test_router"
-  edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.ec.id
 }`, transportZoneName, edgeClusterName)
 }
 
@@ -234,9 +234,9 @@ resource "nsxt_dhcp_relay_profile" "drp1" {
 }
 
 resource "nsxt_dhcp_relay_service" "drs1" {
-	display_name = "srv"
-	description = "Acceptance Test"
-	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.drp1.id}"
+  display_name          = "srv"
+  description           = "Acceptance Test"
+  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.drp1.id}"
 }`
 }
 
@@ -292,7 +292,7 @@ resource "nsxt_logical_router_downlink_port" "test" {
 
   service_binding {
     target_id   = "${nsxt_dhcp_relay_service.drs1.id}"
-	target_type = "%s"
+    target_type = "%s"
   }
 
   tag {

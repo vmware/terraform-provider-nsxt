@@ -23,7 +23,7 @@ var stateMap = map[string]string{
 }
 
 func dataSourceNsxtPolicyVMs() *schema.Resource {
-	stateMapKeys := []string{}
+	var stateMapKeys []string
 	for k := range stateMap {
 		stateMapKeys = append(stateMapKeys, k)
 	}

@@ -141,7 +141,7 @@ data "nsxt_logical_tier0_router" "tier0rtr" {
 
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
   display_name      = "port_on_tier0"
-  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.tier0rtr.id
 }
 
 data "nsxt_edge_cluster" "EC" {
@@ -150,7 +150,7 @@ data "nsxt_edge_cluster" "EC" {
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name    = "tier1_router"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }`, tier0RouterName, edgeClusterName)
 }
 
@@ -172,9 +172,9 @@ resource "nsxt_logical_router_link_port_on_tier1" "test" {
 func testAccNSXLogicalRouterLinkPortOnTier1UpdateTemplate(name string, tier0RouterName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterLinkPortOnTier1PreconditionsTemplate(tier0RouterName, edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier1" "test" {
-  display_name                 = "%s"
-  description                  = "Acceptance Test Update"
-  logical_router_id            = "${nsxt_logical_tier1_router.test.id}"
+  display_name                  = "%s"
+  description                   = "Acceptance Test Update"
+  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
   linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
 
   tag {

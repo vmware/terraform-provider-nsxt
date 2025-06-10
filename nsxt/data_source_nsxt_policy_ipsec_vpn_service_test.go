@@ -59,8 +59,8 @@ func TestAccDataSourceNsxtPolicyIPSecVpnService_withGateway(t *testing.T) {
 func testAccNsxtPolicyIPSecVpnServiceReadTemplate(name string) string {
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
- display_name        = "%s"
- locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
+  display_name        = "%s"
+  locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
 }`, name) + `
 data "nsxt_policy_ipsec_vpn_service" "test" {
   display_name = nsxt_policy_ipsec_vpn_service.test.display_name
@@ -70,8 +70,8 @@ data "nsxt_policy_ipsec_vpn_service" "test" {
 func testAccNsxtPolicyIPSecVpnServiceReadTemplateWithGateway(name string) string {
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
- display_name          = "%s"
- locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
+  display_name        = "%s"
+  locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
 }`, name) + `
 data "nsxt_policy_ipsec_vpn_service" "test" {
   display_name = nsxt_policy_ipsec_vpn_service.test.display_name

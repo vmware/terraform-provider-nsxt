@@ -70,7 +70,7 @@ func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-	ignoreOverridenHosts := d.Get("ignore_overridden_hosts").(bool)
+	ignoreOverriddenHosts := d.Get("ignore_overridden_hosts").(bool)
 
 	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeHost)
 	if err != nil {
@@ -82,7 +82,7 @@ func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m 
 		Description:           &description,
 		Tags:                  tags,
 		HostSwitchSpec:        hostSwitchSpec,
-		IgnoreOverriddenHosts: &ignoreOverridenHosts,
+		IgnoreOverriddenHosts: &ignoreOverriddenHosts,
 	}
 
 	_, err = client.Update(id, obj, nil)
@@ -138,7 +138,7 @@ func resourceNsxtPolicyHostTransportNodeProfileUpdate(d *schema.ResourceData, m 
 	description := d.Get("description").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
-	ignoreOverridenHosts := d.Get("ignore_overridden_hosts").(bool)
+	ignoreOverriddenHosts := d.Get("ignore_overridden_hosts").(bool)
 
 	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeHost)
 	if err != nil {
@@ -150,7 +150,7 @@ func resourceNsxtPolicyHostTransportNodeProfileUpdate(d *schema.ResourceData, m 
 		Description:           &description,
 		Tags:                  tags,
 		HostSwitchSpec:        hostSwitchSpec,
-		IgnoreOverriddenHosts: &ignoreOverridenHosts,
+		IgnoreOverriddenHosts: &ignoreOverriddenHosts,
 		Revision:              &revision,
 	}
 

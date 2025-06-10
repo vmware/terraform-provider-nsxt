@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var advertismentTypeValues = []string{
+var advertisementTypeValues = []string{
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_STATIC_ROUTES,
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_CONNECTED,
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_NAT,
@@ -29,10 +29,10 @@ var advertismentTypeValues = []string{
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_LB_SNAT,
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_DNS_FORWARDER_IP,
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_IPSEC_LOCAL_ENDPOINT}
-var advertismentRuleActionValues = []string{
+var advertisementRuleActionValues = []string{
 	model.RouteAdvertisementRule_ACTION_PERMIT,
 	model.RouteAdvertisementRule_ACTION_DENY}
-var advertismentRuleOperatorValues = []string{
+var advertisementRuleOperatorValues = []string{
 	model.RouteAdvertisementRule_PREFIX_OPERATOR_GE,
 	model.RouteAdvertisementRule_PREFIX_OPERATOR_EQ}
 
@@ -114,7 +114,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Description: "Enable different types of route advertisements",
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice(advertismentTypeValues, false),
+					ValidateFunc: validation.StringInSlice(advertisementTypeValues, false),
 				},
 				Optional: true,
 				Computed: true,
@@ -178,21 +178,21 @@ func getAdvRulesSchema() *schema.Schema {
 					Description:  "Action to advertise filtered routes to the connected Tier0 gateway",
 					Default:      model.RouteAdvertisementRule_ACTION_PERMIT,
 					Optional:     true,
-					ValidateFunc: validation.StringInSlice(advertismentRuleActionValues, false),
+					ValidateFunc: validation.StringInSlice(advertisementRuleActionValues, false),
 				},
 				"prefix_operator": {
 					Type:         schema.TypeString,
 					Description:  "Prefix operator to apply on networks",
 					Default:      model.RouteAdvertisementRule_PREFIX_OPERATOR_GE,
 					Optional:     true,
-					ValidateFunc: validation.StringInSlice(advertismentRuleOperatorValues, false),
+					ValidateFunc: validation.StringInSlice(advertisementRuleOperatorValues, false),
 				},
 				"route_advertisement_types": {
 					Type:        schema.TypeSet,
 					Description: "Enable different types of route advertisements",
 					Elem: &schema.Schema{
 						Type:         schema.TypeString,
-						ValidateFunc: validation.StringInSlice(advertismentTypeValues, false),
+						ValidateFunc: validation.StringInSlice(advertisementTypeValues, false),
 					},
 					Optional: true,
 				},

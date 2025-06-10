@@ -150,8 +150,8 @@ resource "nsxt_compute_manager" "test" {
 
   credential {
     username_password_login {
-      username = "%s"
-      password = "%s"
+      username   = "%s"
+      password   = "%s"
       thumbprint = "%s"
     }
   }

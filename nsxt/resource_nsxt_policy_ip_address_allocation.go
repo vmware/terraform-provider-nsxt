@@ -21,7 +21,7 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var addressRealizationTimeoutDefault = int(1200)
+var addressRealizationTimeoutDefault = 1200
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	return &schema.Resource{

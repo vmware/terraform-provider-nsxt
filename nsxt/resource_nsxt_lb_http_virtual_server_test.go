@@ -362,7 +362,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "rule2" {
 resource "nsxt_lb_http_request_rewrite_rule" "rule3" {
   display_name = "%s"
   uri_condition {
-    uri = "html"
+    uri        = "html"
     match_type = "ENDS_WITH"
   }
 
@@ -417,18 +417,18 @@ resource "nsxt_lb_http_virtual_server" "test" {
 
   client_ssl {
     client_ssl_profile_id   = "${nsxt_lb_client_ssl_profile.test.id}"
-    default_certificate_id  = "${data.nsxt_certificate.mine.id}"
+    default_certificate_id  = data.nsxt_certificate.mine.id
     certificate_chain_depth = %s
     client_auth             = true
-    ca_ids                  = ["${data.nsxt_certificate.ca.id}"]
+    ca_ids                  = [data.nsxt_certificate.ca.id]
   }
 
   server_ssl {
     server_ssl_profile_id   = "${nsxt_lb_server_ssl_profile.test.id}"
-    client_certificate_id   = "${data.nsxt_certificate.client.id}"
+    client_certificate_id   = data.nsxt_certificate.client.id
     certificate_chain_depth = %s
     server_auth             = true
-    ca_ids                  = ["${data.nsxt_certificate.ca.id}"]
+    ca_ids                  = [data.nsxt_certificate.ca.id]
   }
 
 }

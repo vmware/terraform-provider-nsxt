@@ -31,7 +31,7 @@ var ErrUnexpectedPolicyPath = errors.New("unexpected policy path")
 var ErrEmptyImportID = errors.New("import identifier cannot be empty")
 
 func isSpaceString(s string) bool {
-	return (strings.TrimSpace(s) == "")
+	return strings.TrimSpace(s) == ""
 }
 
 func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker func(utl.SessionContext, string, client.Connector) (bool, error)) (string, error) {
@@ -472,7 +472,7 @@ func getVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData,
 			return rd, err
 		}
 
-		// verify that both project and vpc were set in schema by the improter helper above
+		// verify that both project and vpc were set in schema by the importer helper above
 		projectID, vpcID := getContextDataFromSchema(d)
 		if projectID == "" || vpcID == "" {
 			return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
@@ -489,17 +489,20 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 	}
 
 	pathSegs := strings.Split(importID, "/")
+	if len(pathSegs) < 2 {
+		return nil, fmt.Errorf("invalid policy path %s", importID)
+	}
 	if strings.Contains(pathSegs[1], "infra") {
+		// not multitenancy based path
 		d.SetId(pathSegs[len(pathSegs)-1])
+	} else if len(pathSegs) < 5 {
+		return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
 	} else if pathSegs[1] == "orgs" && pathSegs[3] == "projects" {
-		if len(pathSegs) < 5 {
-			return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
-		}
 		// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
 		// assigned into the context as well
 		ctxMap := make(map[string]interface{})
 		ctxMap["project_id"] = pathSegs[4]
-		if pathSegs[5] == "vpcs" {
+		if len(pathSegs) > 5 && pathSegs[5] == "vpcs" {
 			ctxMap["vpc_id"] = pathSegs[6]
 		}
 		d.Set("context", []interface{}{ctxMap})

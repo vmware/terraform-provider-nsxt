@@ -64,8 +64,8 @@ The following arguments are supported:
 * `display_name` - (Required) The display name for the IP Block.
 * `description` - (Optional) Description of the resource.
 * `quota` - (Required) Quota specification
-  * `ip_block_paths` - (Required) List of IP blocks that this quota applies to.
-  * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be speficied within the same quota.
+  * `ip_block_paths` - (Optional) List of IP blocks that this quota applies to.
+  * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be specified within the same quota.
   * `ip_block_visibility` - (Required) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
   * `single_ip_cidrs` - (Optional) Quota for single IP CIDRs allowed. Default is -1 (unlimited). 
   * `other_cidrs` - (Required) Quota for other cidrs
@@ -86,7 +86,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing IP Block can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/cli/import
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```
 terraform import nsxt_policy_ip_block_quota.quota1 POLICY_PATH

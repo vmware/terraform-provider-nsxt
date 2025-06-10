@@ -79,7 +79,7 @@ resource "nsxt_policy_group" "test" {
 
 ## VM tagging and port tagging is not working on big environments
 
-Due to [NSX issue](https://kb.vmware.com/s/article/89437), `vif` API is not working as expected with > 1K objects. Please upgrade your NSX to more recent version.
+Due to [NSX issue](https://knowledge.broadcom.com/external/article?articleNumber=318424), `vif` API is not working as expected with > 1K objects. Please upgrade your NSX to more recent version.
 
 ## I cannot import a segment
 

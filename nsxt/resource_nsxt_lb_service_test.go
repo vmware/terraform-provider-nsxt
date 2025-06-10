@@ -187,12 +187,12 @@ data "nsxt_logical_tier0_router" "test" {
 
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
   display_name      = "port_on_tier0"
-  logical_router_id = "${data.nsxt_logical_tier0_router.test.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.test.id
 }
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name    = "test"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }
 
 resource "nsxt_logical_router_link_port_on_tier1" "test" {
@@ -247,6 +247,7 @@ resource "nsxt_lb_service" "test" {
 func testAccNSXLbServiceCreateTemplateWithServers(name string, logLevel string) string {
 	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
 
+
 resource "nsxt_lb_fast_tcp_application_profile" "test" {
   display_name = "lb service test"
 }
@@ -255,13 +256,13 @@ resource "nsxt_lb_fast_udp_application_profile" "test" {
   display_name = "lb service test"
 }
 
-resource "nsxt_lb_tcp_virtual_server" "test"{
+resource "nsxt_lb_tcp_virtual_server" "test" {
   application_profile_id = "${nsxt_lb_fast_tcp_application_profile.test.id}"
   ip_address             = "1.1.1.2"
   ports                  = ["7887"]
 }
 
-resource "nsxt_lb_udp_virtual_server" "test"{
+resource "nsxt_lb_udp_virtual_server" "test" {
   application_profile_id = "${nsxt_lb_fast_udp_application_profile.test.id}"
   ip_address             = "1.1.1.2"
   ports                  = ["7888"]

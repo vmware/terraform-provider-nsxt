@@ -270,80 +270,80 @@ func testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0 bool, useGatewayPath
 	if isT0 {
 		vpnServiceTemplate = fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_service" "test_l2_svc" {
-	display_name          = "%s"
+  display_name = "%s"
 	%s
-	enable_hub            = true
-	mode                  = "SERVER"
-	encap_ip_pool         = ["192.168.10.0/24"]
+  enable_hub    = true
+  mode          = "SERVER"
+  encap_ip_pool = ["192.168.10.0/24"]
 }
 
 resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
-	display_name          = "%s"
+  display_name = "%s"
 	%s
 }
 `, l2VpnResourceName, gatewayOrLocaleServicePath, l2VpnResourceName, gatewayOrLocaleServicePath)
 	} else {
 		vpnServiceTemplate = fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_service" "test_l2_svc" {
-	display_name          = "%s"
+  display_name = "%s"
 	%s
-	enable_hub            = true
-	mode                  = "SERVER"
-	encap_ip_pool         = ["192.168.10.0/24"]
+  enable_hub    = true
+  mode          = "SERVER"
+  encap_ip_pool = ["192.168.10.0/24"]
 }
 resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
-	display_name          = "%s"
+  display_name = "%s"
 	%s
 }
 `, l2VpnResourceName, gatewayOrLocaleServicePath, l2VpnResourceName, gatewayOrLocaleServicePath)
 	}
 	return vpnServiceTemplate + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
-	display_name          = "%s"
-	description           = "Ike profile for ipsec vpn session"
-	encryption_algorithms = ["AES_128"]
-	digest_algorithms     = ["SHA2_256"]
-	dh_groups             = ["GROUP14"]
-	ike_version           = "IKE_V2"
+  display_name          = "%s"
+  description           = "Ike profile for ipsec vpn session"
+  encryption_algorithms = ["AES_128"]
+  digest_algorithms     = ["SHA2_256"]
+  dh_groups             = ["GROUP14"]
+  ike_version           = "IKE_V2"
 }
 resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
-	display_name       = "%s"
-	description        = "Terraform provisioned IPSec VPN DPD Profile"
-	dpd_probe_mode     = "ON_DEMAND"
-	dpd_probe_interval = 1
-	enabled            = true
-	retry_count        = 8
+  display_name       = "%s"
+  description        = "Terraform provisioned IPSec VPN DPD Profile"
+  dpd_probe_mode     = "ON_DEMAND"
+  dpd_probe_interval = 1
+  enabled            = true
+  retry_count        = 8
 }
 
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
-	service_path  = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
-	display_name  = "%s"
-	local_address = "20.20.0.20"
+  service_path  = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
+  display_name  = "%s"
+  local_address = "20.20.0.20"
 }
 
 resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
-	display_name          = "%s"
-	description           = "Terraform provisioned IPSec VPN Ike Profile"
-	df_policy             = "COPY"
-	encryption_algorithms = ["AES_GCM_128"]
-	dh_groups             = ["GROUP14"]
-	sa_life_time          = 7200
+  display_name          = "%s"
+  description           = "Terraform provisioned IPSec VPN Ike Profile"
+  df_policy             = "COPY"
+  encryption_algorithms = ["AES_GCM_128"]
+  dh_groups             = ["GROUP14"]
+  sa_life_time          = 7200
 }
 
 resource "nsxt_policy_ipsec_vpn_session" "test" {
-	display_name               = "%s"
-	tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
-	local_endpoint_path        = nsxt_policy_ipsec_vpn_local_endpoint.test.path
-	dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
-	ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
-	service_path               = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
-	vpn_type                   = "RouteBased"
-	authentication_mode        = "PSK"
-	peer_address               = "18.18.18.19"
-	peer_id                    = "18.18.18.19"
-	psk                        = "secret1"
-	ip_addresses               = ["169.254.152.2"]
-	prefix_length              = 24
+  display_name        = "%s"
+  tunnel_profile_path = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
+  local_endpoint_path = nsxt_policy_ipsec_vpn_local_endpoint.test.path
+  dpd_profile_path    = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+  ike_profile_path    = nsxt_policy_ipsec_vpn_ike_profile.test.path
+  service_path        = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
+  vpn_type            = "RouteBased"
+  authentication_mode = "PSK"
+  peer_address        = "18.18.18.19"
+  peer_id             = "18.18.18.19"
+  psk                 = "secret1"
+  ip_addresses        = ["169.254.152.2"]
+  prefix_length       = 24
 }
 `, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName)
 }
@@ -363,21 +363,22 @@ func testAccNsxtPolicyL2VpnSessionTemplate(createFlow bool) string {
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_session" "test" {
-	display_name      = "%s"
-	description       = "%s"
-	service_path      = nsxt_policy_l2_vpn_service.test_l2_svc.path
-	transport_tunnels = [nsxt_policy_ipsec_vpn_session.test.path]
-	direction         = "%s"
-  	max_segment_size  = "%s"
-	local_address     = "%s"
-	peer_address      = "%s"
-	protocol          = "%s"
+  display_name      = "%s"
+  description       = "%s"
+  service_path      = nsxt_policy_l2_vpn_service.test_l2_svc.path
+  transport_tunnels = [nsxt_policy_ipsec_vpn_session.test.path]
+  direction         = "%s"
+  max_segment_size  = "%s"
+  local_address     = "%s"
+  peer_address      = "%s"
+  protocol          = "%s"
 
-	tag {
-	  scope = "scope1"
-	  tag   = "tag1"
-	}
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }
+
 
 `, attrMap["display_name"], attrMap["description"], attrMap["direction"], attrMap["max_segment_size"], attrMap["local_address"], attrMap["peer_address"], attrMap["protocol"])
 }
@@ -387,10 +388,11 @@ func testAccNsxtPolicyL2VpnSessionMinimalistic(useGatewayPath bool) string {
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
 		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(true, useGatewayPath) + fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_session" "test" {
-	display_name      = "%s"
-	service_path      = nsxt_policy_l2_vpn_service.test_l2_svc.path
-	transport_tunnels = [nsxt_policy_ipsec_vpn_session.test.path]
+  display_name      = "%s"
+  service_path      = nsxt_policy_l2_vpn_service.test_l2_svc.path
+  transport_tunnels = [nsxt_policy_ipsec_vpn_session.test.path]
 }
+
 
 `, attrMap["display_name"])
 }
