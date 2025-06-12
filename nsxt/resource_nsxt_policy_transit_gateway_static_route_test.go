@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+var dependantResourceName = getAccTestResourceName()
+
 var accTestPolicyTransitGatewayStaticRoutesCreateAttributes = map[string]string{
 	"display_name":         getAccTestResourceName(),
 	"description":          "terraform created",
@@ -34,7 +36,10 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state, accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"])
@@ -96,7 +101,10 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state, name)
@@ -109,6 +117,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -116,7 +125,6 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.
 
 func testAccNsxtPolicyTransitGatewayStaticRoutesExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -134,7 +142,7 @@ func testAccNsxtPolicyTransitGatewayStaticRoutesExists(displayName string, resou
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy ransitGatewayStaticRoutes %s does not exist", resourceID)
+			return fmt.Errorf("Policy transitGatewayStaticRoutes %s does not exist", resourceID)
 		}
 
 		return nil
@@ -148,7 +156,6 @@ func testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state *terraform.St
 		if rs.Type != "nsxt_policy_transit_gateway_static_route" {
 			continue
 		}
-
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyTransitGatewayStaticRoutesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
@@ -170,48 +177,85 @@ func testAccNsxtPolicyTransitGatewayStaticRoutesTemplate(createFlow bool) string
 	} else {
 		attrMap = accTestPolicyTransitGatewayStaticRoutesUpdateAttributes
 	}
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "test" {
-  display_name = "testEdgeCluster"
-}
-
-resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "testt0gw"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-}
-resource "nsxt_policy_project" "proj" {
-  display_name        = "demoproj1"
-  description         = "Terraform provisioned Project"
-  short_id            = "test"
-  tier0_gateway_paths = [nsxt_policy_tier0_gateway.test.path]
-}
-
-resource "nsxt_policy_transit_gateway" "tgwStaticRoute" {
-  context {
-    project_id = resource.nsxt_policy_project.proj.id
-  }
-
-  display_name    = "tgwStaticRoute"
-  description     = "Terraform provisioned TransitGateway"
-  transit_subnets = ["10.203.4.0/24"]
-}
-
+	return testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
-  display_name = "%s"
-  description  = "%s"
-  parent_path = "resource.nsxt_policy_transit_gateway.tgwStaticRoute.path"
+  display_name          = "%s"
+  description           = "%s"
+  parent_path           = data.nsxt_policy_transit_gateway.test.path
+  enabled_on_secondary  = %s
+  network               = "%s"
+
+  next_hop {
+    ip_address     = "%s"
+    admin_distance = %s
+    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
+  }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"])
+  depends_on = [data.nsxt_policy_transit_gateway.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["enabled_on_secondary"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
 }
 
 func testAccNsxtPolicyTransitGatewayStaticRoutesMinimalistic() string {
-	return fmt.Sprintf(`
+	return testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
-  display_name = "%s"
+  display_name     = "%s"
+  parent_path      = data.nsxt_policy_transit_gateway.test.path
+  description      = ""
+  network          = "%s"
+  next_hop {
+    ip_address     = "%s"
+    admin_distance = %s
+    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
+  }
+  depends_on = [data.nsxt_policy_transit_gateway.test]
+}`, accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["ip_address"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["admin_distance"])
+}
 
-}`, accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"])
+func testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "%s"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+
+resource "nsxt_policy_gateway_connection" "test" {
+  display_name     = "%s"
+  tier0_path       = nsxt_policy_tier0_gateway.test.path
+  aggregate_routes = ["192.168.240.0/24"]
+}
+
+resource "nsxt_policy_project" "test" {
+  display_name             = "%s"
+  tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
+  tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+}
+
+data "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  id = "default"
+}
+
+resource "nsxt_policy_transit_gateway_attachment" "test" {
+  parent_path     = data.nsxt_policy_transit_gateway.test.path
+  connection_path = nsxt_policy_gateway_connection.test.path
+  display_name    = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, getEdgeClusterName(), dependantResourceName, dependantResourceName, dependantResourceName, dependantResourceName)
 }

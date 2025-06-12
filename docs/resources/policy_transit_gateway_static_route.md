@@ -1,7 +1,7 @@
 ---
 subcategory: "beta"
 page_title: "NSXT: nsxt_policy_transit_gateway_static_route"
-description: A resource to configure a StaticRoutes.
+description: A resource to configure static routes for a transit gateway
 ---
 
 # nsxt_policy_transit_gateway_static_route
@@ -30,18 +30,16 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
   parent_path          = data.nsxt_policy_transit_gateway.tgw1.path
   enabled_on_secondary = false
   network              = "3.3.3.0/24"
-  next_hop = [
-    {
+  next_hop {
       ip_address     = "192.168.1.1"
       admin_distance = 10
-      scope          = ["/infra/sites/default/enforcement-points/default/edge-clusters/edge-cluster-1"]
-    },
-    {
-      ip_address     = "192.168.1.2"
-      admin_distance = 5
-      scope          = []
+      scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
     }
-  ]
+  next_hop {
+      ip_address     = "192.168.1.2"
+      admin_distance = 2
+      scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
+    }
 }
 
 ```
@@ -55,8 +53,8 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `parent_path` - (Required) Path of parent object
-* `network` - (Optional) Specify network address in CIDR format.
-* `next_hop` - (Optional) Specify next hop routes for network.
+* `network` - (Required) Specify network address in CIDR format.
+* `next_hop` - (Required) Specify next hop routes for network. scope is limited to transit-gateway-attachements
 * `enabled_on_secondary` - (Optional) Flag to plumb route on secondary site.
 
 
