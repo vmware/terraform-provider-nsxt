@@ -1,12 +1,12 @@
 ---
 subcategory: "beta"
 page_title: "NSXT: nsxt_policy_transit_gateway_static_route"
-description: A resource to configure static routes for a transit gateway
+description: A resource to configure a static route
 ---
 
 # nsxt_policy_transit_gateway_static_route
 
-This resource provides a method for the management of a transit gateway StaticRoutes.
+This resource provides a method for the management of a transit gateway StaticRoute.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
@@ -26,20 +26,20 @@ data "nsxt_policy_transit_gateway" "tgw1" {
 
 resource "nsxt_policy_transit_gateway_static_route" "test" {
   display_name         = "test"
-  description          = "Terraform provisioned StaticRoutes for transit gateway"
+  description          = "Terraform provisioned StaticRoute for transit gateway"
   parent_path          = data.nsxt_policy_transit_gateway.tgw1.path
   enabled_on_secondary = false
   network              = "3.3.3.0/24"
   next_hop {
-      ip_address     = "192.168.1.1"
-      admin_distance = 10
-      scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
-    }
+    ip_address     = "192.168.1.1"
+    admin_distance = 10
+    scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
+  }
   next_hop {
-      ip_address     = "192.168.1.2"
-      admin_distance = 2
-      scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
-    }
+    ip_address     = "192.168.1.2"
+    admin_distance = 2
+    scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
+  }
 }
 
 ```
@@ -76,4 +76,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_transit_gateway_static_route.test PATH
 ```
 
-The above command imports StaticRoutes named `test` with the NSX path `PATH`.
+The above command imports StaticRoute named `test` with the NSX path `PATH`.
