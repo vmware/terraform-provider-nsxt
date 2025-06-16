@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -56,6 +57,11 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Compute collection id",
+			},
+			"enable_nsx_on_dvpg": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If this is set to true, NSX on DVPG will be enabled on the Transport Node Collection.",
 			},
 			"sub_cluster_config": {
 				Type:        schema.TypeList,
@@ -166,6 +172,11 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		SubClusterConfig:       subClusterConfigs,
 	}
 
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		enableNsxOnDvpg := d.Get("enable_nsx_on_dvpg").(bool)
+		obj.EnableNsxOnDvpg = &enableNsxOnDvpg
+	}
+
 	if !isCreate {
 		revision := int64(d.Get("revision").(int))
 		obj.Revision = &revision
@@ -232,6 +243,11 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		d.Set("enable_nsx_on_dvpg", obj.EnableNsxOnDvpg)
+	}
+
 	d.Set("revision", obj.Revision)
 	d.Set("compute_collection_id", obj.ComputeCollectionId)
 	if obj.SubClusterConfig != nil {
