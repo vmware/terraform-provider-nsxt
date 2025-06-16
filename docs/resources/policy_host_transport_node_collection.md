@@ -66,4 +66,4 @@ terraform import nsxt_policy_host_transport_node_collection.test POLICY_PATH
 ```
 
 The above command imports Policy Host Transport Node Collection named test with NSX policy path POLICY_PATH.
-Note: `remove_nsx_on_destroy`, `enable_nsx_on_dvpg` will be set to default value upon import. To enforce the intent value, reapply the plan.
+Note: `remove_nsx_on_destroy` will be set to default value upon import. To enforce the intent value, reapply the plan.
