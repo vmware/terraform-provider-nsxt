@@ -14,7 +14,7 @@ import (
 
 var dependantResourceName = getAccTestResourceName()
 
-var accTestPolicyTransitGatewayStaticRoutesCreateAttributes = map[string]string{
+var accTestPolicyTransitGatewayStaticRouteCreateAttributes = map[string]string{
 	"display_name":         getAccTestResourceName(),
 	"description":          "terraform created",
 	"enabled_on_secondary": "true",
@@ -23,7 +23,7 @@ var accTestPolicyTransitGatewayStaticRoutesCreateAttributes = map[string]string{
 	"admin_distance":       "2",
 }
 
-var accTestPolicyTransitGatewayStaticRoutesUpdateAttributes = map[string]string{
+var accTestPolicyTransitGatewayStaticRouteUpdateAttributes = map[string]string{
 	"display_name":         getAccTestResourceName(),
 	"description":          "terraform updated",
 	"enabled_on_secondary": "false",
@@ -32,7 +32,7 @@ var accTestPolicyTransitGatewayStaticRoutesUpdateAttributes = map[string]string{
 	"admin_distance":       "5",
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
+func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -42,20 +42,20 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state, accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"])
+			return testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state, accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRoutesTemplate(true),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayStaticRoutesExists(accTestPolicyTransitGatewayStaticRoutesCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["network"]),
+					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayStaticRouteCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRouteCreateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["enabled_on_secondary"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["ip_address"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRoutesCreateAttributes["admin_distance"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRouteCreateAttributes["enabled_on_secondary"]),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRouteCreateAttributes["ip_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRouteCreateAttributes["admin_distance"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -64,16 +64,16 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRoutesTemplate(false),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayStaticRoutesExists(accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["network"]),
+					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["enabled_on_secondary"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["ip_address"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["admin_distance"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["enabled_on_secondary"]),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["ip_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -82,9 +82,9 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRoutesMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayStaticRoutesExists(accTestPolicyTransitGatewayStaticRoutesCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -96,7 +96,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.T) {
+func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
 
@@ -107,11 +107,11 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state, name)
+			return testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRoutesMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -123,33 +123,33 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoutes_importBasic(t *testing.
 	})
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutesExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyTransitGatewayStaticRouteExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy TransitGatewayStaticRoutes resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy TransitGatewayStaticRoute resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy ransitGatewayStaticRoutes resource ID not set in resources")
+			return fmt.Errorf("Policy ransitGatewayStaticRoute resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayStaticRoutesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy transitGatewayStaticRoutes %s does not exist", resourceID)
+			return fmt.Errorf("Policy transitGatewayStaticRoute %s does not exist", resourceID)
 		}
 
 		return nil
 	}
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -158,26 +158,26 @@ func testAccNsxtPolicyTransitGatewayStaticRoutesCheckDestroy(state *terraform.St
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayStaticRoutesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
 
 		if exists {
-			return fmt.Errorf("Policy ransitGatewayStaticRoutes %s still exists", displayName)
+			return fmt.Errorf("Policy ransitGatewayStaticRoute %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutesTemplate(createFlow bool) string {
+func testAccNsxtPolicyTransitGatewayStaticRouteTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
-		attrMap = accTestPolicyTransitGatewayStaticRoutesCreateAttributes
+		attrMap = accTestPolicyTransitGatewayStaticRouteCreateAttributes
 	} else {
-		attrMap = accTestPolicyTransitGatewayStaticRoutesUpdateAttributes
+		attrMap = accTestPolicyTransitGatewayStaticRouteUpdateAttributes
 	}
-	return testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
   display_name          = "%s"
   description           = "%s"
@@ -199,8 +199,8 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled_on_secondary"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutesMinimalistic() string {
-	return testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic() string {
+	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
   display_name     = "%s"
   parent_path      = data.nsxt_policy_transit_gateway.test.path
@@ -212,10 +212,10 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
     scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["ip_address"], accTestPolicyTransitGatewayStaticRoutesUpdateAttributes["admin_distance"])
+}`, accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["ip_address"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"])
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutesPrerequisites() string {
+func testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
