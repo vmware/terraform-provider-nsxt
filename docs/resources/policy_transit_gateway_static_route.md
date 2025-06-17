@@ -33,12 +33,12 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
   next_hop {
     ip_address     = "192.168.1.1"
     admin_distance = 10
-    scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
+    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
   next_hop {
     ip_address     = "192.168.1.2"
     admin_distance = 2
-    scope          = ["/orgs/default/projects/<project-id>/transit-gateways/default/attachments/<attachment-id>"]
+    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
 }
 
@@ -55,6 +55,10 @@ The following arguments are supported:
 * `parent_path` - (Required) Path of parent object
 * `network` - (Required) Specify network address in CIDR format.
 * `next_hop` - (Required) Specify next hop routes for network. scope is limited to transit-gateway-attachements
+* `next_hop` - (Required) List of Next Hops, each with those arguments:
+  * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
+  * `ip_address` - (Optional) Next Hop IP.
+  * `scope` - (Required) Set of policy object paths where the rule is applied.
 * `enabled_on_secondary` - (Optional) Flag to plumb route on secondary site.
 
 
