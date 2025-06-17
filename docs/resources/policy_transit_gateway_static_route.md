@@ -35,11 +35,6 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
     admin_distance = 10
     scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
-  next_hop {
-    ip_address     = "192.168.1.2"
-    admin_distance = 2
-    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
-  }
 }
 
 ```
