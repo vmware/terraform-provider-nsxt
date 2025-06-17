@@ -369,8 +369,6 @@ func validateIPv6WithLocaleService(diff *schema.ResourceDiff, fieldName, logPref
 	isIPv6 := ip != nil && strings.Contains(address, ":") && ip.To4() == nil
 	isLocaleService := strings.Contains(servicePath, "/locale-services/")
 
-	log.Printf("[DEBUG] %s: %s=%s, service_path=%s, isIPv6=%t", logPrefix, fieldName, address, servicePath, isIPv6)
-
 	if isIPv6 && isLocaleService {
 		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
 	}
