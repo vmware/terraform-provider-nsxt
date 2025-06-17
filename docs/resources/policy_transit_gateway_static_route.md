@@ -1,5 +1,5 @@
 ---
-subcategory: "beta"
+subcategory: "Beta"
 page_title: "NSXT: nsxt_policy_transit_gateway_static_route"
 description: A resource to configure a static route
 ---
@@ -8,7 +8,7 @@ description: A resource to configure a static route
 
 This resource provides a method for the management of a transit gateway StaticRoute.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
