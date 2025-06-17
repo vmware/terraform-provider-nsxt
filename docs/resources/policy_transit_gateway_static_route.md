@@ -35,6 +35,11 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
     admin_distance = 10
     scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
+  next_hop {
+    ip_address     = "192.168.1.2"
+    admin_distance = 2
+    scope          = [nsxt_policy_transit_gateway_attachment.test.path]
+  }
 }
 
 ```
@@ -49,7 +54,6 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `parent_path` - (Required) Path of parent object
 * `network` - (Required) Specify network address in CIDR format.
-* `next_hop` - (Required) Specify next hop routes for network. scope is limited to transit-gateway-attachements
 * `next_hop` - (Required) List of Next Hops, each with those arguments:
   * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
   * `ip_address` - (Optional) Next Hop IP.
