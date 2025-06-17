@@ -491,6 +491,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_mac_discovery_profile":                        resourceNsxtPolicyMacDiscoveryProfile(),
 			"nsxt_policy_metadata_proxy":                               resourceNsxtPolicyMetadataProxy(),
 			"nsxt_policy_nat_rule":                                     resourceNsxtPolicyNATRule(),
+			"nsxt_policy_network_span":                                 resourceNsxtPolicyNetworkSpan(),
 			"nsxt_policy_ospf_area":                                    resourceNsxtPolicyOspfArea(),
 			"nsxt_policy_ospf_config":                                  resourceNsxtPolicyOspfConfig(),
 			"nsxt_policy_parent_security_policy":                       resourceNsxtPolicyParentSecurityPolicy(),

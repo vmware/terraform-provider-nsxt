@@ -105,7 +105,8 @@ func (c *localEndpointClient) Get(connector client.Connector, id string) (model.
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
-// Note: we don't expect pagination to be relevant here
+// List retrieves a list of IPSecVpnLocalEndpoint objects for the specified gateway, service, and locale configuration.
+// Note: We don't expect pagination to be relevant here.
 func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpnLocalEndpoint, error) {
 	boolFalse := false
 	var cursor string
