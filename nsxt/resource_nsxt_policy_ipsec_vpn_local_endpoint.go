@@ -367,11 +367,11 @@ func validateIPv6WithLocaleService(diff *schema.ResourceDiff, fieldName, logPref
 	address := diff.Get(fieldName).(string)
 	servicePath := diff.Get("service_path").(string)
 	ip := net.ParseIP(address)
-	isIPv6 := ip != nil && strings.Contains(address, ":") && ip.To4() == nil
+	isIPv6 := ip != nil && strings.Contains(address, ":")
 	isLocaleService := strings.Contains(servicePath, "/locale-services/")
 
 	if isIPv6 && isLocaleService {
-		return fmt.Errorf("IPv6 is not supported with locale-service, refer to documentation")
+		return fmt.Errorf("IPv6 addresses are not supported for VPN services configured with locale service path. Please use a VPN service configured with a gateway path")
 	}
 	return nil
 }
