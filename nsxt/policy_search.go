@@ -90,10 +90,7 @@ func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Conne
 func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
-	isGlobal := false
-	if isGlobalRaw, ok := d.GetOk("is_global"); ok {
-		isGlobal, _ = isGlobalRaw.(bool)
-	}
+	isGlobal := context.FromGlobal
 	var err error
 	var resultValues []*data.StructValue
 	additionalQueryString := buildQueryStringFromMap(additionalQuery)
