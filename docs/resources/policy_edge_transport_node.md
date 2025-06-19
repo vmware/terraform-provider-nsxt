@@ -79,11 +79,13 @@ obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashi
 
 ```hcl
 data "nsxt_policy_edge_node" "node1" {
-  display_name = "tf_edge_node"
+  display_name      = "tf_edge_node"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.ec.path
 }
 
 resource "nsxt_policy_edge_transport_node" "test" {
-  node_id = data.nsxt_policy_edge_node.node1.id
+  display_name = "tf_edge_transport_node"
+  node_id      = data.nsxt_policy_edge_node.node1.id
 
   hostname = "test-edge-12"
   switch {
