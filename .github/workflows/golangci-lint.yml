@@ -1,13 +1,12 @@
----
 name: golangci-lint
 
 on:
   pull_request:
     paths-ignore:
-      - README.md
+      - 'README.md'
   push:
     paths-ignore:
-      - README.md
+      - 'README.md'
 
 permissions:
   contents: read
@@ -16,19 +15,20 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Setup Go
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
-          go-version-file: go.mod
+          go-version-file: 'go.mod'
           cache: false
       - run: go mod download
       - run: go build -v .
       - name: Run Linters
-        uses: golangci/golangci-lint-action@1481404843c368bc19ca9406f87d6e0fc97bdcfd # v7.0.0
+        uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6.5.2
         with:
-          version: latest
+          version: v1.64.8
           args: --issues-exit-code=1 --timeout 10m
           only-new-issues: true
