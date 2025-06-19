@@ -22,6 +22,8 @@ data "nsxt_policy_tier0_gateway" "tier0_gw_gateway" {
 
 * `id` - (Optional) The ID of Tier-0 gateway to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Tier-0 gateway to retrieve.
+* `context` - (Optional) The context which the object belongs to
+  * `from_global` - (Optinal) Set to True if the data source will need to search Tier-0 gateway created in a global manager instance (/global-infra)
 
 ## Attributes Reference
 
