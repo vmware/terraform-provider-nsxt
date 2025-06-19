@@ -26,12 +26,13 @@ Learn more:
 
   The following table lists the supported product versions for this provider.
 
+  - VMWare NSX 9.0.0
   - VMware NSX 4.2.x
   - VMware NSX 4.1.x
   - VMware NSX 4.0.x
   - VMware NSX-T Data Center 3.2.x
   - VMware NSX-T Data Center 3.1.x
-  - VMware NSX-T Data Center 3.1.x
+  - VMware NSX-T Data Center 3.0.x
   - VMware NSX-T Data Center 2.5.x [^1]
 
   [^1]: Support for VMware NSX-T Data Center 2.5.x is limited with v3.2.x and later.
