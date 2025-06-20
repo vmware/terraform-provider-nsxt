@@ -1,3 +1,71 @@
+## 3.9.0 (June 20, 2025)
+
+NSX Virtual Private Networking (VPC) support
+
+Simplified VPC configuration
+
+* `data/nsxt_vpc_connectivity_profile`
+* `data/nsxt_vpc_group`
+* `data/nsxt_vpc_ip_address_allocation`
+* `data/nsxt_vpc_nat`
+* `data/nsxt_vpc_service_profile`
+* `data/nsxt_vpc_subnet_port`
+* `data/nsxt_vpc_subnet`
+* `data/nsxt_vpc`
+* `resource/nsxt_vpc_attachment`
+* `resource/nsxt_vpc_connectivity_profile`
+* `resource/nsxt_vpc_dhcp_v4_static_binding`
+* `resource/nsxt_vpc_external_address`
+* `resource/nsxt_vpc_gateway_policy`
+* `resource/nsxt_vpc_group`
+* `resource/nsxt_vpc_ip_address_allocation`
+* `resource/nsxt_vpc_nat_rule`
+* `resource/nsxt_vpc_security_policy`
+* `resource/nsxt_vpc_service_profile`
+* `resource/nsxt_vpc_static_route`
+* `resource/nsxt_vpc_subnet`
+* `resource/nsxt_vpc`
+
+VPC Transit Gateways
+
+* `data/nsxt_policy_project_ip_address_allocation`
+* `data/nsxt_policy_transit_gateway_nat`
+* `data/nsxt_policy_transit_gateway`
+* `resource/nsxt_policy_project_ip_address_allocation`
+* `resource/nsxt_policy_transit_gateway_attachment`
+* `resource/nsxt_policy_transit_gateway_nat_rule`
+* `resource/nsxt_policy_transit_gateway`
+
+Centralized and Distributed connections
+
+* `data/nsxt_policy_distributed_vlan_connection`
+* `data/nsxt_policy_gateway_connection`
+
+BUG FIXES:
+
+* Improve validation for path importer ([#1701](https://github.com/vmware/terraform-provider-nsxt/pull/1701))
+* `resource/nsxt_edge_transport_node`: Fix IPv6 assignment in transport node subconfig ([#1635](https://github.com/vmware/terraform-provider-nsxt/pull/1635))
+* `resource/nsxt_upgrade_run`: Fix pause issue for updrade units ([#1585](https://github.com/vmware/terraform-provider-nsxt/pull/1585))
+* `resource/nsxt_policy_tier1_gateway`: Fix tier1 behavior for v4.2.0 which caused issues with NAT creation ([#1307](https://github.com/vmware/terraform-provider-nsxt/pull/1307))
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Avoid recreating gateway when locale service added ([#1517](https://github.com/vmware/terraform-provider-nsxt/pull/1517))
+
+IMPROVEMENTS:
+
+* Support IPv6 in `nsxt_policy_host_transport_node` and `nsxt_edge_transport_node` resources.
+* Support service entries in policy rules ([#1504](https://github.com/vmware/terraform-provider-nsxt/pull/1504))
+* `resource/nsxt_edge_transport_node`: Replaced host switch profiles attributes with typed ones ([#1512](https://github.com/vmware/terraform-provider-nsxt/pull/1512))
+* `resource/nsxt_policy_group`: Add new member types to group criteria ([#1285](https://github.com/vmware/terraform-provider-nsxt/pull/1285))
+* `resource/nsxt_policy_project`: support latest changes for VPC.
+
+EXPERIMENTAL FEATURES:
+
+* `data/nsxt_policy_edge_high_availability_profile`
+* `data/nsxt_policy_edge_transport_node`
+* `resource/nsxt_policy_edge_cluster`
+* `resource/nsxt_policy_edge_high_availability_profile`
+* `resource/nsxt_policy_edge_transport_node`
+* `resource/nsxt_policy_l7_access_profile`
+
 ## 3.8.2 (May 6, 2025)
 
 BUG FIXES:
