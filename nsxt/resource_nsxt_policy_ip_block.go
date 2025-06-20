@@ -48,7 +48,6 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Optional:     true,
 				ValidateFunc: validateCidr(),
-				Deprecated:   "Use cidr_list attribute instead, for v9.1 and above",
 			},
 			"visibility": {
 				Type:         schema.TypeString,
@@ -165,7 +164,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		obj.CidrList = cidrList
 		obj.RangeList = rangeList
 		obj.ReservedIps = reservedIPs
-	} else {
+	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
 
@@ -218,7 +217,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		obj.CidrList = cidrList
 		obj.RangeList = rangeList
 		obj.ReservedIps = reservedIPs
-	} else {
+	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
 
