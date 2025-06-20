@@ -820,12 +820,3 @@ func getGatewayPathFromLocaleServicesPath(localeServicesPath string) string {
 	pathList := strings.Split(localeServicesPath, "/")[:4]
 	return strings.Join(pathList, "/")
 }
-
-func getDataSourceGMBoolSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeBool,
-		Description: "Whether to fetch the GM object instead of the LM object",
-		Optional:    true,
-		Default:     false,
-	}
-}

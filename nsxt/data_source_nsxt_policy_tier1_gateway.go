@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -27,7 +28,7 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"context": getContextSchema(false, false, false),
+			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: false, AllowDefaultProject: false, FromGlobal: true}),
 		},
 	}
 }
