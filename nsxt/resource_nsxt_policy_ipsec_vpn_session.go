@@ -5,6 +5,7 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -127,13 +128,13 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.",
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"peer_address": {
 				Type:         schema.TypeString,
-				Description:  "Public IPV4 address of the remote device terminating the VPN connection.",
+				Description:  "Public IPv4/v6 address of the remote device terminating the VPN connection.",
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"service_path": getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"),
 			"ip_addresses": {
@@ -165,6 +166,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				Computed:    true,
 			},
 		},
+		CustomizeDiff: validateIPv6LocaleConflict,
 	}
 }
 
@@ -765,4 +767,8 @@ func nsxtVpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.Re
 	d.Set("service_path", s[0])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func validateIPv6LocaleConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return validateIPv6WithLocaleService(diff, "peer_address", "validateIPv6LocaleConflict")
 }

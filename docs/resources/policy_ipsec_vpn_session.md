@@ -76,7 +76,7 @@ The following arguments are supported:
 * `authentication_mode` - (Optional) Peer authentication mode. `PSK` - In this mode a secret key shared between local and peer sites is to be used for authentication. The secret key can be a string with a maximum length of 128 characters. `CERTIFICATE` - In this mode a certificate defined at the global level is to be used for authentication. If user wants to configure compliance_suite, then the authentication_mode can only be `CERTIFICATE`.
 * `ip_addresses` - (Optional) IP Tunnel interface (commonly referred as VTI) ip_addresses. Only applied for Route Based VPN Session.
 * `prefix_length` - (Optional) Subnet Prefix Length. Only applied for Route Based VPN Session.
-* `peer_address` - (Optional) Public IPV4 address of the remote device terminating the VPN connection.
+* `peer_address` - (Optional) Public IPV4/V6 address of the remote device terminating the VPN connection.
 * `peer_id` - (Optional) Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.
 * `local_endpoint_path` - (Required) Policy path referencing Local endpoint. In VMC, Local Endpoints are pre-configured the user can refer to their path using `data nsxt_policy_ipsec_vpn_local_endpoint` and using the "Private IP1" or "Public IP1" values to refer to the private and public endpoints respectively. Note that if `authentication_mode` is `CERTIFICATE`, then the local_endpoint must be configured with `certificate_path` and `trust_ca_paths`.
 * `rule` - (Optional) Bypass rules for this IPSec VPN Session. Only applicable to `PolicyBased` VPN Session.
