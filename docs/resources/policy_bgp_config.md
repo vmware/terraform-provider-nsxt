@@ -78,4 +78,12 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-Since BGP config is auto-created by the backend, and terraform create is de-facto an update, importing the resource is not useful and thus not supported.
+An existing policy Tier-0 gateway BGP config can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
+
+```shell
+terraform import nsxt_policy_bgp_config.test PATH
+```
+
+The above command imports the policy BGP config named `tier0_gw` with the NSX Policy path `PATH`.
