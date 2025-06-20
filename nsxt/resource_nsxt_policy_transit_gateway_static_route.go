@@ -19,7 +19,6 @@ import (
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
 
-// var staticRoutesPathExample = getMultitenancyPathExample("/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/static-routess/[static-routes]")
 var staticRoutesParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
 
 var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
@@ -168,12 +167,12 @@ func resourceNsxtPolicyTransitGatewayStaticRouteCreate(d *schema.ResourceData, m
 		return err
 	}
 
-	log.Printf("[INFO] Creating StaticRoutes with ID %s", id)
+	log.Printf("[INFO] Creating TGW StaticRoute with ID %s", id)
 
 	client := clientLayer.NewStaticRoutesClient(connector)
 	_, err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
-		return handleCreateError("StaticRoutes", id, err)
+		return handleCreateError("TGW StaticRoute", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -186,7 +185,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteRead(d *schema.ResourceData, m i
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining StaticRoutes ID")
+		return fmt.Errorf("Error obtaining TGW StaticRoute ID")
 	}
 
 	client := clientLayer.NewStaticRoutesClient(connector)
@@ -197,7 +196,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteRead(d *schema.ResourceData, m i
 	}
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
-		return handleReadError(d, "StaticRoutes", id, err)
+		return handleReadError(d, "TGW StaticRoute", id, err)
 	}
 
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -217,7 +216,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining StaticRoutes ID")
+		return fmt.Errorf("Error obtaining TGW StaticRoute ID")
 	}
 
 	parentPath := d.Get("parent_path").(string)
@@ -245,7 +244,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 	client := clientLayer.NewStaticRoutesClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
-		return handleUpdateError("StaticRoutes", id, err)
+		return handleUpdateError("TGW StaticRoute", id, err)
 	}
 
 	return resourceNsxtPolicyTransitGatewayStaticRouteRead(d, m)
@@ -254,7 +253,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 func resourceNsxtPolicyTransitGatewayStaticRouteDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining StaticRoutes ID")
+		return fmt.Errorf("Error obtaining TGW StaticRoute ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -268,7 +267,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteDelete(d *schema.ResourceData, m
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
-		return handleDeleteError("StaticRoutes", id, err)
+		return handleDeleteError("TGW StaticRoute", id, err)
 	}
 
 	return nil
