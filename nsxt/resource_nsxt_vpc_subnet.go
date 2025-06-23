@@ -503,6 +503,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		Description: &description,
 		Tags:        tags,
 	}
+
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
@@ -601,6 +602,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		Tags:        tags,
 		Revision:    &revision,
 	}
+
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
