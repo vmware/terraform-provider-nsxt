@@ -76,14 +76,13 @@ obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashi
 ## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
 
 ```hcl
-data "nsxt_policy_edge_node" "node1" {
-  display_name      = "tf_edge_node"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.ec.path
+data "nsxt_policy_edge_transport_node" "node1" {
+  display_name = "tf_edge_node"
 }
 
 resource "nsxt_policy_edge_transport_node" "test" {
   display_name = "tf_edge_transport_node"
-  node_id      = data.nsxt_policy_edge_node.node1.id
+  node_id      = data.nsxt_policy_edge_transport_node.node1.id
 
   hostname = "test-edge-12"
   switch {
