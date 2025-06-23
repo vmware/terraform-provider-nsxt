@@ -44,6 +44,9 @@ The following arguments are supported:
   * `sub_cluster_id` - (Required) sub-cluster ID.
 * `transport_node_profile_path` - (Optional) Transport Node Profile Path.
 * `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node Collection member hosts. Default is true.
+* `enable_nsx_on_dvpg` - (Optional) Activate/Deactivate DFW on Distributed Virtual Port Group (DVPG).
+Default is false.
+* `network_span_paths` - (Optional) Network Span paths associated with the cluster.
 
 ## Attributes Reference
 

@@ -5,8 +5,10 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +42,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 			"local_address": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.IsIPv4Address,
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"certificate_path": getPolicyPathSchema(false, false, "Policy path referencing site certificate"),
 			"local_id": {
@@ -59,6 +61,8 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 				Optional: true,
 			},
 		},
+
+		CustomizeDiff: validateIPv6LocaleServiceConflict,
 	}
 }
 
@@ -101,7 +105,8 @@ func (c *localEndpointClient) Get(connector client.Connector, id string) (model.
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
-// Note: we don't expect pagination to be relevant here
+// List retrieves a list of IPSecVpnLocalEndpoint objects for the specified gateway, service, and locale configuration.
+// Note: We don't expect pagination to be relevant here.
 func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpnLocalEndpoint, error) {
 	boolFalse := false
 	var cursor string
@@ -352,4 +357,21 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	d.Set("service_path", s[0])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func validateIPv6LocaleServiceConflict(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return validateIPv6WithLocaleService(diff, "local_address", "validateIPv6LocaleServiceConflict")
+}
+
+func validateIPv6WithLocaleService(diff *schema.ResourceDiff, fieldName, logPrefix string) error {
+	address := diff.Get(fieldName).(string)
+	servicePath := diff.Get("service_path").(string)
+	ip := net.ParseIP(address)
+	isIPv6 := ip != nil && strings.Contains(address, ":")
+	isLocaleService := strings.Contains(servicePath, "/locale-services/")
+
+	if isIPv6 && isLocaleService {
+		return fmt.Errorf("IPv6 addresses are not supported for VPN services configured with locale service path. Please use a VPN service configured with a gateway path")
+	}
+	return nil
 }

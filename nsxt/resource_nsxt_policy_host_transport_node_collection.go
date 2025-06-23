@@ -9,13 +9,15 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 const removeOnDestroyDefault = true
@@ -56,6 +58,11 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Compute collection id",
+			},
+			"enable_nsx_on_dvpg": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If this is set to true, NSX on DVPG will be enabled on the Transport Node Collection.",
 			},
 			"sub_cluster_config": {
 				Type:        schema.TypeList,
@@ -100,6 +107,15 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Optional:    true,
 				Description: "Indicate whether NSX service should be removed from hypervisors during resource deletion",
 				Default:     removeOnDestroyDefault,
+			},
+			"network_span_paths": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Network Span paths associated with the cluster",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
 			},
 		},
 	}
@@ -165,6 +181,15 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		TransportNodeProfileId: &transportNodeProfileID,
 		SubClusterConfig:       subClusterConfigs,
 	}
+	networkSitePaths := getStringListFromSchemaList(d, "network_span_paths")
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(networkSitePaths) > 0 {
+		obj.NetworkSpanPaths = networkSitePaths
+	}
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		enableNsxOnDvpg := d.Get("enable_nsx_on_dvpg").(bool)
+		obj.EnableNsxOnDvpg = &enableNsxOnDvpg
+	}
 
 	if !isCreate {
 		revision := int64(d.Get("revision").(int))
@@ -206,7 +231,6 @@ func resourceNsxtPolicyHostTransportNodeCollectionCreate(d *schema.ResourceData,
 	if err != nil {
 		return handleCreateError("HostTransportNodeCollection", id, err)
 	}
-
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -232,6 +256,11 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		d.Set("enable_nsx_on_dvpg", obj.EnableNsxOnDvpg)
+	}
+
 	d.Set("revision", obj.Revision)
 	d.Set("compute_collection_id", obj.ComputeCollectionId)
 	if obj.SubClusterConfig != nil {
@@ -256,6 +285,9 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 		d.Set("sub_cluster_config", sccList)
 	}
 	d.Set("transport_node_profile_path", obj.TransportNodeProfileId)
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		d.Set("network_span_paths", obj.NetworkSpanPaths)
+	}
 	return nil
 }
 

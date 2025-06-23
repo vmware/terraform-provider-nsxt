@@ -64,12 +64,10 @@ resource "nsxt_policy_edge_transport_node" "test" {
 }
 
 # Wait for realization of the Edge transport node
-data "nsxt_policy_realization_info" "info" {
-  path        = nsxt_policy_edge_transport_node.test.path
-  timeout     = 1200
-  entity_type = "RealizedEdgeTransportNode"
+data "nsxt_policy_edge_transport_node_realization" "info" {
+  path    = nsxt_policy_edge_transport_node.test.path
+  timeout = 1200
 }
-
 ```
 
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are
@@ -78,12 +76,13 @@ obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashi
 ## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
 
 ```hcl
-data "nsxt_policy_edge_node" "node1" {
+data "nsxt_policy_edge_transport_node" "node1" {
   display_name = "tf_edge_node"
 }
 
 resource "nsxt_policy_edge_transport_node" "test" {
-  node_id = data.nsxt_policy_edge_node.node1.id
+  display_name = "tf_edge_transport_node"
+  node_id      = data.nsxt_policy_edge_transport_node.node1.id
 
   hostname = "test-edge-12"
   switch {
