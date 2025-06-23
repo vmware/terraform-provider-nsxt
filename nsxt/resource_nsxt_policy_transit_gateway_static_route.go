@@ -42,7 +42,8 @@ var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"next_hop": {
 		Schema: schema.Schema{
-			Type: schema.TypeList,
+			Type:     schema.TypeList,
+			MaxItems: 1,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
 					"ip_address": {
