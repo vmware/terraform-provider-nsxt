@@ -1,6 +1,6 @@
 ---
 subcategory: "Fabric"
-page_title: "NSXT: policy_edge cluster"
+page_title: "NSXT: policy_edge_cluster"
 description: A policy Edge Cluster data source.
 ---
 
