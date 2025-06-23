@@ -77,7 +77,7 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 					Schema: schema.Schema{
 						Type:         schema.TypeString,
 						Optional:     true,
-						Description:  "Policy path of external IP block. This IP block must be marked as reserved for VLAN extension.",
+						Description:  "Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.",
 						ValidateFunc: validatePolicyPath(),
 					},
 					Metadata: metadata.Metadata{
@@ -212,6 +212,7 @@ func resourceNsxtPolicyDistributedVlanConnectionRead(d *schema.ResourceData, m i
 	d.Set("description", obj.Description)
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
+
 	elem := reflect.ValueOf(&obj).Elem()
 	return metadata.StructToSchema(elem, d, distributedVlanConnectionSchema, "", nil)
 }

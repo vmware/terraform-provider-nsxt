@@ -497,6 +497,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
+
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
