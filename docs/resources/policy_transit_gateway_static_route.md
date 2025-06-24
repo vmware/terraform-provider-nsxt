@@ -51,7 +51,7 @@ The following arguments are supported:
 * `network` - (Required) Specify network address in CIDR format.
 * `next_hop` - (Required) List of next hops (only one supported),each with those arguments:
   * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
-  * `ip_address` - (Optional) Next Hop IP.
+  * `ip_address` - (Required) Next Hop IP.
   * `scope` - (Required) Set of policy object paths where the rule is applied.
 * `enabled_on_secondary` - (Optional) Flag to plumb route on secondary site.
 
