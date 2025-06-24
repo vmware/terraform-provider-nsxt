@@ -30,7 +30,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `path` - The NSX path of the policy resource.
 * `short_id` - Unique ID used for logging.
 * `site_info` - Information related to sites applicable for given Project.
-  * `edge_cluster_paths` - The edge cluster on which the networking elements for the Org are be created.
-  * `site_path` - This represents the path of the site which is managed by Global Manager. For the local manager the value would be 'default'.
+    * `edge_cluster_paths` - The edge cluster on which the networking elements for the Org are be created.
+    * `site_path` - This represents the path of the site which is managed by Global Manager. For the local manager the value would be 'default'.
 * `tier0_gateway_paths` - Policy paths of Tier0 gateways associated with the project.
 * `external_ipv4_blocks` - Policy paths of IPv4 blocks associated with the project.

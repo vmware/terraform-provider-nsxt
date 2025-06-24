@@ -70,7 +70,7 @@ The following arguments are supported:
 * `block_path` - (Required) The Policy path to the IP Block for this Block Subnet.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `size` - (Required) The size of this Block Subnet. Must be a power of 2
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Block Subnet.

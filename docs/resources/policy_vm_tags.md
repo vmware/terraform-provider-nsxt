@@ -77,10 +77,10 @@ The following arguments are supported:
 * `instance_id` - (Required) ID of the Virtual Machine. Can be the instance UUID or BIOS UUID.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Virtual Machine.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `port` - (Optional) Option to tag segment port auto-created for the VM on specified segment.
-  * `segment_path` - (Required) Segment where the port is to be tagged.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this segment port.
+    * `segment_path` - (Required) Segment where the port is to be tagged.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this segment port.
 
 ## Importing
 

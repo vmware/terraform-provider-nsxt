@@ -41,8 +41,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `network` - (Required) Specify network address in CIDR format. Optionally this can be allocated IP from one of the external blocks associated with VPC. Only /32 CIDR is allowed in case IP overlaps with external blocks.
 * `next_hop` - (Required) Specify next hop routes for network.
-  * `ip_address` - (Optional) Next hop gateway IP address
-  * `admin_distance` - (Optional) Cost associated with next hop route. Default is 1.
+    * `ip_address` - (Optional) Next hop gateway IP address
+    * `admin_distance` - (Optional) Cost associated with next hop route. Default is 1.
 
 ## Attributes Reference
 

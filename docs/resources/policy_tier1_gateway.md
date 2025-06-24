@@ -117,13 +117,13 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-1 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.For advanced configuration, use `locale_service` clause instead.
 * `locale_service` - (Optional) This argument is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
-  * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
-  * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
-  * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
-  * `display_name` - (Optional) Display name for the locale service.
+    * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
+    * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
+    * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
+    * `display_name` - (Optional) Display name for the locale service.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
@@ -136,16 +136,16 @@ The following arguments are supported:
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
 * `pool_allocation` - (Optional) Size of edge node allocation at for routing and load balancer service to meet performance and scalability requirements, one of `ROUTING`, `LB_SMALL`, `LB_MEDIUM`, `LB_LARGE`, `LB_XLARGE`. Default is `ROUTING`. Changing this attribute would force new resource.
 * `route_advertisement_rule` - (Optional) List of rules for routes advertisement:
-  * `name` - (Required) The name of the rule.
-  * `action` - (Required) Action to advertise filtered routes to the connected Tier0 gateway. PERMIT (which is the default): Enables the advertisement, DENY: Disables the advertisement.
-  * `subnets` - (Required) list of network CIDRs to be routed.
-  * `prefix_operator` - (Optional) Prefix operator to apply on subnets. GE prefix operator (which is the default|) filters all the routes having network subset of any of the networks configured in Advertise rule. EQ prefix operator filter all the routes having network equal to any of the network configured in Advertise rule.The name of the rule.
+    * `name` - (Required) The name of the rule.
+    * `action` - (Required) Action to advertise filtered routes to the connected Tier0 gateway. PERMIT (which is the default): Enables the advertisement, DENY: Disables the advertisement.
+    * `subnets` - (Required) list of network CIDRs to be routed.
+    * `prefix_operator` - (Optional) Prefix operator to apply on subnets. GE prefix operator (which is the default|) filters all the routes having network subset of any of the networks configured in Advertise rule. EQ prefix operator filter all the routes having network equal to any of the network configured in Advertise rule.The name of the rule.
 * `route_advertisement_types` - (Optional) List of desired types of route advertisements, supported values: `TIER1_STATIC_ROUTES`, `TIER1_CONNECTED`, `TIER1_NAT`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_IPSEC_LOCAL_ENDPOINT`. This field is Computed, meaning that NSX can auto-assign types. Hence, in order to revert to default behavior, set route advertisement values explicitly rather than removing this clause from configuration.
 * `ingress_qos_profile_path` - (Optional) QoS Profile path for ingress traffic on link connected to Tier0 gateway.
 * `egress_qos_profile_path` - (Optional) QoS Profile path for egress traffic on link connected to Tier0 gateway.
 * `intersite_config` - (Optional) This clause is relevant for Global Manager only.
-  * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
-  * `primary_site_path` - (Optional) Primary egress site for gateway.
+    * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
+    * `primary_site_path` - (Optional) Primary egress site for gateway.
 * `ha_mode` - (Optional) High-availability Mode for Tier-1. Valid values are `ACTIVE_ACTIVE`, `ACTIVE_STANDBY` and `NONE`.  `ACTIVE_ACTIVE` is supported with NSX version 4.0.0 and above. `NONE` mode should be used for Distributed Only, e.g when a gateway is created and has no services.
 * `type` - (Optional) This setting is only applicable to VMC and it helps auto-configure router advertisements for the gateway. Valid values are `ROUTED`, `NATTED` and `ISOLATED`. For `ROUTED` and `NATTED`, `tier0_path` should be specified in configuration.
 

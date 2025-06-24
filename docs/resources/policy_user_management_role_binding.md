@@ -69,14 +69,14 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `name` - (Required) User/Group's name.
 * `type` - (Required) Indicates the type of the user. Valid options:
-  * `remote_user` - This is a user which is external to NSX.
-  * `remote_group` - This is a group of users which is external to NSX.
-  * `local_user` - This is a user local to NSX. These are linux users. Note: Role bindings for local users are owned by NSX. Creation and deletion is not allowed for local users' binding. For updates, import existing bindings first. Alternatively, set `overwrite_local_user` to overwrite current role bindings with the one defined in terraform.
+    * `remote_user` - This is a user which is external to NSX.
+    * `remote_group` - This is a group of users which is external to NSX.
+    * `local_user` - This is a user local to NSX. These are linux users. Note: Role bindings for local users are owned by NSX. Creation and deletion is not allowed for local users' binding. For updates, import existing bindings first. Alternatively, set `overwrite_local_user` to overwrite current role bindings with the one defined in terraform.
 * `identity_source_type` - (Optional) Identity source type. Applicable only to `remote_user` and `remote_group` user types. Valid options are: `VIDM`, `LDAP`, `OIDC`, `CSP`. Defaults to `VIDM` when applicable.
 * `identity_source_id` - (Optional) The ID of the external identity source that holds the referenced external entity. Currently, only external `LDAP` and `OIDC` servers are allowed.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
-  * `path` - (Required) Path of the entity in parent hierarchy.
-  * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
+    * `path` - (Required) Path of the entity in parent hierarchy.
+    * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
 * `overwrite_local_user` - (Optional) Flag to allow overwriting existing role bindings for local user with terraform definition. On deletion, the user's role will be reverted to auditor only. Any existing configuration will be lost.
 
 ## Attributes Reference

@@ -68,17 +68,17 @@ The following arguments are supported:
 * `logical_dhcp_server_id` - (Required) DHCP server uuid. Changing this would force new pool to be created.
 * `gateway_ip` - (Optional) Gateway IP.
 * `ip_range` - (Required) IP Ranges to be used within this pool.
-  * `start` - (Required) IP address that indicates range start.
-  * `end` - (Required) IP address that indicates range end.
+    * `start` - (Required) IP address that indicates range start.
+    * `end` - (Required) IP address that indicates range end.
 * `lease_time` - (Optional) Lease time in seconds. Default is 86400.
 * `error_threshold` - (Optional) Error threshold in percent. Valid values are from 80 to 100, default is 100.
 * `warning_threshold` - (Optional) Warning threshold in percent. Valid values are from 50 to 80, default is 80.
 * `dhcp_option_121` - (Optional) DHCP classless static routes. If specified, overrides DHCP server settings.
-  * `network` - (Required) Destination in cidr format.
-  * `next_hop` - (Required) IP address of next hop.
+    * `network` - (Required) Destination in cidr format.
+    * `next_hop` - (Required) IP address of next hop.
 * `dhcp_generic_option` - (Optional) Generic DHCP options. If specified, overrides DHCP server settings.
-  * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
-  * `values` - (Required) List of DHCP option values.
+    * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
+    * `values` - (Required) List of DHCP option values.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this logical DHCP server.
 
 ## Attributes Reference

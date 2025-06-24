@@ -102,25 +102,25 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `class_of_service` - (Optional) Class of service.
 * `dscp_trusted` - (Optional) Trust mode for DSCP (False by default)
 * `dscp_priority` - (Optional) DSCP Priority (0-63)
 * `ingress_rate_shaper` - (Optional) Ingress rate shaper configuration:
-  * `enabled` - (Optional) Whether this rate shaper is enabled.
-  * `average_bw_mbps` - (Optional) Average Bandwidth in MBPS.
-  * `peak_bw_mbps` - (Optional) Peak Bandwidth in MBPS.
-  * `burst_size` - (Optional) Burst size in bytes.
+    * `enabled` - (Optional) Whether this rate shaper is enabled.
+    * `average_bw_mbps` - (Optional) Average Bandwidth in MBPS.
+    * `peak_bw_mbps` - (Optional) Peak Bandwidth in MBPS.
+    * `burst_size` - (Optional) Burst size in bytes.
 * `egress_rate_shaper` - (Optional) Egress rate shaper configuration:
-  * `enabled` - (Optional) Whether this rate shaper is enabled.
-  * `average_bw_mbps` - (Optional) Average Bandwidth in MBPS.
-  * `peak_bw_mbps` - (Optional) Peak Bandwidth in MBPS.
-  * `burst_size` - (Optional) Burst size in bytes.
+    * `enabled` - (Optional) Whether this rate shaper is enabled.
+    * `average_bw_mbps` - (Optional) Average Bandwidth in MBPS.
+    * `peak_bw_mbps` - (Optional) Peak Bandwidth in MBPS.
+    * `burst_size` - (Optional) Burst size in bytes.
 * `ingress_broadcast_rate_shaper` - (Optional) Ingress rate shaper configuration:
-  * `enabled` - (Optional) Whether this rate shaper is enabled.
-  * `average_bw_kbps` - (Optional) Average Bandwidth in KBPS.
-  * `peak_bw_kbps` - (Optional) Peak Bandwidth in KBPS.
-  * `burst_size` - (Optional) Burst size in bytes.
+    * `enabled` - (Optional) Whether this rate shaper is enabled.
+    * `average_bw_kbps` - (Optional) Average Bandwidth in KBPS.
+    * `peak_bw_kbps` - (Optional) Peak Bandwidth in KBPS.
+    * `burst_size` - (Optional) Burst size in bytes.
 
 ## Attributes Reference
 

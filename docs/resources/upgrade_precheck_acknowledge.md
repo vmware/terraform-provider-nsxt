@@ -28,9 +28,9 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `precheck_warnings` - (Computed) State of all precheck warnings.
-  * `id` - ID of the precheck warning.
-  * `message` - Message of the precheck warning.
-  * `is_acknowledged` - Boolean value which identifies if the precheck warning has been acknowledged.
+    * `id` - ID of the precheck warning.
+    * `message` - Message of the precheck warning.
+    * `is_acknowledged` - Boolean value which identifies if the precheck warning has been acknowledged.
 
 ## Importing
 

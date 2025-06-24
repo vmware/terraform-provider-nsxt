@@ -78,13 +78,13 @@ The following arguments are supported:
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
 * `site_path` - (Required for global manager only) Path of the site the Tier0 edge cluster belongs to. This configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 * `ospf` - (Optional) OSPF configuration block - supported for `EXTERNAL` interface only. Not supported on Global Manager.
-  * `enabled` - (Optional) Flag to enable/disable OSPF for this interface. Default is `true`.
-  * `enable_bfd` - (Optional) Flag that controls whether OSPF will register for BFD event. Default is `false`.
-  * `bfd_profile_path` - (Optional) Policy path to BFD profile. Relevant only if BFD is enabled.
-  * `area_path` - (Required) Policy path to OSPF area defined on this Tier0 Gateway.
-  * `network_type` - (Optional) OSPF network type, one of `BROADCAST` and `P2P`. Default is `BROADCAST`.
-  * `hello_interval` - (Optional) Interval between OSPF Hello Packets, in seconds. Defaults to 10.
-  * `dead_interval` - (Optional) Interval to wait before declaring OSPF peer as down, in seconds. Defaults to 40. Must be at least 3 times greater than `hello_interval`.
+    * `enabled` - (Optional) Flag to enable/disable OSPF for this interface. Default is `true`.
+    * `enable_bfd` - (Optional) Flag that controls whether OSPF will register for BFD event. Default is `false`.
+    * `bfd_profile_path` - (Optional) Policy path to BFD profile. Relevant only if BFD is enabled.
+    * `area_path` - (Required) Policy path to OSPF area defined on this Tier0 Gateway.
+    * `network_type` - (Optional) OSPF network type, one of `BROADCAST` and `P2P`. Default is `BROADCAST`.
+    * `hello_interval` - (Optional) Interval between OSPF Hello Packets, in seconds. Defaults to 10.
+    * `dead_interval` - (Optional) Interval to wait before declaring OSPF peer as down, in seconds. Defaults to 40. Must be at least 3 times greater than `hello_interval`.
 
 ## Attributes Reference
 

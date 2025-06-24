@@ -83,12 +83,12 @@ The following arguments are supported:
 
 * `display_name` - (Required) The display name for the Static Subnet.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `pool_path` - (Required) The Policy path to the IP Pool for this Static Subnet.
 * `cidr` - (Required) The network CIDR
 * `allocation_range` - (Required) One or more IP allocation ranges for the Subnet.
-  * `start` - (Required) The start IP address for the allocation range.
-  * `end` - (Required) The end IP address for the allocation range.
+    * `start` - (Required) The start IP address for the allocation range.
+    * `end` - (Required) The end IP address for the allocation range.
 * `description` - (Optional) Description of the resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Static Subnet.

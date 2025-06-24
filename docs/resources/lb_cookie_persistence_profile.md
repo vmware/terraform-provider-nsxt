@@ -50,11 +50,11 @@ The following arguments are supported:
 * `cookie_fallback` - (Optional) A boolean flag which reflects whether once the server points by this cookie is down, a new server is selected, or the requests will be rejected.
 * `cookie_garble` - (Optional) A boolean flag which reflects whether the cookie value (server IP and port) would be encrypted or in plain text.
 * `insert_mode_params` - (Optional) Additional parameters for the INSERT cookie mode:
-  * `cookie_domain` - (Optional) HTTP cookie domain (for INSERT mode only).
-  * `cookie_path` - (Optional) HTTP cookie path (for INSERT mode only).
-  * `cookie_expiry_type` - (Optional) Type of cookie expiration timing (for INSERT mode only). Accepted values: SESSION_COOKIE_TIME for session cookie time setting and PERSISTENCE_COOKIE_TIME for persistence cookie time setting.
-  * `max_idle_time` - (Required if cookie_expiry_type is set) Maximum interval the cookie is valid for from the last time it was seen in a request.
-  * `max_life_time` - (Required for INSERT mode with SESSION_COOKIE_TIME expiration) Maximum interval the cookie is valid for from the first time the cookie was seen in a request.
+    * `cookie_domain` - (Optional) HTTP cookie domain (for INSERT mode only).
+    * `cookie_path` - (Optional) HTTP cookie path (for INSERT mode only).
+    * `cookie_expiry_type` - (Optional) Type of cookie expiration timing (for INSERT mode only). Accepted values: SESSION_COOKIE_TIME for session cookie time setting and PERSISTENCE_COOKIE_TIME for persistence cookie time setting.
+    * `max_idle_time` - (Required if cookie_expiry_type is set) Maximum interval the cookie is valid for from the last time it was seen in a request.
+    * `max_life_time` - (Required for INSERT mode with SESSION_COOKIE_TIME expiration) Maximum interval the cookie is valid for from the first time the cookie was seen in a request.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this lb cookie persistence profile.
 
 ## Attributes Reference
