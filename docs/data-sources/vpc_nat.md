@@ -37,8 +37,8 @@ data "nsxt_vpc_nat" "test" {
 
 * `nat_type` - (Required) Type of NAT, one of `USER`, `INTERNAL`, `DEFAULT` or `NAT64`.
 * `context` - (Required) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
-  * `vpc_id` - (Required) The ID of the VPC which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
+    * `vpc_id` - (Required) The ID of the VPC which the object belongs to
 
 ## Attributes Reference
 

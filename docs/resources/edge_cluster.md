@@ -32,10 +32,10 @@ The following arguments are supported:
 * `edge_ha_profile_id` - (Optional) Edge high availability cluster profile ID.
 * `failure_domain_allocation` - (Optional) Flag to enable failure domain based allocation. Enable placement algorithm to consider failure domain of edge transport nodes and place active and standby contexts in different failure domains. Supported values are `enable` and `disable`.
 * `member` - (Optional) Edge cluster members
-  * `description` - (Optional) Description of this resource.
-  * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-  * `member_index` - (Optional) System generated index for cluster member.
-  * `transport_node_id` - (Optional) UUID of edge transport node.
+    * `description` - (Optional) Description of this resource.
+    * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
+    * `member_index` - (Optional) System generated index for cluster member.
+    * `transport_node_id` - (Optional) UUID of edge transport node.
 
 ## Attributes Reference
 
@@ -46,9 +46,9 @@ In addition to arguments listed above, the following attributes are exported:
 * `deployment_type` - Edge cluster deployment type.
 * `member_node_type` - Node type of the cluster members.
 * `node_rtep_ips` - Remote tunnel endpoint ip address.
-  * `member_index` - System generated index for cluster member
-  * `rtep_ips` - Remote tunnel endpoint ip address
-  * `transport_node_id` - UUID of edge transport node
+    * `member_index` - System generated index for cluster member
+    * `rtep_ips` - Remote tunnel endpoint ip address
+    * `transport_node_id` - UUID of edge transport node
 
 ## Importing
 

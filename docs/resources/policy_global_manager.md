@@ -48,11 +48,11 @@ The following arguments are supported:
 * `fail_if_rtt_exceeded` - (Optional) Fail onboarding if maximum RTT exceeded. Default is true.
 * `maximum_rtt` - (Optional) Maximum acceptable packet round trip time (RTT). Default is 250.
 * `connection_info` - (Optional) Connection information.
-  * `fqdn` - (Optional) Fully Qualified Domain Name of the Management Node.
-  * `password` - (Optional) Password.
-  * `site_uuid` - (Optional) ID of Global Manager.
-  * `thumbprint` - (Optional) Thumbprint of Enforcement Point.
-  * `username` - (Optional) Username.
+    * `fqdn` - (Optional) Fully Qualified Domain Name of the Management Node.
+    * `password` - (Optional) Password.
+    * `site_uuid` - (Optional) ID of Global Manager.
+    * `thumbprint` - (Optional) Thumbprint of Enforcement Point.
+    * `username` - (Optional) Username.
 * `mode` - (Required) Mode of the global manager. Allowed values are `ACTIVE`, `STANDBY`.
 
 ## Attributes Reference

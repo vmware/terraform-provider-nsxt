@@ -157,53 +157,53 @@ The following arguments are supported:
 * `match_strategy` - (Required) Strategy to define how load balancer rule is considered a match when multiple match conditions are specified in one rule. If set to ALL, then load balancer rule is considered a match only if all the conditions match. If set to ANY, then load balancer rule is considered a match if any one of the conditions match.
 
 * `body_condition` - (Optional) Set of match conditions used to match http request body:
-  * `value` - (Required) The value to look for in the body.
-  * `match_type` - (Required) Defines how value field is used to match the body of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
-  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `value` - (Required) The value to look for in the body.
+    * `match_type` - (Required) Defines how value field is used to match the body of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+    * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `header_condition` - (Optional) Set of match conditions used to match http request header:
-  * `name` - (Required) The name of HTTP header to match.
-  * `value` - (Required) The value of HTTP header to match.
-  * `match_type` - (Required) Defines how value field is used to match the header value of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX. Header name field does not support match types.
-  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `name` - (Required) The name of HTTP header to match.
+    * `value` - (Required) The value of HTTP header to match.
+    * `match_type` - (Required) Defines how value field is used to match the header value of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX. Header name field does not support match types.
+    * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `cookie_condition` - (Optional) Set of match conditions used to match http request cookie:
-  * `name` - (Required) The name of cookie to match.
-  * `value` - (Required) The value of cookie to match.
-  * `match_type` - (Required) Defines how value field is used to match the cookie. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
-  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `name` - (Required) The name of cookie to match.
+    * `value` - (Required) The value of cookie to match.
+    * `match_type` - (Required) Defines how value field is used to match the cookie. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+    * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `method_condition` - (Optional) Set of match conditions used to match http request method:
-  * `method` - (Required) One of GET, HEAD, POST, PUT, OPTIONS.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `method` - (Required) One of GET, HEAD, POST, PUT, OPTIONS.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `version_condition` - (Optional) Match condition used to match http version of the request:
-  * `version` - (Required) One of HTTP_VERSION_1_0, HTTP_VERSION_1_1.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `version` - (Required) One of HTTP_VERSION_1_0, HTTP_VERSION_1_1.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `ip_condition` - (Optional) Set of match conditions used to match IP header values of HTTP request:
-  * `source_address` - (Required) The value source IP address to match.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `source_address` - (Required) The value source IP address to match.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `uri_condition` - (Optional) Set of match conditions used to match http request URI:
-  * `uri` - (Required) The value of URI to match.
-  * `match_type` - (Required) Defines how value field is used to match the URI. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
-  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
-  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+    * `uri` - (Required) The value of URI to match.
+    * `match_type` - (Required) Defines how value field is used to match the URI. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+    * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+    * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `http_reject_action` - (At least one action is required) Set of http reject actions to be executed when load balancer rule matches:
-  * `reply_status` - (Required) The HTTP reply status.
-  * `reply_message` - (Required) The HTTP reply message.
+    * `reply_status` - (Required) The HTTP reply status.
+    * `reply_message` - (Required) The HTTP reply message.
 
 * `http_redirect_action` - (At least one action is required) Set of http redirect actions to be executed when load balancer rule matches:
-  * `redirect_status` - (Required) The HTTP reply status.
-  * `redirect_url` - (Required) The URL to redirect to.
+    * `redirect_status` - (Required) The HTTP reply status.
+    * `redirect_url` - (Required) The URL to redirect to.
 
 * `select_pool_action` - (At least one action is required) Set of pool selection actions to be executed when load balancer rule matches:
-  * `pool_id` - (Required) The loadbalancer pool the request will be forwarded to.
+    * `pool_id` - (Required) The loadbalancer pool the request will be forwarded to.
 
 ## Attributes Reference
 

@@ -92,29 +92,29 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `comments` - (Optional) Comments for IDS policy lock/unlock.
 * `locked` - (Optional) Indicates whether the policy should be locked. If locked by a user, no other user would be able to modify this policy.
 * `sequence_number` - (Optional) This field is used to resolve conflicts between IDS policies across domains.
 * `stateful` - (Optional) If true, state of the network connects are tracked and a stateful packet inspection is performed. Default is true.
 * `rule` - (Optional) A repeatable block to specify rules for the Policy. Each rule includes the following fields:
-  * `display_name` - (Required) Display name of the resource.
-  * `description` - (Optional) Description of the resource.
-  * `action` - (Optional) Rule action, one of `DETECT`, `DETECT_PREVENT`. Default is `DETECT`.
-  * `destination_groups` - (Optional) Set of group paths that serve as destination for this rule.
-  * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
-  * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
-  * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
-  * `scope` - (Optional) Set of policy object paths where the rule is applied.
-  * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
-  * `disabled` - (Optional) Flag to disable this rule. Default is false.
-  * `ip_version` - (Optional) Version of IP protocol, one of `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`.
-  * `logged` - (Optional) Flag to enable packet logging. Default is false.
-  * `notes` - (Optional) Additional notes on changes.
-  * `ids_profiles` - (Required) Set of IDS profile paths relevant for this rule.
-  * `services` - (Optional) Set of service paths to match.
-  * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+    * `display_name` - (Required) Display name of the resource.
+    * `description` - (Optional) Description of the resource.
+    * `action` - (Optional) Rule action, one of `DETECT`, `DETECT_PREVENT`. Default is `DETECT`.
+    * `destination_groups` - (Optional) Set of group paths that serve as destination for this rule.
+    * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
+    * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
+    * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
+    * `scope` - (Optional) Set of policy object paths where the rule is applied.
+    * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
+    * `disabled` - (Optional) Flag to disable this rule. Default is false.
+    * `ip_version` - (Optional) Version of IP protocol, one of `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`.
+    * `logged` - (Optional) Flag to enable packet logging. Default is false.
+    * `notes` - (Optional) Additional notes on changes.
+    * `ids_profiles` - (Required) Set of IDS profile paths relevant for this rule.
+    * `services` - (Optional) Set of service paths to match.
+    * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
 
 ## Attributes Reference
 
@@ -124,10 +124,10 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule`:
-  * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-  * `path` - The NSX policy path for this rule.
-  * `sequence_number` - Sequence number for this rule, as defined by order of rules in the list.
-  * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
+    * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+    * `path` - The NSX policy path for this rule.
+    * `sequence_number` - Sequence number for this rule, as defined by order of rules in the list.
+    * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ## Importing
 

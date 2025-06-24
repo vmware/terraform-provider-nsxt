@@ -49,8 +49,8 @@ The following arguments are supported:
 * `transport_zone_path` - (Required) Policy path for Overlay Transport Zone.
 * `vni_pool_path` - (Required) Policy path for existing VNI pool.
 * `mapping` - (Required) List of VLAN - VNI mappings for this tenant.
-  * `vlans` - (Required) Single VLAN Id or range of VLAN Ids.
-  * `vnis` - (Required) Single VNI or range of VNIs. Please note that the range should match the range of vlans exactly.
+    * `vlans` - (Required) Single VLAN Id or range of VLAN Ids.
+    * `vnis` - (Required) Single VNI or range of VNIs. Please note that the range should match the range of vlans exactly.
 
 ## Attributes Reference
 

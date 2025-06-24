@@ -35,12 +35,12 @@ The following arguments are supported:
 * `edge_id` - (Required) Edge ID to associate with remote tunnel endpoint.
 * `host_switch_name` - (Required) The host switch name to be used for the remote tunnel endpoint.
 * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-  * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
-  * `static_ip` - (Optional) IP assignment specification for Static IP List.
-    * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-    * `subnet_mask` - (Required) Subnet mask.
-    * `default_gateway` - (Required) Gateway IP.
-  * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+    * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
+    * `static_ip` - (Optional) IP assignment specification for Static IP List.
+        * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+        * `subnet_mask` - (Required) Subnet mask.
+        * `default_gateway` - (Required) Gateway IP.
+    * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
 * `rtep_vlan` - (Required) VLAN id for remote tunnel endpoint.
 * `named_teaming_policy` - (Optional) The named teaming policy to be used by the remote tunnel endpoint.
 

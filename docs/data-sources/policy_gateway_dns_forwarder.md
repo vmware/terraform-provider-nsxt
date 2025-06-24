@@ -25,7 +25,7 @@ data "nsxt_policy_gateway_dns_forwarder" "my_dns_forwarder" {
 * `display_name` - (Optional) The Display Name of the gateway DNS forwarder to retrieve.
 * `gateway_path` - (Optional) Gateway Path for this Service.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

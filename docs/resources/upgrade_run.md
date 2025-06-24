@@ -67,30 +67,30 @@ The following arguments are supported:
 
 * `upgrade_prepare_ready_id` - (Required) ID of corresponding `nsxt_upgrade_prepare_ready` resource. Updating this field will trigger replacement (destroy and create) of this resource.
 * `edge_group` - (Optional) EDGE component upgrade unit group configurations. Groups will be reordered following the order they present in this field.
-  * `id` - (Required) ID of the upgrade unit group.
-  * `enabled` - (Optional) Flag to indicate whether upgrade of this group is enabled or not. Default: True.
-  * `parallel` - (Optional) Upgrade method to specify whether upgrades of UpgradeUnits in this group are performed in parallel or serially. Default: True.
-  * `pause_after_each_upgrade_unit` - (Optional) Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit. Default: False.
+    * `id` - (Required) ID of the upgrade unit group.
+    * `enabled` - (Optional) Flag to indicate whether upgrade of this group is enabled or not. Default: True.
+    * `parallel` - (Optional) Upgrade method to specify whether upgrades of UpgradeUnits in this group are performed in parallel or serially. Default: True.
+    * `pause_after_each_upgrade_unit` - (Optional) Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit. Default: False.
 * `host_group` - (Optional) HOST component upgrade unit group configurations. Groups will be reordered following the order they present in this field.
-  * `id` - (Optional) ID of the upgrade unit group. Should exist only for predefined groups. When creating a custom host group, the value is assigned by NSX.
-  * `display_name` - (Optional) The display name of the host group. Should be assigned only for custom host groups and must be unique.
-  * `enabled` - (Optional) Flag to indicate whether upgrade of this group is enabled or not. Default: True.
-  * `parallel` - (Optional) Upgrade method to specify whether upgrades of UpgradeUnits in this group are performed in parallel or serially. Default: True.
-  * `pause_after_each_upgrade_unit` - (Optional) Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit. Default: False.
-  * `upgrade_mode` - (Optional) Upgrade mode. Supported values: `maintenance_mode`, `in_place`, `stage_in_vlcm`.
-  * `maintenance_mode_config_vsan_mode` - (Optional) Maintenance mode config of vsan mode. Supported values: `evacuate_all_data`, `ensure_object_accessibility`, `no_action`.
-  * `maintenance_mode_config_evacuate_powered_off_vms` - (Optional) Maintenance mode config of whether evacuate powered off vms.
-  * `rebootless_upgrade` - (Optional) Flag to indicate whether to use rebootless upgrade. Default: True.
-  * `hosts` - (Optional) The list of hosts to be associated with a custom group.
+    * `id` - (Optional) ID of the upgrade unit group. Should exist only for predefined groups. When creating a custom host group, the value is assigned by NSX.
+    * `display_name` - (Optional) The display name of the host group. Should be assigned only for custom host groups and must be unique.
+    * `enabled` - (Optional) Flag to indicate whether upgrade of this group is enabled or not. Default: True.
+    * `parallel` - (Optional) Upgrade method to specify whether upgrades of UpgradeUnits in this group are performed in parallel or serially. Default: True.
+    * `pause_after_each_upgrade_unit` - (Optional) Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit. Default: False.
+    * `upgrade_mode` - (Optional) Upgrade mode. Supported values: `maintenance_mode`, `in_place`, `stage_in_vlcm`.
+    * `maintenance_mode_config_vsan_mode` - (Optional) Maintenance mode config of vsan mode. Supported values: `evacuate_all_data`, `ensure_object_accessibility`, `no_action`.
+    * `maintenance_mode_config_evacuate_powered_off_vms` - (Optional) Maintenance mode config of whether evacuate powered off vms.
+    * `rebootless_upgrade` - (Optional) Flag to indicate whether to use rebootless upgrade. Default: True.
+    * `hosts` - (Optional) The list of hosts to be associated with a custom group.
 * `edge_upgrade_setting` - (Optional) EDGE component upgrade plan setting.
-  * `parallel` - (Optional) Upgrade Method to specify whether upgrades of UpgradeUnitGroups in this component are performed serially or in parallel. Default: True.
-  * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
+    * `parallel` - (Optional) Upgrade Method to specify whether upgrades of UpgradeUnitGroups in this component are performed serially or in parallel. Default: True.
+    * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
 * `host_upgrade_setting` - (Optional) HOST component upgrade plan setting.
-  * `parallel` - (Optional) Upgrade Method to specify whether upgrades of UpgradeUnitGroups in this component are performed serially or in parallel. Default: True.
-  * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
-  * `stop_on_error` - (Optional) Flag to indicate whether to pause the upgrade plan execution when an error occurs. Default: False.
+    * `parallel` - (Optional) Upgrade Method to specify whether upgrades of UpgradeUnitGroups in this component are performed serially or in parallel. Default: True.
+    * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
+    * `stop_on_error` - (Optional) Flag to indicate whether to pause the upgrade plan execution when an error occurs. Default: False.
 * `finalize_upgrade_setting` - (Optional) FINALIZE_UPGRADE component upgrade plan setting.
-  * `enabled` - (Optional) Finalize upgrade after completion of all the components' upgrade is complete. Default: True.
+    * `enabled` - (Optional) Finalize upgrade after completion of all the components' upgrade is complete. Default: True.
 * `timeout` - (Optional) Upgrade status check timeout in seconds. Default: 3600 seconds.
 * `interval` - (Optional) Interval to check upgrade status in seconds. Default: 30 seconds.
 * `delay` - (Optional) Initial delay to start upgrade status checks in seconds. Default: 300 seconds.
@@ -100,21 +100,21 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `upgrade_plan` - (Computed) Upgrade plan for current upgrade. Upgrade unit groups that are not defined in `edge_group` or `host_group` will also be included here.
-  * `type` - Component type.
-  * `id` - ID of the upgrade unit group.
-  * `enabled` - Flag to indicate whether upgrade of this group is enabled or not.
-  * `parallel` - Upgrade method to specify whether the upgrade is to be performed in parallel or serially.
-  * `pause_after_each_upgrade_unit` - Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit.
-  * `extended_config` - Extended configuration for the group.
+    * `type` - Component type.
+    * `id` - ID of the upgrade unit group.
+    * `enabled` - Flag to indicate whether upgrade of this group is enabled or not.
+    * `parallel` - Upgrade method to specify whether the upgrade is to be performed in parallel or serially.
+    * `pause_after_each_upgrade_unit` - Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit.
+    * `extended_config` - Extended configuration for the group.
 * `state` - (Computed) Upgrade states of each component
-  * `type` - Component type.
-  * `status` - Upgrade status of component.
-  * `details` - Details about the upgrade status.
-  * `target_version` - Target component version
-  * `group_state` - State of upgrade group
-    * `group_id` - Upgrade group ID
-    * `group_name` - Upgrade group name
-    * `status` - Upgrade status of the upgrade group
+    * `type` - Component type.
+    * `status` - Upgrade status of component.
+    * `details` - Details about the upgrade status.
+    * `target_version` - Target component version
+    * `group_state` - State of upgrade group
+        * `group_id` - Upgrade group ID
+        * `group_name` - Upgrade group name
+        * `status` - Upgrade status of the upgrade group
 
 ## Importing
 

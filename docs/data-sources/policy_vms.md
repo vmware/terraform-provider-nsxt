@@ -64,7 +64,7 @@ resource "nsxt_policy_vm_tags" "test" {
 * `state` - (Optional) Filter results by power state of the machine.
 * `guest_os` - (Optional) Filter results by operating system of the machine. The match is case insensitive and prefix-based.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

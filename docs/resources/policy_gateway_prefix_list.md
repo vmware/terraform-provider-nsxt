@@ -44,10 +44,10 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `prefix` - (Required) A list of network prefixes.
-  * `action` - (Optional) PERMIT or DENY Action for the prefix list. The default value is PERMIT.
-  * `le` - (Optional) Prefix length less than or equal to, between 0-128. (0 means no value)
-  * `ge` - (Optional) Prefix length greater than or equal to, between 0-128. (0 means no value).
-  * `network` - (Optional) Network prefix in CIDR format. If not set it will match ANY network.
+    * `action` - (Optional) PERMIT or DENY Action for the prefix list. The default value is PERMIT.
+    * `le` - (Optional) Prefix length less than or equal to, between 0-128. (0 means no value)
+    * `ge` - (Optional) Prefix length greater than or equal to, between 0-128. (0 means no value).
+    * `network` - (Optional) Network prefix in CIDR format. If not set it will match ANY network.
 
 ## Attributes Reference
 

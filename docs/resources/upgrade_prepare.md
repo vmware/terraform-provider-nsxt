@@ -46,13 +46,13 @@ The following arguments are supported:
 In addition to arguments listed above, the following attributes are exported:
 
 * `failed_prechecks` - (Computed) Failed prechecks from running pre-upgrade check.
-  * `id` - ID of the failed precheck.
-  * `message` - Message of the failed precheck.
-  * `type` - Type of the failed precheck, possible values are `WARNING` and `FAILURE`.
-  * `needs_ack` - Boolean value which identifies if acknowledgement is required for the precheck.
-  * `needs_resolve` - Boolean value identifies if resolution is required for the precheck.
-  * `acked` - Boolean value which identifies if precheck has been acknowledged.
-  * `resolution_status` - The resolution status of precheck failure.
+    * `id` - ID of the failed precheck.
+    * `message` - Message of the failed precheck.
+    * `type` - Type of the failed precheck, possible values are `WARNING` and `FAILURE`.
+    * `needs_ack` - Boolean value which identifies if acknowledgement is required for the precheck.
+    * `needs_resolve` - Boolean value identifies if resolution is required for the precheck.
+    * `acked` - Boolean value which identifies if precheck has been acknowledged.
+    * `resolution_status` - The resolution status of precheck failure.
 * `target_version` - Target system version
 
 ## Importing

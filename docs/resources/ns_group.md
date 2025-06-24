@@ -41,12 +41,12 @@ The following arguments are supported:
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this NS group.
 * `member` - (Optional) Reference to the direct/static members of the NSGroup. Can be ID based expressions only. VirtualMachine cannot be added as a static member.
-  * `target_type` - (Required) Static member type, one of: NSGroup, IPSet, LogicalPort, LogicalSwitch, MACSet
-  * `value` - (Required) Member ID
+    * `target_type` - (Required) Static member type, one of: NSGroup, IPSet, LogicalPort, LogicalSwitch, MACSet
+    * `value` - (Required) Member ID
 * `membership_criteria` - (Optional) List of tag or ID expressions which define the membership criteria for this NSGroup. An object must satisfy at least one of these expressions to qualify as a member of this group.
-  * `target_type` - (Required) Dynamic member type, one of: LogicalPort, LogicalSwitch, VirtualMachine.
-  * `scope` - (Optional) Tag scope for matching dynamic members.
-  * `tag` - (Optional) Tag value for matching dynamic members.
+    * `target_type` - (Required) Dynamic member type, one of: LogicalPort, LogicalSwitch, VirtualMachine.
+    * `scope` - (Optional) Tag scope for matching dynamic members.
+    * `tag` - (Optional) Tag value for matching dynamic members.
 
 ## Attributes Reference
 

@@ -40,10 +40,10 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this MAC management switching profile.
 * `mac_change_allowed` - (Optional) A boolean flag indicating allowing source MAC address change.
 * `mac_learning` - (Optional) Mac learning configuration:
-  * `enabled` - (Optional) A boolean flag indicating allowing source MAC address learning.
-  * `unicast_flooding_allowed` - (Optional) A boolean flag indicating allowing flooding for unlearned MAC for ingress traffic. Can be True only if mac_learning is enabled.
-  * `limit` - (Optional) The maximum number of MAC addresses that can be learned on this port.
-  * `limit_policy` - (Optional) The policy after MAC Limit is exceeded: ALLOW/DROP.
+    * `enabled` - (Optional) A boolean flag indicating allowing source MAC address learning.
+    * `unicast_flooding_allowed` - (Optional) A boolean flag indicating allowing flooding for unlearned MAC for ingress traffic. Can be True only if mac_learning is enabled.
+    * `limit` - (Optional) The maximum number of MAC addresses that can be learned on this port.
+    * `limit_policy` - (Optional) The policy after MAC Limit is exceeded: ALLOW/DROP.
 
 ## Attributes Reference
 

@@ -43,7 +43,7 @@ Note: `key`, `attribute` must be present.
 * `key` - (Required) Policy Custom Attribute Key. Valid values are "DOMAIN_NAME" and "CUSTOM_URL"
 * `attribute` - (Required) FQDN or URL to be used as custom attribute.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Importing
 

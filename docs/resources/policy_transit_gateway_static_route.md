@@ -55,9 +55,9 @@ The following arguments are supported:
 * `parent_path` - (Required) Path of parent object
 * `network` - (Required) Specify network address in CIDR format.
 * `next_hop` - (Required) List of Next Hops, each with those arguments:
-  * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
-  * `ip_address` - (Optional) Next Hop IP.
-  * `scope` - (Required) Set of policy object paths where the rule is applied.
+    * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
+    * `ip_address` - (Optional) Next Hop IP.
+    * `scope` - (Required) Set of policy object paths where the rule is applied.
 * `enabled_on_secondary` - (Optional) Flag to plumb route on secondary site.
 
 

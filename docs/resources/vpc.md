@@ -41,7 +41,7 @@ The following arguments are supported:
 * `private_ips` - (Optional) IP CIDRs to manage private IPv4 subnets.
 * `vpc_service_profile` - (Optional) The path of the configuration profile of the VPC services.
 * `load_balancer_vpc_endpoint` - (Optional) Configuration for Load Balancer Endpoint
-  * `enabled` - (Optional) Flag to indicate whether support for load balancing is needed. Setting this flag to `true` causes allocation of private IPs from the private block associated with this VPC for the use of the load balancer.
+    * `enabled` - (Optional) Flag to indicate whether support for load balancing is needed. Setting this flag to `true` causes allocation of private IPs from the private block associated with this VPC for the use of the load balancer.
 * `ip_address_type` - (Optional) This defines the IP address type that will be allocated for subnets.
 * `short_id` - (Optional) Defaults to id if id is less than equal to 8 characters or defaults to random generated id if not set. Can not be updated once VPC is created.
 * `quotas` - (Optional) List of policy paths for quota resources that are applicable to this VPC.

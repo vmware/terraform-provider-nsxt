@@ -37,7 +37,7 @@ The following arguments are supported:
 * `bfd_allowed_hops` - (Optional) Value of BFD allowed hops. Default: 255.
 * `bfd_declare_dead_multiple` - (Optional) Number of times a packet is missed before BFD declares the neighbor down. Default: 3.
 * `standby_relocation_config` - (Optional) Stand by relocation flag.
-  * `standby_relocation_threshold` - (Required) Standby service context relocation wait time.
+    * `standby_relocation_threshold` - (Required) Standby service context relocation wait time.
 
 ## Attributes Reference
 

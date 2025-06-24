@@ -38,7 +38,7 @@ data "nsxt_policy_spoofguard_profile" "demosgprof" {
 * `id` - (Optional) The ID of SpoofGuardProfile to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the SpoofGuardProfile to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

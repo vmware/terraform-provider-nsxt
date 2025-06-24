@@ -37,7 +37,7 @@ resource "nsxt_policy_nat_rule" "dnat1" {
 ## Argument Reference
 
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

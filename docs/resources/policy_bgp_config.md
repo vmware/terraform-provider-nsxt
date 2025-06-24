@@ -64,8 +64,8 @@ The following arguments are supported:
 * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`.
 * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`.
 * `route_aggregation`- (Optional) Zero or more route aggregations for BGP.
-  * `prefix` - (Required) CIDR of aggregate address.
-  * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
+    * `prefix` - (Required) CIDR of aggregate address.
+    * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
 
 ## Attributes Reference

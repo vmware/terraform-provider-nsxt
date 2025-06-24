@@ -34,8 +34,8 @@ The following arguments are supported:
 * `node_id` - (Required) Unique node-id of a principal. This is used primarily in the case where a cluster of nodes is used to make calls to the NSX Manager and the same `name` is used so that the nodes can access and modify the same data while still accessing NSX through their individual secret (certificate or JWT). In all other cases this can be any string.
 * `certificate_pem` - (Required) PEM encoding of the certificate to be associated with this principal identity.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
-  * `path` - (Required) Path of the entity in parent hierarchy.
-  * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
+    * `path` - (Required) Path of the entity in parent hierarchy.
+    * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
 
 Once a Principal Identity is created, it can't be modified. Modification of above arguments will cause the current PI on NSX to be deleted and recreated. Certificate updates is also handled in the same way.
 
