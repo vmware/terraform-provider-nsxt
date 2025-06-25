@@ -202,6 +202,17 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 							ReflectType:  reflect.TypeOf(model.StaticIpAllocation{}),
 						},
 					},
+					"enable_vlan_extension": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							IntroducedInVersion: "9.1.0",
+							SchemaType:          "bool",
+							SdkFieldName:        "EnableVlanExtension",
+						},
+					},
 				},
 			},
 			Optional: true,

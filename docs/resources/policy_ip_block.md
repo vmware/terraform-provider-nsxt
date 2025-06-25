@@ -85,6 +85,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `cidr` - (Optional) Network address and the prefix length which will be associated with a layer-2 broadcast domain. Either cidr or cidr_list should be set.
 * `cidr_list` - (Optional) Array of contiguous IP address spaces represented by network address and prefix length. This attribute is supported with NSX 9.1.0 onwards. Either cidr or cidr_list should be set.
+* `is_subnet_exclusive` - (Optional) If this property is set to true, then this block is reserved for direct vlan extension use case. This attribute is supported starting from NSX version 9.1.0.
 * `range_list` - (Optional) Represents list of IP address ranges in the form of start and end IPs. This attribute is supported with NSX 9.1.0 onwards.
   * `start` - (Required) The start IP address for the allocation range.
   * `end` - (Required) The end IP address for the allocation range.
