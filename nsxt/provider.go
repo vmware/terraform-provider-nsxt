@@ -310,6 +310,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_server_ssl_profile":                      dataSourceNsxtPolicyLBServerSslProfile(),
 			"nsxt_policy_lb_service":                                 dataSourceNsxtPolicyLbService(),
 			"nsxt_policy_mac_discovery_profile":                      dataSourceNsxtPolicyMacDiscoveryProfile(),
+			"nsxt_policy_network_span":                               dataSourceNsxtPolicyNetworkSpan(),
 			"nsxt_policy_project":                                    dataSourceNsxtPolicyProject(),
 			"nsxt_policy_project_ip_address_allocation":              dataSourceNsxtProjectIpAddressAllocation(),
 			"nsxt_policy_qos_profile":                                dataSourceNsxtPolicyQosProfile(),
