@@ -41,7 +41,8 @@ The following arguments are supported:
   * `host_switch_config_source` - (Required) List of overridden HostSwitch configuration.
     * `host_switch_id` - (Required) HostSwitch ID.
     * `transport_node_profile_sub_config_name` - (Required) Name of the Transport Node Profile sub configuration to be used.
-  * `sub_cluster_id` - (Required) sub-cluster ID.
+  * `sub_cluster_id` - (Deprecated) sub-cluster path.
+  * `sub_cluster_path` - (Required) sub-cluster path.
 * `transport_node_profile_path` - (Optional) Transport Node Profile Path.
 * `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node Collection member hosts. Default is true.
 * `enable_nsx_on_dvpg` - (Optional) Activate/Deactivate DFW on Distributed Virtual Port Group (DVPG).

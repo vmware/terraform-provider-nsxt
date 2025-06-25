@@ -91,8 +91,16 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 						},
 						"sub_cluster_id": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "sub-cluster Id",
+							Deprecated:  "Use with sub_cluster_path instead of sub_cluster_id",
+						},
+						"sub_cluster_path": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "sub-cluster path",
+							ValidateFunc: validatePolicyPath(),
 						},
 					},
 				},
@@ -166,9 +174,20 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 			}
 			hostSwitchConfigSources = append(hostSwitchConfigSources, elem)
 		}
+		subClusterPath := subClusterConfig["sub_cluster_path"].(string)
 		subClusterID := subClusterConfig["sub_cluster_id"].(string)
+		if subClusterPath != "" && subClusterID != "" {
+			// Cannot use ExactlyOneOf for sub_cluster_id, path as this is list of >1
+			return fmt.Errorf("only one of sub_cluster_path, sub_cluster_id should be specified")
+		} else if subClusterID != "" {
+			subClusterPath = subClusterID
+		} else if subClusterPath == "" {
+			// We cannot use AtLeastOneOf for the same reason
+			return fmt.Errorf("sub_cluster_path should not be empty")
+		}
+
 		elem := model.SubClusterConfig{
-			SubClusterId:            &subClusterID,
+			SubClusterId:            &subClusterPath,
 			HostSwitchConfigSources: hostSwitchConfigSources,
 		}
 		subClusterConfigs = append(subClusterConfigs, elem)
@@ -280,6 +299,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 			}
 
 			scc["sub_cluster_id"] = cfg.SubClusterId
+			scc["sub_cluster_path"] = cfg.SubClusterId
 			sccList = append(sccList, scc)
 		}
 		d.Set("sub_cluster_config", sccList)
