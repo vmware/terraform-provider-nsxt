@@ -49,7 +49,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `parent_path` - (Required) Path of parent object
 * `network` - (Required) Specify network address in CIDR format.
-* `next_hop` - (Required) List of next hops (only one supported),each with those arguments:
+* `next_hop` - (Required) Next hop is defined with the following arguments::
   * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
   * `ip_address` - (Required) Next Hop IP.
   * `scope` - (Required) Set of policy object paths where the rule is applied.
