@@ -24,18 +24,33 @@ data "nsxt_vpc" "demovpc" {
   display_name = "vpc1"
 }
 
-
-resource "nsxt_vpc_subnet" "test" {
+// This will create an isolated subnet, which requires
+// a CIDR to be specified in ip_addresses
+resource "nsxt_vpc_subnet" "test_isolated" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
     vpc_id     = data.nsxt_vpc.demovpc.id
   }
 
-  display_name     = "test-subnet"
-  description      = "Test VPC subnet"
+  display_name     = "test-subnet-isolated"
+  description      = "Test Isolated VPC subnet"
   ipv4_subnet_size = 32
   ip_addresses     = ["192.168.240.0/24"]
   access_mode      = "Isolated"
+}
+
+// This will create a private subnet. A CIDR will be
+// automatically cut from the VPC's private IP ranges.
+resource "nsxt_vpc_subnet" "test_private" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
+  }
+
+  display_name     = "test-subnet-private"
+  description      = "Test Private VPC subnet"
+  ipv4_subnet_size = 32
+  access_mode      = "Private"
 }
 ```
 
@@ -51,8 +66,8 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
-  from respective ip block defined in the parent VPC. The default is 64.
-* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs
+  from respective ip block defined in the parent VPC. The default is 64. Conflicts with `ip_addresses`.
+* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`
 * `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated` or `Private_TGW`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
   * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
