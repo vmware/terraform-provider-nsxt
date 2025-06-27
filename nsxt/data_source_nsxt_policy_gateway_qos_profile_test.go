@@ -139,7 +139,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 func testAccNsxtPolicyGatewayQosProfileReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_gateway_qos_profile" "test" {

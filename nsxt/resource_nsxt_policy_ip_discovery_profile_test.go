@@ -245,7 +245,7 @@ func testAccNsxtPolicyIPDiscoveryProfileTemplate(createFlow, withContext bool) s
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {
@@ -273,7 +273,7 @@ resource "nsxt_policy_ip_discovery_profile" "test" {
 func testAccNsxtPolicyIPDiscoveryProfileMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {

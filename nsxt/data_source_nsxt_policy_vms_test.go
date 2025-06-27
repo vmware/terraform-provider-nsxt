@@ -86,7 +86,7 @@ func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
 func testAccNsxtPolicyVMsTemplate(valueType string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vms" "test" {

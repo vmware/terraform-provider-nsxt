@@ -243,7 +243,7 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 func testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`
@@ -271,7 +271,7 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
 func testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext) + fmt.Sprintf(`
@@ -298,7 +298,7 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
 func testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {

@@ -208,7 +208,7 @@ func testAccNsxtPolicyDNSForwarderZoneTemplate(createFlow, withContext bool) str
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dns_forwarder_zone" "test" {
@@ -230,7 +230,7 @@ func testAccNsxtPolicyDNSForwarderZoneMinimalistic(withContext bool) string {
 	attrMap := accTestPolicyDNSForwarderZoneUpdateAttributes
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dns_forwarder_zone" "test" {

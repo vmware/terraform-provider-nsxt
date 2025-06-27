@@ -143,7 +143,7 @@ func testAccNsxtPolicyParentSecurityPolicyCheckDestroy(state *terraform.State, d
 func testAccNsxtPolicyParentSecurityPolicyTemplate(withContext bool, name, locked, seqNum, tcpStrict string) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_parent_security_policy" "test" {

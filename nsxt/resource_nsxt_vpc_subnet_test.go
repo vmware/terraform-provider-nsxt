@@ -310,7 +310,7 @@ resource "nsxt_vpc_subnet" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["access_mode"])
+}`, testAccNsxtPolicyMultitenancyContext(true), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["access_mode"])
 }
 
 func testAccNsxtVpcSubnetSizeTemplate(createFlow bool) string {
@@ -348,7 +348,7 @@ resource "nsxt_vpc_subnet" "test" {
       }
     }
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ipv4_subnet_size"])
+}`, testAccNsxtPolicyMultitenancyContext(true), attrMap["display_name"], attrMap["description"], attrMap["ipv4_subnet_size"])
 }
 
 func testAccNsxtVpcSubnetMinimalisticIsolated() string {
@@ -358,7 +358,7 @@ resource "nsxt_vpc_subnet" "test" {
   display_name = "%s"
   ip_addresses = ["%s"]
   access_mode  = "Isolated"
-}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"], accTestVpcSubnetUpdateAttributes["ip_addresses"])
+}`, testAccNsxtPolicyMultitenancyContext(true), accTestVpcSubnetUpdateAttributes["display_name"], accTestVpcSubnetUpdateAttributes["ip_addresses"])
 }
 
 func testAccNsxtVpcSubnetMinimalisticPublic() string {
@@ -367,7 +367,7 @@ resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "%s"
   access_mode  = "Public"
-}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"])
+}`, testAccNsxtPolicyMultitenancyContext(true), accTestVpcSubnetUpdateAttributes["display_name"])
 }
 
 func testAccNsxtVpcSubnetReservedIPRangeTemplate(createFlow bool) string {
@@ -401,5 +401,5 @@ resource "nsxt_vpc_subnet" "test" {
       reserved_ip_ranges = ["%s"]
     }
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"])
+}`, testAccNsxtPolicyMultitenancyContext(true), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"])
 }

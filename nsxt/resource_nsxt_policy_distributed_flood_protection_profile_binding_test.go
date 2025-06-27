@@ -190,7 +190,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingTemplate(createFlo
 	context := ""
 	resourceName := "test"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		resourceName = "mttest"
 	}
 	return testAccNsxtPolicyDistributedFloodProtectionProfileBindingDeps(withContext) + fmt.Sprintf(`
@@ -213,7 +213,7 @@ resource "nsxt_policy_distributed_flood_protection_profile_binding" "%s" {
 func testAccNsxtPolicyDistributedFloodProtectionProfileBindingDeps(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {

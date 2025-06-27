@@ -61,7 +61,7 @@ data "nsxt_policy_spoofguard_profile" "test" {
 }
 
 func testAccNsxtPolicySpoofGuardProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return fmt.Sprintf(`
 resource "nsxt_policy_spoof_guard_profile" "test" {
 %s

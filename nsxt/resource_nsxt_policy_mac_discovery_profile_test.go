@@ -226,7 +226,7 @@ func testAccNsxtPolicyMacDiscoveryProfileTemplate(createFlow, withContext bool) 
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_mac_discovery_profile" "test" {
@@ -243,7 +243,7 @@ resource "nsxt_policy_mac_discovery_profile" "test" {
 func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_mac_discovery_profile" "test" {

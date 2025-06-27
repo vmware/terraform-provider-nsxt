@@ -85,7 +85,7 @@ data "nsxt_policy_context_profile" "test" {
 }
 
 func testAccNsxtPolicyContextProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile" "test" {
 %s

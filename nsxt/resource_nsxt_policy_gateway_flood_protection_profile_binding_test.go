@@ -235,7 +235,7 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileBindingTemplate(createFlow, w
 	context := ""
 	resourceName := "test"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		resourceName = "mttest"
 	}
 	return testAccNsxtPolicyGatewayFloodProtectionProfileBindingDeps(withContext) + fmt.Sprintf(`
@@ -258,7 +258,7 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileBindingDeps(withContext bool)
 	context := ""
 	parentDeps := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		parentDeps = fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s

@@ -223,7 +223,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileTemplate(createFlow, with
 	context := ""
 	resourceName := "test"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		resourceName = "mttest"
 	}
 	return fmt.Sprintf(`
@@ -254,7 +254,7 @@ data "nsxt_policy_distributed_flood_protection_profile" "%s" {
 func testAccNsxtPolicyDistributedFloodProtectionProfileMinimalistic(withContext bool, name string) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_flood_protection_profile" "test" {

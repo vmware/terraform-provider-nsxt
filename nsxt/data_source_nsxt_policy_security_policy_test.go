@@ -99,7 +99,7 @@ func TestAccDataSourceNsxtPolicySecurityPolicy_default(t *testing.T) {
 func testAccNsxtPolicySecurityPolicyTemplate(name string, category string, extra string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {

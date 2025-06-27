@@ -118,7 +118,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 func testAccNsxtPolicyIpv6NdraProfileReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "test" {

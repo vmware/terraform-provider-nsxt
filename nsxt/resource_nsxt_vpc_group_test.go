@@ -114,7 +114,7 @@ func testAccNsxtVPCGroupCheckDestroy(state *terraform.State, displayName string)
 }
 
 func testAccNsxtVPCGroupAddressCreateTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(true)
 	return fmt.Sprintf(`
 resource "nsxt_vpc_group" "test" {
 %s
@@ -158,7 +158,7 @@ data "nsxt_vpc_group" "test" {
 }
 
 func testAccNsxtVPCGroupAddressUpdateTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(true)
 	return fmt.Sprintf(`
 resource "nsxt_vpc_group" "test" {
 %s

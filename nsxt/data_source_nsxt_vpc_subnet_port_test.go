@@ -39,7 +39,7 @@ func TestAccDataSourceNsxtVpcSubnetPort_basic(t *testing.T) {
 }
 
 func testAccNsxtVpcSubnetPortReadTemplate() string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(true)
 	subnetName := os.Getenv("NSXT_TEST_VPC_SUBNET_NAME")
 	vmID := os.Getenv("NSXT_TEST_VPC_VM_ID")
 	return fmt.Sprintf(`

@@ -565,7 +565,7 @@ resource "nsxt_policy_nat_rule" "test" {
 func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sourceNet string, destNet string, translatedNet string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
@@ -602,7 +602,7 @@ resource "nsxt_policy_nat_rule" "test" {
 func testAccNsxtPolicyNATRuleTier1CreateTemplateWithPolicyBasedVpnMode(name string, action string, sourceNet string, destNet string, translatedNet string, policyBasedVpnMode string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
@@ -640,7 +640,7 @@ resource "nsxt_policy_nat_rule" "test" {
 func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`

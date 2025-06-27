@@ -279,7 +279,7 @@ func testAccNsxtPolicyIPAddressAllocationTemplate(createFlow, withContext bool) 
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_ip_address_allocation" "test" {
@@ -321,7 +321,7 @@ resource "nsxt_policy_ip_address_allocation" "test" {
 func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {

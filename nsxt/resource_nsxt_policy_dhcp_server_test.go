@@ -201,7 +201,7 @@ func testAccNsxtPolicyDhcpServerCreateTemplate(withContext bool) string {
 	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
 	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
 
@@ -238,7 +238,7 @@ func testAccNsxtPolicyDhcpServerUpdateTemplate(withContext bool) string {
 	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
 
@@ -262,7 +262,7 @@ resource "nsxt_policy_dhcp_server" "test" {
 func testAccNsxtPolicyDhcpServerMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {

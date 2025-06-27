@@ -632,7 +632,7 @@ resource "nsxt_policy_gateway_policy" "test" {
 func testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments string, withContext, withCategory bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	category := ""
 	if withCategory {
@@ -663,7 +663,7 @@ resource "%s" "test" {
 func testAccNsxtPolicyGatewayPolicyWithRule(resourceName, name, direction, protocol, ruleTag string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "gwt1test" {

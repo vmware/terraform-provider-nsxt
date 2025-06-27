@@ -173,7 +173,7 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
 data "nsxt_vpc_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_vpc_ip_address_allocation.test.allocation_ips
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtPolicyMultitenancyContext())
+}`, testAccNsxtPolicyMultitenancyContext(false), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtPolicyMultitenancyContext(false))
 }
 
 func testAccNsxtVpcIpAddressAllocationMinimalistic() string {
@@ -187,5 +187,5 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
 data "nsxt_vpc_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_vpc_ip_address_allocation.test.allocation_ips
-}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcIpAddressAllocationUpdateAttributes["display_name"], accTestVpcIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtPolicyMultitenancyContext())
+}`, testAccNsxtPolicyMultitenancyContext(false), accTestVpcIpAddressAllocationUpdateAttributes["display_name"], accTestVpcIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtPolicyMultitenancyContext(false))
 }

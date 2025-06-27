@@ -332,7 +332,7 @@ func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 func testAccNSXPolicyIPBlockCreateMinimalTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	visibility := ""
@@ -352,7 +352,7 @@ resource "nsxt_policy_ip_block" "test" {
 func testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(displayName string, cidr string, withContext bool, visibility string, isSubnetExclusive string) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`
@@ -372,7 +372,7 @@ resource "nsxt_policy_ip_block" "test" {
 func testAccNSXPolicyIPBlockCreateV910Template(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	visibility := ""
@@ -402,7 +402,7 @@ resource "nsxt_policy_ip_block" "test" {
 func testAccNSXPolicyIPBlockUpdateTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	visibility := ""

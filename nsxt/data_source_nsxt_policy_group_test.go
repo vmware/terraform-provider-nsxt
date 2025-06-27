@@ -171,7 +171,7 @@ func testAccDataSourceNsxtPolicyGroupDeleteByName(domain string, name string) er
 func testAccNsxtPolicyGroupReadTemplate(domain string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_group" "test" {

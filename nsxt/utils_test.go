@@ -622,7 +622,7 @@ resource "nsxt_policy_tier%s_gateway" "test" {
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier%s_gateway" "test" {
@@ -720,8 +720,8 @@ func testAccNsxtPolicyResourceCheckDestroy(context tf_api.SessionContext, state 
 	return nil
 }
 
-func testAccNsxtPolicyMultitenancyContext() string {
-	if testAccIsVPC() {
+func testAccNsxtPolicyMultitenancyContext(isVPCTest bool) string {
+	if isVPCTest {
 		projectID := os.Getenv("NSXT_VPC_PROJECT_ID")
 		vpcID := os.Getenv("NSXT_VPC_ID")
 		return fmt.Sprintf(`

@@ -175,7 +175,7 @@ data "nsxt_policy_gateway_policy" "test" {
 
 func testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy() string {
 	t1EdgeCluster := `edge_cluster_path = data.nsxt_policy_edge_cluster.test.path`
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 
 
@@ -210,7 +210,7 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
   path        = data.nsxt_policy_gateway_policy.test.path
   description = "%s"
   %s
-}`, testAccNsxtPolicyMultitenancyContext(), description, tags)
+}`, testAccNsxtPolicyMultitenancyContext(false), description, tags)
 }
 
 func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description string, action string, label string, tags string) string {

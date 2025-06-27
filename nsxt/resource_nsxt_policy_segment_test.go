@@ -556,7 +556,7 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 func testAccNsxtPolicySegmentDeps(tzName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	s := fmt.Sprintf(`
 
@@ -596,7 +596,7 @@ func testAccNsxtPolicySegmentImportTemplate(tzName string, name string, withCont
 	context := ""
 	tzSetting := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	} else {
 		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	}
@@ -1071,7 +1071,7 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 

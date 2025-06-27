@@ -483,7 +483,7 @@ func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu str
 	context := ""
 	ecTemplate := testAccNsxtPolicyTier0EdgeClusterTemplate()
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		_, ecSpec := testAccNsxtPolicyProjectSpec()
 		ecTemplate = fmt.Sprintf("edge_cluster_path = %s", ecSpec)
 	}
@@ -516,7 +516,7 @@ func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string, wit
 	context := ""
 	ecTemplate := testAccNsxtPolicyTier0EdgeClusterTemplate()
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		_, ecSpec := testAccNsxtPolicyProjectSpec()
 		ecTemplate = fmt.Sprintf("edge_cluster_path = %s", ecSpec)
 	}

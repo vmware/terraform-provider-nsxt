@@ -263,7 +263,7 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
 func testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
@@ -291,7 +291,7 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
 func testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
@@ -334,7 +334,7 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
 func testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {

@@ -364,7 +364,7 @@ func testAccNSXPolicyFixedSegmentImporterGetID(s *terraform.State) (string, erro
 func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
@@ -383,7 +383,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 
@@ -411,7 +411,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 func testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName string, name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {

@@ -194,7 +194,7 @@ resource "nsxt_policy_ip_pool" "test" {
 func testAccNSXPolicyIPPoolCreateTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
@@ -212,7 +212,7 @@ resource "nsxt_policy_ip_pool" "test" {
 func testAccNSXPolicyIPPoolUpdateTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {

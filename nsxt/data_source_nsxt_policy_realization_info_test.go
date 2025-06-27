@@ -224,7 +224,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
@@ -261,7 +261,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyRealizationInfoReadDataSourceTemplate(resourceDataType string, resourceName string, entityType string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "%s" "policy_resource" {
@@ -279,7 +279,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyRealizationInfoReadResourceTemplate(resourceType string, resourceName string, entityType string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "policy_resource" {

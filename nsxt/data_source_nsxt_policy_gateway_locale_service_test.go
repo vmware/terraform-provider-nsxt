@@ -92,7 +92,7 @@ func TestAccDataSourceNsxtPolicyGatewayLocaleService_multitenancy(t *testing.T) 
 func testAccNsxtPolicyGatewayLocaleServiceTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {

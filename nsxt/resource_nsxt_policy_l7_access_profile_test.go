@@ -282,7 +282,7 @@ func testAccNsxtPolicyL7AccessProfileTemplate(createFlow bool, withContext bool)
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_l7_access_profile" "test" {
@@ -339,7 +339,7 @@ func testAccNsxtPolicyL7AccessProfileMinimalistic(withContext bool) string {
 	attrMap := accTestPolicyL7AccessProfileUpdateAttributes
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_l7_access_profile" "test" {
