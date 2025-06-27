@@ -10,6 +10,7 @@ import (
 	"hash/crc32"
 	"log"
 
+	api_util "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -691,6 +692,27 @@ func handlePagination(lister func(*paginationInfo) error) (int64, error) {
 
 func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
 	return getContextSchemaExtended(isRequired, isComputed, isVPC, false)
+}
+
+func getContextSchemaWithSpec(spec api_util.SessionContextSpec) *schema.Schema {
+	ctxSchema := getContextSchemaExtended(spec.IsRequired, spec.IsComputed, spec.IsVpc, spec.AllowDefaultProject)
+	if spec.FromGlobal {
+		elem := ctxSchema.Elem.(*schema.Resource)
+		elem.Schema["from_global"] = &schema.Schema{
+			Type:        schema.TypeBool,
+			Description: "Search among global resource",
+			Optional:    true,
+			Default:     false,
+		}
+		ctxSchema.Elem = elem
+		// if from_global is set, project_id  needs to be optional
+		if projectIdElem, ok := elem.Schema["project_id"]; ok {
+			projectIdElem.Required = false
+			projectIdElem.Optional = true
+		}
+
+	}
+	return ctxSchema
 }
 
 func getContextSchemaExtended(isRequired, isComputed, isVPC, allowDefaultProject bool) *schema.Schema {

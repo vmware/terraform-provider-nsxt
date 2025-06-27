@@ -6,6 +6,8 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func dataSourceNsxtPolicySegment() *schema.Resource {
@@ -17,7 +19,7 @@ func dataSourceNsxtPolicySegment() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false, false),
+			"context":      getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: false, AllowDefaultProject: false, FromGlobal: true}),
 		},
 	}
 }
