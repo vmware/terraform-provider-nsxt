@@ -214,7 +214,7 @@ resource "nsxt_vpc_subnet" "test" {
     }
   }
 }
-`, testAccNsxtPolicyMultitenancyContext())
+`, testAccNsxtPolicyMultitenancyContext(true))
 }
 
 func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool) string {

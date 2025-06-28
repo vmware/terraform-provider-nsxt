@@ -115,7 +115,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 func testAccNsxtPolicyTier1ReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_tier1_gateway" "test" {

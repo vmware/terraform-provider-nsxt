@@ -811,7 +811,7 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 func testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(name string, icmpType string, icmpCode string, protocol string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`
@@ -838,7 +838,7 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(name string, icmpType string, protocol string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
@@ -863,7 +863,7 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name string, protocol string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
@@ -907,7 +907,7 @@ resource "nsxt_policy_service" "test" {
 func testAccNsxtPolicyIcmpTypeServiceCreate2Template(name string, icmpType string, icmpCode string, protocol string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {

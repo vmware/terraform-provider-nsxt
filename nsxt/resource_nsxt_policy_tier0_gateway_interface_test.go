@@ -679,7 +679,7 @@ func testAccNsxtPolicyGatewayInterfaceDeps(vlans string, withContext bool) strin
 	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	defsSpec := testAccNsxtPolicyGatewayFabricDeps(true)
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		tzSpec = ""
 		defsSpec, _ = testAccNsxtPolicyProjectSpec()
 	}

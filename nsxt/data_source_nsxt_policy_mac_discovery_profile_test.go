@@ -83,7 +83,7 @@ data "nsxt_policy_mac_discovery_profile" "test" {
 }
 
 func testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return fmt.Sprintf(`
 resource "nsxt_policy_mac_discovery_profile" "test" {
 %s

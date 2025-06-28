@@ -73,7 +73,7 @@ func testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t *testing.T, withC
 func testAccNsxtPolicyIntrusionServiceProfileReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_intrusion_service_profile" "test" {

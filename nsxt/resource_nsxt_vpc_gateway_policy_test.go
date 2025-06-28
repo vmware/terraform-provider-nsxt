@@ -142,7 +142,7 @@ func TestAccResourceNsxtVPCGatewayPolicy_importBasic(t *testing.T) {
 func testAccNsxtVPCGatewayPolicyWithRule(resourceName, name, direction, protocol, ruleTag string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "test" {

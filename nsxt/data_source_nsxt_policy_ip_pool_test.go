@@ -115,7 +115,7 @@ func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
 func testAccNsxtPolicyIPPoolReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_pool" "test" {

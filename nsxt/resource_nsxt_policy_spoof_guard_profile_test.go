@@ -194,7 +194,7 @@ func testAccNsxtPolicySpoofGuardProfileTemplate(createFlow, withContext bool) st
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_spoof_guard_profile" "test" {
@@ -214,7 +214,7 @@ resource "nsxt_policy_spoof_guard_profile" "test" {
 func testAccNsxtPolicySpoofGuardProfileMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_spoof_guard_profile" "test" {

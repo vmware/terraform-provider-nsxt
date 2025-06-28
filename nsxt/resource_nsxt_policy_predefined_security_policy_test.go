@@ -176,7 +176,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 func testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "group1" {
@@ -199,7 +199,7 @@ data "nsxt_policy_security_policy" "test" {
 func testAccNsxtPolicyPredefinedSecurityPolicyBasic(description string, tags string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_predefined_security_policy" "test" {

@@ -269,7 +269,7 @@ func testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, isIpv6, withContex
 	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
 	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		tzSpec = ""
 		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
@@ -317,7 +317,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed bool, createFlow, with
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, false, withContext) + fmt.Sprintf(`
 
@@ -344,7 +344,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(isFixed, withContext bool)
 	attrMap := accTestPolicyDhcpV4StaticBindingUpdateAttributes
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, false, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {

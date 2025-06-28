@@ -244,7 +244,7 @@ func testAccNsxtPolicySegmentSecurityProfileTemplate(createFlow, withContext boo
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {
@@ -278,7 +278,7 @@ resource "nsxt_policy_segment_security_profile" "test" {
 func testAccNsxtPolicySegmentSecurityProfileMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {

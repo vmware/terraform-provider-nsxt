@@ -664,7 +664,7 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 func testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments, domainName string, withContext, withCategory bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	category := ""
 	if withCategory {
@@ -716,7 +716,7 @@ resource "%s" "test" {
 func testAccNsxtPolicySecurityPolicyWithRule(resourceName, name, direction, protocol, ruleTag, domainName, profiles string, withContext, withCategory bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	category := ""
 	if withCategory {

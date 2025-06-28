@@ -45,7 +45,7 @@ func testAccDataSourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, 
 func testAccNsxtPolicyDhcpServerReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {

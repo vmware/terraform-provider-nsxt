@@ -197,7 +197,7 @@ func testAccNSXPolicyVMTagsCheckDestroy(state *terraform.State) error {
 func testAccNSXPolicyVMTagsCreateTemplate(instanceID string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vm_tags" "test" {
@@ -214,7 +214,7 @@ resource "nsxt_policy_vm_tags" "test" {
 func testAccNSXPolicyVMTagsUpdateTemplate(instanceID string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vm_tags" "test" {

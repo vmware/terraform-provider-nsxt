@@ -341,7 +341,7 @@ resource "nsxt_policy_static_route" "test" {
 func testAccNsxtPolicyStaticRouteTier1CreateTemplate(name string, network string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
@@ -376,7 +376,7 @@ resource "nsxt_policy_static_route" "test" {
 func testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(name string, network string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`

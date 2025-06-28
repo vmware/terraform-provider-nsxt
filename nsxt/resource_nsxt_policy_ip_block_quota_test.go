@@ -201,7 +201,7 @@ func testAccNsxtPolicyIpBlockQuotaTemplate(createFlow bool, withContext bool) st
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_block" "test-ipv4" {
@@ -242,7 +242,7 @@ func testAccNsxtPolicyIpBlockQuotaMinimalistic(withContext bool) string {
 	attrMap := accTestPolicyIpBlockQuotaCreateAttributes
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_block_quota" "test" {

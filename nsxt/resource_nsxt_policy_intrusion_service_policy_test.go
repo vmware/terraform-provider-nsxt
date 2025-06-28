@@ -294,7 +294,7 @@ func testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state *terraform.State,
 func testAccNsxtPolicyIntrusionServicePolicyBasic(name string, comments string, domainName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
@@ -338,7 +338,7 @@ func testAccNsxtPolicyIntrusionServicePolicyWithRule(name string, direction stri
 	profile := ""
 	profilePath := fmt.Sprintf("\"%s\"", policyDefaultIdsProfilePath)
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		profile = testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext)
 		profilePath = "nsxt_policy_intrusion_service_profile.test.path"
 	}

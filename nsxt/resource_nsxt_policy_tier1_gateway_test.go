@@ -575,7 +575,7 @@ func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string, with
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	config := fmt.Sprintf(`
@@ -613,7 +613,7 @@ func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, with
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
@@ -645,7 +645,7 @@ func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, wit
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
@@ -674,7 +674,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 func testAccNsxtPolicyTier1ImportTemplate(name string, failoverMode string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {

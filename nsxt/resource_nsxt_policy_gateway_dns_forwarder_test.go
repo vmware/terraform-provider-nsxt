@@ -212,7 +212,7 @@ func testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state *terraform.State, di
 func testAccNsxtPolicyGatewayDNSForwarderPrerequisites(names [2]string, isT0 bool, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyGatewayWithEdgeClusterTemplate("test", isT0, true, withContext) +
@@ -241,7 +241,7 @@ func testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0 bool, createFlow bool, wi
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {
@@ -277,7 +277,7 @@ func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0, withContext bool) st
 	whyDoesGoNeedToBeSoComplicated := map[bool]int8{false: 1, true: 0}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {

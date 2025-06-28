@@ -209,7 +209,7 @@ func testAccNSXPolicyQosProfileCheckDestroy(state *terraform.State, displayName 
 func testAccNSXPolicyQosProfileBasicTemplate(name string, cos string, peak string, direction string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
@@ -243,7 +243,7 @@ resource "nsxt_policy_qos_profile" "test" {
 func testAccNSXPolicyQosProfileUpdateTemplate(name string, cos string, peak string, direction string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
@@ -274,7 +274,7 @@ resource "nsxt_policy_qos_profile" "test" {
 func testAccNSXPolicyQosProfileEmptyTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
@@ -287,7 +287,7 @@ resource "nsxt_policy_qos_profile" "test" {
 func testAccNSXPolicyQosProfileCreateTemplateTrivial(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {

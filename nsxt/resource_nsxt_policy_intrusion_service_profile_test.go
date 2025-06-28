@@ -181,7 +181,7 @@ func testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state *terraform.State
 func testAccNsxtPolicyIntrusionServiceProfileCreate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {
@@ -211,7 +211,7 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
 func testAccNsxtPolicyIntrusionServiceProfileUpdate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {
@@ -248,7 +248,7 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
 func testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {

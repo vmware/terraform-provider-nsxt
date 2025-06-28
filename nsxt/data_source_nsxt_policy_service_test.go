@@ -159,7 +159,7 @@ data "nsxt_policy_service" "test" {
 }
 
 func testAccNsxtPolicyServiceMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
 %s

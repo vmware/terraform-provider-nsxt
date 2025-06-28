@@ -59,7 +59,7 @@ func testAccNsxtPolicySegmentRealizationTemplate(vlan, withContext bool) string 
 	extra := ""
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	if vlan {
 		resource = "nsxt_policy_vlan_segment"

@@ -47,7 +47,7 @@ func testAccDataSourceNsxtPolicyServicesBasic(t *testing.T, withContext bool, pr
 func testAccNSXPolicyServicesReadTemplate(serviceName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(serviceName, "3", "1", "ICMPv4", withContext) + fmt.Sprintf(`
 data "nsxt_policy_services" "test" {

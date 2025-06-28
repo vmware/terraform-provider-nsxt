@@ -189,7 +189,7 @@ resource "nsxt_vpc_static_route" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
+}`, testAccNsxtPolicyMultitenancyContext(false), attrMap["display_name"], attrMap["description"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
 }
 
 func testAccNsxtVpcStaticRoutesMinimalistic() string {
@@ -201,5 +201,5 @@ resource "nsxt_vpc_static_route" "test" {
   next_hop {
     ip_address = "%s"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), accTestStaticRoutesUpdateAttributes["display_name"], accTestStaticRoutesUpdateAttributes["network"], accTestStaticRoutesUpdateAttributes["ip_address"])
+}`, testAccNsxtPolicyMultitenancyContext(false), accTestStaticRoutesUpdateAttributes["display_name"], accTestStaticRoutesUpdateAttributes["network"], accTestStaticRoutesUpdateAttributes["ip_address"])
 }

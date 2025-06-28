@@ -332,7 +332,7 @@ func testAccNsxtPolicyVlanSegmentImportTemplate(name string, withContext bool) s
 	context := ""
 	tzSetting := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	} else {
 		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	}
@@ -356,7 +356,7 @@ func testAccNsxtPolicyVlanSegmentBasicTemplate(name string, withContext bool) st
 	deps := testAccNsxtPolicyVlanSegmentDeps()
 	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		deps = ""
 		tzSpec = ""
 	}
@@ -384,7 +384,7 @@ func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string, withContext bo
 	deps := testAccNsxtPolicyVlanSegmentDeps()
 	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 		deps = ""
 		tzSpec = ""
 	}

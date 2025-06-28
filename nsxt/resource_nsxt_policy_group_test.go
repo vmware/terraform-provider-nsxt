@@ -816,7 +816,7 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 func testAccNsxtPolicyGroupIPAddressImportTemplate(name string, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "test" {
@@ -830,7 +830,7 @@ resource "%s" "test" {
 func testAccNsxtPolicyEmptyCreateTemplate(name, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "test_empty" {
@@ -857,7 +857,7 @@ resource "%s" "test_empty" {
 func testAccNsxtPolicyGroupAddressCreateTemplate(name, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "test" {
@@ -897,7 +897,7 @@ resource "%s" "test" {
 func testAccNsxtPolicyGroupAddressUpdateTemplate(name, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "%s" "test" {

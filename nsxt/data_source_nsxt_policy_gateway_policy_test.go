@@ -68,7 +68,7 @@ func testAccDataSourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext boo
 func testAccNsxtPolicyGatewayPolicyTemplate(name string, category string, extra string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`

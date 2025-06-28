@@ -134,7 +134,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeTemplate(withContext bool) st
 func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attribute string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 
 	return fmt.Sprintf(`

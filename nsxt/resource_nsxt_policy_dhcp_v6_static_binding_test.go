@@ -266,7 +266,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingTemplate(isFixed, createFlow, withConte
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, true, withContext) + fmt.Sprintf(`
 
@@ -295,7 +295,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingMinimalistic(isFixed, withContext bool)
 	attrMap := accTestPolicyDhcpV6StaticBindingUpdateAttributes
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, true, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_v6_static_binding" "test" {

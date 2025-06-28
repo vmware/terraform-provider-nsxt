@@ -61,7 +61,7 @@ data "nsxt_policy_ip_discovery_profile" "test" {
 }
 
 func testAccNsxtPolicyIPDiscoveryProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtPolicyMultitenancyContext(false)
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {
 %s

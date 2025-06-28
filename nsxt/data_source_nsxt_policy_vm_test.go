@@ -64,7 +64,7 @@ func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck
 func testAccNsxtPolicyVMReadByNameTemplate(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vm" "test" {
@@ -76,7 +76,7 @@ data "nsxt_policy_vm" "test" {
 func testAccNsxtPolicyVMReadByIDTemplate(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vm" "test" {

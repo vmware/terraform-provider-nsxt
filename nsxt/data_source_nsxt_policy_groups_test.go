@@ -57,7 +57,7 @@ func testAccDataSourceNsxtPolicyGroupsBasic(t *testing.T, withContext bool, preC
 func testAccNSXPolicyGroupsReadTemplate(groupName string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtPolicyMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_groups" "test" {

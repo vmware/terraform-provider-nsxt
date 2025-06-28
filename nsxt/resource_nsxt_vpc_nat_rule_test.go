@@ -246,7 +246,7 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
   allocation_size = 1
   display_name    = "%s"
 }
-`, testAccNsxtPolicyMultitenancyContext(), testAccNsxtPolicyMultitenancyContext(), accTestVpcNatIPAllocationTestName)
+`, testAccNsxtPolicyMultitenancyContext(true), testAccNsxtPolicyMultitenancyContext(true), accTestVpcNatIPAllocationTestName)
 }
 
 func testAccNsxtVpcNatRuleTemplate(createFlow bool) string {
