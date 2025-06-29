@@ -99,6 +99,12 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 			},
 			"ospf":            getGatewayInterfaceOspfSchema(),
 			"dhcp_relay_path": getPolicyPathSchema(false, false, "Policy path for DHCP relay config"),
+			"edge_cluster_member_index": {
+				Type:        schema.TypeInt,
+				Description: "Association of interface with edge cluster member",
+				Optional:    true,
+				Deprecated:  "edge_cluster_member_index attribute is deprecated",
+			},
 		},
 	}
 }
@@ -164,6 +170,11 @@ func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, o
 	vlanID := int64(d.Get("access_vlan_id").(int))
 	if vlanID > 0 {
 		obj.AccessVlanId = &vlanID
+	}
+
+	if edgeClusterMemberIndex, ok := d.GetOk("edge_cluster_member_index"); ok {
+		ecmi := int64(edgeClusterMemberIndex.(int))
+		obj.EdgeClusterMemberIndex = &ecmi
 	}
 
 	urpfMode := d.Get("urpf_mode").(string)
@@ -432,6 +443,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	if obj.AccessVlanId != nil {
 		d.Set("access_vlan_id", *obj.AccessVlanId)
+	}
+
+	if obj.EdgeClusterMemberIndex != nil {
+		d.Set("edge_cluster_member_index", *obj.EdgeClusterMemberIndex)
 	}
 
 	if obj.Subnets != nil {
