@@ -25,13 +25,13 @@ func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"is_global":    getDataSourceGMBoolSchema(),
 			"edge_cluster_path": {
 				Type:        schema.TypeString,
 				Description: "The path of the edge cluster connected to this Tier0 gateway",
 				Optional:    true,
 				Computed:    true,
 			},
+			"context": getContextSchemaWithSpec(utl.SessionContextSpec{FromGlobal: true}),
 		},
 	}
 }
