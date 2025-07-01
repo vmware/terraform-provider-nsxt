@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,7 +33,11 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 		Read: dataSourceNsxtPolicyVMsRead,
 
 		Schema: map[string]*schema.Schema{
-			// TODO: add option to filter by display name regex
+			"display_name": {
+				Type:        schema.TypeString,
+				Description: "The display name regex of the VMs",
+				Optional:    true,
+			},
 			"value_type": {
 				Type:         schema.TypeString,
 				Description:  "Type of data populated in map value",
@@ -67,6 +72,7 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
+	displayNameRegex := d.Get("display_name").(string)
 	valueType := d.Get("value_type").(string)
 	state := d.Get("state").(string)
 	osPrefix := d.Get("guest_os").(string)
@@ -75,6 +81,13 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	allVMs, err := listAllPolicyVirtualMachines(getSessionContext(d, m), connector, m)
 	if err != nil {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
+	}
+	var re *regexp.Regexp
+	if d.HasChange("display_name") {
+		re, err = regexp.Compile(displayNameRegex)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, vm := range allVMs {
@@ -92,9 +105,10 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
-		if vm.DisplayName == nil {
+		if vm.DisplayName == nil || (d.HasChange("display_name") && !re.MatchString(*vm.DisplayName)) {
 			continue
 		}
+
 		computeIDMap := collectSeparatedStringListToMap(vm.ComputeIds, ":")
 		if valueType == "instance_id" {
 			vmMap[*vm.DisplayName] = computeIDMap[nsxtPolicyInstanceUUIDKey]
