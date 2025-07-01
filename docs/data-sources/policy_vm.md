@@ -22,7 +22,7 @@ data "nsxt_policy_vm" "nsxt_vm1" {
 
 ```hcl
 data "nsxt_policy_vm" "nsxt_vm2" {
-    instance_id = "524ee6d0-c287-9a07-5897-585f3350fe77"
+  instance_id = "524ee6d0-c287-9a07-5897-585f3350fe77"
 }
 ```
 
