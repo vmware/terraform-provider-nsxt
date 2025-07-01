@@ -108,7 +108,6 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 		if vm.DisplayName == nil || (d.HasChange("display_name") && !re.MatchString(*vm.DisplayName)) {
 			continue
 		}
-
 		computeIDMap := collectSeparatedStringListToMap(vm.ComputeIds, ":")
 		if valueType == "instance_id" {
 			vmMap[*vm.DisplayName] = computeIDMap[nsxtPolicyInstanceUUIDKey]
