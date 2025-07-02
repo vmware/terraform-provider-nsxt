@@ -229,7 +229,7 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 
 	// We're limiting to one span of any kind in the schema
 	span := iSpan.([]interface{})[0].(map[string]interface{})
-	if span["cluster_based_span"] != nil {
+	if len(span["cluster_based_span"].([]interface{})) > 0 {
 		cbs := span["cluster_based_span"].([]interface{})[0].(map[string]interface{})
 		spanPath := cbs["span_path"].(string)
 		clusterBasedSpan := model.ClusterBasedSpan{
@@ -242,7 +242,7 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		}
 		return dataValue.(*data.StructValue), nil
 	}
-	if span["zone_based_span"] != nil {
+	if len(span["zone_based_span"].([]interface{})) > 0 {
 		zbs := span["zone_based_span"].([]interface{})[0].(map[string]interface{})
 		zoneExternalIds := interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
 		zoneBasedSpan := model.ZoneBasedSpan{
