@@ -247,7 +247,7 @@ data "nsxt_policy_transit_gateway" "test" {
 }
 
 data "nsxt_policy_transit_gateway_nat" "test" {
-  transit_gateway_path = nsxt_policy_transit_gateway.test.path
+  transit_gateway_path = data.nsxt_policy_transit_gateway.test.path
 }
 `, testAccNsxtProjectContext(), accTestTransitGatewayNatRuleHelperName)
 }
