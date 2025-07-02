@@ -112,23 +112,33 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"vpc_deployment_scope": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "Project Vpc network Deployment Scope",
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"default_span": {
-							Type:         schema.TypeString,
-							Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
-							ValidateFunc: validatePolicyPath(),
-							Optional:     true,
-						},
-						"non_default_spans": {
+						"span_reference": {
 							Type:        schema.TypeList,
-							Description: "PolicyPaths of NetworkSpan object",
+							Description: "List of Span object references available with the project for TGW consumption",
+							MaxItems:    10,
+							Computed:    true,
 							Optional:    true,
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validatePolicyPath(),
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"span_path": {
+										Type:         schema.TypeString,
+										Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
+										ValidateFunc: validatePolicyPath(),
+										Optional:     true,
+										Computed:     true,
+									},
+									"is_default": {
+										Type:        schema.TypeBool,
+										Description: "Default span indicator",
+										Optional:    true,
+										Computed:    true,
+									},
+								},
 							},
 						},
 						"zone_external_ids": {
@@ -220,14 +230,24 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	vdsIntface, ok := d.GetOk("vpc_deployment_scope")
 	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 {
 		// There should be just one object here
-		vds := vdsIntface.([]interface{})[0].(map[string]interface{})
-		defaultSpan := vds["default_span"].(string)
-		nonDefaultSpans := interfaceListToStringList(vds["non_default_spans"].([]interface{}))
-		zoneExternalIds := interfaceListToStringList(vds["zone_external_ids"].([]interface{}))
+		vdScope := vdsIntface.([]interface{})[0].(map[string]interface{})
+		var spanReferences []model.SpanReference
+		if vdScope["span_reference"] != nil {
+			spanRefs := vdScope["span_reference"].([]interface{})
+			for _, spanRef := range spanRefs {
+				sr := spanRef.(map[string]interface{})
+				spanPath := sr["span_path"].(string)
+				isDefault := sr["is_default"].(bool)
+				spanReferences = append(spanReferences, model.SpanReference{
+					SpanPath:  &spanPath,
+					IsDefault: &isDefault,
+				})
+			}
+		}
+		zoneExternalIds := interfaceListToStringList(vdScope["zone_external_ids"].([]interface{}))
 
 		vpcDeploymentScope := model.VpcDeploymentScope{
-			DefaultSpan:     &defaultSpan,
-			NonDefaultSpans: nonDefaultSpans,
+			SpanReferences:  spanReferences,
 			ZoneExternalIds: zoneExternalIds,
 		}
 		obj.VpcDeploymentScope = &vpcDeploymentScope
@@ -368,8 +388,15 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
 		deploymentScope := make(map[string]interface{})
-		deploymentScope["default_span"] = obj.VpcDeploymentScope.DefaultSpan
-		deploymentScope["non_default_spans"] = stringList2Interface(obj.VpcDeploymentScope.NonDefaultSpans)
+		var spanRefs []interface{}
+		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
+			sr := make(map[string]interface{})
+			sr["span_path"] = spanRef.SpanPath
+			sr["is_default"] = spanRef.IsDefault
+
+			spanRefs = append(spanRefs, sr)
+		}
+		deploymentScope["span_reference"] = spanRefs
 		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
 		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})
 	}

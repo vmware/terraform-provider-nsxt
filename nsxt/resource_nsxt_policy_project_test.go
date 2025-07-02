@@ -90,7 +90,8 @@ func runChecksNsx900(testResourceName string, expectedValues map[string]string) 
 func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.#", expectedValues["vpc_deployment_scope_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.default_span"),
+		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.span_reference.#", expectedValues["span_reference_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.span_reference.0.span_path"),
 	)
 }
 
@@ -361,6 +362,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"ip_block_count":             "1",
 		"tgw_ext_conn_count":         "1",
 		"vpc_deployment_scope_count": "1",
+		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "true",
 		"site_count":                 siteCount,
 	}
@@ -369,6 +371,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"ip_block_count":             "0",
 		"tgw_ext_conn_count":         "1",
 		"vpc_deployment_scope_count": "1",
+		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "false",
 		"site_count":                 siteCount,
 	}
@@ -547,7 +550,10 @@ resource "nsxt_policy_project" "test" {
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
   {{if .PolicyNetworkSpan}}vpc_deployment_scope {
-    default_span = {{.PolicyNetworkSpan}}
+    span_reference {
+      span_path  = {{.PolicyNetworkSpan}}
+      is_default = true
+    }
   }{{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]

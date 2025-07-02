@@ -85,7 +85,7 @@ func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m 
 		IgnoreOverriddenHosts: &ignoreOverriddenHosts,
 	}
 
-	_, err = client.Update(id, obj, nil)
+	_, err = client.Update(id, obj, nil, nil)
 	if err != nil {
 		return handleCreateError("Policy Host Transport Node Profile", id, err)
 	}
@@ -154,7 +154,7 @@ func resourceNsxtPolicyHostTransportNodeProfileUpdate(d *schema.ResourceData, m 
 		Revision:              &revision,
 	}
 
-	_, err = client.Update(id, obj, nil)
+	_, err = client.Update(id, obj, nil, nil)
 	if err != nil {
 		return handleUpdateError("Policy Host Transport Node Profile", id, err)
 	}
