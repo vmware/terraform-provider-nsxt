@@ -32,11 +32,10 @@ resource "nsxt_vpc_subnet" "test_isolated" {
     vpc_id     = data.nsxt_vpc.demovpc.id
   }
 
-  display_name     = "test-subnet-isolated"
-  description      = "Test Isolated VPC subnet"
-  ipv4_subnet_size = 32
-  ip_addresses     = ["192.168.240.0/24"]
-  access_mode      = "Isolated"
+  display_name = "test-subnet-isolated"
+  description  = "Test Isolated VPC subnet"
+  ip_addresses = ["192.168.240.0/24"]
+  access_mode  = "Isolated"
 }
 
 // This will create a private subnet. A CIDR will be
