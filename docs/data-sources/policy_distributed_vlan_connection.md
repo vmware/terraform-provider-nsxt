@@ -20,8 +20,8 @@ data "nsxt_policy_distributed_vlan_connection" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of transit gateway to retrieve.
-* `display_name` - (Optional) The Display Name prefix of the transit gateway to retrieve.
+* `id` - (Optional) The ID of distributed VLAN connection to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the distributed VLAN connection to retrieve.
 
 ## Attributes Reference
 
