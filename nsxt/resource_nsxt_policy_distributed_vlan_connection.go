@@ -76,7 +76,7 @@ func subnetExclusiveConfigSchema() *schema.Schema {
 				"ip_block_path": {
 					Schema: schema.Schema{
 						Type:         schema.TypeString,
-						Optional:     true,
+						Required:     true,
 						Description:  "Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.",
 						ValidateFunc: validatePolicyPath(),
 					},
