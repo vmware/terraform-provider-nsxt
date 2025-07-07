@@ -33,103 +33,128 @@ var policyVpcNatRuleFirewallMatchValues = []string{
 
 var vpcNatPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/nat/[type]"
 
-var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
-	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
-	"path":         metadata.GetExtendedSchema(getPathSchema()),
-	"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
-	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
-	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
-	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"parent_path":  metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
-	"translated_network": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateCidrOrIPOrRangeList(),
-			Optional:     true,
+func getPolicyVpcNatRuleSchema(withScope bool) map[string]*metadata.ExtendedSchema {
+	var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
+		"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+		"path":         metadata.GetExtendedSchema(getPathSchema()),
+		"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"parent_path":  metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
+		"translated_network": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validateCidrOrIPOrRangeList(),
+				Optional:     true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "string",
+				SdkFieldName: "TranslatedNetwork",
+			},
 		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "TranslatedNetwork",
+		"logging": {
+			Schema: schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "bool",
+				SdkFieldName: "Logging",
+			},
 		},
-	},
-	"logging": {
-		Schema: schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
+		"destination_network": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validateCidrOrIPOrRangeList(),
+				Optional:     true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "string",
+				SdkFieldName: "DestinationNetwork",
+				OmitIfEmpty:  true,
+			},
 		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "bool",
-			SdkFieldName: "Logging",
+		"action": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice(policyVpcNatRuleActionValues, false),
+				Required:     true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "string",
+				SdkFieldName: "Action",
+			},
 		},
-	},
-	"destination_network": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateCidrOrIPOrRangeList(),
-			Optional:     true,
+		"firewall_match": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice(policyVpcNatRuleFirewallMatchValues, false),
+				Optional:     true,
+				Default:      model.PolicyVpcNatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "string",
+				SdkFieldName: "FirewallMatch",
+			},
 		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "DestinationNetwork",
-			OmitIfEmpty:  true,
+		"source_network": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validateCidrOrIPOrRangeList(),
+				Optional:     true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "string",
+				SdkFieldName: "SourceNetwork",
+				OmitIfEmpty:  true,
+			},
 		},
-	},
-	"action": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(policyVpcNatRuleActionValues, false),
-			Required:     true,
+		"enabled": {
+			Schema: schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "bool",
+				SdkFieldName: "Enabled",
+			},
 		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "Action",
+		"sequence_number": {
+			Schema: schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:   "int",
+				SdkFieldName: "SequenceNumber",
+			},
 		},
-	},
-	"firewall_match": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(policyVpcNatRuleFirewallMatchValues, false),
-			Optional:     true,
-			Default:      model.PolicyVpcNatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "FirewallMatch",
-		},
-	},
-	"source_network": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateCidrOrIPOrRangeList(),
-			Optional:     true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "SourceNetwork",
-			OmitIfEmpty:  true,
-		},
-	},
-	"enabled": {
-		Schema: schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-			Default:  true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "bool",
-			SdkFieldName: "Enabled",
-		},
-	},
-	"sequence_number": {
-		Schema: schema.Schema{
-			Type:     schema.TypeInt,
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "int",
-			SdkFieldName: "SequenceNumber",
-		},
-	},
+	}
+	if withScope {
+		policyVpcNatRuleSchema["scope"] = &metadata.ExtendedSchema{
+			Schema: schema.Schema{
+				Type: schema.TypeList,
+				Elem: &metadata.ExtendedSchema{
+					Schema: schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validatePolicyPath(),
+					},
+					Metadata: metadata.Metadata{
+						SchemaType: "string",
+					},
+				},
+				Optional: true,
+			},
+			Metadata: metadata.Metadata{
+				SchemaType:          "list",
+				SdkFieldName:        "Scope",
+				IntroducedInVersion: "9.1.0",
+			},
+		}
+	}
+	return policyVpcNatRuleSchema
 }
 
 func resourceNsxtPolicyVpcNatRule() *schema.Resource {
@@ -141,7 +166,7 @@ func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
-		Schema: metadata.GetSchemaFromExtendedSchema(policyVpcNatRuleSchema),
+		Schema: metadata.GetSchemaFromExtendedSchema(getPolicyVpcNatRuleSchema(false)),
 	}
 }
 
@@ -188,7 +213,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, policyVpcNatRuleSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(false), "", nil); err != nil {
 		return err
 	}
 
@@ -232,7 +257,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	return metadata.StructToSchema(elem, d, policyVpcNatRuleSchema, "", nil)
+	return metadata.StructToSchema(elem, d, getPolicyVpcNatRuleSchema(false), "", nil)
 }
 
 func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
@@ -263,7 +288,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, policyVpcNatRuleSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(false), "", nil); err != nil {
 		return err
 	}
 	client := clientLayer.NewNatRulesClient(connector)

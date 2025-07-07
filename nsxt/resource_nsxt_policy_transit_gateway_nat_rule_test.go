@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var accTestTransitGatewayNatRuleHelperName = getAccTestResourceName()
 var accTestTransitGatewayNatRuleCreateAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
 	"description":         "terraform created",
@@ -20,8 +19,8 @@ var accTestTransitGatewayNatRuleCreateAttributes = map[string]string{
 	"logging":             "true",
 	"action":              "DNAT",
 	"source_network":      "2.2.2.14",
-	"destination_network": "2.1.1.14",
-	"translated_network":  "2.3.3.24",
+	"destination_network": "10.110.0.14",
+	"translated_network":  "10.110.0.15",
 	"enabled":             "false",
 	"sequence_number":     "16",
 }
@@ -33,8 +32,8 @@ var accTestTransitGatewayNatRuleUpdateAttributes = map[string]string{
 	"logging":             "false",
 	"action":              "DNAT",
 	"source_network":      "3.3.3.14",
-	"destination_network": "3.1.1.14",
-	"translated_network":  "30.3.3.14",
+	"destination_network": "10.110.0.14",
+	"translated_network":  "10.110.0.15",
 	"enabled":             "true",
 	"sequence_number":     "3",
 }
@@ -43,7 +42,10 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_nat_rule.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtTransitGatewayNatRuleCheckDestroy(state, accTestTransitGatewayNatRuleUpdateAttributes["display_name"])
@@ -111,11 +113,14 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_nat_rule.test"
 	sourceIP := "2.2.2.34"
-	translatedNetwork := "2.2.3.34"
+	translatedNetwork := accTestTransitGatewayNatRuleCreateAttributes["translated_network"]
 	ruleName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtTransitGatewayNatRuleCheckDestroy(state, ruleName)
@@ -166,7 +171,10 @@ func TestAccResourceNsxtTransitGatewayNatRule_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_nat_rule.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtTransitGatewayNatRuleCheckDestroy(state, name)
@@ -237,18 +245,31 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 	return nil
 }
 
-func testAccNsxtTransitGatewayNatRulePrerequisites() string {
-	return fmt.Sprintf(`
-resource "nsxt_policy_transit_gateway" "test" {
-  %s
-  display_name    = "%s"
-  transit_subnets = ["192.168.5.0/24"]
+func testAccNsxtTransitGatewayNatRulePrerequisites(attrMap map[string]string) string {
+	return testAccNsxtPolicyTransitGatewayAttachmentTemplate(true) + fmt.Sprintf(`
+
+resource "nsxt_policy_project_ip_address_allocation" "dest_nat" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = "nat"
+  allocation_ips = "%s"
+  ip_block     = nsxt_policy_project.test.external_ipv4_blocks[0]
+}
+
+resource "nsxt_policy_project_ip_address_allocation" "tran_nat" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = "nat"
+  allocation_ips = "%s"
+  ip_block     = nsxt_policy_project.test.external_ipv4_blocks[0]
 }
 
 data "nsxt_policy_transit_gateway_nat" "test" {
   transit_gateway_path = data.nsxt_policy_transit_gateway.test.path
 }
-`, testAccNsxtProjectContext(), accTestTransitGatewayNatRuleHelperName)
+`, attrMap["destination_network"], attrMap["translated_network"])
 }
 
 func testAccNsxtTransitGatewayNatRuleTemplate(createFlow bool) string {
@@ -258,7 +279,7 @@ func testAccNsxtTransitGatewayNatRuleTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestTransitGatewayNatRuleUpdateAttributes
 	}
-	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
+	return testAccNsxtTransitGatewayNatRulePrerequisites(attrMap) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
   display_name        = "%s"
@@ -280,7 +301,7 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }
 
 func testAccNsxtTransitGatewayNatRuleMinimalistic() string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
   display_name        = "%s"
@@ -291,7 +312,7 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }
 
 func testAccNsxtTransitGatewayNatRuleSnatTemplate(name string, translatedNetwork string) string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
   display_name       = "%s"
@@ -301,12 +322,13 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }
 
 func testAccNsxtTransitGatewayNatRuleReflexiveTemplate(name string, sourceIP string, translatedNetwork string) string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites() + fmt.Sprintf(`
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
   display_name       = "%s"
   source_network     = "%s"
   translated_network = "%s"
   action             = "REFLEXIVE"
+  scope              = [nsxt_policy_transit_gateway_attachment.test.path]
 }`, name, sourceIP, translatedNetwork)
 }
