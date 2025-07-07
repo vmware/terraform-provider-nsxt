@@ -58,6 +58,7 @@ stage is not skipped, one of `MATCH_EXTERNAL_ADDRESS`, `MATCH_INTERNAL_ADDRESS` 
 * `source_network` - (Optional) Source network. For `SNAT` and `REFLEXIVE` rules, this is a required field. For `DNAT` rules, it may contain source network for incoming packets.
 * `enabled` - (Optional) Flag for enabling the NAT rule, default is `true`.
 * `sequence_number` - (Optional) The sequence_number decides the rule_priority of a NAT rule.
+* `scope` - (Optional) The list of policy paths of TGW Attachments on which the NAT rule is applied.
 
 ## Attributes Reference
 
