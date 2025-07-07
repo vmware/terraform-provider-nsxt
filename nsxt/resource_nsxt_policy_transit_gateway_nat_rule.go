@@ -31,7 +31,7 @@ func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
 		},
 		// Today, transit gateway nat rule schema is equal to VPC nat rule schema
 		// If in future they diverge, we'll introduce new schema here
-		Schema: metadata.GetSchemaFromExtendedSchema(policyVpcNatRuleSchema),
+		Schema: metadata.GetSchemaFromExtendedSchema(getPolicyVpcNatRuleSchema(true)),
 	}
 }
 
@@ -78,7 +78,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, policyVpcNatRuleSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(true), "", nil); err != nil {
 		return err
 	}
 
@@ -122,7 +122,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	return metadata.StructToSchema(elem, d, policyVpcNatRuleSchema, "", nil)
+	return metadata.StructToSchema(elem, d, getPolicyVpcNatRuleSchema(true), "", nil)
 }
 
 func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
@@ -153,7 +153,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, policyVpcNatRuleSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(true), "", nil); err != nil {
 		return err
 	}
 	client := clientLayer.NewNatRulesClient(connector)
