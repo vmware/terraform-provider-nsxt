@@ -239,11 +239,10 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 
 func testAccNsxtTransitGatewayNatRulePrerequisites() string {
 	return fmt.Sprintf(`
-data "nsxt_policy_transit_gateway" "test" {
+resource "nsxt_policy_transit_gateway" "test" {
   %s
-//   display_name    = "%s"
-//   transit_subnets = ["192.168.5.0/24"]
-	display_name = "Default Transit Gateway"
+  display_name    = "%s"
+  transit_subnets = ["192.168.5.0/24"]
 }
 
 data "nsxt_policy_transit_gateway_nat" "test" {
