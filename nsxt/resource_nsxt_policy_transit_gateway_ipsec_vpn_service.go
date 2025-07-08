@@ -58,7 +58,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesCreate(d *schema.ResourceDa
 	client := clientLayer.NewIpsecVpnServicesClient(connector)
 	_, err = client.Update(parents[0], parents[1], parents[2], id, ipSecVpnService)
 	if err != nil {
-		return handleUpdateError("TransitGateway IPSecVpnService", id, err)
+		return handleUpdateError("Transit Gateway IPSecVpnService", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -70,7 +70,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d *schema.ResourceData
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining TransitGateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
 	}
 
 	client := clientLayer.NewIpsecVpnServicesClient(connector)
@@ -81,7 +81,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d *schema.ResourceData
 	}
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
-		return handleReadError(d, "TransitGateway IPSecVpnService", id, err)
+		return handleReadError(d, "Transit Gateway IPSecVpnService", id, err)
 	}
 	setIpsecVPNServices(id, d, obj)
 
@@ -92,7 +92,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceDa
 	connector := getPolicyConnector(m)
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining TransitGateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
 	}
 
 	parentPath := d.Get("parent_path").(string)
@@ -107,7 +107,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceDa
 	client := clientLayer.NewIpsecVpnServicesClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, ipSecVpnService)
 	if err != nil {
-		return handleUpdateError("TransitGateway IPSecVpnService", id, err)
+		return handleUpdateError("Transit Gateway IPSecVpnService", id, err)
 	}
 
 	return resourceNsxtPolicyIPSecVpnServiceRead(d, m)
@@ -116,7 +116,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceDa
 func resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining TransitGateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -130,7 +130,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete(d *schema.ResourceDa
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
-		return handleDeleteError("TransitGateway IPSecVpnService", id, err)
+		return handleDeleteError("Transit Gateway IPSecVpnService", id, err)
 	}
 
 	return nil
@@ -151,5 +151,5 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists(sessionContext utl.S
 	if isNotFoundError(err) {
 		return false, nil
 	}
-	return false, logAPIError("Error retrieving resource", err)
+	return false, logAPIError("error retrieving Transit Gateway IPSecVpnService resource", err)
 }

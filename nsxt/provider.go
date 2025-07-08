@@ -524,6 +524,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_transit_gateway_nat_rule":                     resourceNsxtPolicyTransitGatewayNatRule(),
 			"nsxt_policy_transit_gateway_static_route":                 resourceNsxtPolicyTransitGatewayStaticRoute(),
 			"nsxt_policy_transit_gateway_ipsec_vpn_service":            resourceNsxtPolicyTransitGatewayIpsecVpn(),
+			"nsxt_policy_transit_gateway_ipsec_vpn_session":            resourceNsxtPolicyTransitGatewayIPSecVpnSession(),
+			"nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint":     resourceNsxtPolicyTransitGatewayIPSecVpnLocalEndpoint(),
 			"nsxt_policy_transport_zone":                               resourceNsxtPolicyTransportZone(),
 			"nsxt_policy_uplink_host_switch_profile":                   resourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_policy_user_management_role":                         resourceNsxtPolicyUserManagementRole(),
