@@ -65,6 +65,11 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				},
 				ConflictsWith: []string{"cidr"},
 			},
+			"is_subnet_exclusive": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If this property is set to true, then this block is reserved for direct vlan extension use case",
+			},
 			"range_list":   getAllocationRangeListSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
 			"reserved_ips": getAllocationRangeListSchema(false, "Represents list of reserved IP address in the form of start and end IPs"),
 		},
@@ -119,6 +124,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		if len(d.Get("cidr_list").([]interface{})) > 0 {
 			d.Set("cidr_list", block.CidrList)
 		}
+		d.Set("is_subnet_exclusive", block.IsSubnetExclusive)
 		d.Set("range_list", setAllocationRangeListInSchema(block.RangeList))
 		d.Set("reserved_ips", setAllocationRangeListInSchema(block.ReservedIps))
 		if block.Cidr != nil {
@@ -149,6 +155,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
 	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
 	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
 	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
 
@@ -166,6 +173,9 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		obj.ReservedIps = reservedIPs
 	} else if cidr != "" {
 		obj.Cidr = &cidr
+	}
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		obj.IsSubnetExclusive = &isSubnetExclusive
 	}
 
 	// Create the resource using PATCH
@@ -200,6 +210,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
 	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
 	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
 	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
 
@@ -219,6 +230,9 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		obj.ReservedIps = reservedIPs
 	} else if cidr != "" {
 		obj.Cidr = &cidr
+	}
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		obj.IsSubnetExclusive = &isSubnetExclusive
 	}
 
 	_, err := client.Update(id, obj)

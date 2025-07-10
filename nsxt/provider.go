@@ -310,6 +310,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_server_ssl_profile":                      dataSourceNsxtPolicyLBServerSslProfile(),
 			"nsxt_policy_lb_service":                                 dataSourceNsxtPolicyLbService(),
 			"nsxt_policy_mac_discovery_profile":                      dataSourceNsxtPolicyMacDiscoveryProfile(),
+			"nsxt_policy_network_span":                               dataSourceNsxtPolicyNetworkSpan(),
 			"nsxt_policy_project":                                    dataSourceNsxtPolicyProject(),
 			"nsxt_policy_project_ip_address_allocation":              dataSourceNsxtProjectIpAddressAllocation(),
 			"nsxt_policy_qos_profile":                                dataSourceNsxtPolicyQosProfile(),
@@ -433,6 +434,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_cluster":                                 resourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_high_availability_profile":               resourceNsxtPolicyEdgeHighAvailabilityProfile(),
 			"nsxt_policy_edge_transport_node":                          resourceNsxtPolicyEdgeTransportNode(),
+			"nsxt_policy_edge_transport_node_rtep":                     resourceNsxtPolicyEdgeTransportNodeRTEP(),
 			"nsxt_policy_evpn_config":                                  resourceNsxtPolicyEvpnConfig(),
 			"nsxt_policy_evpn_tenant":                                  resourceNsxtPolicyEvpnTenant(),
 			"nsxt_policy_evpn_tunnel_endpoint":                         resourceNsxtPolicyEvpnTunnelEndpoint(),
@@ -1287,21 +1289,24 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
 
-func getContextDataFromSchema(d *schema.ResourceData) (string, string) {
+func getContextDataFromSchema(d *schema.ResourceData) (string, string, bool) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
 		contexts := ctxPtr.([]interface{})
 		for _, context := range contexts {
 			data := context.(map[string]interface{})
 			vpcID := ""
+			fromGlobal := false
 			if data["vpc_id"] != nil {
 				vpcID = data["vpc_id"].(string)
 			}
-
-			return data["project_id"].(string), vpcID
+			if data["from_global"] != nil {
+				fromGlobal = data["from_global"].(bool)
+			}
+			return data["project_id"].(string), vpcID, fromGlobal
 		}
 	}
-	return "", ""
+	return "", "", false
 }
 
 func getContextDataFromParentPath(parentPath string) (string, string) {
@@ -1328,10 +1333,17 @@ func getParentContext(d *schema.ResourceData, m interface{}, parentPath string) 
 func getSessionContextHelper(d *schema.ResourceData, m interface{}, parentPath string) tf_api.SessionContext {
 	var clientType tf_api.ClientType
 	var projectID, vpcID string
+	fromGlobal := false
 	if parentPath == "" {
-		projectID, vpcID = getContextDataFromSchema(d)
+		projectID, vpcID, fromGlobal = getContextDataFromSchema(d)
 	} else {
 		projectID, vpcID = getContextDataFromParentPath(parentPath)
+	}
+	// if fromGlobal = True values pertaining multitenancy should be ignored
+	// and clientType must be tf_api.Local
+	if fromGlobal {
+		projectID = ""
+		vpcID = ""
 	}
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
@@ -1343,5 +1355,5 @@ func getSessionContextHelper(d *schema.ResourceData, m interface{}, parentPath s
 	} else {
 		clientType = tf_api.Local
 	}
-	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType, FromGlobal: fromGlobal}
 }

@@ -72,6 +72,119 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "Tier0Path",
 		},
 	},
+	"inbound_remote_networks": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type: schema.TypeString,
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:          "list",
+			SdkFieldName:        "InboundRemoteNetworks",
+			IntroducedInVersion: "9.1.0",
+		},
+	},
+	"advertise_outbound_networks": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"allow_external_blocks": {
+						Schema: schema.Schema{
+							Type: schema.TypeList,
+							Elem: &metadata.ExtendedSchema{
+								Schema: schema.Schema{
+									Type: schema.TypeString,
+								},
+								Metadata: metadata.Metadata{
+									SchemaType: "string",
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "list",
+							SdkFieldName: "AllowExternalBlocks",
+						},
+					},
+					"allow_private": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "bool",
+							SdkFieldName: "AllowPrivate",
+						},
+					},
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:          "struct",
+			SdkFieldName:        "AdvertiseOutboundNetworks",
+			IntroducedInVersion: "9.1.0",
+			ReflectType:         reflect.TypeOf(model.ProviderAdvertiseOutBoundNetworks{}),
+		},
+	},
+	"nat_config": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"enable_snat": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "bool",
+							SdkFieldName: "EnableSnat",
+						},
+					},
+					"ip_block": {
+						Schema: schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "IpBlock",
+						},
+					},
+					"logging_enabled": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "bool",
+							SdkFieldName: "LoggingEnabled",
+						},
+					},
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:          "struct",
+			SdkFieldName:        "NatConfig",
+			IntroducedInVersion: "9.1.0",
+			ReflectType:         reflect.TypeOf(model.ProviderNatConfig{}),
+		},
+	},
 }
 
 var gatewayConnectionPathExample = "/infra/gateway-connections/[connection]"

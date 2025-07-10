@@ -13,15 +13,27 @@ import (
 )
 
 var accTestPolicyGatewayConnectionCreateAttributes = map[string]string{
-	"display_name":     getAccTestResourceName(),
-	"description":      "terraform created",
-	"aggregate_routes": "192.168.240.0/24",
+	"display_name":            getAccTestResourceName(),
+	"description":             "terraform created",
+	"aggregate_routes":        "192.168.240.0/24",
+	"enable_snat":             "false",
+	"ip_block":                "11.0.0.2/16",
+	"logging_enabled":         "false",
+	"allow_external_blocks":   "172.1.1.0/24",
+	"allow_private":           "false",
+	"inbound_remote_networks": "196.1.1.0/24",
 }
 
 var accTestPolicyGatewayConnectionUpdateAttributes = map[string]string{
-	"display_name":     getAccTestResourceName(),
-	"description":      "terraform updated",
-	"aggregate_routes": "192.168.241.0/24",
+	"display_name":            getAccTestResourceName(),
+	"description":             "terraform updated",
+	"aggregate_routes":        "192.168.241.0/24",
+	"enable_snat":             "true",
+	"ip_block":                "11.4.0.2/16",
+	"logging_enabled":         "true",
+	"allow_external_blocks":   "168.1.1.0/24",
+	"allow_private":           "true",
+	"inbound_remote_networks": "196.1.3.0/24",
 }
 
 func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
@@ -112,6 +124,87 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayConnection_910(t *testing.T) {
+	testResourceName := "nsxt_policy_gateway_connection.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+			testAccOnlyVPC(t)
+
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayConnectionCheckDestroy(state, accTestPolicyGatewayConnectionUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayConnection910Template(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyGatewayConnectionCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyGatewayConnectionCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "aggregate_routes.0", accTestPolicyGatewayConnectionCreateAttributes["aggregate_routes"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_path"),
+					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.0", accTestPolicyGatewayConnectionCreateAttributes["inbound_remote_networks"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", accTestPolicyGatewayConnectionCreateAttributes["allow_external_blocks"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", accTestPolicyGatewayConnectionCreateAttributes["allow_private"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.enable_snat", accTestPolicyGatewayConnectionCreateAttributes["enable_snat"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.ip_block", accTestPolicyGatewayConnectionCreateAttributes["ip_block"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.logging_enabled", accTestPolicyGatewayConnectionCreateAttributes["logging_enabled"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayConnection910Template(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyGatewayConnectionUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyGatewayConnectionUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "aggregate_routes.0", accTestPolicyGatewayConnectionUpdateAttributes["aggregate_routes"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_path"),
+					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.0", accTestPolicyGatewayConnectionUpdateAttributes["inbound_remote_networks"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", accTestPolicyGatewayConnectionUpdateAttributes["allow_external_blocks"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", accTestPolicyGatewayConnectionUpdateAttributes["allow_private"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.enable_snat", accTestPolicyGatewayConnectionUpdateAttributes["enable_snat"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.ip_block", accTestPolicyGatewayConnectionUpdateAttributes["ip_block"]),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.logging_enabled", accTestPolicyGatewayConnectionUpdateAttributes["logging_enabled"]),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayConnectionMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGatewayConnectionExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -197,6 +290,36 @@ data "nsxt_policy_gateway_connection" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_gateway_connection.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["display_name"])
+}
+
+func testAccNsxtPolicyGatewayConnection910Template(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyGatewayConnectionCreateAttributes
+	} else {
+		attrMap = accTestPolicyGatewayConnectionUpdateAttributes
+	}
+	return testAccNsxtPolicyGatewayConnectionPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_gateway_connection" "test" {
+  display_name = "%s"
+  description  = "%s"
+  tier0_path   = nsxt_policy_tier0_gateway.test.path
+
+  aggregate_routes        = ["%s"]
+  inbound_remote_networks = ["%s"]
+
+  advertise_outbound_networks {
+    allow_external_blocks = ["%s"]
+    allow_private         = %s
+  }
+
+  nat_config {
+    enable_snat     = %s
+    ip_block        = "%s"
+    logging_enabled = %s
+  }
+}
+`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["inbound_remote_networks"], attrMap["allow_external_blocks"], attrMap["allow_private"], attrMap["enable_snat"], attrMap["ip_block"], attrMap["logging_enabled"])
 }
 
 func testAccNsxtPolicyGatewayConnectionMinimalistic() string {

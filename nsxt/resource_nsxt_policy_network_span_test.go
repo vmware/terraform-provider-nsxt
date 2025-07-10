@@ -15,7 +15,7 @@ import (
 var accTestPolicyNetworkSpanCreateAttributes = map[string]string{
 	"display_name": getAccTestResourceName(),
 	"description":  "terraform created",
-	"exclusive":    "true",
+	"exclusive":    "false",
 }
 
 var accTestPolicyNetworkSpanUpdateAttributes = map[string]string{

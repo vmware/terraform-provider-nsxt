@@ -57,7 +57,7 @@ var conditionMemberTypeValues = []string{
 	model.Condition_MEMBER_TYPE_KUBERNETESNODE,
 	model.Condition_MEMBER_TYPE_VPCSUBNETPORT,
 	model.Condition_MEMBER_TYPE_VPCSUBNET,
-	model.Condition_MEMBER_TYPE_VPC,
+	//model.Condition_MEMBER_TYPE_VPC,
 }
 
 var conditionOperatorValues = []string{

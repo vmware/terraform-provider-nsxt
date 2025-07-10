@@ -72,6 +72,21 @@ func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
+			{
+				Config: testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(name, cidr, false, "EXTERNAL", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "is_subnet_exclusive", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
 		},
 	})
 }
@@ -332,6 +347,26 @@ resource "nsxt_policy_ip_block" "test" {
   cidr         = "%s"
 %s
 }`, context, displayName, cidr, visibility)
+}
+
+func testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(displayName string, cidr string, withContext bool, visibility string, isSubnetExclusive string) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
+	return fmt.Sprintf(`
+resource "nsxt_policy_ip_block" "test" {
+%s
+  display_name = "%s"
+  cidr_list    = ["%s"]
+  visibility = "%s"
+  reserved_ips {
+    start = "192.168.1.10"
+    end   = "192.168.1.11"
+  }
+  is_subnet_exclusive = "%s"
+}`, context, displayName, cidr, visibility, isSubnetExclusive)
 }
 
 func testAccNSXPolicyIPBlockCreateV910Template(displayName string, cidr string, withContext, withVisibility bool) string {

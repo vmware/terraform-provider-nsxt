@@ -34,6 +34,15 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "VlanId",
 		},
 	},
+	"subnet_exclusive_config": {
+		Schema: *subnetExclusiveConfigSchema(),
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.1.0",
+			SchemaType:          "struct",
+			SdkFieldName:        "SubnetExclusiveConfig",
+			ReflectType:         reflect.TypeOf(model.SubnetExclusiveConfig{}),
+		},
+	},
 	"gateway_addresses": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
@@ -53,6 +62,66 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "GatewayAddresses",
 		},
 	},
+}
+
+func subnetExclusiveConfigSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Subnet exclusive config",
+		Optional:    true,
+		ForceNew:    false,
+		MaxItems:    1,
+		Elem: &metadata.ExtendedResource{
+			Schema: map[string]*metadata.ExtendedSchema{
+				"ip_block_path": {
+					Schema: schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						Description:  "Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.",
+						ValidateFunc: validatePolicyPath(),
+					},
+					Metadata: metadata.Metadata{
+						SchemaType:   "string",
+						SdkFieldName: "IpBlockPath",
+					},
+				},
+				"vlan_extension": vlanExtensionSchema(),
+			},
+		},
+	}
+
+}
+
+func vlanExtensionSchema() *metadata.ExtendedSchema {
+	return &metadata.ExtendedSchema{
+		Schema: schema.Schema{
+			Type:        schema.TypeList,
+			Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
+			Optional:    true,
+			ForceNew:    false,
+			MaxItems:    1,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"vpc_gateway_connection_enable": {
+						Schema: schema.Schema{
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "bool",
+							SdkFieldName: "VpcGatewayConnectionEnable",
+						},
+					},
+				},
+			},
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "struct",
+			SdkFieldName: "VlanExtension",
+			ReflectType:  reflect.TypeOf(model.VlanExtension{}),
+		},
+	}
 }
 
 const distributedVlanConnectionPathExample = "/infra/distributed-vlan-connections/[connection]"

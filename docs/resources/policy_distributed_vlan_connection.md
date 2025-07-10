@@ -31,6 +31,10 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `vlan_id` - (Required) Vlan id for external gateway traffic.
 * `gateway_addresses` - (Required) List of gateway addresses in CIDR format.
+* `subnet_exclusive_config` - (Optional) Subnet exclusive config. This attribute is supported with NSX 9.1.0 onwards.
+  * `ip_block_path` - Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.
+  * `vlan_extension` - Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.
+    * `vpc_gateway_connection_enable` - This configuration controls whether the VLAN extension subnet connects to the VPC gateway.
 
 ## Attributes Reference
 
