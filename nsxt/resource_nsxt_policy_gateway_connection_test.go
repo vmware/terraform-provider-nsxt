@@ -119,6 +119,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
