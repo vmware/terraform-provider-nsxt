@@ -12,7 +12,7 @@ This resource is supported with NSX 9.0.0 onwards.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_node" "test_node" {
+data "nsxt_policy_edge_transport_node" "test_node" {
   display_name = "edgenode1"
 }
 
