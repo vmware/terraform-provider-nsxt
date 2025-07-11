@@ -14,7 +14,7 @@ This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC
 
 ```hcl
 data "nsxt_policy_gateway_locale_service" "test" {
-  gateway_path = data.nsxt_policy_tier0_gateway.path
+  gateway_path = data.nsxt_policy_tier0_gateway.test.path
   display_name = "london"
 }
 ```

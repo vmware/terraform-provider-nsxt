@@ -15,7 +15,7 @@ This data source is applicable to NSX Policy Manager.
 ```hcl
 data "nsxt_policy_gateway_connection" "test" {
   display_name = "test"
-  tier0_path   = data.nsxt_policy_tier0_gateway.path
+  tier0_path   = data.nsxt_policy_tier0_gateway.test.path
 }
 ```
 
