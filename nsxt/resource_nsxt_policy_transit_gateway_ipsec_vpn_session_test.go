@@ -501,20 +501,20 @@ func testAccNsxtPolicyTGWIPSecVpnSessionExists(displayName string, resourceName 
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy TgwIPSecVpnSession resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy TGWIPSecVpnSession resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy TgwIPSecVpnSession resource ID not set in resources")
+			return fmt.Errorf("Policy TGWIPSecVpnSession resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy TgwIPSecVpnSession %s does not exist", resourceID)
+			return fmt.Errorf("Policy TGWIPSecVpnSession %s does not exist", resourceID)
 		}
 
 		return nil
@@ -531,13 +531,13 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
 
 		if exists {
-			return fmt.Errorf("Policy TgwIPSecVpnSession %s still exists", displayName)
+			return fmt.Errorf("Policy TGWIPSecVpnSession %s still exists", displayName)
 		}
 	}
 	return nil

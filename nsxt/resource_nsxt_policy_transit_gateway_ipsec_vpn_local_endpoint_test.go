@@ -116,12 +116,12 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(displayName string, resourc
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy IPSecVpnLocalEndpoint resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnLocalEndpoint resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnLocalEndpoint resource ID not set in resources")
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnLocalEndpoint resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyTGWIPSecVpnLocalEndpointExists(testAccGetSessionContext(), parentPath, resourceID, connector)
@@ -129,7 +129,7 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(displayName string, resourc
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy Transit gateway IPSecVpnLocalEndpoint %s does not exist", resourceID)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnLocalEndpoint %s does not exist", resourceID)
 		}
 
 		return nil
@@ -152,7 +152,7 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state *terraform.Stat
 		}
 
 		if exists {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnLocalEndpoint %s still exists", displayName)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnLocalEndpoint %s still exists", displayName)
 		}
 	}
 	return nil
@@ -165,7 +165,7 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes
 	}
-	return testAccNsxtPolicyTransitGatewayIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   display_name  = "%s"
@@ -181,7 +181,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
 }
 
 func testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic() string {
-	return testAccNsxtPolicyTransitGatewayIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   display_name = "%s"
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
@@ -189,7 +189,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
 }`, accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["display_name"])
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnLocalEndpointPrerequisites() string {
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"

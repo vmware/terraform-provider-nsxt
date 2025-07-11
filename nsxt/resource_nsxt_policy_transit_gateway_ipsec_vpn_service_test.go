@@ -14,7 +14,7 @@ import (
 
 var RelatedResourceName = getAccTestResourceName()
 
-var accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes = map[string]string{
+var accTestPolicyTGWIPSecVpnServicesCreateAttributes = map[string]string{
 	"display_name":  getAccTestResourceName(),
 	"description":   "terraform created",
 	"enabled":       "true",
@@ -28,7 +28,7 @@ var accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes = map[string]str
 	// "subnet":          "test-create",
 }
 
-var accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes = map[string]string{
+var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
 	"display_name":  getAccTestResourceName(),
 	"description":   "terraform updated",
 	"enabled":       "false",
@@ -42,7 +42,7 @@ var accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes = map[string]str
 	// "subnet":          "test-update",
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_basic(t *testing.T) {
+func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -52,22 +52,22 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_basic(t *testing.T)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayIPSecVpnServicesCheckDestroy(state, accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["display_name"])
+			return testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state, accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayIPSecVpnServicesTemplate(true),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayIPSecVpnServicesExists(accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["ha_sync"]),
-					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["ike_log_level"]),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnServicesCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnServicesCreateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTGWIPSecVpnServicesCreateAttributes["ha_sync"]),
+					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyTGWIPSecVpnServicesCreateAttributes["ike_log_level"]),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["sources"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["action"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTGWIPSecVpnServicesCreateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTGWIPSecVpnServicesCreateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTGWIPSecVpnServicesCreateAttributes["action"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -75,18 +75,18 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_basic(t *testing.T)
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayIPSecVpnServicesTemplate(false),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayIPSecVpnServicesExists(accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["ha_sync"]),
-					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["ike_log_level"]),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["ha_sync"]),
+					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["ike_log_level"]),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["sources"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["action"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["action"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -94,9 +94,9 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_basic(t *testing.T)
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayIPSecVpnServicesMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayIPSecVpnServicesExists(accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -108,7 +108,7 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_basic(t *testing.T)
 	})
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_importBasic(t *testing.T) {
+func TestAccResourceNsxtPolicyTGWIPSecVpnServices_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_service.test"
 
@@ -116,11 +116,11 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_importBasic(t *test
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayIPSecVpnServicesCheckDestroy(state, name)
+			return testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayIPSecVpnServicesMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -132,34 +132,34 @@ func TestAccResourceNsxtPolicyTransitGatewayIPSecVpnServices_importBasic(t *test
 	})
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnServicesExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyTGWIPSecVpnServicesExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnServices resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnServices resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnServices resource ID not set in resources")
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnServices resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnServicesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnServices %s does not exist", resourceID)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnServices %s does not exist", resourceID)
 		}
 
 		return nil
 	}
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnServicesCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -169,26 +169,26 @@ func testAccNsxtPolicyTransitGatewayIPSecVpnServicesCheckDestroy(state *terrafor
 
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnServicesExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
 
 		if exists {
-			return fmt.Errorf("Policy Transit Gateway IPSecVpnServices %s still exists", displayName)
+			return fmt.Errorf("Policy TransitGatewayIPSecVpnServices %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnServicesTemplate(createFlow bool) string {
+func testAccNsxtPolicyTGWIPSecVpnServicesTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
-		attrMap = accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes
+		attrMap = accTestPolicyTGWIPSecVpnServicesCreateAttributes
 	} else {
-		attrMap = accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes
+		attrMap = accTestPolicyTGWIPSecVpnServicesUpdateAttributes
 	}
-	return testAccNsxtPolicyTransitGatewayIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   display_name = "%s"
   parent_path  = data.nsxt_policy_transit_gateway.test.path
@@ -209,16 +209,16 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"]) //, attrMap["sequence_number"], attrMap["subnet"], attrMap["subnet"])
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnServicesMinimalistic() string {
-	return testAccNsxtPolicyTransitGatewayIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic() string {
+	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   display_name = "%s"
   parent_path      = data.nsxt_policy_transit_gateway.test.path
 
-}`, accTestPolicyTransitGatewayIPSecVpnServicesUpdateAttributes["display_name"])
+}`, accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"])
 }
 
-func testAccNsxtPolicyTransitGatewayIPSecVpnServicesPrerequisites() string {
+func testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"

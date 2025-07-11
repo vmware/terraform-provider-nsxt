@@ -7,7 +7,7 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
+	tgwclientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
 
 var twIpsecVpnParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
@@ -28,12 +28,12 @@ var transitGatewayIpsecVpnServiceSchema = map[string]*metadata.ExtendedSchema{
 }
 
 // add it in the provider.go
-func resourceNsxtPolicyTransitGatewayIpsecVpn() *schema.Resource {
+func resourceNsxtPolicyTransitGatewayIpsecVpnService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyTransitGatewayIPSecVpnServicesCreate,
-		Read:   resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead,
-		Update: resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate,
-		Delete: resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete,
+		Create: resourceNsxtPolicyTGWIPSecVpnServicesCreate,
+		Read:   resourceNsxtPolicyTGWIPSecVpnServicesRead,
+		Update: resourceNsxtPolicyTGWIPSecVpnServicesUpdate,
+		Delete: resourceNsxtPolicyTGWIPSecVpnServicesDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
@@ -41,9 +41,9 @@ func resourceNsxtPolicyTransitGatewayIpsecVpn() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnServicesCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnServicesCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists)
+	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTGWIPSecVpnServicesExists)
 	if err != nil {
 		return err
 	}
@@ -55,25 +55,25 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesCreate(d *schema.ResourceDa
 		return pathErr
 	}
 
-	client := clientLayer.NewIpsecVpnServicesClient(connector)
+	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
 	_, err = client.Update(parents[0], parents[1], parents[2], id, ipSecVpnService)
 	if err != nil {
-		return handleUpdateError("Transit Gateway IPSecVpnService", id, err)
+		return handleUpdateError("TransitGatewayIPSecVpnService", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	return resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d, m)
+	return resourceNsxtPolicyTGWIPSecVpnServicesRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnServicesRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnService ID")
 	}
 
-	client := clientLayer.NewIpsecVpnServicesClient(connector)
+	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, twIpsecVpnParentPathExample)
 	if pathErr != nil {
@@ -81,18 +81,18 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d *schema.ResourceData
 	}
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
-		return handleReadError(d, "Transit Gateway IPSecVpnService", id, err)
+		return handleReadError(d, "TransitGatewayIPSecVpnService", id, err)
 	}
 	setIpsecVPNServices(id, d, obj)
 
 	return nil
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnServicesUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnService ID")
 	}
 
 	parentPath := d.Get("parent_path").(string)
@@ -104,19 +104,19 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceDa
 	revision := int64(d.Get("revision").(int))
 	ipSecVpnService.Revision = &revision
 
-	client := clientLayer.NewIpsecVpnServicesClient(connector)
+	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, ipSecVpnService)
 	if err != nil {
-		return handleUpdateError("Transit Gateway IPSecVpnService", id, err)
+		return handleUpdateError("TGWIPSecVpnService", id, err)
 	}
 
-	return resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d, m)
+	return resourceNsxtPolicyTGWIPSecVpnServicesRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnServicesDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnService ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnService ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -126,23 +126,23 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete(d *schema.ResourceDa
 		return pathErr
 	}
 
-	client := clientLayer.NewIpsecVpnServicesClient(connector)
+	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
-		return handleDeleteError("Transit Gateway IPSecVpnService", id, err)
+		return handleDeleteError("TransitGatewayIPSecVpnService", id, err)
 	}
 
 	return nil
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyTGWIPSecVpnServicesExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, twIpsecVpnParentPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewIpsecVpnServicesClient(connector)
+	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -151,5 +151,5 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesExists(sessionContext utl.S
 	if isNotFoundError(err) {
 		return false, nil
 	}
-	return false, logAPIError("error retrieving Transit Gateway IPSecVpnService resource", err)
+	return false, logAPIError("error retrieving TransitGatewayIPSecVpnService resource", err)
 }

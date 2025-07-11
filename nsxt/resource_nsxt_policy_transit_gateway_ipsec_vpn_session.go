@@ -48,10 +48,10 @@ var transitGatewayIPSecVpnSessionSchema = map[string]*metadata.ExtendedSchema{
 
 func resourceNsxtPolicyTransitGatewayIPSecVpnSession() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyTransitGatewayIPSecVpnSessionCreate,
-		Read:   resourceNsxtPolicyTransitGatewayIPSecVpnSessionRead,
-		Update: resourceNsxtPolicyTransitGatewayIPSecVpnSessionUpdate,
-		Delete: resourceNsxtPolicyTransitGatewayIPSecVpnSessionDelete,
+		Create: resourceNsxtPolicyTGWIPSecVpnSessionCreate,
+		Read:   resourceNsxtPolicyTGWIPSecVpnSessionRead,
+		Update: resourceNsxtPolicyTGWIPSecVpnSessionUpdate,
+		Delete: resourceNsxtPolicyTGWIPSecVpnSessionDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
@@ -59,9 +59,8 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSession() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyTGWIPSecVpnSessionExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	fmt.Println("pooja resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists")
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
 		return false, pathErr
@@ -76,13 +75,13 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists(sessionContext utl.Se
 		return false, nil
 	}
 
-	return false, logAPIError("error retrieving Transit Gateway IPSecVpnSession resource", err)
+	return false, logAPIError("error retrieving TransitGatewayIPSecVpnSession resource", err)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnSessionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnSessionCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists)
+	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTGWIPSecVpnSessionExists)
 	if err != nil {
 		return err
 	}
@@ -98,25 +97,25 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionCreate(d *schema.ResourceDat
 		return err
 	}
 
-	log.Printf("[INFO] Creating Transit Gateway IPSecVpnSession with ID %s", id)
+	log.Printf("[INFO] Creating TransitGatewayIPSecVpnSession with ID %s", id)
 
 	client := clientLayer.NewSessionsClient(connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
-		return handleCreateError("Transit Gateway IPSecVpnSession", id, err)
+		return handleCreateError("TransitGatewayIPSecVpnSession", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyTransitGatewayIPSecVpnSessionRead(d, m)
+	return resourceNsxtPolicyTGWIPSecVpnSessionRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnSessionRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnSessionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnSession ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnSession ID")
 	}
 
 	client := clientLayer.NewSessionsClient(connector)
@@ -128,18 +127,18 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionRead(d *schema.ResourceData,
 
 	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err != nil {
-		return handleReadError(d, "Transit Gateway IPSecVpnSession", id, err)
+		return handleReadError(d, "TransitGatewayIPSecVpnSession", id, err)
 	}
 
 	return setIPSecVpnSessionResourceData(d, obj)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnSessionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnSessionUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnSession ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnSession ID")
 	}
 
 	parentPath := d.Get("parent_path").(string)
@@ -156,17 +155,17 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionUpdate(d *schema.ResourceDat
 	client := clientLayer.NewSessionsClient(connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
-		return handleUpdateError("pooja client update call error TGW IPSecVpnSession", id, err)
+		return handleUpdateError("pooja client update call error TransitGatewayIPSecVpnSession", id, err)
 	}
 
 	d.Set("nsx_id", id)
-	return resourceNsxtPolicyTransitGatewayIPSecVpnSessionRead(d, m)
+	return resourceNsxtPolicyTGWIPSecVpnSessionRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayIPSecVpnSessionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTGWIPSecVpnSessionDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("error obtaining Transit Gateway IPSecVpnSession ID")
+		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnSession ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -180,7 +179,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionDelete(d *schema.ResourceDat
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {
-		return handleDeleteError("Transit Gateway IPSecVpnSession", id, err)
+		return handleDeleteError("TransitGatewayIPSecVpnSession", id, err)
 	}
 
 	return nil
