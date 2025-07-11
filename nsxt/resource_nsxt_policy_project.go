@@ -112,16 +112,24 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"vpc_deployment_scope": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
+				Computed:    false,
 				Description: "Project Vpc network Deployment Scope",
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"default_span_path": {
+							Type:         schema.TypeString,
+							Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
+							ValidateFunc: validatePolicyPath(),
+							Default: "/infra/network-spans/default",
+							Optional:     true,
+							Computed:     false,
+						},
 						"span_reference": {
 							Type:        schema.TypeList,
 							Description: "List of Span object references available with the project for TGW consumption",
 							MaxItems:    10,
-							Computed:    true,
+							Computed:    false,
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -130,13 +138,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 										Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
 										ValidateFunc: validatePolicyPath(),
 										Optional:     true,
-										Computed:     true,
-									},
-									"is_default": {
-										Type:        schema.TypeBool,
-										Description: "Default span indicator",
-										Optional:    true,
-										Computed:    true,
+										Computed:     false,
 									},
 								},
 							},
@@ -232,12 +234,18 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		// There should be just one object here
 		vdScope := vdsIntface.([]interface{})[0].(map[string]interface{})
 		var spanReferences []model.SpanReference
+		defaultSpanPath := vdScope["default_span_path"].(string)
+		isDefault := true
+		spanReferences = append(spanReferences, model.SpanReference{
+			SpanPath:  &defaultSpanPath,
+			IsDefault: &isDefault,
+		})
 		if vdScope["span_reference"] != nil {
 			spanRefs := vdScope["span_reference"].([]interface{})
 			for _, spanRef := range spanRefs {
 				sr := spanRef.(map[string]interface{})
 				spanPath := sr["span_path"].(string)
-				isDefault := sr["is_default"].(bool)
+				isDefault := false
 				spanReferences = append(spanReferences, model.SpanReference{
 					SpanPath:  &spanPath,
 					IsDefault: &isDefault,
