@@ -61,6 +61,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSession() *schema.Resource {
 
 func resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
+	fmt.Println("pooja resourceNsxtPolicyTransitGatewayIPSecVpnSessionExists")
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
 		return false, pathErr
@@ -153,9 +154,9 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnSessionUpdate(d *schema.ResourceDat
 	}
 
 	client := clientLayer.NewSessionsClient(connector)
-	_, err = client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
+	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
-		return handleUpdateError("IPSecVpnSession", id, err)
+		return handleUpdateError("pooja client update call error TGW IPSecVpnSession", id, err)
 	}
 
 	d.Set("nsx_id", id)

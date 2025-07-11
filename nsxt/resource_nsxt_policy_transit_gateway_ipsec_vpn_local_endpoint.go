@@ -93,7 +93,6 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnLocalEndpointCreate(d *schema.Resou
 	obj := ipSecVpnLocalEndpointInitStruct(d)
 
 	log.Printf("[INFO] Creating TransitGateway IPSecVpnLocalEndpoint with ID %s", id)
-	fmt.Printf("pooja----------------***> %s \n %s \n  %s \n  %s \n  %s \n  %s \n ", parentPath, parents[0], parents[1], parents[2], id, parents[3])
 
 	client := clientLayer.NewLocalEndpointsClient(connector)
 

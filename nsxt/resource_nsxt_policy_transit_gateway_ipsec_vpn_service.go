@@ -110,7 +110,7 @@ func resourceNsxtPolicyTransitGatewayIPSecVpnServicesUpdate(d *schema.ResourceDa
 		return handleUpdateError("Transit Gateway IPSecVpnService", id, err)
 	}
 
-	return resourceNsxtPolicyIPSecVpnServiceRead(d, m)
+	return resourceNsxtPolicyTransitGatewayIPSecVpnServicesRead(d, m)
 }
 
 func resourceNsxtPolicyTransitGatewayIPSecVpnServicesDelete(d *schema.ResourceData, m interface{}) error {
