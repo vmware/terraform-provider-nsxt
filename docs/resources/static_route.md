@@ -40,9 +40,9 @@ The following arguments are supported:
 * `logical_router_id` - (Required) Logical router id.
 * `network` - (Required) CIDR.
 * `next_hop` - (Required) List of Next Hops, each with those arguments:
-  * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
-  * `ip_address` - (Optional) Next Hop IP.
-  * `logical_router_port_id` - (Optional) Reference of logical router port to be used for next hop.
+    * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
+    * `ip_address` - (Optional) Next Hop IP.
+    * `logical_router_port_id` - (Optional) Reference of logical router port to be used for next hop.
 
 ## Attributes Reference
 
@@ -51,8 +51,8 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the static route.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `next_hop` additional arguments:
-  * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
-  * `blackhole_action` - Action to be taken on matching packets for NULL routes.
+    * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
+    * `blackhole_action` - Action to be taken on matching packets for NULL routes.
 
 ## Importing
 

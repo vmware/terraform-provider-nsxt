@@ -58,13 +58,13 @@ The following arguments are supported:
 * `lease_time` - (Optional) DHCP lease time in seconds.
 * `ip_address` - (Optional) IP assigned to host. The IP address must belong to the subnet, if any, configured on Segment.
 * `options` - (Optional) DHCPv4 options block
-  * `option121` - (Optional) Specification for DHCP option 121
-    * `static_route` - (Required) Classless static route of DHCP option 121.
-      * `next_hop` - (Required) IP address of next hop of the route.
-      * `network` - (Required) Destination network in CIDR format.
-  * `other` - (Optional) To define DHCP options other than option 121 in generic format.
-    * `code` - (Required) Code of the dhcp option.
-    * `values` - (Optional) Value of the option.
+    * `option121` - (Optional) Specification for DHCP option 121
+          * `static_route` - (Required) Classless static route of DHCP option 121.
+                  * `next_hop` - (Required) IP address of next hop of the route.
+                  * `network` - (Required) Destination network in CIDR format.
+    * `other` - (Optional) To define DHCP options other than option 121 in generic format.
+          * `code` - (Required) Code of the dhcp option.
+          * `values` - (Optional) Value of the option.
 
 Please note, only the following options can be defined in generic
 format. Those other options will be accepted without validation

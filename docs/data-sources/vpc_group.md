@@ -38,8 +38,8 @@ data "nsxt_vpc_group" "test" {
 * `id` - (Optional) The ID of Group to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Group to retrieve.
 * `context` - (Required) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
-  * `vpc_id` - (Required) The ID of the VPC which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
+    * `vpc_id` - (Required) The ID of the VPC which the object belongs to
 
 ## Attributes Reference
 

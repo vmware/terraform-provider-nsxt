@@ -49,9 +49,9 @@ resource "nsxt_policy_tier0_gateway_ha_vip_config" "ha-vip" {
 The following arguments are supported:
 
 * `config` - (Required) List of HA vip configurations (all belonging to the same Tier0 locale-service) containing:
-  * `enabled` - (Optional) Flag indicating if this HA VIP config is enabled. True by default.
-  * `vip_subnets` - (Required) 1 or 2 Ip Addresses/Prefixes in CIDR format, which will be used as floating IP addresses.
-  * `external_interface_paths` - (Required) Paths of 2 external interfaces belonging to the same Tier0 gateway locale-service, which are to be paired to provide redundancy. Floating IP will be owned by one of these interfaces depending upon which edge node is active.
+    * `enabled` - (Optional) Flag indicating if this HA VIP config is enabled. True by default.
+    * `vip_subnets` - (Required) 1 or 2 Ip Addresses/Prefixes in CIDR format, which will be used as floating IP addresses.
+    * `external_interface_paths` - (Required) Paths of 2 external interfaces belonging to the same Tier0 gateway locale-service, which are to be paired to provide redundancy. Floating IP will be owned by one of these interfaces depending upon which edge node is active.
 
 ## Attributes Reference
 

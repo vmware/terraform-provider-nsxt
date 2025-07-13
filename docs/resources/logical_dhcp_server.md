@@ -59,11 +59,11 @@ The following arguments are supported:
 * `domain_name` - (Optional) Domain name.
 * `dns_name_servers` - (Optional) DNS IPs.
 * `dhcp_option_121` - (Optional) DHCP classless static routes.
-  * `network` - (Required) Destination in cidr format.
-  * `next_hop` - (Required) IP address of next hop.
+    * `network` - (Required) Destination in cidr format.
+    * `next_hop` - (Required) IP address of next hop.
 * `dhcp_generic_option` - (Optional) Generic DHCP options.
-  * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
-  * `values` - (Required) List of DHCP option values.
+    * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
+    * `values` - (Required) List of DHCP option values.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this logical DHCP server.
 
 ## Attributes Reference

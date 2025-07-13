@@ -74,15 +74,15 @@ The following arguments are supported:
 * `remote_as_num` - (Required) ASN of the neighbor in ASPLAIN/ASDOT Format.
 * `source_addresses` - (Optional) A list of up to 8 source IP Addresses for BGP peering. `ip_addresses` field of an existing `nsxt_policy_tier0_gateway_interface` can be used here.
 * `bfd_config` - (Optional) The BFD configuration.
-  * `enabled` - (Optional) A boolean flag to enable/disable BFD. Defaults to `false`.
-  * `interval` - (Optional) Time interval between heartbeat packets in milliseconds. Defaults to `500`.
-  * `multiple` - (Optional) Number of times heartbeat packet is missed before BFD declares the neighbor is down. Defaults to `3`.
+    * `enabled` - (Optional) A boolean flag to enable/disable BFD. Defaults to `false`.
+    * `interval` - (Optional) Time interval between heartbeat packets in milliseconds. Defaults to `500`.
+    * `multiple` - (Optional) Number of times heartbeat packet is missed before BFD declares the neighbor is down. Defaults to `3`.
 * `route_filtering` - (Optional) Up to 2 route filters for the neighbor. Note that prior to NSX version 3.0.0, only 1 element is supported.
-  * `address_family` - (Required) Address family type. Must be one of `L2VPN_EVPN`, `IPV4` or `IPV6`. Note the `L2VPN_EVPN` property is only available starting with NSX version 3.0.0.
-  * `enabled`- (Optional) A boolean flag to enable/disable address family. Defaults to `false`.
-  * `in_route_filter`- (Optional) Path of prefix-list or route map to filter routes for IN direction.
-  * `out_route_filter`- (Optional) Path of prefix-list or route map to filter routes for OUT direction.
-  * `maximum_routes` - (Optional) Maximum number of routes for the address family. Note this property is only available starting with NSX version 3.0.0.
+    * `address_family` - (Required) Address family type. Must be one of `L2VPN_EVPN`, `IPV4` or `IPV6`. Note the `L2VPN_EVPN` property is only available starting with NSX version 3.0.0.
+    * `enabled`- (Optional) A boolean flag to enable/disable address family. Defaults to `false`.
+    * `in_route_filter`- (Optional) Path of prefix-list or route map to filter routes for IN direction.
+    * `out_route_filter`- (Optional) Path of prefix-list or route map to filter routes for OUT direction.
+    * `maximum_routes` - (Optional) Maximum number of routes for the address family. Note this property is only available starting with NSX version 3.0.0.
 
 ## Attributes Reference
 

@@ -49,11 +49,11 @@ The following arguments are supported:
 * `bpdu_filter_enabled` - (Optional) Indicates whether BPDU filter is enabled
 * `bpdu_filter_whitelist` - (Optional) Set of allowed MAC addresses to be excluded from BPDU filtering, if enabled.
 * `rate_limits` - (Optional) Rate limit definitions for broadcast and multicast traffic.
-  * `enabled` - (Optional) Whether rate limiting is enabled.
-  * `rx_broadcast` - (Optional) Incoming broadcast traffic limit in packets per second.
-  * `rx_multicast` - (Optional) Incoming multicast traffic limit in packets per second.
-  * `tx_broadcast` - (Optional) Outgoing broadcast traffic limit in packets per second.
-  * `tx_multicast` - (Optional) Outgoing multicast traffic limit in packets per second.
+    * `enabled` - (Optional) Whether rate limiting is enabled.
+    * `rx_broadcast` - (Optional) Incoming broadcast traffic limit in packets per second.
+    * `rx_multicast` - (Optional) Incoming multicast traffic limit in packets per second.
+    * `tx_broadcast` - (Optional) Outgoing broadcast traffic limit in packets per second.
+    * `tx_multicast` - (Optional) Outgoing multicast traffic limit in packets per second.
 
 ## Attributes Reference
 

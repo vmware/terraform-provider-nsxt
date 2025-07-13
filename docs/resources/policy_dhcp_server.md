@@ -52,7 +52,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The Policy path to the edge cluster for this DHCP Server.
 * `lease_time` - (Optional) IP address lease time in seconds. Valid values from `60` to `4294967295`. Default is `86400`.
 * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. The first edge node is assigned as active edge, and second one as standby edge.

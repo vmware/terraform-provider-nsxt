@@ -66,12 +66,12 @@ The following arguments are supported:
 If not specified then in-use prefixes are configured as TGW_PREFIXES routes on Tier-0 gateway.
 * `inbound_remote_networks` - (Optional) List of inbound remote network routes for transit gateways. This attribute is supported with NSX 9.1.0 onwards.
 * `advertise_outbound_networks` - (Optional) Configure advertisement of outboud networks. This attribute is supported with NSX 9.1.0 onwards.
-  * `allow_external_blocks` - (Optional) IP blocks (in CIDR format) used in advertisement filter to advertise prefixes from transit gateway.
-  * `allow_private` - (Optional) Setting to true allows tenant user to configure advertisement rules and nat. If set to true, snat can not be enabled for this connection.
+    * `allow_external_blocks` - (Optional) IP blocks (in CIDR format) used in advertisement filter to advertise prefixes from transit gateway.
+    * `allow_private` - (Optional) Setting to true allows tenant user to configure advertisement rules and nat. If set to true, snat can not be enabled for this connection.
 * `nat_config` - (Optional) List of inbound remote network routes for transit gateways. This attribute is supported with NSX 9.1.0 onwards.
-  * `enable_snat` - (Optional) Enable the provider managed SNAT rule with translated ip from ip blocks. Defaults to `false`. Note that if set to `true`, `allow_private` in `advertise_outbound_networks` will not be supported.
-  * `ip_block` - (Optional) IP block (in CIDR format - must be part of `allow_external_blocks` for advertisement
-  * `logging_enabled` - (Optional) Enable NAT translation logging. Defaults to `false`.
+    * `enable_snat` - (Optional) Enable the provider managed SNAT rule with translated ip from ip blocks. Defaults to `false`. Note that if set to `true`, `allow_private` in `advertise_outbound_networks` will not be supported.
+    * `ip_block` - (Optional) IP block (in CIDR format - must be part of `allow_external_blocks` for advertisement
+    * `logging_enabled` - (Optional) Enable NAT translation logging. Defaults to `false`.
 
 ## Attributes Reference
 

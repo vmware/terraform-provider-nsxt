@@ -53,7 +53,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `policy_path` - (Required) The path of the Security Policy which the object belongs to
 * `context` - (Optional) The context which the object belongs to. If it's not provided, it will be derived from `policy_path`.
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `sequence_number` - (Required) This field is used to resolve conflicts between multiple Rules under Security or Gateway Policy for a Domain. Please note that sequence numbers should start with 1 and not 0 to avoid confusion.
 * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
 * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
@@ -69,29 +69,29 @@ The following arguments are supported:
 * `scope` - (Optional) Set of policy object paths where the rule is applied.
 * `services` - (Optional) Set of service paths to match.
 * `service_entries` - (Optional) Set of explicit protocol/port service definition
-  * `icmp_entry` - (Optional) Set of ICMP type service entries
-    * `display_name` - (Optional) Display name of the service entry
-    * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
-    * `icmp_code` - (Optional) ICMP message code
-    * `icmp_type` - (Optional) ICMP message type
-  * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
-    * `display_name` - (Optional) Display name of the service entry
-    * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
-    * `destination_ports` - (Optional) Set of destination ports
-    * `source_ports` - (Optional) Set of source ports
-  * `igmp_entry` - (Optional) Set of IGMP type service entries
-    * `display_name` - (Optional) Display name of the service entry
-  * `ether_type_entry` - (Optional) Set of Ether type service entries
-    * `display_name` - (Optional) Display name of the service entry
-    * `ether_type` - (Required) Type of the encapsulated protocol
-  * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
-    * `display_name` - (Optional) Display name of the service entry
-    * `protocol` - (Required) IP protocol number
-  * `algorithm_entry` - (Optional) Set of Algorithm type service entries
-    * `display_name` - (Optional) Display name of the service entry
-    * `destination_port` - (Required) a single destination port
-    * `source_ports` - (Optional) Set of source ports/ranges
-    * `algorithm` - (Required) Algorithm: one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`
+    * `icmp_entry` - (Optional) Set of ICMP type service entries
+          * `display_name` - (Optional) Display name of the service entry
+          * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
+          * `icmp_code` - (Optional) ICMP message code
+          * `icmp_type` - (Optional) ICMP message type
+    * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
+          * `display_name` - (Optional) Display name of the service entry
+          * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
+          * `destination_ports` - (Optional) Set of destination ports
+          * `source_ports` - (Optional) Set of source ports
+    * `igmp_entry` - (Optional) Set of IGMP type service entries
+          * `display_name` - (Optional) Display name of the service entry
+    * `ether_type_entry` - (Optional) Set of Ether type service entries
+          * `display_name` - (Optional) Display name of the service entry
+          * `ether_type` - (Required) Type of the encapsulated protocol
+    * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
+          * `display_name` - (Optional) Display name of the service entry
+          * `protocol` - (Required) IP protocol number
+    * `algorithm_entry` - (Optional) Set of Algorithm type service entries
+          * `display_name` - (Optional) Display name of the service entry
+          * `destination_port` - (Required) a single destination port
+          * `source_ports` - (Optional) Set of source ports/ranges
+          * `algorithm` - (Required) Algorithm: one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`
 * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
 
 ## Attributes Reference

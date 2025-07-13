@@ -38,11 +38,11 @@ The following arguments are supported:
 * `edge_transport_node_path` - (Required) Policy path for Policy Edge Transport Node to associate with remote tunnel endpoint.
 * `host_switch_name` - (Required) The host switch name to be used for the remote tunnel endpoint.
 * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
-  * `static_ipv4_list` - (Optional) IP assignment specification value for Static IPv4 List.
-    * `default_gateway` - (Required) Gateway IP.
-    * `ip_addresses` - (Required) List of IPV4 addresses for edge transport node host switch virtual tunnel endpoints.
-    * `subnet_mask` - (Required) Subnet mask.
-  * `static_ipv4_pool` - (Optional) IP assignment specification for Static IPv4 Pool. Input can be MP ip pool UUID or policy path of IP pool.
+    * `static_ipv4_list` - (Optional) IP assignment specification value for Static IPv4 List.
+          * `default_gateway` - (Required) Gateway IP.
+          * `ip_addresses` - (Required) List of IPV4 addresses for edge transport node host switch virtual tunnel endpoints.
+          * `subnet_mask` - (Required) Subnet mask.
+    * `static_ipv4_pool` - (Optional) IP assignment specification for Static IPv4 Pool. Input can be MP ip pool UUID or policy path of IP pool.
 * `vlan` - (Required) VLAN id for remote tunnel endpoint.
 * `named_teaming_policy` - (Optional) The named teaming policy to be used by the remote tunnel endpoint.
 

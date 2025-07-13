@@ -67,18 +67,18 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `ip_address` - (Required) The IPv4 address must belong to the subnet, if any, configured on Segment.
 * `mac_address` - (Required) MAC address of the host.
 * `gateway_address` - (Optional) Gateway IPv4 Address. When not specified, gateway address is auto-assigned from segment configuration.
 * `hostname` - (Optional) Hostname to assign to the host.
 * `lease_time` - (Optional) Lease time, in seconds. Defaults to 86400.
 * `dhcp_option_121` - (Optional) DHCP classless static routes.
-  * `network` - (Required) Destination in cidr format.
-  * `next_hop` - (Required) IP address of next hop.
+    * `network` - (Required) Destination in cidr format.
+    * `next_hop` - (Required) IP address of next hop.
 * `dhcp_generic_option` - (Optional) Generic DHCP options.
-  * `dhcp_generic_option` - (Optional) Generic DHCP option number. Please note not all options are supported by the platform.
-  * `values` - (Required) List of DHCP option values.
+    * `dhcp_generic_option` - (Optional) Generic DHCP option number. Please note not all options are supported by the platform.
+    * `values` - (Required) List of DHCP option values.
 
 ## Attributes Reference
 

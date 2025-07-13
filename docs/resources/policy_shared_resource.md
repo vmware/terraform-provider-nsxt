@@ -34,8 +34,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `share_path` - (Required) Share policy path to associate the resource to.
 * `resource_object` _ (Required) List of resources to be shared.
-  * `include_children` - (Optional) Denotes if the children of the shared path are also shared.
-  * `resource_path` - (Required) Path of the resource to be shared.
+    * `include_children` - (Optional) Denotes if the children of the shared path are also shared.
+    * `resource_path` - (Required) Path of the resource to be shared.
 
 ## Attributes Reference
 
