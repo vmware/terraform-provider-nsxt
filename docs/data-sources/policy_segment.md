@@ -47,8 +47,8 @@ data "nsxt_policy_segment" "test_global" {
 * `id` - (Optional) The ID of Segment to retrieve. If ID is specified, no additional argument should be configured.
 * `display_name` - (Optional) The Display Name prefix of the Segment to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Optional) The ID of the project which the object belongs to
-  * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)
+    * `project_id` - (Optional) The ID of the project which the object belongs to
+    * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)
 
 ## Attributes Reference
 

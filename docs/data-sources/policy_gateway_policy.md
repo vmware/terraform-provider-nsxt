@@ -41,7 +41,7 @@ data "nsxt_policy_gateway_policy" "demopolicy" {
 * `category` - (Optional) Category of the policy to retrieve. May be useful to retrieve default policy.
 * `display_name` - (Optional) The Display Name prefix of the policy to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

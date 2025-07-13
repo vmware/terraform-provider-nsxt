@@ -69,31 +69,31 @@ The following arguments are supported:
 * `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`
 * `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated` or `Private_TGW`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
-  * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
-  * `connectivity_state` - (Optional) Connectivity state for the subnet, one of `CONNECTED`, `DISCONNECTED`
-  * `dhcp_server_addresses` - (Optional) List of DHCP server addresses per address family, in CIDR format
-  * `static_ip_allocation` - (Optional) Static IP allocation configuration
-    * `enabled` - (Optional) Enable ip and mac address allocation for VPC Subnet ports from static ip pool. To
+    * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
+    * `connectivity_state` - (Optional) Connectivity state for the subnet, one of `CONNECTED`, `DISCONNECTED`
+    * `dhcp_server_addresses` - (Optional) List of DHCP server addresses per address family, in CIDR format
+    * `static_ip_allocation` - (Optional) Static IP allocation configuration
+          * `enabled` - (Optional) Enable ip and mac address allocation for VPC Subnet ports from static ip pool. To
           enable this,
           dhcp pool shall be empty and static ip pool shall own all available ip addresses.
-  * `extra_configs` - (Optional) List of vendor specific configuration key/value pairs
-    * `config_pair` - (Required)
-      * `key` - (Required) key for vendor-specific configuration
-      * `value` - (Required) value for vendor-specific configuration
-  * `enable_vlan_extension` - (Optional) Enabling VLAN connection for the subnet. The user must configure the exclusive IP block for this subnet. This IP block must be leveraged by a distributed VLAN connection. The default value for this will be false. This attribute is supported with NSX 9.1.0 onwards.
+    * `extra_configs` - (Optional) List of vendor specific configuration key/value pairs
+          * `config_pair` - (Required)
+                  * `key` - (Required) key for vendor-specific configuration
+                  * `value` - (Required) value for vendor-specific configuration
+    * `enable_vlan_extension` - (Optional) Enabling VLAN connection for the subnet. The user must configure the exclusive IP block for this subnet. This IP block must be leveraged by a distributed VLAN connection. The default value for this will be false. This attribute is supported with NSX 9.1.0 onwards.
 * `dhcp_config` - (Optional) DHCP configuration block
-  * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`.
+    * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`.
        Default is `DHCP_DEACTIVATED`
-  * `dhcp_server_additional_config` - (Optional) Additional DHCP server config
-    * `options` - (Optional) DHCPv4 options block
-      * `option121` - (Optional) Specification for DHCP option 121
-        * `static_route` - (Optional) Static route
-          * `network` - (Optional) Destination network in CIDR format
-          * `next_hop` - (Optional) IP Address for next hop of the route
-        * `other` - (Optional) DHCP option in generic format
-          * `code` - (Optional) Code of DHCP option
-          * `values` - (Optional) List of values in string format
-    * `reserved_ip_ranges` - (Optional) Specifies IP ranges that are reserved and excluded from being assigned by the DHCP server to clients.
+    * `dhcp_server_additional_config` - (Optional) Additional DHCP server config
+          * `options` - (Optional) DHCPv4 options block
+                  * `option121` - (Optional) Specification for DHCP option 121
+                            * `static_route` - (Optional) Static route
+                                        * `network` - (Optional) Destination network in CIDR format
+                                        * `next_hop` - (Optional) IP Address for next hop of the route
+                            * `other` - (Optional) DHCP option in generic format
+                                        * `code` - (Optional) Code of DHCP option
+                                        * `values` - (Optional) List of values in string format
+          * `reserved_ip_ranges` - (Optional) Specifies IP ranges that are reserved and excluded from being assigned by the DHCP server to clients.
          This is a list of IP ranges or IP addresses.
 * `ip_blocks` - (Optional) List of IP block path for subnet IP allocation
 

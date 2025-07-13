@@ -38,11 +38,11 @@ The following arguments are supported:
 * `fail_if_rtt_exceeded` - (Optional) Fail onboarding if maximum RTT exceeded. Default is true.
 * `maximum_rtt` - (Optional) Maximum acceptable packet round trip time (RTT). Default is 250.
 * `site_connection_info` - (Optional) Connection information.
-  * `fqdn` - (Optional) Fully Qualified Domain Name of the Management Node.
-  * `password` - (Optional) Password.
-  * `site_uuid` - (Optional) ID of Site. This attribute is supported with NSX 4.1.0 onwards.
-  * `thumbprint` - (Optional) Thumbprint of Enforcement Point.
-  * `username` - (Optional) Username.
+    * `fqdn` - (Optional) Fully Qualified Domain Name of the Management Node.
+    * `password` - (Optional) Password.
+    * `site_uuid` - (Optional) ID of Site. This attribute is supported with NSX 4.1.0 onwards.
+    * `thumbprint` - (Optional) Thumbprint of Enforcement Point.
+    * `username` - (Optional) Username.
 * `site_type` - (Required) Persistent Site Type. Allowed values are `ONPREM_LM`, `SDDC_LM`. This attribute is supported with NSX 4.1.0 onwards.
 
 ## Attributes Reference

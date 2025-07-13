@@ -39,11 +39,11 @@ The following arguments are supported:
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP pool.
 * `subnet` - (Optional) Subnets can be IPv4 or IPv6 and they should not overlap. The maximum number will not exceed 5 subnets. Each subnet has the following arguments:
-  * `allocation_ranges` - (Required) A collection of IPv4 Pool Ranges
-  * `cidr` - (Required) Network address and the prefix length which will be associated with a layer-2 broadcast domainIPv4 Pool Ranges
-  * `dns_nameservers` - (Optional) A collection of up to 3 DNS servers for the subnet
-  * `dns_suffix` - (Optional) The DNS suffix for the DNS server
-  * `gateway_ip` - (Optional) The default gateway address on a layer-3 router
+    * `allocation_ranges` - (Required) A collection of IPv4 Pool Ranges
+    * `cidr` - (Required) Network address and the prefix length which will be associated with a layer-2 broadcast domainIPv4 Pool Ranges
+    * `dns_nameservers` - (Optional) A collection of up to 3 DNS servers for the subnet
+    * `dns_suffix` - (Optional) The DNS suffix for the DNS server
+    * `gateway_ip` - (Optional) The default gateway address on a layer-3 router
 
 ## Attributes Reference
 

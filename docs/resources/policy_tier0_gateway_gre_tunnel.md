@@ -93,16 +93,16 @@ The following arguments are supported:
 * `enabled` - (Optional) - Enable/Disable Tunnel. Default is true.
 * `mtu` - (Optional) - Maximum transmission unit. Default is 1476.
 * `tunnel_address` - (Required) Tunnel Address object parameter. At least one is required, maximum is 8.
-  * `edge_path` - (Required) Policy edge node path.
-  * `source_address` - (Required) IPv4 source address.
-  * `tunnel_interface_subnet` - (Required) Interface Subnet object parameter. At least one is required, maximum is 2.
-    * `ip_addresses` - (Required) List of IP addresses assigned to interface.
-    * `prefix_len` - (Required) Subnet prefix length.
+    * `edge_path` - (Required) Policy edge node path.
+    * `source_address` - (Required) IPv4 source address.
+    * `tunnel_interface_subnet` - (Required) Interface Subnet object parameter. At least one is required, maximum is 2.
+          * `ip_addresses` - (Required) List of IP addresses assigned to interface.
+          * `prefix_len` - (Required) Subnet prefix length.
 * `tunnel_keepalive` - (Optional) tunnel keep alive object. One is required.
-  * `dead_time_multiplier` - (Optional) Dead time multiplier. Default is 3.
-  * `enable_keepalive_ack` - (Optional) Enable tunnel keep alive acknowledge. Default is true.
-  * `enabled` - (Optional) Enable/Disable tunnel keep alive. Default is false.
-  * `keepalive_interval` - (Optional) Keep alive interval. Default is 10.
+    * `dead_time_multiplier` - (Optional) Dead time multiplier. Default is 3.
+    * `enable_keepalive_ack` - (Optional) Enable tunnel keep alive acknowledge. Default is true.
+    * `enabled` - (Optional) Enable/Disable tunnel keep alive. Default is false.
+    * `keepalive_interval` - (Optional) Keep alive interval. Default is 10.
 
 ## Attributes Reference
 

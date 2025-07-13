@@ -70,7 +70,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `bpdu_filter_allow` - (Optional) List of allowed MAC addresses to be excluded from BPDU filtering. List of allowed MACs - `01:80:c2:00:00:00`, `01:80:c2:00:00:01`, `01:80:c2:00:00:02`, `01:80:c2:00:00:03`, `01:80:c2:00:00:04`, `01:80:c2:00:00:05`, `01:80:c2:00:00:06`, `01:80:c2:00:00:07`, `01:80:c2:00:00:08`, `01:80:c2:00:00:09`, `01:80:c2:00:00:0a`, `01:80:c2:00:00:0b`, `01:80:c2:00:00:0c`, `01:80:c2:00:00:0d`, `01:80:c2:00:00:0e`, `01:80:c2:00:00:0f`, `00:e0:2b:00:00:00`, `00:e0:2b:00:00:04`, `00:e0:2b:00:00:06`, `01:00:0c:00:00:00`, `01:00:0c:cc:cc:cc`, `01:00:0c:cc:cc:cd`, `01:00:0c:cd:cd:cd`, `01:00:0c:cc:cc:c0`, `01:00:0c:cc:cc:c1`, `01:00:0c:cc:cc:c2`, `01:00:0c:cc:cc:c3`, `01:00:0c:cc:cc:c4`, `01:00:0c:cc:cc:c5`, `01:00:0c:cc:cc:c6`, `01:00:0c:cc:cc:c7`.
 * `bpdu_filter_enable` - (Optional) Indicates whether BPDU filter is enabled. Default is `True`.
 * `dhcp_client_block_enabled` - (Optional) Filters DHCP server and/or client traffic. Default is `False`.
@@ -80,10 +80,10 @@ The following arguments are supported:
 * `non_ip_traffic_block_enabled` - (Optional) A flag to block all traffic except IP/(G)ARP/BPDU. Default is `False`.
 * `ra_guard_enabled` - (Optional) Enable or disable Router Advertisement Guard. Default is `False`
 * `rate_limit` - (Optional) Rate limits.
-  * `rx_broadcast` - (Optional) Incoming broadcast traffic limit in packets per second.
-  * `rx_multicast` - (Optional) Incoming multicast traffic limit in packets per second.
-  * `tx_broadcast` - (Optional) Outgoing broadcast traffic limit in packets per second.
-  * `tx_multicast` - (Optional) Outgoing multicast traffic limit in packets per second.
+    * `rx_broadcast` - (Optional) Incoming broadcast traffic limit in packets per second.
+    * `rx_multicast` - (Optional) Incoming multicast traffic limit in packets per second.
+    * `tx_broadcast` - (Optional) Outgoing broadcast traffic limit in packets per second.
+    * `tx_multicast` - (Optional) Outgoing multicast traffic limit in packets per second.
 * `rate_limits_enabled` - (Optional) Enable or disable Rate Limits. Default is `False`.
 
 ## Attributes Reference

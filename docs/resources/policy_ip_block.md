@@ -87,16 +87,16 @@ The following arguments are supported:
 * `cidr_list` - (Optional) Array of contiguous IP address spaces represented by network address and prefix length. This attribute is supported with NSX 9.1.0 onwards. Either cidr or cidr_list should be set.
 * `is_subnet_exclusive` - (Optional) If this property is set to true, then this block is reserved for direct vlan extension use case. This attribute is supported starting from NSX version 9.1.0.
 * `range_list` - (Optional) Represents list of IP address ranges in the form of start and end IPs. This attribute is supported with NSX 9.1.0 onwards.
-  * `start` - (Required) The start IP address for the allocation range.
-  * `end` - (Required) The end IP address for the allocation range.
+    * `start` - (Required) The start IP address for the allocation range.
+    * `end` - (Required) The end IP address for the allocation range.
 * `reserved_ips` - (Optional) Represents list of reserved IP address in the form of start and end IPs. This attribute is supported with NSX 9.1.0 onwards.
-  * `start` - (Required) The start IP address for the allocation range.
-  * `end` - (Required) The end IP address for the allocation range.
+    * `start` - (Required) The start IP address for the allocation range.
+    * `end` - (Required) The end IP address for the allocation range.
 * `visibility` - (Optional) Visibility of the IP Block. Valid options are `PRIVATE`, `EXTERNAL` or unset. Visibility cannot be changed once the block is associated with other resources.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP Block.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

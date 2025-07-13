@@ -37,7 +37,7 @@ resource "nsxt_policy_distributed_flood_protection_profile" "test" {
 * `id` - (Optional) The ID of Distributed Flood Protection Profile to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Distributed Flood Protection Profile to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

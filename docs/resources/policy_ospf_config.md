@@ -43,8 +43,8 @@ The following arguments are supported:
 * `default_originate` - (Optional) A boolean flag to configure advertisement of default route into OSPF domain. Default is `false`.
 * `graceful_restart_mode` - (Optional) Graceful Restart Mode, one of `HELPER_ONLY` or `DISABLED`. Default is `HELPER_ONLY`.
 * `summary_address`- (Optional) Repeatable block to define addresses to summarize or filter external routes.
-  * `prefix` - (Required) OSPF Summary address in CIDR format.
-  * `advertise` - (Optional) A boolean flag to configure advertisement of external routes into the OSPF domain. Default is `true`.
+    * `prefix` - (Required) OSPF Summary address in CIDR format.
+    * `advertise` - (Optional) A boolean flag to configure advertisement of external routes into the OSPF domain. Default is `true`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's OSPF configuration.
 
 ## Attributes Reference

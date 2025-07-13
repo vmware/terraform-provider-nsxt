@@ -43,13 +43,13 @@ The following arguments are supported:
 * `private_tgw_ip_blocks` - (Optional) Policy path of Private IP block
 * `external_ip_blocks` - (Optional) Policy path of External IP block
 * `service_gateway` - (Optional) Service Gateway configuration
-  * `nat_config` - (Optional) NAT configuration
-    * `enable_default_snat` - (Optional) Auto configured SNAT for private subnet.
-  * `qos_config` - (Optional) None
-    * `ingress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in ingress direction.
-    * `egress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in egress direction.
-  * `enable` - (Optional) Status of the VPC attachment SR.
-  * `edge_cluster_paths` - (Optional) List of edge cluster paths for VPC attachment SR realization. If edge cluster is not specified transit gateway's edge cluster will be used.
+    * `nat_config` - (Optional) NAT configuration
+          * `enable_default_snat` - (Optional) Auto configured SNAT for private subnet.
+    * `qos_config` - (Optional) None
+          * `ingress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in ingress direction.
+          * `egress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in egress direction.
+    * `enable` - (Optional) Status of the VPC attachment SR.
+    * `edge_cluster_paths` - (Optional) List of edge cluster paths for VPC attachment SR realization. If edge cluster is not specified transit gateway's edge cluster will be used.
 
 ## Attributes Reference
 

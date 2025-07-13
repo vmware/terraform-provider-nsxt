@@ -49,8 +49,8 @@ data "nsxt_policy_tier1_gateway" "tier1_router_global" {
 * `id` - (Optional) The ID of Tier-1 gateway to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Tier-1 gateway to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Optional) The ID of the project which the object belongs to
-  * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)
+    * `project_id` - (Optional) The ID of the project which the object belongs to
+    * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)
 
 ## Attributes Reference
 

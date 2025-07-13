@@ -66,7 +66,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `icmp_active_flow_limit` - (Optional) Active ICMP connections limit. If this field is empty, firewall will not set a limit to active ICMP connections. Minimum: 1, Maximum: 1000000.
 * `other_active_conn_limit` - (Optional) Timeout after first TN. If this field is empty, firewall will not set a limit to other active connections. besides UDP, ICMP and half open TCP connections. Minimum: 1, Maximum: 1000000.
 * `tcp_half_open_conn_limit` - (Optional) Active half open TCP connections limit. If this field is empty, firewall will not set a limit to half open TCP connections. Minimum: 1, Maximum: 1000000.
