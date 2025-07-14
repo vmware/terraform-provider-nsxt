@@ -281,7 +281,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(createFlow bool) stri
 		attrMap = accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes
 	}
 	return testAccNsxtPolicyTGWIPSecVpnSessionPreConditionTemplate() +
-		// 	+ testAccNsxtPolicyTGWIPSecVpnSessionResourceShareTemplate() +
+		//// Placeholder for configuration paths (API not yet implemented):
 		// 	  ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
 		//   tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
 		//   dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
@@ -291,7 +291,6 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   description                = "%s"
   enabled                    = "%s"
   parent_path                = nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
-
   local_endpoint_path        = nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test.path
   vpn_type                   = "%s"
   authentication_mode        = "%s"
@@ -403,73 +402,6 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
 }`, getEdgeClusterName(), SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName)
 }
 
-// func testAccNsxtPolicyTGWIPSecVpnSessionResourceShareTemplate() string {
-// 	return fmt.Sprintln(`
-// resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
-//   display_name          = "test_ike-profile-01"
-//   description           = "Ike profile for ipsec vpn session"
-//   encryption_algorithms = ["AES_128"]
-//   digest_algorithms     = ["SHA2_256"]
-//   dh_groups             = ["GROUP14"]
-//   ike_version           = "IKE_V2"
-// }
-
-// resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
-//   display_name          = "test_tunnel-profile-01"
-//   description           = "Terraform provisioned IPSec VPN Ike Profile"
-//   df_policy             = "COPY"
-//   encryption_algorithms = ["AES_128"]
-//   digest_algorithms     = ["SHA2_256"]
-//   dh_groups             = ["GROUP14"]
-//   sa_life_time          = 7200
-// }
-
-// resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
-//   display_name       = "test_dpd-profile-01"
-//   description        = "Terraform provisioned IPSec VPN DPD Profile"
-//   dpd_probe_mode     = "ON_DEMAND"
-//   dpd_probe_interval = 1
-//   enabled            = true
-//   retry_count        = 8
-// }
-
-// resource "nsxt_policy_share" "test" {
-//   display_name = "test_share"
-//   description  = "Terraform provisioned Share"
-//   shared_with  = [nsxt_policy_project.test.path]
-// }
-
-// resource "nsxt_policy_shared_resource" "test_share_tunnel" {
-//   display_name = "test_tunnel_share"
-//   description  = "Terraform provisioned Shared Resource"
-
-//   share_path = nsxt_policy_share.test.path
-//   resource_object {
-//     resource_path = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
-//   }
-// }
-
-// resource "nsxt_policy_shared_resource" "test_share_ike" {
-//   display_name = "test_ike_share"
-//   description  = "Terraform provisioned Shared Resource"
-
-//   share_path = nsxt_policy_share.test.path
-//   resource_object {
-//     resource_path = nsxt_policy_ipsec_vpn_ike_profile.test.path
-//   }
-// }
-
-// resource "nsxt_policy_shared_resource" "test_share_dpd" {
-//   display_name = "test_dpd_share"
-//   description  = "Terraform provisioned Shared Resource"
-
-//   share_path = nsxt_policy_share.test.path
-//   resource_object {
-//     resource_path = nsxt_policy_ipsec_vpn_dpd_profile.test.path
-//   }
-// }`)
-// }
-
 func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tranist_gateway_ipsec_vpn_session.test"
@@ -545,7 +477,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 
 func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic() string {
 	attrMap := accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes
-	return testAccNsxtPolicyTGWIPSecVpnSessionPreConditionTemplate() + //+ testAccNsxtPolicyTGWIPSecVpnSessionResourceShareTemplate() +
+	return testAccNsxtPolicyTGWIPSecVpnSessionPreConditionTemplate() +
 		fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   display_name        = "%s"

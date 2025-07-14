@@ -14,7 +14,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/ipsec_vpn_services"
+	tgwclientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/ipsec_vpn_services"
 )
 
 var iPSecVpnLocalEndpointPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/ipsec-vpn-local-endpoints/[ipsec-vpn-local-endpoint]"
@@ -54,7 +54,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointExists(sessionContext utl.Session
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewLocalEndpointsClient(connector)
+	client := tgwclientLayer.NewLocalEndpointsClient(connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -85,7 +85,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m 
 
 	log.Printf("[INFO] Creating TransitGatewayIPSecVpnLocalEndpoint with ID %s", id)
 
-	client := clientLayer.NewLocalEndpointsClient(connector)
+	client := tgwclientLayer.NewLocalEndpointsClient(connector)
 
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
@@ -105,7 +105,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointRead(d *schema.ResourceData, m in
 		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnLocalEndpoint ID")
 	}
 
-	client := clientLayer.NewLocalEndpointsClient(connector)
+	client := tgwclientLayer.NewLocalEndpointsClient(connector)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
@@ -150,7 +150,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointUpdate(d *schema.ResourceData, m 
 	revision := int64(d.Get("revision").(int))
 	obj.Revision = &revision
 
-	client := clientLayer.NewLocalEndpointsClient(connector)
+	client := tgwclientLayer.NewLocalEndpointsClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleUpdateError("TransitGatewayIPSecVpnLocalEndpoint", id, err)
@@ -172,7 +172,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointDelete(d *schema.ResourceData, m 
 		return pathErr
 	}
 
-	client := clientLayer.NewLocalEndpointsClient(connector)
+	client := tgwclientLayer.NewLocalEndpointsClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {

@@ -14,7 +14,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/ipsec_vpn_services"
+	tgwclientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/ipsec_vpn_services"
 )
 
 var tgwIPSecVpnSessionPathExample = getMultitenancyPathExample("/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/ipsec-vpn-sessions/[ipsec-vpn-session]")
@@ -65,7 +65,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionExists(sessionContext utl.SessionContex
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewSessionsClient(connector)
+	client := tgwclientLayer.NewSessionsClient(connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -99,7 +99,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating TransitGatewayIPSecVpnSession with ID %s", id)
 
-	client := clientLayer.NewSessionsClient(connector)
+	client := tgwclientLayer.NewSessionsClient(connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleCreateError("TransitGatewayIPSecVpnSession", id, err)
@@ -118,7 +118,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnSession ID")
 	}
 
-	client := clientLayer.NewSessionsClient(connector)
+	client := tgwclientLayer.NewSessionsClient(connector)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
@@ -152,7 +152,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	client := clientLayer.NewSessionsClient(connector)
+	client := tgwclientLayer.NewSessionsClient(connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleUpdateError("pooja client update call error TransitGatewayIPSecVpnSession", id, err)
@@ -175,7 +175,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionDelete(d *schema.ResourceData, m interf
 		return pathErr
 	}
 
-	client := clientLayer.NewSessionsClient(connector)
+	client := tgwclientLayer.NewSessionsClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {

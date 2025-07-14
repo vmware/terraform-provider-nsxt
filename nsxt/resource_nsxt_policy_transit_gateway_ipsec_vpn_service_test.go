@@ -23,9 +23,6 @@ var accTestPolicyTGWIPSecVpnServicesCreateAttributes = map[string]string{
 	"sources":       "192.168.10.0/24",
 	"destinations":  "192.169.10.0/24",
 	"action":        "BYPASS",
-	// "sequence_number": "2",
-	// "subnet":          "test-create",
-	// "subnet":          "test-create",
 }
 
 var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
@@ -37,9 +34,6 @@ var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
 	"sources":       "192.170.10.0/24",
 	"destinations":  "192.171.10.0/24",
 	"action":        "BYPASS",
-	// "sequence_number": "5",
-	// "subnet":          "test-update",
-	// "subnet":          "test-update",
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
@@ -206,7 +200,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"]) //, attrMap["sequence_number"], attrMap["subnet"], attrMap["subnet"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
 }
 
 func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic() string {
