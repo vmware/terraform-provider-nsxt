@@ -229,6 +229,8 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 	vdsIntface, ok := d.GetOk("vpc_deployment_scope")
 	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 {
+		vcFolder := true
+		obj.VcFolder = &vcFolder
 		// There should be just one object here
 		vdScope := vdsIntface.([]interface{})[0].(map[string]interface{})
 		var spanReferences []model.SpanReference
