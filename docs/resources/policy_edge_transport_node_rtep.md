@@ -44,7 +44,7 @@ The following arguments are supported:
           * `subnet_mask` - (Required) Subnet mask.
     * `static_ipv4_pool` - (Optional) IP assignment specification for Static IPv4 Pool. Input can be MP ip pool UUID or policy path of IP pool.
 * `vlan` - (Required) VLAN id for remote tunnel endpoint.
-* `named_teaming_policy` - (Optional) The named teaming policy to be used by the remote tunnel endpoint.
+* `named_teaming_policy` - (Required) The named teaming policy to be used by the remote tunnel endpoint.
 
 ## Importing
 
