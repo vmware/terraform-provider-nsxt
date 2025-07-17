@@ -38,3 +38,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `is_default` - Specifies if the Transit Gateway is set as the default.
