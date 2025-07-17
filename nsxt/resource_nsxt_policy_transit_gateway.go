@@ -55,16 +55,6 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "TransitSubnets",
 		},
 	},
-	"is_default": {
-		Schema: schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "bool",
-			SdkFieldName: "IsDefault",
-		},
-	},
 	"high_availability_config": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,

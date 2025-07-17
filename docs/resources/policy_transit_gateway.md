@@ -33,7 +33,6 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `transit_subnets` - (Optional) Array of IPV4 CIDRs for internal VPC attachment networks.
-* `is_default` - (Optional) Default transit gateway indicator.
 * `high_availability_config` - (Optional) Transit Gateway high availability config centralized transit gateway.
     * `ha_mode` - (Optional) High-availability Mode for Transit Gateway. Accepted values are: "ACTIVE_ACTIVE", "ACTIVE_STANDBY". Default is "ACTIVE_STANDBY".
     * `edge_cluster_paths` - (Optional) The Edge cluster should be authorized to be used in the transit gateway. A single edge cluster will be supported when the transit gateway is created from the local NSX manager.
