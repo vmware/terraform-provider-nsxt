@@ -35,7 +35,7 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:        schema.TypeString,
-				Description: "The display name regex of the VMs",
+				Description: "Display name for the VM. Supports regular expressions",
 				Optional:    true,
 			},
 			"value_type": {
@@ -71,8 +71,6 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 
 func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-
-	displayNameRegex := d.Get("display_name").(string)
 	valueType := d.Get("value_type").(string)
 	state := d.Get("state").(string)
 	osPrefix := d.Get("guest_os").(string)
@@ -83,13 +81,17 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
 	}
 	var re *regexp.Regexp
-	if d.HasChange("display_name") {
-		re, err = regexp.Compile(displayNameRegex)
+	if displayNameRegex, ok := d.GetOk("display_name"); ok {
+		re, err = regexp.Compile(displayNameRegex.(string))
+		if err != nil {
+			return err
+		}
+	} else {
+		re, err = regexp.Compile(".*")
 		if err != nil {
 			return err
 		}
 	}
-
 	for _, vm := range allVMs {
 		if state != "" {
 			if vm.PowerState != nil && *vm.PowerState != stateMap[state] {
@@ -105,7 +107,7 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
-		if vm.DisplayName == nil || (d.HasChange("display_name") && !re.MatchString(*vm.DisplayName)) {
+		if vm.DisplayName == nil || !re.MatchString(*vm.DisplayName) {
 			continue
 		}
 		computeIDMap := collectSeparatedStringListToMap(vm.ComputeIds, ":")
