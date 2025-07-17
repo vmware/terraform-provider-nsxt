@@ -119,7 +119,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "9.0.0")
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
