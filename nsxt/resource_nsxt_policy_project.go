@@ -121,9 +121,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 							Type:         schema.TypeString,
 							Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
 							ValidateFunc: validatePolicyPath(),
-							Default:      "/infra/network-spans/default",
 							Optional:     true,
-							Computed:     false,
 						},
 						"span_reference": {
 							Type:        schema.TypeList,
@@ -230,16 +228,18 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	}
 
 	vdsIntface, ok := d.GetOk("vpc_deployment_scope")
-	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 {
+	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 && vdsIntface.([]interface{})[0] != nil {
 		// There should be just one object here
 		vdScope := vdsIntface.([]interface{})[0].(map[string]interface{})
 		var spanReferences []model.SpanReference
-		defaultSpanPath := vdScope["default_span_path"].(string)
-		isDefault := true
-		spanReferences = append(spanReferences, model.SpanReference{
-			SpanPath:  &defaultSpanPath,
-			IsDefault: &isDefault,
-		})
+		if _, ok := vdScope["default_span_path"]; ok && vdScope["default_span_path"] != "" {
+			defaultSpanPath := vdScope["default_span_path"].(string)
+			isDefault := true
+			spanReferences = append(spanReferences, model.SpanReference{
+				SpanPath:  &defaultSpanPath,
+				IsDefault: &isDefault,
+			})
+		}
 		if vdScope["span_reference"] != nil {
 			spanRefs := vdScope["span_reference"].([]interface{})
 			for _, spanRef := range spanRefs {
@@ -397,14 +397,20 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
 		deploymentScope := make(map[string]interface{})
 		var spanRefs []interface{}
+		var defaultSpanRefs *string
 		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
 			sr := make(map[string]interface{})
 			sr["span_path"] = spanRef.SpanPath
-			sr["is_default"] = spanRef.IsDefault
-
-			spanRefs = append(spanRefs, sr)
+			if *spanRef.IsDefault {
+				defaultSpanRefs = sr["span_path"].(*string)
+			} else {
+				spanRefs = append(spanRefs, sr["span_path"])
+			}
 		}
-		deploymentScope["span_reference"] = spanRefs
+		deploymentScope["default_span_path"] = *defaultSpanRefs
+		if len(spanRefs) > 0 {
+			deploymentScope["span_reference"] = spanRefs
+		}
 		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
 		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})
 	}
