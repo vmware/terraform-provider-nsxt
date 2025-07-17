@@ -52,18 +52,18 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `gateway_path` - (Required) Policy path of relevant Tier0 Gateway.
 * `entry` - (Required) List of entries for the Route Map.
-  * `action` - (Optional) Action for the route map entry, either `PERMIT` or `DENY`, with default being `PERMIT`.
-  * `community_list_match` - (Optional) List of Prefix List match criteria for route map. Cannot be configured together with `prefix_list_matches`. If configured together, `prefix_list_matches` will be ignored.
-    * `criteria` - (Required) Community list path or a regular expression.
-    * `match_operator` - (Required) Match operator for the criteria, one of `MATCH_ANY`, `MATCH_ALL`, `MATCH_EXACT`, `MATCH_COMMUNITY_REGEX`, `MATCH_LARGE_COMMUNITY_REGEX`. Only last two operators can be used together with regular expression criteria.
-  * `prefix_list_matches` - (Optional) List of policy paths for Prefix Lists configured on this Gateway. Cannot be configured together with `community_list_match`. If configured together, `prefix_list_matches` will be ignored.
-  * `set` - (Optional) Set criteria for route map entry.
-    * `as_path_prepend` - (Optional) Autonomous System (AS) path prepend to influence route selection.
-    * `community` - (Optional) BGP regular or large community for matching routes.
-    * `local_preference` - (Optional) Local preference indicates the degree of preference for one BGP route over other BGP routes.
-    * `med` - (Optional) Multi Exit Discriminator (lower value is preferred over higher value).
-    * `prefer_global_v6_next_hop` - (Optional)  Indicator whether to prefer IPv6 global address over link-local as the next hop.
-    * `weight` - (Optional) Weight is used to select a route when multiple routes are available to the same network.
+    * `action` - (Optional) Action for the route map entry, either `PERMIT` or `DENY`, with default being `PERMIT`.
+    * `community_list_match` - (Optional) List of Prefix List match criteria for route map. Cannot be configured together with `prefix_list_matches`. If configured together, `prefix_list_matches` will be ignored.
+          * `criteria` - (Required) Community list path or a regular expression.
+          * `match_operator` - (Required) Match operator for the criteria, one of `MATCH_ANY`, `MATCH_ALL`, `MATCH_EXACT`, `MATCH_COMMUNITY_REGEX`, `MATCH_LARGE_COMMUNITY_REGEX`. Only last two operators can be used together with regular expression criteria.
+    * `prefix_list_matches` - (Optional) List of policy paths for Prefix Lists configured on this Gateway. Cannot be configured together with `community_list_match`. If configured together, `prefix_list_matches` will be ignored.
+    * `set` - (Optional) Set criteria for route map entry.
+          * `as_path_prepend` - (Optional) Autonomous System (AS) path prepend to influence route selection.
+          * `community` - (Optional) BGP regular or large community for matching routes.
+          * `local_preference` - (Optional) Local preference indicates the degree of preference for one BGP route over other BGP routes.
+          * `med` - (Optional) Multi Exit Discriminator (lower value is preferred over higher value).
+          * `prefer_global_v6_next_hop` - (Optional)  Indicator whether to prefer IPv6 global address over link-local as the next hop.
+          * `weight` - (Optional) Weight is used to select a route when multiple routes are available to the same network.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 

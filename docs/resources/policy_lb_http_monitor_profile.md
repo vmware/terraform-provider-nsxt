@@ -41,8 +41,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `request_body` - (Optional) String to send as part of HTTP health check request body. Valid only for certain HTTP methods like POST.
 * `request_header` - (Optional) Array of HTTP request headers.
-  * `header_name` - (Optional) Name of HTTP request header
-  * `header_value` - (Optional) Value of HTTP request header
+    * `header_name` - (Optional) Name of HTTP request header
+    * `header_value` - (Optional) Value of HTTP request header
 * `request_method` - (Optional) Possible values are: `GET`, `OPTIONS`, `POST`, `HEAD`, `PUT`.
 * `request_url` - (Optional) For HTTP active healthchecks, the HTTP request url sent can be customized and can include query parameters.
 * `request_version` - (Optional) Possible values are: `HTTP_VERSION_1_0`, `HTTP_VERSION_1_1`, HTTP request version.

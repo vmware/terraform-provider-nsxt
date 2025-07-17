@@ -27,7 +27,7 @@ data "nsxt_upgrade_postcheck" "pc" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `failed_group` - (Computed) The description of the resource.
-    * `id` - ID of upgrade unit group.
-    * `status` - Status of execution of upgrade post-checks.
-    * `details` - Details about current execution of upgrade post-checks.
-    * `failure_count` - Total count of generated failures or warnings in last execution of upgrade post-checks      },
+          * `id` - ID of upgrade unit group.
+          * `status` - Status of execution of upgrade post-checks.
+          * `details` - Details about current execution of upgrade post-checks.
+          * `failure_count` - Total count of generated failures or warnings in last execution of upgrade post-checks      },

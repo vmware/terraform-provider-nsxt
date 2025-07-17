@@ -111,51 +111,51 @@ The following arguments are supported:
 * `vlan_ids` - (Optional) List of VLAN IDs or VLAN ranges.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Optional) Subnet configuration block.
-  * `cidr` - (Required) Gateway IP address CIDR.
-  * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
-  * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This attribute is supported with NSX 3.0.0 onwards.
-    * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
-    * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
-    * `lease_time`  - (Optional) DHCP lease time in seconds.
-    * `dhcp_option_121` - (Optional) DHCP classless static routes.
-      * `network` - (Required) Destination in cidr format.
-      * `next_hop` - (Required) IP address of next hop.
-    * `dhcp_generic_option` - (Optional) Generic DHCP options.
-      * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
-      * `values` - (Required) List of DHCP option values.
-  * `dhcp_v6_config` - (Optional) DHCPv6 config for IPv6 subnet. This attribute is supported with NSX 3.0.0 onwards.
-    * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
-    * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
-    * `lease_time`  - (Optional) DHCP lease time in seconds.
-    * `preferred_time` - (Optional) The time interval in seconds, in which the prefix is advertised as preferred.
-    * `domain_names` - (Optional) List of domain names for this subnet.
-    * `excluded_range` - (Optional) List of excluded address ranges to define dynamic ip allocation ranges.
-      * `start` - (Required) IPv6 address that marks beginning of the range.
-      * `end` - (Required) IPv6 address that marks end of the range.
-    * `sntp_servers` - (Optional) IPv6 address of SNTP servers for the subnet.
+    * `cidr` - (Required) Gateway IP address CIDR.
+    * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
+    * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This attribute is supported with NSX 3.0.0 onwards.
+          * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
+          * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
+          * `lease_time`  - (Optional) DHCP lease time in seconds.
+          * `dhcp_option_121` - (Optional) DHCP classless static routes.
+                  * `network` - (Required) Destination in cidr format.
+                  * `next_hop` - (Required) IP address of next hop.
+          * `dhcp_generic_option` - (Optional) Generic DHCP options.
+                  * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
+                  * `values` - (Required) List of DHCP option values.
+    * `dhcp_v6_config` - (Optional) DHCPv6 config for IPv6 subnet. This attribute is supported with NSX 3.0.0 onwards.
+          * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
+          * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
+          * `lease_time`  - (Optional) DHCP lease time in seconds.
+          * `preferred_time` - (Optional) The time interval in seconds, in which the prefix is advertised as preferred.
+          * `domain_names` - (Optional) List of domain names for this subnet.
+          * `excluded_range` - (Optional) List of excluded address ranges to define dynamic ip allocation ranges.
+                  * `start` - (Required) IPv6 address that marks beginning of the range.
+                  * `end` - (Required) IPv6 address that marks end of the range.
+          * `sntp_servers` - (Optional) IPv6 address of SNTP servers for the subnet.
 * `l2_extension` - (Optional) Configuration for extending Segment through L2 VPN.
-  * `l2vpn_paths` - (Optional) Policy paths of associated L2 VPN sessions.
-  * `tunnel_id` - (Optional) The Tunnel ID that's a int value between 1 and 4093.
+    * `l2vpn_paths` - (Optional) Policy paths of associated L2 VPN sessions.
+    * `tunnel_id` - (Optional) The Tunnel ID that's a int value between 1 and 4093.
 * `advanced_config` - (Optional) Advanced Segment configuration.
-  * `address_pool_path` - (Optional) Policy path to IP address pool.
-  * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
-  * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
-  * `local_egress` - (Optional) Boolean flag to enable local egress.
-  * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
-  * `urpf_mode` - (Optional) URPF mode to be applied to gateway downlink interface. One of `STRICT`, `NONE`.
+    * `address_pool_path` - (Optional) Policy path to IP address pool.
+    * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
+    * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
+    * `local_egress` - (Optional) Boolean flag to enable local egress.
+    * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
+    * `urpf_mode` - (Optional) URPF mode to be applied to gateway downlink interface. One of `STRICT`, `NONE`.
 * `discovery_profile` - (Optional) IP and MAC discovery profile specification for the segment.
-  * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
-  * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
+    * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
+    * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
 * `security_profile` - (Optional) Security profile specification for the segment.
-  * `spoofguard_profile_path` - (Optional) Path for spoofguard profile to be associated with the segment.
-  * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
+    * `spoofguard_profile_path` - (Optional) Path for spoofguard profile to be associated with the segment.
+    * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
 * `qos_profile` - (Optional) QoS profile specification for the segment.
-  * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
+    * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
 * `bridge_config` - (Optional) List of edge bridge configuration for the segment. This setting is not supported on Global Manager.
-  * `profile_path` - (Required) Path for edge bridge profile to be associated with the segment.
-  * `transport_zone_path` - (Required) Path for vlan transport zone for the bridge.
-  * `vlan_ids` - (Required) List of VLAN IDs or ranges.
-  * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint.
+    * `profile_path` - (Required) Path for edge bridge profile to be associated with the segment.
+    * `transport_zone_path` - (Required) Path for vlan transport zone for the bridge.
+    * `vlan_ids` - (Required) List of VLAN IDs or ranges.
+    * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint.
 * `metadata_proxy_paths` - (Optional) Metadata Proxy Configuration Paths.
 
 ## Attributes Reference

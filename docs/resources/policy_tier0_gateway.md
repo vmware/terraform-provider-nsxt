@@ -121,10 +121,10 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed.For advanced configuration and on Global Manager, use `locale_service` clause instead. Note that for some configurations (such as BGP) setting edge cluster is required.
 * `locale_service` - (Optional) This is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
-  * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
-  * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
-  * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
-  * `display_name` - (Optional) Display name for the locale service.
+    * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
+    * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
+    * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
+    * `display_name` - (Optional) Display name for the locale service.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
@@ -138,40 +138,40 @@ The following arguments are supported:
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
 * `rd_admin_address` - (Optional) Route distinguisher administrator address. If using EVPN service, then this attribute should be defined if auto generation of route distinguisher on VRF configuration is needed.
 * `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable for Global Manager - use `nsxt_policy_bgp_config` resource instead.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
-  * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
-  * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
-  * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is applicable to VRF-Lite Gateway with NSX 4.2.1 and above, when `multi_vrf_inter_sr` is enabled on parent gateway.
-  * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is optional for VRF-Lite Gateways, and is required otherwise.
-  * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
-  * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.
-  * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`. This setting is not applicable to VRF-Lite Gateway.
-  * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`. This setting is not applicable to VRF-Lite Gateway.
-  * `route_aggregation`- (Optional) Zero or more route aggregations for BGP.
-    * `prefix` - (Required) CIDR of aggregate address.
-    * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
+    * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
+    * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
+    * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is applicable to VRF-Lite Gateway with NSX 4.2.1 and above, when `multi_vrf_inter_sr` is enabled on parent gateway.
+    * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is optional for VRF-Lite Gateways, and is required otherwise.
+    * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
+    * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.
+    * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`. This setting is not applicable to VRF-Lite Gateway.
+    * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`. This setting is not applicable to VRF-Lite Gateway.
+    * `route_aggregation`- (Optional) Zero or more route aggregations for BGP.
+          * `prefix` - (Required) CIDR of aggregate address.
+          * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
 * `vrf_config` - (Optional) VRF config for VRF Tier0. This clause is supported with NSX 3.0.0 onwards.
-  * `gateway_path` - (Required) Default Tier0 path. Cannot be modified after realization.
-  * `evpn_transit_vni` - (Optional) L3 VNI associated with the VRF for overlay traffic. VNI must be unique and belong to configured VNI pool.
-  * `route_distinguisher` - (Optional) Route distinguisher. Format: <ASN>:<number> or <IPAddress>:<number>.
-  * `route_target` - (Optional) Only one target is supported.
-    * `auto_mode` - (Optional) When true, import and export targets should not be specified.
-    * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
-    * `import_targets` - (Optional) List of import route targets. Format: <ASN>:<number>.
-    * `export_targets` - (Optional) List of export route targets. Format: <ASN>:<number>.
+    * `gateway_path` - (Required) Default Tier0 path. Cannot be modified after realization.
+    * `evpn_transit_vni` - (Optional) L3 VNI associated with the VRF for overlay traffic. VNI must be unique and belong to configured VNI pool.
+    * `route_distinguisher` - (Optional) Route distinguisher. Format: <ASN>:<number> or <IPAddress>:<number>.
+    * `route_target` - (Optional) Only one target is supported.
+          * `auto_mode` - (Optional) When true, import and export targets should not be specified.
+          * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
+          * `import_targets` - (Optional) List of import route targets. Format: <ASN>:<number>.
+          * `export_targets` - (Optional) List of export route targets. Format: <ASN>:<number>.
 * `intersite_config` - (Optional) This clause is relevant for Global Manager only.
-  * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
-  * `primary_site_path` - (Optional) Primary egress site for gateway.
-  * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
+    * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
+    * `primary_site_path` - (Optional) Primary egress site for gateway.
+    * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
 * `redistribution_config` - (Deprecated) Route redistribution properties. This setting is for local manager only and supported with NSXt 3.0.0 onwards. This setting is deprecated, please use `nsxt_policy_gateway_redistribution_config` resource instead.
-  * `enabled` - (Optional) Enable route redistribution for BGP. Defaults to `true`.
-  * `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`. Applicable from NSX 3.1.0 onwards.
-  * `rule` - (Optional) List of redistribution rules.
-    * `name` - (Optional) Rule name.
-    * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
-    * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
+    * `enabled` - (Optional) Enable route redistribution for BGP. Defaults to `true`.
+    * `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`. Applicable from NSX 3.1.0 onwards.
+    * `rule` - (Optional) List of redistribution rules.
+          * `name` - (Optional) Rule name.
+          * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
+          * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
 * `advanced_config` - (Optional) Advanced gateway configuration
-  * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
+    * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
 * `multi_vrf_inter_sr` - (Optional) Flag to control multi VRF inter SR. This is one time toggle flag and can't be disabled once enabled. Supported with NSX 4.2.1 and above.
 * `enable_rd_per_edge` - (Optional) Flag to enable distinct route distinguisher per edge node. Supported with NSX 4.2.0 and above.
 * `tgw_transit_subnets` - (Optional) Subnets that are used to assign addresses to logical links connecting default T0/VRF and transit gateway.
@@ -184,8 +184,8 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `bgp_config` - The following attributes are exported for `bgp_config`:
-  * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-  * `path` - The NSX path of the policy resource.
+    * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+    * `path` - The NSX path of the policy resource.
 
 ## Importing
 

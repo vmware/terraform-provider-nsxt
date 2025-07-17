@@ -37,8 +37,8 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `role` - (Required) Short identifier for the role. Must be all lower case with no spaces. This will also be the NSX ID of this resource.
 * `feature` - (Required) A list of permissions for features to be granted with this role.
-  * `feature` - (Required) The ID of feature to grant permission.
-  * `permission` - (Required) Type of permission to grant. Valid values are `crud`, `read`, `execute`.
+    * `feature` - (Required) The ID of feature to grant permission.
+    * `permission` - (Required) Type of permission to grant. Valid values are `crud`, `read`, `execute`.
 
 ## Attributes Reference
 
@@ -47,8 +47,8 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `feature` - The permissions for features in the list will also have the following attributes exported:
-  * `feature_description` - Description of the feature.
-  * `feature_name` - Name of the feature.
+    * `feature_description` - Description of the feature.
+    * `feature_name` - Name of the feature.
 
 ## Importing
 
