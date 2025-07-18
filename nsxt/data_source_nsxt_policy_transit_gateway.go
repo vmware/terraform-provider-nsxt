@@ -30,6 +30,14 @@ func dataSourceNsxtPolicyTransitGateway() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{}) error {
+	_, default_ok := d.GetOk("is_default")
+	_, dp_ok := d.GetOk("display_name")
+	_, id_ok := d.GetOk("id")
+
+	if default_ok && !dp_ok && !id_ok {
+		_, err := policyDataSourceReadWithFlag(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", "is_default", nil)
+		return err
+	}
 	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", nil)
 	if err != nil {
 		return err
