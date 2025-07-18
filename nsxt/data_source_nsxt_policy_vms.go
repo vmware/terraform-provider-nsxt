@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,7 +33,11 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 		Read: dataSourceNsxtPolicyVMsRead,
 
 		Schema: map[string]*schema.Schema{
-			// TODO: add option to filter by display name regex
+			"display_name": {
+				Type:        schema.TypeString,
+				Description: "Display name for the VM. Supports regular expressions",
+				Optional:    true,
+			},
 			"value_type": {
 				Type:         schema.TypeString,
 				Description:  "Type of data populated in map value",
@@ -77,6 +82,18 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
 	}
 
+	var re *regexp.Regexp
+	if displayNameRegex, ok := d.GetOk("display_name"); ok {
+		re, err = regexp.Compile(displayNameRegex.(string))
+		if err != nil {
+			return err
+		}
+	} else {
+		re, err = regexp.Compile(".*")
+		if err != nil {
+			return err
+		}
+	}
 	for _, vm := range allVMs {
 		if state != "" {
 			if vm.PowerState != nil && *vm.PowerState != stateMap[state] {
@@ -92,7 +109,7 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
-		if vm.DisplayName == nil {
+		if vm.DisplayName == nil || !re.MatchString(*vm.DisplayName) {
 			continue
 		}
 		computeIDMap := collectSeparatedStringListToMap(vm.ComputeIds, ":")
