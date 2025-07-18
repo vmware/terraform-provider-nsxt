@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -64,6 +65,7 @@ func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preChec
 func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
 	testResourceName := "data.nsxt_policy_vms.test"
 	checkResourceName := "nsxt_policy_group.check"
+	re, _ := regexp.Compile(`.*`)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -77,6 +79,13 @@ func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrSet(checkResourceName, "display_name"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyVMsTemplateWithRegex(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestMatchOutput("vmout", re),
 				),
 			},
 		},
@@ -115,4 +124,18 @@ data "nsxt_policy_vms" "test" {
 resource "nsxt_policy_group" "check" {
   display_name = length(data.nsxt_policy_vms.test.items)
 }`
+}
+
+func testAccNsxtPolicyVMsTemplateWithRegex() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_vms" "test" {
+  state    = "running"
+  display_name = ".*"
+}
+
+output "vmout" {
+  value = data.nsxt_policy_vms.test.items["%s"]
+}
+
+`, getTestVMName())
 }
