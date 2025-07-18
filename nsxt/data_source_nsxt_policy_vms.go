@@ -71,6 +71,7 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 
 func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+
 	valueType := d.Get("value_type").(string)
 	state := d.Get("state").(string)
 	osPrefix := d.Get("guest_os").(string)
@@ -80,6 +81,7 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
 	}
+
 	var re *regexp.Regexp
 	if displayNameRegex, ok := d.GetOk("display_name"); ok {
 		re, err = regexp.Compile(displayNameRegex.(string))

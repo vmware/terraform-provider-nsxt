@@ -33,8 +33,8 @@ resource "nsxt_policy_vm_tags" "test" {
 
 ```hcl
 data "nsxt_policy_vms" "all" {
-  state      = "running"
-  value_type = "bios_id"
+  state        = "running"
+  value_type   = "bios_id"
   display_name = ".*CLS*"
 }
 ```
