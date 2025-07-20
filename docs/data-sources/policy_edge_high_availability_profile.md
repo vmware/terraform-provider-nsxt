@@ -7,7 +7,7 @@ description: A policy Edge high availability profile data source.
 # nsxt_policy_edge_high_availability_profile
 
 This data source provides information about policy Edge high availability profile configured on NSX.
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
