@@ -24,6 +24,7 @@ data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
 ```
 
 ## Tier0 gateway interface example with service path
+
 ```hcl
 data "nsxt_policy_tier0_gateway" "t0_gw" {
   display_name = "t0Gateway"
@@ -38,7 +39,6 @@ data "nsxt_policy_gateway_interface" "tier0_gw_interface" {
   service_path = data.nsxt_policy_gateway_locale_service.test.path
 }
 ```
-
 
 ## Tier1 gateway interface example
 

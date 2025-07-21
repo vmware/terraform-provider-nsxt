@@ -17,5 +17,14 @@ jobs:
         uses: ./.github/actions/setup-go
       - name: Install Tools
         run: make tools
-      - name: Docs Lint
+      - name: Docs HCL Lint
         run: make docs-lint
+      - name: Docs Lint
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          config: '.markdownlint.jsonc'
+          globs: |
+            docs/*.md
+            docs/data-sources/*.md
+            docs/guides/*.md
+            docs/resources/*.md

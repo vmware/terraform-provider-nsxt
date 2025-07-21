@@ -9,6 +9,7 @@ description: A resource to configure a PolicyEdgeCluster.
 This resource provides a method for the management of a PolicyEdgeCluster.
 
 This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+
 ## Example Usage
 
 ```hcl

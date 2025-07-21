@@ -38,10 +38,10 @@ The following arguments are supported:
     * `edge_cluster_paths` - (Optional) The Edge cluster should be authorized to be used in the transit gateway. A single edge cluster will be supported when the transit gateway is created from the local NSX manager.
 * `span` - (Optional) Span configuration. Note that one of `cluster_based_span` and `zone_based_span` is required.
     * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
-          * `span_path` - (Required) Policy path of the network span object.
+        * `span_path` - (Required) Policy path of the network span object.
     * `zone_based_span` - (Optional) Span based on zones.
-          * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
-          * `use_all_zones` - (Optional) Flag to indicate that TransitGateway is associated with all project zones.
+        * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
+        * `use_all_zones` - (Optional) Flag to indicate that TransitGateway is associated with all project zones.
 
 ## Attributes Reference
 
