@@ -397,21 +397,21 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
 		deploymentScope := make(map[string]interface{})
-		var spanRefs []interface{}
-		var defaultSpanRefs *string
-		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
-			sr := make(map[string]interface{})
-			sr["span_path"] = spanRef.SpanPath
-			if *spanRef.IsDefault {
-				defaultSpanRefs = sr["span_path"].(*string)
-			} else {
-				spanRefs = append(spanRefs, sr["span_path"])
-			}
-		}
-		deploymentScope["default_span_path"] = *defaultSpanRefs
-		if len(spanRefs) > 0 {
-			deploymentScope["span_reference"] = spanRefs
-		}
+        var spanRefs []interface{}
+        var defaultSpanRefs *string
+        for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
+            if *spanRef.IsDefault {
+                defaultSpanRefs = spanRef.SpanPath
+            } else {
+                sr := make(map[string]interface{})
+                sr["span_path"] = spanRef.SpanPath
+                spanRefs = append(spanRefs, sr)
+            }
+        }
+        deploymentScope["default_span_path"] = defaultSpanRefs
+        if len(spanRefs) > 0 {
+            deploymentScope["span_reference"] = spanRefs
+        }
 		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
 		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})
 	}
