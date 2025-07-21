@@ -138,7 +138,7 @@ func policyDataSourceReadWithFlag(d *schema.ResourceData, connector client.Conne
 		d.Set("path", obj.Resource.Path)
 		return obj.StructValue, err
 	}
-	return nil, fmt.Errorf("found multiple %s with ID '%s'", resourceType, customFlag)
+	return nil, fmt.Errorf("found multiple %s with is_default '%s'", resourceType, customFlag)
 }
 
 func searchPolicyResourcesByCustomField(connector client.Connector, context utl.SessionContext, resourceType string, customFlag string, flagValue string, additionalQuery *string) ([]*data.StructValue, error) {
