@@ -549,10 +549,11 @@ resource "nsxt_policy_project" "test" {
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
-  {{if .PolicyNetworkSpan}}vpc_deployment_scope {
+  {{if .PolicyNetworkSpan}}
+  vc_folder = true
+  vpc_deployment_scope {
     span_reference {
       span_path  = {{.PolicyNetworkSpan}}
-      is_default = true
     }
   }{{end}}
   site_info {
