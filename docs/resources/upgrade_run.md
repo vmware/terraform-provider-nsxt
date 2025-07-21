@@ -112,9 +112,9 @@ In addition to arguments listed above, the following attributes are exported:
     * `details` - Details about the upgrade status.
     * `target_version` - Target component version
     * `group_state` - State of upgrade group
-          * `group_id` - Upgrade group ID
-          * `group_name` - Upgrade group name
-          * `status` - Upgrade status of the upgrade group
+        * `group_id` - Upgrade group ID
+        * `group_name` - Upgrade group name
+        * `status` - Upgrade status of the upgrade group
 
 ## Importing
 

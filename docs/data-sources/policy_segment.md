@@ -42,6 +42,7 @@ data "nsxt_policy_segment" "test_global" {
   display_name = "test"
 }
 ```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Segment to retrieve. If ID is specified, no additional argument should be configured.

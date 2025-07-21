@@ -96,8 +96,8 @@ The following arguments are supported:
     * `edge_path` - (Required) Policy edge node path.
     * `source_address` - (Required) IPv4 source address.
     * `tunnel_interface_subnet` - (Required) Interface Subnet object parameter. At least one is required, maximum is 2.
-          * `ip_addresses` - (Required) List of IP addresses assigned to interface.
-          * `prefix_len` - (Required) Subnet prefix length.
+        * `ip_addresses` - (Required) List of IP addresses assigned to interface.
+        * `prefix_len` - (Required) Subnet prefix length.
 * `tunnel_keepalive` - (Optional) tunnel keep alive object. One is required.
     * `dead_time_multiplier` - (Optional) Dead time multiplier. Default is 3.
     * `enable_keepalive_ack` - (Optional) Enable tunnel keep alive acknowledge. Default is true.

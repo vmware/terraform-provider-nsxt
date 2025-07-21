@@ -52,11 +52,11 @@ The following arguments are supported:
     * `out_filter` - (Optional) List of route map paths for OUT direction.
 * `static_route_advertisement` - (Optional) Advertise subnet to target peers as static routes.
     * `advertisement_rule` - (Optional) Route advertisement rules.
-          * `action` - (Optional) Action to advertise routes. Valid values are "PERMIT", "DENY". Default is "PERMIT".
-          * `name` - (Optional) Display name for rule.
-          * `prefix_operator` - (Optional) Prefix operator to match subnets. Valid values are "GE", "EQ". Default is "GE".
-          * `route_advertisement_types` - (Optional) Enable different types of route advertisements. Valid values are "TIER0_STATIC", "TIER0_CONNECTED", "TIER0_NAT", "TIER0_DNS_FORWARDER_IP", "TIER0_IPSEC_LOCAL_ENDPOINT", "TIER1_STATIC", "TIER1_CONNECTED", "TIER1_LB_SNAT", "TIER1_LB_VIP", "TIER1_NAT", "TIER1_DNS_FORWARDER_IP", "TIER1_IPSEC_LOCAL_ENDPOINT".
-          * `subnets` - (Optional) Network CIDRs.
+        * `action` - (Optional) Action to advertise routes. Valid values are "PERMIT", "DENY". Default is "PERMIT".
+        * `name` - (Optional) Display name for rule.
+        * `prefix_operator` - (Optional) Prefix operator to match subnets. Valid values are "GE", "EQ". Default is "GE".
+        * `route_advertisement_types` - (Optional) Enable different types of route advertisements. Valid values are "TIER0_STATIC", "TIER0_CONNECTED", "TIER0_NAT", "TIER0_DNS_FORWARDER_IP", "TIER0_IPSEC_LOCAL_ENDPOINT", "TIER1_STATIC", "TIER1_CONNECTED", "TIER1_LB_SNAT", "TIER1_LB_VIP", "TIER1_NAT", "TIER1_DNS_FORWARDER_IP", "TIER1_IPSEC_LOCAL_ENDPOINT".
+        * `subnets` - (Optional) Network CIDRs.
     * `in_filter_prefix_list` - (Optional) Paths of ordered Prefix list.
 * `target_path` - (Required) Policy path to tier0/vrf belongs to the same parent tier0.
 

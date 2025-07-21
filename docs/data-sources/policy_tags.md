@@ -22,7 +22,7 @@ data "nsxt_policy_tags" "tags" {
 ## Argument Reference
 
 * `scope` - (Required) The scope of the tags to retrieve. Supports starts with, ends with, equals, and contains filters.
-Use * as a suffix for "starts with" and a prefix for "ends with". For "contains," wrap the value with *. Use * alone to fetch all tags, irrespective scope.
+Use `*` as a suffix for "starts with" and a prefix for "ends with". For "contains," wrap the value with `*`. Use `*` alone to fetch all tags, irrespective scope.
 
 ## Attributes Reference
 
