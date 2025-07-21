@@ -123,20 +123,14 @@ func resourceNsxtPolicyProject() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 						},
-						"span_reference": {
+						"non_default_span_paths": {
 							Type:        schema.TypeList,
 							Description: "List of Span object references available with the project for TGW consumption",
 							MaxItems:    10,
 							Optional:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"span_path": {
-										Type:         schema.TypeString,
-										Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
-										ValidateFunc: validatePolicyPath(),
-										Optional:     true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validatePolicyPath(),
 							},
 						},
 						"zone_external_ids": {
@@ -238,11 +232,10 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 				IsDefault: &isDefault,
 			})
 		}
-		if vdScope["span_reference"] != nil {
-			spanRefs := vdScope["span_reference"].([]interface{})
+		if vdScope["non_default_span_paths"] != nil {
+			spanRefs := vdScope["non_default_span_paths"].([]interface{})
 			for _, spanRef := range spanRefs {
-				sr := spanRef.(map[string]interface{})
-				spanPath := sr["span_path"].(string)
+				spanPath := spanRef.(string)
 				isDefault := false
 				spanReferences = append(spanReferences, model.SpanReference{
 					SpanPath:  &spanPath,
@@ -394,20 +387,18 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
 		deploymentScope := make(map[string]interface{})
-		var spanRefs []interface{}
+		var nonDefaultSpanPaths []interface{}
 		var defaultSpanRefs *string
 		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
 			if *spanRef.IsDefault {
 				defaultSpanRefs = spanRef.SpanPath
 			} else {
-				sr := make(map[string]interface{})
-				sr["span_path"] = spanRef.SpanPath
-				spanRefs = append(spanRefs, sr)
+				nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
 			}
 		}
-		deploymentScope["default_span_path"] = defaultSpanRefs
-		if len(spanRefs) > 0 {
-			deploymentScope["span_reference"] = spanRefs
+		deploymentScope["default_span_path"] = *defaultSpanRefs
+		if len(nonDefaultSpanPaths) > 0 {
+			deploymentScope["non_default_span_paths"] = nonDefaultSpanPaths
 		}
 		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
 		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})

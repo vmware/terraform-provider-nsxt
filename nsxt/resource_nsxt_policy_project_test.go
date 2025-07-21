@@ -90,8 +90,8 @@ func runChecksNsx900(testResourceName string, expectedValues map[string]string) 
 func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.#", expectedValues["vpc_deployment_scope_count"]),
-		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.span_reference.#", expectedValues["span_reference_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.span_reference.0.span_path"),
+		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.#", expectedValues["span_reference_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.0"),
 	)
 }
 
@@ -552,9 +552,8 @@ resource "nsxt_policy_project" "test" {
   {{if .PolicyNetworkSpan}}
   vc_folder = true
   vpc_deployment_scope {
-    span_reference {
-      span_path  = {{.PolicyNetworkSpan}}
-    }
+    non_default_span_paths = [{{.PolicyNetworkSpan}}]
+  
   }{{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
