@@ -135,7 +135,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 										Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
 										ValidateFunc: validatePolicyPath(),
 										Optional:     true,
-										Computed:     false,
 									},
 								},
 							},
