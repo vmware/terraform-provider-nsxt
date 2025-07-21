@@ -679,6 +679,8 @@ func testAccNsxtPolicyProjectMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_project" "test" {
   display_name = "%s"
+  vpc_deployment_scope {
+  }
 
 }`, accTestPolicyProjectUpdateAttributes["DisplayName"])
 }
@@ -691,6 +693,8 @@ resource "nsxt_policy_project" "test" {
     north_south_firewall {
       enabled = %s
     }
+  }
+  vpc_deployment_scope {
   }
 
 }`, accTestPolicyProjectCreateAttributes["DisplayName"], strconv.FormatBool(enabled))
