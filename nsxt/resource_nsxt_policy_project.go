@@ -112,7 +112,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"vpc_deployment_scope": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    false,
 				Description: "Project Vpc network Deployment Scope",
 				MaxItems:    1,
 				Elem: &schema.Resource{
@@ -128,7 +127,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 							Type:        schema.TypeList,
 							Description: "List of Span object references available with the project for TGW consumption",
 							MaxItems:    10,
-							Computed:    false,
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
