@@ -554,7 +554,10 @@ resource "nsxt_policy_project" "test" {
   vpc_deployment_scope {
     non_default_span_paths = [{{.PolicyNetworkSpan}}]
   
-  }{{end}}
+  }
+  {{else}}
+  vpc_deployment_scope {}
+  {{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
   }
