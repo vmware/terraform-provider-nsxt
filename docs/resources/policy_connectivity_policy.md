@@ -50,7 +50,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
-```
+```shell
 terraform import nsxt_policy_connectivity_policy.test PATH
 ```
 

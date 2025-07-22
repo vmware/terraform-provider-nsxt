@@ -55,7 +55,6 @@ The following arguments are supported:
     * `scope` - (Required) Set of policy object paths where the rule is applied.
 * `enabled_on_secondary` - (Optional) Flag to plumb route on secondary site.
 
-
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
@@ -70,7 +69,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 
 [docs-import]: https://www.terraform.io/cli/import
 
-```
+```shell
 terraform import nsxt_policy_transit_gateway_static_route.test PATH
 ```
 

@@ -39,8 +39,8 @@ The following arguments are supported:
 * `compute_collection_id` - (Required) Compute collection id.
 * `sub_cluster_config` - (Optional) List of sub-cluster configuration.
     * `host_switch_config_source` - (Required) List of overridden HostSwitch configuration.
-          * `host_switch_id` - (Required) HostSwitch ID.
-          * `transport_node_profile_sub_config_name` - (Required) Name of the Transport Node Profile sub configuration to be used.
+        * `host_switch_id` - (Required) HostSwitch ID.
+        * `transport_node_profile_sub_config_name` - (Required) Name of the Transport Node Profile sub configuration to be used.
     * `sub_cluster_id` - (Deprecated) sub-cluster path.
     * `sub_cluster_path` - (Required) sub-cluster path.
 * `transport_node_profile_path` - (Optional) Transport Node Profile Path.

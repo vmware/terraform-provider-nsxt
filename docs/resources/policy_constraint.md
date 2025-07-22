@@ -77,7 +77,6 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 
-
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
@@ -85,7 +84,6 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
-
 
 ## Target resource types
 
@@ -140,14 +138,13 @@ In addition to arguments listed above, the following attributes are exported:
 |L2 VPN Session||Infra.Tier1.L2VpnService.L2VpnSession||
 |VPC||Org.Project.Vpc||
 
-
 ## Importing
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
-```
+```shell
 terraform import nsxt_policy_constraint.test PATH
 ```
 
