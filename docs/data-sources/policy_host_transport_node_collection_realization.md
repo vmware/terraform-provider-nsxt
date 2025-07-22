@@ -15,8 +15,15 @@ This data source is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+resource "nsxt_policy_host_transport_node_collection" "htnc1" {
+  display_name                = "HostTransportNodeCollection1"
+  compute_collection_id       = data.nsxt_compute_collection.compute_cluster_collection.id
+  transport_node_profile_path = nsxt_policy_host_transport_node_profile.tnp.path
+}
+
+// Execution will pend until nsxt_policy_host_transport_node_collection.htnc1 is realized on NSX 
 data "nsxt_policy_host_transport_node_collection_realization" "test" {
-  path = data.nsxt_policy_host_transport_node_collection.path
+  path = nsxt_policy_host_transport_node_collection.htnc1.path
 }
 ```
 
