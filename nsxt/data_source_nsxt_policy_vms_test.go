@@ -71,6 +71,7 @@ func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
