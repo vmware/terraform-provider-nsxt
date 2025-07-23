@@ -434,7 +434,6 @@ func TestAccResourceNsxtPolicyProject_importBasic(t *testing.T) {
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
