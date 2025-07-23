@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -543,8 +544,9 @@ func getPartialUpgradeMap(d *schema.ResourceData, targetVersion string) map[stri
 }
 
 type upgradeStatusAndDetail struct {
-	Status string
-	Detail string
+	Status        string
+	OverallStatus string
+	Detail        string
 }
 
 // Get component upgrade status. Using nil component for overall upgrade status.
@@ -555,7 +557,7 @@ func getUpgradeStatus(statusClient upgrade.StatusSummaryClient, component *strin
 		return nil, err
 	}
 	if component == nil {
-		return &upgradeStatusAndDetail{Status: *status.OverallUpgradeStatus}, nil
+		return &upgradeStatusAndDetail{Status: *status.OverallUpgradeStatus, OverallStatus: *status.OverallUpgradeStatus}, nil
 	}
 	for _, componentStatus := range status.ComponentStatus {
 		if *componentStatus.ComponentType == *component {
@@ -563,7 +565,7 @@ func getUpgradeStatus(statusClient upgrade.StatusSummaryClient, component *strin
 			if componentStatus.Details != nil {
 				detail = *componentStatus.Details
 			}
-			return &upgradeStatusAndDetail{Status: *componentStatus.Status, Detail: detail}, nil
+			return &upgradeStatusAndDetail{Status: *componentStatus.Status, OverallStatus: *status.OverallUpgradeStatus, Detail: detail}, nil
 		}
 	}
 	return nil, fmt.Errorf("couldn't find upgrade status of %s component", *component)
@@ -592,6 +594,9 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 			// Status retrieval was successful but upgrade has failed - report an error
 			if status.Status == model.ComponentUpgradeStatus_STATUS_FAILED {
 				return status, status.Status, fmt.Errorf("N/A")
+			}
+			if slices.Contains(pending, status.OverallStatus) {
+				return status, status.OverallStatus, nil
 			}
 			return status, status.Status, nil
 		},
