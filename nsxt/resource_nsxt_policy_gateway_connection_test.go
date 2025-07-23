@@ -37,6 +37,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -99,6 +100,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,

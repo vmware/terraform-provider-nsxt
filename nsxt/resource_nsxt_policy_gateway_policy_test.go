@@ -394,7 +394,7 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withDomain(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_policy.test"
 	comments := "Acceptance test create"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
