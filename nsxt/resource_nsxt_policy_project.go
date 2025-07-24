@@ -126,7 +126,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 						},
 						"non_default_span_paths": {
 							Type:        schema.TypeList,
-							Description: "List of Span object references available with the project for TGW consumption",
+							Description: "List of non default policy paths of the Span objects of type NetworkSpan",
 							MaxItems:    10,
 							Optional:    true,
 							Elem: &schema.Schema{

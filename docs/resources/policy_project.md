@@ -44,7 +44,7 @@ The following arguments are supported:
 * `quotas` - (Optional) List of policy paths for quota resources that are applicable to this project.
 * `vpc_deployment_scope` - (Optional) Project VPC network Deployment Scope.
     * `default_span_path` - (Optional) Policy path of the Cluster based default Span object of type NetworkSpan.
-    * `non_default_span_paths` - (Optional) List of non default policy path of the Span objects of type NetworkSpan
+    * `non_default_span_paths` - (Optional) List of non default policy paths of the Span objects of type NetworkSpan.
     * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
 
 ## Attributes Reference
