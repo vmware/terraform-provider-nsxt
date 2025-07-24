@@ -15,6 +15,8 @@ func TestAccDataSourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicyTransitGatewayBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccIsMultitenancy()
+		testAccEnvDefined(t, "NSXT_PROJECT_ID")
+
 	})
 }
 
