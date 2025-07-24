@@ -184,8 +184,6 @@ resource "nsxt_policy_project" "test" {
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
   }
-  vpc_deployment_scope {
-  }
 }
 
 data "nsxt_policy_transit_gateway" "test" {

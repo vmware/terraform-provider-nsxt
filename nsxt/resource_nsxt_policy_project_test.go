@@ -432,8 +432,8 @@ func TestAccResourceNsxtPolicyProject_importBasic(t *testing.T) {
 				Config: testAccNsxtPolicyProjectMinimalistic(),
 			},
 			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
+				ResourceName: testResourceName,
+				ImportState:  true,
 			},
 		},
 	})
@@ -554,8 +554,6 @@ resource "nsxt_policy_project" "test" {
     non_default_span_paths = [{{.PolicyNetworkSpan}}]
   
   }
-  {{else}}
-  vpc_deployment_scope {}
   {{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
@@ -681,8 +679,6 @@ func testAccNsxtPolicyProjectMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_project" "test" {
   display_name = "%s"
-  vpc_deployment_scope {
-  }
 
 }`, accTestPolicyProjectUpdateAttributes["DisplayName"])
 }
@@ -695,8 +691,6 @@ resource "nsxt_policy_project" "test" {
     north_south_firewall {
       enabled = %s
     }
-  }
-  vpc_deployment_scope {
   }
 
 }`, accTestPolicyProjectCreateAttributes["DisplayName"], strconv.FormatBool(enabled))

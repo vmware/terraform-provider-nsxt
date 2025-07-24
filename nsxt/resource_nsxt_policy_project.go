@@ -112,6 +112,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"vpc_deployment_scope": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "Project Vpc network Deployment Scope",
 				MaxItems:    1,
 				Elem: &schema.Resource{
