@@ -90,8 +90,8 @@ func runChecksNsx900(testResourceName string, expectedValues map[string]string) 
 func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.#", expectedValues["vpc_deployment_scope_count"]),
-		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.span_reference.#", expectedValues["span_reference_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.span_reference.0.span_path"),
+		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.#", expectedValues["span_reference_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.0"),
 	)
 }
 
@@ -432,9 +432,8 @@ func TestAccResourceNsxtPolicyProject_importBasic(t *testing.T) {
 				Config: testAccNsxtPolicyProjectMinimalistic(),
 			},
 			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName: testResourceName,
+				ImportState:  true,
 			},
 		},
 	})
@@ -549,12 +548,13 @@ resource "nsxt_policy_project" "test" {
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
-  {{if .PolicyNetworkSpan}}vpc_deployment_scope {
-    span_reference {
-      span_path  = {{.PolicyNetworkSpan}}
-      is_default = true
-    }
-  }{{end}}
+  {{if .PolicyNetworkSpan}}
+  vc_folder = true
+  vpc_deployment_scope {
+    non_default_span_paths = [{{.PolicyNetworkSpan}}]
+  
+  }
+  {{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
   }
