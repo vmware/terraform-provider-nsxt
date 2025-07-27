@@ -111,6 +111,28 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 	return liberrors.New(details)
 }
 
+func getInvalidRequestErrorCode(err error) (int64, error) {
+	if vapiError, ok := err.(errors.InvalidRequest); ok {
+		// Connection errors end up here
+		if vapiError.Data == nil {
+			return 0, errors.NotFound{}
+		}
+
+		// ApiError type is identical in all three relevant SDKs - policy, MP and GM
+		var typeConverter = bindings.NewTypeConverter()
+		vapiData, err := typeConverter.ConvertToGolang(vapiError.Data, model.ApiErrorBindingType())
+		if err != nil {
+			return 0, err[0]
+		}
+
+		if apiError, ok := vapiData.(model.ApiError); ok {
+			return *apiError.ErrorCode, nil
+		}
+	}
+
+	return 0, errors.NotFound{}
+}
+
 func logAPIError(message string, err error) error {
 	if vapiError, ok := err.(errors.InvalidRequest); ok {
 		// Connection errors end up here
