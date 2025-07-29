@@ -6,7 +6,7 @@ description: |-
 
 # Support for NSX Upgrades
 
-The provider includes support for upgrading NSX components](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-1/upgrade-guide.html).
+The provider includes support for upgrading [NSX components](https://techdocs.broadcom.com/us/en/vmware-cis/nsx/vmware-nsx/4-2/upgrade-guide.html).
 
 The provider support consists of several resources and data sources which can perform a complete upgrade cycle.
 

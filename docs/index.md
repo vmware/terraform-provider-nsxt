@@ -86,7 +86,7 @@ provider "nsxt" {
 
 ### Example of Setting Environment Variables
 
-```
+```shell
 export NSXT_MANAGER_HOST="192.168.110.41"
 export NSXT_USERNAME="admin"
 export NSXT_PASSWORD="default"

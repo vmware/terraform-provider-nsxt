@@ -148,17 +148,17 @@ The following arguments are supported:
     * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`. This setting is not applicable to VRF-Lite Gateway.
     * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`. This setting is not applicable to VRF-Lite Gateway.
     * `route_aggregation`- (Optional) Zero or more route aggregations for BGP.
-          * `prefix` - (Required) CIDR of aggregate address.
-          * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
+        * `prefix` - (Required) CIDR of aggregate address.
+        * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
 * `vrf_config` - (Optional) VRF config for VRF Tier0. This clause is supported with NSX 3.0.0 onwards.
     * `gateway_path` - (Required) Default Tier0 path. Cannot be modified after realization.
     * `evpn_transit_vni` - (Optional) L3 VNI associated with the VRF for overlay traffic. VNI must be unique and belong to configured VNI pool.
-    * `route_distinguisher` - (Optional) Route distinguisher. Format: <ASN>:<number> or <IPAddress>:<number>.
+    * `route_distinguisher` - (Optional) Route distinguisher. Format: `<ASN>:<number>` or `<IPAddress>:<number>`.
     * `route_target` - (Optional) Only one target is supported.
-          * `auto_mode` - (Optional) When true, import and export targets should not be specified.
-          * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
-          * `import_targets` - (Optional) List of import route targets. Format: <ASN>:<number>.
-          * `export_targets` - (Optional) List of export route targets. Format: <ASN>:<number>.
+        * `auto_mode` - (Optional) When true, import and export targets should not be specified.
+        * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
+        * `import_targets` - (Optional) List of import route targets. Format: `<ASN>:<number>`.
+        * `export_targets` - (Optional) List of export route targets. Format: `<ASN>:<number>`.
 * `intersite_config` - (Optional) This clause is relevant for Global Manager only.
     * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
     * `primary_site_path` - (Optional) Primary egress site for gateway.
@@ -167,9 +167,9 @@ The following arguments are supported:
     * `enabled` - (Optional) Enable route redistribution for BGP. Defaults to `true`.
     * `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`. Applicable from NSX 3.1.0 onwards.
     * `rule` - (Optional) List of redistribution rules.
-          * `name` - (Optional) Rule name.
-          * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
-          * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
+        * `name` - (Optional) Rule name.
+        * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
+        * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
 * `advanced_config` - (Optional) Advanced gateway configuration
     * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
 * `multi_vrf_inter_sr` - (Optional) Flag to control multi VRF inter SR. This is one time toggle flag and can't be disabled once enabled. Supported with NSX 4.2.1 and above.

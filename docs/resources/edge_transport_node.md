@@ -106,39 +106,39 @@ The following arguments are supported:
     * `uplink_profile` - (Optional) Uplink host switch profile id.
     * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile id. Only applicable with VDS switch.
     * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-          * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
-          * `no_ipv4` - (Optional) No IPv4 for this host switch.
-          * `static_ip` - (Optional) IP assignment specification for Static IP List.
-                  * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-                  * `subnet_mask` - (Required) Subnet mask
-                  * `default_gateway` - (Required) Gateway IP
-          * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
-                  * `ip_mac_pair` - (Required) List of IP MAC Pairs
-                            * `ip_address` - (Required) IP address
-                            * `mac_address` - (Required) MAC address
-                  * `subnet_mask` - (Required) Subnet mask
-                  * `default_gateway` - (Required) Gateway IP
-          * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool. Pool ID is expected here (if `nsxt_policy_ip_pool` object is referenced here, please use `realized_id` attribute)
+        * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
+        * `no_ipv4` - (Optional) No IPv4 for this host switch.
+        * `static_ip` - (Optional) IP assignment specification for Static IP List.
+            * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+            * `subnet_mask` - (Required) Subnet mask
+            * `default_gateway` - (Required) Gateway IP
+        * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
+            * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                * `ip_address` - (Required) IP address
+                * `mac_address` - (Required) MAC address
+            * `subnet_mask` - (Required) Subnet mask
+            * `default_gateway` - (Required) Gateway IP
+        * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool. Pool ID is expected here (if `nsxt_policy_ip_pool` object is referenced here, please use `realized_id` attribute)
     * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-          * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
-          * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
-          * `no_ipv6` - (Optional) No IPv6 for this host switch.
-          * `static_ip` - (Optional) IP assignment specification for Static IP List.
-                  * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-                  * `prefix_length` - (Required) Prefix Length.
-                  * `default_gateway` - (Required) Gateway IP.
-          * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
-                  * `ip_mac_pair` - (Required) List of IP MAC Pairs
-                            * `ip_address` - (Required) IPv6 address
-                            * `mac_address` - (Required) MAC address
-                  * `prefix_length` - (Required) Prefix Length.
-                  * `default_gateway` - (Required) Gateway IP.
+        * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
+        * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
+        * `no_ipv6` - (Optional) No IPv6 for this host switch.
+        * `static_ip` - (Optional) IP assignment specification for Static IP List.
+            * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+            * `prefix_length` - (Required) Prefix Length.
+            * `default_gateway` - (Required) Gateway IP.
+        * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
+            * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                * `ip_address` - (Required) IPv6 address
+                * `mac_address` - (Required) MAC address
+            * `prefix_length` - (Required) Prefix Length.
+            * `default_gateway` - (Required) Gateway IP.
     * `pnic` - (Optional) Physical NICs connected to the host switch.
-          * `device_name` - (Required) Device name or key.
-          * `uplink_name` - (Required) Uplink name for this Pnic.
+        * `device_name` - (Required) Device name or key.
+        * `uplink_name` - (Required) Uplink name for this Pnic.
     * `transport_zone_endpoint` - (Optional) Transport zone endpoints
-          * `transport_zone` - (Required) Unique ID identifying the transport zone for this endpoint.
-          * `transport_zone_profiles` - (Optional) Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node.
+        * `transport_zone` - (Required) Unique ID identifying the transport zone for this endpoint.
+        * `transport_zone_profiles` - (Optional) Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node.
 * `external_id` - (Optional) ID of the Node.
 * `fqdn` - (Optional) Fully qualified domain name of the fabric node.
 * `id` - (Optional) Unique identifier of this resource.
@@ -146,31 +146,31 @@ The following arguments are supported:
 * `deployment_config` - (Optional) Config for automatic deployment of edge node virtual machine.
     * `form_factor` - (Optional) Accepted values - 'SMALL', 'MEDIUM', 'LARGE', 'XLARGE'. The default value is 'MEDIUM'.
     * `node_user_settings` - (Required) Node user settings.
-          * `audit_password` - (Optional) Node audit user password.
-          * `audit_username` - (Optional) CLI "audit" username.
-          * `cli_password` - (Required) Node cli password.
-          * `cli_username` - (Optional) CLI "admin" username. Defaults to "admin".
-          * `root_password` - (Required) Node root user password.
+        * `audit_password` - (Optional) Node audit user password.
+        * `audit_username` - (Optional) CLI "audit" username.
+        * `cli_password` - (Required) Node cli password.
+        * `cli_username` - (Optional) CLI "admin" username. Defaults to "admin".
+        * `root_password` - (Required) Node root user password.
     * `vm_deployment_config` - (Required) The vSphere deployment configuration determines where to deploy the edge node.
-          * `compute_folder_id` - (Optional) Compute folder identifier in the specified vcenter server.
-          * `compute_id` - (Required) Cluster identifier or resourcepool identifier for specified vcenter server.
-          * `data_network_ids` - (Required) List of portgroups, logical switch identifiers or segment paths for datapath connectivity.
-          * `default_gateway_address` - (Optional) Default gateway for the node.
-          * `host_id` - (Optional) Host identifier in the specified vcenter server.
-          * `management_network_id` - (Required) Portgroup, logical switch identifier or segment path for management network connectivity.
-          * `management_port_subnet` - (Optional) Port subnets for management port. IPv4, IPv6 and Dual Stack Address is supported.
-                  * `ip_addresses` - (Required) List of IP addresses.
-                  * `prefix_length` - (Required) Subnet Prefix Length.
-          * `reservation_info` - (Optional) Resource reservation settings.
-                  * `cpu_reservation_in_mhz` - (Optional) CPU reservation in MHz.
-                  * `cpu_reservation_in_shares` - (Optional) CPU reservation in shares. Accepted values - 'EXTRA_HIGH_PRIORITY', 'HIGH_PRIORITY', 'NORMAL_PRIORITY', 'LOW_PRIORITY'. The default value is 'HIGH_PRIORITY'.
-                  * `memory_reservation_percentage` - (Optional) Memory reservation percentage.
-          * `storage_id` - (Required) Storage/datastore identifier in the specified vcenter server
-          * `vc_id` - (Required) Vsphere compute identifier for identifying the vcenter server.
+        * `compute_folder_id` - (Optional) Compute folder identifier in the specified vcenter server.
+        * `compute_id` - (Required) Cluster identifier or resourcepool identifier for specified vcenter server.
+        * `data_network_ids` - (Required) List of portgroups, logical switch identifiers or segment paths for datapath connectivity.
+        * `default_gateway_address` - (Optional) Default gateway for the node.
+        * `host_id` - (Optional) Host identifier in the specified vcenter server.
+        * `management_network_id` - (Required) Portgroup, logical switch identifier or segment path for management network connectivity.
+        * `management_port_subnet` - (Optional) Port subnets for management port. IPv4, IPv6 and Dual Stack Address is supported.
+            * `ip_addresses` - (Required) List of IP addresses.
+            * `prefix_length` - (Required) Subnet Prefix Length.
+        * `reservation_info` - (Optional) Resource reservation settings.
+            * `cpu_reservation_in_mhz` - (Optional) CPU reservation in MHz.
+            * `cpu_reservation_in_shares` - (Optional) CPU reservation in shares. Accepted values - 'EXTRA_HIGH_PRIORITY', 'HIGH_PRIORITY', 'NORMAL_PRIORITY', 'LOW_PRIORITY'. The default value is 'HIGH_PRIORITY'.
+            * `memory_reservation_percentage` - (Optional) Memory reservation percentage.
+        * `storage_id` - (Required) Storage/datastore identifier in the specified vcenter server
+        * `vc_id` - (Required) Vsphere compute identifier for identifying the vcenter server.
 * `node_settings` - (Required) Current configuration on edge node.
     * `advanced_configuration` - (Optional) Advanced configuration.
-          * `key` - (Required)
-          * `value` - (Required)
+        * `key` - (Required)
+        * `value` - (Required)
     * `allow_ssh_root_login` - (Optional) Allow root SSH logins. Defaults to false.
     * `dns_servers` - (Optional) List of DNS servers.
     * `enable_ssh` - (Optional) Enable SSH. Defaults to false.
@@ -179,11 +179,11 @@ The following arguments are supported:
     * `ntp_servers` - (Optional) List of NTP servers.
     * `search_domains` - (Optional) List of Search domain names.
     * `syslog_server` - (Optional) List of Syslog servers.
-          * `log_level` - (Optional) Log level to be redirected. Accepted values - 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO' or 'DEBUG'. The default value is 'INFO'.
-          * `name` - (Optional) Display name of the syslog server.
-          * `port` - (Optional) Syslog server port. Defaults to 514.
-          * `protocol` - (Optional) Syslog protocol. Accepted values - 'TCP', 'UDP', 'TLS', 'LI', 'LI_TLS'. The default value is 'UDP'.
-          * `server` - (Required) Server IP or fqdn.
+        * `log_level` - (Optional) Log level to be redirected. Accepted values - 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO' or 'DEBUG'. The default value is 'INFO'.
+        * `name` - (Optional) Display name of the syslog server.
+        * `port` - (Optional) Syslog server port. Defaults to 514.
+        * `protocol` - (Optional) Syslog protocol. Accepted values - 'TCP', 'UDP', 'TLS', 'LI', 'LI_TLS'. The default value is 'UDP'.
+        * `server` - (Required) Server IP or fqdn.
 
 ## Attributes Reference
 

@@ -64,16 +64,16 @@ The following arguments are supported:
 * `qos_profile` - (Optional) Policy path for QoS profile
 * `dhcp_config` - (Required) DHCP configuration for this profile
     * `dhcp_server_config` - (Optional) DHCP server configuration for this profile
-          * `ntp_servers` - (Optional) List of NTP servers
-          * `dns_client_config` - (Optional) DNS Client configuration
-                  * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
-          * `lease_time` - (Optional) DHCP lease time in seconds.
-          * `advanced_config` - (Optional) VPC DHCP advanced configuration
-                  * `is_distributed_dhcp` - DHCP server's IP allocation model based on workloads subnet port id. Can be `false` only when Edge cluster is available, in
+        * `ntp_servers` - (Optional) List of NTP servers
+        * `dns_client_config` - (Optional) DNS Client configuration
+            * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
+        * `lease_time` - (Optional) DHCP lease time in seconds.
+        * `advanced_config` - (Optional) VPC DHCP advanced configuration
+            * `is_distributed_dhcp` - DHCP server's IP allocation model based on workloads subnet port id. Can be `false` only when Edge cluster is available, in
         which case edge cluster in VPC connectivity profile must be configured. This is the traditional DHCP server that dynamically allocates IP per VM's MAC.
         If value is `true`, edge cluster will not be required. This is a DHCP server that dynamically assigns IP per VM port.
     * `dhcp_relay_config` - (Optional) DHCP Relay configuration
-          * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
+        * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
 
 ## Attributes Reference
 

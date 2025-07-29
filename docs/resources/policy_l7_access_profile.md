@@ -76,18 +76,18 @@ The following arguments are supported:
     * `description` - (Optional) Description of the L7 access entry.
     * `action` - (Optional) The action to be applied to all the services.  Valid values are `ALLOW`, `REJECT`, `REJECT_WITH_RESPONSE`.
     * `attribute` - (Optional) Property containing attributes/sub-attributes for Policy L7 Access Profile.
-          * `attribute_source` - (Optional) Source of attribute value i.e whether system defined or custom value. Valid values are `SYSTEM`, `CUSTOM`.
-          * `custom_url_partial_match` - (Optional) True value for this flag will be treated as a partial match for custom url.
-          * `description` - (Optional) Description for attribute value.
-          * `key` - (Optional) Key for attribute. Supported Attribute Keys are APP_ID, URL_CATEGORY, CUSTOM_URL.
-          * `isALGType` - (Optional) Describes whether the APP_ID value is ALG type or not.
-          * `values` - (Optional) Multiple attribute values can be specified as elements of array.
-          * `metadata` - (Optional) This is optional part that can hold additional data about the attribute key/values. Example - For URL CATEGORY key , it specified super category for url category value. This is generic array and can hold multiple meta information about key/values in future
-                  * `key` - (Optional) Key for metadata.
-                  * `value` - (Optional) Value for metadata key.
-          * `sub_attribute` - (Optional) Reference to sub attributes for the attribute
-                  * `key` - (Optional) Key for sub attribute
-                  * `values` - (Optional) Multiple sub attribute values can be specified as elements of array.
+        * `attribute_source` - (Optional) Source of attribute value i.e whether system defined or custom value. Valid values are `SYSTEM`, `CUSTOM`.
+        * `custom_url_partial_match` - (Optional) True value for this flag will be treated as a partial match for custom url.
+        * `description` - (Optional) Description for attribute value.
+        * `key` - (Optional) Key for attribute. Supported Attribute Keys are APP_ID, URL_CATEGORY, CUSTOM_URL.
+        * `isALGType` - (Optional) Describes whether the APP_ID value is ALG type or not.
+        * `values` - (Optional) Multiple attribute values can be specified as elements of array.
+        * `metadata` - (Optional) This is optional part that can hold additional data about the attribute key/values. Example - For URL CATEGORY key , it specified super category for url category value. This is generic array and can hold multiple meta information about key/values in future
+            * `key` - (Optional) Key for metadata.
+            * `value` - (Optional) Value for metadata key.
+        * `sub_attribute` - (Optional) Reference to sub attributes for the attribute
+            * `key` - (Optional) Key for sub attribute
+            * `values` - (Optional) Multiple sub attribute values can be specified as elements of array.
     * `disabled` - (Optional) Flag to deactivate the entry. Default is activated.
     * `logged` - (Optional) Flag to activate packet logging. Default is deactivated.
     * `sequence_number` - (Optional) Determines the order of the entry in this profile. If no sequence number is specified in the payload, a value of 0 is assigned by default. If there are multiple rules with the same sequence number then their order is not deterministic.
