@@ -46,7 +46,7 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 			"named_teaming_policy": {
 				Type:        schema.TypeString,
 				Description: "The named teaming policy to be used by the remote tunnel endpoint",
-				Optional:    true,
+				Required:    true,
 			},
 			"vlan": {
 				Type:         schema.TypeInt,

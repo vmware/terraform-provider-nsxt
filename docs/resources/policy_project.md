@@ -40,12 +40,11 @@ The following arguments are supported:
 * `default_security_profile`- (Optional) Default security profile properties for project.
     * `north_south_firewall` - (Required) North South firewall configuration.
           * `enabled` - (Required) This flag indicates whether north-south firewall (Gateway Firewall) is enabled. If set to false, then gateway firewall policies will not be enforced on the VPCs associated with this configuration.
-* `vc_folder` - (Optional) Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC. Defaults to `true`.
+* `vc_folder` - (Optional) Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC. `vc_folder` should be set to true when `vpc_deployment_scope` is set.
 * `quotas` - (Optional) List of policy paths for quota resources that are applicable to this project.
 * `vpc_deployment_scope` - (Optional) Project VPC network Deployment Scope.
-    * `span_reference` - (Optional) List of Span object references available with the project for TGW consumption.
-          * `span_path` - (Required) Policy path of the Cluster based Span object of type NetworkSpan.
-          * `is_default` - (Optional) Default span indicator.
+    * `default_span_path` - (Optional) Policy path of the Cluster based default Span object of type NetworkSpan.
+    * `non_default_span_paths` - (Optional) List of non default policy paths of the Span objects of type NetworkSpan.
     * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
 
 ## Attributes Reference
