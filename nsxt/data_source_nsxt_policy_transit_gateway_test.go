@@ -14,7 +14,8 @@ import (
 func TestAccDataSourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicyTransitGatewayBasic(t, true, func() {
 		testAccPreCheck(t)
-		testAccIsMultitenancy()
+		testAccOnlyVPC(t)
+		testAccNSXVersion(t, "9.1.0")
 		testAccEnvDefined(t, "NSXT_PROJECT_ID")
 
 	})
@@ -29,7 +30,7 @@ func testAccDataSourceNsxtPolicyTransitGatewayBasic(t *testing.T, withContext bo
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyTransitGatewayDefaultReadTemplate(withContext),
+				Config: testAccNSXPolicyTransitGatewayDefaultReadTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
@@ -41,16 +42,10 @@ func testAccDataSourceNsxtPolicyTransitGatewayBasic(t *testing.T, withContext bo
 	})
 }
 
-func testAccNSXPolicyTransitGatewayDefaultReadTemplate(withContext bool) string {
-	context := ""
-	if withContext {
-		context = testAccNsxtProjectContext()
-	}
+func testAccNSXPolicyTransitGatewayDefaultReadTemplate() string {
 	return fmt.Sprintf(`
-	
 	data "nsxt_policy_transit_gateway" "test" {
-	%s
-	
-		  is_default = "true"
-		}`, context)
+    %s
+	  is_default = "true"
+	}`, testAccNsxtProjectContext())
 }

@@ -37,7 +37,9 @@ func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{
 	_, idOk := d.GetOk("id")
 
 	if defaultOK && !dpOk && !idOk {
-		_, err := policyDataSourceReadWithFlag(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", "is_default", nil)
+		query := make(map[string]string)
+		query["is_default"] = "true"
+		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", query)
 		return err
 	}
 	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", nil)

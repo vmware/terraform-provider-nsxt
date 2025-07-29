@@ -7,7 +7,6 @@ package nsxt
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -116,11 +115,9 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func policyDataSourceReadWithFlag(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, customFlag string, additionalQuery map[string]string) (*data.StructValue, error) {
-	flagValue := d.Get(customFlag).(bool)
-	flagValueStr := strconv.FormatBool(flagValue)
+func policyDataSourceReadWithCustomField(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
 	additionalQueryString := buildQueryStringFromMap(additionalQuery)
-	result, err := searchPolicyResourcesByCustomField(connector, context, resourceType, customFlag, flagValueStr, &additionalQueryString)
+	result, err := searchPolicyResourcesByCustomField(connector, context, resourceType, &additionalQueryString)
 	if len(result) == 1 {
 		converter := bindings.NewTypeConverter()
 		dataValue, errors := converter.ConvertToGolang(result[0], model.PolicyResourceBindingType())
@@ -138,11 +135,11 @@ func policyDataSourceReadWithFlag(d *schema.ResourceData, connector client.Conne
 		d.Set("path", obj.Resource.Path)
 		return obj.StructValue, err
 	}
-	return nil, fmt.Errorf("found multiple %s with is_default '%s'", resourceType, customFlag)
+	return nil, fmt.Errorf("multiple values found for resource type %s with query fields: '%v'", resourceType, additionalQueryString)
 }
 
-func searchPolicyResourcesByCustomField(connector client.Connector, context utl.SessionContext, resourceType string, customFlag string, flagValue string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s AND %s:%s AND marked_for_delete:false", resourceType, escapeSpecialCharacters(customFlag), escapeSpecialCharacters(flagValue))
+func searchPolicyResourcesByCustomField(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
 	return searchByContext(connector, context, query, additionalQuery)
 }
 
