@@ -12,21 +12,17 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyTransitGateway_basic(t *testing.T) {
-	testAccDataSourceNsxtPolicyTransitGatewayBasic(t, true, func() {
-		testAccPreCheck(t)
-		testAccOnlyVPC(t)
-		testAccNSXVersion(t, "9.1.0")
-		testAccEnvDefined(t, "NSXT_PROJECT_ID")
-
-	})
-}
-
-func testAccDataSourceNsxtPolicyTransitGatewayBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_transit_gateway.test"
 	checkResourceName := "data.nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  preCheck,
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
+			testAccEnvDefined(t, "NSXT_PROJECT_ID")
+
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
