@@ -433,6 +433,11 @@ func validateProjectID(allowDefault bool) schema.SchemaValidateFunc {
 		if !allowDefault && v == "default" {
 			es = append(es, fmt.Errorf("for creation in default project context, do not use a context block"))
 		}
+
+		if v == "" {
+			es = append(es, fmt.Errorf("project ID attribute cannot be empty"))
+		}
+
 		if !isValidID(v) {
 			es = append(es, fmt.Errorf("invalid ID atrribute: %s", v))
 		}
