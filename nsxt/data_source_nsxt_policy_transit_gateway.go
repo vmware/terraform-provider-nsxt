@@ -23,7 +23,6 @@ func dataSourceNsxtPolicyTransitGateway() *schema.Resource {
 			"is_default": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: false,
 			},
 		},
 	}
