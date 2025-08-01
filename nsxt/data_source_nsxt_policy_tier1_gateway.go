@@ -29,7 +29,7 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: false, AllowDefaultProject: false, FromGlobal: true}),
+			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: true, AllowDefaultProject: false, FromGlobal: true}),
 		},
 	}
 }

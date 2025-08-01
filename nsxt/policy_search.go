@@ -96,7 +96,7 @@ func policyDataSourceCreateMap(connector client.Connector, context utl.SessionCo
 			return fmt.Errorf("conversion error: %v", errors)
 		}
 		policyResource := dataValue.(model.PolicyResource)
-		if resourceType != *policyResource.ResourceType {
+		if policyResource.ResourceType == nil || resourceType != *policyResource.ResourceType {
 			continue
 		}
 		output[*policyResource.Id] = *policyResource.DisplayName
