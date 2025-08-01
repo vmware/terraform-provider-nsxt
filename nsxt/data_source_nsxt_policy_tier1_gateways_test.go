@@ -13,14 +13,14 @@ import (
 
 // list the Tier1 gateways
 func TestAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T) {
-	checkResourceName := "data.nsxt_policy_tier1_gateways.all"
+	checkResourceName := "nsxt_policy_tier1_gateways_result"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyVPC(t)
+			//	testAccOnlyVPC(t)
 			testAccNSXVersion(t, "9.1.0")
-			testAccEnvDefined(t, "NSXT_PROJECT_ID")
+			//testAccEnvDefined(t, "NSXT_PROJECT_ID")
 
 		},
 		Providers: testAccProviders,
@@ -28,7 +28,7 @@ func TestAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T) {
 			{
 				Config: testAccNSXPolicyTier1GatewaysReadTemplate(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(checkResourceName, "items.#", "1"),
+					resource.TestCheckOutput(checkResourceName, "1"),
 				),
 			},
 		},
@@ -37,5 +37,9 @@ func TestAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T) {
 
 func testAccNSXPolicyTier1GatewaysReadTemplate() string {
 	return fmt.Sprintln(`
-	data "nsxt_policy_tier1_gateways" "all" {}`)
+data "nsxt_policy_tier1_gateways" "all" {}
+
+output "nsxt_policy_tier1_gateways_result"  {
+  value = length(data.nsxt_policy_tier1_gateways.all.items)
+}`)
 }
