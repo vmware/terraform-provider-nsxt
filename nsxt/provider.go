@@ -326,6 +326,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_tags":                                       dataSourceNsxtTags(),
 			"nsxt_policy_tier0_gateway":                              dataSourceNsxtPolicyTier0Gateway(),
 			"nsxt_policy_tier1_gateway":                              dataSourceNsxtPolicyTier1Gateway(),
+			"nsxt_policy_tier1_gateways":                             dataSourceNsxtPolicyTier0Gateways(),
 			"nsxt_policy_gateway_interface":                          dataSourceNsxtPolicyGatewayInterface(),
 			"nsxt_policy_transit_gateway":                            dataSourceNsxtPolicyTransitGateway(),
 			"nsxt_policy_transit_gateway_nat":                        dataSourceNsxtPolicyTransitGatewayNat(),

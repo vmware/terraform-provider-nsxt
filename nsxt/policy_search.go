@@ -83,6 +83,27 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
+func policyDataSourceCreateMap(connector client.Connector, context utl.SessionContext, resourceType string, output map[string]string, additionalQuery map[string]string) error {
+	additionalQueryString := buildQueryStringFromMap(additionalQuery)
+	resultValues, err := listPolicyResources(connector, context, resourceType, &additionalQueryString)
+	if err != nil {
+		return fmt.Errorf("failed to fetch the list of resources %s: %v", resourceType, err)
+	}
+	converter := bindings.NewTypeConverter()
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return fmt.Errorf("conversion error: %v", errors)
+		}
+		policyResource := dataValue.(model.PolicyResource)
+		if resourceType != *policyResource.ResourceType {
+			continue
+		}
+		output[*policyResource.Id] = *policyResource.DisplayName
+	}
+	return nil
+}
+
 func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
 	return policyDataSourceResourceReadWithValidation(d, connector, context, resourceType, additionalQuery, true)
 }
@@ -154,6 +175,11 @@ func searchByContext(connector client.Connector, context utl.SessionContext, que
 		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
 	return nil, errors.New("invalid ClientType")
+}
+
+func listPolicyResources(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
+	return searchByContext(connector, context, query, additionalQuery)
 }
 
 // globalFlag argument is an optional
