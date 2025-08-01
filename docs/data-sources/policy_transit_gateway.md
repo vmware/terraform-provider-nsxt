@@ -24,9 +24,10 @@ data "nsxt_policy_transit_gateway" "test" {
   display_name = "tgw1"
 }
 ```
-## Example Usage: Fetching Default Gateway Attribute 
-```hcl
 
+## Example Usage: Fetching Default Gateway Attribute
+
+```hcl
 data "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = "default"
@@ -37,8 +38,8 @@ data "nsxt_policy_transit_gateway" "test" {
 output nsxt_policy_transit_gateway_test {
   value = data.nsxt_policy_transit_gateway.test.display_name
 }
-
 ```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of transit gateway to retrieve.
