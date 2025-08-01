@@ -18,7 +18,6 @@ data "nsxt_policy_tier1_gateways" "all" {}
 output "nsxt_policy_tier1_gateways_result" {
   value = data.nsxt_policy_tier1_gateways.all.items
 }
-
 ```
 
 ## Example Usage - Multi-Tenancy

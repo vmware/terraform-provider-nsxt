@@ -18,9 +18,7 @@ data "nsxt_policy_tier0_gateways" "all" {}
 output "nsxt_policy_tier0_gateways_result" {
   value = data.nsxt_policy_tier0_gateways.all.items
 }
-
 ```
-
 
 ## Example Usage - Global infra
 
@@ -30,7 +28,6 @@ data "nsxt_policy_tier0_gateways" "all" {
     from_global = true
   }
 }
-
 ```
 
 ## Argument Reference
