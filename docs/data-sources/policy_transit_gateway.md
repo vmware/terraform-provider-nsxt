@@ -31,7 +31,7 @@ data "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = "default"
   }
-   is_default = true
+  is_default = true
 }
 
 output nsxt_policy_transit_gateway_test {
