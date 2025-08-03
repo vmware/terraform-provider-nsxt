@@ -262,6 +262,7 @@ func Provider() *schema.Provider {
 			"nsxt_management_cluster":                                dataSourceNsxtManagementCluster(),
 			"nsxt_policy_edge_cluster":                               dataSourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_node":                                  dataSourceNsxtPolicyEdgeNode(),
+			"nsxt_policy_share":                                      dataSourceNsxtPolicyShare(),
 			"nsxt_policy_tier0_gateway":                              dataSourceNsxtPolicyTier0Gateway(),
 			"nsxt_policy_tier1_gateway":                              dataSourceNsxtPolicyTier1Gateway(),
 			"nsxt_policy_service":                                    dataSourceNsxtPolicyService(),
