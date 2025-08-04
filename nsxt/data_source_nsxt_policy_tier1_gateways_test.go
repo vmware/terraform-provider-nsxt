@@ -18,10 +18,6 @@ func TestAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			//	testAccOnlyVPC(t)
-			testAccNSXVersion(t, "9.1.0")
-			//testAccEnvDefined(t, "NSXT_PROJECT_ID")
-
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
