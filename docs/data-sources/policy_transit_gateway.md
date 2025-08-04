@@ -35,7 +35,7 @@ data "nsxt_policy_transit_gateway" "test" {
   is_default = true
 }
 
-output nsxt_policy_transit_gateway_test {
+output "nsxt_policy_transit_gateway_test" {
   value = data.nsxt_policy_transit_gateway.test.display_name
 }
 ```
