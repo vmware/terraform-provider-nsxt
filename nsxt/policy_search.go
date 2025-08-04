@@ -156,7 +156,7 @@ func policyDataSourceReadWithCustomField(d *schema.ResourceData, connector clien
 		d.Set("path", obj.Resource.Path)
 		return obj.StructValue, err
 	}
-	return nil, fmt.Errorf("multiple values found for resource type %s with query fields: '%v'", resourceType, additionalQueryString)
+	return nil, fmt.Errorf("found none or multiple values for resource type %s with query fields: '%v'", resourceType, additionalQueryString)
 }
 
 func searchPolicyResourcesByCustomField(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {

@@ -5,6 +5,8 @@
 package nsxt
 
 import (
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -31,13 +33,13 @@ func dataSourceNsxtPolicyTransitGateway() *schema.Resource {
 func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{}) error {
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.
-	_, defaultOK := d.GetOkExists("is_default")
+	value, defaultOK := d.GetOkExists("is_default")
 	_, dpOk := d.GetOk("display_name")
 	_, idOk := d.GetOk("id")
 
 	if defaultOK && !dpOk && !idOk {
 		query := make(map[string]string)
-		query["is_default"] = "true"
+		query["is_default"] = strconv.FormatBool(value.(bool))
 		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", query)
 		return err
 	}
