@@ -730,7 +730,7 @@ func getElemPolicyPathSchema() *schema.Schema {
 	return getElemPolicyPathSchemaWithFlags(false, false, false)
 }
 
-func getAllocationRangeListSchema(required bool, description string) *schema.Schema {
+func getAllocationRangesSchema(required bool, description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: description,

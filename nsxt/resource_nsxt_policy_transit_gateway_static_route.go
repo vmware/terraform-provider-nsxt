@@ -55,6 +55,7 @@ var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
 							SdkFieldName: "IpAddress",
+							OmitIfEmpty:  true,
 						},
 					},
 					"admin_distance": {
