@@ -34,6 +34,7 @@ var accTestPolicyIPSecVpnIkeProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ipsec_vpn_ike_profile.test"
+	testDataSourceName := "data.nsxt_policy_ipsec_vpn_ike_profile.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
@@ -58,6 +59,7 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -185,7 +187,12 @@ resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["encryption_algorithms"], attrMap["ike_version"], attrMap["sa_life_time"])
+}
+data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+  display_name = "%s"
+  depends_on   = [nsxt_policy_ipsec_vpn_ike_profile.test]
+}  
+`, attrMap["display_name"], attrMap["description"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["encryption_algorithms"], attrMap["ike_version"], attrMap["sa_life_time"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic() string {

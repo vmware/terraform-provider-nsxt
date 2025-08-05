@@ -36,6 +36,7 @@ var accTestPolicyIPSecVpnTunnelProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ipsec_vpn_tunnel_profile.test"
+	testDataSourceName := "data.nsxt_policy_ipsec_vpn_tunnel_profile.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
@@ -60,6 +61,7 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -188,7 +190,11 @@ resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"])
+}
+data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+  display_name = "%s"
+  depends_on   = [nsxt_policy_ipsec_vpn_tunnel_profile.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic() string {

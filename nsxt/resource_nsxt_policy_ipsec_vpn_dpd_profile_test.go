@@ -32,6 +32,7 @@ var accTestPolicyIPSecVpnDpdProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ipsec_vpn_dpd_profile.test"
+	testDataSourceName := "data.nsxt_policy_ipsec_vpn_dpd_profile.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
@@ -55,6 +56,7 @@ func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -180,7 +182,12 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["dpd_probe_interval"], attrMap["dpd_probe_mode"], attrMap["enabled"], attrMap["retry_count"])
+}
+
+data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+  display_name = "%s"
+  depends_on   = [nsxt_policy_ipsec_vpn_dpd_profile.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["dpd_probe_interval"], attrMap["dpd_probe_mode"], attrMap["enabled"], attrMap["retry_count"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic() string {
