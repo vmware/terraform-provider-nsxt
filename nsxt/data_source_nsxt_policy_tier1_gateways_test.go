@@ -11,32 +11,60 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+func TestAccDataSourceNsxtPolicyTier1Gateways(t *testing.T) {
+	testAccDataSourceNsxtPolicyTier1Gateways_basic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+func TestAccDataSourceNsxtPolicyTier1Gateways_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyTier1Gateways_basic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
 // list the Tier1 gateways
-func TestAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T) {
+func testAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T, withContext bool, preCheck func()) {
 	checkResourceName := "nsxt_policy_tier1_gateways_result"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccNSXVersion(t, "9.1.0")
-		},
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyTier1GatewaysReadTemplate(),
+				Config: testAccNSXPolicyTier1GatewaysReadTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckOutput(checkResourceName, "1"),
+					resource.TestCheckOutput(checkResourceName, "tier1-gateway-01"),
 				),
 			},
 		},
 	})
 }
 
-func testAccNSXPolicyTier1GatewaysReadTemplate() string {
-	return fmt.Sprintln(`
-data "nsxt_policy_tier1_gateways" "all" {}
+func testAccNSXPolicyTier1GatewaysReadTemplate(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "EDGECLUSTER1"
+}
+
+resource "nsxt_policy_tier1_gateway" "test" {
+%s
+  display_name      = "tier1-gateway-01"
+  nsx_id = "test-tier1-gateway-01"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+}
+
+data "nsxt_policy_tier1_gateways" "all" {
+%s
+depends_on = [nsxt_policy_tier1_gateway.test]
+}
 
 output "nsxt_policy_tier1_gateways_result"  {
-  value = length(data.nsxt_policy_tier1_gateways.all.items)
-}`)
+  value = data.nsxt_policy_tier1_gateways.all.items["test-tier1-gateway-01"]
+  depends_on = [data.nsxt_policy_tier1_gateways.all]
+}`, context, context)
 }

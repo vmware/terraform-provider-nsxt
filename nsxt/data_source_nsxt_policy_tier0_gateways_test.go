@@ -18,14 +18,13 @@ func TestAccDataSourceNsxtPolicyTier0Gateways_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyTier0GatewaysReadTemplate(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckOutput(checkResourceName, "1"),
+					resource.TestCheckOutput(checkResourceName, "tier0-gateway-01"),
 				),
 			},
 		},
@@ -34,9 +33,22 @@ func TestAccDataSourceNsxtPolicyTier0Gateways_basic(t *testing.T) {
 
 func testAccNSXPolicyTier0GatewaysReadTemplate() string {
 	return fmt.Sprintln(`
-data "nsxt_policy_tier0_gateways" "all" {}
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "EDGECLUSTER1"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "tier0-gateway-01"
+  nsx_id = "test-tier0-gateway-01"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+}
+
+data "nsxt_policy_tier0_gateways" "all" {
+depends_on = [nsxt_policy_tier0_gateway.test]
+}
 
 output "nsxt_policy_tier0_gateways_result"  {
-  value = length(data.nsxt_policy_tier0_gateways.all.items)
+  value = data.nsxt_policy_tier0_gateways.all.items["test-tier0-gateway-01"]
+  depends_on = [data.nsxt_policy_tier0_gateways.all]
 }`)
 }
