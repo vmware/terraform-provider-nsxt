@@ -20,6 +20,18 @@ output "nsxt_policy_tier1_gateways_result" {
 }
 ```
 
+## Example Usage - Using Regex
+
+```hcl
+data "nsxt_policy_tier1_gateways" "all" {
+  display_name = ".*"
+}
+
+output "nsxt_policy_tier1_gateways_result" {
+  value = data.nsxt_policy_tier1_gateways.all.items
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl
@@ -44,6 +56,7 @@ data "nsxt_policy_tier1_gateways" "all" {
 
 ## Argument Reference
 
+* `display_name` - (Optional) Display name for the Tier1. Supports regular expressions.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Optional) The ID of the project which the object belongs to
     * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)

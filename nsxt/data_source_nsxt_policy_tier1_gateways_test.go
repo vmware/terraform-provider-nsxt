@@ -37,6 +37,12 @@ func testAccDataSourceNsxtPolicyTier1Gateways_basic(t *testing.T, withContext bo
 					resource.TestCheckOutput(checkResourceName, "tier1-gateway-01"),
 				),
 			},
+			{
+				Config: testAccNSXPolicyTier1GatewaysReadTemplateWithRegex(withContext),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckOutput(checkResourceName, "regex-tier1-gateway-01"),
+				),
+			},
 		},
 	})
 }
@@ -60,6 +66,35 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
 data "nsxt_policy_tier1_gateways" "all" {
 %s
+depends_on = [nsxt_policy_tier1_gateway.test]
+}
+
+output "nsxt_policy_tier1_gateways_result"  {
+  value = data.nsxt_policy_tier1_gateways.all.items["test-tier1-gateway-01"]
+  depends_on = [data.nsxt_policy_tier1_gateways.all]
+}`, context, context)
+}
+
+func testAccNSXPolicyTier1GatewaysReadTemplateWithRegex(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "EDGECLUSTER1"
+}
+
+resource "nsxt_policy_tier1_gateway" "test" {
+%s
+  display_name      = "regex-tier1-gateway-01"
+  nsx_id = "test-tier1-gateway-01"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+}
+
+data "nsxt_policy_tier1_gateways" "all" {
+%s
+display_name = ".*"
 depends_on = [nsxt_policy_tier1_gateway.test]
 }
 
