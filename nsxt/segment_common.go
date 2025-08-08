@@ -226,6 +226,11 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(urpfModeValues, false),
 				Default:      model.SegmentAdvancedConfig_URPF_MODE_STRICT,
 			},
+			"multicast": {
+				Type:        schema.TypeBool,
+				Description: "Enable multicast on the downlink LRP created to connect the segment to Tier0/Tier1 gateway",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -798,6 +803,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 		connectivity := advConfigMap["connectivity"].(string)
 		hybrid := advConfigMap["hybrid"].(bool)
 		egress := advConfigMap["local_egress"].(bool)
+		multicast := advConfigMap["multicast"].(bool)
 		var poolPaths []string
 		if advConfigMap["cidr"] != nil {
 			poolPaths = append(poolPaths, advConfigMap["cidr"].(string))
@@ -806,6 +812,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 			AddressPoolPaths: poolPaths,
 			Hybrid:           &hybrid,
 			LocalEgress:      &egress,
+			Multicast:        &multicast,
 		}
 
 		if connectivity != "" {
@@ -1409,6 +1416,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		advConfig["connectivity"] = obj.AdvancedConfig.Connectivity
 		advConfig["hybrid"] = obj.AdvancedConfig.Hybrid
 		advConfig["local_egress"] = obj.AdvancedConfig.LocalEgress
+		advConfig["multicast"] = obj.AdvancedConfig.Multicast
 		if obj.AdvancedConfig.UplinkTeamingPolicyName != nil {
 			advConfig["uplink_teaming_policy"] = *obj.AdvancedConfig.UplinkTeamingPolicyName
 		}

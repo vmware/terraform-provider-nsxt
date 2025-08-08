@@ -130,6 +130,7 @@ The following arguments are supported:
     * `local_egress` - (Optional) Boolean flag to enable local egress when used in conjunction with L2VPN.
     * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
     * `urpf_mode` - (Optional) URPF mode to be applied to gateway downlink interface. One of `STRICT`, `NONE`.
+    * `multicast` - (Optional) Enable multicast on the downlink LRP created to connect the segment to Tier0/Tier1 gateway.
 * `metadata_proxy_paths` - (Optional) Metadata Proxy Configuration Paths.
 
 ## Attributes Reference
