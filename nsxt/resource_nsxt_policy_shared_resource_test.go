@@ -197,7 +197,7 @@ func testAccNsxtPolicySharedResourceTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestPolicySharedResourceUpdateAttributes
 	}
-	return testAccNsxtPolicyShareTemplate(createFlow) + testAccNsxtPolicyContextProfileReadTemplate("AMQP") + fmt.Sprintf(`
+	return testAccNsxtPolicyShareTemplate(createFlow, false) + testAccNsxtPolicyContextProfileReadTemplate("AMQP") + fmt.Sprintf(`
 resource "nsxt_policy_shared_resource" "test" {
   display_name = "%s"
   description  = "%s"
