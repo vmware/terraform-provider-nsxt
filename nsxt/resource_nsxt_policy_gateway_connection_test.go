@@ -283,7 +283,7 @@ func testAccNsxtPolicyGatewayConnection910Template(createFlow bool) string {
 resource "nsxt_policy_ip_block" "defExtBlock" {
   display_name = "defExtBlock"
   visibility   = "EXTERNAL"
-  cidr_list  = ["22.21.0.0/16"]
+  cidrs        = ["22.21.0.0/16"]
 }
 
 resource "nsxt_policy_gateway_connection" "test" {

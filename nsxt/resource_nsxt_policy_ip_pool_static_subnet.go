@@ -34,7 +34,7 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 			"tag":              getTagsSchema(),
 			"context":          getContextSchema(false, false, false),
 			"pool_path":        getPolicyPathSchema(true, true, "Policy path to the IP Pool for this Subnet"),
-			"allocation_range": getAllocationRangeListSchema(true, "A collection of IPv4 or IPv6 IP ranges"),
+			"allocation_range": getAllocationRangesSchema(true, "A collection of IPv4 or IPv6 IP ranges"),
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "Network address and prefix length",

@@ -296,6 +296,9 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
 	client := projects.NewVpcSecurityProfilesClient(connector)
 	obj, err := client.Get(defaultOrgID, projectID, "default")
+	if isNotFoundError(err) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
