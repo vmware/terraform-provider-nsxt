@@ -6,7 +6,9 @@ package nsxt
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -279,14 +281,18 @@ func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0, withContext bool) st
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+	ipSfx := r.Intn(50) + 1
+
 	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {
 %s
   display_name = "%s"
   gateway_path = nsxt_policy_tier%d_gateway.test.path
-  listener_ip  = "78.2.1.12"
+  listener_ip  = "78.2.1.%d"
 
   default_forwarder_zone_path = nsxt_policy_dns_forwarder_zone.default.path
 }
-`, context, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
+`, context, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0], ipSfx)
 }

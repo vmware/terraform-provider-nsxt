@@ -44,6 +44,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -173,6 +174,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_importBasic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,

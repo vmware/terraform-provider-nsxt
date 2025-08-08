@@ -336,7 +336,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 	testResourceName := "nsxt_policy_group.test"
 	domainName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")

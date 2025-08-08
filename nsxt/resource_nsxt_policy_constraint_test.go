@@ -91,7 +91,11 @@ func TestAccResourceNsxtPolicyConstraint_vpc(t *testing.T) {
 	testResourceName := "nsxt_policy_constraint.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.0.0"); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+			testAccOnlyVPC(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyConstraintCheckDestroy(state, accTestPolicyConstraintUpdateAttributes["display_name"])
@@ -138,7 +142,11 @@ func TestAccResourceNsxtPolicyConstraint_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_constraint.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyConstraintCheckDestroy(state, name)
