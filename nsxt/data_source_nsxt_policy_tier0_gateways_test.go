@@ -38,15 +38,11 @@ func TestAccDataSourceNsxtPolicyTier0Gateways_basic(t *testing.T) {
 }
 
 func testAccNSXPolicyTier0GatewaysReadTemplate() string {
-	return fmt.Sprintln(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "EDGECLUSTER1"
-}
-
+	return testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "tier0-gateway-01"
   nsx_id = "test-tier0-gateway-01"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  %s
 }
 
 data "nsxt_policy_tier0_gateways" "all" {
@@ -56,28 +52,24 @@ depends_on = [nsxt_policy_tier0_gateway.test]
 output "nsxt_policy_tier0_gateways_result"  {
   value = data.nsxt_policy_tier0_gateways.all.items["test-tier0-gateway-01"]
   depends_on = [data.nsxt_policy_tier0_gateways.all]
-}`)
+}`, testAccNsxtPolicyTier0EdgeClusterTemplate())
 }
 
 func testAccNSXPolicyTier0GatewaysReadTemplateWithRegex() string {
-	return fmt.Sprintln(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "EDGECLUSTER1"
-}
-
+	return testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "regex-tier0-gateway-01"
-  nsx_id = "testre-tier0-gateway-01"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  display_name = "regex-tier0-gateway-01"
+  nsx_id       = "testre-tier0-gateway-01"
+  %s
 }
 
 data "nsxt_policy_tier0_gateways" "all" {
 display_name = ".*"
-depends_on = [nsxt_policy_tier0_gateway.test]
+depends_on   = [nsxt_policy_tier0_gateway.test]
 }
 
 output "nsxt_policy_tier0_gateways_result"  {
-  value = data.nsxt_policy_tier0_gateways.all.items["testre-tier0-gateway-01"]
+  value      = data.nsxt_policy_tier0_gateways.all.items["testre-tier0-gateway-01"]
   depends_on = [data.nsxt_policy_tier0_gateways.all]
-}`)
+}`, testAccNsxtPolicyTier0EdgeClusterTemplate())
 }
