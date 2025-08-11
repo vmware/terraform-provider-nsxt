@@ -50,7 +50,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 
 func getGatewayPolicyDefaultRulesSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:          schema.TypeList,
+		Type:          schema.TypeSet,
 		Description:   "List of default rules",
 		Optional:      true,
 		Computed:      true,
@@ -92,7 +92,7 @@ func getGatewayPolicyDefaultRulesSchema() *schema.Schema {
 }
 
 func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceData, connector client.Connector, isGlobalManager bool) *model.Rule {
-	defaultRules := d.Get("default_rule").([]interface{})
+	defaultRules := d.Get("default_rule").(*schema.Set).List()
 
 	for _, obj := range defaultRules {
 		defaultRule := obj.(map[string]interface{})
