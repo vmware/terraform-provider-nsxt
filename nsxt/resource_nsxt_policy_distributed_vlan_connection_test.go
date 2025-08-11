@@ -16,7 +16,7 @@ var accTestPolicyDistributedVlanConnectionCreateAttributes = map[string]string{
 	"display_name":      getAccTestResourceName(),
 	"description":       "terraform created",
 	"vlan_id":           "12",
-	"gateway_addresses": "3.3.3.1/24",
+	"gateway_addresses": "10.66.66.10/24",
 }
 
 var accTestPolicyDistributedVlanConnectionUpdateAttributes = map[string]string{
@@ -242,7 +242,7 @@ func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
 resource "nsxt_policy_ip_block" "big_corp_vlan" {
   description         = "IP block for big corp extended subnet test"
   display_name        = "%s"
-  cidr_list           = ["10.66.66.0/24"]
+  cidrs               = ["10.66.66.0/24"]
   visibility          = "EXTERNAL"
   is_subnet_exclusive = true
 }

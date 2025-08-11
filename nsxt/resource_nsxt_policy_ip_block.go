@@ -55,7 +55,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(visibilityTypes, false),
 			},
-			"cidr_list": {
+			"cidrs": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Array of contiguous IP address spaces represented by network address and prefix length",
@@ -70,8 +70,8 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Optional:    true,
 				Description: "If this property is set to true, then this block is reserved for direct vlan extension use case",
 			},
-			"range_list":   getAllocationRangeListSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
-			"reserved_ips": getAllocationRangeListSchema(false, "Represents list of reserved IP address in the form of start and end IPs"),
+			"ranges":       getAllocationRangesSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
+			"excluded_ips": getAllocationRangesSchema(false, "Represents list of excluded IP address in the form of start and end IPs"),
 		},
 	}
 }
@@ -121,12 +121,12 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("visibility", block.Visibility)
 	}
 	if util.NsxVersionHigherOrEqual("9.1.0") {
-		if len(d.Get("cidr_list").([]interface{})) > 0 {
-			d.Set("cidr_list", block.CidrList)
+		if len(d.Get("cidrs").([]interface{})) > 0 {
+			d.Set("cidrs", block.Cidrs)
 		}
 		d.Set("is_subnet_exclusive", block.IsSubnetExclusive)
-		d.Set("range_list", setAllocationRangeListInSchema(block.RangeList))
-		d.Set("reserved_ips", setAllocationRangeListInSchema(block.ReservedIps))
+		d.Set("ranges", setAllocationRangeListInSchema(block.Ranges))
+		d.Set("excluded_ips", setAllocationRangeListInSchema(block.ExcludedIps))
 		if block.Cidr != nil {
 			d.Set("cidr", block.Cidr)
 		}
@@ -154,10 +154,10 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	cidr := d.Get("cidr").(string)
 	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
-	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	cidrs := getStringListFromSchemaList(d, "cidrs")
 	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
-	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
-	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
+	ranges := getAllocationRangeListFromSchema(d.Get("ranges").([]interface{}))
+	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
 		DisplayName: &displayName,
@@ -167,10 +167,10 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
-	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrList) > 0 {
-		obj.CidrList = cidrList
-		obj.RangeList = rangeList
-		obj.ReservedIps = reservedIPs
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrs) > 0 {
+		obj.Cidrs = cidrs
+		obj.Ranges = ranges
+		obj.ExcludedIps = excludedIPs
 	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
@@ -209,10 +209,10 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	visibility := d.Get("visibility").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
-	cidrList := getStringListFromSchemaList(d, "cidr_list")
+	cidrs := getStringListFromSchemaList(d, "cidrs")
 	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
-	rangeList := getAllocationRangeListFromSchema(d.Get("range_list").([]interface{}))
-	reservedIPs := getAllocationRangeListFromSchema(d.Get("reserved_ips").([]interface{}))
+	ranges := getAllocationRangeListFromSchema(d.Get("ranges").([]interface{}))
+	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
 		Id:          &id,
@@ -224,10 +224,10 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
-	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrList) > 0 {
-		obj.CidrList = cidrList
-		obj.RangeList = rangeList
-		obj.ReservedIps = reservedIPs
+	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrs) > 0 {
+		obj.Cidrs = cidrs
+		obj.Ranges = ranges
+		obj.ExcludedIps = excludedIPs
 	} else if cidr != "" {
 		obj.Cidr = &cidr
 	}
