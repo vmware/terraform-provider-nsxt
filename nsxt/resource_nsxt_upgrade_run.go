@@ -587,6 +587,9 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 				// Keep polling for this case.
 				return nil, model.ComponentUpgradeStatus_STATUS_IN_PROGRESS, nil
 			}
+			if errCode, _ := getInvalidRequestErrorCode(err); errCode == 30023 {
+				return nil, model.ComponentUpgradeStatus_STATUS_IN_PROGRESS, nil
+			}
 			if err != nil {
 				return nil, model.ComponentUpgradeStatus_STATUS_FAILED, err
 			}
