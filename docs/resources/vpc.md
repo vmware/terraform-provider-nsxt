@@ -53,7 +53,6 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
-* `private_ipv4_blocks` - (Optional) Policy paths of automatically created private IPv4 blocks, based on `private_ips` specified for the VPC.
 
 ## Importing
 

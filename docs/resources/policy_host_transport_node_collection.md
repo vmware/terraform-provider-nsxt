@@ -32,8 +32,8 @@ resource "nsxt_policy_host_transport_node_collection" "htnc1" {
 
 The following arguments are supported:
 
-* `display_name` - (Optional) The Display Name of the Transport Zone.
-* `description` - (Optional) Description of the Transport Zone.
+* `display_name` - (Optional) The Display Name of the Transport Node Collection.
+* `description` - (Optional) Description of the Transport Node Collection.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `compute_collection_id` - (Required) Compute collection id.
