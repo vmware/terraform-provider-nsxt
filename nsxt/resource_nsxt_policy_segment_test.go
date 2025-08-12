@@ -999,7 +999,7 @@ resource "nsxt_policy_segment" "test" {
 
 func testAccNsxtPolicyEdgeCluster(name string) string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf(`
+		return testAccNsxtPolicySiteReadTemplate(getTestSiteName()) + fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
   site_path    = data.nsxt_policy_site.test.path
