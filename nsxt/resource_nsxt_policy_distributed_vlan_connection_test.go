@@ -109,6 +109,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -226,13 +227,15 @@ func testAccNsxtPolicyDistributedVlanConnectionMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
+  vlan_id = "%s"
+  gateway_addresses = ["192.168.1.1/24"]
 }
 
 data "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
 
   depends_on = [nsxt_policy_distributed_vlan_connection.test]
-}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["vlan_id"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
 }
 
 func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
