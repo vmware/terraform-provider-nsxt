@@ -89,9 +89,8 @@ func runChecksNsx900(testResourceName string, expectedValues map[string]string) 
 
 func runChecksNsx910(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
 	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.#", expectedValues["vpc_deployment_scope_count"]),
-		resource.TestCheckResourceAttr(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.#", expectedValues["span_reference_count"]),
-		resource.TestCheckResourceAttrSet(testResourceName, "vpc_deployment_scope.0.non_default_span_paths.0"),
+		resource.TestCheckResourceAttr(testResourceName, "non_default_span_paths.#", expectedValues["span_reference_count"]),
+		resource.TestCheckResourceAttrSet(testResourceName, "non_default_span_paths.0"),
 	)
 }
 
@@ -361,7 +360,6 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"t0_count":                   "1",
 		"ip_block_count":             "1",
 		"tgw_ext_conn_count":         "1",
-		"vpc_deployment_scope_count": "1",
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "true",
 		"site_count":                 siteCount,
@@ -370,7 +368,6 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"t0_count":                   "1",
 		"ip_block_count":             "0",
 		"tgw_ext_conn_count":         "1",
-		"vpc_deployment_scope_count": "1",
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "false",
 		"site_count":                 siteCount,
@@ -550,10 +547,7 @@ resource "nsxt_policy_project" "test" {
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
   {{if .PolicyNetworkSpan}}
   vc_folder = true
-  vpc_deployment_scope {
-    non_default_span_paths = [{{.PolicyNetworkSpan}}]
-  
-  }
+  non_default_span_paths = [{{.PolicyNetworkSpan}}]
   {{end}}
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.EC.path]
