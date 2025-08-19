@@ -204,7 +204,7 @@ The following arguments are used to configure the provider:
   Can also be specified with the `NSXT_RETRY_MAX_DELAY` environment variable.
 * `retry_on_status_codes` - (Optional) A list of HTTP status codes to retry on.
   By default, the provider supplies a set of status codes recommended for retry with
-  policy resources: `409, 429, 500, 503, 504`. Can also be specified with the
+  policy resources: `400, 409, 429, 500, 503, 504`. Can also be specified with the
   `NSXT_RETRY_ON_STATUS_CODES` environment variable.
 * `remote_auth` - (Optional) Would trigger remote authorization instead of basic
   authorization. This is required for users based on vIDM authentication for early
