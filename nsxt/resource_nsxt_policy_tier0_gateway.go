@@ -612,12 +612,10 @@ func resourceNsxtPolicyTier0GatewayIsVrf(id string, connector client.Connector, 
 	return false, logAPIError("Error retrieving Tier0", err)
 }
 
-func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVrf bool, gwID string) model.BgpRoutingConfig {
-	cfgMap := cfg.(map[string]interface{})
+func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfgMap map[string]interface{}, isVrf bool, gwID string) model.BgpRoutingConfig {
 	revision := int64(cfgMap["revision"].(int))
 	ecmp := cfgMap["ecmp"].(bool)
 	enabled := cfgMap["enabled"].(bool)
-	interSrIbgp := cfgMap["inter_sr_ibgp"].(bool)
 	localAsNum := cfgMap["local_as_num"].(string)
 	multipathRelax := cfgMap["multipath_relax"].(bool)
 	restartMode := cfgMap["graceful_restart_mode"].(string)
@@ -690,7 +688,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 		routeStruct.GracefulRestartConfig = &restartConfigStruct
 	}
 
-	if !isVrf || util.NsxVersionHigherOrEqual("4.2.1") {
+	if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok && (!isVrf || util.NsxVersionHigherOrEqual("4.2.1")) {
 		routeStruct.InterSrIbgp = &interSrIbgp
 	}
 
@@ -887,7 +885,12 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	// no need to include BGP child block if it didn't change
 	if d.HasChange("bgp_config") && len(bgpConfig) > 0 && bgpConfig[0] != nil && !isGlobalManager {
 		// For Global Manager BGP is defined as separate resource
-		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
+		bgpCfgMap := bgpConfig[0].(map[string]interface{})
+		if !d.HasChange("inter_sr_ibgp") {
+			delete(bgpCfgMap, "inter_sr_ibgp")
+		}
+
+		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpCfgMap, vrfConfig != nil, id)
 		structValue, err := initPolicyTier0ChildBgpConfig(&routingConfigStruct)
 		if err != nil {
 			return infraStruct, err
