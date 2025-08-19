@@ -7,8 +7,7 @@ description: A resource to configure a Policy Edge Transport Node.
 # nsxt_policy_edge_transport_node
 
 This resource provides a method for the management of a Policy Edge Transport Node.
-This resource is supported with NSX 9.0.0 onwards.
-
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 ## Example Usage
 
 ```hcl
