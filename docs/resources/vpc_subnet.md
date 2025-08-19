@@ -66,7 +66,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
   from respective ip block defined in the parent VPC. The default is 64. Conflicts with `ip_addresses`.
-* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`
+* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`. This argument is required when access_mode is set to `Isolated`
 * `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated` or `Private_TGW`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
     * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
