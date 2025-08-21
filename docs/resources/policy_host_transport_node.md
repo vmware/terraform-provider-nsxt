@@ -58,98 +58,98 @@ The following arguments are supported:
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Host Transport Node. Defaults to default enforcement point.
 * `discovered_node_id` - (Required)  Discovered node id to create Host Transport Node. Specify discovered node id to create Host Transport Node for Discovered Node. This field is required during Host Transport Node create from vCenter server managing the ESXi type HostNode.
 * `standard_host_switch` - (Required) Standard host switch specification.
-  * `cpu_config` - (Optional) Enhanced Networking Stack enabled HostSwitch CPU configuration.
-    * `num_lcores` - (Required) Number of Logical cpu cores (Lcores) to be placed on a specified NUMA node.
-    * `numa_node_index` - (Required) Unique index of the Non Uniform Memory Access (NUMA) node.
-  * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
-  * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
-  * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'.
-  * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
-  * `uplink_profile` - (Optional) Uplink host switch profile path.
-  * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile path. Only applicable with VDS switch.
-  * `ip_assignment` - (Optional) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-    * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
-    * `no_ipv4` - (Optional) No IPv4 for this host switch.
-    * `static_ip` - (Optional) IP assignment specification for Static IP List.
-      * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-      * `subnet_mask` - (Required) Subnet mask.
-      * `default_gateway` - (Required) Gateway IP
-    * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
-      * `ip_mac_pair` - (Required) List of IP MAC Pairs
-        * `ip_address` - (Required) IPv6 address
-        * `mac_address` - (Required) MAC address
-      * `subnet_mask` - (Required) Subnet mask
-      * `default_gateway` - (Required) Gateway IP
-    * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IP assignment specification.
-  * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-    * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
-    * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
-    * `no_ipv6` - (Optional) No IPv6 for this host switch.
-    * `static_ip` - (Optional) IP assignment specification for Static IP List.
-      * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-      * `prefix_length` - (Required) Prefix Length
-      * `default_gateway` - (Required) Gateway IP
-    * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
-      * `ip_mac_pair` - (Required) List of IP MAC Pairs
-        * `ip_address` - (Required) IPv6 address
-        * `mac_address` - (Required) MAC address
-      * `prefix_length` - (Required) Prefix Length
-      * `default_gateway` - (Required) Gateway IP
-    * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IPv6 assignment specification.
-  * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
-  * `pnic` - (Optional) Physical NICs connected to the host switch.
-    * `device_name` - (Required) Device name or key.
-    * `uplink_name` - (Required) Uplink name for this Pnic.
-  * `transport_node_profile_sub_config` - (Optional) Transport Node Profile sub-configuration Options.
-    * `host_switch_config_option` - (Required) Subset of the host switch configuration.
-      * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
-      * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
-      * `uplink_profile` - (Optional) Uplink host switch profile path.
-      * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile path. Only applicable with VDS switch.
-      * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
+    * `cpu_config` - (Optional) Enhanced Networking Stack enabled HostSwitch CPU configuration.
+        * `num_lcores` - (Required) Number of Logical cpu cores (Lcores) to be placed on a specified NUMA node.
+        * `numa_node_index` - (Required) Unique index of the Non Uniform Memory Access (NUMA) node.
+    * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
+    * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
+    * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'.
+    * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
+    * `uplink_profile` - (Optional) Uplink host switch profile path.
+    * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile path. Only applicable with VDS switch.
+    * `ip_assignment` - (Optional) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
         * `no_ipv4` - (Optional) No IPv4 for this host switch.
         * `static_ip` - (Optional) IP assignment specification for Static IP List.
-          * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-          * `subnet_mask` - (Required) Subnet mask
-          * `default_gateway` - (Required) Gateway IP
+            * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+            * `subnet_mask` - (Required) Subnet mask.
+            * `default_gateway` - (Required) Gateway IP
         * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
-          * `ip_mac_pair` - (Required) List of IP MAC Pairs
-            * `ip_address` - (Required) IP address
-            * `mac_address` - (Required) MAC address
-          * `subnet_mask` - (Required) Subnet mask
-          * `default_gateway` - (Required) Gateway IP
-        * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
-      * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
+            * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                * `ip_address` - (Required) IPv6 address
+                * `mac_address` - (Required) MAC address
+            * `subnet_mask` - (Required) Subnet mask
+            * `default_gateway` - (Required) Gateway IP
+        * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IP assignment specification.
+    * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
         * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
         * `no_ipv6` - (Optional) No IPv6 for this host switch.
         * `static_ip` - (Optional) IP assignment specification for Static IP List.
-          * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-          * `prefix_length` - (Required) Prefix Length.
-          * `default_gateway` - (Required) Gateway IP.
+            * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+            * `prefix_length` - (Required) Prefix Length
+            * `default_gateway` - (Required) Gateway IP
         * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
-          * `ip_mac_pair` - (Required) List of IP MAC Pairs
-            * `ip_address` - (Required) IPv6 address
-            * `mac_address` - (Required) MAC address
-          * `prefix_length` - (Required) Prefix Length.
-          * `default_gateway` - (Required) Gateway IP.
+            * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                * `ip_address` - (Required) IPv6 address
+                * `mac_address` - (Required) MAC address
+            * `prefix_length` - (Required) Prefix Length
+            * `default_gateway` - (Required) Gateway IP
         * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IPv6 assignment specification.
-      * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
+    * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
+    * `pnic` - (Optional) Physical NICs connected to the host switch.
+        * `device_name` - (Required) Device name or key.
+        * `uplink_name` - (Required) Uplink name for this Pnic.
+    * `transport_node_profile_sub_config` - (Optional) Transport Node Profile sub-configuration Options.
+        * `host_switch_config_option` - (Required) Subset of the host switch configuration.
+            * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
+            * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
+            * `uplink_profile` - (Optional) Uplink host switch profile path.
+            * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile path. Only applicable with VDS switch.
+            * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
+                * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
+                * `no_ipv4` - (Optional) No IPv4 for this host switch.
+                * `static_ip` - (Optional) IP assignment specification for Static IP List.
+                    * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+                    * `subnet_mask` - (Required) Subnet mask
+                    * `default_gateway` - (Required) Gateway IP
+                * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
+                    * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                        * `ip_address` - (Required) IP address
+                        * `mac_address` - (Required) MAC address
+                    * `subnet_mask` - (Required) Subnet mask
+                    * `default_gateway` - (Required) Gateway IP
+                * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+            * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
+                * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
+                * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
+                * `no_ipv6` - (Optional) No IPv6 for this host switch.
+                * `static_ip` - (Optional) IP assignment specification for Static IP List.
+                    * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+                    * `prefix_length` - (Required) Prefix Length.
+                    * `default_gateway` - (Required) Gateway IP.
+                * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
+                    * `ip_mac_pair` - (Required) List of IP MAC Pairs
+                        * `ip_address` - (Required) IPv6 address
+                        * `mac_address` - (Required) MAC address
+                    * `prefix_length` - (Required) Prefix Length.
+                    * `default_gateway` - (Required) Gateway IP.
+                * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IPv6 assignment specification.
+            * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
+                * `uplink_name` - (Required) Uplink name from UplinkHostSwitch profile.
+                * `vds_lag_name` - (Optional) Link Aggregation Group (LAG) name of Virtual Distributed Switch.
+                * `vds_uplink_name` - (Optional) Uplink name of VMware vSphere Distributed Switch (VDS).
+        * `name` - (Required) Name of the transport node profile config option.
+    * `transport_zone_endpoint` - (Optional) Transport zone endpoints
+        * `transport_zone` - (Required) Unique ID identifying the transport zone for this endpoint.
+        * `transport_zone_profiles` - (Optional) Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node.
+    * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
         * `uplink_name` - (Required) Uplink name from UplinkHostSwitch profile.
         * `vds_lag_name` - (Optional) Link Aggregation Group (LAG) name of Virtual Distributed Switch.
         * `vds_uplink_name` - (Optional) Uplink name of VMware vSphere Distributed Switch (VDS).
-    * `name` - (Required) Name of the transport node profile config option.
-  * `transport_zone_endpoint` - (Optional) Transport zone endpoints
-    * `transport_zone` - (Required) Unique ID identifying the transport zone for this endpoint.
-    * `transport_zone_profiles` - (Optional) Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node.
-  * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
-    * `uplink_name` - (Required) Uplink name from UplinkHostSwitch profile.
-    * `vds_lag_name` - (Optional) Link Aggregation Group (LAG) name of Virtual Distributed Switch.
-    * `vds_uplink_name` - (Optional) Uplink name of VMware vSphere Distributed Switch (VDS).
-  * `vmk_install_migration` - (Optional) The vmknic and logical switch mappings.
-    * `destination_network` - (Required) The network id to which the ESX vmk interface will be migrated.
-    * `device_name` - (Required) ESX vmk interface name.
+    * `vmk_install_migration` - (Optional) The vmknic and logical switch mappings.
+        * `destination_network` - (Required) The network id to which the ESX vmk interface will be migrated.
+        * `device_name` - (Required) ESX vmk interface name.
 * `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node. Default is true.
 
 ## Attributes Reference

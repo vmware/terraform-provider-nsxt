@@ -60,17 +60,17 @@ resource "nsxt_policy_ip_block_quota" "small" {
 The following arguments are supported:
 
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - (Required) The ID of the project which the object belongs to
+          * `project_id` - (Required) The ID of the project which the object belongs to
 * `display_name` - (Required) The display name for the IP Block.
 * `description` - (Optional) Description of the resource.
 * `quota` - (Required) Quota specification
-  * `ip_block_paths` - (Optional) List of IP blocks that this quota applies to.
-  * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be specified within the same quota.
-  * `ip_block_visibility` - (Required) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
-  * `single_ip_cidrs` - (Optional) Quota for single IP CIDRs allowed. Default is -1 (unlimited). 
-  * `other_cidrs` - (Required) Quota for other cidrs
-    * `mask` - (Optional) Largest mask size that is allowed, format: `/[size]`
-    * `total_count` - (Optional) Number of CIDRs that can be allocated from the block. Default is -1 (unlimited).
+    * `ip_block_paths` - (Optional) List of IP blocks that this quota applies to.
+    * `ip_block_address_type` - (Required) One of `IPV4`, `IPV6`. A quota will be applied on block of same address type. One v4 block and another v6 block cannot be specified within the same quota.
+    * `ip_block_visibility` - (Required) One of `EXTERNAL`, `PRIVATE`. A quota will be applied on blocks with same visibility. Private and External blocks cannot be specified within the same block.
+    * `single_ip_cidrs` - (Optional) Quota for single IP CIDRs allowed. Default is -1 (unlimited).
+    * `other_cidrs` - (Required) Quota for other cidrs
+        * `mask` - (Optional) Largest mask size that is allowed, format: `/[size]`
+        * `total_count` - (Optional) Number of CIDRs that can be allocated from the block. Default is -1 (unlimited).
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP Block.
 
@@ -88,7 +88,8 @@ An existing IP Block can be [imported][docs-import] into this resource, via the 
 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
-```
+```shell
 terraform import nsxt_policy_ip_block_quota.quota1 POLICY_PATH
 ```
+
 The above would import IP Block Quota as a resource named `quota1` with policy path `POLICY_PATH`.

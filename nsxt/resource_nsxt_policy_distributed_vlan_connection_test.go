@@ -16,7 +16,7 @@ var accTestPolicyDistributedVlanConnectionCreateAttributes = map[string]string{
 	"display_name":      getAccTestResourceName(),
 	"description":       "terraform created",
 	"vlan_id":           "12",
-	"gateway_addresses": "3.3.3.1/24",
+	"gateway_addresses": "10.66.66.10/24",
 }
 
 var accTestPolicyDistributedVlanConnectionUpdateAttributes = map[string]string{
@@ -109,6 +109,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -226,13 +227,15 @@ func testAccNsxtPolicyDistributedVlanConnectionMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
+  vlan_id = "%s"
+  gateway_addresses = ["192.168.1.1/24"]
 }
 
 data "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
 
   depends_on = [nsxt_policy_distributed_vlan_connection.test]
-}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["vlan_id"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
 }
 
 func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
@@ -242,7 +245,7 @@ func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
 resource "nsxt_policy_ip_block" "big_corp_vlan" {
   description         = "IP block for big corp extended subnet test"
   display_name        = "%s"
-  cidr_list           = ["10.66.66.0/24"]
+  cidrs               = ["10.66.66.0/24"]
   visibility          = "EXTERNAL"
   is_subnet_exclusive = true
 }

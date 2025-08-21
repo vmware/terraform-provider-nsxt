@@ -37,7 +37,7 @@ data "nsxt_policy_intrusion_service_profile" "test" {
 * `id` - (Optional) The ID of Profile to retrieve. If ID is specified, no additional argument should be configured.
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

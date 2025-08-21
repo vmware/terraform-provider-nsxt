@@ -176,6 +176,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "OFF"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.multicast", "true"),
 				),
 			},
 			{
@@ -193,6 +194,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.multicast", "false"),
 				),
 			},
 		},
@@ -957,6 +959,7 @@ resource "nsxt_policy_segment" "test" {
     connectivity = "OFF"
     local_egress = true
     urpf_mode    = "STRICT"
+    multicast    = true
   }
 }
 `, name)
@@ -988,6 +991,7 @@ resource "nsxt_policy_segment" "test" {
     connectivity = "ON"
     local_egress = false
     urpf_mode    = "NONE"
+    multicast    = false
   }
 }
 `, name)
@@ -995,7 +999,7 @@ resource "nsxt_policy_segment" "test" {
 
 func testAccNsxtPolicyEdgeCluster(name string) string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf(`
+		return testAccNsxtPolicySiteReadTemplate(getTestSiteName()) + fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
   site_path    = data.nsxt_policy_site.test.path

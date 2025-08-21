@@ -14,7 +14,7 @@ This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC
 
 ```hcl
 data "nsxt_policy_gateway_locale_service" "test" {
-  gateway_path = data.nsxt_policy_tier0_gateway.path
+  gateway_path = data.nsxt_policy_tier0_gateway.test.path
   display_name = "london"
 }
 ```
@@ -41,7 +41,7 @@ data "nsxt_policy_gateway_locale_service" "demoserv" {
 * `id` - (Optional) The ID of locale service gateway to retrieve.
 * `display_name` - (Optional) The Display Name or prefix of locale service to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

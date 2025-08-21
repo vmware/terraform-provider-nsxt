@@ -33,16 +33,15 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `transit_subnets` - (Optional) Array of IPV4 CIDRs for internal VPC attachment networks.
-* `is_default` - (Optional) Default transit gateway indicator.
 * `high_availability_config` - (Optional) Transit Gateway high availability config centralized transit gateway.
-  * `ha_mode` - (Optional) High-availability Mode for Transit Gateway. Accepted values are: "ACTIVE_ACTIVE", "ACTIVE_STANDBY". Default is "ACTIVE_STANDBY".
-  * `edge_cluster_paths` - (Optional) The Edge cluster should be authorized to be used in the transit gateway. A single edge cluster will be supported when the transit gateway is created from the local NSX manager.
+    * `ha_mode` - (Optional) High-availability Mode for Transit Gateway. Accepted values are: "ACTIVE_ACTIVE", "ACTIVE_STANDBY". Default is "ACTIVE_STANDBY".
+    * `edge_cluster_paths` - (Optional) The Edge cluster should be authorized to be used in the transit gateway. A single edge cluster will be supported when the transit gateway is created from the local NSX manager.
 * `span` - (Optional) Span configuration. Note that one of `cluster_based_span` and `zone_based_span` is required.
-  * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
-    * `span_path` - (Required) Policy path of the network span object.
-  * `zone_based_span` - (Optional) Span based on zones.
-    * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
-    * `use_all_zones` - (Optional) Flag to indicate that TransitGateway is associated with all project zones.
+    * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
+        * `span_path` - (Required) Policy path of the network span object.
+    * `zone_based_span` - (Optional) Span based on zones.
+        * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
+        * `use_all_zones` - (Optional) Flag to indicate that TransitGateway is associated with all project zones.
 
 ## Attributes Reference
 

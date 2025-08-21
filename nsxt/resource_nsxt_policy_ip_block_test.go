@@ -62,10 +62,10 @@ func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
-					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "range_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ranges.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -73,14 +73,14 @@ func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(name, cidr, false, "EXTERNAL", "true"),
+				Config: testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(name, cidr, false, "EXTERNAL", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
-					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "is_subnet_exclusive", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "is_subnet_exclusive", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -123,10 +123,10 @@ func TestAccResourceNsxtPolicyIPBlock_v910_migrate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr_list.0", cidr),
-					resource.TestCheckResourceAttr(testResourceName, "reserved_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "range_list.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ranges.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -359,9 +359,9 @@ func testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(displayName string, ci
 resource "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
-  cidr_list    = ["%s"]
+  cidrs        = ["%s"]
   visibility = "%s"
-  reserved_ips {
+  excluded_ips {
     start = "192.168.1.10"
     end   = "192.168.1.11"
   }
@@ -384,13 +384,13 @@ func testAccNSXPolicyIPBlockCreateV910Template(displayName string, cidr string, 
 resource "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
-  cidr_list    = ["%s"]
-  reserved_ips {
+  cidrs        = ["%s"]
+  excluded_ips {
     start = "192.168.1.10"
     end   = "192.168.1.11"
   }
 
-  range_list {
+  ranges {
     start = "192.168.2.20"
     end   = "192.168.2.39"
   }

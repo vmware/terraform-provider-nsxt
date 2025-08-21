@@ -46,10 +46,10 @@ The following arguments are supported:
 * `cookie_path` - (Optional) HTTP cookie path. Only relevant for `INSERT` mode.
 * `cookie_secure` - (Optional) If enabled, this cookie will only be sent over HTTPS. Only relevant for `INSERT` mode.
 * `session_cookie_time` - (Optional) Session cookie time preferences
-  * `max_idle` - (Optional) Maximum interval the cookie is valid for from the last time it was seen in a request
-  * `max_life` - (Optional) Maximum interval the cookie is valid for from the first time it was seen in a request
+    * `max_idle` - (Optional) Maximum interval the cookie is valid for from the last time it was seen in a request
+    * `max_life` - (Optional) Maximum interval the cookie is valid for from the first time it was seen in a request
 * `persistence_cookie_time` - (Optional) Persistence cookie time preferences
-  * `max_idle` - (Optional) Maximum interval the cookie is valid for from the last time it was seen in a request
+    * `max_idle` - (Optional) Maximum interval the cookie is valid for from the last time it was seen in a request
 * `persistence_shared` - (Optional) If enabled, all virtual servers with this profile will share the same persistence mechanism.
 
 ## Attributes Reference

@@ -8,7 +8,7 @@ description: A resource to configure a PolicyEdgeHighAvailabilityProfile.
 
 This resource provides a method for the management of a PolicyEdgeHighAvailabilityProfile.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
@@ -37,7 +37,7 @@ The following arguments are supported:
 * `bfd_allowed_hops` - (Optional) Value of BFD allowed hops. Default: 255.
 * `bfd_declare_dead_multiple` - (Optional) Number of times a packet is missed before BFD declares the neighbor down. Default: 3.
 * `standby_relocation_config` - (Optional) Stand by relocation flag.
-  * `standby_relocation_threshold` - (Required) Standby service context relocation wait time.
+    * `standby_relocation_threshold` - (Required) Standby service context relocation wait time.
 
 ## Attributes Reference
 

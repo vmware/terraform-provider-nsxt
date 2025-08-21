@@ -8,7 +8,7 @@ description: A resource to configure a PolicyEdgeCluster.
 
 This resource provides a method for the management of a PolicyEdgeCluster.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
@@ -34,10 +34,10 @@ The following arguments are supported:
 * `inter_site_forwarding_enabled` - (Optional) Inter site forwarding is enabled if true.
 * `edge_cluster_profile_path` - (Required) Path of edge cluster high availability profile.
 * `allocation_rule` - Allocation rules for auto placement.
-  * `action_based_on_failure_domain_enabled` - (Optional) Auto place TIER1 logical routers, DHCP and MDProxy contexts on two edge nodes (active and standby) from different failure domains.
+    * `action_based_on_failure_domain_enabled` - (Optional) Auto place TIER1 logical routers, DHCP and MDProxy contexts on two edge nodes (active and standby) from different failure domains.
 * `policy_edge_node` - (Optional) Policy Edge Cluster Member.
-  * `edge_transport_node_path` - (Required) Edge Transport Node Path.
-  * `id` - (Optional) ID of PolicyEdgeNode.
+    * `edge_transport_node_path` - (Required) Edge Transport Node Path.
+    * `id` - (Optional) ID of PolicyEdgeNode.
 * `password_managed_by_vcf` - (Optional) Setting to true enables VCF password management for all edge nodes in the cluster. Default: false.
 
 ## Attributes Reference

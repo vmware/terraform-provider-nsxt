@@ -45,7 +45,7 @@ data "nsxt_policy_security_policy" "predefined" {
 * `category` - (Optional) Category of the policy to retrieve.
 * `display_name` - (Optional) The Display Name of the policy to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

@@ -7,7 +7,7 @@ description: An Edge transport node data source.
 # nsxt_policy_edge_transport_node
 
 This data source provides information about Edge transport node configured on NSX.
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

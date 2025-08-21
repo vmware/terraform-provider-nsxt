@@ -109,48 +109,30 @@ func resourceNsxtPolicyProject() *schema.Resource {
 					},
 				},
 			},
-			"vpc_deployment_scope": {
+			"default_span_path": {
+				Type:         schema.TypeString,
+				Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
+				ValidateFunc: validatePolicyPath(),
+				Optional:     true,
+				Default:      "/infra/network-spans/default",
+			},
+			"non_default_span_paths": {
 				Type:        schema.TypeList,
+				Description: "List of non default policy paths of the Span objects of type NetworkSpan",
+				MaxItems:    10,
 				Optional:    true,
-				Computed:    true,
-				Description: "Project Vpc network Deployment Scope",
-				MaxItems:    1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"span_reference": {
-							Type:        schema.TypeList,
-							Description: "List of Span object references available with the project for TGW consumption",
-							MaxItems:    10,
-							Computed:    true,
-							Optional:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"span_path": {
-										Type:         schema.TypeString,
-										Description:  "Policy path of the Cluster based Span object of type NetworkSpan",
-										ValidateFunc: validatePolicyPath(),
-										Optional:     true,
-										Computed:     true,
-									},
-									"is_default": {
-										Type:        schema.TypeBool,
-										Description: "Default span indicator",
-										Optional:    true,
-										Computed:    true,
-									},
-								},
-							},
-						},
-						"zone_external_ids": {
-							Type:        schema.TypeList,
-							Description: "An array of Zone object's external IDs",
-							Optional:    true,
-							MinItems:    1,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+			},
+			"zone_external_ids": {
+				Type:        schema.TypeList,
+				Description: "An array of Zone object's external IDs",
+				Optional:    true,
+				MinItems:    1,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
 			},
 		},
@@ -227,24 +209,29 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		obj.ShortId = &shortID
 	}
 
-	vdsIntface, ok := d.GetOk("vpc_deployment_scope")
-	if util.NsxVersionHigherOrEqual("9.1.0") && ok && len(vdsIntface.([]interface{})) > 0 {
+	if util.NsxVersionHigherOrEqual("9.1.0") {
 		// There should be just one object here
-		vdScope := vdsIntface.([]interface{})[0].(map[string]interface{})
 		var spanReferences []model.SpanReference
-		if vdScope["span_reference"] != nil {
-			spanRefs := vdScope["span_reference"].([]interface{})
-			for _, spanRef := range spanRefs {
-				sr := spanRef.(map[string]interface{})
-				spanPath := sr["span_path"].(string)
-				isDefault := sr["is_default"].(bool)
-				spanReferences = append(spanReferences, model.SpanReference{
-					SpanPath:  &spanPath,
-					IsDefault: &isDefault,
-				})
-			}
+		defaultSpanPath := d.Get("default_span_path").(string)
+
+		// default_span_path will never be empty, since it has a default value and the validator will make sure that
+		// user will not assign an empty string or such.
+		isDefault := true
+		spanReferences = append(spanReferences, model.SpanReference{
+			SpanPath:  &defaultSpanPath,
+			IsDefault: &isDefault,
+		})
+
+		spanRefs := d.Get("non_default_span_paths").([]interface{})
+		for _, spanRef := range spanRefs {
+			spanPath := spanRef.(string)
+			isDefault := false
+			spanReferences = append(spanReferences, model.SpanReference{
+				SpanPath:  &spanPath,
+				IsDefault: &isDefault,
+			})
 		}
-		zoneExternalIds := interfaceListToStringList(vdScope["zone_external_ids"].([]interface{}))
+		zoneExternalIds := interfaceListToStringList(d.Get("zone_external_ids").([]interface{}))
 
 		vpcDeploymentScope := model.VpcDeploymentScope{
 			SpanReferences:  spanReferences,
@@ -296,6 +283,9 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
 	client := projects.NewVpcSecurityProfilesClient(connector)
 	obj, err := client.Get(defaultOrgID, projectID, "default")
+	if isNotFoundError(err) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
@@ -387,18 +377,19 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
-		deploymentScope := make(map[string]interface{})
-		var spanRefs []interface{}
+		var nonDefaultSpanPaths []interface{}
+		var defaultSpanRefs *string
 		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
-			sr := make(map[string]interface{})
-			sr["span_path"] = spanRef.SpanPath
-			sr["is_default"] = spanRef.IsDefault
-
-			spanRefs = append(spanRefs, sr)
+			if *spanRef.IsDefault {
+				defaultSpanRefs = spanRef.SpanPath
+			} else {
+				nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
+			}
 		}
-		deploymentScope["span_reference"] = spanRefs
-		deploymentScope["zone_external_ids"] = stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds)
-		d.Set("vpc_deployment_scope", []interface{}{deploymentScope})
+		d.Set("default_span_path", defaultSpanRefs)
+		d.Set("non_default_span_paths", nonDefaultSpanPaths)
+		d.Set("zone_external_ids", stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds))
+
 	}
 	return nil
 }

@@ -19,7 +19,6 @@ var accTestPolicyTransitGatewayStaticRouteCreateAttributes = map[string]string{
 	"description":          "terraform created",
 	"enabled_on_secondary": "true",
 	"network":              "2.2.2.0/24",
-	"ip_address":           "3.1.1.1",
 	"admin_distance":       "2",
 }
 
@@ -28,7 +27,6 @@ var accTestPolicyTransitGatewayStaticRouteUpdateAttributes = map[string]string{
 	"description":          "terraform updated",
 	"enabled_on_secondary": "false",
 	"network":              "3.3.3.0/24",
-	"ip_address":           "4.1.1.1",
 	"admin_distance":       "5",
 }
 
@@ -54,7 +52,6 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRouteCreateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRouteCreateAttributes["enabled_on_secondary"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRouteCreateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRouteCreateAttributes["admin_distance"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -72,7 +69,6 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "network", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled_on_secondary", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["enabled_on_secondary"]),
-					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -186,7 +182,6 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
   network               = "%s"
 
   next_hop {
-    ip_address     = "%s"
     admin_distance = %s
     scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
@@ -196,7 +191,7 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled_on_secondary"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["enabled_on_secondary"], attrMap["network"], attrMap["admin_distance"])
 }
 
 func testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic() string {
@@ -207,12 +202,11 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
   description      = ""
   network          = "%s"
   next_hop {
-    ip_address     = "%s"
     admin_distance = %s
     scope          = [nsxt_policy_transit_gateway_attachment.test.path]
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["ip_address"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"])
+}`, accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"])
 }
 
 func testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() string {

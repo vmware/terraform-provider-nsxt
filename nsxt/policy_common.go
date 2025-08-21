@@ -612,7 +612,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		}
 
 		schemaServiceEntries := data["service_entries"].([]interface{})
-		if len(schemaServiceEntries) > 0 {
+		if len(schemaServiceEntries) > 0 && schemaServiceEntries[0] != nil {
 			schemaServiceEntry := schemaServiceEntries[0].(map[string]interface{})
 			serviceEntries, _ := getServiceEntriesFromSchema(schemaServiceEntry)
 			elem.ServiceEntries = serviceEntries
@@ -730,7 +730,7 @@ func getElemPolicyPathSchema() *schema.Schema {
 	return getElemPolicyPathSchemaWithFlags(false, false, false)
 }
 
-func getAllocationRangeListSchema(required bool, description string) *schema.Schema {
+func getAllocationRangesSchema(required bool, description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: description,

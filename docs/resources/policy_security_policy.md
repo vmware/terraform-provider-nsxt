@@ -152,7 +152,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `category` - (Required) Category of this policy. For local manager must be one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`. For global manager must be one of: `Infrastructure`, `Environment`, `Application`.
 * `comments` - (Optional) Comments for security policy lock/unlock.
 * `locked` - (Optional) Indicates whether a security policy should be locked. If locked by a user, no other user would be able to modify this policy.
@@ -161,48 +161,48 @@ The following arguments are supported:
 * `stateful` - (Optional) If true, state of the network connects are tracked and a stateful packet inspection is performed. Default is true.
 * `tcp_strict` - (Optional) Ensures that a 3 way TCP handshake is done before the data packets are sent. Default is false.
 * `rule` - (Optional) A repeatable block to specify rules for the Security Policy. Each rule includes the following fields:
-  * `display_name` - (Required) Display name of the resource.
-  * `description` - (Optional) Description of the resource.
-  * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
-  * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
-  * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
-  * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
-  * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
-  * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
-  * `disabled` - (Optional) Flag to disable this rule. Default is false.
-  * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`. For `Ethernet` category rules, use `NONE` value.
-  * `logged` - (Optional) Flag to enable packet logging. Default is false.
-  * `notes` - (Optional) Additional notes on changes.
-  * `profiles` - (Optional) Set of profile paths relevant for this rule.
-  * `scope` - (Optional) Set of policy object paths where the rule is applied.
-  * `services` - (Optional) Set of service paths to match.
-  * `service_entries` - (Optional) Set of explicit protocol/port service definition
-    * `icmp_entry` - (Optional) Set of ICMP type service entries
-      * `display_name` - (Optional) Display name of the service entry
-      * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
-      * `icmp_code` - (Optional) ICMP message code
-      * `icmp_type` - (Optional) ICMP message type
-    * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
-      * `display_name` - (Optional) Display name of the service entry
-      * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
-      * `destination_ports` - (Optional) Set of destination ports
-      * `source_ports` - (Optional) Set of source ports
-    * `igmp_entry` - (Optional) Set of IGMP type service entries
-      * `display_name` - (Optional) Display name of the service entry
-    * `ether_type_entry` - (Optional) Set of Ether type service entries
-      * `display_name` - (Optional) Display name of the service entry
-      * `ether_type` - (Required) Type of the encapsulated protocol
-    * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
-      * `display_name` - (Optional) Display name of the service entry
-      * `protocol` - (Required) IP protocol number
-    * `algorithm_entry` - (Optional) Set of Algorithm type service entries
-      * `display_name` - (Optional) Display name of the service entry
-      * `destination_port` - (Required) a single destination port
-      * `source_ports` - (Optional) Set of source ports/ranges
-      * `algorithm` - (Required) Algorithm: one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`
-  * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
-  * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on provider to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. Please note that sequence numbers should start with 1 and not 0. To avoid confusion, either specify sequence numbers in all rules, or none at all.
+    * `display_name` - (Required) Display name of the resource.
+    * `description` - (Optional) Description of the resource.
+    * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
+    * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
+    * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
+    * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
+    * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
+    * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
+    * `disabled` - (Optional) Flag to disable this rule. Default is false.
+    * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`. For `Ethernet` category rules, use `NONE` value.
+    * `logged` - (Optional) Flag to enable packet logging. Default is false.
+    * `notes` - (Optional) Additional notes on changes.
+    * `profiles` - (Optional) Set of profile paths relevant for this rule.
+    * `scope` - (Optional) Set of policy object paths where the rule is applied.
+    * `services` - (Optional) Set of service paths to match.
+    * `service_entries` - (Optional) Set of explicit protocol/port service definition
+        * `icmp_entry` - (Optional) Set of ICMP type service entries
+            * `display_name` - (Optional) Display name of the service entry
+            * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
+            * `icmp_code` - (Optional) ICMP message code
+            * `icmp_type` - (Optional) ICMP message type
+        * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
+            * `display_name` - (Optional) Display name of the service entry
+            * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
+            * `destination_ports` - (Optional) Set of destination ports
+            * `source_ports` - (Optional) Set of source ports
+            * `igmp_entry` - (Optional) Set of IGMP type service entries
+            * `display_name` - (Optional) Display name of the service entry
+        * `ether_type_entry` - (Optional) Set of Ether type service entries
+            * `display_name` - (Optional) Display name of the service entry
+            * `ether_type` - (Required) Type of the encapsulated protocol
+        * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
+            * `display_name` - (Optional) Display name of the service entry
+            * `protocol` - (Required) IP protocol number
+        * `algorithm_entry` - (Optional) Set of Algorithm type service entries
+            * `display_name` - (Optional) Display name of the service entry
+            * `destination_port` - (Required) a single destination port
+            * `source_ports` - (Optional) Set of source ports/ranges
+            * `algorithm` - (Required) Algorithm: one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`
+    * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+    * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on provider to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. Please note that sequence numbers should start with 1 and not 0. To avoid confusion, either specify sequence numbers in all rules, or none at all.
 
 ## Attributes Reference
 
@@ -212,10 +212,10 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule`:
-  * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-  * `path` - The NSX path of the policy resource.
-  * `sequence_number` - Sequence number for the rule.
-  * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
+    * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+    * `path` - The NSX path of the policy resource.
+    * `sequence_number` - Sequence number for the rule.
+    * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ~> **NOTE:** `display_name` argument for rule service entries is not supported for NSX 3.2.x and below.
 

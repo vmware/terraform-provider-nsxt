@@ -18,6 +18,14 @@ data "nsxt_policy_vm" "nsxt_vm1" {
 }
 ```
 
+## Example Usage - Filtering by UID (external_id, bios_id or instance_id)
+
+```hcl
+data "nsxt_policy_vm" "nsxt_vm2" {
+  instance_id = "524ee6d0-c287-9a07-5897-585f3350fe77"
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl
@@ -40,7 +48,7 @@ data "nsxt_policy_vm" "nsxt_vm1" {
 * `bios_id` - (Optional) The BIOS UUID of the Virtual Machine.
 * `instance_id` - (Optional) The instance UUID of the Virtual Machine.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

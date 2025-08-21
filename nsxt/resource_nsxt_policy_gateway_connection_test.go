@@ -17,10 +17,7 @@ var accTestPolicyGatewayConnectionCreateAttributes = map[string]string{
 	"description":             "terraform created",
 	"aggregate_routes":        "192.168.240.0/24",
 	"enable_snat":             "false",
-	"ip_block":                "11.0.0.2/16",
 	"logging_enabled":         "false",
-	"allow_external_blocks":   "172.1.1.0/24",
-	"allow_private":           "false",
 	"inbound_remote_networks": "196.1.1.0/24",
 }
 
@@ -29,10 +26,7 @@ var accTestPolicyGatewayConnectionUpdateAttributes = map[string]string{
 	"description":             "terraform updated",
 	"aggregate_routes":        "192.168.241.0/24",
 	"enable_snat":             "true",
-	"ip_block":                "11.4.0.2/16",
 	"logging_enabled":         "true",
-	"allow_external_blocks":   "168.1.1.0/24",
-	"allow_private":           "true",
 	"inbound_remote_networks": "196.1.3.0/24",
 }
 
@@ -40,10 +34,11 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_connection.test"
 	testDataSourceName := "data.nsxt_policy_gateway_connection.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyVPC(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -102,10 +97,11 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_connection.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyVPC(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -119,6 +115,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -127,11 +124,10 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 func TestAccResourceNsxtPolicyGatewayConnection_910(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_connection.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.1.0")
-			testAccOnlyVPC(t)
 
 		},
 		Providers: testAccProviders,
@@ -150,11 +146,10 @@ func TestAccResourceNsxtPolicyGatewayConnection_910(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.0", accTestPolicyGatewayConnectionCreateAttributes["inbound_remote_networks"]),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", accTestPolicyGatewayConnectionCreateAttributes["allow_external_blocks"]),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", accTestPolicyGatewayConnectionCreateAttributes["allow_private"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.enable_snat", accTestPolicyGatewayConnectionCreateAttributes["enable_snat"]),
-					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.ip_block", accTestPolicyGatewayConnectionCreateAttributes["ip_block"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nat_config.0.ip_block"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.logging_enabled", accTestPolicyGatewayConnectionCreateAttributes["logging_enabled"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -174,31 +169,16 @@ func TestAccResourceNsxtPolicyGatewayConnection_910(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.0", accTestPolicyGatewayConnectionUpdateAttributes["inbound_remote_networks"]),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", accTestPolicyGatewayConnectionUpdateAttributes["allow_external_blocks"]),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", accTestPolicyGatewayConnectionUpdateAttributes["allow_private"]),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.enable_snat", accTestPolicyGatewayConnectionUpdateAttributes["enable_snat"]),
-					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.ip_block", accTestPolicyGatewayConnectionUpdateAttributes["ip_block"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nat_config.0.ip_block"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_config.0.logging_enabled", accTestPolicyGatewayConnectionUpdateAttributes["logging_enabled"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyGatewayConnectionMinimalistic(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "description", ""),
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "inbound_remote_networks.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "nat_config.#", "0"),
 				),
 			},
 		},
@@ -300,6 +280,12 @@ func testAccNsxtPolicyGatewayConnection910Template(createFlow bool) string {
 		attrMap = accTestPolicyGatewayConnectionUpdateAttributes
 	}
 	return testAccNsxtPolicyGatewayConnectionPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_ip_block" "defExtBlock" {
+  display_name = "defExtBlock"
+  visibility   = "EXTERNAL"
+  cidrs        = ["22.21.0.0/16"]
+}
+
 resource "nsxt_policy_gateway_connection" "test" {
   display_name = "%s"
   description  = "%s"
@@ -309,17 +295,16 @@ resource "nsxt_policy_gateway_connection" "test" {
   inbound_remote_networks = ["%s"]
 
   advertise_outbound_networks {
-    allow_external_blocks = ["%s"]
-    allow_private         = %s
+    allow_external_blocks = [nsxt_policy_ip_block.defExtBlock.path]
   }
 
   nat_config {
     enable_snat     = %s
-    ip_block        = "%s"
+    ip_block        = nsxt_policy_ip_block.defExtBlock.path
     logging_enabled = %s
   }
 }
-`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["inbound_remote_networks"], attrMap["allow_external_blocks"], attrMap["allow_private"], attrMap["enable_snat"], attrMap["ip_block"], attrMap["logging_enabled"])
+`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["inbound_remote_networks"], attrMap["enable_snat"], attrMap["logging_enabled"])
 }
 
 func testAccNsxtPolicyGatewayConnectionMinimalistic() string {

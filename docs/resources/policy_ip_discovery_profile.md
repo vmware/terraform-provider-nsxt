@@ -82,7 +82,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `arp_nd_binding_timeout` - (Optional) ARP and ND cache timeout (in minutes)
 * `duplicate_ip_detection_enabled` - (Optional) Duplicate IP detection
 * `arp_binding_limit` - (Optional) Maximum number of ARP bindings

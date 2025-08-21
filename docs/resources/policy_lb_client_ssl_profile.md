@@ -36,7 +36,38 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `cipher_group_label` - (Optional) A label of cipher group which is mostly consumed by GUI. Possible values are: `BALANCED`, `HIGH_SECURITY`, `HIGH_COMPATIBILITY` and `CUSTOM`.
-* `ciphers` - (Optional) Supported SSL cipher list to client side. Possible values are: `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`, `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`, `TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA`,`TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA`, `TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA`, `TLS_ECDH_RSA_WITH_AES_256_CBC_SHA`, `TLS_RSA_WITH_AES_256_CBC_SHA`, `TLS_RSA_WITH_AES_128_CBC_SHA`, `TLS_RSA_WITH_3DES_EDE_CBC_SHA`,`TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA`, `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256`, `TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384`, `TLS_RSA_WITH_AES_128_CBC_SHA256`,`TLS_RSA_WITH_AES_128_GCM_SHA256`, `TLS_RSA_WITH_AES_256_CBC_SHA256`,`TLS_RSA_WITH_AES_256_GCM_SHA384`, `TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA`, `TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256`, `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`,  `TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384`, `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`, `TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA`, `TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256`, `TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256`,`TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384`, `TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384`, `TLS_ECDH_RSA_WITH_AES_128_CBC_SHA`, `TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256`, `TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256`,`TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384`, `TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384`
+* `ciphers` - (Optional) Supported SSL cipher list to client side. Possible values are:
+  `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`,
+  `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`,
+  `TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA`,
+  `TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA`,
+  `TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA`,
+  `TLS_ECDH_RSA_WITH_AES_256_CBC_SHA`,
+  `TLS_RSA_WITH_AES_256_CBC_SHA`,
+  `TLS_RSA_WITH_AES_128_CBC_SHA`,
+  `TLS_RSA_WITH_3DES_EDE_CBC_SHA`,
+  `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA`,
+  `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256`,
+  `TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384`,
+  `TLS_RSA_WITH_AES_128_CBC_SHA256`,
+  `TLS_RSA_WITH_AES_128_GCM_SHA256`,
+  `TLS_RSA_WITH_AES_256_CBC_SHA256`,
+  `TLS_RSA_WITH_AES_256_GCM_SHA384`,
+  `TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA`,
+  `TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256`,
+  `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`,
+  `TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384`,
+  `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`,
+  `TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA`,
+  `TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256`,
+  `TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256`,
+  `TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384`,
+  `TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384`,
+  `TLS_ECDH_RSA_WITH_AES_128_CBC_SHA`,
+  `TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256`,
+  `TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256`,
+  `TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384`,
+  `TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384`
 * `is_fips` - (Optional) This flag is set to true when all the ciphers and protocols are FIPS compliant. It is set to false when one of the ciphers or protocols are not FIPS compliant. Read-only property, its value will be decided automatically based on the result of applying this configuration.
 * `is_secure` - (Optional) This flag is set to true when all the ciphers and protocols are secure. It is set to false when one of the ciphers or protocols is insecure.  Read-only property, its value will be decided automatically based on the result of applying this configuration.
 * `prefer_server_ciphers` - (Optional) During SSL handshake as part of the SSL client Hello client sends an ordered list of ciphers that it can support (or prefers) and typically server selects the first one from the top of that list it can also support. For Perfect Forward Secrecy(PFS), server could override the client's preference. Default is `true`.

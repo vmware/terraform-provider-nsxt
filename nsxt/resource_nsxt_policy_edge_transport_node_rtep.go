@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_transport_nodes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -46,7 +47,7 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 			"named_teaming_policy": {
 				Type:        schema.TypeString,
 				Description: "The named teaming policy to be used by the remote tunnel endpoint",
-				Optional:    true,
+				Required:    true,
 			},
 			"vlan": {
 				Type:         schema.TypeInt,
@@ -59,9 +60,16 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 }
 
 func setNsxtPolicyEdgeTransportNodeRTEP(d *schema.ResourceData, m interface{}, op string) error {
-	connector := getPolicyConnector(m)
 
 	tnPath := d.Get("edge_transport_node_path").(string)
+	realized, err := isPolicyEdgeTransportNodeRealized(m, tnPath)
+	if err != nil {
+		return fmt.Errorf("failed to check Policy Edge realization. Error is: %s", err)
+	} else if !realized {
+		return fmt.Errorf("Policy Edge Transport Node %s is not realized", tnPath)
+	}
+
+	connector := getPolicyConnector(m)
 	client := enforcement_points.NewEdgeTransportNodesClient(connector)
 
 	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
@@ -199,4 +207,17 @@ func resourceNsxtPolicyEdgeTransportNodeRTEPImporter(d *schema.ResourceData, m i
 	d.SetId(fmt.Sprintf("%s:%s", tnPath, hswName))
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func isPolicyEdgeTransportNodeRealized(m interface{}, tnPath string) (bool, error) {
+	connector := getPolicyConnector(m)
+	client := edge_transport_nodes.NewStateClient(connector)
+	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
+	state, err := client.Get(siteID, epID, edgeID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return *state.EdgeTnState.ConsolidatedStatus == model.EdgeTnState_CONSOLIDATED_STATUS_SUCCESS, nil
 }

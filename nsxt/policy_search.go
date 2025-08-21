@@ -83,6 +83,27 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
+func policyDataSourceCreateMap(connector client.Connector, context utl.SessionContext, resourceType string, output map[string]string, additionalQuery map[string]string) error {
+	additionalQueryString := buildQueryStringFromMap(additionalQuery)
+	resultValues, err := listPolicyResources(connector, context, resourceType, &additionalQueryString)
+	if err != nil {
+		return fmt.Errorf("failed to fetch the list of resources %s: %v", resourceType, err)
+	}
+	converter := bindings.NewTypeConverter()
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return fmt.Errorf("conversion error: %v", errors)
+		}
+		policyResource := dataValue.(model.PolicyResource)
+		if policyResource.ResourceType == nil || resourceType != *policyResource.ResourceType {
+			continue
+		}
+		output[*policyResource.Id] = *policyResource.DisplayName
+	}
+	return nil
+}
+
 func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
 	return policyDataSourceResourceReadWithValidation(d, connector, context, resourceType, additionalQuery, true)
 }
@@ -115,9 +136,36 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-// globalFlag argument is an optional
-func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
+func policyDataSourceReadWithCustomField(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
+	additionalQueryString := buildQueryStringFromMap(additionalQuery)
+	result, err := searchPolicyResourcesByCustomField(connector, context, resourceType, &additionalQueryString)
+	if len(result) == 1 {
+		converter := bindings.NewTypeConverter()
+		dataValue, errors := converter.ConvertToGolang(result[0], model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return nil, errors[0]
+		}
+		policyResource := dataValue.(model.PolicyResource)
+		if resourceType != *policyResource.ResourceType {
+			return nil, fmt.Errorf("found no resources of the type %s", resourceType)
+		}
+		obj := policySearchDataValue{StructValue: result[0], Resource: policyResource}
+		d.SetId(*obj.Resource.Id)
+		d.Set("display_name", obj.Resource.DisplayName)
+		d.Set("description", obj.Resource.Description)
+		d.Set("path", obj.Resource.Path)
+		return obj.StructValue, err
+	}
+	return nil, fmt.Errorf("found none or multiple values for resource type %s with query fields: '%v'", resourceType, additionalQueryString)
+}
+
+func searchPolicyResourcesByCustomField(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
+	return searchByContext(connector, context, query, additionalQuery)
+}
+
+func searchByContext(connector client.Connector, context utl.SessionContext, query string, additionalQuery *string) ([]*data.StructValue, error) {
+	isGlobal := context.FromGlobal
 	switch context.ClientType {
 	case utl.Local:
 		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
@@ -126,8 +174,18 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 	case utl.Multitenancy, utl.VPC:
 		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
-
 	return nil, errors.New("invalid ClientType")
+}
+
+func listPolicyResources(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
+	return searchByContext(connector, context, query, additionalQuery)
+}
+
+// globalFlag argument is an optional
+func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
+	return searchByContext(connector, context, query, additionalQuery)
 }
 
 func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
@@ -156,29 +214,12 @@ func escapeSpecialCharacters(str string) string {
 
 func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
-	switch context.ClientType {
-	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
-	case utl.Global:
-		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy, utl.VPC:
-		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
-	}
-
-	return nil, errors.New("invalid ClientType")
+	return searchByContext(connector, context, query, additionalQuery)
 }
 
 func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
-	switch context.ClientType {
-	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), false)
-	case utl.Global:
-		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy, utl.VPC:
-		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
-	}
-	return nil, errors.New("invalid ClientType")
+	return searchByContext(connector, context, query, additionalQuery)
 }
 
 func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {

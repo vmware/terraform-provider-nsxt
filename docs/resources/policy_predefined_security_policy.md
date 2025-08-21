@@ -112,32 +112,32 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Security Policy.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `rule` (Optional) A repeatable block to specify rules for the Security Policy. This setting is applicable to non-Default policies only. Each rule includes the following fields:
-  * `display_name` - (Required) Display name of the resource.
-  * `description` - (Optional) Description of the resource.
-  * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
-  * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
-  * `direction` - (Optional) The traffic direction for the policy. Must be one of: `IN`, `OUT` or `IN_OUT`. Defaults to `IN_OUT`.
-  * `disabled` - (Optional) A boolean value to indicate the rule is disabled. Defaults to `false`.
-  * `ip_version` - (Optional) The IP Protocol for the rule. Must be one of: `IPV4`, `IPV6` or `IPV4_IPV6`. Defaults to `IPV4_IPV6`.
-  * `logged` - (Optional) A boolean flag to enable packet logging.
-  * `notes` - (Optional) Text for additional notes on changes for the rule.
-  * `profiles` - (Optional) A list of profiles for the rule.
-  * `scope` - (Required) List of policy paths where the rule is applied.
-  * `services` - (Optional) List of services to match.
-  * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
-  * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
-  * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
-  * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`. Note that `REJECT` action is not applicable for L2 policy.
+    * `display_name` - (Required) Display name of the resource.
+    * `description` - (Optional) Description of the resource.
+    * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
+    * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
+    * `direction` - (Optional) The traffic direction for the policy. Must be one of: `IN`, `OUT` or `IN_OUT`. Defaults to `IN_OUT`.
+    * `disabled` - (Optional) A boolean value to indicate the rule is disabled. Defaults to `false`.
+    * `ip_version` - (Optional) The IP Protocol for the rule. Must be one of: `IPV4`, `IPV6` or `IPV4_IPV6`. Defaults to `IPV4_IPV6`.
+    * `logged` - (Optional) A boolean flag to enable packet logging.
+    * `notes` - (Optional) Text for additional notes on changes for the rule.
+    * `profiles` - (Optional) A list of profiles for the rule.
+    * `scope` - (Required) List of policy paths where the rule is applied.
+    * `services` - (Optional) List of services to match.
+    * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
+    * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
+    * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+    * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`. Note that `REJECT` action is not applicable for L2 policy.
 
 * `default_rule` (Optional) A repeatable block to modify default rules for the Security Policy in a `DEFAULT` category. Each rule includes the following fields:
-  * `description` - (Optional) Description of the resource.
-  * `logged` - (Optional) A boolean flag to enable packet logging.
-  * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
-  * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Note that `REJECT` action is not applicable for L2 policy.
+    * `description` - (Optional) Description of the resource.
+    * `logged` - (Optional) A boolean flag to enable packet logging.
+    * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
+    * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+    * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Note that `REJECT` action is not applicable for L2 policy.
 
 ## Attributes Reference
 
@@ -145,7 +145,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `rule`, `default_rule`:
-  * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-  * `path` - The NSX path of the policy resource.
-  * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
-  * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
+    * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+    * `path` - The NSX path of the policy resource.
+    * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
+    * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.

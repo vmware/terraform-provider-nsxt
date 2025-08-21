@@ -78,28 +78,32 @@ The following arguments are supported:
 * `transport_vlan` - (Optional) VLAN used for tagging Overlay traffic of associated HostSwitch. Default: 0.
 * `overlay_encap` - (Optional) The protocol used to encapsulate overlay traffic. Possible values are: `VXLAN`, `GENEVE`. Default: `GENEVE`.
 * `lag` - (Optional) List of LACP group.
-  * `load_balance_algorithm` - (Required) LACP load balance Algorithm. Possible values are: `SRCMAC`, `DESTMAC`, `SRCDESTMAC`, `SRCDESTIPVLAN`, `SRCDESTMACIPPORT`.
-  * `mode` - (Required) LACP group mode. Possible values are: `ACTIVE`, `PASSIVE`.
-  * `name` - (Required) Lag name.
-  * `number_of_uplinks` - (Required) Number of uplinks. Minimum: 2, maximum: 32.
-  * `timeout_type` - (Optional) LACP timeout type. Possible values are: `SLOW`, `FAST`. Default: `SLOW`.
+    * `load_balance_algorithm` - (Required) LACP load balance Algorithm. Possible values are: `SRCMAC`, `DESTMAC`, `SRCDESTMAC`, `SRCDESTIPVLAN`, `SRCDESTMACIPPORT`.
+    * `mode` - (Required) LACP group mode. Possible values are: `ACTIVE`, `PASSIVE`.
+    * `name` - (Required) Lag name.
+    * `number_of_uplinks` - (Required) Number of uplinks. Minimum: 2, maximum: 32.
+    * `timeout_type` - (Optional) LACP timeout type. Possible values are: `SLOW`, `FAST`. Default: `SLOW`.
 * `teaming` - (Required) Default TeamingPolicy associated with this UplinkProfile.
-  * `active` - (Required) List of Uplinks used in active list.
-    * `uplink_name` - (Required) Name of this uplink.
-    * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
-  * `policy` - (Required) Teaming policy. Possible values are: `FAILOVER_ORDER`, `LOADBALANCE_SRCID`, `LOADBALANCE_SRC_MAC`.
-  * `standby` - (Optional) List of Uplinks used in standby list.
-    * `uplink_name` - (Required) Name of this uplink.
-    * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
+    * `active` - (Required) List of Uplinks used in active list.
+        * `uplink_name` - (Required) Name of this uplink.
+        * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
+    * `policy` - (Required) Teaming policy. Possible values are: `FAILOVER_ORDER`, `LOADBALANCE_SRCID`, `LOADBALANCE_SRC_MAC`.
+    * `standby` - (Optional) List of Uplinks used in standby list.
+        * `uplink_name` - (Required) Name of this uplink.
+        * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
 * `named_teaming` - (Optional) List of named uplink teaming policies that can be used by logical switches.
-  * `active` - (Required) List of Uplinks used in active list.
-    * `uplink_name` - (Required) Name of this uplink.
-    * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
-  * `policy` - (Required) Teaming policy. Possible values are: `FAILOVER_ORDER`, `LOADBALANCE_SRCID`, `LOADBALANCE_SRC_MAC`.
-  * `standby` - (Optional) List of Uplinks used in standby list.
-    * `uplink_name` - (Required) Name of this uplink.
-    * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
-  * `name` - (Optional) An uplink teaming policy of a given name defined in UplinkHostSwitchProfile. The names of all NamedTeamingPolicies in an UplinkHostSwitchProfile must be different, but a name can be shared by different UplinkHostSwitchProfiles. Different TransportNodes can use different NamedTeamingPolicies having the same name in different UplinkHostSwitchProfiles to realize an uplink teaming policy on a logical switch. An uplink teaming policy on a logical switch can be any policy defined by a user; it does not have to be a single type of FAILOVER or LOADBALANCE. It can be a combination of types, for instance, a user can define a policy with name `MyHybridTeamingPolicy` as `FAILOVER on all ESX TransportNodes and LOADBALANCE on all KVM TransportNodes`.
+    * `active` - (Required) List of Uplinks used in active list.
+        * `uplink_name` - (Required) Name of this uplink.
+        * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
+    * `policy` - (Required) Teaming policy. Possible values are: `FAILOVER_ORDER`, `LOADBALANCE_SRCID`, `LOADBALANCE_SRC_MAC`.
+    * `standby` - (Optional) List of Uplinks used in standby list.
+        * `uplink_name` - (Required) Name of this uplink.
+        * `uplink_type` - (Required) Type of the uplink. Possible values are: `PNIC`, `LAG`.
+    * `name` - (Optional) An uplink teaming policy of a given name defined in UplinkHostSwitchProfile.
+      The names of all NamedTeamingPolicies in an UplinkHostSwitchProfile must be different, but a name can be shared by different UplinkHostSwitchProfiles.
+      Different TransportNodes can use different NamedTeamingPolicies having the same name in different UplinkHostSwitchProfiles to realize an uplink teaming policy on a logical switch.
+      An uplink teaming policy on a logical switch can be any policy defined by a user; it does not have to be a single type of `FAILOVER` or `LOADBALANCE`.
+      It can be a combination of types, for instance, a user can define a policy with name `MyHybridTeamingPolicy` as `FAILOVER on all ESX TransportNodes and LOADBALANCE on all KVM TransportNodes`.
 
 ## Attributes Reference
 

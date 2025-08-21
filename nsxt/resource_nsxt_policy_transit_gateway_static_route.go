@@ -46,17 +46,6 @@ var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
 			MaxItems: 1,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
-					"ip_address": {
-						Schema: schema.Schema{
-							Type:         schema.TypeString,
-							ValidateFunc: validateSingleIP(),
-							Optional:     true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "string",
-							SdkFieldName: "IpAddress",
-						},
-					},
 					"admin_distance": {
 						Schema: schema.Schema{
 							Type:     schema.TypeInt,
@@ -79,7 +68,7 @@ var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
 									SchemaType: "string",
 								},
 							},
-							Optional: true,
+							Required: true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "list",
