@@ -8,7 +8,7 @@ description: A resource to configure IP Pools in NSX Policy.
 
 This resource provides a means to configure IP Pools in NSX Policy.
 
-This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

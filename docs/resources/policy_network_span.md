@@ -8,7 +8,7 @@ description: A resource to configure a NetworkSpan.
 
 This resource provides a method for the management of a NetworkSpan.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager with version 9.1.0 onwards and VMC.
+This resource is applicable to NSX Global Manager, NSX Policy Manager with version 9.1.0 onwards.
 
 ## Example Usage
 
