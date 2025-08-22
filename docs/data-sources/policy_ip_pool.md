@@ -8,7 +8,7 @@ description: Policy IP Pool Config data source.
 
 This data source provides information about policy IP Pools configured on NSX.
 
-This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
