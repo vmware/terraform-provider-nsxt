@@ -8,7 +8,7 @@ description: A resource to configure a Static Routes under VPC.
 
 This resource provides a method for the management of VPC Static Routes.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

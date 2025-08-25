@@ -8,7 +8,7 @@ description: A resource to configure Transit Gateway Connectivity Policy.
 
 This resource provides a method for the management of TGW Connectivity Policy.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.1.0 onwards.
 
 ## Example Usage
 

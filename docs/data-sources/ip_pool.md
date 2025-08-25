@@ -6,7 +6,7 @@ description: A IP pool data source.
 
 # nsxt_ip_pool
 
-This data source provides information about a IP Pool configured on NSX.
+This data source provides information about a IP Pool configured on NSX and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
