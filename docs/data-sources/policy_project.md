@@ -7,7 +7,7 @@ description: Policy Project data source.
 # nsxt_policy_project
 
 This data source provides information about policy Project configured on NSX.
-This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
