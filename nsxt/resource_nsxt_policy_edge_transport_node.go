@@ -1527,7 +1527,7 @@ func setPolicyIPAssignmentsInSchema(specs []*data.StructValue) (interface{}, err
 		}
 	}
 
-	return elem, nil
+	return []interface{}{elem}, nil
 }
 
 func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) error {
@@ -1624,7 +1624,7 @@ func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface
 				tunnelEndpoints = append(tunnelEndpoints, t)
 			}
 			sw["tunnel_endpoint"] = tunnelEndpoints
-			d.Set("vlan_transport_zone_paths", switc.VlanTransportZonePaths)
+			sw["vlan_transport_zone_paths"] = switc.VlanTransportZonePaths
 
 			switches = append(switches, sw)
 		}
