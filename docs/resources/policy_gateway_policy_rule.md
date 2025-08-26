@@ -18,7 +18,7 @@ data "nsxt_policy_gateway_policy" "predefined" {
 }
 
 data "nsxt_policy_tier0_gateway" "t0_pepsi" {
-  display_name      = "pepsi"
+  display_name = "pepsi"
 }
 
 resource "nsxt_policy_gateway_policy_rule" "rule1" {
