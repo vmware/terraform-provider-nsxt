@@ -36,7 +36,7 @@ resource "nsxt_policy_gateway_policy_rule" "rule1" {
 ## Argument Reference
 
 The following arguments are supported:
-    
+
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
@@ -88,4 +88,3 @@ In addition to arguments listed above, the following attributes are exported:
 * `path` - The NSX path of the policy resource.
 * `sequence_number` - Sequence number for the rule.
 * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
-
