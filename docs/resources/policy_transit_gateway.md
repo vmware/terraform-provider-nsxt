@@ -8,7 +8,11 @@ description: A resource to configure a Transit Gateway.
 
 This resource provides a method for the management of a Transit Gateway.
 
-This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+This resource is applicable to NSX Policy Manager.
+
+In NSX 9.0, users cannot create TGWs. Terraform users can import and update the default TGW.
+In NSX 9.1 onwards, users can create and delete TGWs
+
 
 ## Example Usage
 
@@ -33,10 +37,10 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `transit_subnets` - (Optional) Array of IPV4 CIDRs for internal VPC attachment networks.
-* `high_availability_config` - (Optional) Transit Gateway high availability config centralized transit gateway.
+* `high_availability_config` - (Optional) Transit Gateway high availability config centralized transit gateway.Available since NSX 9.1.0.
     * `ha_mode` - (Optional) High-availability Mode for Transit Gateway. Accepted values are: "ACTIVE_ACTIVE", "ACTIVE_STANDBY". Default is "ACTIVE_STANDBY".
     * `edge_cluster_paths` - (Optional) The Edge cluster should be authorized to be used in the transit gateway. A single edge cluster will be supported when the transit gateway is created from the local NSX manager.
-* `span` - (Optional) Span configuration. Note that one of `cluster_based_span` and `zone_based_span` is required.
+* `span` - (Optional) Span configuration. Note that one of `cluster_based_span` and `zone_based_span` is required.Available since NSX 9.1.0.
     * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
         * `span_path` - (Required) Policy path of the network span object.
     * `zone_based_span` - (Optional) Span based on zones.
