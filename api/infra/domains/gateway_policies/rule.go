@@ -21,7 +21,7 @@ func NewRulesClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	var client interface{}
 
 	switch sessionContext.ClientType {
-	
+
 	case utl.Local:
 		client = client0.NewRulesClient(connector)
 
