@@ -453,6 +453,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_flood_protection_profile":             resourceNsxtPolicyGatewayFloodProtectionProfile(),
 			"nsxt_policy_gateway_flood_protection_profile_binding":     resourceNsxtPolicyGatewayFloodProtectionProfileBinding(),
 			"nsxt_policy_gateway_policy":                               resourceNsxtPolicyGatewayPolicy(),
+			"nsxt_policy_gateway_policy_rule":                          resourceNsxtPolicyGatewayRulePolicy(),
 			"nsxt_policy_gateway_prefix_list":                          resourceNsxtPolicyGatewayPrefixList(),
 			"nsxt_policy_gateway_qos_profile":                          resourceNsxtPolicyGatewayQosProfile(),
 			"nsxt_policy_gateway_redistribution_config":                resourceNsxtPolicyGatewayRedistributionConfig(),
