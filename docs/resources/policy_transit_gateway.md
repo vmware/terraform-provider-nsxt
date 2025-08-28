@@ -13,7 +13,6 @@ This resource is applicable to NSX Policy Manager.
 In NSX 9.0, users cannot create TGWs. Terraform users can import and update the default TGW.
 In NSX 9.1 onwards, users can create and delete TGWs
 
-
 ## Example Usage
 
 ```hcl
