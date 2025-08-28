@@ -8,7 +8,7 @@ description: A resource to configure a NAT rule under VPC.
 
 This resource provides a method for the management of a VPC NAT Rule.
 
-This resource is applicable to NSX Policy Managerand is supported with NSX 9.0.0 onwards.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
