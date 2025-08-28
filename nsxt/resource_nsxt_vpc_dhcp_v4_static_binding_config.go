@@ -19,6 +19,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
@@ -231,6 +232,9 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(sessionContext utl.Ses
 }
 
 func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Subnet DhcpV4 Static Binding Config resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists)

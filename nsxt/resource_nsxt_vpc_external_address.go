@@ -1,8 +1,10 @@
 package nsxt
 
 import (
+	"fmt"
 	"log"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -64,6 +66,9 @@ func updatePort(d *schema.ResourceData, m interface{}, deleteFlow bool) error {
 }
 
 func resourceNsxtVpcExternalAddressCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc External Address resource requires NSX version 9.0.0 or higher")
+	}
 	err := updatePort(d, m, false)
 	if err != nil {
 		return handleCreateError("External Address", "", err)
