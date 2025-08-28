@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcSecurityPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"
@@ -28,6 +29,9 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 }
 
 func resourceNsxtVPCSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Security Policy resource requires NSX version 9.0.0 or higher")
+	}
 	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, true)
 }
 

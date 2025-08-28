@@ -18,6 +18,7 @@ import (
 	clientLayer "github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var ipBlockQuotaIpBlockVisibilityValues = []string{
@@ -181,6 +182,9 @@ func resourceNsxtPolicyIpBlockQuotaExists(sessionContext utl.SessionContext, id 
 }
 
 func resourceNsxtPolicyIpBlockQuotaCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Policy Ip BlockQuota resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIpBlockQuotaExists)
