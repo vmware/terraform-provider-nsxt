@@ -233,7 +233,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(sessionContext utl.Ses
 
 func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Subnet DhcpV4 Static Binding Config resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Vpc Subnet Dhcp V4 Static Binding Config resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

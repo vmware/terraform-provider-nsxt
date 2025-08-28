@@ -183,7 +183,7 @@ func resourceNsxtPolicyIpBlockQuotaExists(sessionContext utl.SessionContext, id 
 
 func resourceNsxtPolicyIpBlockQuotaCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Policy Ip BlockQuota resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Policy Ip Block Quota resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 
