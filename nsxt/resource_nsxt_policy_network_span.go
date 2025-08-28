@@ -71,7 +71,7 @@ func resourceNsxtPolicyNetworkSpanExists(id string, connector client.Connector, 
 
 func resourceNsxtPolicyNetworkSpanCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.1.0") {
-		return fmt.Errorf("Policy NetworkSpan resource requires NSX version 9.1.0 or higher")
+		return fmt.Errorf("Policy Network Span resource requires NSX version 9.1.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

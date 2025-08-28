@@ -75,7 +75,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 
 func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Policy TransitGateway Attachment resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Policy Transit Gateway Attachment resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 
