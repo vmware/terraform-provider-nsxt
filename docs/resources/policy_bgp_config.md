@@ -57,7 +57,7 @@ The following arguments are supported:
 * `site_path` - (Optional) Path for policy site. This attribute is required for Global Manager and is not relevant for Local Manager.
 * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
 * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
-* `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`.
+* `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration.
 * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This attribute is optional for VRF-Lite gateways, and is required otherwise.
 * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`.
 * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`.

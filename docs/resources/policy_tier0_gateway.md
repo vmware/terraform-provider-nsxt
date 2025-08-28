@@ -141,7 +141,7 @@ The following arguments are supported:
     * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
     * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
     * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
-    * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is applicable to VRF-Lite Gateway with NSX 4.2.1 and above, when `multi_vrf_inter_sr` is enabled on parent gateway.
+    * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. This setting is applicable to VRF-Lite Gateway with NSX 4.2.1 and above, when `multi_vrf_inter_sr` is enabled on parent gateway.
     * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is optional for VRF-Lite Gateways, and is required otherwise.
     * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
     * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.

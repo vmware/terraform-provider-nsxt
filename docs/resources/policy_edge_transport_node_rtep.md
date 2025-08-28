@@ -31,8 +31,6 @@ resource "nsxt_policy_edge_transport_node_rtep" "test_rtep" {
 }
 ```
 
-**NOTE:** In order to create the Remote Tunnel Endpoint, Policy Edge appliance should be in realized state. Use `nsxt_policy_edge_transport_node_realization` data source to validate that Policy edge realized successfully.
-
 ## Argument Reference
 
 The following arguments are supported:
