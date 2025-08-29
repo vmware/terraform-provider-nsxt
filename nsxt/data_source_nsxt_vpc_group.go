@@ -27,7 +27,7 @@ func dataSourceNsxtVpcGroup() *schema.Resource {
 
 func dataSourceNsxtVpcGroupRead(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Groupdata source requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Group data source requires NSX version 9.0.0 or higher")
 	}
 	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Group", nil)
 	if err != nil {

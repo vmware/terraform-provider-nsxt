@@ -250,7 +250,6 @@ func nsxtVpcServiceProfileImporter(d *schema.ResourceData, m interface{}) ([]*sc
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Service Profile import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing policy path importer logic
 	importer := getPolicyPathResourceImporter(vpcServiceProfilePathExample)
 	return importer(d, m)

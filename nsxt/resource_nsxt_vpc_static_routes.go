@@ -85,7 +85,6 @@ func nsxtVpcStaticRoutesImporter(d *schema.ResourceData, m interface{}) ([]*sche
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Static Routes import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing VPC path importer logic
 	importer := getVpcPathResourceImporter(vpcStaticRoutesPathExample)
 	return importer(d, m)

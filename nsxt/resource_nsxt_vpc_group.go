@@ -19,7 +19,6 @@ func nsxtVpcGroupImporter(d *schema.ResourceData, m interface{}) ([]*schema.Reso
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Group import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing VPC path importer logic
 	importer := getVpcPathResourceImporter(vpcGroupPathExample)
 	return importer(d, m)

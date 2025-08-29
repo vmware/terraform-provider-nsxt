@@ -164,7 +164,6 @@ func nsxtVpcNatRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.Re
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC NAT Rule import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing parent path importer logic
 	return nsxtParentPathResourceImporter(d, m)
 }

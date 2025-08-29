@@ -109,7 +109,6 @@ func nsxtVpcIpAddressAllocationImporter(d *schema.ResourceData, m interface{}) (
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC IP Address Allocation import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing VPC path importer logic
 	importer := getVpcPathResourceImporter(vpcIpAddressAllocationPathExample)
 	return importer(d, m)

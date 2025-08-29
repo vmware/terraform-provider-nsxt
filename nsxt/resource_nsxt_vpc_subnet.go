@@ -459,7 +459,6 @@ func nsxtVpcSubnetImporter(d *schema.ResourceData, m interface{}) ([]*schema.Res
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Subnet import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing VPC path importer logic
 	importer := getVpcPathResourceImporter(vpcSubnetPathExample)
 	return importer(d, m)

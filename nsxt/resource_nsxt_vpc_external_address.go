@@ -123,7 +123,6 @@ func nsxtVpcExternalAddressImporter(d *schema.ResourceData, m interface{}) ([]*s
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC External Address import requires NSX version 9.0.0 or higher")
 	}
-	
 	importID := d.Id()
 	if isSpaceString(importID) {
 		return []*schema.ResourceData{d}, ErrEmptyImportID

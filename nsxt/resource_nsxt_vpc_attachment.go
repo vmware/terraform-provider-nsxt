@@ -48,7 +48,6 @@ func nsxtVpcAttachmentImporter(d *schema.ResourceData, m interface{}) ([]*schema
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Attachment import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing parent path importer logic
 	return nsxtParentPathResourceImporter(d, m)
 }

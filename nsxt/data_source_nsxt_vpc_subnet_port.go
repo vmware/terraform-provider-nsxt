@@ -80,7 +80,7 @@ func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.
 
 func dataSourceNsxtVpcSubnetPortRead(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Subnet Portdata source requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Subnet Port data source requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 
