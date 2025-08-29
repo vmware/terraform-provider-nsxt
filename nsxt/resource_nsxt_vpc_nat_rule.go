@@ -158,6 +158,17 @@ func getPolicyVpcNatRuleSchema(withScope bool) map[string]*metadata.ExtendedSche
 	return policyVpcNatRuleSchema
 }
 
+// VPC NAT Rule importer with version check
+func nsxtVpcNatRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC NAT Rule import requires NSX version 9.0.0 or higher")
+	}
+	
+	// Use the existing parent path importer logic
+	return nsxtParentPathResourceImporter(d, m)
+}
+
 func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyVpcNatRuleCreate,
@@ -165,7 +176,7 @@ func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 		Update: resourceNsxtPolicyVpcNatRuleUpdate,
 		Delete: resourceNsxtPolicyVpcNatRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtVpcNatRuleImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(getPolicyVpcNatRuleSchema(false)),
 	}

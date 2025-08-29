@@ -244,6 +244,18 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcServiceProfilePathExample = "/orgs/[org]/projects/[project]/vpc-service-profiles/[profile]"
 
+// VPC Service Profile importer with version check
+func nsxtVpcServiceProfileImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Service Profile import requires NSX version 9.0.0 or higher")
+	}
+	
+	// Use the existing policy path importer logic
+	importer := getPolicyPathResourceImporter(vpcServiceProfilePathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVpcServiceProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcServiceProfileCreate,
@@ -251,7 +263,7 @@ func resourceNsxtVpcServiceProfile() *schema.Resource {
 		Update: resourceNsxtVpcServiceProfileUpdate,
 		Delete: resourceNsxtVpcServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathResourceImporter(vpcServiceProfilePathExample),
+			State: nsxtVpcServiceProfileImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcServiceProfileSchema),
 	}

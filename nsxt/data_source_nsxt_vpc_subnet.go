@@ -5,7 +5,10 @@
 package nsxt
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func dataSourceNsxtVpcSubnet() *schema.Resource {
@@ -23,6 +26,9 @@ func dataSourceNsxtVpcSubnet() *schema.Resource {
 }
 
 func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Subnetdata source requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "VpcSubnet", nil, false)
