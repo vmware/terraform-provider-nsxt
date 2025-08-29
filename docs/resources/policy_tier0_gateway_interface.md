@@ -7,6 +7,7 @@ description: A resource to configure an Interface on Tier-0 gateway on NSX Polic
 # nsxt_policy_tier0_gateway_interface
 
 This resource provides a method for the management of a Tier-0 gateway Interface. Note that edge cluster must be configured on Tier-0 Gateway in order to configure interfaces on it.
+For interfaces of type EXTERNAL it is recommended to explicitly specify an edge cluster member via the edge_node_path argument
 
 ~> **NOTE:** When configuring VRF-Lite interfaces, please specify explicit dependency on parent Tier-0 Gateway interface(see VRF interface example below).  This will ensure correct order of object deletion.
 
@@ -40,7 +41,7 @@ resource "nsxt_policy_tier0_gateway_interface" "if1" {
 }
 ```
 
-## Example Usage: VRF Interface
+## Example Usage: VRF External Interface
 
 ```hcl
 resource "nsxt_policy_tier0_gateway_interface" "red_vrf_uplink1" {
