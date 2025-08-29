@@ -144,7 +144,6 @@ func nsxtVpcImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceD
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC import requires NSX version 9.0.0 or higher")
 	}
-	
 	importID := d.Id()
 	if isPolicyPath(importID) {
 		pathSegs := strings.Split(importID, "/")

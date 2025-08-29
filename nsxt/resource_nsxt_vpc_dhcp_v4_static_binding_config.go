@@ -205,7 +205,6 @@ func nsxtVpcDhcpV4StaticBindingConfigImporter(d *schema.ResourceData, m interfac
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC DHCP v4 Static Binding Config import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing parent path importer logic
 	return nsxtParentPathResourceImporter(d, m)
 }

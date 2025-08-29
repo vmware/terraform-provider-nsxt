@@ -25,7 +25,6 @@ func nsxtVpcGatewayPolicyImporter(d *schema.ResourceData, m interface{}) ([]*sch
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return []*schema.ResourceData{d}, fmt.Errorf("VPC Gateway Policy import requires NSX version 9.0.0 or higher")
 	}
-	
 	// Use the existing VPC path importer logic
 	importer := getVpcPathResourceImporter(vpcGatewayPolicyPathExample)
 	return importer(d, m)
