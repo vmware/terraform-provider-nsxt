@@ -7,7 +7,8 @@ description: A resource to configure a DHCP IPv4 Static Binding.
 # nsxt_vpc_dhcp_v4_static_binding
 
 This resource provides a method for the management of a DhcpV4StaticBindingConfig.
-This resource is applicable to NSX Policy Manager.
+
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
