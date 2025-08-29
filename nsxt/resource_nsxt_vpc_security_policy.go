@@ -15,6 +15,18 @@ import (
 
 var vpcSecurityPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"
 
+// VPC Security Policy importer with version check
+func nsxtVpcSecurityPolicyImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Security Policy import requires NSX version 9.0.0 or higher")
+	}
+	
+	// Use the existing VPC path importer logic
+	importer := getVpcPathResourceImporter(vpcSecurityPolicyPathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCSecurityPolicyCreate,
@@ -22,7 +34,7 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 		Update: resourceNsxtVPCSecurityPolicyUpdate,
 		Delete: resourceNsxtVPCSecurityPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcSecurityPolicyPathExample),
+			State: nsxtVpcSecurityPolicyImporter,
 		},
 		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}

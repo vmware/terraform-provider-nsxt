@@ -119,6 +119,11 @@ func resourceNsxtVpcExternalAddressDelete(d *schema.ResourceData, m interface{})
 }
 
 func nsxtVpcExternalAddressImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC External Address import requires NSX version 9.0.0 or higher")
+	}
+	
 	importID := d.Id()
 	if isSpaceString(importID) {
 		return []*schema.ResourceData{d}, ErrEmptyImportID
