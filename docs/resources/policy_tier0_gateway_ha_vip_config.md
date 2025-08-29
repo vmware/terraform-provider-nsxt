@@ -8,38 +8,67 @@ description: A resource to configure HA Vip config on Tier-0 gateway in NSX Poli
 
 This resource provides a method for the management of a Tier-0 gateway HA VIP config. Note that this configuration can be defined only for Active-Standby Tier0 gateway.
 
+In order to correctly configure the HA VIP for a Tier-0 gateway, the selected external interfaces should be configured with the same subnet CIDR, and the vip_subnets setting
+should specify an IP in this subnet CIDR which is not already in use by any external interface.
+
 ~> **NOTE:** All HA VIP configuration for particular Gateway should be defined within single resource clause - use multiple `config` sections to define HA on multiple interfaces. Defining multiple resources for same Gateway may result in apply conflicts.
 
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_tier0_gateway" "gw1" {
-  display_name = "gw1"
+data "nsxt_policy_tier0_gateway" "tier0_gw" {
+  display_name = "tier0_gw"
+}
+
+data "nsxt_policy_segment" "extseg_1" {
+  display_name = "extseg1"
+}
+
+data "nsxt_policy_segment" "extseg_2" {
+  display_name = "extseg2"
+}
+
+data "nsxt_policy_edge_cluster" "ec" {
+  display_name = "ec"
+}
+
+data "nsxt_policy_edge_node" "node1" {
+  edge_cluster_path = data.nsxt_policy_edge_cluster.ec.path
+  member_index      = 0
+}
+
+data "nsxt_policy_edge_node" "node2" {
+  edge_cluster_path = data.nsxt_policy_edge_cluster.ec.path
+  member_index      = 1
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "if1" {
-  display_name = "segment0_interface"
-  description  = "connection to segment1"
-  type         = "EXTERNAL"
-  gateway_path = data.nsxt_policy_tier0_gateway.gw1.path
-  segment_path = nsxt_policy_vlan_segment.segment1.path
-  subnets      = ["12.12.2.1/24"]
+  description    = "connection to segment1"
+  display_name   = "seg1"
+  gateway_path   = data.nsxt_policy_tier0_gateway.tier0_gw.path
+  segment_path   = data.nsxt_policy_segment.extseg_1.path
+  edge_node_path = data.nsxt_policy_edge_node.node1.path
+  subnets        = ["12.12.1.1/24"]
+  type           = "EXTERNAL"
+  urpf_mode      = "STRICT"
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "if2" {
-  display_name = "segment0_interface"
-  description  = "connection to segment2"
-  type         = "EXTERNAL"
-  gateway_path = data.nsxt_policy_tier0_gateway.gw1.path
-  segment_path = nsxt_policy_vlan_segment.segment2.path
-  subnets      = ["12.12.2.2/24"]
+  description    = "connection to segment1"
+  display_name   = "seg2"
+  gateway_path   = data.nsxt_policy_tier0_gateway.tier0_gw.path
+  segment_path   = data.nsxt_policy_segment.extseg_2.path
+  edge_node_path = data.nsxt_policy_edge_node.node2.path
+  subnets        = ["12.12.1.2/24"]
+  type           = "EXTERNAL"
+  urpf_mode      = "STRICT"
 }
 
 resource "nsxt_policy_tier0_gateway_ha_vip_config" "ha-vip" {
   config {
     enabled                  = true
     external_interface_paths = [nsxt_policy_tier0_gateway_interface.if1.path, nsxt_policy_tier0_gateway_interface.if2.path]
-    vip_subnets              = ["12.12.2.3/24"]
+    vip_subnets              = ["12.12.1.3/24"]
   }
 }
 ```
