@@ -8,7 +8,7 @@ description: A resource to configure IP Block on NSX Policy.
 
 This resource provides a means to configure IP Block Quota on NSX Policy.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
