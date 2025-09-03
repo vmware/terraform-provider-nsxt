@@ -94,6 +94,9 @@ The following arguments are supported:
 * `timeout` - (Optional) Upgrade status check timeout in seconds. Default: 3600 seconds.
 * `interval` - (Optional) Interval to check upgrade status in seconds. Default: 30 seconds.
 * `delay` - (Optional) Initial delay to start upgrade status checks in seconds. Default: 300 seconds.
+* `max_retries` - (Optional) Maximum number of retries before failing the upgrade operation. Default: 100.
+
+**NOTE:** With Global Manager, `edge_group`, `host_group`, `finalize_upgrade_setting`, `edge_upgrade_setting`, `host_upgrade_setting` attributes are not supported.
 
 ## Attributes Reference
 
