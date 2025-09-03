@@ -70,7 +70,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Optional:    true,
 				Description: "If this property is set to true, then this block is reserved for direct vlan extension use case",
 			},
-			"ranges":       getAllocationRangesSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
+			"range":        getAllocationRangesSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
 			"excluded_ips": getAllocationRangesSchema(false, "Represents list of excluded IP address in the form of start and end IPs"),
 		},
 	}
@@ -125,7 +125,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 			d.Set("cidrs", block.Cidrs)
 		}
 		d.Set("is_subnet_exclusive", block.IsSubnetExclusive)
-		d.Set("ranges", setAllocationRangeListInSchema(block.Ranges))
+		d.Set("range", setAllocationRangeListInSchema(block.Ranges))
 		d.Set("excluded_ips", setAllocationRangeListInSchema(block.ExcludedIps))
 		if block.Cidr != nil {
 			d.Set("cidr", block.Cidr)
@@ -156,7 +156,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	tags := getPolicyTagsFromSchema(d)
 	cidrs := getStringListFromSchemaList(d, "cidrs")
 	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
-	ranges := getAllocationRangeListFromSchema(d.Get("ranges").([]interface{}))
+	ranges := getAllocationRangeListFromSchema(d.Get("range").([]interface{}))
 	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
@@ -211,7 +211,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	tags := getPolicyTagsFromSchema(d)
 	cidrs := getStringListFromSchemaList(d, "cidrs")
 	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
-	ranges := getAllocationRangeListFromSchema(d.Get("ranges").([]interface{}))
+	ranges := getAllocationRangeListFromSchema(d.Get("range").([]interface{}))
 	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
 	obj := model.IpAddressBlock{
