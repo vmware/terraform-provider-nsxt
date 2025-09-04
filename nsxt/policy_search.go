@@ -5,10 +5,15 @@
 package nsxt
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -108,28 +113,57 @@ func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Conne
 	return policyDataSourceResourceReadWithValidation(d, connector, context, resourceType, additionalQuery, true)
 }
 
-func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
+func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, c utl.SessionContext, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
-	isGlobal := context.FromGlobal
-	var err error
+	isGlobal := c.FromGlobal
+
 	var resultValues []*data.StructValue
 	additionalQueryString := buildQueryStringFromMap(additionalQuery)
 	if paramsValidation && objID == "" && objName == "" {
 		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
 	}
-	if objID != "" {
-		if resourceType == "PolicyEdgeNode" {
-			// Edge Node is a special case where id != nsx_id
-			// TODO: consider switching all searches to nsx id
-			resultValues, err = listPolicyResourcesByNsxID(connector, context, &objID, &additionalQueryString)
-		} else {
-			resultValues, err = listPolicyResourcesByID(connector, context, &objID, &additionalQueryString, isGlobal)
+	var readTimeoutSeconds int
+	var err error
+	readTimeoutStr, retryCheck := os.LookupEnv("READ_RETRY_TIMEOUT_SECONDS")
+	if retryCheck {
+		readTimeoutSeconds , err = strconv.Atoi(readTimeoutStr)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading READ_RETRY_TIMEOUT_SECONDS: %v", err)
 		}
 	} else {
-		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString, isGlobal)
+		// This timeout is for the non retryable case. So it fails with the first error.
+		readTimeoutSeconds = 60
 	}
-	if err != nil {
+
+	if err = retry.RetryContext(context.Background(), time.Duration(readTimeoutSeconds)*time.Second, func() *retry.RetryError {
+		var err1 error
+		if objID != "" {
+			if resourceType == "PolicyEdgeNode" {
+				// Edge Node is a special case where id != nsx_id
+				// TODO: consider switching all searches to nsx id
+				resultValues, err1 = listPolicyResourcesByNsxID(connector, c, &objID, &additionalQueryString)
+			} else {
+				resultValues, err1 = listPolicyResourcesByID(connector, c, &objID, &additionalQueryString, isGlobal)
+			}
+		} else {
+			resultValues, err1 = listPolicyResourcesByNameAndType(connector, c, objName, resourceType, &additionalQueryString, isGlobal)
+		}
+		if err1 != nil || len(resultValues) == 0 {
+			if objID != "" {
+				if retryCheck {
+					return retry.RetryableError(fmt.Errorf("%s with ID '%s' was not found : %v", resourceType, objID, err1))
+				}
+				return retry.NonRetryableError(fmt.Errorf("%s with ID '%s' was not found : %v", resourceType, objID, err1))
+			}
+			if retryCheck {
+				return retry.RetryableError(fmt.Errorf("%s with name '%s' was not found : %v", resourceType, objName, err1))
+			}
+			return retry.NonRetryableError(fmt.Errorf("%s with name '%s' was not found : %v", resourceType, objName, err1))
+		}
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
