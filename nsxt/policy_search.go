@@ -127,7 +127,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	var err error
 	readTimeoutStr, retryCheck := os.LookupEnv("READ_RETRY_TIMEOUT_SECONDS")
 	if retryCheck {
-		readTimeoutSeconds , err = strconv.Atoi(readTimeoutStr)
+		readTimeoutSeconds, err = strconv.Atoi(readTimeoutStr)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading READ_RETRY_TIMEOUT_SECONDS: %v", err)
 		}
