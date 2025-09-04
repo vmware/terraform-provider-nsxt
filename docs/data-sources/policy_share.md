@@ -8,6 +8,7 @@ description: A Share data source.
 
 This data source provides information about a Share configured on NSX.
 This data source is applicable to NSX Policy Manager.
+Note: The env variable READ_RETRY_TIMEOUT_SECONDS can be set to add a retry while reading the resources.
 
 ## Example Usage
 
