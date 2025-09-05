@@ -18,12 +18,21 @@ type SessionContext struct {
 	ClientType ClientType
 	ProjectID  string
 	VPCID      string
+	FromGlobal bool
 }
 type ClientContext struct {
 	Client     interface{}
 	ClientType ClientType
 	ProjectID  string
 	VPCID      string
+}
+
+type SessionContextSpec struct {
+	IsRequired          bool
+	IsComputed          bool
+	IsVpc               bool
+	AllowDefaultProject bool
+	FromGlobal          bool
 }
 
 func ConvertModelBindingType(obj interface{}, sourceType bindings.BindingType, destType bindings.BindingType) (interface{}, error) {

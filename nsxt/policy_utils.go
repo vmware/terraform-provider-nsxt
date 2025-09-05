@@ -472,8 +472,8 @@ func getVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData,
 			return rd, err
 		}
 
-		// verify that both project and vpc were set in schema by the improter helper above
-		projectID, vpcID := getContextDataFromSchema(d)
+		// verify that both project and vpc were set in schema by the importer helper above
+		projectID, vpcID, _ := getContextDataFromSchema(d)
 		if projectID == "" || vpcID == "" {
 			return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
 		}
