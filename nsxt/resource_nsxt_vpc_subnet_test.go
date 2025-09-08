@@ -64,6 +64,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestVpcSubnetCreateAttributes["ip_addresses"]),
 					resource.TestCheckResourceAttr(testResourceName, "access_mode", accTestVpcSubnetCreateAttributes["access_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", "DHCP_DEACTIVATED"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -81,6 +82,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestVpcSubnetUpdateAttributes["ip_addresses"]),
 					resource.TestCheckResourceAttr(testResourceName, "access_mode", accTestVpcSubnetUpdateAttributes["access_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", "DHCP_DEACTIVATED"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -126,6 +128,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ipv4_subnet_size", accTestVpcSubnetCreateAttributes["ipv4_subnet_size"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -146,6 +149,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv4_subnet_size", accTestVpcSubnetCreateAttributes["ipv4_subnet_size"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -196,6 +200,7 @@ func TestAccResourceNsxtVpcSubnet_reservedIPRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.reserved_ip_ranges.0", accTestVpcSubnetReservedIPRangeAttributes["reserved_ip_ranges"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -303,6 +308,7 @@ resource "nsxt_vpc_subnet" "test" {
   ip_addresses = ["%s"]
   access_mode  = "%s"
   dhcp_config {
+    dns_server_preference = "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"
     mode = "DHCP_DEACTIVATED"
   }
 
@@ -331,6 +337,7 @@ resource "nsxt_vpc_subnet" "test" {
   access_mode      = "Public"
 
   dhcp_config {
+    dns_server_preference = "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"
     mode = "DHCP_SERVER"
 
     dhcp_server_additional_config {
@@ -383,6 +390,7 @@ resource "nsxt_vpc_subnet" "test" {
   access_mode = "Public"
 
   dhcp_config {
+    dns_server_preference = "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"
     mode = "DHCP_SERVER"
 
     dhcp_server_additional_config {
