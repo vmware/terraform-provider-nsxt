@@ -49,6 +49,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -113,6 +114,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -184,6 +186,7 @@ func TestAccResourceNsxtVpcSubnet_reservedIPRange(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
