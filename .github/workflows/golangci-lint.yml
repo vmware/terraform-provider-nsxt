@@ -30,3 +30,5 @@ jobs:
         uses: ./.github/actions/golangci-lint
         with:
           only-new-issues: true
+      - name: Check provider.go sorting
+        run: ./scripts/check_object_sorting.sh
