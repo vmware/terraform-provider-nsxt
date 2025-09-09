@@ -4,7 +4,7 @@ page_title: "NSXT: policy_network_span"
 description: A policy Network Span data source.
 ---
 
-# nsxt_policy_edge_cluster
+# nsxt_policy_network_span
 
 This data source provides information about policy network span configured on NSX.
 
