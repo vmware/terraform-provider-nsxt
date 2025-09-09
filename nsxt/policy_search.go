@@ -150,6 +150,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 			resultValues, err1 = listPolicyResourcesByNameAndType(connector, c, objName, resourceType, &additionalQueryString, isGlobal)
 		}
 		if err1 != nil || len(resultValues) == 0 {
+			time.Sleep(100 * time.Millisecond)
 			if objID != "" {
 				if retryCheck {
 					return retry.RetryableError(fmt.Errorf("%s with ID '%s' was not found : %v", resourceType, objID, err1))
