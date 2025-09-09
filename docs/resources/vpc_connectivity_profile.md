@@ -49,7 +49,7 @@ The following arguments are supported:
         * `ingress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in ingress direction.
         * `egress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in egress direction.
     * `enable` - (Optional) Status of the VPC attachment SR.
-    * `edge_cluster_paths` - (Optional) List of edge cluster paths for VPC attachment SR realization. If edge cluster is not specified transit gateway's edge cluster will be used.
+    * `edge_cluster_paths` - (Optional) Array of edge cluster or service cluster path for VPC service instance realization. Edge / Service cluster must be associated with the Project. Edge cluster path shall be specified when VPC is connected to centralised transit gateway and service cluster path shall be specified when VPC is connected to distributed transit gateway Changing edge or service cluster is allowed but relocation of vpc services to new cluster is a disruptive operation and affects traffic.
 
 ## Attributes Reference
 
