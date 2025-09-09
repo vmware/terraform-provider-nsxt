@@ -291,8 +291,8 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 						},
 						Metadata: metadata.Metadata{
 							IntroducedInVersion: "9.1.0",
-							SchemaType:   "string",
-							SdkFieldName: "DnsServerPreference",
+							SchemaType:          "string",
+							SdkFieldName:        "DnsServerPreference",
 						},
 					},
 					"mode": {
