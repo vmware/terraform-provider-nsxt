@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicyGatewayPolicyRule_basic(t *testing.T) {
-	testAccResourceNsxtPolicyGatewayPolicyBasic(t, false, func() {
+	testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t, false, func() {
 		testAccPreCheck(t)
 	})
 }
