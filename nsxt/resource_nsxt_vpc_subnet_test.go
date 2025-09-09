@@ -599,5 +599,5 @@ resource "nsxt_vpc_subnet" "test" {
       reserved_ip_ranges = ["%s"]
     }
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"], dnsPref)
+}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], dnsPref, attrMap["reserved_ip_ranges"])
 }
