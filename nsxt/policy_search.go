@@ -125,11 +125,11 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	}
 	var readTimeoutSeconds int
 	var err error
-	readTimeoutStr, retryCheck := os.LookupEnv("READ_RETRY_TIMEOUT_SECONDS")
+	readTimeoutStr, retryCheck := os.LookupEnv("NSXT_READ_RETRY_TIMEOUT_SECONDS")
 	if retryCheck {
 		readTimeoutSeconds, err = strconv.Atoi(readTimeoutStr)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading READ_RETRY_TIMEOUT_SECONDS: %v", err)
+			return nil, fmt.Errorf("Error reading NSXT_READ_RETRY_TIMEOUT_SECONDS: %v", err)
 		}
 	} else {
 		// This timeout is for the non retryable case. So it fails with the first error.
