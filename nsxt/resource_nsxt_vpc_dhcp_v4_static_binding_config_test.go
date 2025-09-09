@@ -207,7 +207,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig910_basic(t *testing.T
 func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
-	
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersionLessThan(t, "9.1.0") },
 		Providers: testAccProviders,
@@ -261,7 +261,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(displayName string, res
 		if !ok {
 			return fmt.Errorf("Policy DhcpV4StaticBindingConfig resource %s not found in resources", resourceName)
 		}
-		
+
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
 			return fmt.Errorf("Policy DhcpV4StaticBindingConfig resource ID not set in resources")

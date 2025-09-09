@@ -477,7 +477,7 @@ func testAccNsxtVpcSubnetTemplate(createFlow bool, isNSXGt910 bool) string {
 	if isNSXGt910 {
 		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
 	} else {
-		dnsPref = ""	
+		dnsPref = ""
 	}
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
