@@ -48,7 +48,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0"); },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"])
