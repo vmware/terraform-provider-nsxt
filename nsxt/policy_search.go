@@ -133,7 +133,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		}
 	} else {
 		// This timeout is for the non retryable case. So it fails with the first error.
-		readTimeoutSeconds = 60
+		readTimeoutSeconds = 10
 	}
 
 	if err = retry.RetryContext(context.Background(), time.Duration(readTimeoutSeconds)*time.Second, func() *retry.RetryError {
