@@ -271,13 +271,12 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 		}
 	}
 
-	clientSecurity := projects.NewVpcSecurityProfilesClient(connector)
-	objSec, err := clientSecurity.Get(defaultOrgID, projectID, "default")
+	client := projects.NewVpcSecurityProfilesClient(connector)
+	objSec, err := client.Get(defaultOrgID, projectID, "default")
 	if isNotFoundError(err) {
 		return fmt.Errorf("failed to fetch the details of the VPC security profile: %v", err)
 	}
 	// Default security profile is created by NSX, we can assume that it's there already
-	client := projects.NewVpcSecurityProfilesClient(connector)
 	obj := model.VpcSecurityProfile{
 		DisplayName: objSec.DisplayName,
 		Description: objSec.Description,
