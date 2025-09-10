@@ -13,7 +13,6 @@ import (
 )
 
 var accTestUplinkHostSwitchProfileCreateAttributes = map[string]string{
-	"display_name":                 getAccTestResourceName(),
 	"description":                  "terraform created",
 	"mtu":                          "1400",
 	"overlay_encap":                "GENEVE",
@@ -37,7 +36,6 @@ var accTestUplinkHostSwitchProfileCreateAttributes = map[string]string{
 }
 
 var accTestUplinkHostSwitchProfileUpdateAttributes = map[string]string{
-	"display_name":                 getAccTestResourceName(),
 	"description":                  "terraform updated",
 	"mtu":                          "1500",
 	"overlay_encap":                "VXLAN",
@@ -62,6 +60,8 @@ var accTestUplinkHostSwitchProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_uplink_host_switch_profile.test"
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -70,14 +70,14 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtUplinkHostSwitchProfileCheckDestroy(state, accTestUplinkHostSwitchProfileUpdateAttributes["display_name"])
+			return testAccNsxtUplinkHostSwitchProfileCheckDestroy(state, updateDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtUplinkHostSwitchProfileTemplate(true),
+				Config: testAccNsxtUplinkHostSwitchProfileTemplate(createDisplayName, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtUplinkHostSwitchProfileExists(accTestUplinkHostSwitchProfileCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestUplinkHostSwitchProfileCreateAttributes["display_name"]),
+					testAccNsxtUplinkHostSwitchProfileExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestUplinkHostSwitchProfileCreateAttributes["description"]),
 
 					resource.TestCheckResourceAttr(testResourceName, "mtu", accTestUplinkHostSwitchProfileCreateAttributes["mtu"]),
@@ -117,10 +117,10 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtUplinkHostSwitchProfileTemplate(false),
+				Config: testAccNsxtUplinkHostSwitchProfileTemplate(updateDisplayName, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtUplinkHostSwitchProfileExists(accTestUplinkHostSwitchProfileUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestUplinkHostSwitchProfileUpdateAttributes["display_name"]),
+					testAccNsxtUplinkHostSwitchProfileExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestUplinkHostSwitchProfileUpdateAttributes["description"]),
 
 					resource.TestCheckResourceAttr(testResourceName, "mtu", accTestUplinkHostSwitchProfileUpdateAttributes["mtu"]),
@@ -160,9 +160,9 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtUplinkHostSwitchProfileMinimalistic(),
+				Config: testAccNsxtUplinkHostSwitchProfileMinimalistic(createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtUplinkHostSwitchProfileExists(accTestUplinkHostSwitchProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtUplinkHostSwitchProfileExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -183,6 +183,7 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_uplink_host_switch_profile.test"
+	displayName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -191,11 +192,11 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_importBasic(t *testing.T) 
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtUplinkHostSwitchProfileCheckDestroy(state, accTestUplinkHostSwitchProfileUpdateAttributes["display_name"])
+			return testAccNsxtUplinkHostSwitchProfileCheckDestroy(state, displayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtUplinkHostSwitchProfileMinimalistic(),
+				Config: testAccNsxtUplinkHostSwitchProfileMinimalistic(displayName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -254,7 +255,7 @@ func testAccNsxtUplinkHostSwitchProfileCheckDestroy(state *terraform.State, disp
 	return nil
 }
 
-func testAccNsxtUplinkHostSwitchProfileTemplate(createFlow bool) string {
+func testAccNsxtUplinkHostSwitchProfileTemplate(displayName string, createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestUplinkHostSwitchProfileCreateAttributes
@@ -309,10 +310,10 @@ resource "nsxt_policy_uplink_host_switch_profile" "test" {
 data "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_uplink_host_switch_profile.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["mtu"], attrMap["transport_vlan"], attrMap["overlay_encap"], attrMap["lag_name"], attrMap["lag_load_balance_algorithm"], attrMap["lag_mode"], attrMap["lag_number_of_uplinks"], attrMap["lag_timeout_type"], attrMap["teaming_al_uplink_name"], attrMap["teaming_al_uplink_type"], attrMap["teaming_sl_uplink_name"], attrMap["teaming_sl_uplink_type"], attrMap["teaming_policy"], attrMap["named_teaming_al_uplink_name"], attrMap["named_teaming_al_uplink_type"], attrMap["named_teaming_sl_uplink_name"], attrMap["named_teaming_sl_uplink_type"], attrMap["named_teaming_policy"], attrMap["named_teaming_name"], attrMap["display_name"])
+}`, displayName, attrMap["description"], attrMap["mtu"], attrMap["transport_vlan"], attrMap["overlay_encap"], attrMap["lag_name"], attrMap["lag_load_balance_algorithm"], attrMap["lag_mode"], attrMap["lag_number_of_uplinks"], attrMap["lag_timeout_type"], attrMap["teaming_al_uplink_name"], attrMap["teaming_al_uplink_type"], attrMap["teaming_sl_uplink_name"], attrMap["teaming_sl_uplink_type"], attrMap["teaming_policy"], attrMap["named_teaming_al_uplink_name"], attrMap["named_teaming_al_uplink_type"], attrMap["named_teaming_sl_uplink_name"], attrMap["named_teaming_sl_uplink_type"], attrMap["named_teaming_policy"], attrMap["named_teaming_name"], displayName)
 }
 
-func testAccNsxtUplinkHostSwitchProfileMinimalistic() string {
+func testAccNsxtUplinkHostSwitchProfileMinimalistic(displayName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
@@ -323,5 +324,5 @@ resource "nsxt_policy_uplink_host_switch_profile" "test" {
     }
     policy = "%s"
   }
-}`, accTestUplinkHostSwitchProfileUpdateAttributes["display_name"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_name"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_type"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_policy"])
+}`, displayName, accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_name"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_type"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_policy"])
 }
