@@ -5,8 +5,6 @@
 package nsxt
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -31,5 +29,5 @@ func dataSourceNsxtPolicyShareRead(d *schema.ResourceData, m interface{}) error 
 		return nil
 	}
 
-	return fmt.Errorf("Share with name '%s' was not found", d.Get("display_name").(string))
+	return err
 }
