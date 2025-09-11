@@ -1,4 +1,4 @@
-module mocks
+module github.com/vmware/terraform-provider-nsxt/mocks
 
 go 1.24.2
 
