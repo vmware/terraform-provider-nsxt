@@ -16,10 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-// TODO - include display name in metadata
-var createDisplayName = getAccTestResourceName()
-var updateDisplayName = getAccTestResourceName()
-
 func TestAccResourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, false, func() {
 		testAccPreCheck(t)
@@ -35,11 +31,7 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 	})
 }
 
-func getMacDiscoveryProfileTestCheckFunc(testResourceName string, create bool) []resource.TestCheckFunc {
-	displayName := createDisplayName
-	if !create {
-		displayName = updateDisplayName
-	}
+func getMacDiscoveryProfileTestCheckFunc(testResourceName, displayName string, create bool) []resource.TestCheckFunc {
 	result := []resource.TestCheckFunc{testAccNsxtPolicyMacDiscoveryProfileExists(displayName, testResourceName),
 		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 		resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -93,6 +85,8 @@ func getMacDiscoveryProfileTestConfigAttributes(create bool) string {
 
 func testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_mac_discovery_profile.test"
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -102,15 +96,15 @@ func testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t *testing.T, withContext
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(true, withContext),
-				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, true)...),
+				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(createDisplayName, true, withContext),
+				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, createDisplayName, true)...),
 			},
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(false, withContext),
-				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, false)...),
+				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(updateDisplayName, false, withContext),
+				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, updateDisplayName, false)...),
 			},
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext),
+				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(updateDisplayName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyMacDiscoveryProfileExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -136,7 +130,7 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(false),
+				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(getAccTestResourceName(), false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -159,7 +153,7 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_importBasic_multitenancy(t *te
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(true),
+				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(getAccTestResourceName(), true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -219,11 +213,7 @@ func testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state *terraform.State, di
 	return nil
 }
 
-func testAccNsxtPolicyMacDiscoveryProfileTemplate(createFlow, withContext bool) string {
-	displayName := createDisplayName
-	if !createFlow {
-		displayName = updateDisplayName
-	}
+func testAccNsxtPolicyMacDiscoveryProfileTemplate(displayName string, createFlow, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -240,7 +230,7 @@ resource "nsxt_policy_mac_discovery_profile" "test" {
 }`, context, displayName, getMacDiscoveryProfileTestConfigAttributes(createFlow))
 }
 
-func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext bool) string {
+func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(displayName string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -249,5 +239,5 @@ func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext bool) string {
 resource "nsxt_policy_mac_discovery_profile" "test" {
 %s
   display_name = "%s"
-}`, context, updateDisplayName)
+}`, context, displayName)
 }

@@ -182,5 +182,5 @@ func testAccNsxtFailureDomainMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_failure_domain" "test" {
   display_name = "%s"
-}`, accTestUplinkHostSwitchProfileUpdateAttributes["display_name"])
+}`, accTestFailureDomainUpdateAttributes["display_name"])
 }
