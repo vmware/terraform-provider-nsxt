@@ -1,3 +1,25 @@
+## 3.10.0 (September 10, 2025)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_edge_transport_node`: Fix schema set errors in policy edge resource ([#1810](https://github.com/vmware/terraform-provider-nsxt/pull/1810))
+* `resource/nsxt_policy_security_policy`: Handle empty service_entries block case in nsxt_policy_security_policy ([#1798](https://github.com/vmware/terraform-provider-nsxt/pull/1798))
+* `resource/nsxt_policy_tier0_gateway_interface`: Add edge_cluster_member_index to T0 gw interface ([#1737](https://github.com/vmware/terraform-provider-nsxt/pull/1737))
+* `resource/nsxt_policy_host_transport_node_collection`: Replace sub_cluster_id in host_transport_node_collection with sub_cluster_path ([#1733](https://github.com/vmware/terraform-provider-nsxt/pull/1733)) 
+* Allowed usage of default project in various resources and data sources.
+* Various documentation fixes.
+
+IMPROVEMENTS:
+
+* Add multicast attribute to segment resources ([#1797](https://github.com/vmware/terraform-provider-nsxt/pull/1797))
+* `data/nsxt_policy_share`:  Add a policy_share datasource ([#1796](https://github.com/vmware/terraform-provider-nsxt/pull/1796))
+* `data/nsxt_policy_edge_transport_node_realization`:Implement policy edge transport node realization datasource ([#1675](https://github.com/vmware/terraform-provider-nsxt/pull/1675))
+* `resource/nsxt_policy_ipsec_vpn_local_endpoint`, `resource/nsxt_policy_ipsec_vpn_session`: Support for IPv6 addresses in VPN sessions and local endpoints ([#1681](https://github.com/vmware/terraform-provider-nsxt/pull/1681))
+* `resource/nsxt_policy_host_transport_node_collection`: Support Activate NSX on DVPG toggle in TNC ([#1717](https://github.com/vmware/terraform-provider-nsxt/pull/1717))
+* `data/nsxt_policy_gateway_interface`: Data sources for T0 & T1 gateway interfaces ([#1614](https://github.com/vmware/terraform-provider-nsxt/pull/1614))
+* `resource/nsxt_policy_tier0_gateway`: New Tier0 flags and allow inter_sr for VRF ([#1654](https://github.com/vmware/terraform-provider-nsxt/pull/1654))
+* `resource/nsxt_policy_bgp_config`: Issue Support import for BGP config ([#1826](https://github.com/vmware/terraform-provider-nsxt/pull/1826))
+
 ## 3.9.0 (June 20, 2025)
 
 NSX Virtual Private Networking (VPC) support

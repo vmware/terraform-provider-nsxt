@@ -8,7 +8,7 @@ description: VPC Subnet Port data source.
 
 This data source provides information about Subnet Port configured under VPC on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

@@ -8,7 +8,7 @@ description: A resource to configure a VpcSubnet.
 
 This resource provides a method for the management of a Vpc Subnet.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
@@ -81,6 +81,7 @@ The following arguments are supported:
             * `value` - (Required) value for vendor-specific configuration
     * `enable_vlan_extension` - (Optional) Enabling VLAN connection for the subnet. The user must configure the exclusive IP block for this subnet. This IP block must be leveraged by a distributed VLAN connection. The default value for this will be false. This attribute is supported with NSX 9.1.0 onwards.
 * `dhcp_config` - (Optional) DHCP configuration block
+    * `dns_server_preference` - (Optional) DNS server IP preference. Select the preference between the DNS server IPs (from the DHCP config in VPC service profile), and VPC DNS forwarder IP. The preferred DNS server IP config will be attempted first when the system selects the DNS server to forward DNS requests. This can be one of `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER`, `DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS`. The default value is `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER`.
     * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`.
        Default is `DHCP_DEACTIVATED`
     * `dhcp_server_additional_config` - (Optional) Additional DHCP server config

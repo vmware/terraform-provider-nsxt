@@ -170,7 +170,11 @@ func testAccNsxtPolicyGWPrefixListCheckDestroy(state *terraform.State, displayNa
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		gwPath := rs.Primary.Attributes["gateway_path"]
+		gwPath, ok := rs.Primary.Attributes["gateway_path"]
+		if !ok {
+			// This is the datasource which has no gateway_path attribute
+			continue
+		}
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
 		var err error

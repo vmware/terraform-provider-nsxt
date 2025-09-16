@@ -4,11 +4,11 @@ page_title: "NSXT: policy_network_span"
 description: A policy Network Span data source.
 ---
 
-# nsxt_policy_edge_cluster
+# nsxt_policy_network_span
 
 This data source provides information about policy network span configured on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.1.0 onwards.
 
 ## Example Usage
 
