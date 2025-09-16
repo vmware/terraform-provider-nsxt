@@ -84,7 +84,7 @@ func resourceNsxtPolicyGatewayPolicyRuleExists(sessionContext utl.SessionContext
 		return false, nil
 	}
 
-	return false, logAPIError("Error retrieving Security Policy Rule", err)
+	return false, logAPIError("Error retrieving Gateway Policy Rule", err)
 }
 
 func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface{}) error {
