@@ -355,6 +355,13 @@ resource "nsxt_policy_gateway_connection" "test" {
   aggregate_routes = ["192.168.240.0/24"]
 }
 
+resource "nsxt_policy_ip_block" "extblk" {
+  display_name = "ipsec-testing-extblk"
+  cidr         = "10.110.0.0/22"
+  visibility   = "EXTERNAL"
+}
+
+
 resource "nsxt_policy_project" "test" {
   display_name             = "%s"
   tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
@@ -362,7 +369,17 @@ resource "nsxt_policy_project" "test" {
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
   }
+ external_ipv4_blocks = [nsxt_policy_ip_block.extblk.path] 
 }
+
+resource "nsxt_policy_project_ip_address_allocation" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = "ipsec_ipaddr_allocation"
+  ip_block     = nsxt_policy_project.test.external_ipv4_blocks[0]
+}
+
 
 data "nsxt_policy_transit_gateway" "test" {
   context {
@@ -397,8 +414,8 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   display_name  = "%s"
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   description   = "IPSec VPN Local Endpoint"
-  local_address = "20.20.0.25"
-  local_id      = "20.20.0.25"
+  local_address = "10.110.0.0"
+  local_id      = "10.110.0.0"
 }`, getEdgeClusterName(), SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName)
 }
 
