@@ -18,6 +18,21 @@ data "nsxt_policy_network_span" "netspan" {
 }
 ```
 
+## Example Usage: Fetching Default Network Span Attribute
+
+```hcl
+data "nsxt_policy_network_span" "test" {
+  context {
+    project_id = "default"
+  }
+  is_default = true
+}
+
+output "nsxt_policy_network_span_test" {
+  value = data.nsxt_policy_network_span.test.display_name
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of the network span to retrieve.
@@ -29,3 +44,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `is_default` - Specifies if the Network Span is set as the default.
