@@ -462,4 +462,3 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 
 	return nil
 }
-
