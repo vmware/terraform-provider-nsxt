@@ -52,7 +52,7 @@ func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) 
 	if len(errors) > 0 {
 		return errors[0]
 	}
-	vpcSvcProfile := dataValue.(model.VpcSecurityProfile)
+	vpcSvcProfile := dataValue.(model.VpcServiceProfile)
 	d.Set("is_default", vpcSvcProfile.IsDefault)
 	return nil
 }
