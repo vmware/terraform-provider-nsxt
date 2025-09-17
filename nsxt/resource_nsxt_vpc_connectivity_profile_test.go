@@ -28,7 +28,7 @@ var accTestVpcConnectivityProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_connectivity_profile.test"
-	testDataSourceName := "nsxt_vpc_connectivity_profile.test"
+	testDataSourceName := "data.nsxt_vpc_connectivity_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
