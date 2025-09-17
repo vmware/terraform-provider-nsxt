@@ -18,12 +18,13 @@ import (
 
 var spoofGuardProfilePathExample = getMultitenancyPathExample("/infra/spoofguard-profiles/[profile]")
 
-func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
+func resourceNsxtPolicySpoofGuardProfile(deprecationMessage string) *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicySpoofGuardProfileCreate,
-		Read:   resourceNsxtPolicySpoofGuardProfileRead,
-		Update: resourceNsxtPolicySpoofGuardProfileUpdate,
-		Delete: resourceNsxtPolicySpoofGuardProfileDelete,
+		Create:             resourceNsxtPolicySpoofGuardProfileCreate,
+		Read:               resourceNsxtPolicySpoofGuardProfileRead,
+		Update:             resourceNsxtPolicySpoofGuardProfileUpdate,
+		Delete:             resourceNsxtPolicySpoofGuardProfileDelete,
+		DeprecationMessage: deprecationMessage,
 		Importer: &schema.ResourceImporter{
 			State: getPolicyPathOrIDResourceImporter(spoofGuardProfilePathExample),
 		},

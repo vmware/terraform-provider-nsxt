@@ -38,7 +38,7 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_multitenancy(t *testing.T) {
 }
 
 func testAccResourceNsxtPolicySpoofGuardProfileBasic(t *testing.T, withContext bool, preCheck func()) {
-	testResourceName := "nsxt_policy_spoof_guard_profile.test"
+	testResourceName := "nsxt_policy_spoofguard_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -92,7 +92,7 @@ func testAccResourceNsxtPolicySpoofGuardProfileBasic(t *testing.T, withContext b
 
 func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_spoof_guard_profile.test"
+	testResourceName := "nsxt_policy_spoofguard_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -115,7 +115,7 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic(t *testing.T) {
 
 func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic_multitenancy(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_spoof_guard_profile.test"
+	testResourceName := "nsxt_policy_spoofguard_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
@@ -168,7 +168,7 @@ func testAccNsxtPolicySpoofGuardProfileCheckDestroy(state *terraform.State, disp
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_policy_spoof_guard_profile" {
+		if rs.Type != "nsxt_policy_spoofguard_profile" {
 			continue
 		}
 
@@ -197,7 +197,7 @@ func testAccNsxtPolicySpoofGuardProfileTemplate(createFlow, withContext bool) st
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_spoof_guard_profile" "test" {
+resource "nsxt_policy_spoofguard_profile" "test" {
 %s
   display_name = "%s"
   description  = "%s"
@@ -217,7 +217,7 @@ func testAccNsxtPolicySpoofGuardProfileMinimalistic(withContext bool) string {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_spoof_guard_profile" "test" {
+resource "nsxt_policy_spoofguard_profile" "test" {
 %s
   display_name = "%s"
 
