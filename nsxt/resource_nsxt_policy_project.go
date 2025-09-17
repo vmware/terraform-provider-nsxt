@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	infra2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
@@ -114,7 +115,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
 				ValidateFunc: validatePolicyPath(),
 				Optional:     true,
-				Default:      "/infra/network-spans/default",
 			},
 			"non_default_span_paths": {
 				Type:        schema.TypeList,
@@ -212,8 +212,17 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		// There should be just one object here
 		var spanReferences []model.SpanReference
-		defaultSpanPath := d.Get("default_span_path").(string)
-
+		defaultSpanPathinfce, isDefaultSet := d.GetOkExists("default_span_path")
+		var defaultSpanPath string
+		if !isDefaultSet {
+			var err error
+			defaultSpanPath, err = getDefaultSpan(connector)
+			if err != nil {
+				return err
+			}
+		} else {
+			defaultSpanPath = defaultSpanPathinfce.(string)
+		}
 		// default_span_path will never be empty, since it has a default value and the validator will make sure that
 		// user will not assign an empty string or such.
 		isDefault := true
@@ -252,6 +261,25 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		err = patchVpcSecurityProfile(d, connector, id)
 	}
 	return err
+}
+
+func getDefaultSpan(connector client.Connector) (string, error) {
+	var cursor *string
+	client := infra2.NewNetworkSpansClient(connector)
+	spanList, err := client.List(cursor, nil, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	defaultSpanPath := []string{}
+	for _, spanObj := range spanList.Results {
+		if *spanObj.IsDefault {
+			defaultSpanPath = append(defaultSpanPath, *spanObj.Path)
+		}
+	}
+	if len(defaultSpanPath) > 1 {
+		return "", fmt.Errorf("Found more than one span marked as default")
+	}
+	return defaultSpanPath[0], nil
 }
 
 func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector, projectID string) error {
@@ -434,3 +462,4 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 
 	return nil
 }
+
