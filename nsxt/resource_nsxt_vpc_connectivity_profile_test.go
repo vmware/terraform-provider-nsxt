@@ -28,7 +28,7 @@ var accTestVpcConnectivityProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_connectivity_profile.test"
-	testDataSourceName := "nsxt_vpc_connectivity_profile.test"
+	testDataSourceName := "data.nsxt_vpc_connectivity_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,6 +46,7 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 					testAccNsxtVpcConnectivityProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
+					resource.TestCheckResourceAttr(testDataSourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcConnectivityProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "transit_gateway_path"),
@@ -66,6 +67,7 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 					testAccNsxtVpcConnectivityProfileExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
+					resource.TestCheckResourceAttr(testDataSourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcConnectivityProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "transit_gateway_path"),
