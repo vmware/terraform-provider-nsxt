@@ -26,7 +26,7 @@ var accTestPolicyTGWIPSecVpnServicesCreateAttributes = map[string]string{
 }
 
 var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
-	"display_name":  getAccTestResourceName(),
+
 	"description":   "terraform updated",
 	"enabled":       "false",
 	"ha_sync":       "false",
@@ -38,7 +38,8 @@ var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_service.test"
-
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -46,14 +47,14 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state, accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"])
+			return testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state, updateDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(true),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnServicesCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnServicesCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTGWIPSecVpnServicesCreateAttributes["ha_sync"]),
@@ -69,10 +70,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(false),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(false, updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["ha_sync"]),
@@ -88,9 +89,9 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnServicesExists(accTestPolicyTGWIPSecVpnServicesCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTGWIPSecVpnServicesExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -114,7 +115,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -175,7 +176,7 @@ func testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state *terraform.State, di
 	return nil
 }
 
-func testAccNsxtPolicyTGWIPSecVpnServicesTemplate(createFlow bool) string {
+func testAccNsxtPolicyTGWIPSecVpnServicesTemplate(createFlow bool, displayName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnServicesCreateAttributes
@@ -200,16 +201,16 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
 }
 
-func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic() string {
+func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(displayName string) string {
 	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   display_name = "%s"
   parent_path      = data.nsxt_policy_transit_gateway.test.path
 
-}`, accTestPolicyTGWIPSecVpnServicesUpdateAttributes["display_name"])
+}`, displayName)
 }
 
 func testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() string {
@@ -255,6 +256,12 @@ resource "nsxt_policy_gateway_connection" "test" {
   aggregate_routes = ["192.168.240.0/24"]
 }
 
+resource "nsxt_policy_ip_block" "extblk" {
+  display_name = "ipsec-testing-extblk"
+  cidr         = "10.110.0.0/22"
+  visibility   = "EXTERNAL"
+}
+  
 resource "nsxt_policy_project" "test" {
   display_name             = "%s"
   tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
@@ -262,6 +269,7 @@ resource "nsxt_policy_project" "test" {
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
   }
+ external_ipv4_blocks = [nsxt_policy_ip_block.extblk.path] 
 }
 
 data "nsxt_policy_transit_gateway" "test" {

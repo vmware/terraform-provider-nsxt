@@ -14,22 +14,19 @@ import (
 
 var EpRelatedResourceName = getAccTestResourceName()
 var accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes = map[string]string{
-	"display_name":  getAccTestResourceName(),
-	"description":   "terraform created",
-	"local_address": "20.20.0.10",
-	"local_id":      "test-create",
+	"description": "terraform created",
+	"local_id":    "test-create",
 }
 
 var accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes = map[string]string{
-	"display_name":  getAccTestResourceName(),
-	"description":   "terraform updated",
-	"local_address": "20.20.0.20",
-	"local_id":      "test-update",
+	"description": "terraform updated",
+	"local_id":    "test-update",
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test"
-
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -37,16 +34,16 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state, accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["display_name"])
+			return testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state, createDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(true),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "local_address", accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["local_address"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "local_address"),
 					resource.TestCheckResourceAttr(testResourceName, "local_id", accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["local_id"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -56,12 +53,12 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(false),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(false, updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "local_address", accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["local_address"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "local_address"),
 					resource.TestCheckResourceAttr(testResourceName, "local_id", accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["local_id"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -71,9 +68,9 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -97,7 +94,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_importBasic(t *testing.T)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -158,35 +155,36 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state *terraform.Stat
 	return nil
 }
 
-func testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(createFlow bool) string {
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(createFlow bool, displayName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes
 	} else {
 		attrMap = accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes
 	}
-	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() +
+		fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   display_name  = "%s"
   description   = "%s"
-  local_address = "%s"
+  local_address = nsxt_policy_project_ip_address_allocation.test.allocation_ips
   local_id      = "%s"
-    tag {
+  tag {
     scope = "scope1"
     tag   = "tag1"
   }
   depends_on = [nsxt_policy_transit_gateway_ipsec_vpn_service.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
+}`, displayName, attrMap["description"], attrMap["local_id"])
 }
 
-func testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic() string {
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(displayName string) string {
 	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   display_name = "%s"
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
-  local_address = "fd21:3:3::1"
-}`, accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes["display_name"])
+  local_address = nsxt_policy_project_ip_address_allocation.test.allocation_ips
+}`, displayName)
 }
 
 func testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() string {
@@ -232,6 +230,12 @@ resource "nsxt_policy_gateway_connection" "test" {
   aggregate_routes = ["192.168.240.0/24"]
 }
 
+resource "nsxt_policy_ip_block" "extblk" {
+  display_name = "ipsec-testing-extblk"
+  cidr         = "10.110.0.0/22"
+  visibility   = "EXTERNAL"
+}
+
 resource "nsxt_policy_project" "test" {
   display_name             = "%s"
   tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
@@ -239,6 +243,18 @@ resource "nsxt_policy_project" "test" {
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
   }
+ external_ipv4_blocks = [nsxt_policy_ip_block.extblk.path] 
+}
+
+resource "nsxt_policy_project_ip_address_allocation" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  
+  display_name = "ipsec-local-endpoint-ip"
+  description  = "IP allocation for IPSec VPN local endpoint test"
+  ip_block     = nsxt_policy_ip_block.extblk.path
+  allocation_size = 1
 }
 
 data "nsxt_policy_transit_gateway" "test" {

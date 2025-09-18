@@ -15,7 +15,6 @@ import (
 var SessionRelatedResourceName = getAccTestResourceName()
 
 var accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes = map[string]string{
-	"display_name":               getAccTestResourceName(),
 	"description":                "terraform created",
 	"enabled":                    "true",
 	"vpn_type":                   "RouteBased",
@@ -30,7 +29,6 @@ var accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes = map[string]strin
 }
 
 var accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes = map[string]string{
-	"display_name":               getAccTestResourceName(),
 	"description":                "terraform updated",
 	"enabled":                    "false",
 	"vpn_type":                   "RouteBased",
@@ -45,7 +43,6 @@ var accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes = map[string]strin
 }
 
 var accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes = map[string]string{
-	"display_name":               getAccTestResourceName(),
 	"description":                "Terraform-provisioned IPsec Route-Based VPN",
 	"enabled":                    "true",
 	"vpn_type":                   "PolicyBased",
@@ -61,7 +58,6 @@ var accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes = map[string]stri
 }
 
 var accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes = map[string]string{
-	"display_name":               getAccTestResourceName(),
 	"description":                "terraform updated",
 	"enabled":                    "true",
 	"vpn_type":                   "PolicyBased",
@@ -77,20 +73,21 @@ var accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes = map[string]stri
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
-
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["display_name"])
+			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(true),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnSessionExists(accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnSessionExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
@@ -113,10 +110,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(false),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(false, updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnSessionExists(accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnSessionExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
@@ -139,16 +136,16 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnSessionExists(accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnSessionExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
-					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["vpn_type"]),
 					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes["authentication_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", "NONE"),
@@ -170,20 +167,22 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) {
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["display_name"])
+			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(true),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnSessionExists(accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnSessionExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["vpn_type"]),
@@ -205,10 +204,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(false),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(false, updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTGWIPSecVpnSessionExists(accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["display_name"]),
+					testAccNsxtPolicyTGWIPSecVpnSessionExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["vpn_type"]),
@@ -233,7 +232,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 	})
 }
 
-func testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(createFlow bool) string {
+func testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(createFlow bool, displayName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes
@@ -268,12 +267,12 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
+}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
 			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
 }
 
-func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(createFlow bool) string {
+func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(createFlow bool, displayName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes
@@ -281,10 +280,6 @@ func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(createFlow bool) stri
 		attrMap = accTestPolicyTGWIPSecVpnSessionRouteBasedUpdateAttributes
 	}
 	return testAccNsxtPolicyTGWIPSecVpnSessionPreConditionTemplate() +
-		//// Placeholder for configuration paths (API not yet implemented):
-		// 	  ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
-		//   tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
-		//   dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
 		fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   display_name               = "%s"
@@ -308,7 +303,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
+}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["peer_address"], attrMap["peer_id"], attrMap["psk"], attrMap["connection_initiation_mode"])
 }
 
@@ -380,13 +375,13 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
   ip_block     = nsxt_policy_project.test.external_ipv4_blocks[0]
 }
 
-
 data "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = nsxt_policy_project.test.id
   }
   id = "default"
 }
+
 resource "nsxt_policy_transit_gateway_attachment" "test" {
   parent_path     = data.nsxt_policy_transit_gateway.test.path
   connection_path = nsxt_policy_gateway_connection.test.path
@@ -414,7 +409,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   display_name  = "%s"
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   description   = "IPSec VPN Local Endpoint"
-  local_address = "10.110.0.0"
+  local_address = nsxt_policy_project_ip_address_allocation.test.allocation_ips
   local_id      = "10.110.0.0"
 }`, getEdgeClusterName(), SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName)
 }
@@ -431,7 +426,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(),
+				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -492,7 +487,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 	return nil
 }
 
-func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic() string {
+func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(displayName string) string {
 	attrMap := accTestPolicyTGWIPSecVpnSessionRouteBasedCreateAttributes
 	return testAccNsxtPolicyTGWIPSecVpnSessionPreConditionTemplate() +
 		fmt.Sprintf(`
@@ -506,5 +501,5 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   ip_addresses        = ["%s"]
   prefix_length       = "%s"
   psk                 = "%s"
-}`, attrMap["display_name"], attrMap["vpn_type"], attrMap["peer_address"], attrMap["peer_id"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["psk"])
+}`, displayName, attrMap["vpn_type"], attrMap["peer_address"], attrMap["peer_id"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["psk"])
 }
