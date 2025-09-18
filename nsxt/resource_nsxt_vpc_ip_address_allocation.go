@@ -17,6 +17,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcIpAddressAllocationIpAddressTypeValues = []string{
@@ -102,6 +103,17 @@ var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcIpAddressAllocationPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/ip-address-allocations/[allocation]"
 
+// VPC IP Address Allocation importer with version check
+func nsxtVpcIpAddressAllocationImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC IP Address Allocation import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing VPC path importer logic
+	importer := getVpcPathResourceImporter(vpcIpAddressAllocationPathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcIpAddressAllocationCreate,
@@ -109,7 +121,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtVpcIpAddressAllocationUpdate,
 		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcIpAddressAllocationPathExample),
+			State: nsxtVpcIpAddressAllocationImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}
@@ -132,6 +144,9 @@ func resourceNsxtVpcIpAddressAllocationExists(sessionContext utl.SessionContext,
 }
 
 func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Ip Address Allocation resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcIpAddressAllocationExists)
