@@ -839,7 +839,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 	}
 
 	l2Ext := d.Get("l2_extension").([]interface{})
-	if len(l2Ext) > 0 {
+	if len(l2Ext) > 0 && l2Ext[0] != nil {
 		l2ExtMap := l2Ext[0].(map[string]interface{})
 		vpnPaths := interfaceListToStringList(l2ExtMap["l2vpn_paths"].([]interface{}))
 		tunnelID := int64(l2ExtMap["tunnel_id"].(int))
