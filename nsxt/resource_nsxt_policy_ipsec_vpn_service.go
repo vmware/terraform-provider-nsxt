@@ -52,6 +52,7 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 				ForceNew:     true,
 				Deprecated:   "Use gateway_path instead.",
 				ValidateFunc: validatePolicyPath(),
+				AtLeastOneOf: []string{"locale_service_path", "gateway_path"},
 			},
 			"enabled": {
 				Type:        schema.TypeBool,
