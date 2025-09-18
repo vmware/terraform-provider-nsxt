@@ -14,19 +14,20 @@ import (
 )
 
 var accTestFailureDomainCreateAttributes = map[string]string{
-	"display_name":            getAccTestResourceName(),
 	"description":             "terraform created",
 	"preferred_edge_services": "active",
 }
 
 var accTestFailureDomainUpdateAttributes = map[string]string{
-	"display_name":            getAccTestResourceName(),
 	"description":             "terraform created",
 	"preferred_edge_services": "standby",
 }
 
 func TestAccResourceNsxtFailureDomain_basic(t *testing.T) {
 	testResourceName := "nsxt_failure_domain.test"
+
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -35,14 +36,14 @@ func TestAccResourceNsxtFailureDomain_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtFailureDomainCheckDestroy(state, accTestFailureDomainUpdateAttributes["display_name"])
+			return testAccNsxtFailureDomainCheckDestroy(state, updateDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtFailureDomainTemplate(true),
+				Config: testAccNsxtFailureDomainTemplate(createDisplayName, true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtFailureDomainExists(accTestFailureDomainCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestFailureDomainCreateAttributes["display_name"]),
+					testAccNsxtFailureDomainExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestFailureDomainCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "preferred_edge_services", accTestFailureDomainCreateAttributes["preferred_edge_services"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -50,10 +51,10 @@ func TestAccResourceNsxtFailureDomain_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtFailureDomainTemplate(false),
+				Config: testAccNsxtFailureDomainTemplate(updateDisplayName, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtFailureDomainExists(accTestFailureDomainUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestFailureDomainUpdateAttributes["display_name"]),
+					testAccNsxtFailureDomainExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestFailureDomainUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "preferred_edge_services", accTestFailureDomainUpdateAttributes["preferred_edge_services"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -61,9 +62,9 @@ func TestAccResourceNsxtFailureDomain_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtFailureDomainMinimalistic(),
+				Config: testAccNsxtFailureDomainMinimalistic(updateDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtFailureDomainExists(accTestFailureDomainCreateAttributes["display_name"], testResourceName),
+					testAccNsxtFailureDomainExists(updateDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
@@ -75,6 +76,7 @@ func TestAccResourceNsxtFailureDomain_basic(t *testing.T) {
 
 func TestAccResourceNsxtFailureDomain_importBasic(t *testing.T) {
 	testResourceName := "nsxt_failure_domain.test"
+	displayName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -83,11 +85,11 @@ func TestAccResourceNsxtFailureDomain_importBasic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtFailureDomainCheckDestroy(state, accTestFailureDomainUpdateAttributes["display_name"])
+			return testAccNsxtFailureDomainCheckDestroy(state, displayName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtFailureDomainMinimalistic(),
+				Config: testAccNsxtFailureDomainMinimalistic(displayName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -154,7 +156,7 @@ func testAccNsxtFailureDomainCheckDestroy(state *terraform.State, displayName st
 	return nil
 }
 
-func testAccNsxtFailureDomainTemplate(createFlow bool) string {
+func testAccNsxtFailureDomainTemplate(displayName string, createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestFailureDomainCreateAttributes
@@ -175,12 +177,12 @@ resource "nsxt_failure_domain" "test" {
 data "nsxt_failure_domain" "test" {
   display_name = "%s"
   depends_on   = [nsxt_failure_domain.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["preferred_edge_services"], attrMap["display_name"])
+}`, displayName, attrMap["description"], attrMap["preferred_edge_services"], displayName)
 }
 
-func testAccNsxtFailureDomainMinimalistic() string {
+func testAccNsxtFailureDomainMinimalistic(displayName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_failure_domain" "test" {
   display_name = "%s"
-}`, accTestFailureDomainUpdateAttributes["display_name"])
+}`, displayName)
 }
