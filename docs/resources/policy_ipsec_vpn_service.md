@@ -42,8 +42,8 @@ The following arguments are supported:
 * `ha_sync` - (Optional) Enable/Disable IPSec VPN service HA state sync. Default is `true`.
 * `ike_log_level` - (Optional) Set of algorithms to be used for message digest during IKE negotiation. Value is one of `DEBUG`, `INFO`, `WARN`, `ERROR` and `EMERGENCY`. Default is `INFO`.
 * `bypass_rule` - (Optional) Set the bypass rules for this IPSec VPN Service.
-    * `sources` - (Required) List of source subnets. Subnet format is ipv4 CIDR.
-    * `destinations` - (Required) List of destination subnets. Subnet format is ipv4 CIDR.
+    * `sources` - (Required) List of source subnets. Subnet format is ipv4 or IPv6 CIDR.
+    * `destinations` - (Required) List of destination subnets. Subnet format is ipv4 or IPv6 CIDR.
     * `action` - (Required) `PROTECT` or `BYPASS`.
 
 ## Attributes Reference
