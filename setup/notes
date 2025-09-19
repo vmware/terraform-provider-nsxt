@@ -1,0 +1,81 @@
+ipsec service missing attribute
+						resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.logged", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["logged"]),
+						resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.enabled", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["enabled"]),
+						resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sequence_number", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["sequence_number"]),
+						resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.source.0.subnet", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["subnet"]),
+						resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destination.0.subnet", accTestPolicyTransitGatewayIPSecVpnServicesCreateAttributes["subnet"]),
+
+
+local endpoint
+					resource.TestCheckResourceAttr(testResourceName, "scope", accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes["scope"]),
+
+
+
+DUMP
+
+// func testAccNsxtPolicyTGWIPSecVpnSessionResourceShareTemplate() string {
+// 	return fmt.Sprintln(`
+// resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+//   display_name          = "test_ike-profile-01"
+//   description           = "Ike profile for ipsec vpn session"
+//   encryption_algorithms = ["AES_128"]
+//   digest_algorithms     = ["SHA2_256"]
+//   dh_groups             = ["GROUP14"]
+//   ike_version           = "IKE_V2"
+// }
+
+// resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+//   display_name          = "test_tunnel-profile-01"
+//   description           = "Terraform provisioned IPSec VPN Ike Profile"
+//   df_policy             = "COPY"
+//   encryption_algorithms = ["AES_128"]
+//   digest_algorithms     = ["SHA2_256"]
+//   dh_groups             = ["GROUP14"]
+//   sa_life_time          = 7200
+// }
+
+// resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+//   display_name       = "test_dpd-profile-01"
+//   description        = "Terraform provisioned IPSec VPN DPD Profile"
+//   dpd_probe_mode     = "ON_DEMAND"
+//   dpd_probe_interval = 1
+//   enabled            = true
+//   retry_count        = 8
+// }
+
+// resource "nsxt_policy_share" "test" {
+//   display_name = "test_share"
+//   description  = "Terraform provisioned Share"
+//   shared_with  = [nsxt_policy_project.test.path]
+// }
+
+// resource "nsxt_policy_shared_resource" "test_share_tunnel" {
+//   display_name = "test_tunnel_share"
+//   description  = "Terraform provisioned Shared Resource"
+
+//   share_path = nsxt_policy_share.test.path
+//   resource_object {
+//     resource_path = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
+//   }
+// }
+
+// resource "nsxt_policy_shared_resource" "test_share_ike" {
+//   display_name = "test_ike_share"
+//   description  = "Terraform provisioned Shared Resource"
+
+//   share_path = nsxt_policy_share.test.path
+//   resource_object {
+//     resource_path = nsxt_policy_ipsec_vpn_ike_profile.test.path
+//   }
+// }
+
+// resource "nsxt_policy_shared_resource" "test_share_dpd" {
+//   display_name = "test_dpd_share"
+//   description  = "Terraform provisioned Shared Resource"
+
+//   share_path = nsxt_policy_share.test.path
+//   resource_object {
+//     resource_path = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+//   }
+// }`)
+// }
