@@ -71,9 +71,9 @@ The following arguments are supported:
 * `enabled` - (Optional) Boolean. Enable/Disable IPsec VPN session. Default is "true" (session enabled).
 * `dpd_profile_path` - (Optional) Policy path referencing Dead Peer Detection (DPD) profile. Default is set to system default profile.
 * `vpn_type` - (Required) `RouteBased` or `PolicyBased`. Policy Based VPN requires to define protect rules that match local and peer subnets.
-IPSec security association is negotiated for each pair of local and peer subnet. For PolicyBased Session, `rule` must be specified with `sources`, `destination` and `action`. 
-A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. 
-Routes can be configured statically or can be learned through BGP. A route based VPN is a must for establishing redundant VPN session to remote site. 
+IPSec security association is negotiated for each pair of local and peer subnet. For PolicyBased Session, `rule` must be specified with `sources`, `destination` and `action`.
+A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected.
+Routes can be configured statically or can be learned through BGP. A route based VPN is a must for establishing redundant VPN session to remote site.
 For RouteBased VPN session, `ip_addresses` and `prefix_length` must be specified to create the tunnel interface and its subnet.
 * `compliance_suite` -  (Optional) Compliance suite. Value is one of `CNSA`, `SUITE_B_GCM_128`, `SUITE_B_GCM_256`, `PRIME`, `FOUNDATION`, `FIPS`, `None`.
 * `compliance_initiation_mode` - (Optional) Connection initiation mode used by local endpoint to establish ike connection with peer site.
