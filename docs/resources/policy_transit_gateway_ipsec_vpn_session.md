@@ -70,9 +70,11 @@ The following arguments are supported:
 * `tunnel_profile_path` - (Optional) Policy path referencing Tunnel profile to be used. Note that if user wants to create session with `compliance_suite`, then this field should not be configured, the provider will use the default Profile for each compliance suite type.
 * `enabled` - (Optional) Boolean. Enable/Disable IPsec VPN session. Default is "true" (session enabled).
 * `dpd_profile_path` - (Optional) Policy path referencing Dead Peer Detection (DPD) profile. Default is set to system default profile.
-* `vpn_type` - (Required) `RouteBased` or `PolicyBased`. Policy Based VPN requires to define protect rules that match local and peer subnets. IPSec security association is negotiated for each pair of local and peer subnet. For PolicyBased Session, `rule` must be specified with `sources`, `destination` and `action`. A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. Routes can be configured statically or can be learned through BGP. A route based VPN is a must for establishing redundant VPN session to remote site. For RouteBased VPN session, `ip_addresses` and `prefix_length` must be specified to create the tunnel interface and its subnet.
+* `vpn_type` - (Required) `RouteBased` or `PolicyBased`. Policy Based VPN requires to define protect rules that match local and peer subnets.
+IPSec security association is negotiated for each pair of local and peer subnet. For PolicyBased Session, `rule` must be specified with `sources`, `destination` and `action`. A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. Routes can be configured statically or can be learned through BGP. A route based VPN is a must for establishing redundant VPN session to remote site. For RouteBased VPN session, `ip_addresses` and `prefix_length` must be specified to create the tunnel interface and its subnet.
 * `compliance_suite` -  (Optional) Compliance suite. Value is one of `CNSA`, `SUITE_B_GCM_128`, `SUITE_B_GCM_256`, `PRIME`, `FOUNDATION`, `FIPS`, `None`.
-* `compliance_initiation_mode` - (Optional) Connection initiation mode used by local endpoint to establish ike connection with peer site. `INITIATOR` - In this mode local endpoint initiates tunnel setup and will also respond to incoming tunnel setup requests from peer gateway. `RESPOND_ONLY` - In this mode, local endpoint shall only respond to incoming tunnel setup requests. It shall not initiate the tunnel setup. `ON_DEMAND` - In this mode local endpoint will initiate tunnel creation once first packet matching the policy rule is received and will also respond to incoming initiation request.
+* `compliance_initiation_mode` - (Optional) Connection initiation mode used by local endpoint to establish ike connection with peer site.
+`INITIATOR` - In this mode local endpoint initiates tunnel setup and will also respond to incoming tunnel setup requests from peer gateway. `RESPOND_ONLY` - In this mode, local endpoint shall only respond to incoming tunnel setup requests. It shall not initiate the tunnel setup. `ON_DEMAND` - In this mode local endpoint will initiate tunnel creation once first packet matching the policy rule is received and will also respond to incoming initiation request.
 * `authentication_mode` - (Optional) Peer authentication mode. `PSK` - In this mode a secret key shared between local and peer sites is to be used for authentication. The secret key can be a string with a maximum length of 128 characters. `CERTIFICATE` - In this mode a certificate defined at the global level is to be used for authentication. If user wants to configure compliance_suite, then the authentication_mode can only be `CERTIFICATE`.
 * `ip_addresses` - (Optional) IP Tunnel interface (commonly referred as VTI) ip_addresses. Only applied for Route Based VPN Session.
 * `prefix_length` - (Optional) Subnet Prefix Length. Only applied for Route Based VPN Session.
@@ -94,14 +96,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule` additional arguments:
-  * `nsx_id` - The NSX ID of the bypass rule for this Tranist Gateway IPSec VPN Session.
+    * `nsx_id` - The NSX ID of the bypass rule for this Tranist Gateway IPSec VPN Session.
+
 ## Importing
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: https://www.terraform.io/cli/import
 
-```
+``` shell
 terraform import nsxt_policy_transit_gateway_ipsec_vpn_session.test PATH
 ```
 

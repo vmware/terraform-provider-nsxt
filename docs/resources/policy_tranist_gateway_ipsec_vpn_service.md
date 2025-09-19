@@ -59,7 +59,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 
 [docs-import]: https://www.terraform.io/cli/import
 
-```
+```shell
 terraform import nsxt_policy_transit_gateway_ipsec_vpn_service.test PATH
 ```
 

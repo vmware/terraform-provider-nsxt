@@ -52,7 +52,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 
 [docs-import]: https://www.terraform.io/cli/import
 
-```
+```shell
 terraform import nsxt_policy_tranist_gateway_ipsec_vpn_local_endpoint.test PATH
 ```
 
