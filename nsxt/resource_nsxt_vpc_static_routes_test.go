@@ -31,7 +31,7 @@ var accTestStaticRoutesUpdateAttributes = map[string]string{
 func TestAccResourceNsxtVpcStaticRoutes_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_static_route.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
@@ -94,7 +94,7 @@ func TestAccResourceNsxtVpcStaticRoutes_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_static_route.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
