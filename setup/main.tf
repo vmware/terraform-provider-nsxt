@@ -75,17 +75,12 @@ resource "nsxt_policy_tier0_gateway" "main_tier0" {
   display_name             = "pepsi-tgw-enabled"
   description              = "Enterprise Tier-0 gateway providing external connectivity and transit gateway integration for multi-tenant VPC environments"
   ha_mode                  = "ACTIVE_STANDBY"
-  failover_mode            = "PREEMPTIVE"
+  failover_mode            = "NON_PREEMPTIVE"
   enable_firewall          = true
   edge_cluster_path        = data.nsxt_policy_edge_cluster.main_edge_cluster.path
   
   # Required for TGW attachments in NSX 9.1.0+
   tgw_transit_subnets      = ["169.254.0.0/28"]
-  
-  tag {
-    scope = "terraform"
-    tag   = "managed"
-  }
 }
 
 # Keep the data source as backup reference
@@ -99,11 +94,6 @@ resource "nsxt_policy_ip_block" "dev_external_block" {
   description  = "Public IP address pool for development environment external services and NAT translations"
   cidr         = "203.0.114.0/24"
   visibility   = "EXTERNAL"
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
 }
 
 resource "nsxt_policy_ip_block" "dev_private_block" {
@@ -115,11 +105,6 @@ resource "nsxt_policy_ip_block" "dev_private_block" {
   description  = "Internal IP address space for development VPCs and private subnet allocations"
   cidrs        = ["10.0.0.0/12", "10.16.0.0/12"]
   visibility   = "PRIVATE"
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
 }
 
 # IP Blocks for different visibility types - Prod Project
@@ -128,11 +113,6 @@ resource "nsxt_policy_ip_block" "prod_external_block" {
   description  = "Public IP address pool for production environment external services and customer-facing applications"
   cidr         = "203.0.113.0/24"
   visibility   = "EXTERNAL"
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
 
 resource "nsxt_policy_ip_block" "prod_private_block" {
@@ -144,24 +124,8 @@ resource "nsxt_policy_ip_block" "prod_private_block" {
   description  = "Internal IP address space for production VPCs ensuring isolation from development networks"
   cidrs        = ["10.32.0.0/12", "10.48.0.0/12"]
   visibility   = "PRIVATE"
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
 
-resource "nsxt_policy_ip_block" "vlan_extension_block" {
-  display_name = "vlan-extension-block"
-  description  = "Dedicated IP range for legacy system integration and VLAN-backed network extensions"
-  cidr         = "192.168.100.0/24"
-  visibility   = "EXTERNAL"
-  is_subnet_exclusive = true
-  tag {
-    scope = "purpose"
-    tag   = "vlan-extension"
-  }
-}
 
 # IP Block Quotas for different projects
 resource "nsxt_policy_ip_block_quota" "dev_quota" {
@@ -205,16 +169,6 @@ resource "nsxt_policy_project" "dev_project" {
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
   }
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "project"
-    tag   = "dev"
-  }
 }
 
 resource "nsxt_policy_project" "prod_project" {
@@ -226,16 +180,6 @@ resource "nsxt_policy_project" "prod_project" {
 
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
-  }
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "project"
-    tag   = "prod"
   }
 }
 
@@ -258,16 +202,6 @@ resource "nsxt_policy_project_ip_address_allocation" "dev_nat_ip" {
   description  = "IP allocation for development NAT rules"
   ip_block     = data.nsxt_policy_project.dev_project.external_ipv4_blocks[0]
   allocation_size = 1
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "purpose"
-    tag   = "nat"
-  }
 }
 
 resource "nsxt_policy_project_ip_address_allocation" "dev_web_dnat_ip" {
@@ -279,16 +213,6 @@ resource "nsxt_policy_project_ip_address_allocation" "dev_web_dnat_ip" {
   description  = "IP allocation for development web DNAT rule"
   ip_block     = data.nsxt_policy_project.dev_project.external_ipv4_blocks[0]
   allocation_size = 1
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "purpose"
-    tag   = "dnat"
-  }
 }
 
 resource "nsxt_policy_project_ip_address_allocation" "prod_nat_ip" {
@@ -300,16 +224,6 @@ resource "nsxt_policy_project_ip_address_allocation" "prod_nat_ip" {
   description  = "IP allocation for production NAT rules"
   ip_block     = data.nsxt_policy_project.prod_project.external_ipv4_blocks[0]
   allocation_size = 1
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "purpose"
-    tag   = "nat"
-  }
 }
 
 resource "nsxt_policy_project_ip_address_allocation" "prod_web_dnat_ip" {
@@ -321,16 +235,6 @@ resource "nsxt_policy_project_ip_address_allocation" "prod_web_dnat_ip" {
   description  = "IP allocation for production web DNAT rule"
   ip_block     = data.nsxt_policy_project.prod_project.external_ipv4_blocks[0]
   allocation_size = 1
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "purpose"
-    tag   = "dnat"
-  }
 }
 
 
@@ -348,16 +252,6 @@ resource "nsxt_policy_transit_gateway_nat_rule" "dev_snat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.dev_tgw_attachment.path]
   logging            = true
   enabled            = true
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "rule_type"
-    tag   = "snat"
-  }
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "dev_web_dnat_rule" {
@@ -373,16 +267,6 @@ resource "nsxt_policy_transit_gateway_nat_rule" "dev_web_dnat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.dev_tgw_attachment.path]
   logging            = true
   enabled            = true
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "rule_type"
-    tag   = "dnat"
-  }
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "prod_snat_rule" {
@@ -397,16 +281,6 @@ resource "nsxt_policy_transit_gateway_nat_rule" "prod_snat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.prod_tgw_attachment.path]
   logging            = true
   enabled            = true
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "rule_type"
-    tag   = "snat"
-  }
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "prod_web_dnat_rule" {
@@ -421,16 +295,6 @@ resource "nsxt_policy_transit_gateway_nat_rule" "prod_web_dnat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.prod_tgw_attachment.path]
   logging            = true
   enabled            = true
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "rule_type"
-    tag   = "dnat"
-  }
 }
 
 # Transit Gateways for each project
@@ -446,16 +310,6 @@ resource "nsxt_policy_transit_gateway" "dev_tgw" {
     ha_mode            = "ACTIVE_STANDBY"
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
   }
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
-
-  tag {
-    scope = "component"
-    tag   = "transit-gateway"
-  }
 }
 
 resource "nsxt_policy_transit_gateway" "prod_tgw" {
@@ -470,16 +324,6 @@ resource "nsxt_policy_transit_gateway" "prod_tgw" {
     ha_mode            = "ACTIVE_STANDBY"
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
   }
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
-
-  tag {
-    scope = "component"
-    tag   = "transit-gateway"
-  }
 }
 
 # Gateway Connections - moved to project context for proper scoping
@@ -489,10 +333,6 @@ resource "nsxt_policy_gateway_connection" "dev_gw_connection" {
   tier0_path   = nsxt_policy_tier0_gateway.main_tier0.path
   advertise_outbound_networks {
     allow_external_blocks = [nsxt_policy_ip_block.dev_external_block.path]
-  }
-  tag {
-    scope = "environment"
-    tag   = "development"
   }
   depends_on = [ nsxt_policy_ip_block.dev_external_block,nsxt_policy_tier0_gateway.main_tier0]
 }
@@ -504,10 +344,6 @@ resource "nsxt_policy_gateway_connection" "prod_gw_connection" {
 advertise_outbound_networks {
     allow_external_blocks = [nsxt_policy_ip_block.prod_external_block.path]
   }
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
 
 # Transit Gateway Attachments
@@ -516,11 +352,6 @@ resource "nsxt_policy_transit_gateway_attachment" "dev_tgw_attachment" {
   description     = "Transit gateway attachment for development"
   parent_path     = nsxt_policy_transit_gateway.dev_tgw.path
   connection_path = nsxt_policy_gateway_connection.dev_gw_connection.path
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "prod_tgw_attachment" {
@@ -528,16 +359,7 @@ resource "nsxt_policy_transit_gateway_attachment" "prod_tgw_attachment" {
   description     = "Transit gateway attachment for production"
   parent_path     = nsxt_policy_transit_gateway.prod_tgw.path
   connection_path = nsxt_policy_gateway_connection.prod_gw_connection.path
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
-
-# Removed distributed VLAN connection due to IP block conflict error 640504
-# The IP block is being used by VPC subnets and exclusive subnet configuration 
-# requires an IP block that is not used by any other resources
 
 # VPC Service Profiles for different environments
 resource "nsxt_vpc_service_profile" "dev_service_profile" {
@@ -561,11 +383,6 @@ resource "nsxt_vpc_service_profile" "dev_service_profile" {
         is_distributed_dhcp = true
       }
     }
-  }
-
-  tag {
-    scope = "environment"
-    tag   = "development"
   }
 }
 
@@ -591,11 +408,6 @@ resource "nsxt_vpc_service_profile" "prod_service_profile" {
       }
     }
   }
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
 
 # VPC Connectivity Profiles
@@ -616,11 +428,6 @@ resource "nsxt_vpc_connectivity_profile" "dev_connectivity_profile" {
       enable_default_snat = true
     }
   }
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
 }
 
 resource "nsxt_vpc_connectivity_profile" "prod_connectivity_profile" {
@@ -640,14 +447,7 @@ resource "nsxt_vpc_connectivity_profile" "prod_connectivity_profile" {
       enable_default_snat = true
     }
   }
-
-  tag {
-    scope = "environment"
-    tag   = "production"
-  }
 }
-#resource "nsxt_policy_connectivity_policy" "test"
-# IP blocks removed - VPC uses direct private_ips allocation
 
 # VPCs for different applications
 resource "nsxt_vpc" "dev_web_vpc" {
@@ -663,11 +463,6 @@ resource "nsxt_vpc" "dev_web_vpc" {
 
   load_balancer_vpc_endpoint {
     enabled = false
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 
   depends_on = [
@@ -704,11 +499,6 @@ resource "nsxt_vpc" "dev_db_vpc" {
 
   load_balancer_vpc_endpoint {
     enabled = false
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "database"
   }
 
   depends_on = [
@@ -788,11 +578,6 @@ resource "nsxt_vpc_nat_rule" "outbound_snat" {
   logging             = true
   enabled             = true
   sequence_number     = 100
-  
-  tag {
-    scope = "direction"
-    tag   = "outbound"
-  }
 }
 
 # Note: VPC External Address resources removed due to provider limitations
@@ -865,11 +650,6 @@ resource "nsxt_vpc" "prod_web_vpc" {
     enabled = false
   }
 
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
-
   depends_on = [
     nsxt_policy_project.prod_project,
     nsxt_vpc_service_profile.prod_service_profile,
@@ -892,18 +672,12 @@ resource "nsxt_vpc" "prod_db_vpc" {
     enabled = false
   }
 
-  tag {
-    scope = "tier"
-    tag   = "database"
-  }
-
   depends_on = [
     nsxt_policy_project.prod_project,
     nsxt_vpc_service_profile.prod_service_profile,
     nsxt_policy_transit_gateway.prod_tgw
   ]
 }
-
 
 resource "nsxt_vpc_attachment" "prod_db" {
   display_name             = "prodDBAttachment"
@@ -943,108 +717,6 @@ resource "nsxt_policy_connectivity_policy" "prodapps" {
   connectivity_scope = "COMMUNITY"
 }
 
-
-# Additional IP Block with IPv6 support
-resource "nsxt_policy_ip_block" "ipv6_block" {
-  display_name = "ipv6-block"
-  description  = "IPv6 IP block for dual-stack support"
-  cidr         = "2001:db8::/64"
-  visibility   = "PRIVATE"
-
-  tag {
-    scope = "ip_version"
-    tag   = "ipv6"
-  }
-}
-
-# IPv6 IP Block Quota
-resource "nsxt_policy_ip_block_quota" "ipv6_quota" {
-  display_name = "ipv6-quota"
-  description  = "IPv6 quota for projects"
-
-  quota {
-    ip_block_paths        = [nsxt_policy_ip_block.ipv6_block.path]
-    ip_block_visibility   = "PRIVATE"
-    ip_block_address_type = "IPV6"
-    single_ip_cidrs       = -1
-    other_cidrs {
-      mask        = "/64"
-      total_count = 10
-    }
-  }
-}
-
-# Additional VPC configurations demonstrating different attribute combinations
-resource "nsxt_vpc" "dev_dmz_vpc" {
-  context {
-    project_id = nsxt_policy_project.dev_project.id
-  }
-
-  display_name    = "dev-dmz-vpc"
-  description     = "Development DMZ VPC for external services"
-  #private_ips     = ["10.50.0.0/16"]
-  short_id        = "dev-dmz"
-  ip_address_type = "IPV4"
-  
-
-  load_balancer_vpc_endpoint {
-    enabled = false
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "dmz"
-  }
-}
-
-# VPC with dual-stack IPv4/IPv6 configuration
-resource "nsxt_vpc" "prod_dual_stack_vpc" {
-  context {
-    project_id = nsxt_policy_project.prod_project.id
-  }
-
-  display_name    = "prod-dual-stack-vpc"
-  description     = "Production VPC with IPv4/IPv6 dual-stack"
-  #private_ips     = ["10.60.0.0/16"]
-  short_id        = "prod-ds"
-  ip_address_type = "IPV4"
-
-  load_balancer_vpc_endpoint {
-    enabled = false
-  }
-
-  tag {
-    scope = "ip_version"
-    tag   = "dual-stack"
-  }
-}
-
-# Additional VPC Connectivity Profile with different edge cluster configuration
-resource "nsxt_vpc_connectivity_profile" "dmz_connectivity_profile" {
-  context {
-    project_id = nsxt_policy_project.dev_project.id
-  }
-
-  display_name         = "dmz-connectivity-profile"
-  description          = "Connectivity profile for DMZ VPC with custom edge cluster"
-  transit_gateway_path = nsxt_policy_transit_gateway.dev_tgw.path
-
-  service_gateway {
-    enable             = true
-    edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
-    nat_config {
-      enable_default_snat = false
-    }
-    # }
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "dmz"
-  }
-}
-
-# VPC Subnets with different access mode
 resource "nsxt_vpc_subnet" "dev_web_private_subnet" {
   context {
     project_id = nsxt_policy_project.dev_project.id
@@ -1070,11 +742,6 @@ resource "nsxt_vpc_subnet" "dev_web_private_subnet" {
     }
   }
 
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
-
   depends_on = [nsxt_vpc.dev_web_vpc]
 }
 
@@ -1094,7 +761,7 @@ resource "nsxt_vpc_subnet" "dev_web_public_subnet" {
     }
   depends_on = [
     nsxt_vpc.dev_web_vpc,
-    nsxt_vpc_attachment.dev  # This is crucial for Public subnets
+    nsxt_vpc_attachment.dev  
   ]
 }
 
@@ -1127,11 +794,6 @@ resource "nsxt_vpc_subnet" "dev_db_isolated_subnet" {
     }
   }
 
-  tag {
-    scope = "tier"
-    tag   = "database"
-  }
-
   depends_on = [nsxt_vpc.dev_db_vpc]
 }
 
@@ -1144,16 +806,11 @@ resource "nsxt_vpc_subnet" "prod_web_private_subnet" {
 
   display_name     = "prod-web-private-subnet"
   description      = "Private subnet for production web tier"
-  ipv4_subnet_size = 128
+  ipv4_subnet_size = 32
   access_mode      = "Private"
 
   dhcp_config {
     mode = "DHCP_DEACTIVATED"
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 
   depends_on = [nsxt_vpc.prod_web_vpc]
@@ -1166,17 +823,12 @@ resource "nsxt_vpc_subnet" "prod_web_public_subnet" {
   }
 
   display_name     = "prod-web-private-subnet-2"
-  description      = "Private subnet for production web tier"
+  description      = "Public subnet for production web tier"
   ipv4_subnet_size = 64
   access_mode      = "Public"
 
   dhcp_config {
     mode = "DHCP_DEACTIVATED"
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 
   depends_on = [nsxt_vpc.prod_web_vpc, nsxt_vpc_attachment.prod_web]
@@ -1200,11 +852,6 @@ resource "nsxt_vpc_group" "dev_web_servers" {
       value       = "dev-web"
     }
   }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
 }
 
 resource "nsxt_vpc_group" "dev_db_servers" {
@@ -1223,11 +870,6 @@ resource "nsxt_vpc_group" "dev_db_servers" {
       operator    = "STARTSWITH"
       value       = "dev-db"
     }
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "database"
   }
 }
 
@@ -1248,11 +890,6 @@ resource "nsxt_vpc_group" "prod_web_servers" {
       value       = "prod-web"
     }
   }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
 }
 
 resource "nsxt_vpc_group" "prod_db_servers" {
@@ -1271,11 +908,6 @@ resource "nsxt_vpc_group" "prod_db_servers" {
       operator    = "STARTSWITH"
       value       = "prod-db"
     }
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "database"
   }
 }
 
@@ -1311,11 +943,6 @@ resource "nsxt_vpc_security_policy" "dev_web_security_policy" {
     destination_groups = [nsxt_vpc_group.dev_web_servers.path]
     services           = []
     logged             = true
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 
   lifecycle {
@@ -1356,11 +983,6 @@ resource "nsxt_vpc_security_policy" "dev_db_security_policy" {
     logged             = true
   }
 
-  tag {
-    scope = "tier"
-    tag   = "database"
-  }
-
   lifecycle {
     create_before_destroy = true
   }
@@ -1395,11 +1017,6 @@ resource "nsxt_vpc_gateway_policy" "dev_web_gateway_policy" {
     action       = "ALLOW"
     direction    = "OUT"
     logged       = false
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 
   lifecycle {
@@ -1437,11 +1054,6 @@ resource "nsxt_vpc_gateway_policy" "prod_web_gateway_policy" {
     logged       = true
   }
 
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
-
   lifecycle {
     create_before_destroy = true
   }
@@ -1463,11 +1075,6 @@ resource "nsxt_vpc_static_route" "dev_web_static_route" {
     ip_address = "10.10.1.1"
     admin_distance = 1
   }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
-  }
 }
 
 resource "nsxt_vpc_static_route" "prod_web_static_route" {
@@ -1483,11 +1090,6 @@ resource "nsxt_vpc_static_route" "prod_web_static_route" {
   next_hop {
     ip_address = "10.30.1.1"
     admin_distance = 1
-  }
-
-  tag {
-    scope = "tier"
-    tag   = "web"
   }
 }
 
@@ -1509,11 +1111,6 @@ resource "nsxt_policy_transit_gateway_static_route" "dev_tgw_static_route" {
     scope = [nsxt_policy_transit_gateway_attachment.dev_tgw_attachment.path]
     admin_distance = 1
   }
-
-  tag {
-    scope = "environment"
-    tag   = "development"
-  }
 }
 
 resource "nsxt_policy_transit_gateway_static_route" "prod_tgw_static_route" {
@@ -1524,11 +1121,6 @@ resource "nsxt_policy_transit_gateway_static_route" "prod_tgw_static_route" {
   next_hop {
     scope = [nsxt_policy_transit_gateway_attachment.prod_tgw_attachment.path]
     admin_distance = 1
-  }
-
-  tag {
-    scope = "environment"
-    tag   = "production"
   }
 }
 
