@@ -70,22 +70,23 @@ data "nsxt_policy_edge_cluster" "main_edge_cluster" {
 data "nsxt_policy_edge_cluster" "main_edge_cluster2" {
   display_name = "EDGECLUSTER2"
 }
-# Create a new Tier-0 gateway with TGW transit subnets support
+
+
+# run  terraform import nsxt_policy_tier0_gateway.main_tier0 pepsi 
 resource "nsxt_policy_tier0_gateway" "main_tier0" {
-  display_name             = "pepsi-tgw-enabled"
-  description              = "Enterprise Tier-0 gateway providing external connectivity and transit gateway integration for multi-tenant VPC environments"
+  display_name = "pepsi"
   ha_mode                  = "ACTIVE_STANDBY"
-  failover_mode            = "NON_PREEMPTIVE"
-  enable_firewall          = true
-  edge_cluster_path        = data.nsxt_policy_edge_cluster.main_edge_cluster.path
+  # Required for TGW attachments
+  tgw_transit_subnets      = ["169.254.1.0/28"]
   
-  # Required for TGW attachments in NSX 9.1.0+
-  tgw_transit_subnets      = ["169.254.0.0/28"]
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Keep the data source as backup reference
-data "nsxt_policy_tier0_gateway" "original_tier0" {
-  display_name = "pepsi"
+data "nsxt_policy_tier0_gateway" "main_tier0" {
+  id = "pepsi"
 }
 
 # IP Blocks for different visibility types - Dev Project
@@ -188,7 +189,7 @@ resource "nsxt_policy_distributed_vlan_connection" "legacy_vlan_connection" {
 resource "nsxt_policy_project" "dev_project" {
   display_name = "dev-project"
   description  = "Development project for multi-tenant isolation"
-  tier0_gateway_paths = [nsxt_policy_tier0_gateway.main_tier0.path]
+  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.main_tier0.path]
   external_ipv4_blocks = [nsxt_policy_ip_block.dev_external_block.path]
   tgw_external_connections = [nsxt_policy_gateway_connection.dev_gw_connection.path, nsxt_policy_distributed_vlan_connection.legacy_vlan_connection.path]
 
@@ -200,7 +201,7 @@ resource "nsxt_policy_project" "dev_project" {
 resource "nsxt_policy_project" "prod_project" {
   display_name = "prod-project"
   description  = "Production project for multi-tenant isolation"
-  tier0_gateway_paths = [nsxt_policy_tier0_gateway.main_tier0.path]
+  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.main_tier0.path]
   external_ipv4_blocks = [nsxt_policy_ip_block.prod_external_block.path]
   tgw_external_connections = [nsxt_policy_gateway_connection.prod_gw_connection.path]
 
@@ -266,8 +267,6 @@ resource "nsxt_policy_project_ip_address_allocation" "prod_web_dnat_ip" {
 
 # Transit Gateway NAT Rules
 resource "nsxt_policy_transit_gateway_nat_rule" "dev_snat_rule" {
-
-
   display_name = "dev-snat-rule"
   description  = "SNAT rule for development outbound traffic"
   parent_path  = data.nsxt_policy_transit_gateway_nat.dev_nat.path
@@ -278,11 +277,15 @@ resource "nsxt_policy_transit_gateway_nat_rule" "dev_snat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.dev_tgw_attachment.path]
   logging            = true
   enabled            = true
+
+  depends_on = [
+    nsxt_policy_transit_gateway.dev_tgw,
+    nsxt_policy_transit_gateway_attachment.dev_tgw_attachment,
+    nsxt_policy_project_ip_address_allocation.dev_nat_ip
+  ]
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "dev_web_dnat_rule" {
-
-
   display_name = "dev-web-dnat-rule"
   description  = "DNAT rule for development web services"
   parent_path  = data.nsxt_policy_transit_gateway_nat.dev_nat.path
@@ -293,10 +296,15 @@ resource "nsxt_policy_transit_gateway_nat_rule" "dev_web_dnat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.dev_tgw_attachment.path]
   logging            = true
   enabled            = true
+
+  depends_on = [
+    nsxt_policy_transit_gateway.dev_tgw,
+    nsxt_policy_transit_gateway_attachment.dev_tgw_attachment,
+    nsxt_policy_project_ip_address_allocation.dev_web_dnat_ip
+  ]
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "prod_snat_rule" {
-
   display_name = "prod-snat-rule"
   description  = "SNAT rule for production outbound traffic"
   parent_path  = data.nsxt_policy_transit_gateway_nat.prod_nat.path
@@ -307,10 +315,15 @@ resource "nsxt_policy_transit_gateway_nat_rule" "prod_snat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.prod_tgw_attachment.path]
   logging            = true
   enabled            = true
+
+  depends_on = [
+    nsxt_policy_transit_gateway.prod_tgw,
+    nsxt_policy_transit_gateway_attachment.prod_tgw_attachment,
+    nsxt_policy_project_ip_address_allocation.prod_nat_ip
+  ]
 }
 
 resource "nsxt_policy_transit_gateway_nat_rule" "prod_web_dnat_rule" {
-
   display_name = "prod-web-dnat-rule"
   description  = "DNAT rule for production web services"
   parent_path  = data.nsxt_policy_transit_gateway_nat.prod_nat.path
@@ -321,6 +334,12 @@ resource "nsxt_policy_transit_gateway_nat_rule" "prod_web_dnat_rule" {
   scope              = [nsxt_policy_transit_gateway_attachment.prod_tgw_attachment.path]
   logging            = true
   enabled            = true
+
+  depends_on = [
+    nsxt_policy_transit_gateway.prod_tgw,
+    nsxt_policy_transit_gateway_attachment.prod_tgw_attachment,
+    nsxt_policy_project_ip_address_allocation.prod_web_dnat_ip
+  ]
 }
 
 # Transit Gateways for each project
@@ -356,20 +375,24 @@ resource "nsxt_policy_transit_gateway" "prod_tgw" {
 resource "nsxt_policy_gateway_connection" "dev_gw_connection" {
   display_name = "dev-gateway-connection"
   description  = "Gateway connection for development project"
-  tier0_path   = nsxt_policy_tier0_gateway.main_tier0.path
+  tier0_path   = data.nsxt_policy_tier0_gateway.main_tier0.path
   advertise_outbound_networks {
     allow_external_blocks = [nsxt_policy_ip_block.dev_external_block.path]
   }
-  depends_on = [ nsxt_policy_ip_block.dev_external_block,nsxt_policy_tier0_gateway.main_tier0]
+  depends_on = [ nsxt_policy_ip_block.dev_external_block]#,data.nsxt_policy_tier0_gateway.main_tier0]
 }
 
 resource "nsxt_policy_gateway_connection" "prod_gw_connection" {
   display_name = "prod-gateway-connection"
   description  = "Gateway connection for production project"
-  tier0_path   = nsxt_policy_tier0_gateway.main_tier0.path
-advertise_outbound_networks {
+  tier0_path   = data.nsxt_policy_tier0_gateway.main_tier0.path
+  advertise_outbound_networks {
     allow_external_blocks = [nsxt_policy_ip_block.prod_external_block.path]
   }
+  
+  depends_on = [
+    nsxt_policy_ip_block.prod_external_block,
+  ]
 }
 
 # Transit Gateway Attachments
@@ -378,6 +401,11 @@ resource "nsxt_policy_transit_gateway_attachment" "dev_tgw_attachment" {
   description     = "Transit gateway attachment for development"
   parent_path     = nsxt_policy_transit_gateway.dev_tgw.path
   connection_path = nsxt_policy_gateway_connection.dev_gw_connection.path
+  
+  depends_on = [
+    nsxt_policy_transit_gateway.dev_tgw,
+    nsxt_policy_gateway_connection.dev_gw_connection
+  ]
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "prod_tgw_attachment" {
@@ -385,6 +413,11 @@ resource "nsxt_policy_transit_gateway_attachment" "prod_tgw_attachment" {
   description     = "Transit gateway attachment for production"
   parent_path     = nsxt_policy_transit_gateway.prod_tgw.path
   connection_path = nsxt_policy_gateway_connection.prod_gw_connection.path
+  
+  depends_on = [
+    nsxt_policy_transit_gateway.prod_tgw,
+    nsxt_policy_gateway_connection.prod_gw_connection
+  ]
 }
 
 # VPC Service Profiles for different environments
@@ -517,7 +550,7 @@ resource "nsxt_vpc" "dev_db_vpc" {
     project_id = nsxt_policy_project.dev_project.id
   }
 
-  display_name           = "dev-web-vpc"
+  display_name           = "dev-db-vpc"
   description            = "Development VPC for web applications"
   private_ips           = ["10.1.0.0/16"]
   short_id              = "dev-db"
@@ -535,17 +568,29 @@ resource "nsxt_vpc" "dev_db_vpc" {
 }
 
 resource "nsxt_vpc_attachment" "dev" {
-  display_name             = "App1Attachment"
-  description              = "terraform provisioned dev vpc attachment"
+  display_name             = "devWebAttachment"
+  description              = "terraform provisioned dev web vpc attachment"
   parent_path              = nsxt_vpc.dev_web_vpc.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.dev_connectivity_profile.path
+
+  depends_on = [
+    nsxt_vpc.dev_web_vpc,
+    nsxt_vpc_connectivity_profile.dev_connectivity_profile,
+    nsxt_policy_transit_gateway.dev_tgw
+  ]
 }
 
 resource "nsxt_vpc_attachment" "dev_db" {
   display_name             = "devDBAttachment"
-  description              = "terraform provisioned dev vpc attachment"
+  description              = "terraform provisioned dev db vpc attachment"
   parent_path              = nsxt_vpc.dev_db_vpc.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.dev_connectivity_profile.path
+
+  depends_on = [
+    nsxt_vpc.dev_db_vpc,
+    nsxt_vpc_connectivity_profile.dev_connectivity_profile,
+    nsxt_policy_transit_gateway.dev_tgw
+  ]
 }
 
 resource "nsxt_policy_group" "dev" {
@@ -720,16 +765,28 @@ resource "nsxt_vpc" "prod_db_vpc" {
 
 resource "nsxt_vpc_attachment" "prod_db" {
   display_name             = "prodDBAttachment"
-  description              = "terraform provisioned dev vpc attachment"
+  description              = "terraform provisioned prod db vpc attachment"
   parent_path              = nsxt_vpc.prod_db_vpc.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.prod_connectivity_profile.path
+
+  depends_on = [
+    nsxt_vpc.prod_db_vpc,
+    nsxt_vpc_connectivity_profile.prod_connectivity_profile,
+    nsxt_policy_transit_gateway.prod_tgw
+  ]
 }
 
 resource "nsxt_vpc_attachment" "prod_web" {
-  display_name             = "prodDBAttachment"
-  description              = "terraform provisioned dev vpc attachment"
+  display_name             = "prodWebAttachment"
+  description              = "terraform provisioned prod web vpc attachment"
   parent_path              = nsxt_vpc.prod_web_vpc.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.prod_connectivity_profile.path
+
+  depends_on = [
+    nsxt_vpc.prod_web_vpc,
+    nsxt_vpc_connectivity_profile.prod_connectivity_profile,
+    nsxt_policy_transit_gateway.prod_tgw
+  ]
 }
 
 
