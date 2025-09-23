@@ -543,6 +543,12 @@ resource "nsxt_policy_connectivity_policy" "devapps" {
   group_path = nsxt_policy_group.dev.path
   parent_path = nsxt_policy_transit_gateway.dev_tgw.path
   connectivity_scope = "ISOLATED"
+
+  depends_on = [
+    nsxt_vpc_attachment.dev,
+    nsxt_vpc_attachment.dev_db,
+    nsxt_policy_group.dev
+  ]
 }
 
 resource "nsxt_vpc_ip_address_allocation" "dev_external_nat_pool" {
@@ -556,6 +562,13 @@ resource "nsxt_vpc_ip_address_allocation" "dev_external_nat_pool" {
   allocation_size             = 1
   ip_address_block_visibility = "EXTERNAL"
   ip_address_type            = "IPV4"
+
+  depends_on = [
+    nsxt_vpc.dev_web_vpc,
+    nsxt_vpc_connectivity_profile.dev_connectivity_profile,
+    nsxt_vpc_attachment.dev,
+    nsxt_policy_ip_block.dev_external_block
+  ]
 }
 
 
@@ -715,6 +728,12 @@ resource "nsxt_policy_connectivity_policy" "prodapps" {
   group_path = nsxt_policy_group.prod.path
   parent_path = nsxt_policy_transit_gateway.prod_tgw.path
   connectivity_scope = "COMMUNITY"
+
+  depends_on = [
+    nsxt_vpc_attachment.prod_web,
+    nsxt_vpc_attachment.prod_db,
+    nsxt_policy_group.prod
+  ]
 }
 
 resource "nsxt_vpc_subnet" "dev_web_private_subnet" {
