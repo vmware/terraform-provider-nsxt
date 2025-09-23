@@ -22,6 +22,9 @@ Core Network Infrastructure
 │   └── Edge Cluster: main_edge_cluster
 ├── nsxt_policy_ip_block.dev_external_block (203.0.114.0/24)
 ├── nsxt_policy_ip_block.prod_external_block (203.0.113.0/24)
+└── nsxt_policy_ip_block.vlan_extension_block (192.168.100.0/24)
+    ├── Visibility: EXTERNAL
+    └── Subnet Exclusive: true
 ```
 
 ### Level 2: Resource Governance
@@ -33,13 +36,19 @@ IP Block Quotas
     └── Depends on: prod_external_block
 ```
 
-### Level 3: Gateway Connections
+### Level 3: Gateway Connections & VLAN Extensions
 ```
 Gateway Connections
 ├── nsxt_policy_gateway_connection.dev_gw_connection
 │   └── Depends on: main_tier0, dev_external_block
-└── nsxt_policy_gateway_connection.prod_gw_connection
-    └── Depends on: main_tier0, prod_external_block
+├── nsxt_policy_gateway_connection.prod_gw_connection
+│   └── Depends on: main_tier0, prod_external_block
+└── nsxt_policy_distributed_vlan_connection.legacy_vlan_connection
+    ├── Gateway Addresses: 192.168.100.254/24
+    ├── VLAN ID: 100
+    ├── IP Block: vlan_extension_block
+    ├── VPC Gateway Connection: Enabled
+    └── Depends on: vlan_extension_block
 ```
 
 ### Level 4: Projects (Multi-tenancy)
@@ -47,9 +56,11 @@ Gateway Connections
 Projects
 ├── nsxt_policy_project.dev_project
 │   ├── Depends on: main_tier0, dev_external_block, dev_gw_connection
+│   ├── TGW External Connections: dev_gw_connection, legacy_vlan_connection
 │   └── Contains: dev private IP blocks
 └── nsxt_policy_project.prod_project
     ├── Depends on: main_tier0, prod_external_block, prod_gw_connection
+    ├── TGW External Connections: prod_gw_connection
     └── Contains: prod private IP blocks
 
 Private IP Blocks (Project-scoped)
@@ -357,10 +368,20 @@ VM References
 ## Key Dependencies
 
 - **Projects** require Tier-0 gateway, IP blocks, and gateway connections
+- **Distributed VLAN connections** require dedicated subnet-exclusive IP blocks
+- **VLAN connections** can only be assigned to one project at a time
 - **VPCs** require projects, service profiles, and transit gateways
 - **Subnets** require VPCs and (for public subnets) VPC attachments
 - **Security policies** require VPC groups and VPCs
 - **NAT rules** require IP allocations and NAT data sources
 - **Static routes** require parent resources (VPCs or transit gateways)
 
-Total Resources: **60+** across 16 hierarchical levels
+Total Resources: **62+** across 16 hierarchical levels
+
+## Legacy System Integration
+
+The distributed VLAN connection provides hybrid connectivity for legacy system integration:
+- **VLAN Extension**: Enables L2 connectivity to existing infrastructure
+- **Project Exclusivity**: Each VLAN connection can only be used by one project
+- **Subnet Exclusive IP Block**: Requires dedicated IP block with exclusive subnet configuration
+- **VPC Gateway Connection**: Enables VPC-to-VLAN connectivity when needed

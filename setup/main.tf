@@ -127,6 +127,15 @@ resource "nsxt_policy_ip_block" "prod_private_block" {
 }
 
 
+# IP Block for VLAN Extension - Legacy System Integration
+resource "nsxt_policy_ip_block" "vlan_extension_block" {
+  display_name = "vlan-extension-ip-block"
+  description  = "Dedicated IP block for VLAN extension to legacy systems"
+  cidr         = "192.168.100.0/24"
+  visibility   = "EXTERNAL"
+  is_subnet_exclusive = true
+}
+
 # IP Block Quotas for different projects
 resource "nsxt_policy_ip_block_quota" "dev_quota" {
   display_name = "dev-project-quota"
@@ -158,13 +167,30 @@ resource "nsxt_policy_ip_block_quota" "prod_quota" {
   }
 }
 
+# Distributed VLAN Connection for Legacy System Integration
+resource "nsxt_policy_distributed_vlan_connection" "legacy_vlan_connection" {
+  display_name      = "legacy-vlan-connection"
+  description       = "VLAN connection for legacy system integration and hybrid connectivity"
+  gateway_addresses = ["192.168.100.254/24"]
+  vlan_id          = 100
+
+  subnet_exclusive_config {
+    ip_block_path = nsxt_policy_ip_block.vlan_extension_block.path
+    vlan_extension {
+      vpc_gateway_connection_enable = true
+    }
+  }
+
+  depends_on = [nsxt_policy_ip_block.vlan_extension_block]
+}
+
 # Projects for multitenancy
 resource "nsxt_policy_project" "dev_project" {
   display_name = "dev-project"
   description  = "Development project for multi-tenant isolation"
   tier0_gateway_paths = [nsxt_policy_tier0_gateway.main_tier0.path]
   external_ipv4_blocks = [nsxt_policy_ip_block.dev_external_block.path]
-  tgw_external_connections = [nsxt_policy_gateway_connection.dev_gw_connection.path]
+  tgw_external_connections = [nsxt_policy_gateway_connection.dev_gw_connection.path, nsxt_policy_distributed_vlan_connection.legacy_vlan_connection.path]
 
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
