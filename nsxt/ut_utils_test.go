@@ -7,10 +7,9 @@ import (
 	"net/http"
 )
 
-
 var (
-emptyBody = ""
-serviceWithId = `
+	emptyBody     = ""
+	serviceWithId = `
 {
   "resource_type": "Service",
   "description": "My HTTP",
@@ -49,8 +48,8 @@ serviceWithId = `
   "_revision": 0
 }
 `
-    
-    nsxtVersion = `
+
+	nsxtVersion = `
 {
     "node_version": "9.1.0",
     "product_version": "9.1.0"
@@ -58,61 +57,59 @@ serviceWithId = `
 `
 )
 
-
 type mockRoundTripper struct {
-	cache  []string
-	fn func(req *http.Request) *http.Response
+	cache []string
+	fn    func(req *http.Request) *http.Response
 }
 
 func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if (req.Method == http.MethodPatch || req.Method == http.MethodPost || req.Method == http.MethodPut) && req.Body != nil {
-        body, _ := io.ReadAll(req.Body)
-        m.cache = append(m.cache, string(body))
-    }
+		body, _ := io.ReadAll(req.Body)
+		m.cache = append(m.cache, string(body))
+	}
 	return m.fn(req), nil
 }
 
 func (m *mockRoundTripper) ClearCache() {
-    m.cache = []string{}
+	m.cache = []string{}
 }
 
 func constructMockResponse(response string) *mockRoundTripper {
-    
-    return &mockRoundTripper{
+
+	return &mockRoundTripper{
 		cache: []string{},
 		fn: func(req *http.Request) *http.Response {
 			if req.URL.Path == "/api/v1/node/version" {
-                return &http.Response{
-                    StatusCode: http.StatusOK,
-                    Body:       ioutil.NopCloser(bytes.NewBufferString(nsxtVersion)),
-                    Header:     http.Header{"Content-Type": []string{"application/json"}},
-                }
-            } else if response != "" {
-                return &http.Response{
-                    StatusCode: http.StatusOK,
-                    Body:       ioutil.NopCloser(bytes.NewBufferString(response)),
-                    Header:     http.Header{"Content-Type": []string{"application/json"}},
-                }            
-            } else {
-                return &http.Response{
-                    StatusCode: http.StatusOK,
-                    // Body:       ioutil.NopCloser(bytes.NewBufferString(serviceWithId)),
-                    Header:     http.Header{"Content-Type": []string{"application/json"}},
-                }
-            }
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewBufferString(nsxtVersion)),
+					Header:     http.Header{"Content-Type": []string{"application/json"}},
+				}
+			} else if response != "" {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       ioutil.NopCloser(bytes.NewBufferString(response)),
+					Header:     http.Header{"Content-Type": []string{"application/json"}},
+				}
+			} else {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					// Body:       ioutil.NopCloser(bytes.NewBufferString(serviceWithId)),
+					Header: http.Header{"Content-Type": []string{"application/json"}},
+				}
+			}
 		},
 	}
 }
 
-
 func newMockProviderClient(response string) (nsxtClients, *mockRoundTripper) {
-    mockRoundTripper := constructMockResponse(response)
-    mockProviderClient := ConstructMockProviderClient()
-    mockProviderClient.NsxtClientConfig.HTTPClient = &http.Client{
-        Transport: mockRoundTripper,
-    }
-    mockProviderClient.PolicyHTTPClient = &http.Client{
-        Transport: mockRoundTripper,
-    }
-    return mockProviderClient, mockRoundTripper
+	mockRoundTripper := constructMockResponse(response)
+	mockProviderClient := ConstructMockProviderClient()
+	mockProviderClient.NsxtClientConfig.HTTPClient = &http.Client{
+		Transport: mockRoundTripper,
+	}
+	mockProviderClient.PolicyHTTPClient = &http.Client{
+		Transport: mockRoundTripper,
+	}
+	return mockProviderClient, mockRoundTripper
 }
