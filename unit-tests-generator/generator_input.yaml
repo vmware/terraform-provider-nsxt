@@ -1,0 +1,9 @@
+# Fill edit the contents before running the generator
+InputFileName: resource_nsxt_policy_segment.go  # Name of the go file for which unit tests are to be written
+SchemaFunction: resourceNsxtPolicySegment       # This is the function name which has a return type *schema.Resource 
+CreateFunc: resourceNsxtPolicySegmentCreate     # Create function name set in the SchemaFunction
+ReadFunc: resourceNsxtPolicySegmentRead         # Read function name set in the SchemaFunction
+UpdateFunc:    resourceNsxtPolicySegmentUpdate  # Update function name set in the SchemaFunction
+DeleteFunc: resourceNsxtPolicySegmentDelete     # Delete function name set in the SchemaFunction
+ResourceOpVariableName: segmentWithId           # This is the variable name of the resource output set in the ut_static_test.go file. Get the sample output for the API calls from this page https://developer.broadcom.com/xapis/nsx-t-data-center-rest-api/latest/ 
+

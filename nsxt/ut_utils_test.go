@@ -5,57 +5,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/tidwall/gjson"
+	api "github.com/vmware/go-vmware-nsxt"
 )
 
-var (
-	emptyBody     = ""
-	serviceWithId = `
-{
-  "resource_type": "Service",
-  "description": "My HTTP",
-  "id": "foo",
-  "display_name": "foo",
-  "path": "/infra/services/my-http",
-  "parent_path": "/infra/services/my-http",
-  "relative_path": "my-http",
-  "service_entries": [
-      {
-          "resource_type": "L4PortSetServiceEntry",
-          "id": "MyHttpEntry",
-          "display_name": "MyHttpEntry",
-          "path": "/infra/services/my-http/service-entries/MyHttpEntry",
-          "parent_path": "/infra/services/my-http",
-          "relative_path": "MyHttpEntry",
-          "destination_ports": [
-              "8080"
-          ],
-          "l4_protocol": "TCP",
-          "_create_user": "admin",
-          "_create_time": 1517310677617,
-          "_last_modified_user": "admin",
-          "_last_modified_time": 1517310677617,
-          "_system_owned": false,
-          "_protection": "NOT_PROTECTED",
-          "_revision": 0
-      }
-  ],
-  "_create_user": "admin",
-  "_create_time": 1517310677604,
-  "_last_modified_user": "admin",
-  "_last_modified_time": 1517310677604,
-  "_system_owned": false,
-  "_protection": "NOT_PROTECTED",
-  "_revision": 0
-}
-`
 
-	nsxtVersion = `
-{
-    "node_version": "9.1.0",
-    "product_version": "9.1.0"
-}
-`
-)
 
 type mockRoundTripper struct {
 	cache []string
@@ -102,9 +57,37 @@ func constructMockResponse(response string) *mockRoundTripper {
 	}
 }
 
+func constructMockProviderClient() nsxtClients {
+	commonConfig := commonProviderConfig{
+		RemoteAuth:             false,
+		ToleratePartialSuccess: false,
+		MaxRetries:             2,
+		MinRetryInterval:       0,
+		MaxRetryInterval:       0,
+		RetryStatusCodes:       []int{404, 400},
+		Username:               "username",
+		Password:               "password",
+	}
+	
+	nsxtClient := nsxtClients{
+		CommonConfig: commonConfig,
+	}
+	nsxtClient.NsxtClientConfig = &api.Configuration{
+		BasePath:   "/api/v1",
+		Scheme:     "https",
+		UserAgent:  "terraform-provider-nsxt",
+		UserName:   "username",
+		Password:   "password",
+		RemoteAuth: true,
+		Insecure:   true,
+	}
+	
+	return nsxtClient
+}
+
 func newMockProviderClient(response string) (nsxtClients, *mockRoundTripper) {
 	mockRoundTripper := constructMockResponse(response)
-	mockProviderClient := ConstructMockProviderClient()
+	mockProviderClient := constructMockProviderClient()
 	mockProviderClient.NsxtClientConfig.HTTPClient = &http.Client{
 		Transport: mockRoundTripper,
 	}
@@ -112,4 +95,8 @@ func newMockProviderClient(response string) (nsxtClients, *mockRoundTripper) {
 		Transport: mockRoundTripper,
 	}
 	return mockProviderClient, mockRoundTripper
+}
+
+func getGjsonString(input, jqpath string) string {
+	return gjson.Get(input, jqpath).String()
 }
