@@ -11,7 +11,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-
 func main() {
 	rawData, err := ioutil.ReadFile("generator_input.yaml")
 	data := make(map[string]interface{})
@@ -42,12 +41,12 @@ func main() {
 		log.Fatal("parse error:", err)
 	}
 
-	outFile, err := os.Create(path+"ut_"+inResource+"_test.go")
+	outFile, err := os.Create(path + "ut_" + inResource + "_test.go")
 	if err != nil {
 		log.Fatal("Error creating file:", err)
 	}
 	defer outFile.Close()
-	
+
 	err = tmpl.Execute(outFile, data)
 	if err != nil {
 		log.Fatal("execute error:", err)

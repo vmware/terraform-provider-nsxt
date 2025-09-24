@@ -18,11 +18,11 @@ func TestResourceNsxtPolicyServiceCreate(t *testing.T) {
 	})
 
 	err := resourceNsxtPolicyServiceCreate(d, mockProviderClient)
-	
+
 	log.Println("Cache Request body :", m.cache)
-	
+
 	require.Empty(t, err)
-	
+
 	assert.Equal(t, "foo", getGjsonString(m.cache[0], "display_name"))
 }
 
@@ -64,10 +64,9 @@ func TestResourceNsxtPolicyServiceDelete(t *testing.T) {
 	})
 	d.SetId("foo")
 	err := resourceNsxtPolicyServiceDelete(d, mockProviderClient)
-	
+
 	log.Println("Cache Request body :", m.cache)
 
 	require.Empty(t, err)
 	assert.Equal(t, d.Id(), "foo")
 }
-

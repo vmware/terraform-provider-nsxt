@@ -1,7 +1,7 @@
 package nsxt
 
 var (
-	emptyBody     = ""
+	emptyBody   = ""
 	nsxtVersion = `
 {
     "node_version": "9.1.0",
@@ -73,6 +73,4 @@ var (
   "_revision": 0
 }
 `
-
-
 )

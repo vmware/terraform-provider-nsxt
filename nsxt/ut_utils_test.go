@@ -10,8 +10,6 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 )
 
-
-
 type mockRoundTripper struct {
 	cache []string
 	fn    func(req *http.Request) *http.Response
@@ -68,7 +66,7 @@ func constructMockProviderClient() nsxtClients {
 		Username:               "username",
 		Password:               "password",
 	}
-	
+
 	nsxtClient := nsxtClients{
 		CommonConfig: commonConfig,
 	}
@@ -81,7 +79,7 @@ func constructMockProviderClient() nsxtClients {
 		RemoteAuth: true,
 		Insecure:   true,
 	}
-	
+
 	return nsxtClient
 }
 
