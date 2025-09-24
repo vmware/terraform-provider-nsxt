@@ -62,32 +62,53 @@ provider "nsxt" {
 #
 # =============================================================================
 
-# Data Sources for existing infrastructure
-data "nsxt_policy_edge_cluster" "main_edge_cluster" {
-  display_name = "EDGECLUSTER1"
-}
-
-data "nsxt_policy_edge_cluster" "main_edge_cluster2" {
-  display_name = "EDGECLUSTER2"
-}
-
-
-# run  terraform import nsxt_policy_tier0_gateway.main_tier0 pepsi 
-resource "nsxt_policy_tier0_gateway" "main_tier0" {
-  display_name = "pepsi"
+resource "nsxt_policy_tier0_gateway" "m_tier0" {
+  display_name             = "pepsi-tgw-enabled"
+  nsx_id                   = "pepsi-tgw-enabled"
+  description              = "Tier-0 gateway with TGW transit subnets support"
   ha_mode                  = "ACTIVE_STANDBY"
-  # Required for TGW attachments
+  failover_mode            = "PREEMPTIVE"
+  enable_firewall          = true
+  edge_cluster_path        = data.nsxt_policy_edge_cluster.main_edge_cluster.path
+  
+  # Required for TGW attachments in NSX 9.1.0+
   tgw_transit_subnets      = ["169.254.1.0/28"]
   
-  lifecycle {
-    prevent_destroy = true
+  tag {
+    scope = "terraform"
+    tag   = "managed"
   }
 }
 
-# Keep the data source as backup reference
 data "nsxt_policy_tier0_gateway" "main_tier0" {
-  id = "pepsi"
+  id = "pepsi-tgw-enabled"
+  depends_on = [nsxt_policy_tier0_gateway.m_tier0 ]
 }
+
+
+# VRF Gateway attached to the existing main Tier-0
+resource "nsxt_policy_tier0_gateway" "vrf_gateway" {
+  display_name         = "pepsi-vrf-gateway"
+  description          = "VRF-lite gateway"
+  ha_mode              = "ACTIVE_STANDBY"
+  failover_mode        = "PREEMPTIVE"
+  tgw_transit_subnets      = ["169.254.2.0/28"]
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.main_edge_cluster.path
+  }
+
+  vrf_config {
+    gateway_path        = data.nsxt_policy_tier0_gateway.main_tier0.path
+    
+    route_target {
+      auto_mode      = true
+    }
+  }
+
+  depends_on = [data.nsxt_policy_tier0_gateway.main_tier0]
+}
+
+#-------------------------------------------------------------
 
 # IP Blocks for different visibility types - Dev Project
 resource "nsxt_policy_ip_block" "dev_external_block" {
@@ -191,7 +212,9 @@ resource "nsxt_policy_project" "dev_project" {
   description  = "Development project for multi-tenant isolation"
   tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.main_tier0.path]
   external_ipv4_blocks = [nsxt_policy_ip_block.dev_external_block.path]
-  tgw_external_connections = [nsxt_policy_gateway_connection.dev_gw_connection.path, nsxt_policy_distributed_vlan_connection.legacy_vlan_connection.path]
+  tgw_external_connections = [nsxt_policy_gateway_connection.dev_gw_connection.path,
+   nsxt_policy_gateway_connection.dev_gwconn2.path,
+   nsxt_policy_distributed_vlan_connection.legacy_vlan_connection.path]
 
   site_info {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.main_edge_cluster.path]
@@ -371,6 +394,31 @@ resource "nsxt_policy_transit_gateway" "prod_tgw" {
   }
 }
 
+#---------------
+resource "nsxt_policy_gateway_connection" "dev_gwconn2" {
+  display_name = "customer-datacenter-connection"
+  description  = "Gateway connection routing (10.10.0.0/16)"
+  tier0_path   = nsxt_policy_tier0_gateway.vrf_gateway.path
+  
+  advertise_outbound_networks {
+    allow_external_blocks = [
+      nsxt_policy_ip_block.dev_external_block.path,
+    ]
+  }
+
+  # Restrict inbound access 
+  inbound_remote_networks = [
+    "10.10.0.0/16",
+    "172.16.0.0/12"  
+  ]
+  
+  depends_on = [
+    nsxt_policy_tier0_gateway.vrf_gateway,
+    nsxt_policy_ip_block.dev_external_block,
+    nsxt_policy_ip_block.prod_external_block
+  ]
+}
+
 # Gateway Connections - moved to project context for proper scoping
 resource "nsxt_policy_gateway_connection" "dev_gw_connection" {
   display_name = "dev-gateway-connection"
@@ -392,6 +440,18 @@ resource "nsxt_policy_gateway_connection" "prod_gw_connection" {
   
   depends_on = [
     nsxt_policy_ip_block.prod_external_block,
+  ]
+}
+
+resource "nsxt_policy_transit_gateway_attachment" "dev_tgw2_attachment" {
+  display_name    = "dev-tgw2-attachment"
+  description     = "Transit gateway attachment for development 2"
+  parent_path     = nsxt_policy_transit_gateway.dev_tgw.path
+  connection_path = nsxt_policy_gateway_connection.dev_gwconn2.path
+  
+  depends_on = [
+    nsxt_policy_transit_gateway.dev_tgw,
+    nsxt_policy_gateway_connection.dev_gwconn2
   ]
 }
 
