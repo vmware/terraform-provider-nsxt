@@ -26,6 +26,7 @@ import (
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
+var getNSXVersionFunc = getNSXVersion
 
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
@@ -585,7 +586,7 @@ func getNSXVersion(connector client.Connector) (string, error) {
 
 func initNSXVersion(connector client.Connector) error {
 	var err error
-	util.NsxVersion, err = getNSXVersion(connector)
+	util.NsxVersion, err = getNSXVersionFunc(connector)
 	return err
 }
 
