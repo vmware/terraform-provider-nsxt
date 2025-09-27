@@ -21,6 +21,7 @@ import (
 )
 
 var servicePathExample = getMultitenancyPathExample("/infra/services/[service]")
+var cli = infra.NewServicesClient // Needed for the gomock approach of unit tests
 
 func getIcmpEntrySchema() *schema.Schema {
 	return &schema.Schema{
@@ -478,7 +479,8 @@ func getServiceEntriesFromSchema(d interface{}) ([]*data.StructValue, error) {
 }
 
 func resourceNsxtPolicyServiceExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewServicesClient(sessionContext, connector)
+	// client := infra.NewServicesClient(sessionContext, connector)
+	client := cli(sessionContext, connector) // Needed for the gomock approach of unit tests
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -532,7 +534,8 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating service with ID %s", id)
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	// client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cli(getSessionContext(d, m), connector) // Needed for the gomock approach of unit tests
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -554,7 +557,8 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining service id")
 	}
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	// client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cli(getSessionContext(d, m), connector) // Needed for the gomock approach of unit tests
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -732,7 +736,8 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// Update the resource using Update to totally replace the list of entries
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	// client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cli(getSessionContext(d, m), connector) // Needed for the gomock approach of unit tests
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -753,7 +758,8 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	doDelete := func() error {
-		client := infra.NewServicesClient(getSessionContext(d, m), connector)
+		// client := infra.NewServicesClient(getSessionContext(d, m), connector)
+		client := cli(getSessionContext(d, m), connector) // Needed for the gomock approach of unit tests
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
