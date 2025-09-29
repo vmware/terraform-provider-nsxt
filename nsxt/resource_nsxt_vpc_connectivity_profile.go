@@ -16,6 +16,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
@@ -188,6 +189,17 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcConnectivityProfilePathExample = "/orgs/[org]/projects/[project]/vpc-connectivity-profiles/[profile]"
 
+// VPC Connectivity Profile importer with version check
+func nsxtVpcConnectivityProfileImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Connectivity Profile import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing policy path importer logic
+	importer := getPolicyPathResourceImporter(vpcConnectivityProfilePathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcConnectivityProfileCreate,
@@ -195,7 +207,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 		Update: resourceNsxtVpcConnectivityProfileUpdate,
 		Delete: resourceNsxtVpcConnectivityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathResourceImporter(vpcConnectivityProfilePathExample),
+			State: nsxtVpcConnectivityProfileImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcConnectivityProfileSchema),
 	}
@@ -218,6 +230,9 @@ func resourceNsxtVpcConnectivityProfileExists(sessionContext utl.SessionContext,
 }
 
 func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Connectivity Profile resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcConnectivityProfileExists)

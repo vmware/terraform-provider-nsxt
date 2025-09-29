@@ -16,6 +16,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]"
@@ -41,6 +42,16 @@ var vpcAttachmentSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+// VPC Attachment importer with version check
+func nsxtVpcAttachmentImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Attachment import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing parent path importer logic
+	return nsxtParentPathResourceImporter(d, m)
+}
+
 func resourceNsxtVpcAttachment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcAttachmentCreate,
@@ -48,7 +59,7 @@ func resourceNsxtVpcAttachment() *schema.Resource {
 		Update: resourceNsxtVpcAttachmentUpdate,
 		Delete: resourceNsxtVpcAttachmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtVpcAttachmentImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcAttachmentSchema),
 	}
@@ -74,6 +85,9 @@ func resourceNsxtVpcAttachmentExists(sessionContext utl.SessionContext, parentPa
 }
 
 func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Attachment resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtVpcAttachmentExists)
