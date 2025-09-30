@@ -29,9 +29,9 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
-		// CheckDestroy: func(state *terraform.State) error {
-		// 	return testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state, ruleName, defaultDomain)
-		// },
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state, ruleName, defaultDomain)
+		},
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccNsxtPolicyGatewayRule(policyResourceName, policyName, direction, proto, tag, withContext, ruleName, action, description),
