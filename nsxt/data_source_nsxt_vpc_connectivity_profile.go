@@ -36,9 +36,7 @@ func dataSourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interfac
 	// It does not return true for a key that's explicitly set to false.
 
 	value, defaultOK := d.GetOkExists("is_default")
-	_, dpOk := d.GetOk("display_name")
-	_, idOk := d.GetOk("id")
-	if defaultOK && !dpOk && !idOk {
+	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
 		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "VpcConnectivityProfile", query)
