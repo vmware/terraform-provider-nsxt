@@ -23,8 +23,9 @@ func dataSourceNsxtVpcServiceProfile() *schema.Resource {
 			"path":         getPathSchema(),
 			"context":      getContextSchemaExtended(true, false, false, true),
 			"is_default": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				ExactlyOneOf: []string{"id", "display_name", "is_default"},
 			},
 		},
 	}

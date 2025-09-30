@@ -22,8 +22,9 @@ func dataSourceNsxtPolicyNetworkSpan() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"is_default": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				ExactlyOneOf: []string{"id", "display_name", "is_default"},
 			},
 		},
 	}

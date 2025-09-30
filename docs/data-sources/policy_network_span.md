@@ -22,9 +22,6 @@ data "nsxt_policy_network_span" "netspan" {
 
 ```hcl
 data "nsxt_policy_network_span" "test" {
-  context {
-    project_id = "default"
-  }
   is_default = true
 }
 
