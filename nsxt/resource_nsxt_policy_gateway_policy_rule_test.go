@@ -38,7 +38,7 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testPolicyResourceName, defaultDomain),
-					// testAccNsxtPolicyGatewayPolicyRuleExists(testruleResourceName, defaultDomain),
+					testAccNsxtPolicyGatewayPolicyRuleExists(testruleResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testruleResourceName, "display_name", ruleName),
 					resource.TestCheckResourceAttr(testruleResourceName, "description", description),
 					resource.TestCheckResourceAttr(testruleResourceName, "action", action),
@@ -95,7 +95,6 @@ func testAccNsxtPolicyGatewayPolicyRuleExists(resourceName string, domainName st
 }
 
 func testAccNsxtPolicyGatewayRule(policyResourceName, policyName, direction, proto, tag string, withContext bool, ruleName, action, description string) string {
-	// return testAccNsxtPolicyGatewayPolicyWithRule(policyName, updatedName, direction1, proto1, tag1, withContext)
 	return testAccNsxtPolicyGatewayPolicyWithRule(policyResourceName, policyName, direction, proto, tag, withContext) + fmt.Sprintf(`
 	
 resource "nsxt_policy_gateway_policy_rule" "rule1" {
