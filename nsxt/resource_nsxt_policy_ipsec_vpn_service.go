@@ -79,13 +79,13 @@ var IPSecVpnServiceSchemaExt = map[string]*metadata.ExtendedSchema{
 	// Add new fields (correct schema references)
 	"gateway_path": metadata.GetExtendedSchema(getPolicyPathSchema(false, true, "Policy path for the gateway.")),
 	"locale_service_path": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
+		Schema: schema.Schema{Type: schema.TypeString,
 			Description:  "Policy path for the locale service.",
 			Optional:     true,
 			ForceNew:     true,
 			Deprecated:   "Use gateway_path instead.",
 			ValidateFunc: validatePolicyPath(),
+			AtLeastOneOf: []string{"locale_service_path", "gateway_path"},
 		},
 	},
 }
