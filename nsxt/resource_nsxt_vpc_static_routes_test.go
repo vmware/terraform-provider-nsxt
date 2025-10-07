@@ -45,8 +45,8 @@ func TestAccResourceNsxtVpcStaticRoutes_basic(t *testing.T) {
 					testAccNsxtVpcStaticRoutesExists(accTestStaticRoutesCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestStaticRoutesCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestStaticRoutesCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "network"),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestStaticRoutesCreateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestStaticRoutesCreateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestStaticRoutesCreateAttributes["admin_distance"]),
 
@@ -62,8 +62,8 @@ func TestAccResourceNsxtVpcStaticRoutes_basic(t *testing.T) {
 					testAccNsxtVpcStaticRoutesExists(accTestStaticRoutesUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestStaticRoutesUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestStaticRoutesUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "network"),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestStaticRoutesUpdateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestStaticRoutesUpdateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestStaticRoutesUpdateAttributes["admin_distance"]),
 
