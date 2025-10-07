@@ -16,6 +16,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var staticRoutesSchema = map[string]*metadata.ExtendedSchema{
@@ -78,6 +79,17 @@ var staticRoutesSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcStaticRoutesPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"
 
+// VPC Static Routes importer with version check
+func nsxtVpcStaticRoutesImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Static Routes import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing VPC path importer logic
+	importer := getVpcPathResourceImporter(vpcStaticRoutesPathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVpcStaticRoutes() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcStaticRoutesCreate,
@@ -85,7 +97,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 		Update: resourceNsxtVpcStaticRoutesUpdate,
 		Delete: resourceNsxtVpcStaticRoutesDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcStaticRoutesPathExample),
+			State: nsxtVpcStaticRoutesImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(staticRoutesSchema),
 	}
@@ -108,6 +120,9 @@ func resourceNsxtVpcStaticRoutesExists(sessionContext utl.SessionContext, id str
 }
 
 func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Static Routes resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcStaticRoutesExists)

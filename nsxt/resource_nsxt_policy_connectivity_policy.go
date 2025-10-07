@@ -17,6 +17,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
 
@@ -106,6 +107,10 @@ func resourceNsxtPolicyConnectivityPolicyExists(sessionContext utl.SessionContex
 }
 
 func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interface{}) error {
+
+	if !util.NsxVersionHigherOrEqual("9.1.0") {
+		return fmt.Errorf("policy Connectivity Policy Create resource requires NSX version 9.1.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyConnectivityPolicyExists)

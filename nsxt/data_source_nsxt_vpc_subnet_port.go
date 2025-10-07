@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
@@ -78,6 +79,9 @@ func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.
 }
 
 func dataSourceNsxtVpcSubnetPortRead(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Subnet Port data source requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	externalID := d.Get("vm_id").(string)

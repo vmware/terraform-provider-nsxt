@@ -20,6 +20,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcSubnetAccessModeValues = []string{
@@ -470,6 +471,17 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+// VPC Subnet importer with version check
+func nsxtVpcSubnetImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC Subnet import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing VPC path importer logic
+	importer := getVpcPathResourceImporter(vpcSubnetPathExample)
+	return importer(d, m)
+}
+
 func resourceNsxtVpcSubnet() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcSubnetCreate,
@@ -477,7 +489,7 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 		Update: resourceNsxtVpcSubnetUpdate,
 		Delete: resourceNsxtVpcSubnetDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcSubnetPathExample),
+			State: nsxtVpcSubnetImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcSubnetSchema),
 	}
@@ -500,6 +512,9 @@ func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, id string, c
 }
 
 func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Vpc Subnet resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcSubnetExists)
