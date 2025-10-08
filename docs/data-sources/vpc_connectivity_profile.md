@@ -25,6 +25,21 @@ data "nsxt_vpc_connectivity_profile" "test" {
 }
 ```
 
+## Example Usage: Fetching Default VPC Connectivity Profile Attribute
+
+```hcl
+data "nsxt_vpc_connectivity_profile" "test" {
+  context {
+    project_id = "default"
+  }
+  is_default = true
+}
+
+output "nsxt_vpc_connectivity_profile_test" {
+  value = data.nsxt_vpc_connectivity_profile.test.display_name
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Connectivity Profile to retrieve.
@@ -38,3 +53,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `is_default` - Specifies if the VPC Connectivity Profile is set as the default.

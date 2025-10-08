@@ -23,8 +23,9 @@ func dataSourceNsxtPolicyTransitGateway() *schema.Resource {
 			"path":         getPathSchema(),
 			"context":      getContextSchemaExtended(true, false, false, true),
 			"is_default": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				ExactlyOneOf: []string{"id", "display_name", "is_default"},
 			},
 		},
 	}
@@ -34,10 +35,8 @@ func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.
 	value, defaultOK := d.GetOkExists("is_default")
-	_, dpOk := d.GetOk("display_name")
-	_, idOk := d.GetOk("id")
 
-	if defaultOK && !dpOk && !idOk {
+	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
 		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", query)
