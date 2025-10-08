@@ -1,21 +1,19 @@
 ---
-subcategory: "Deprecated"
+subcategory: "Segments"
 page_title: "NSXT: nsxt_policy_spoof_guard_profile"
 description: A resource to configure SpoofGuard Profile.
 ---
 
-# nsxt_policy_spoof_guard_profile
+# nsxt_policy_spoofguard_profile
 
 This resource provides a method for the management of SpoofGuard Profile.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
-~> **NOTE:** This resource has been deprecated and replaced with nsxt_policy_spoofguard_profile.
-
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_spoof_guard_profile" "test" {
+resource "nsxt_policy_spoofguard_profile" "test" {
   display_name              = "test"
   description               = "Terraform provisioned SpoofGuardProfile"
   address_binding_allowlist = true
@@ -29,7 +27,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-resource "nsxt_policy_spoof_guard_profile" "test" {
+resource "nsxt_policy_spoofguard_profile" "test" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
@@ -66,13 +64,13 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_spoof_guard_profile.test UUID
+terraform import nsxt_policy_spoofguard_profile.test UUID
 ```
 
 The above command imports SpoofGuard Profile named `test` with the NSX ID `UUID`.
 
 ```shell
-terraform import nsxt_policy_spoof_guard_profile.test POLICY_PATH
+terraform import nsxt_policy_spoofguard_profile.test POLICY_PATH
 ```
 
 The above command imports SpoofGuard Profile named `test` with policy path `POLICY_PATH`.

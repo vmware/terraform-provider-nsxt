@@ -147,7 +147,7 @@ The following arguments are supported:
     * `form_factor` - (Optional) Accepted values - 'SMALL', 'MEDIUM', 'LARGE', 'XLARGE'. The default value is 'MEDIUM'.
     * `node_user_settings` - (Required) Node user settings.
         * `audit_password` - (Optional) Node audit user password.
-        * `audit_username` - (Optional) CLI "audit" username.
+        * `audit_username` - (Optional) CLI "audit" username. Defaults to "audit".
         * `cli_password` - (Required) Node cli password.
         * `cli_username` - (Optional) CLI "admin" username. Defaults to "admin".
         * `root_password` - (Required) Node root user password.
