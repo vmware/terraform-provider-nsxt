@@ -15,7 +15,6 @@ import (
 var accTestStaticRoutesCreateAttributes = map[string]string{
 	"display_name":   getAccTestResourceName(),
 	"description":    "terraform created",
-	"network":        "2.2.2.0/24",
 	"ip_address":     "3.1.1.1",
 	"admin_distance": "2",
 }
@@ -23,7 +22,6 @@ var accTestStaticRoutesCreateAttributes = map[string]string{
 var accTestStaticRoutesUpdateAttributes = map[string]string{
 	"display_name":   getAccTestResourceName(),
 	"description":    "terraform updated",
-	"network":        "3.3.3.0/24",
 	"ip_address":     "4.1.1.1",
 	"admin_distance": "5",
 }
@@ -47,8 +45,8 @@ func TestAccResourceNsxtVpcStaticRoutes_basic(t *testing.T) {
 					testAccNsxtVpcStaticRoutesExists(accTestStaticRoutesCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestStaticRoutesCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestStaticRoutesCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "network"),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestStaticRoutesCreateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestStaticRoutesCreateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestStaticRoutesCreateAttributes["admin_distance"]),
 
@@ -64,8 +62,8 @@ func TestAccResourceNsxtVpcStaticRoutes_basic(t *testing.T) {
 					testAccNsxtVpcStaticRoutesExists(accTestStaticRoutesUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestStaticRoutesUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestStaticRoutesUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "network"),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "network", accTestStaticRoutesUpdateAttributes["network"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", accTestStaticRoutesUpdateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.admin_distance", accTestStaticRoutesUpdateAttributes["admin_distance"]),
 
@@ -173,13 +171,18 @@ func testAccNsxtVpcStaticRoutesTemplate(createFlow bool) string {
 		attrMap = accTestStaticRoutesUpdateAttributes
 	}
 	return fmt.Sprintf(`
+resource "nsxt_vpc_ip_address_allocation" "vpc_private_ips" {
+%s
+  display_name = "vpc-ip-allocation"
+  allocation_size = 2
+  ip_address_block_visibility = "EXTERNAL"
+}
+
 resource "nsxt_vpc_static_route" "test" {
 %s
   display_name = "%s"
   description  = "%s"
-
-  network = "%s"
-
+  network = nsxt_vpc_ip_address_allocation.vpc_private_ips.allocation_ips
   next_hop {
     ip_address     = "%s"
     admin_distance = %s
@@ -189,17 +192,24 @@ resource "nsxt_vpc_static_route" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["network"], attrMap["ip_address"], attrMap["admin_distance"])
+}`, testAccNsxtPolicyMultitenancyContext(), testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_address"], attrMap["admin_distance"])
 }
 
 func testAccNsxtVpcStaticRoutesMinimalistic() string {
 	return fmt.Sprintf(`
+resource "nsxt_vpc_ip_address_allocation" "vpc_private_ips" {
+%s
+  display_name = "vpc-ip-allocation"
+  allocation_size = 2
+  ip_address_block_visibility = "EXTERNAL"
+}
+
 resource "nsxt_vpc_static_route" "test" {
 %s
   display_name = "%s"
-  network      = "%s"
+  network      = nsxt_vpc_ip_address_allocation.vpc_private_ips.allocation_ips
   next_hop {
     ip_address = "%s"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), accTestStaticRoutesUpdateAttributes["display_name"], accTestStaticRoutesUpdateAttributes["network"], accTestStaticRoutesUpdateAttributes["ip_address"])
+}`, testAccNsxtPolicyMultitenancyContext(), testAccNsxtPolicyMultitenancyContext(), accTestStaticRoutesUpdateAttributes["display_name"], accTestStaticRoutesUpdateAttributes["ip_address"])
 }
