@@ -303,6 +303,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+  depends_on = [nsxt_policy_transit_gateway_ipsec_vpn_service.test, nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test]
 }`, displayName, attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["peer_address"], attrMap["peer_id"], attrMap["psk"], attrMap["connection_initiation_mode"])
 }
@@ -337,6 +338,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
       prefix = "12.11.10.0/24"
     }
   }
+  depends_on = [data.nsxt_policy_edge_cluster.test]
 
   tag {
     scope = "color"
@@ -348,6 +350,7 @@ resource "nsxt_policy_gateway_connection" "test" {
   display_name     = "%s"
   tier0_path       = nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["192.168.240.0/24"]
+  depends_on = [nsxt_policy_tier0_gateway.test]
 }
 
 resource "nsxt_policy_ip_block" "extblk" {
@@ -365,6 +368,7 @@ resource "nsxt_policy_project" "test" {
     edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
   }
  external_ipv4_blocks = [nsxt_policy_ip_block.extblk.path] 
+ depends_on = [nsxt_policy_gateway_connection.test, nsxt_policy_tier0_gateway.test, data.nsxt_policy_edge_cluster.test]
 }
 
 resource "nsxt_policy_project_ip_address_allocation" "test" {
@@ -373,6 +377,7 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
   }
   display_name = "ipsec_ipaddr_allocation"
   ip_block     = nsxt_policy_project.test.external_ipv4_blocks[0]
+  depends_on = [nsxt_policy_project.test]
 }
 
 data "nsxt_policy_transit_gateway" "test" {
@@ -391,7 +396,7 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-  depends_on = [data.nsxt_policy_transit_gateway.test]
+  depends_on = [data.nsxt_policy_transit_gateway.test, nsxt_policy_gateway_connection.test]
 }
 
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
@@ -411,12 +416,13 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   description   = "IPSec VPN Local Endpoint"
   local_address = nsxt_policy_project_ip_address_allocation.test.allocation_ips
   local_id      = "10.110.0.0"
+  depends_on = [nsxt_policy_transit_gateway_ipsec_vpn_service.test, nsxt_policy_project_ip_address_allocation.test]
 }`, getEdgeClusterName(), SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName, SessionRelatedResourceName)
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_tranist_gateway_ipsec_vpn_session.test"
+	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -429,10 +435,11 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(name),
 			},
 			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psk"},
+				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -469,7 +476,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_policy_tranist_gateway_ipsec_vpn_session" {
+		if rs.Type != "nsxt_policy_transit_gateway_ipsec_vpn_session" {
 			continue
 		}
 
@@ -501,5 +508,6 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   ip_addresses        = ["%s"]
   prefix_length       = "%s"
   psk                 = "%s"
+  depends_on = [nsxt_policy_transit_gateway_ipsec_vpn_service.test, nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test]
 }`, displayName, attrMap["vpn_type"], attrMap["peer_address"], attrMap["peer_id"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["psk"])
 }
