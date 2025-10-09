@@ -212,7 +212,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		// There should be just one object here
 		var spanReferences []model.SpanReference
-		defaultSpanPathinfce, isDefaultSet := d.GetOkExists("default_span_path")
+		defaultSpanPathinterface, isDefaultSet := d.GetOkExists("default_span_path")
 		var defaultSpanPath string
 		if !isDefaultSet {
 			var err error
@@ -221,7 +221,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 				return err
 			}
 		} else {
-			defaultSpanPath = defaultSpanPathinfce.(string)
+			defaultSpanPath = defaultSpanPathinterface.(string)
 		}
 		// default_span_path will never be empty, since it has a default value and the validator will make sure that
 		// user will not assign an empty string or such.
@@ -276,9 +276,7 @@ func getDefaultSpan(connector client.Connector) (string, error) {
 			defaultSpanPath = append(defaultSpanPath, *spanObj.Path)
 		}
 	}
-	if len(defaultSpanPath) > 1 {
-		return "", fmt.Errorf("Found more than one span marked as default")
-	}
+
 	return defaultSpanPath[0], nil
 }
 
