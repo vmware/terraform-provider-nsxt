@@ -87,7 +87,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_importBasic(t *testing.T)
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state, name)

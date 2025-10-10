@@ -77,7 +77,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 	updateDisplayName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
@@ -172,7 +175,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
@@ -425,7 +431,10 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_session.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, name)
