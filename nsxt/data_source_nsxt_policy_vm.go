@@ -29,6 +29,14 @@ func dataSourceNsxtPolicyVM() *schema.Resource {
 			"instance_id":  getDataSourceStringSchema("Instance UUID of the Virtual Machine"),
 			"tag":          getTagsSchema(),
 			"context":      getContextSchema(false, false, false),
+			"vif_ids": {
+				Type:        schema.TypeList,
+				Description: "List of VIF attahement ids",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -88,6 +96,13 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("external_id", *vmModel.ExternalId)
 	d.Set("bios_id", computeIDMap[nsxtPolicyBiosUUIDKey])
 	d.Set("instance_id", computeIDMap[nsxtPolicyInstanceUUIDKey])
+
+	vifList, err := listPolicyVifAttachmentsForVM(m, *vmModel.ExternalId)
+	if err != nil {
+		return fmt.Errorf("Error getting the VIF attachment ids for the VM : %v", err)
+	}
+	d.Set("vif_ids", vifList)
+
 	setPolicyTagsInSchema(d, vmModel.Tags)
 
 	return nil
