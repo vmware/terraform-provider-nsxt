@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -326,7 +325,7 @@ func nsxtPolicyPortSecurityProfileSetInStruct(d *schema.ResourceData) (*data.Str
 	return dataValue.(*data.StructValue), nil
 }
 
-func resourceNsxtPolicySegmentPortExists(d *schema.ResourceData, context api.SessionContext, connector client.Connector) func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicySegmentPortExists(d *schema.ResourceData, context utl.SessionContext, connector client.Connector) func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	segmentPath := d.Get("segment_path").(string)
 	return func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 		_, err := getSegmentPort(segmentPath, id, context, connector)
@@ -340,7 +339,7 @@ func resourceNsxtPolicySegmentPortExists(d *schema.ResourceData, context api.Ses
 	}
 }
 
-func getSegmentPort(segmentPath, segmentPortId string, context api.SessionContext, connector client.Connector) (model.SegmentPort, error) {
+func getSegmentPort(segmentPath, segmentPortId string, context utl.SessionContext, connector client.Connector) (model.SegmentPort, error) {
 	var segPort model.SegmentPort
 	var err error
 	segmentId := getSegmentIdFromSegPath(segmentPath)

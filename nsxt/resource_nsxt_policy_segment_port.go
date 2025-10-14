@@ -70,7 +70,7 @@ func getPolicySegmentPortSchema() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"allocate_addresses": {
 				Type:         schema.TypeString,
-				Description:  "Indicate how IP will be allocated for the port. Alowed values are IP_POOL, MAC_POOL, BOTH, DHCP, DHCPV6, SLAAC, NONE",
+				Description:  "Indicate how IP will be allocated for the port. Allowed values are IP_POOL, MAC_POOL, BOTH, DHCP, DHCPV6, SLAAC, NONE",
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(allocateAddresses, false),
 			},
