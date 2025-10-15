@@ -104,7 +104,7 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 	if len(apiError.RelatedErrors) > 0 {
 		details += "\nRelated errors:\n"
 		for _, relatedErr := range apiError.RelatedErrors {
-			details += fmt.Sprintf("%s ", printRelatedAPIError(relatedErr))
+			details += fmt.Sprintf("%s\n", printRelatedAPIError(relatedErr))
 		}
 	}
 	log.Printf("[ERROR]: %s", details)
