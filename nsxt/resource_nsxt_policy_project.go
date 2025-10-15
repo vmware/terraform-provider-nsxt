@@ -115,6 +115,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
 				ValidateFunc: validatePolicyPath(),
 				Optional:     true,
+				Computed:     true,
 			},
 			"non_default_span_paths": {
 				Type:        schema.TypeList,
