@@ -87,7 +87,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 	}
 
 	doPatch := func() error {
-		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+		client := tier0s.NewLocaleServicesClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -109,7 +109,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigCreate(d *schema.ResourceData,
 	}
 
 	localeServiceID := ""
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isPolicyGlobalManager(m) {
 		if sitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_gateway_redistribution_config")
@@ -159,7 +159,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigRead(d *schema.ResourceData, m
 		return fmt.Errorf("Error obtaining Tier0 Gateway id or Locale Service id")
 	}
 
-	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	client := tier0s.NewLocaleServicesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -213,7 +213,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 
 	// Update the locale service with empty Redistribution config using get/post
 	doUpdate := func() error {
-		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+		client := tier0s.NewLocaleServicesClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -246,7 +246,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigImport(d *schema.ResourceData,
 	gwID := s[0]
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
-	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	client := tier0s.NewLocaleServicesClient(commonSessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

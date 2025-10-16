@@ -359,7 +359,7 @@ func setPolicyVMPortTagsInSchema(d *schema.ResourceData, m interface{}, external
 	if err != nil {
 		return err
 	}
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 
 	portTags := d.Get("port").([]interface{})
 	var actualPortTags []map[string]interface{}
@@ -400,7 +400,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Virtual Machine ID")
 	}
 
-	vm, err := findNsxtPolicyVMByID(getSessionContext(d, m), connector, vmID, m)
+	vm, err := findNsxtPolicyVMByID(commonSessionContext, connector, vmID, m)
 	if err != nil {
 		d.SetId("")
 		log.Printf("[ERROR] Cannot find VM with ID %s, skip reading VM tag", vmID)
@@ -420,7 +420,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 
 	vm, err := findNsxtPolicyVMByID(context, connector, instanceID, m)
 	if err != nil {
@@ -463,7 +463,7 @@ func resourceNsxtPolicyVMTagsUpdate(d *schema.ResourceData, m interface{}) error
 func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 
 	vm, err := findNsxtPolicyVMByID(context, connector, instanceID, m)
 
