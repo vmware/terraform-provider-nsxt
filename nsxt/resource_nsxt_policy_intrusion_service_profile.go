@@ -384,7 +384,7 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := services.NewProfilesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -407,7 +407,7 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Ids Profile ID")
 	}
 
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := services.NewProfilesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -466,7 +466,7 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := services.NewProfilesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -489,7 +489,7 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 
 	connector := getPolicyConnector(m)
 	var err error
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := services.NewProfilesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
