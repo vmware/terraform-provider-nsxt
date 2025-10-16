@@ -65,7 +65,7 @@ func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
 					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ranges.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "range.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -126,7 +126,7 @@ func TestAccResourceNsxtPolicyIPBlock_v910_migrate(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
 					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ranges.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "range.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -390,7 +390,7 @@ resource "nsxt_policy_ip_block" "test" {
     end   = "192.168.1.11"
   }
 
-  ranges {
+  range {
     start = "192.168.2.20"
     end   = "192.168.2.39"
   }

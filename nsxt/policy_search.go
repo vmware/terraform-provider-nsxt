@@ -130,7 +130,10 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString, isGlobal)
 	}
 	if err != nil {
-		return nil, err
+		if objID != "" {
+			return nil, fmt.Errorf("Error getting resource %s with ID '%s' : %v", resourceType, objID, err)
+		}
+		return nil, fmt.Errorf("Error getting resource %s with name '%s' : %v", resourceType, objName, err)
 	}
 
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)

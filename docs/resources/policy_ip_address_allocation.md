@@ -13,9 +13,6 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_ip_pool" "pool1" {
-  context {
-    project_id = data.nsxt_policy_project.tenant1.id
-  }
   display_name = "ip_pool"
   description  = "Created by Terraform"
 }
@@ -49,7 +46,7 @@ data "nsxt_policy_project" "demoproj" {
 
 resource "nsxt_policy_ip_pool" "pool1" {
   context {
-    project_id = data.nsxt_policy_project.tenant1.id
+    project_id = data.nsxt_policy_project.demoproj.id
   }
   display_name = "ip_pool"
   description  = "Created by Terraform"
@@ -57,7 +54,7 @@ resource "nsxt_policy_ip_pool" "pool1" {
 
 resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
   context {
-    project_id = data.nsxt_policy_project.tenant1.id
+    project_id = data.nsxt_policy_project.demoproj.id
   }
 
   display_name = "static-subnet1"

@@ -41,6 +41,11 @@ var vpcSubnetModeValues = []string{
 	model.SubnetDhcpConfig_MODE_DEACTIVATED,
 }
 
+var dnsServerPreferenceValues = []string{
+	model.SubnetDhcpConfig_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER,
+	model.SubnetDhcpConfig_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS,
+}
+
 var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -279,6 +284,19 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			Computed: true,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
+					"dns_server_preference": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice(dnsServerPreferenceValues, false),
+							Optional:     true,
+						},
+						Metadata: metadata.Metadata{
+							IntroducedInVersion: "9.1.0",
+							SchemaType:          "string",
+							SdkFieldName:        "DnsServerPreference",
+							OmitIfEmpty:         true,
+						},
+					},
 					"mode": {
 						Schema: schema.Schema{
 							Type:         schema.TypeString,

@@ -4,7 +4,7 @@ page_title: "NSXT: policy_network_span"
 description: A policy Network Span data source.
 ---
 
-# nsxt_policy_edge_cluster
+# nsxt_policy_network_span
 
 This data source provides information about policy network span configured on NSX.
 
@@ -15,6 +15,18 @@ This data source is applicable to NSX Policy Manager and is supported with NSX 9
 ```hcl
 data "nsxt_policy_network_span" "netspan" {
   display_name = "ns1"
+}
+```
+
+## Example Usage: Fetching Default Network Span Attribute
+
+```hcl
+data "nsxt_policy_network_span" "test" {
+  is_default = true
+}
+
+output "nsxt_policy_network_span_test" {
+  value = data.nsxt_policy_network_span.test.display_name
 }
 ```
 
@@ -29,3 +41,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `is_default` - Specifies if the Network Span is set as the default.

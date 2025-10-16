@@ -7,8 +7,13 @@ package nsxt
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strconv"
+
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtVpcServiceProfile() *schema.Resource {
@@ -21,6 +26,11 @@ func dataSourceNsxtVpcServiceProfile() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"context":      getContextSchemaExtended(true, false, false, true),
+			"is_default": {
+				Type:         schema.TypeBool,
+				Optional:     true,
+				ExactlyOneOf: []string{"id", "display_name", "is_default"},
+			},
 		},
 	}
 }
@@ -29,9 +39,25 @@ func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) 
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Service profile data source requires NSX version 9.0.0 or higher")
 	}
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", nil)
+	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
+	// It does not return true for a key that's explicitly set to false.
+	value, defaultOK := d.GetOkExists("is_default")
+	if defaultOK {
+		query := make(map[string]string)
+		query["is_default"] = strconv.FormatBool(value.(bool))
+		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", query)
+		return err
+	}
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", nil)
 	if err != nil {
 		return err
 	}
+	converter := bindings.NewTypeConverter()
+	dataValue, errors := converter.ConvertToGolang(obj, model.VpcServiceProfileBindingType())
+	if len(errors) > 0 {
+		return errors[0]
+	}
+	vpcSvcProfile := dataValue.(model.VpcServiceProfile)
+	d.Set("is_default", vpcSvcProfile.IsDefault)
 	return nil
 }

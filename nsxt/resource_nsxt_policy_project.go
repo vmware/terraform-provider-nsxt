@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	infra2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
@@ -114,7 +115,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
 				ValidateFunc: validatePolicyPath(),
 				Optional:     true,
-				Default:      "/infra/network-spans/default",
+				Computed:     true,
 			},
 			"non_default_span_paths": {
 				Type:        schema.TypeList,
@@ -212,8 +213,17 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		// There should be just one object here
 		var spanReferences []model.SpanReference
-		defaultSpanPath := d.Get("default_span_path").(string)
-
+		defaultSpanPathinterface, isDefaultSet := d.GetOkExists("default_span_path")
+		var defaultSpanPath string
+		if !isDefaultSet {
+			var err error
+			defaultSpanPath, err = getDefaultSpan(connector)
+			if err != nil {
+				return err
+			}
+		} else {
+			defaultSpanPath = defaultSpanPathinterface.(string)
+		}
 		// default_span_path will never be empty, since it has a default value and the validator will make sure that
 		// user will not assign an empty string or such.
 		isDefault := true
@@ -254,6 +264,23 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	return err
 }
 
+func getDefaultSpan(connector client.Connector) (string, error) {
+	var cursor *string
+	client := infra2.NewNetworkSpansClient(connector)
+	spanList, err := client.List(cursor, nil, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	defaultSpanPath := []string{}
+	for _, spanObj := range spanList.Results {
+		if *spanObj.IsDefault {
+			defaultSpanPath = append(defaultSpanPath, *spanObj.Path)
+		}
+	}
+
+	return defaultSpanPath[0], nil
+}
+
 func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector, projectID string) error {
 	enabled := false
 	defaultSecurityProfile := d.Get("default_security_profile")
@@ -270,9 +297,16 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 			}
 		}
 	}
-	// Default security profile is created by NSX, we can assume that it's there already
+
 	client := projects.NewVpcSecurityProfilesClient(connector)
+	objSec, err := client.Get(defaultOrgID, projectID, "default")
+	if isNotFoundError(err) {
+		return fmt.Errorf("failed to fetch the details of the VPC security profile: %v", err)
+	}
+	// Default security profile is created by NSX, we can assume that it's there already
 	obj := model.VpcSecurityProfile{
+		DisplayName: objSec.DisplayName,
+		Description: objSec.Description,
 		NorthSouthFirewall: &model.NorthSouthFirewall{
 			Enabled: &enabled,
 		},
