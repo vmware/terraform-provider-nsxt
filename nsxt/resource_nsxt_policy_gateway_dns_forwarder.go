@@ -107,7 +107,7 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -188,7 +188,7 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 
 	// Verify DNS forwarder is not yet defined for this Gateway
 	var err error
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
@@ -233,7 +233,7 @@ func resourceNsxtPolicyGatewayDNSForwarderUpdate(d *schema.ResourceData, m inter
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -256,7 +256,7 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 	}
 
 	var err error
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}

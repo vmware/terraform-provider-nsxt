@@ -23,7 +23,7 @@ func dataSourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "SpoofGuardProfile", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "SpoofGuardProfile", nil)
 	if err != nil {
 		return err
 	}

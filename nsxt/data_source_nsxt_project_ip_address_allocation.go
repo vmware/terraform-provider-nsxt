@@ -34,7 +34,7 @@ func dataSourceNsxtProjectIpAddressAllocationRead(d *schema.ResourceData, m inte
 	query := make(map[string]string)
 	query["allocation_ips"] = ips
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "ProjectIpAddressAllocation", query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "ProjectIpAddressAllocation", query, false)
 	if err != nil {
 		return err
 	}
