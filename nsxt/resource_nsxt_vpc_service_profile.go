@@ -284,7 +284,7 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -330,7 +330,7 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	client := clientLayer.NewVpcServiceProfilesClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "VpcServiceProfile", id, err)
@@ -356,7 +356,7 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining VpcServiceProfile ID")
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -402,7 +402,7 @@ func resourceNsxtVpcServiceProfileDelete(d *schema.ResourceData, m interface{}) 
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 
 	client := clientLayer.NewVpcServiceProfilesClient(connector)
 	err := client.Delete(parents[0], parents[1], id)
