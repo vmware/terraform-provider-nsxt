@@ -262,7 +262,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	}
 
 	localeServiceID := ""
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isPolicyGlobalManager(m) {
 		enablePIM := d.Get("enable_pim").(bool)
 		if enablePIM {

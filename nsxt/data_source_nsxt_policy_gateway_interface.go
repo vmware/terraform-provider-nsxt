@@ -85,7 +85,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	if isT0 {
 		searchStr = "Tier0Interface"
 	}
-	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), searchStr, query)
+	obj, err := policyDataSourceResourceRead(d, connector, commonSessionContext, searchStr, query)
 	if err != nil {
 		return err
 	}
