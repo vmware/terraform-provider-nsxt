@@ -39,7 +39,7 @@ func dataSourceNsxtPolicyTier0Gateways() *schema.Resource {
 func dataSourceNsxtPolicyTier0GatewaysRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	resultMap := make(map[string]string)
-	err := policyDataSourceCreateMap(connector, getSessionContext(d, m), "Tier0", resultMap, nil)
+	err := policyDataSourceCreateMap(connector, commonSessionContext, "Tier0", resultMap, nil)
 	if err != nil {
 		return fmt.Errorf("error in listing the Tier0 gateways items : %v", err)
 	}

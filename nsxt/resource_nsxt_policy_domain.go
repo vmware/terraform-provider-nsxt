@@ -201,7 +201,7 @@ func resourceNsxtPolicyDomainCreate(d *schema.ResourceData, m interface{}) error
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Domain with ID %s", id)
-	err = policyInfraPatch(getSessionContext(d, m), infraStruct, getPolicyConnector(m), false)
+	err = policyInfraPatch(commonSessionContext, infraStruct, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Domain", id, err)
 	}
@@ -298,7 +298,7 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 		ResourceType: &infraType,
 	}
 
-	err = policyInfraPatch(getSessionContext(d, m), infraStruct, getPolicyConnector(m), false)
+	err = policyInfraPatch(commonSessionContext, infraStruct, getPolicyConnector(m), false)
 	if err != nil {
 		return handleUpdateError("Domain", id, err)
 	}

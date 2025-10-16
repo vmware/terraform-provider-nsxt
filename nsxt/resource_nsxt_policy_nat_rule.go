@@ -190,7 +190,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -298,7 +298,7 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -376,7 +376,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -437,7 +437,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
 
-	err := patchNsxtPolicyNATRule(getSessionContext(d, m), connector, gwID, ruleStruct, isT0, natType)
+	err := patchNsxtPolicyNATRule(commonSessionContext, connector, gwID, ruleStruct, isT0, natType)
 	if err != nil {
 		return handleCreateError("NAT Rule", id, err)
 	}
@@ -463,7 +463,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context := commonSessionContext
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -556,7 +556,7 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	t0Client := infra.NewTier0sClient(commonSessionContext, connector)
 	if t0Client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -565,7 +565,7 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1Client := infra.NewTier1sClient(commonSessionContext, connector)
 		if t1Client == nil {
 			return nil, policyResourceNotSupportedError()
 		}

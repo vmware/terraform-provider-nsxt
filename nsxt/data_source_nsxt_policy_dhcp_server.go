@@ -25,7 +25,7 @@ func dataSourceNsxtPolicyDhcpServer() *schema.Resource {
 func dataSourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "DhcpServerConfig", nil)
+	_, err := policyDataSourceResourceRead(d, connector, commonSessionContext, "DhcpServerConfig", nil)
 	if err != nil {
 		return err
 	}
