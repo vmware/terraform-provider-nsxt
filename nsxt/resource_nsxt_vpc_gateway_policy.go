@@ -19,17 +19,6 @@ import (
 
 var vpcGatewayPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/gateway-policies/[policy]"
 
-// VPC Gateway Policy importer with version check
-func nsxtVpcGatewayPolicyImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Check NSX version compatibility for import
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return []*schema.ResourceData{d}, fmt.Errorf("VPC Gateway Policy import requires NSX version 9.0.0 or higher")
-	}
-	// Use the existing VPC path importer logic
-	importer := getVpcPathResourceImporter(vpcGatewayPolicyPathExample)
-	return importer(d, m)
-}
-
 func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCGatewayPolicyCreate,
@@ -37,7 +26,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 		Update: resourceNsxtVPCGatewayPolicyUpdate,
 		Delete: resourceNsxtVPCGatewayPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpcGatewayPolicyImporter,
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Gateway Policy", getVpcPathResourceImporter(vpcGatewayPolicyPathExample)),
 		},
 
 		Schema: getPolicyGatewayPolicySchema(true),

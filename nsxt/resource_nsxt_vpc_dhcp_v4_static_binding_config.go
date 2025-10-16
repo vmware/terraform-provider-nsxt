@@ -199,16 +199,6 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-// VPC DHCP v4 Static Binding Config importer with version check
-func nsxtVpcDhcpV4StaticBindingConfigImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Check NSX version compatibility for import
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return []*schema.ResourceData{d}, fmt.Errorf("VPC DHCP v4 Static Binding Config import requires NSX version 9.0.0 or higher")
-	}
-	// Use the existing parent path importer logic
-	return nsxtParentPathResourceImporter(d, m)
-}
-
 func resourceNsxtVpcSubnetDhcpV4StaticBindingConfig() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate,
@@ -216,7 +206,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfig() *schema.Resource {
 		Update: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate,
 		Delete: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpcDhcpV4StaticBindingConfigImporter,
+			State: nsxtVersionCheckImporter("9.0.0", "VPC DHCP v4 Static Binding", nsxtParentPathResourceImporter),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(dhcpV4StaticBindingConfigSchema),
 	}

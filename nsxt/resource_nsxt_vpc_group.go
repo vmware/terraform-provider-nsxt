@@ -13,17 +13,6 @@ import (
 
 var vpcGroupPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/groups/[group]"
 
-// VPC Group importer with version check
-func nsxtVpcGroupImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Check NSX version compatibility for import
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return []*schema.ResourceData{d}, fmt.Errorf("VPC Group import requires NSX version 9.0.0 or higher")
-	}
-	// Use the existing VPC path importer logic
-	importer := getVpcPathResourceImporter(vpcGroupPathExample)
-	return importer(d, m)
-}
-
 func resourceNsxtVPCGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCGroupCreate,
@@ -31,7 +20,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpcGroupImporter,
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Group", getVpcPathResourceImporter(vpcGroupPathExample)),
 		},
 
 		Schema: getPolicyGroupSchema(false),

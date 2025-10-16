@@ -103,17 +103,6 @@ var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcIpAddressAllocationPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/ip-address-allocations/[allocation]"
 
-// VPC IP Address Allocation importer with version check
-func nsxtVpcIpAddressAllocationImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Check NSX version compatibility for import
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return []*schema.ResourceData{d}, fmt.Errorf("VPC IP Address Allocation import requires NSX version 9.0.0 or higher")
-	}
-	// Use the existing VPC path importer logic
-	importer := getVpcPathResourceImporter(vpcIpAddressAllocationPathExample)
-	return importer(d, m)
-}
-
 func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcIpAddressAllocationCreate,
@@ -121,7 +110,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtVpcIpAddressAllocationUpdate,
 		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpcIpAddressAllocationImporter,
+			State: nsxtVersionCheckImporter("9.0.0", "VPC IP Address Allocation", getVpcPathResourceImporter(vpcIpAddressAllocationPathExample)),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}

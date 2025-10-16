@@ -79,17 +79,6 @@ var staticRoutesSchema = map[string]*metadata.ExtendedSchema{
 
 var vpcStaticRoutesPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"
 
-// VPC Static Routes importer with version check
-func nsxtVpcStaticRoutesImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	// Check NSX version compatibility for import
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return []*schema.ResourceData{d}, fmt.Errorf("VPC Static Routes import requires NSX version 9.0.0 or higher")
-	}
-	// Use the existing VPC path importer logic
-	importer := getVpcPathResourceImporter(vpcStaticRoutesPathExample)
-	return importer(d, m)
-}
-
 func resourceNsxtVpcStaticRoutes() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcStaticRoutesCreate,
@@ -97,7 +86,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 		Update: resourceNsxtVpcStaticRoutesUpdate,
 		Delete: resourceNsxtVpcStaticRoutesDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpcStaticRoutesImporter,
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Static Routes", getVpcPathResourceImporter(vpcStaticRoutesPathExample)),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(staticRoutesSchema),
 	}
