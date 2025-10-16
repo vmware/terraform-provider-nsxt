@@ -56,9 +56,9 @@ func resourceNsxtPolicyTGWIPSecVpnServicesCreate(d *schema.ResourceData, m inter
 	}
 
 	client := tgwclientLayer.NewIpsecVpnServicesClient(connector)
-	_, err = client.Update(parents[0], parents[1], parents[2], id, ipSecVpnService)
+	err = client.Patch(parents[0], parents[1], parents[2], id, ipSecVpnService)
 	if err != nil {
-		return handleUpdateError("TransitGatewayIPSecVpnService", id, err)
+		return handleCreateError("TransitGatewayIPSecVpnService", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
