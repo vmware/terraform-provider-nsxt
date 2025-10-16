@@ -33,7 +33,7 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	domainName := d.Get("domain").(string)
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	client := domains.NewGroupsClient(commonSessionContext, connector)
 
 	boolFalse := false
 	var cursor *string

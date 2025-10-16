@@ -31,7 +31,7 @@ func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	}
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "VpcSubnet", nil, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "VpcSubnet", nil, false)
 	if err != nil {
 		return err
 	}

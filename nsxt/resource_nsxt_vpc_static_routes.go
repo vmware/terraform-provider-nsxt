@@ -119,7 +119,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -157,7 +157,7 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 	}
 
 	client := clientLayer.NewStaticRoutesClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
 		return handleReadError(d, "StaticRoutes", id, err)
@@ -183,7 +183,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("Error obtaining StaticRoutes ID")
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -220,7 +220,7 @@ func resourceNsxtVpcStaticRoutesDelete(d *schema.ResourceData, m interface{}) er
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 
 	client := clientLayer.NewStaticRoutesClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)

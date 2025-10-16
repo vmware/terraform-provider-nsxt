@@ -23,7 +23,7 @@ func dataSourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "MacDiscoveryProfile", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "MacDiscoveryProfile", nil)
 	if err != nil {
 		return err
 	}

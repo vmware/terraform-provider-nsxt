@@ -199,7 +199,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -238,7 +238,7 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	client := clientLayer.NewVpcsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "Vpc", id, err)
@@ -264,7 +264,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Vpc ID")
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -301,7 +301,7 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 
 	client := clientLayer.NewVpcsClient(connector)
 	err := client.Delete(parents[0], parents[1], id, nil)

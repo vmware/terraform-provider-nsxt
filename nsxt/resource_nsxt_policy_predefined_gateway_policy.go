@@ -310,7 +310,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return fmt.Errorf("Failed to extract domain from Gateway Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getGatewayPolicy(getSessionContext(d, m), id, domain, connector)
+	predefinedPolicy, err := getGatewayPolicy(commonSessionContext, id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -393,7 +393,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		predefinedPolicy.Children = childRules
 	}
 
-	err = gatewayPolicyInfraPatch(getSessionContext(d, m), predefinedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(commonSessionContext, predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
@@ -430,7 +430,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	client := domains.NewGatewayPoliciesClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -485,7 +485,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	predefinedPolicy, err := getGatewayPolicy(getSessionContext(d, m), id, domain, getPolicyConnector(m))
+	predefinedPolicy, err := getGatewayPolicy(commonSessionContext, id, domain, getPolicyConnector(m))
 	if err != nil {
 		return err
 	}
@@ -495,7 +495,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to revert Predefined Gateway Policy %s: %s", id, err)
 	}
 
-	err = gatewayPolicyInfraPatch(getSessionContext(d, m), revertedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(commonSessionContext, revertedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
