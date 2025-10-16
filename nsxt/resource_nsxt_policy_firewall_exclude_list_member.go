@@ -69,7 +69,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberCreate(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		client := security.NewExcludeListClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -107,7 +107,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberRead(d *schema.ResourceData, m i
 	connector := getPolicyConnector(m)
 	member := d.Id()
 
-	client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+	client := security.NewExcludeListClient(commonSessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -129,7 +129,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberDelete(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		client := security.NewExcludeListClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

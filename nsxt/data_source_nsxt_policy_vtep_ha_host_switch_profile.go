@@ -27,7 +27,7 @@ func dataSourceNsxtVtepHAHostSwitchProfile() *schema.Resource {
 func dataSourceNsxtVtepHAHostSwitchProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYVTEPHAHOSTSWITCHPROFILE, nil, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYVTEPHAHOSTSWITCHPROFILE, nil, false)
 	if err == nil {
 		return nil
 	}

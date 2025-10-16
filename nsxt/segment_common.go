@@ -1186,7 +1186,7 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 		}
 		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(getSessionContext(d, m), connector)
+		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -1230,7 +1230,7 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 		}
 		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentQosProfileBindingMapsClient(getSessionContext(d, m), connector)
+		client := segments.NewSegmentQosProfileBindingMapsClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -1275,7 +1275,7 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 		}
 		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentSecurityProfileBindingMapsClient(getSessionContext(d, m), connector)
+		client := segments.NewSegmentSecurityProfileBindingMapsClient(commonSessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -1375,7 +1375,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		gwPath = d.Get("connectivity_path").(string)
 	}
 
-	obj, err := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
+	obj, err := nsxtPolicyGetSegment(commonSessionContext, connector, id, gwPath, isFixed)
 
 	if err != nil {
 		return handleReadError(d, "Segment", id, err)
@@ -1484,17 +1484,17 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 		gwPath = d.Get("connectivity_path").(string)
 	}
 
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentExists(getSessionContext(d, m), gwPath, isFixed))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentExists(commonSessionContext, gwPath, isFixed))
 	if err != nil {
 		return err
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(commonSessionContext, id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
 
-	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
+	err = policyInfraPatch(commonSessionContext, obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -1512,12 +1512,12 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(commonSessionContext, id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
 
-	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), true)
+	err = policyInfraPatch(commonSessionContext, obj, getPolicyConnector(m), true)
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -1554,7 +1554,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 				numOfPorts = len(gmPorts.Results)
 				ports = gmPorts
 			} else {
-				portsClient := segments.NewPortsClient(getSessionContext(d, m), connector)
+				portsClient := segments.NewPortsClient(commonSessionContext, connector)
 				if portsClient == nil {
 					return nil, "error", policyResourceNotSupportedError()
 				}
@@ -1624,7 +1624,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete segment with ID %s", id)
-	err := policyInfraPatch(getSessionContext(d, m), infraObj, getPolicyConnector(m), false)
+	err := policyInfraPatch(commonSessionContext, infraObj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}

@@ -32,7 +32,7 @@ func dataSourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface
 	if len(gwPath) > 0 {
 		query["parent_path"] = fmt.Sprintf("%s*", gwPath)
 	}
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "Tier0RouteMap", query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "Tier0RouteMap", query, false)
 	if err != nil {
 		return err
 	}

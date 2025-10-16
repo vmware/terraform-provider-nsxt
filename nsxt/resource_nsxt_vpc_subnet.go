@@ -519,7 +519,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -582,7 +582,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	client := clientLayer.NewSubnetsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
 		return handleReadError(d, "VpcSubnet", id, err)
@@ -615,7 +615,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -660,7 +660,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	parents := getVpcParentsFromContext(commonSessionContext)
 
 	// Wait until potential VM ports are deleted
 	pendingStates := []string{"pending"}
