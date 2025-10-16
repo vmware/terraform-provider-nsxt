@@ -28,6 +28,16 @@ func TestAccDataSourceNsxtPolicyNetworkSpan_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttr(testResourceName, "is_default", "false"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyNetworkSpanDefaultTemplateWithDataSource(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttr(testResourceName, "is_default", "true"),
 				),
 			},
 		},
@@ -45,4 +55,11 @@ data "nsxt_policy_network_span" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_network_span.test]
 }`, name, name, name)
+}
+
+func testAccNsxtPolicyNetworkSpanDefaultTemplateWithDataSource() string {
+	return fmt.Sprintln(`
+data "nsxt_policy_network_span" "test" {
+  is_default = true
+}`)
 }
