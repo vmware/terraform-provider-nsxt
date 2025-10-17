@@ -17,6 +17,7 @@ func dataSourceNsxtPolicyCertificate() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchemaExtended(false, false, false, true),
 		},
 	}
 }
