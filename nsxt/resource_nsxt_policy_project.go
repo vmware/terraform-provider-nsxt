@@ -5,6 +5,7 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -27,6 +28,20 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			c := m.(nsxtClients)
+			_, new := d.GetChange("default_span_path")
+
+			raw := d.GetRawConfig()
+			newAttr := raw.GetAttr("default_span_path")
+
+			if newAttr.IsNull() {
+				d.SetNew("default_span_path", c.DefaultSpanPath)
+				return nil
+			}
+			d.SetNew("default_span_path", new.(string))
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
 			"path":         getPathSchema(),
@@ -211,22 +226,17 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	}
 
 	if util.NsxVersionHigherOrEqual("9.1.0") {
-		// There should be just one object here
 		var spanReferences []model.SpanReference
-		defaultSpanPathinterface, isDefaultSet := d.GetOkExists("default_span_path")
-		var defaultSpanPath string
-		if !isDefaultSet {
-			var err error
-			defaultSpanPath, err = getDefaultSpan(connector)
-			if err != nil {
-				return err
-			}
-		} else {
-			defaultSpanPath = defaultSpanPathinterface.(string)
-		}
-		// default_span_path will never be empty, since it has a default value and the validator will make sure that
-		// user will not assign an empty string or such.
+
 		isDefault := true
+		defaultSpanPathInterface, isDefaultSet := d.GetOkExists("default_span_path")
+		var defaultSpanPath string
+		if isDefaultSet {
+			defaultSpanPath = defaultSpanPathInterface.(string)
+		} else {
+			defaultSpanPath = m.(nsxtClients).DefaultSpanPath
+		}
+
 		spanReferences = append(spanReferences, model.SpanReference{
 			SpanPath:  &defaultSpanPath,
 			IsDefault: &isDefault,

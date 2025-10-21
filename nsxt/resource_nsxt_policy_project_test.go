@@ -91,6 +91,7 @@ func runChecksNsx910(testResourceName string, expectedValues map[string]string) 
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "non_default_span_paths.#", expectedValues["span_reference_count"]),
 		resource.TestCheckResourceAttrSet(testResourceName, "non_default_span_paths.0"),
+		resource.TestCheckResourceAttrSet(testResourceName, "default_span_path"),
 	)
 }
 
