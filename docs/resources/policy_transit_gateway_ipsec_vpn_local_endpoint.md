@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: nsxt_policy_tranist_gateway_ipsec_vpn_local_endpoint"
+page_title: "NSXT: nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint"
 description: A resource to configure a TransitGatewayIPSecVpnLocalEndpoint.
 ---
 
@@ -53,7 +53,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```shell
-terraform import nsxt_policy_tranist_gateway_ipsec_vpn_local_endpoint.test PATH
+terraform import nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test PATH
 ```
 
-The above command imports TranistGatewayIPSecVpnLocalEndpoint named `test` with the NSX path `PATH`.
+The above command imports TransitGatewayIPSecVpnLocalEndpoint named `test` with the NSX path `PATH`.

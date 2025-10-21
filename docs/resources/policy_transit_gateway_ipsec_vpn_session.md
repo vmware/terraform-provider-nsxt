@@ -15,7 +15,7 @@ This resource is applicable to centralised transit gateway.
 ```hcl
 resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   display_name               = "Route-Based VPN Session"
-  description                = "Terraform-provisioned Tranist Gateway IPsec Route-Based VPN"
+  description                = "Terraform-provisioned Transit Gateway IPsec Route-Based VPN"
   parent_path                = nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   local_endpoint_path        = nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test.path
   ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
@@ -35,7 +35,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
 }
 resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test2" {
   display_name               = "Policy-Based VPN Session"
-  description                = "Terraform-provisioned Tranist Gateway IPsec Policy-Based VPN"
+  description                = "Terraform-provisioned Transit Gateway IPsec Policy-Based VPN"
   parent_path                = nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
   local_endpoint_path        = nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test.path
   ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
@@ -85,8 +85,8 @@ For RouteBased VPN session, `ip_addresses` and `prefix_length` must be specified
 * `peer_id` - (Optional) Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.
 * `local_endpoint_path` - (Required) Policy path referencing Local endpoint. In VMC, Local Endpoints are pre-configured the user can refer to their path using `data nsxt_policy_ipsec_vpn_local_endpoint` and using the "Private IP1" or "Public IP1" values to refer to the private and public endpoints respectively. Note that if `authentication_mode` is `CERTIFICATE`, then the local_endpoint must be configured with `certificate_path` and `trust_ca_paths`.
 * `rule` - (Optional) Bypass rules for this IPSec VPN Session. Only applicable to `PolicyBased` VPN Session.
-    * `sources` - (Optional) List of source subnets. Subnet format is ipv4 CIDR.
-    * `destinations` - (Optional) List of destination subnets. Subnet format is ipv4 CIDR.
+    * `sources` - (Optional) List of source subnets. Subnet format is IPV4 CIDR.
+    * `destinations` - (Optional) List of destination subnets. Subnet format is IPV4 CIDR.
     * `action` - (Optional) `PROTECT` or `BYPASS`. Default is `PROTECT`.
 * `direction` - (Optional) The traffic direction apply to the MSS clamping. Value is one of `NONE`, `INBOUND_CONNECTION`, `OUTBOUND_CONNECTION` AND `BOTH`.
 * `max_segment_size` - (Optional) Maximum amount of data the host will accept in a TCP segment. Value is an int between `108` and `8860`. If not specified then the value would be the automatic calculated MSS value.
@@ -99,7 +99,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule` additional arguments:
-    * `nsx_id` - The NSX ID of the bypass rule for this Tranist Gateway IPSec VPN Session.
+    * `nsx_id` - The NSX ID of the bypass rule for this Transit Gateway IPSec VPN Session.
 
 ## Importing
 
