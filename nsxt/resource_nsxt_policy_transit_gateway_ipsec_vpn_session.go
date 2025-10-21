@@ -19,32 +19,7 @@ import (
 
 var tgwIPSecVpnSessionPathExample = getMultitenancyPathExample("/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/ipsec-vpn-sessions/[ipsec-vpn-session]")
 
-var transitGatewayIPSecVpnSessionSchema = map[string]*metadata.ExtendedSchema{
-	"nsx_id":                     IPSecVpnSessionSchema["nsx_id"],
-	"path":                       IPSecVpnSessionSchema["path"],
-	"display_name":               IPSecVpnSessionSchema["display_name"],
-	"description":                IPSecVpnSessionSchema["description"],
-	"revision":                   IPSecVpnSessionSchema["revision"],
-	"tag":                        IPSecVpnSessionSchema["tag"],
-	"tunnel_profile_path":        IPSecVpnSessionSchema["tunnel_profile_path"],
-	"local_endpoint_path":        IPSecVpnSessionSchema["local_endpoint_path"],
-	"ike_profile_path":           IPSecVpnSessionSchema["ike_profile_path"],
-	"dpd_profile_path":           IPSecVpnSessionSchema["dpd_profile_path"],
-	"vpn_type":                   IPSecVpnSessionSchema["vpn_type"],
-	"compliance_suite":           IPSecVpnSessionSchema["compliance_suite"],
-	"connection_initiation_mode": IPSecVpnSessionSchema["connection_initiation_mode"],
-	"authentication_mode":        IPSecVpnSessionSchema["authentication_mode"],
-	"enabled":                    IPSecVpnSessionSchema["enabled"],
-	"psk":                        IPSecVpnSessionSchema["psk"],
-	"peer_id":                    IPSecVpnSessionSchema["peer_id"],
-	"peer_address":               IPSecVpnSessionSchema["peer_address"],
-	"ip_addresses":               IPSecVpnSessionSchema["ip_addresses"],
-	"rule":                       IPSecVpnSessionSchema["rule"],
-	"prefix_length":              IPSecVpnSessionSchema["prefix_length"],
-	"direction":                  IPSecVpnSessionSchema["direction"],
-	"max_segment_size":           IPSecVpnSessionSchema["max_segment_size"],
-	"parent_path":                metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
-}
+var transitGatewayIPSecVpnSessionSchema = getIPSecVpnSessionCommon(true)
 
 func resourceNsxtPolicyTransitGatewayIPSecVpnSession() *schema.Resource {
 	return &schema.Resource{

@@ -65,122 +65,132 @@ var IPSecRulesActionValues = []string{
 	model.IPSecVpnRule_ACTION_BYPASS,
 }
 
-var IPSecVpnSessionSchema = map[string]*metadata.ExtendedSchema{
-	"nsx_id":              metadata.GetExtendedSchema(getNsxIDSchema()),
-	"path":                metadata.GetExtendedSchema(getPathSchema()),
-	"display_name":        metadata.GetExtendedSchema(getDisplayNameSchema()),
-	"description":         metadata.GetExtendedSchema(getDescriptionSchema()),
-	"revision":            metadata.GetExtendedSchema(getRevisionSchema()),
-	"tag":                 metadata.GetExtendedSchema(getTagsSchema()),
-	"tunnel_profile_path": metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing tunnel profile.")),
-	"local_endpoint_path": metadata.GetExtendedSchema(getPolicyPathSchema(true, false, "Policy path referencing Local endpoint.")),
-	"ike_profile_path":    metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing Ike profile.")),
-	"dpd_profile_path":    metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing dpd profile.")),
-	"vpn_type": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "A Policy Based VPN requires to define protect rules that match local and peer subnets. IPSec security associations is negotiated for each pair of local and peer subnet. A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. Routes can be configured statically or can be learned through BGP. A route based VPN is must for establishing redundant VPN session to remote site.",
-			ValidateFunc: validation.StringInSlice(IPSecVpnSessionResourceType, false),
-			Required:     true,
-		},
-	},
-	"compliance_suite": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "Compliance suite.",
-			ValidateFunc: validation.StringInSlice(IPSecVpnSessionComplianceSuite, false),
-			Optional:     true,
-			Default:      model.IPSecVpnSession_COMPLIANCE_SUITE_NONE,
-		},
-	},
-	"connection_initiation_mode": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "Connection initiation mode used by local endpoint to establish ike connection with peer site. INITIATOR - In this mode local endpoint initiates tunnel setup and will also respond to incoming tunnel setup requests from peer gateway. RESPOND_ONLY - In this mode, local endpoint shall only respond to incoming tunnel setup requests. It shall not initiate the tunnel setup. ON_DEMAND - In this mode local endpoint will initiate tunnel creation once first packet matching the policy rule is received and will also respond to incoming initiation request.",
-			ValidateFunc: validation.StringInSlice(IPSecVpnSessionConnectionInitiationMode, false),
-			Optional:     true,
-			Default:      model.IPSecVpnSession_CONNECTION_INITIATION_MODE_INITIATOR,
-		},
-	},
-	"authentication_mode": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "Peer authentication mode. PSK - In this mode a secret key shared between local and peer sites is to be used for authentication. The secret key can be a string with a maximum length of 128 characters. CERTIFICATE - In this mode a certificate defined at the global level is to be used for authentication.",
-			ValidateFunc: validation.StringInSlice(IPSecVpnSessionAuthenticationMode, false),
-			Optional:     true,
-			Default:      model.IPSecVpnSession_AUTHENTICATION_MODE_PSK,
-		},
-	},
-	"enabled": {
-		Schema: schema.Schema{
-			Type:        schema.TypeBool,
-			Description: "Enable/Disable IPSec VPN session.",
-			Optional:    true,
-			Default:     true,
-		},
-	},
-	"psk": {
-		Schema: schema.Schema{
-			Type:        schema.TypeString,
-			Description: "IPSec Pre-shared key. Maximum length of this field is 128 characters.",
-			Optional:    true,
-			Sensitive:   true,
-		},
-	},
-	"peer_id": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.",
-			Required:     true,
-			ValidateFunc: validation.IsIPAddress,
-		},
-	},
-	"peer_address": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "Public IPv4/v6 address of the remote device terminating the VPN connection.",
-			Required:     true,
-			ValidateFunc: validation.IsIPAddress,
-		},
-	},
-	"service_path": metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path for IPSec VPN service")),
-	"ip_addresses": {
-		Schema: schema.Schema{
-			Type:        schema.TypeList,
-			Description: "IP Tunnel interface (commonly referred as VTI) ip addresses.",
-			Optional:    true,
-			Elem: &schema.Schema{
+func getIPSecVpnSessionCommon(isTransitGateway bool) map[string]*metadata.ExtendedSchema {
+	schemaMap := map[string]*metadata.ExtendedSchema{
+		"nsx_id":              metadata.GetExtendedSchema(getNsxIDSchema()),
+		"path":                metadata.GetExtendedSchema(getPathSchema()),
+		"display_name":        metadata.GetExtendedSchema(getDisplayNameSchema()),
+		"description":         metadata.GetExtendedSchema(getDescriptionSchema()),
+		"revision":            metadata.GetExtendedSchema(getRevisionSchema()),
+		"tag":                 metadata.GetExtendedSchema(getTagsSchema()),
+		"tunnel_profile_path": metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing tunnel profile.")),
+		"local_endpoint_path": metadata.GetExtendedSchema(getPolicyPathSchema(true, false, "Policy path referencing Local endpoint.")),
+		"ike_profile_path":    metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing Ike profile.")),
+		"dpd_profile_path":    metadata.GetExtendedSchema(getComputedPolicyPathSchema("Policy path referencing dpd profile.")),
+		"vpn_type": {
+			Schema: schema.Schema{
 				Type:         schema.TypeString,
-				ValidateFunc: validateSingleIP(),
+				Description:  "A Policy Based VPN requires to define protect rules that match local and peer subnets. IPSec security associations is negotiated for each pair of local and peer subnet. A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. Routes can be configured statically or can be learned through BGP. A route based VPN is must for establishing redundant VPN session to remote site.",
+				ValidateFunc: validation.StringInSlice(IPSecVpnSessionResourceType, false),
+				Required:     true,
 			},
 		},
-	},
-	"rule": metadata.GetExtendedSchema(getIPSecVPNRulesSchema()),
-	"prefix_length": {
-		Schema: schema.Schema{
-			Type:         schema.TypeInt,
-			Description:  "Subnet Prefix Length.",
-			Optional:     true,
-			ValidateFunc: validation.IntBetween(1, 255),
+		"compliance_suite": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Compliance suite.",
+				ValidateFunc: validation.StringInSlice(IPSecVpnSessionComplianceSuite, false),
+				Optional:     true,
+				Default:      model.IPSecVpnSession_COMPLIANCE_SUITE_NONE,
+			},
 		},
-	},
-	"direction": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Description:  "The traffic direction apply to the MSS clamping",
-			Optional:     true,
-			ValidateFunc: validation.StringInSlice(TCPMssClampingDirections, false),
+		"connection_initiation_mode": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Connection initiation mode used by local endpoint to establish ike connection with peer site. INITIATOR - In this mode local endpoint initiates tunnel setup and will also respond to incoming tunnel setup requests from peer gateway. RESPOND_ONLY - In this mode, local endpoint shall only respond to incoming tunnel setup requests. It shall not initiate the tunnel setup. ON_DEMAND - In this mode local endpoint will initiate tunnel creation once first packet matching the policy rule is received and will also respond to incoming initiation request.",
+				ValidateFunc: validation.StringInSlice(IPSecVpnSessionConnectionInitiationMode, false),
+				Optional:     true,
+				Default:      model.IPSecVpnSession_CONNECTION_INITIATION_MODE_INITIATOR,
+			},
 		},
-	},
-	"max_segment_size": {
-		Schema: schema.Schema{
-			Type:        schema.TypeInt,
-			Description: "Maximum amount of data the host will accept in a Tcp segment.",
-			Optional:    true,
-			Computed:    true,
+		"authentication_mode": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Peer authentication mode. PSK - In this mode a secret key shared between local and peer sites is to be used for authentication. The secret key can be a string with a maximum length of 128 characters. CERTIFICATE - In this mode a certificate defined at the global level is to be used for authentication.",
+				ValidateFunc: validation.StringInSlice(IPSecVpnSessionAuthenticationMode, false),
+				Optional:     true,
+				Default:      model.IPSecVpnSession_AUTHENTICATION_MODE_PSK,
+			},
 		},
-	},
+		"enabled": {
+			Schema: schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Enable/Disable IPSec VPN session.",
+				Optional:    true,
+				Default:     true,
+			},
+		},
+		"psk": {
+			Schema: schema.Schema{
+				Type:        schema.TypeString,
+				Description: "IPSec Pre-shared key. Maximum length of this field is 128 characters.",
+				Optional:    true,
+				Sensitive:   true,
+			},
+		},
+		"peer_id": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Peer ID to uniquely identify the peer site. The peer ID is the public IP address of the remote device terminating the VPN tunnel. When NAT is configured for the peer, enter the private IP address of the peer.",
+				Required:     true,
+				ValidateFunc: validation.IsIPAddress,
+			},
+		},
+		"peer_address": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Public IPv4/v6 address of the remote device terminating the VPN connection.",
+				Required:     true,
+				ValidateFunc: validation.IsIPAddress,
+			},
+		},
+		"ip_addresses": {
+			Schema: schema.Schema{
+				Type:        schema.TypeList,
+				Description: "IP Tunnel interface (commonly referred as VTI) ip addresses.",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateSingleIP(),
+				},
+			},
+		},
+		"rule": metadata.GetExtendedSchema(getIPSecVPNRulesSchema()),
+		"prefix_length": {
+			Schema: schema.Schema{
+				Type:         schema.TypeInt,
+				Description:  "Subnet Prefix Length.",
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 255),
+			},
+		},
+		"direction": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "The traffic direction apply to the MSS clamping",
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(TCPMssClampingDirections, false),
+			},
+		},
+		"max_segment_size": {
+			Schema: schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "Maximum amount of data the host will accept in a Tcp segment.",
+				Optional:    true,
+				Computed:    true,
+			},
+		},
+	}
+	if isTransitGateway {
+		schemaMap["parent_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent"))
+	} else {
+		schemaMap["service_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"))
+	}
+
+	return schemaMap
 }
+
+var IPSecVpnSessionSchema = getIPSecVpnSessionCommon(false)
 
 func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 	return &schema.Resource{

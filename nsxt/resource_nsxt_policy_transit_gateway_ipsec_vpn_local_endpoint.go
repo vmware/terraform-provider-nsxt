@@ -19,21 +19,7 @@ import (
 
 var iPSecVpnLocalEndpointPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/ipsec-vpn-local-endpoints/[ipsec-vpn-local-endpoint]"
 
-var tGwiPSecVpnLocalEndpointSchema = map[string]*metadata.ExtendedSchema{
-	// Copy all fields from the base IPSecVpnLocalEndpointSchema
-	"nsx_id":           IPSecVpnLocalEndpointSchema["nsx_id"],
-	"path":             IPSecVpnLocalEndpointSchema["path"],
-	"display_name":     IPSecVpnLocalEndpointSchema["display_name"],
-	"description":      IPSecVpnLocalEndpointSchema["description"],
-	"revision":         IPSecVpnLocalEndpointSchema["revision"],
-	"tag":              IPSecVpnLocalEndpointSchema["tag"],
-	"certificate_path": IPSecVpnLocalEndpointSchema["certificate_path"],
-	"trust_ca_paths":   IPSecVpnLocalEndpointSchema["trust_ca_paths"],
-	"trust_crl_paths":  IPSecVpnLocalEndpointSchema["trust_crl_paths"],
-	"local_address":    IPSecVpnLocalEndpointSchema["local_address"],
-	"local_id":         IPSecVpnLocalEndpointSchema["local_id"],
-	"parent_path":      metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
-}
+var tGwiPSecVpnLocalEndpointSchema = getIPSecVpnLocalEndpointCommonSchema(true)
 
 func resourceNsxtPolicyTransitGatewayIPSecVpnLocalEndpoint() *schema.Resource {
 	return &schema.Resource{

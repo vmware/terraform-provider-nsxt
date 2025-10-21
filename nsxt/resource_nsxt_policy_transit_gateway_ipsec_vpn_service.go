@@ -12,20 +12,7 @@ import (
 
 var twIpsecVpnParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
 
-var transitGatewayIpsecVpnServiceSchema = map[string]*metadata.ExtendedSchema{
-	// Copy all fields from the base IPSecVpnServiceSchema
-	"nsx_id":        IPSecVpnServiceSchema["nsx_id"],
-	"path":          IPSecVpnServiceSchema["path"],
-	"display_name":  IPSecVpnServiceSchema["display_name"],
-	"description":   IPSecVpnServiceSchema["description"],
-	"revision":      IPSecVpnServiceSchema["revision"],
-	"tag":           IPSecVpnServiceSchema["tag"],
-	"enabled":       IPSecVpnServiceSchema["enabled"],
-	"ha_sync":       IPSecVpnServiceSchema["ha_sync"],
-	"ike_log_level": IPSecVpnServiceSchema["ike_log_level"],
-	"bypass_rule":   IPSecVpnServiceSchema["bypass_rule"],
-	"parent_path":   metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
-}
+var transitGatewayIpsecVpnServiceSchema = getIPSecVpnServiceCommonSchema(false, true)
 
 // add it in the provider.go
 func resourceNsxtPolicyTransitGatewayIpsecVpnService() *schema.Resource {

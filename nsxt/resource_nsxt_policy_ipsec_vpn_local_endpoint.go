@@ -22,44 +22,54 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var IPSecVpnLocalEndpointSchema = map[string]*metadata.ExtendedSchema{
-	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
-	"path":         metadata.GetExtendedSchema(getPathSchema()),
-	"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
-	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
-	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
-	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"service_path": metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path for IPSec VPN service")),
-	"local_address": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Required:     true,
-			ValidateFunc: validation.IsIPAddress,
+func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*metadata.ExtendedSchema {
+	schema := map[string]*metadata.ExtendedSchema{
+		"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+		"path":         metadata.GetExtendedSchema(getPathSchema()),
+		"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"local_address": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsIPAddress,
+			},
 		},
-	},
-	"certificate_path": metadata.GetExtendedSchema(getPolicyPathSchema(false, false, "Policy path referencing site certificate")),
-	"local_id": {
-		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
+		"certificate_path": metadata.GetExtendedSchema(getPolicyPathSchema(false, false, "Policy path referencing site certificate")),
+		"local_id": {
+			Schema: schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
-	},
-	"trust_ca_paths": {
-		Schema: schema.Schema{
-			Type:     schema.TypeSet,
-			Elem:     getElemPolicyPathSchema(),
-			Optional: true,
+		"trust_ca_paths": {
+			Schema: schema.Schema{
+				Type:     schema.TypeSet,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 		},
-	},
-	"trust_crl_paths": {
-		Schema: schema.Schema{
-			Type:     schema.TypeSet,
-			Elem:     getElemPolicyPathSchema(),
-			Optional: true,
+		"trust_crl_paths": {
+			Schema: schema.Schema{
+				Type:     schema.TypeSet,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 		},
-	},
+	}
+
+	if isTransitGateway {
+		schema["parent_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent"))
+	} else {
+		schema["service_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"))
+	}
+	return schema
 }
+
+var IPSecVpnLocalEndpointSchema = getIPSecVpnLocalEndpointCommonSchema(false)
 
 func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 	return &schema.Resource{
