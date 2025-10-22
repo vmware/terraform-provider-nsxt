@@ -30,8 +30,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
 			c := m.(nsxtClients)
-			_, new := d.GetChange("default_span_path")
-
 			raw := d.GetRawConfig()
 			newAttr := raw.GetAttr("default_span_path")
 
@@ -39,7 +37,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				d.SetNew("default_span_path", c.DefaultSpanPath)
 				return nil
 			}
-			d.SetNew("default_span_path", new.(string))
+
 			return nil
 		},
 		Schema: map[string]*schema.Schema{
