@@ -172,7 +172,7 @@ func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, o
 		obj.AccessVlanId = &vlanID
 	}
 
-	if edgeClusterMemberIndex, ok := d.GetOk("edge_cluster_member_index"); ok {
+	if edgeClusterMemberIndex, ok := d.GetOkExists("edge_cluster_member_index"); ok { //GetOkExists will read from user input and state
 		ecmi := int64(edgeClusterMemberIndex.(int))
 		obj.EdgeClusterMemberIndex = &ecmi
 	}
