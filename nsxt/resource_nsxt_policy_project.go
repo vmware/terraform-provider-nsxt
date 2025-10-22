@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	infra2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -136,6 +137,12 @@ func resourceNsxtPolicyProject() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"id_suffix": {
+				Type:         schema.TypeString,
+				Description:  "Suffix to be appended to the IDs of the project's default objects.",
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 246),
+			},
 		},
 	}
 }
@@ -248,6 +255,11 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 			ZoneExternalIds: zoneExternalIds,
 		}
 		obj.VpcDeploymentScope = &vpcDeploymentScope
+
+		// Set id_suffix if provided
+		if idSuffix := d.Get("id_suffix").(string); idSuffix != "" {
+			obj.IdSuffix = &idSuffix
+		}
 	}
 
 	log.Printf("[INFO] Patching Project with ID %s", id)
@@ -410,20 +422,24 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("quotas", obj.Limits)
 	}
 
-	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
-		var nonDefaultSpanPaths []interface{}
-		var defaultSpanRefs *string
-		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
-			if *spanRef.IsDefault {
-				defaultSpanRefs = spanRef.SpanPath
-			} else {
-				nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
-			}
-		}
-		d.Set("default_span_path", defaultSpanRefs)
-		d.Set("non_default_span_paths", nonDefaultSpanPaths)
-		d.Set("zone_external_ids", stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds))
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		// Set id_suffix if available
+		d.Set("id_suffix", obj.IdSuffix)
 
+		if obj.VpcDeploymentScope != nil {
+			var nonDefaultSpanPaths []interface{}
+			var defaultSpanRefs *string
+			for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
+				if *spanRef.IsDefault {
+					defaultSpanRefs = spanRef.SpanPath
+				} else {
+					nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
+				}
+			}
+			d.Set("default_span_path", defaultSpanRefs)
+			d.Set("non_default_span_paths", nonDefaultSpanPaths)
+			d.Set("zone_external_ids", stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds))
+		}
 	}
 	return nil
 }

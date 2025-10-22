@@ -45,6 +45,7 @@ The following arguments are supported:
 * `default_span_path` - (Optional) Policy path of the Cluster based default Span object of type NetworkSpan. Available since NSX 9.1.0.
 * `non_default_span_paths` - (Optional) List of non default policy paths of the Span objects of type NetworkSpan.
 * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
+* `id_suffix` - (Optional) A suffix appended to the IDs of the project's default objects. This attribute is supported only in NSX 9.1.0 and later, and cannot be modified after creation.
 
 ## Attributes Reference
 
