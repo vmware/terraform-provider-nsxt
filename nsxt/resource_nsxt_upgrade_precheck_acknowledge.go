@@ -6,6 +6,8 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -62,6 +64,29 @@ func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 	}
 }
 
+func validatePrecheckIDs(m interface{}, precheckIDs []string) error {
+	var validChecks []string
+	connector := getPolicyConnector(m)
+	client := upgrade.NewUpgradeChecksInfoClient(connector)
+	checkInfoResults, err := client.List(nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, checkInfo := range checkInfoResults.Results {
+		for _, ci := range checkInfo.PreUpgradeChecksInfo {
+			validChecks = append(validChecks, *ci.Id)
+		}
+	}
+
+	for _, precheckID := range precheckIDs {
+		if !slices.Contains(validChecks, precheckID) {
+			return fmt.Errorf("precheck ID %s is not valid", precheckID)
+		}
+	}
+	return nil
+}
+
 func resourceNsxtUpgradePrecheckAcknowledgeCreate(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
@@ -69,7 +94,11 @@ func resourceNsxtUpgradePrecheckAcknowledgeCreate(d *schema.ResourceData, m inte
 	}
 	d.SetId(id)
 	precheckIDs := interface2StringList(d.Get("precheck_ids").([]interface{}))
-	err := acknowledgePrecheckWarnings(m, precheckIDs)
+	err := validatePrecheckIDs(m, precheckIDs)
+	if err != nil {
+		return handleCreateError("NsxtPrecheckAcknowledge", id, err)
+	}
+	err = acknowledgePrecheckWarnings(m, precheckIDs)
 	if err != nil {
 		return handleCreateError("NsxtPrecheckAcknowledge", id, err)
 	}
@@ -78,12 +107,27 @@ func resourceNsxtUpgradePrecheckAcknowledgeCreate(d *schema.ResourceData, m inte
 
 func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 	connector := getPolicyConnector(m)
+
+	typeParam := nsxModel.UpgradeCheckFailure_TYPE_WARNING
+	precheckWarnings, err := getPrecheckErrors(m, &typeParam)
+	if err != nil {
+		return err
+	}
+	var warns []string
+	for _, warn := range precheckWarnings {
+		warns = append(warns, *warn.Id)
+	}
+
 	client := upgrade.NewPreUpgradeChecksClient(connector)
 	for _, precheckID := range precheckIDs {
-		err := client.Acknowledge(precheckID)
-		if err != nil {
-			msg := fmt.Sprintf("Failed to acknowledge precheck warning with ID %s", precheckID)
-			return logAPIError(msg, err)
+		if slices.Contains(warns, precheckID) {
+			err := client.Acknowledge(precheckID)
+			if err != nil {
+				msg := fmt.Sprintf("Failed to acknowledge precheck warning with ID %s", precheckID)
+				return logAPIError(msg, err)
+			}
+		} else {
+			log.Printf("[INFO] Precheck warning with ID %s has not been triggered by NSX", precheckID)
 		}
 	}
 	return nil
@@ -118,6 +162,12 @@ func setPrecheckWarningsInSchema(d *schema.ResourceData, precheckWarnings []nsxM
 func resourceNsxtUpgradePrecheckAcknowledgeUpdate(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	precheckIDs := interface2StringList(d.Get("precheck_ids").([]interface{}))
+	if d.HasChange("precheck_ids") {
+		err := validatePrecheckIDs(m, precheckIDs)
+		if err != nil {
+			return handleCreateError("NsxtPrecheckAcknowledge", id, err)
+		}
+	}
 	err := acknowledgePrecheckWarnings(m, precheckIDs)
 	if err != nil {
 		return handleUpdateError("NsxtPrecheckAcknowledge", id, err)
