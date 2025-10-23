@@ -180,7 +180,7 @@ func testAccNsxtVpcConnectivityProfilePrerequisite() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_transit_gateway" "test" {
 %s
-  id = "default"
+  is_default = true
 }
 `, testAccNsxtProjectContext())
 }
