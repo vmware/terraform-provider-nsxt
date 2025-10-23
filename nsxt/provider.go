@@ -1170,9 +1170,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 	connector := getPolicyConnector(clients)
-	clients.DefaultSpanPath, err = getDefaultSpan(connector)
-	if err != nil {
-		return nil, err
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		clients.DefaultSpanPath, err = getDefaultSpan(connector)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return clients, nil
