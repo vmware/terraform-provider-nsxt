@@ -30,7 +30,7 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state, ruleName, defaultDomain)
+			return testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state, ruleName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -38,7 +38,7 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testPolicyResourceName, defaultDomain),
-					testAccNsxtPolicyGatewayPolicyRuleExists(testruleResourceName, defaultDomain),
+					testAccNsxtPolicyGatewayPolicyRuleExists(testruleResourceName),
 					resource.TestCheckResourceAttr(testruleResourceName, "display_name", ruleName),
 					resource.TestCheckResourceAttr(testruleResourceName, "description", description),
 					resource.TestCheckResourceAttr(testruleResourceName, "action", action),
@@ -48,16 +48,16 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 	})
 }
 
-func testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state *terraform.State, displayName string, domainName string) error {
+func testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_policy_gateway_policy" {
+		if rs.Type != "nsxt_policy_gateway_policy_rule" {
 			continue
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(testAccGetSessionContext(), resourceID, domainName, connector)
+		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(testAccGetSessionContext(), resourceID, rs.Primary.Attributes["policy_path"], connector)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,7 @@ func testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state *terraform.State, disp
 	return nil
 }
 
-func testAccNsxtPolicyGatewayPolicyRuleExists(resourceName string, domainName string) resource.TestCheckFunc {
+func testAccNsxtPolicyGatewayPolicyRuleExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -83,7 +83,7 @@ func testAccNsxtPolicyGatewayPolicyRuleExists(resourceName string, domainName st
 			return fmt.Errorf("Policy GatewayPolicy resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(testAccGetSessionContext(), resourceID, domainName, connector)
+		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(testAccGetSessionContext(), resourceID, rs.Primary.Attributes["policy_path"], connector)
 		if err != nil {
 			return err
 		}
