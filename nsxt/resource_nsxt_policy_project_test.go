@@ -91,6 +91,7 @@ func runChecksNsx910(testResourceName string, expectedValues map[string]string) 
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "non_default_span_paths.#", expectedValues["span_reference_count"]),
 		resource.TestCheckResourceAttrSet(testResourceName, "non_default_span_paths.0"),
+		resource.TestCheckResourceAttr(testResourceName, "id_suffix", expectedValues["id_suffix"]),
 	)
 }
 
@@ -363,6 +364,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "true",
 		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
 	}
 	expectedValuesStep2 := map[string]string{
 		"t0_count":                   "1",
@@ -371,6 +373,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "false",
 		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -541,6 +544,7 @@ resource "nsxt_policy_project" "test" {
   display_name               = "{{.DisplayName}}"
   description                = "{{.Description}}"
   {{if .ShortId}}short_id                   = "{{.ShortId}}"{{end}}
+  {{if .IdSuffix}}id_suffix                  = "{{.IdSuffix}}"{{end}}
   {{if .T0GwPath}}tier0_gateway_paths        = [{{.T0GwPath}}]{{end}}
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
@@ -657,6 +661,10 @@ func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExterna
 	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
 	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
 	attrMap["PolicyNetworkSpan"] = "nsxt_policy_network_span.netspan.path"
+
+	// Add id_suffix for NSX 9.1+ tests
+	attrMap["IdSuffix"] = "test-suffix"
+
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate910").Parse(templateData)
 	if err != nil {
