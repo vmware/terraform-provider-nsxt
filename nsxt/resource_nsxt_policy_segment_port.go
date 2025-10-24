@@ -30,13 +30,8 @@ func resourceNsxtPolicySegmentPort() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "VIF attachment",
 				Optional:    true,
-				Elem:        getPolicySegmentPortSchema(),
+				Elem:        getPolicySegmentPortAttachmentSchema(),
 				MaxItems:    1,
-			},
-			"vif_id": {
-				Type:        schema.TypeString,
-				Description: "Segment Port attachment id",
-				Optional:    true,
 			},
 			"discovery_profile": {
 				Type:        schema.TypeList,
@@ -65,7 +60,7 @@ func resourceNsxtPolicySegmentPort() *schema.Resource {
 
 var allocateAddresses = []string{"IP_POOL", "MAC_POOL", "BOTH", "DHCP", "DHCPV6", "SLAAC", "NONE"}
 
-func getPolicySegmentPortSchema() *schema.Resource {
+func getPolicySegmentPortAttachmentSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"allocate_addresses": {
