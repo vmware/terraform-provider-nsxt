@@ -5,7 +5,10 @@
 package nsxt
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -28,6 +31,9 @@ func dataSourceNsxtVPC() *schema.Resource {
 }
 
 func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC data source requires NSX version 9.0.0 or higher")
+	}
 	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Vpc", nil)
 	if err != nil {
 		return err
