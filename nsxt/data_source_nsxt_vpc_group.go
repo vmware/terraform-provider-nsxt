@@ -23,7 +23,7 @@ func dataSourceNsxtVpcGroup() *schema.Resource {
 }
 
 func dataSourceNsxtVpcGroupRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Group", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "Group", nil)
 	if err != nil {
 		return err
 	}
