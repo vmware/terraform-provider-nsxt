@@ -430,7 +430,7 @@ func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, true, false),
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.ComposeTestCheckFunc(
 						testAccNsxtCheckSpanPath(testResourceName, false),
@@ -441,7 +441,7 @@ func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
 			},
 			{
 				// Update
-				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, false, true),
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.ComposeTestCheckFunc(
 						testAccNsxtCheckSpanPath(testResourceName, true),
@@ -739,7 +739,7 @@ resource "nsxt_policy_project" "test" {
 }`, accTestPolicyProjectCreateAttributes["DisplayName"], strconv.FormatBool(enabled))
 }
 
-func testAccNsxtPolicyProjectDefaultSpanCheckTemplate(displayName string, withCustomSpan bool, isUpdate bool) string {
+func testAccNsxtPolicyProjectDefaultSpanCheckTemplate(displayName string, isUpdate bool) string {
 	defaultSpan := "span-default"
 	nonDefaultSpan := "span-non-default"
 	spanConstruct := constructSpanForProject("nsxt_policy_network_span.def.path", "nsxt_policy_network_span.nondef.path")
