@@ -415,6 +415,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_project.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -424,27 +425,27 @@ func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectCreateAttributes["DisplayName"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(accTestPolicyProjectCreateAttributes["DisplayName"], true, false),
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.ComposeTestCheckFunc(
 						testAccNsxtCheckSpanPath(testResourceName, false),
-						resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyProjectCreateAttributes["DisplayName"]),
+						resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 						resource.TestCheckResourceAttrSet(testResourceName, "default_span_path"),
 					),
 				),
 			},
 			{
 				// Update
-				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(accTestPolicyProjectCreateAttributes["DisplayName"], false, true),
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, false, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.ComposeTestCheckFunc(
 						testAccNsxtCheckSpanPath(testResourceName, true),
-						resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyProjectCreateAttributes["DisplayName"]),
+						resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 						resource.TestCheckResourceAttrSet(testResourceName, "default_span_path"),
 					),
 				),
