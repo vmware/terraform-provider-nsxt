@@ -127,7 +127,7 @@ The following arguments are supported:
         * `server` - (Required) Server IP or fqdn.
 * `credentials` - (Optional) Username and password settings for the node.
     * `audit_password` - (Optional) Node audit user password.
-    * `audit_username` - (Optional) CLI "audit" username.
+    * `audit_username` - (Optional) CLI "audit" username. Defaults to `audit` when `audit_password` is set.
     * `cli_password` - (Required) Node cli password.
     * `cli_username` - (Optional) CLI "admin" username.
     * `root_password` - (Required) Node root user password.
