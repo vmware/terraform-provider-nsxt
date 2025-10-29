@@ -82,7 +82,7 @@ func validatePrecheckIDs(m interface{}, precheckIDs []string) error {
 
 	for _, precheckID := range precheckIDs {
 		if !slices.Contains(validChecks, precheckID) && !slices.Contains(validChecks, strings.Split(precheckID, "-")[0]) {
-				return fmt.Errorf("precheck ID %s is not valid", precheckID)
+			return fmt.Errorf("precheck ID %s is not valid", precheckID)
 		}
 	}
 	return nil
