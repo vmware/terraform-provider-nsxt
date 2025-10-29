@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -80,8 +81,8 @@ func validatePrecheckIDs(m interface{}, precheckIDs []string) error {
 	}
 
 	for _, precheckID := range precheckIDs {
-		if !slices.Contains(validChecks, precheckID) {
-			return fmt.Errorf("precheck ID %s is not valid", precheckID)
+		if !slices.Contains(validChecks, precheckID) && !slices.Contains(validChecks, strings.Split(precheckID, "-")[0]) {
+				return fmt.Errorf("precheck ID %s is not valid", precheckID)
 		}
 	}
 	return nil
