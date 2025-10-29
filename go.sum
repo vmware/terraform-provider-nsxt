@@ -95,8 +95,8 @@ github.com/hashicorp/terraform-plugin-go v0.29.0 h1:1nXKl/nSpaYIUBU1IG/EsDOX0vv+
 github.com/hashicorp/terraform-plugin-go v0.29.0/go.mod h1:vYZbIyvxyy0FWSmDHChCqKvI40cFTDGSb3D8D70i9GM=
 github.com/hashicorp/terraform-plugin-log v0.9.0 h1:i7hOA+vdAItN1/7UrfBqBwvYPQ9TFvymaRGZED3FCV0=
 github.com/hashicorp/terraform-plugin-log v0.9.0/go.mod h1:rKL8egZQ/eXSyDqzLUuwUYLVdlYeamldAHSxjUFADow=
-github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.0 h1:PQP7Crrc7t/ozj+P9x0/lsTzGNy3lVppH8zAJylofaE=
-github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.0/go.mod h1:GQhpKVvvuwzD79e8/NZ+xzj+ZpWovdPAe8nfV/skwNU=
+github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1 h1:mlAq/OrMlg04IuJT7NpefI1wwtdpWudnEmjuQs04t/4=
+github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1/go.mod h1:GQhpKVvvuwzD79e8/NZ+xzj+ZpWovdPAe8nfV/skwNU=
 github.com/hashicorp/terraform-plugin-testing v1.13.3 h1:QLi/khB8Z0a5L54AfPrHukFpnwsGL8cwwswj4RZduCo=
 github.com/hashicorp/terraform-plugin-testing v1.13.3/go.mod h1:WHQ9FDdiLoneey2/QHpGM/6SAYf4A7AZazVg7230pLE=
 github.com/hashicorp/terraform-registry-address v0.4.0 h1:S1yCGomj30Sao4l5BMPjTGZmCNzuv7/GDTDX99E9gTk=
@@ -166,8 +166,8 @@ github.com/vmware/vsphere-automation-sdk-go/lib v0.8.0 h1:u1SXOTM6D4Ygb3jeidj2Rd
 github.com/vmware/vsphere-automation-sdk-go/lib v0.8.0/go.mod h1:8d5JTwjpM/Z03n/IZb0fwmXkJNWvWwuLXBqoakqYio4=
 github.com/vmware/vsphere-automation-sdk-go/runtime v0.8.0 h1:KnDIX9LY0nru7iMQTg0sy9vChhyorPo5OdASM2MaAcI=
 github.com/vmware/vsphere-automation-sdk-go/runtime v0.8.0/go.mod h1:DzLetYAmw1+vj7bqElRWEpuy40WYE/woL3alsymYa/c=
-github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20250805134840-91d7e047bd3a h1:LvSpakrRj+dxYzWf/ETNbtvhlinEOsMpn89a/LXPb8I=
-github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20250805134840-91d7e047bd3a/go.mod h1:C3JVOHRVLrGBQ8kTWAiGYlRz5UQC5qAcTdt3tvA+5P0=
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20251021071509-9526add9a400 h1:tCIBk/7y1rtWDcQQyR1jQCKz1SPNRL2i/2vL0CwAsDw=
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20251021071509-9526add9a400/go.mod h1:C3JVOHRVLrGBQ8kTWAiGYlRz5UQC5qAcTdt3tvA+5P0=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466 h1:SYBECpviZBcp/cUHKTDPQP7CSQb0lUfPPOClpGOFH44=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466/go.mod h1:gcEvyczWPFMZX2gkBiBVpOwvUGSNXSpxU19Sx9aiouY=
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.6.1-0.20241118070726-666c7cd6e466 h1:yXUKHP/XDGp7Wrcbfl5BHV1VreCNPHRLUj2RQ5qDEmE=

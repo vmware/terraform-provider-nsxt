@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -91,6 +92,7 @@ func runChecksNsx910(testResourceName string, expectedValues map[string]string) 
 	return resource.ComposeTestCheckFunc(
 		resource.TestCheckResourceAttr(testResourceName, "non_default_span_paths.#", expectedValues["span_reference_count"]),
 		resource.TestCheckResourceAttrSet(testResourceName, "non_default_span_paths.0"),
+		resource.TestCheckResourceAttr(testResourceName, "id_suffix", expectedValues["id_suffix"]),
 	)
 }
 
@@ -363,6 +365,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "true",
 		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
 	}
 	expectedValuesStep2 := map[string]string{
 		"t0_count":                   "1",
@@ -371,6 +374,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		"span_reference_count":       "1",
 		"activate_default_dfw_rules": "false",
 		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
 	}
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -404,6 +408,46 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 					runChecksNsx420(testResourceName, expectedValuesStep2),
 					runChecksNsx900(testResourceName, expectedValuesStep2),
 					runChecksNsx910(testResourceName, expectedValuesStep2),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_project.test"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				// Create
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.ComposeTestCheckFunc(
+						testAccNsxtCheckSpanPath(testResourceName, false),
+						resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+						resource.TestCheckResourceAttrSet(testResourceName, "default_span_path"),
+					),
+				),
+			},
+			{
+				// Update
+				Config: testAccNsxtPolicyProjectDefaultSpanCheckTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.ComposeTestCheckFunc(
+						testAccNsxtCheckSpanPath(testResourceName, true),
+						resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+						resource.TestCheckResourceAttrSet(testResourceName, "default_span_path"),
+					),
 				),
 			},
 		},
@@ -541,6 +585,7 @@ resource "nsxt_policy_project" "test" {
   display_name               = "{{.DisplayName}}"
   description                = "{{.Description}}"
   {{if .ShortId}}short_id                   = "{{.ShortId}}"{{end}}
+  {{if .IdSuffix}}id_suffix                  = "{{.IdSuffix}}"{{end}}
   {{if .T0GwPath}}tier0_gateway_paths        = [{{.T0GwPath}}]{{end}}
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
@@ -657,6 +702,10 @@ func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExterna
 	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
 	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
 	attrMap["PolicyNetworkSpan"] = "nsxt_policy_network_span.netspan.path"
+
+	// Add id_suffix for NSX 9.1+ tests
+	attrMap["IdSuffix"] = "test-suffix"
+
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate910").Parse(templateData)
 	if err != nil {
@@ -688,4 +737,87 @@ resource "nsxt_policy_project" "test" {
   }
 
 }`, accTestPolicyProjectCreateAttributes["DisplayName"], strconv.FormatBool(enabled))
+}
+
+func testAccNsxtPolicyProjectDefaultSpanCheckTemplate(displayName string, isUpdate bool) string {
+	defaultSpan := "span-default"
+	nonDefaultSpan := "span-non-default"
+	spanConstruct := constructSpanForProject("nsxt_policy_network_span.def.path", "nsxt_policy_network_span.nondef.path")
+	if isUpdate {
+		spanConstruct = constructSpanForProject("", "nsxt_policy_network_span.def.path")
+	}
+	projectTemplate := fmt.Sprintf(`
+
+resource "nsxt_policy_project" "test" {
+  display_name = "%s"
+  vc_folder = true
+  %s
+}
+`, displayName, spanConstruct)
+
+	return testAccNsxtPolicyNetworkSpan(defaultSpan, nonDefaultSpan) + projectTemplate
+}
+
+func constructSpanForProject(customDefaultSpan, nonDefaultSpan string) string {
+	if customDefaultSpan == "" {
+		return fmt.Sprintf(`
+non_default_span_paths = [%s]
+`, nonDefaultSpan)
+	} else {
+		return fmt.Sprintf(`
+default_span_path = %s
+non_default_span_paths = [%s]
+`, customDefaultSpan, nonDefaultSpan)
+	}
+}
+
+func testAccNsxtPolicyNetworkSpan(defaultSpan, nonDefaultSpan string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_network_span" "def" {
+  display_name = "%s"
+
+}
+
+resource "nsxt_policy_network_span" "nondef" {
+  display_name = "%s"
+
+}
+
+`, defaultSpan, nonDefaultSpan)
+}
+
+func testAccNsxtCheckSpanPath(resourceName string, isSpanNsxDefault bool) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Policy project resource %s not found in resources", resourceName)
+		}
+		resourceID := rs.Primary.ID
+		var err error
+		var defaultSpan string
+		if isSpanNsxDefault {
+			defaultSpan, err = getDefaultSpan(connector)
+			if err != nil {
+				return fmt.Errorf("Failed to get the default span path : %v", err)
+			}
+		} else {
+			defaultSpan = rs.Primary.Attributes["default_span_path"]
+		}
+		client := infra.NewProjectsClient(connector)
+		project, err := client.Get(defaultOrgID, resourceID, nil)
+		if err != nil {
+			return fmt.Errorf("Error retreiving the project %v", resourceID)
+		}
+		defaultSpanFromProject := ""
+		for _, spanRef := range project.VpcDeploymentScope.SpanReferences {
+			if *spanRef.IsDefault {
+				defaultSpanFromProject = *spanRef.SpanPath
+			}
+		}
+		if defaultSpan == defaultSpanFromProject {
+			return nil
+		}
+		return fmt.Errorf("Default span setting check failed for project %v", resourceID)
+	}
 }

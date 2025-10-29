@@ -5,12 +5,15 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	infra2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
@@ -26,6 +29,19 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			if util.NsxVersionHigherOrEqual("9.1.0") {
+				c := m.(nsxtClients)
+				raw := d.GetRawConfig()
+				newAttr := raw.GetAttr("default_span_path")
+
+				if newAttr.IsNull() {
+					d.SetNew("default_span_path", c.DefaultSpanPath)
+					return nil
+				}
+			}
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
 			"path":         getPathSchema(),
@@ -114,7 +130,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Description:  "Policy path of the Cluster based default Span object of type NetworkSpan",
 				ValidateFunc: validatePolicyPath(),
 				Optional:     true,
-				Default:      "/infra/network-spans/default",
+				Computed:     true,
 			},
 			"non_default_span_paths": {
 				Type:        schema.TypeList,
@@ -134,6 +150,12 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"id_suffix": {
+				Type:         schema.TypeString,
+				Description:  "Suffix to be appended to the IDs of the project's default objects.",
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 246),
 			},
 		},
 	}
@@ -210,13 +232,17 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	}
 
 	if util.NsxVersionHigherOrEqual("9.1.0") {
-		// There should be just one object here
 		var spanReferences []model.SpanReference
-		defaultSpanPath := d.Get("default_span_path").(string)
 
-		// default_span_path will never be empty, since it has a default value and the validator will make sure that
-		// user will not assign an empty string or such.
 		isDefault := true
+		defaultSpanPathInterface, isDefaultSet := d.GetOkExists("default_span_path")
+		var defaultSpanPath string
+		if isDefaultSet {
+			defaultSpanPath = defaultSpanPathInterface.(string)
+		} else {
+			defaultSpanPath = m.(nsxtClients).DefaultSpanPath
+		}
+
 		spanReferences = append(spanReferences, model.SpanReference{
 			SpanPath:  &defaultSpanPath,
 			IsDefault: &isDefault,
@@ -238,6 +264,11 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 			ZoneExternalIds: zoneExternalIds,
 		}
 		obj.VpcDeploymentScope = &vpcDeploymentScope
+
+		// Set id_suffix if provided
+		if idSuffix := d.Get("id_suffix").(string); idSuffix != "" {
+			obj.IdSuffix = &idSuffix
+		}
 	}
 
 	log.Printf("[INFO] Patching Project with ID %s", id)
@@ -252,6 +283,23 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		err = patchVpcSecurityProfile(d, connector, id)
 	}
 	return err
+}
+
+func getDefaultSpan(connector client.Connector) (string, error) {
+	var cursor *string
+	client := infra2.NewNetworkSpansClient(connector)
+	spanList, err := client.List(cursor, nil, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	defaultSpanPath := []string{}
+	for _, spanObj := range spanList.Results {
+		if *spanObj.IsDefault {
+			defaultSpanPath = append(defaultSpanPath, *spanObj.Path)
+		}
+	}
+
+	return defaultSpanPath[0], nil
 }
 
 func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector, projectID string) error {
@@ -383,20 +431,24 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("quotas", obj.Limits)
 	}
 
-	if util.NsxVersionHigherOrEqual("9.1.0") && obj.VpcDeploymentScope != nil {
-		var nonDefaultSpanPaths []interface{}
-		var defaultSpanRefs *string
-		for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
-			if *spanRef.IsDefault {
-				defaultSpanRefs = spanRef.SpanPath
-			} else {
-				nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
-			}
-		}
-		d.Set("default_span_path", defaultSpanRefs)
-		d.Set("non_default_span_paths", nonDefaultSpanPaths)
-		d.Set("zone_external_ids", stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds))
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		// Set id_suffix if available
+		d.Set("id_suffix", obj.IdSuffix)
 
+		if obj.VpcDeploymentScope != nil {
+			var nonDefaultSpanPaths []interface{}
+			var defaultSpanRefs *string
+			for _, spanRef := range obj.VpcDeploymentScope.SpanReferences {
+				if *spanRef.IsDefault {
+					defaultSpanRefs = spanRef.SpanPath
+				} else {
+					nonDefaultSpanPaths = append(nonDefaultSpanPaths, *spanRef.SpanPath)
+				}
+			}
+			d.Set("default_span_path", defaultSpanRefs)
+			d.Set("non_default_span_paths", nonDefaultSpanPaths)
+			d.Set("zone_external_ids", stringList2Interface(obj.VpcDeploymentScope.ZoneExternalIds))
+		}
 	}
 	return nil
 }
