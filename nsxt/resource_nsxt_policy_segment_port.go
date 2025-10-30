@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -9,11 +10,13 @@ import (
 
 func resourceNsxtPolicySegmentPort() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceNsxtPolicySegmentPortCreate,
-		Read:     resourceNsxtPolicySegmentPortRead,
-		Update:   resourceNsxtPolicySegmentPortUpdate,
-		Delete:   resourceNsxtPolicySegmentPortDelete,
-		Importer: &schema.ResourceImporter{}, // TODO: Add importer
+		Create: resourceNsxtPolicySegmentPortCreate,
+		Read:   resourceNsxtPolicySegmentPortRead,
+		Update: resourceNsxtPolicySegmentPortUpdate,
+		Delete: resourceNsxtPolicySegmentPortDelete,
+		Importer: &schema.ResourceImporter{
+			State: getSegmentPortPathOrIDResourceImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
 			"path":         getPathSchema(),
@@ -24,7 +27,7 @@ func resourceNsxtPolicySegmentPort() *schema.Resource {
 			"segment_path": {
 				Type:        schema.TypeString,
 				Description: "Path of the segment",
-				Optional:    true,
+				Required:    true,
 			},
 			"attachment": {
 				Type:        schema.TypeList,
@@ -196,4 +199,25 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 	}
 
 	return nil
+}
+
+func getSegmentPortPathOrIDResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	var policyPath = d.Id()
+	var segmentPath string
+	policyPathSegs := strings.Split(policyPath, "/")
+
+	if len(policyPathSegs) == 3 {
+		segmentPath = "/infra/tier-1s/" + policyPathSegs[0] + "/segments/" + policyPathSegs[1]
+	} else if len(policyPathSegs) == 2 {
+		segmentPath = "/infra/segments/" + policyPathSegs[0]
+	} else if len(policyPathSegs) > 5 {
+		segmentPath = strings.Join(policyPathSegs[:len(policyPathSegs)-2], "/")
+	} else {
+		return []*schema.ResourceData{}, fmt.Errorf("Invalid policy path")
+	}
+
+	d.SetId(policyPathSegs[len(policyPathSegs)-1])
+
+	d.Set("segment_path", segmentPath)
+	return []*schema.ResourceData{d}, nil
 }

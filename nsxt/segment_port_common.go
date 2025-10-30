@@ -344,6 +344,7 @@ func getSegmentPort(segmentPath, segmentPortId string, context utl.SessionContex
 	var err error
 	segmentId := getSegmentIdFromSegPath(segmentPath)
 	t1Id := getT1IdFromSegPath(segmentPath)
+
 	if isT1Segment(segmentPath) {
 		if t1Id == "" {
 			return model.SegmentPort{}, fmt.Errorf("Error getting the tier1 gateway ID : %v", err)
