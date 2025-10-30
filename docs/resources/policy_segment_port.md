@@ -8,7 +8,6 @@ description: A resource to configure a network Segment Port.
 
 This resource provides a method for the management of Segments Port.
 
-
 # Example Usage
 
 ```hcl
@@ -49,7 +48,6 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 
-
 ## Importing
 
 An existing segment port can be [imported][docs-import] into this resource, via the following command:
@@ -68,4 +66,3 @@ terraform import nsxt_policy_segment_port.segmentport1 POLICY_PATH
 
 The above command imports the segment port named `segmentport1` with the policy path `POLICY_PATH`.
 Note: for multitenancy projects only the later form is usable.
-
