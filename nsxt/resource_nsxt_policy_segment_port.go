@@ -121,7 +121,7 @@ func resourceNsxtPolicySegmentPortCreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	obj, err := policySegmentPortResourceToInfraStruct(context, id, d, false)
+	obj, err := policySegmentPortResourceToInfraStruct(id, d, false)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func resourceNsxtPolicySegmentPortUpdate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentPortResourceToInfraStruct(context, id, d, false)
+	obj, err := policySegmentPortResourceToInfraStruct(id, d, false)
 	if err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 	if id == "" {
 		return fmt.Errorf("Error obtaining Segment Port ID")
 	}
-	obj, err := policySegmentPortResourceToInfraStruct(getSessionContext(d, m), id, d, true)
+	obj, err := policySegmentPortResourceToInfraStruct(id, d, true)
 	if err != nil {
 		return err
 	}

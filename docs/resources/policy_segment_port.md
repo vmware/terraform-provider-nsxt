@@ -14,15 +14,15 @@ This resource provides a method for the management of Segments Port.
 ```hcl
 resource "nsxt_policy_segment_port" "sample" {
   display_name = "segment-port1"
-  description = "NSX-t Segment port"
+  description  = "NSX-t Segment port"
   segment_path = data.nsxt_policy_segment.segment1.path
   discovery_profile {
-    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.segprofile.path
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.segprofile.path
     mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.segprofile.path
   }
   security_profile {
     spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.segprofile.path
-    security_profile_path = data.nsxt_policy_segment_security_profile.segprofile.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.segprofile.path
   }
 }
 ```

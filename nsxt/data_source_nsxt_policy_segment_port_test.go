@@ -1,7 +1,6 @@
 package nsxt
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -35,10 +34,10 @@ func TestAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T) {
 }
 
 func testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag string) string {
-	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag) + fmt.Sprintf(`
+	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag) + `
 
 data "nsxt_policy_segment_port" "segmentport1" {
 	display_name = nsxt_policy_segment_port.test.display_name
 }
-`)
+`
 }

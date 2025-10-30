@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func policySegmentPortResourceToInfraStruct(context utl.SessionContext, id string, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
+func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
