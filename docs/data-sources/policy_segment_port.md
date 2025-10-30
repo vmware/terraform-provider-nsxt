@@ -8,7 +8,7 @@ description: Policy Segment Port data source.
 
 This resource provides a method for the management of Segments Port.
 
-# Example Usage
+## Example Usage
 
 ```hcl
 data "nsxt_policy_segment_port" "segmentport1" {

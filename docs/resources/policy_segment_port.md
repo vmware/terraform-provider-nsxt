@@ -8,7 +8,7 @@ description: A resource to configure a network Segment Port.
 
 This resource provides a method for the management of Segments Port.
 
-# Example Usage
+## Example Usage
 
 ```hcl
 resource "nsxt_policy_segment_port" "sample" {
