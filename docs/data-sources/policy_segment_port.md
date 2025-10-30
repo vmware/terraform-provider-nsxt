@@ -8,7 +8,6 @@ description: Policy Segment Port data source.
 
 This resource provides a method for the management of Segments Port.
 
-
 # Example Usage
 
 ```hcl
@@ -30,5 +29,3 @@ In addition to arguments listed above, the following attributes are exported:
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
 * `segment_path` - Path of the associated segment.
-
-
