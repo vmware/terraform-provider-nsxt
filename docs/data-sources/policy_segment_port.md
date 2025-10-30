@@ -13,7 +13,7 @@ This resource provides a method for the management of Segments Port.
 
 ```hcl
 data "nsxt_policy_segment_port" "segmentport1" {
-	display_name = "segport1"
+  display_name = "segport1"
 }
 ```
 
