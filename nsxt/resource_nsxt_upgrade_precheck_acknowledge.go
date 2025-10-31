@@ -81,6 +81,9 @@ func validatePrecheckIDs(m interface{}, precheckIDs []string) error {
 	}
 
 	for _, precheckID := range precheckIDs {
+		// Here we are checking if the precheck ID is in the list of valid checks.
+		// If not we are also checking if the ID has a "-" and the string before it is in the list.
+		// This is done because, in some cases NSX adds the precheck in <precheckID>-<taskName> format and only the precheck ID is considered while acknowledging/resolving
 		if !slices.Contains(validChecks, precheckID) && !slices.Contains(validChecks, strings.Split(precheckID, "-")[0]) {
 			return fmt.Errorf("precheck ID %s is not valid", precheckID)
 		}
