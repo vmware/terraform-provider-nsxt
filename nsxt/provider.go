@@ -69,6 +69,7 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicyGlobalManager    bool
+	DefaultSpanPath        string
 }
 
 // Provider for VMWare NSX-T
@@ -1170,6 +1171,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	err = configurePolicyConnectorData(d, &clients)
 	if err != nil {
 		return nil, err
+	}
+	connector := getPolicyConnector(clients)
+	if util.NsxVersionHigherOrEqual("9.1.0") {
+		clients.DefaultSpanPath, err = getDefaultSpan(connector)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return clients, nil

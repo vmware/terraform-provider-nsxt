@@ -239,7 +239,7 @@ data "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = nsxt_policy_project.test.id
   }
-  id = "default"
+  is_default = true
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "test" {
