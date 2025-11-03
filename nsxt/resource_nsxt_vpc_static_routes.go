@@ -110,7 +110,7 @@ func resourceNsxtVpcStaticRoutesExists(sessionContext utl.SessionContext, id str
 
 func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Static Routes resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Static Routes resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

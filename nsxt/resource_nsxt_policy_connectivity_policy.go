@@ -109,7 +109,7 @@ func resourceNsxtPolicyConnectivityPolicyExists(sessionContext utl.SessionContex
 func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interface{}) error {
 
 	if !util.NsxVersionHigherOrEqual("9.1.0") {
-		return fmt.Errorf("policy Connectivity Policy Create resource requires NSX version 9.1.0 or higher")
+		return fmt.Errorf("Policy Connectivity Policy Create resource requires NSX version 9.1.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

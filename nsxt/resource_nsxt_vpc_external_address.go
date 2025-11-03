@@ -67,7 +67,7 @@ func updatePort(d *schema.ResourceData, m interface{}, deleteFlow bool) error {
 
 func resourceNsxtVpcExternalAddressCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc External Address resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC External Address resource requires NSX version 9.0.0 or higher")
 	}
 	err := updatePort(d, m, false)
 	if err != nil {

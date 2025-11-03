@@ -197,7 +197,7 @@ func polishConstraintTargets(constraint *model.Constraint) {
 
 func resourceNsxtPolicyConstraintCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("policy constraint resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Policy constraint resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

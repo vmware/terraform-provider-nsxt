@@ -134,7 +134,7 @@ func resourceNsxtVpcIpAddressAllocationExists(sessionContext utl.SessionContext,
 
 func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Ip Address Allocation resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC IP Address Allocation resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

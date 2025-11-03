@@ -275,7 +275,7 @@ func resourceNsxtVpcServiceProfileExists(sessionContext utl.SessionContext, id s
 
 func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Service Profile resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Service Profile resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

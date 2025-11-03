@@ -37,7 +37,7 @@ func dataSourceNsxtVpcServiceProfile() *schema.Resource {
 
 func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Service profile data source requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Service Profile data source requires NSX version 9.0.0 or higher")
 	}
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.

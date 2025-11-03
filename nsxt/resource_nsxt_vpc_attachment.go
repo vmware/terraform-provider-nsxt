@@ -76,7 +76,7 @@ func resourceNsxtVpcAttachmentExists(sessionContext utl.SessionContext, parentPa
 
 func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Attachment resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Attachment resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

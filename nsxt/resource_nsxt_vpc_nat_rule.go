@@ -202,7 +202,7 @@ func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, paren
 
 func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Policy Vpc Nat Rule resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Policy VPC Nat Rule resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 

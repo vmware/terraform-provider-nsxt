@@ -220,7 +220,7 @@ func resourceNsxtVpcConnectivityProfileExists(sessionContext utl.SessionContext,
 
 func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Vpc Connectivity Profile resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("VPC Connectivity Profile resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 
