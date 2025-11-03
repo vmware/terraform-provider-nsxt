@@ -83,8 +83,6 @@ func getIPSecVpnServiceCommonSchema(isExtended bool, isTransitGateway bool) map[
 	return schemaMap
 }
 
-var IPSecVpnServiceSchema = getIPSecVpnServiceCommonSchema(false, false)
-
 var IPSecVpnServiceSchemaExt = getIPSecVpnServiceCommonSchema(true, false)
 
 func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
