@@ -123,7 +123,7 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "Password for BGP neighbor authentication",
-				ValidateFunc: validation.StringLenBetween(0, 20),
+				ValidateFunc: validation.StringLenBetween(0, 32),
 				Sensitive:    true,
 			},
 			"remote_as_num": {
