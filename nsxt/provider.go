@@ -421,6 +421,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_security_policy":                              resourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_service":                                      resourceNsxtPolicyService(),
 			"nsxt_policy_gateway_policy":                               resourceNsxtPolicyGatewayPolicy(),
+			"nsxt_policy_gateway_policy_rule":                          resourceNsxtPolicyGatewayRulePolicy(),
 			"nsxt_policy_predefined_gateway_policy":                    resourceNsxtPolicyPredefinedGatewayPolicy(),
 			"nsxt_policy_predefined_security_policy":                   resourceNsxtPolicyPredefinedSecurityPolicy(),
 			"nsxt_policy_segment":                                      resourceNsxtPolicySegment(),
