@@ -434,8 +434,8 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 						"audit_username": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Default:     "audit",
 							Description: "CLI \"audit\" username",
+							Computed:    true,
 						},
 						"cli_password": {
 							Type:        schema.TypeString,
