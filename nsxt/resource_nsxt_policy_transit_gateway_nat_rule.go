@@ -57,7 +57,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleExists(sessionContext utl.SessionCon
 
 func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Policy Transit Gateway Nat Rule resource requires NSX version 9.0.0 or higher")
+		return fmt.Errorf("Policy Transit Gateway NAT Rule resource requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
 
