@@ -33,7 +33,7 @@ func dataSourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m inter
 	if len(gwPath) > 0 {
 		query["parent_path"] = fmt.Sprintf("%s*", gwPath)
 	}
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "PolicyDnsForwarder", query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "PolicyDnsForwarder", query, false)
 	if err != nil {
 		return err
 	}

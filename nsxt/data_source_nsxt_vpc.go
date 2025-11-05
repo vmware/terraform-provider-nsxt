@@ -28,7 +28,7 @@ func dataSourceNsxtVPC() *schema.Resource {
 }
 
 func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Vpc", nil)
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "Vpc", nil)
 	if err != nil {
 		return err
 	}

@@ -25,7 +25,7 @@ func dataSourceNsxtPolicyCertificate() *schema.Resource {
 func dataSourceNsxtPolicyCertificateRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "TlsCertificate", nil)
+	_, err := policyDataSourceResourceRead(d, connector, commonSessionContext, "TlsCertificate", nil)
 	if err != nil {
 		return err
 	}

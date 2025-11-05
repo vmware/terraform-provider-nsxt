@@ -221,7 +221,7 @@ func resourceNsxtPolicyConstraintCreate(d *schema.ResourceData, m interface{}) e
 
 	log.Printf("[INFO] Creating Constraint with ID %s", id)
 
-	client := clientLayer.NewConstraintsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewConstraintsClient(commonSessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Constraint", id, err)
@@ -240,7 +240,7 @@ func resourceNsxtPolicyConstraintRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining Constraint ID")
 	}
 
-	client := clientLayer.NewConstraintsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewConstraintsClient(commonSessionContext, connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -287,7 +287,7 @@ func resourceNsxtPolicyConstraintUpdate(d *schema.ResourceData, m interface{}) e
 
 	polishConstraintTargets(&obj)
 
-	client := clientLayer.NewConstraintsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewConstraintsClient(commonSessionContext, connector)
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("Constraint", id, err)
@@ -304,7 +304,7 @@ func resourceNsxtPolicyConstraintDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewConstraintsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewConstraintsClient(commonSessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {
