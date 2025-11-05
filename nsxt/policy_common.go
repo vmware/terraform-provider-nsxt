@@ -311,7 +311,7 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 		ruleSchema["ids_profiles"] = getIdsProfilesSchema()
 	}
 	if separated {
-		ruleSchema["policy_path"] = getPolicyPathSchema(true, true, "Security Policy path")
+		ruleSchema["policy_path"] = getPolicyPathSchema(true, true, "Security or Gateway Policy path")
 		ruleSchema["sequence_number"] = &schema.Schema{
 			Type:        schema.TypeInt,
 			Description: "Sequence number of the this rule",
