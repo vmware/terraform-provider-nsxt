@@ -14,6 +14,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcGatewayPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/gateway-policies/[policy]"
@@ -25,7 +26,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 		Update: resourceNsxtVPCGatewayPolicyUpdate,
 		Delete: resourceNsxtVPCGatewayPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcGatewayPolicyPathExample),
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Gateway Policy", getVpcPathResourceImporter(vpcGatewayPolicyPathExample)),
 		},
 
 		Schema: getPolicyGatewayPolicySchema(true),
@@ -33,6 +34,9 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 }
 
 func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Gateway Policy resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
