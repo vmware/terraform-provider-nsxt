@@ -17,6 +17,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcIpAddressAllocationIpAddressTypeValues = []string{
@@ -109,7 +110,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtVpcIpAddressAllocationUpdate,
 		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcIpAddressAllocationPathExample),
+			State: nsxtVersionCheckImporter("9.0.0", "VPC IP Address Allocation", getVpcPathResourceImporter(vpcIpAddressAllocationPathExample)),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}
@@ -132,6 +133,9 @@ func resourceNsxtVpcIpAddressAllocationExists(sessionContext utl.SessionContext,
 }
 
 func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC IP Address Allocation resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcIpAddressAllocationExists)

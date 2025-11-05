@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
@@ -219,6 +220,10 @@ func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Conne
 }
 
 func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interface{}) error {
+
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Policy Gateway Connection resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayConnectionExists)

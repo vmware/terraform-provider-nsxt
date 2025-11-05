@@ -17,6 +17,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var policyVpcNatRuleActionValues = []string{
@@ -157,6 +158,16 @@ func getPolicyVpcNatRuleSchema(withScope bool) map[string]*metadata.ExtendedSche
 	return policyVpcNatRuleSchema
 }
 
+// VPC NAT Rule importer with version check
+func nsxtVpcNatRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC NAT Rule import requires NSX version 9.0.0 or higher")
+	}
+	// Use the existing parent path importer logic
+	return nsxtParentPathResourceImporter(d, m)
+}
+
 func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyVpcNatRuleCreate,
@@ -164,7 +175,7 @@ func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 		Update: resourceNsxtPolicyVpcNatRuleUpdate,
 		Delete: resourceNsxtPolicyVpcNatRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtVpcNatRuleImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(getPolicyVpcNatRuleSchema(false)),
 	}
@@ -190,6 +201,9 @@ func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, paren
 }
 
 func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("Policy VPC NAT Rule resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyVpcNatRuleExists)

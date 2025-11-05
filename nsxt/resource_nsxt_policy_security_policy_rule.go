@@ -44,7 +44,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityOrGatewayPolicyRuleContext(d, projectID); err != nil {
 		return handleCreateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
@@ -53,7 +53,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	rule := securityPolicyRuleSchemaToModel(d, id)
+	rule := securityAndGatewayPolicyRuleSchemaToModel(d, id)
 	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
 		return handleCreateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
@@ -65,7 +65,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	return resourceNsxtPolicySecurityPolicyRuleRead(d, m)
 }
 
-func setSecurityPolicyRuleContext(d *schema.ResourceData, projectID string) error {
+func setSecurityOrGatewayPolicyRuleContext(d *schema.ResourceData, projectID string) error {
 	providedProjectID, _, _ := getContextDataFromSchema(d)
 	if providedProjectID == "" {
 		contexts := make([]interface{}, 1)
@@ -79,7 +79,7 @@ func setSecurityPolicyRuleContext(d *schema.ResourceData, projectID string) erro
 	return nil
 }
 
-func securityPolicyRuleSchemaToModel(d *schema.ResourceData, id string) model.Rule {
+func securityAndGatewayPolicyRuleSchemaToModel(d *schema.ResourceData, id string) model.Rule {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	action := d.Get("action").(string)
@@ -175,7 +175,7 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityOrGatewayPolicyRuleContext(d, projectID); err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
@@ -188,11 +188,11 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	securityPolicyRuleModelToSchema(d, rule)
+	securityAndGatewayPolicyRuleModelToSchema(d, rule)
 	return nil
 }
 
-func securityPolicyRuleModelToSchema(d *schema.ResourceData, rule model.Rule) {
+func securityAndGatewayPolicyRuleModelToSchema(d *schema.ResourceData, rule model.Rule) {
 	d.Set("display_name", rule.DisplayName)
 	d.Set("description", rule.Description)
 	d.Set("path", rule.Path)
@@ -247,7 +247,7 @@ func resourceNsxtPolicySecurityPolicyRuleUpdate(d *schema.ResourceData, m interf
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	rule := securityPolicyRuleSchemaToModel(d, id)
+	rule := securityAndGatewayPolicyRuleSchemaToModel(d, id)
 	err := client.Patch(domain, policyID, id, rule)
 	if err != nil {
 		return handleUpdateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)

@@ -18,6 +18,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcIPAddressTypeValues = []string{
@@ -139,6 +140,10 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 // VPC resource needs dedicated importer since its path is VPC path,
 // but VPC does not need to be set in context
 func nsxtVpcImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	// Check NSX version compatibility for import
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return []*schema.ResourceData{d}, fmt.Errorf("VPC import requires NSX version 9.0.0 or higher")
+	}
 	importID := d.Id()
 	if isPolicyPath(importID) {
 		pathSegs := strings.Split(importID, "/")
@@ -184,6 +189,9 @@ func resourceNsxtVpcExists(sessionContext utl.SessionContext, id string, connect
 }
 
 func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcExists)
@@ -221,6 +229,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
+
 	connector := getPolicyConnector(m)
 
 	id := d.Id()

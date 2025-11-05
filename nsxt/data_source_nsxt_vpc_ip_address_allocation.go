@@ -5,7 +5,10 @@
 package nsxt
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func dataSourceNsxtVpcIpAddressAllocation() *schema.Resource {
@@ -28,6 +31,9 @@ func dataSourceNsxtVpcIpAddressAllocation() *schema.Resource {
 }
 
 func dataSourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC IP Address Allocation data source requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	ips := d.Get("allocation_ips").(string)

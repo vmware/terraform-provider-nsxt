@@ -16,6 +16,7 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
@@ -195,7 +196,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 		Update: resourceNsxtVpcConnectivityProfileUpdate,
 		Delete: resourceNsxtVpcConnectivityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathResourceImporter(vpcConnectivityProfilePathExample),
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Connectivity Profile", getPolicyPathResourceImporter(vpcConnectivityProfilePathExample)),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcConnectivityProfileSchema),
 	}
@@ -218,6 +219,9 @@ func resourceNsxtVpcConnectivityProfileExists(sessionContext utl.SessionContext,
 }
 
 func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Connectivity Profile resource requires NSX version 9.0.0 or higher")
+	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtVpcConnectivityProfileExists)
