@@ -28,7 +28,7 @@ func NewStatusClient(sessionContext utl.SessionContext, connector vapiProtocolCl
 	return &ComputeManagerStatusClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c ComputeManagerStatusClientContext) Get(computeManagerIdParam string) (nsxModel.ComputeManagerStatus, error) {
+func (c ComputeManagerStatusClientContext) Get(computeManagerIdParam string) (model0.ComputeManagerStatus, error) {
 	var obj model0.ComputeManagerStatus
 	var err error
 
