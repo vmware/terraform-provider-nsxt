@@ -52,7 +52,7 @@ func (c Tier0RouteMapClientContext) Delete(tier0IdParam string, routeMapIdParam 
 	return err
 }
 
-func (c Tier0RouteMapClientContext) Get(tier0IdParam string, routeMapIdParam string) (nsx_global_policyModel.Tier0RouteMap, error) {
+func (c Tier0RouteMapClientContext) Get(tier0IdParam string, routeMapIdParam string) (model0.Tier0RouteMap, error) {
 	var obj model0.Tier0RouteMap
 	var err error
 
@@ -81,7 +81,7 @@ func (c Tier0RouteMapClientContext) Get(tier0IdParam string, routeMapIdParam str
 	return obj, err
 }
 
-func (c Tier0RouteMapClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_global_policyModel.Tier0RouteMapListResult, error) {
+func (c Tier0RouteMapClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.Tier0RouteMapListResult, error) {
 	var err error
 	var obj model0.Tier0RouteMapListResult
 
@@ -109,7 +109,7 @@ func (c Tier0RouteMapClientContext) List(tier0IdParam string, cursorParam *strin
 	return obj, err
 }
 
-func (c Tier0RouteMapClientContext) Patch(tier0IdParam string, routeMapIdParam string, tier0RouteMapParam nsx_global_policyModel.Tier0RouteMap) error {
+func (c Tier0RouteMapClientContext) Patch(tier0IdParam string, routeMapIdParam string, tier0RouteMapParam model0.Tier0RouteMap) error {
 	var err error
 
 	switch c.ClientType {
@@ -132,7 +132,7 @@ func (c Tier0RouteMapClientContext) Patch(tier0IdParam string, routeMapIdParam s
 	return err
 }
 
-func (c Tier0RouteMapClientContext) Update(tier0IdParam string, routeMapIdParam string, tier0RouteMapParam nsx_global_policyModel.Tier0RouteMap) (nsx_global_policyModel.Tier0RouteMap, error) {
+func (c Tier0RouteMapClientContext) Update(tier0IdParam string, routeMapIdParam string, tier0RouteMapParam model0.Tier0RouteMap) (model0.Tier0RouteMap, error) {
 	var err error
 	var obj model0.Tier0RouteMap
 

@@ -28,19 +28,20 @@ func NewFailureDomainsClient(sessionContext utl.SessionContext, connector vapiPr
 	return &FailureDomainClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c FailureDomainClientContext) Create(failureDomainParam nsxModel.FailureDomain) (nsxModel.FailureDomain, error) {
+func (c FailureDomainClientContext) Create(failureDomainParam model0.FailureDomain) (model0.FailureDomain, error) {
 	var err error
+	var obj model0.FailureDomain
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.FailureDomainsClient)
-		err = client.Create(failureDomainParam)
+		obj, err = client.Create(failureDomainParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
-	return err
+	return obj, err
 }
 
 func (c FailureDomainClientContext) Delete(failureDomainIdParam string) error {
@@ -58,7 +59,7 @@ func (c FailureDomainClientContext) Delete(failureDomainIdParam string) error {
 	return err
 }
 
-func (c FailureDomainClientContext) Get(failureDomainIdParam string) (nsxModel.FailureDomain, error) {
+func (c FailureDomainClientContext) Get(failureDomainIdParam string) (model0.FailureDomain, error) {
 	var obj model0.FailureDomain
 	var err error
 
@@ -77,7 +78,7 @@ func (c FailureDomainClientContext) Get(failureDomainIdParam string) (nsxModel.F
 	return obj, err
 }
 
-func (c FailureDomainClientContext) List() (nsxModel.FailureDomainListResult, error) {
+func (c FailureDomainClientContext) List() (model0.FailureDomainListResult, error) {
 	var err error
 	var obj model0.FailureDomainListResult
 
@@ -93,7 +94,7 @@ func (c FailureDomainClientContext) List() (nsxModel.FailureDomainListResult, er
 	return obj, err
 }
 
-func (c FailureDomainClientContext) Update(failureDomainIdParam string, failureDomainParam nsxModel.FailureDomain) (nsxModel.FailureDomain, error) {
+func (c FailureDomainClientContext) Update(failureDomainIdParam string, failureDomainParam model0.FailureDomain) (model0.FailureDomain, error) {
 	var err error
 	var obj model0.FailureDomain
 
