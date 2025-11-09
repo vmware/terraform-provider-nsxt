@@ -23,7 +23,7 @@ func NewBfdProfilesClient(sessionContext utl.SessionContext, connector vapiProto
 
 	case utl.Global:
 		client = client0.NewBfdProfilesClient(connector)
-	
+
 	case utl.Local:
 		client = client1.NewBfdProfilesClient(connector)
 
@@ -35,17 +35,17 @@ func NewBfdProfilesClient(sessionContext utl.SessionContext, connector vapiProto
 
 func (c BfdProfileClientContext) Delete(bfdProfileIdParam string, overrideParam *bool) error {
 	var err error
-	
+
 	switch c.ClientType {
-	
+
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
 		err = client.Delete(bfdProfileIdParam, overrideParam)
-	
+
 	case utl.Local:
 		client := c.Client.(client1.BfdProfilesClient)
 		err = client.Delete(bfdProfileIdParam, overrideParam)
-	
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
