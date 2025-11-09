@@ -28,19 +28,20 @@ func NewNodesClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	return &ClusterNodeConfigClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c ClusterNodeConfigClientContext) Create(addClusterNodeSpecParam nsxModel.AddClusterNodeSpec, actionParam string) (nsxModel.ClusterNodeConfig, error) {
+func (c ClusterNodeConfigClientContext) Create(addClusterNodeSpecParam model0.AddClusterNodeSpec, actionParam string) (model0.ClusterNodeConfig, error) {
 	var err error
+	var obj model0.ClusterNodeConfig
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.NodesClient)
-		err = client.Create(addClusterNodeSpecParam, actionParam)
+		obj, err = client.Create(addClusterNodeSpecParam, actionParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
-	return err
+	return obj, err
 }
 
 func (c ClusterNodeConfigClientContext) Delete(nodeIdParam string) error {
@@ -58,7 +59,7 @@ func (c ClusterNodeConfigClientContext) Delete(nodeIdParam string) error {
 	return err
 }
 
-func (c ClusterNodeConfigClientContext) Get(nodeIdParam string) (nsxModel.ClusterNodeConfig, error) {
+func (c ClusterNodeConfigClientContext) Get(nodeIdParam string) (model0.ClusterNodeConfig, error) {
 	var obj model0.ClusterNodeConfig
 	var err error
 
@@ -77,7 +78,7 @@ func (c ClusterNodeConfigClientContext) Get(nodeIdParam string) (nsxModel.Cluste
 	return obj, err
 }
 
-func (c ClusterNodeConfigClientContext) List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsxModel.ClusterNodeConfigListResult, error) {
+func (c ClusterNodeConfigClientContext) List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.ClusterNodeConfigListResult, error) {
 	var err error
 	var obj model0.ClusterNodeConfigListResult
 
