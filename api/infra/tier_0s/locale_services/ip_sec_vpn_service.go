@@ -16,7 +16,7 @@ type IPSecVpnServiceClientContext utl.ClientContext
 
 func NewIpsecVpnServicesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *IPSecVpnServiceClientContext {
 	var client interface{}
-	
+
 	switch sessionContext.ClientType {
 
 	case utl.Local:
@@ -37,7 +37,6 @@ func (c IPSecVpnServiceClientContext) Delete(tier0IdParam string, localeServiceI
 		client := c.Client.(client2.IpsecVpnServicesClient)
 		err = client.Delete(tier0IdParam, serviceIdParam)
 
-
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -49,7 +48,7 @@ func (c IPSecVpnServiceClientContext) Get(tier0IdParam string, localeServiceIdPa
 	var err error
 
 	switch c.ClientType {
-	
+
 	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
 		obj, err = client.Get(tier0IdParam, serviceIdParam)
@@ -99,7 +98,7 @@ func (c IPSecVpnServiceClientContext) Update(tier0IdParam string, localeServiceI
 	var obj model0.IPSecVpnService
 
 	switch c.ClientType {
-	
+
 	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
 		obj, err = client.Update(tier0IdParam, serviceIdParam, ipSecVpnServiceParam)
