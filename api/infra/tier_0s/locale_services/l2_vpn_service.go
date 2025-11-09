@@ -103,7 +103,6 @@ func (c L2VPNServiceClientContext) Update(tier0IdParam string, localeServiceIdPa
 		client := c.Client.(client2.L2vpnServicesClient)
 		obj, err = client.Update(tier0IdParam, serviceIdParam, l2VPNServiceParam)
 
-
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
