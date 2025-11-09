@@ -43,7 +43,7 @@ func (c DomainDeploymentMapClientContext) Delete(domainIdParam string, domainDep
 	return err
 }
 
-func (c DomainDeploymentMapClientContext) Get(domainIdParam string, domainDeploymentMapIdParam string) (nsx_global_policyModel.DomainDeploymentMap, error) {
+func (c DomainDeploymentMapClientContext) Get(domainIdParam string, domainDeploymentMapIdParam string) (model0.DomainDeploymentMap, error) {
 	var obj model0.DomainDeploymentMap
 	var err error
 
@@ -62,7 +62,7 @@ func (c DomainDeploymentMapClientContext) Get(domainIdParam string, domainDeploy
 	return obj, err
 }
 
-func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_global_policyModel.DomainDeploymentMapListResult, error) {
+func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainDeploymentMapListResult, error) {
 	var err error
 	var obj model0.DomainDeploymentMapListResult
 
@@ -78,7 +78,7 @@ func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam
 	return obj, err
 }
 
-func (c DomainDeploymentMapClientContext) Patch(domainIdParam string, domainDeploymentMapIdParam string, domainDeploymentMapParam nsx_global_policyModel.DomainDeploymentMap) error {
+func (c DomainDeploymentMapClientContext) Patch(domainIdParam string, domainDeploymentMapIdParam string, domainDeploymentMapParam model0.DomainDeploymentMap) error {
 	var err error
 
 	switch c.ClientType {
@@ -93,7 +93,7 @@ func (c DomainDeploymentMapClientContext) Patch(domainIdParam string, domainDepl
 	return err
 }
 
-func (c DomainDeploymentMapClientContext) Update(domainIdParam string, domainDeploymentMapIdParam string, domainDeploymentMapParam nsx_global_policyModel.DomainDeploymentMap) (nsx_global_policyModel.DomainDeploymentMap, error) {
+func (c DomainDeploymentMapClientContext) Update(domainIdParam string, domainDeploymentMapIdParam string, domainDeploymentMapParam model0.DomainDeploymentMap) (model0.DomainDeploymentMap, error) {
 	var err error
 	var obj model0.DomainDeploymentMap
 

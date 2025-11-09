@@ -35,7 +35,7 @@ func (c TransitGatewayClientContext) Delete(orgIdParam string, projectIdParam st
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.TransitGatewaysClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, transitGatewayIdParam)
+		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -51,7 +51,7 @@ func (c TransitGatewayClientContext) Get(orgIdParam string, projectIdParam strin
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.TransitGatewaysClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, transitGatewayIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -70,7 +70,7 @@ func (c TransitGatewayClientContext) List(orgIdParam string, projectIdParam stri
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.TransitGatewaysClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +85,7 @@ func (c TransitGatewayClientContext) Patch(orgIdParam string, projectIdParam str
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.TransitGatewaysClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
+		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +101,7 @@ func (c TransitGatewayClientContext) Update(orgIdParam string, projectIdParam st
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.TransitGatewaysClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
+		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

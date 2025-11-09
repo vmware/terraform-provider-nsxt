@@ -7,9 +7,6 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	client3 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -19,20 +16,11 @@ type IPSecVpnServiceClientContext utl.ClientContext
 
 func NewIpsecVpnServicesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *IPSecVpnServiceClientContext {
 	var client interface{}
-
+	
 	switch sessionContext.ClientType {
 
 	case utl.Local:
-		client = client0.NewIpsecVpnServicesClient(connector)
-
-	case utl.Local:
-		client = client1.NewIpsecVpnServicesClient(connector)
-
-	case utl.Local:
 		client = client2.NewIpsecVpnServicesClient(connector)
-
-	case utl.Local:
-		client = client3.NewIpsecVpnServicesClient(connector)
 
 	default:
 		return nil
@@ -46,20 +34,9 @@ func (c IPSecVpnServiceClientContext) Delete(tier0IdParam string, localeServiceI
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IpsecVpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
-
-	case utl.Local:
-		client := c.Client.(client1.IpsecVpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
-
-	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
+		err = client.Delete(tier0IdParam, serviceIdParam)
 
-	case utl.Local:
-		client := c.Client.(client3.IpsecVpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -72,31 +49,10 @@ func (c IPSecVpnServiceClientContext) Get(tier0IdParam string, localeServiceIdPa
 	var err error
 
 	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.IpsecVpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.IpsecVpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
+	
 	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client3.IpsecVpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
+		obj, err = client.Get(tier0IdParam, serviceIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -114,20 +70,8 @@ func (c IPSecVpnServiceClientContext) List(tier0IdParam string, localeServiceIdP
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IpsecVpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.IpsecVpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client3.IpsecVpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -141,20 +85,8 @@ func (c IPSecVpnServiceClientContext) Patch(tier0IdParam string, localeServiceId
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IpsecVpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client1.IpsecVpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
-	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client3.IpsecVpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
+		err = client.Patch(tier0IdParam, serviceIdParam, ipSecVpnServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -167,22 +99,10 @@ func (c IPSecVpnServiceClientContext) Update(tier0IdParam string, localeServiceI
 	var obj model0.IPSecVpnService
 
 	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.IpsecVpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client1.IpsecVpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
+	
 	case utl.Local:
 		client := c.Client.(client2.IpsecVpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client3.IpsecVpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, ipSecVpnServiceParam)
+		obj, err = client.Update(tier0IdParam, serviceIdParam, ipSecVpnServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
