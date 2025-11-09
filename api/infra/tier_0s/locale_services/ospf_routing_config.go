@@ -49,17 +49,18 @@ func (c OspfRoutingConfigClientContext) Get(tier0IdParam string, localeServiceId
 
 func (c OspfRoutingConfigClientContext) Patch(tier0IdParam string, localeServiceIdParam string, ospfRoutingConfigParam model0.OspfRoutingConfig) (model0.OspfRoutingConfig, error) {
 	var err error
+	var obj model0.OspfRoutingConfig
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.OspfClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, ospfRoutingConfigParam)
+		obj, err = client.Patch(tier0IdParam, localeServiceIdParam, ospfRoutingConfigParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
-	return err
+	return obj, err
 }
 
 func (c OspfRoutingConfigClientContext) Update(tier0IdParam string, localeServiceIdParam string, ospfRoutingConfigParam model0.OspfRoutingConfig) (model0.OspfRoutingConfig, error) {

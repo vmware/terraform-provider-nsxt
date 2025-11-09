@@ -43,7 +43,7 @@ func (c DomainClientContext) Delete(domainIdParam string) error {
 	return err
 }
 
-func (c DomainClientContext) Get(domainIdParam string) (nsx_global_policyModel.Domain, error) {
+func (c DomainClientContext) Get(domainIdParam string) (model0.Domain, error) {
 	var obj model0.Domain
 	var err error
 
@@ -62,7 +62,7 @@ func (c DomainClientContext) Get(domainIdParam string) (nsx_global_policyModel.D
 	return obj, err
 }
 
-func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_global_policyModel.DomainListResult, error) {
+func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainListResult, error) {
 	var err error
 	var obj model0.DomainListResult
 
@@ -78,7 +78,7 @@ func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjec
 	return obj, err
 }
 
-func (c DomainClientContext) Patch(domainIdParam string, domainParam nsx_global_policyModel.Domain) error {
+func (c DomainClientContext) Patch(domainIdParam string, domainParam model0.Domain) error {
 	var err error
 
 	switch c.ClientType {
@@ -93,7 +93,7 @@ func (c DomainClientContext) Patch(domainIdParam string, domainParam nsx_global_
 	return err
 }
 
-func (c DomainClientContext) Update(domainIdParam string, domainParam nsx_global_policyModel.Domain) (nsx_global_policyModel.Domain, error) {
+func (c DomainClientContext) Update(domainIdParam string, domainParam model0.Domain) (model0.Domain, error) {
 	var err error
 	var obj model0.Domain
 

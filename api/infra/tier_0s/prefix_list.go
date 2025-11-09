@@ -52,7 +52,7 @@ func (c PrefixListClientContext) Delete(tier0IdParam string, prefixListIdParam s
 	return err
 }
 
-func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam string) (nsx_global_policyModel.PrefixList, error) {
+func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam string) (model0.PrefixList, error) {
 	var obj model0.PrefixList
 	var err error
 
@@ -81,9 +81,9 @@ func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam stri
 	return obj, err
 }
 
-func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_global_policyModel.PrefixListResult, error) {
+func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PrefixListResult, error) {
 	var err error
-	var obj model0.PrefixListListResult
+	var obj model0.PrefixListResult
 
 	switch c.ClientType {
 
@@ -97,11 +97,11 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 		if err != nil {
 			return obj, err
 		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.PrefixListListResultBindingType(), model0.PrefixListListResultBindingType())
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.PrefixListResultBindingType(), model0.PrefixListResultBindingType())
 		if err1 != nil {
 			return obj, err1
 		}
-		obj = obj1.(model0.PrefixListListResult)
+		obj = obj1.(model0.PrefixListResult)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -109,7 +109,7 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 	return obj, err
 }
 
-func (c PrefixListClientContext) Patch(tier0IdParam string, prefixListIdParam string, prefixListParam nsx_global_policyModel.PrefixList) error {
+func (c PrefixListClientContext) Patch(tier0IdParam string, prefixListIdParam string, prefixListParam model0.PrefixList) error {
 	var err error
 
 	switch c.ClientType {
@@ -132,7 +132,7 @@ func (c PrefixListClientContext) Patch(tier0IdParam string, prefixListIdParam st
 	return err
 }
 
-func (c PrefixListClientContext) Update(tier0IdParam string, prefixListIdParam string, prefixListParam nsx_global_policyModel.PrefixList) (nsx_global_policyModel.PrefixList, error) {
+func (c PrefixListClientContext) Update(tier0IdParam string, prefixListIdParam string, prefixListParam model0.PrefixList) (model0.PrefixList, error) {
 	var err error
 	var obj model0.PrefixList
 
