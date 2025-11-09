@@ -7,9 +7,6 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	client3 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -23,16 +20,7 @@ func NewL2vpnServicesClient(sessionContext utl.SessionContext, connector vapiPro
 	switch sessionContext.ClientType {
 
 	case utl.Local:
-		client = client0.NewL2vpnServicesClient(connector)
-
-	case utl.Local:
-		client = client1.NewL2vpnServicesClient(connector)
-
-	case utl.Local:
 		client = client2.NewL2vpnServicesClient(connector)
-
-	case utl.Local:
-		client = client3.NewL2vpnServicesClient(connector)
 
 	default:
 		return nil
@@ -46,20 +34,8 @@ func (c L2VPNServiceClientContext) Delete(tier0IdParam string, localeServiceIdPa
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.L2vpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
-
-	case utl.Local:
-		client := c.Client.(client1.L2vpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
-
-	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
-
-	case utl.Local:
-		client := c.Client.(client3.L2vpnServicesClient)
-		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
+		err = client.Delete(tier0IdParam, serviceIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -74,29 +50,8 @@ func (c L2VPNServiceClientContext) Get(tier0IdParam string, localeServiceIdParam
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.L2vpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.L2vpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client3.L2vpnServicesClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
+		obj, err = client.Get(tier0IdParam, serviceIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -114,20 +69,8 @@ func (c L2VPNServiceClientContext) List(tier0IdParam string, localeServiceIdPara
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.L2vpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.L2vpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client3.L2vpnServicesClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -141,20 +84,8 @@ func (c L2VPNServiceClientContext) Patch(tier0IdParam string, localeServiceIdPar
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.L2vpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client1.L2vpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
-
-	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client3.L2vpnServicesClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
+		err = client.Patch(tier0IdParam, serviceIdParam, l2VPNServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -169,20 +100,9 @@ func (c L2VPNServiceClientContext) Update(tier0IdParam string, localeServiceIdPa
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.L2vpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
-
-	case utl.Local:
-		client := c.Client.(client1.L2vpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
-
-	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
+		obj, err = client.Update(tier0IdParam, serviceIdParam, l2VPNServiceParam)
 
-	case utl.Local:
-		client := c.Client.(client3.L2vpnServicesClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

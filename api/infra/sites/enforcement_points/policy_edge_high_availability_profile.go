@@ -64,7 +64,7 @@ func (c PolicyEdgeHighAvailabilityProfileClientContext) Get(siteIdParam string, 
 
 func (c PolicyEdgeHighAvailabilityProfileClientContext) List(siteIdParam string, enforcementpointIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeSystemOwnedParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.EdgeClusterHighAvailabilityProfileListResult, error) {
 	var err error
-	var obj model0.PolicyEdgeHighAvailabilityProfileListResult
+	var obj model0.EdgeClusterHighAvailabilityProfileListResult
 
 	switch c.ClientType {
 
