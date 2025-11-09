@@ -43,7 +43,7 @@ func (c GlobalManagerClientContext) Delete(globalManagerIdParam string) error {
 	return err
 }
 
-func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (nsx_global_policyModel.GlobalManager, error) {
+func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (model0.GlobalManager, error) {
 	var obj model0.GlobalManager
 	var err error
 
@@ -62,7 +62,7 @@ func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (nsx_global
 	return obj, err
 }
 
-func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_global_policyModel.GlobalManagerListResult, error) {
+func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.GlobalManagerListResult, error) {
 	var err error
 	var obj model0.GlobalManagerListResult
 
@@ -78,7 +78,7 @@ func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDele
 	return obj, err
 }
 
-func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalManagerParam nsx_global_policyModel.GlobalManager, forceParam *bool) error {
+func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalManagerParam model0.GlobalManager, forceParam *bool) error {
 	var err error
 
 	switch c.ClientType {
@@ -93,7 +93,7 @@ func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalMan
 	return err
 }
 
-func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalManagerParam nsx_global_policyModel.GlobalManager, forceParam *bool) (nsx_global_policyModel.GlobalManager, error) {
+func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalManagerParam model0.GlobalManager, forceParam *bool) (model0.GlobalManager, error) {
 	var err error
 	var obj model0.GlobalManager
 
