@@ -66,7 +66,7 @@ func (c PolicyTransportZoneClientContext) List(siteIdParam string, enforcementpo
 func (c PolicyTransportZoneClientContext) Patch(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model0.PolicyTransportZone) (model0.PolicyTransportZone, error) {
 	var err error
 	var obj model0.PolicyTransportZone
-	
+
 	switch c.ClientType {
 
 	case utl.Local:

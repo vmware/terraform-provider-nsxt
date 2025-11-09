@@ -102,7 +102,7 @@ func (c StaticRouteBfdPeerClientContext) List(tier0IdParam string, cursorParam *
 			return obj, err1
 		}
 		obj = obj1.(model0.StaticRouteBfdPeerListResult)
-	
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
