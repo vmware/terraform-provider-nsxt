@@ -36,7 +36,7 @@ func (c VpcSecurityProfileClientContext) Get(orgIdParam string, projectIdParam s
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcSecurityProfileIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcSecurityProfileIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -55,7 +55,7 @@ func (c VpcSecurityProfileClientContext) List(orgIdParam string, projectIdParam 
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -70,7 +70,7 @@ func (c VpcSecurityProfileClientContext) Patch(orgIdParam string, projectIdParam
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
+		err = client.Patch(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -86,7 +86,7 @@ func (c VpcSecurityProfileClientContext) Update(orgIdParam string, projectIdPara
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

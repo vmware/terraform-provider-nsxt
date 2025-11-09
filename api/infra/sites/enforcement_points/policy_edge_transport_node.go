@@ -22,12 +22,6 @@ func NewEdgeTransportNodesClient(sessionContext utl.SessionContext, connector va
 	case utl.Local:
 		client = client0.NewEdgeTransportNodesClient(connector)
 
-	case utl.Local:
-		client = client0.NewEdgeTransportNodesClient(connector)
-
-	case utl.Local:
-		client = client0.NewEdgeTransportNodesClient(connector)
-
 	default:
 		return nil
 	}
@@ -38,14 +32,6 @@ func (c PolicyEdgeTransportNodeClientContext) Delete(siteIdParam string, enforce
 	var err error
 
 	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		err = client.Delete(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, forceParam)
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		err = client.Delete(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, forceParam)
 
 	case utl.Local:
 		client := c.Client.(client0.EdgeTransportNodesClient)
@@ -70,20 +56,6 @@ func (c PolicyEdgeTransportNodeClientContext) Get(siteIdParam string, enforcemen
 			return obj, err
 		}
 
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.Get(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.Get(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam)
-		if err != nil {
-			return obj, err
-		}
-
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -95,14 +67,6 @@ func (c PolicyEdgeTransportNodeClientContext) List(siteIdParam string, enforceme
 	var obj model0.PolicyEdgeTransportNodeListResult
 
 	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, inMaintenanceModeParam, includeMarkForDeleteObjectsParam, includedFieldsParam, managementIpParam, nodeTypesParam, pageSizeParam, sortAscendingParam, sortByParam, transportZonePathParam)
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, inMaintenanceModeParam, includeMarkForDeleteObjectsParam, includedFieldsParam, managementIpParam, nodeTypesParam, pageSizeParam, sortAscendingParam, sortByParam, transportZonePathParam)
 
 	case utl.Local:
 		client := c.Client.(client0.EdgeTransportNodesClient)
@@ -123,14 +87,6 @@ func (c PolicyEdgeTransportNodeClientContext) Patch(siteIdParam string, enforcem
 		client := c.Client.(client0.EdgeTransportNodesClient)
 		err = client.Patch(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, policyEdgeTransportNodeParam)
 
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		err = client.Patch(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, policyEdgeTransportNodeParam)
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		err = client.Patch(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, policyEdgeTransportNodeParam)
-
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -142,14 +98,6 @@ func (c PolicyEdgeTransportNodeClientContext) Update(siteIdParam string, enforce
 	var obj model0.PolicyEdgeTransportNode
 
 	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.Update(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, policyEdgeTransportNodeParam)
-
-	case utl.Local:
-		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.Update(siteIdParam, enforcementpointIdParam, edgeTransportNodeIdParam, policyEdgeTransportNodeParam)
 
 	case utl.Local:
 		client := c.Client.(client0.EdgeTransportNodesClient)

@@ -35,7 +35,7 @@ func (c ProjectIpAddressAllocationClientContext) Delete(orgIdParam string, proje
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.IpAddressAllocationsClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, ipAddressAllocationIdParam)
+		err = client.Delete(orgIdParam, projectIdParam, ipAddressAllocationIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -51,7 +51,7 @@ func (c ProjectIpAddressAllocationClientContext) Get(orgIdParam string, projectI
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.IpAddressAllocationsClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, ipAddressAllocationIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, ipAddressAllocationIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -70,7 +70,7 @@ func (c ProjectIpAddressAllocationClientContext) List(orgIdParam string, project
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.IpAddressAllocationsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +85,7 @@ func (c ProjectIpAddressAllocationClientContext) Patch(orgIdParam string, projec
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.IpAddressAllocationsClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
+		err = client.Patch(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +101,7 @@ func (c ProjectIpAddressAllocationClientContext) Update(orgIdParam string, proje
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.IpAddressAllocationsClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
+		obj, err = client.Update(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

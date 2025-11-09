@@ -35,7 +35,7 @@ func (c VpcClientContext) Delete(orgIdParam string, projectIdParam string, vpcId
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcsClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcIdParam, isRecursiveParam)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, isRecursiveParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -51,7 +51,7 @@ func (c VpcClientContext) Get(orgIdParam string, projectIdParam string, vpcIdPar
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcsClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -70,7 +70,7 @@ func (c VpcClientContext) List(orgIdParam string, projectIdParam string, cursorP
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +85,7 @@ func (c VpcClientContext) Patch(orgIdParam string, projectIdParam string, vpcIdP
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcsClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcIdParam, vpcParam)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +101,7 @@ func (c VpcClientContext) Update(orgIdParam string, projectIdParam string, vpcId
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcsClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcIdParam, vpcParam)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

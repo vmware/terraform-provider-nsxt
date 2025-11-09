@@ -65,17 +65,18 @@ func (c PolicyTransportZoneClientContext) List(siteIdParam string, enforcementpo
 
 func (c PolicyTransportZoneClientContext) Patch(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model0.PolicyTransportZone) (model0.PolicyTransportZone, error) {
 	var err error
-
+	var obj model0.PolicyTransportZone
+	
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.TransportZonesClient)
-		err = client.Patch(siteIdParam, enforcementpointIdParam, transportZoneIdParam, policyTransportZoneParam)
+		obj, err = client.Patch(siteIdParam, enforcementpointIdParam, transportZoneIdParam, policyTransportZoneParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
-	return err
+	return obj, err
 }
 
 func (c PolicyTransportZoneClientContext) Update(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model0.PolicyTransportZone) (model0.PolicyTransportZone, error) {
