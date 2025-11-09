@@ -70,7 +70,7 @@ func (c BgpRoutingConfigClientContext) Patch(tier0IdParam string, localeServiceI
 	case utl.Global:
 		client := c.Client.(client0.BgpClient)
 		err = client.Patch(tier0IdParam, localeServiceIdParam, bgpRoutingConfigParam, overrideParam)
-	
+
 	case utl.Local:
 		client := c.Client.(client1.BgpClient)
 		gmObj, err1 := utl.ConvertModelBindingType(bgpRoutingConfigParam, model0.BgpRoutingConfigBindingType(), model1.BgpRoutingConfigBindingType())
@@ -119,13 +119,13 @@ func (c BgpRoutingConfigClientContext) Update(tier0IdParam string, localeService
 
 func (c BgpRoutingConfigClientContext) Delete(bfdProfileIdParam string, localeServiceIdParam string, overrideParam *bool) error {
 	var err error
-	
+
 	switch c.ClientType {
-	
+
 	case utl.Local:
 		client := c.Client.(client1.BgpClient)
 		err = client.Delete(bfdProfileIdParam, localeServiceIdParam, overrideParam)
-	
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}

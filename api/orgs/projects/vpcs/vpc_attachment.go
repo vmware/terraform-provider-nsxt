@@ -55,7 +55,7 @@ func (c VpcAttachmentClientContext) Get(orgIdParam string, projectIdParam string
 		if err != nil {
 			return obj, err
 		}
-	
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -86,7 +86,7 @@ func (c VpcAttachmentClientContext) Patch(orgIdParam string, projectIdParam stri
 	case utl.Multitenancy:
 		client := c.Client.(client0.AttachmentsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
-	
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -102,7 +102,7 @@ func (c VpcAttachmentClientContext) Update(orgIdParam string, projectIdParam str
 	case utl.Multitenancy:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
-	
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
