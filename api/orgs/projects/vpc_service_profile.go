@@ -35,7 +35,7 @@ func (c VpcServiceProfileClientContext) Delete(orgIdParam string, projectIdParam
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcServiceProfilesClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcServiceProfileIdParam)
+		err = client.Delete(orgIdParam, projectIdParam, vpcServiceProfileIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -51,7 +51,7 @@ func (c VpcServiceProfileClientContext) Get(orgIdParam string, projectIdParam st
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcServiceProfilesClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcServiceProfileIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcServiceProfileIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -70,7 +70,7 @@ func (c VpcServiceProfileClientContext) List(orgIdParam string, projectIdParam s
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcServiceProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +85,7 @@ func (c VpcServiceProfileClientContext) Patch(orgIdParam string, projectIdParam 
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcServiceProfilesClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcServiceProfileIdParam, vpcServiceProfileParam)
+		err = client.Patch(orgIdParam, projectIdParam, vpcServiceProfileIdParam, vpcServiceProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +101,7 @@ func (c VpcServiceProfileClientContext) Update(orgIdParam string, projectIdParam
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.VpcServiceProfilesClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, orgIdParam, projectIdParam, vpcServiceProfileIdParam, vpcServiceProfileParam)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcServiceProfileIdParam, vpcServiceProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

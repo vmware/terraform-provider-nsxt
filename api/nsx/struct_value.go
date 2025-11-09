@@ -5,6 +5,7 @@ package nsx
 import (
 	"errors"
 
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -30,17 +31,18 @@ func NewClusterProfilesClient(sessionContext utl.SessionContext, connector vapiP
 
 func (c StructValueClientContext) Create(clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
 	var err error
+	var obj *vapiData_.StructValue
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.ClusterProfilesClient)
-		err = client.Create(clusterProfileParam)
+		obj, err = client.Create(clusterProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
-	return err
+	return obj, err
 }
 
 func (c StructValueClientContext) Delete(clusterProfileIdParam string) error {
@@ -59,7 +61,7 @@ func (c StructValueClientContext) Delete(clusterProfileIdParam string) error {
 }
 
 func (c StructValueClientContext) Get(clusterProfileIdParam string) (*vapiData_.StructValue, error) {
-	var obj model0.StructValue
+	var obj *vapiData_.StructValue
 	var err error
 
 	switch c.ClientType {
@@ -77,9 +79,9 @@ func (c StructValueClientContext) Get(clusterProfileIdParam string) (*vapiData_.
 	return obj, err
 }
 
-func (c StructValueClientContext) List(cursorParam *string, includeSystemOwnedParam *bool, includedFieldsParam *string, pageSizeParam *int64, resourceTypeParam *string, sortAscendingParam *bool, sortByParam *string) (nsxModel.ClusterProfileListResult, error) {
+func (c StructValueClientContext) List(cursorParam *string, includeSystemOwnedParam *bool, includedFieldsParam *string, pageSizeParam *int64, resourceTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.ClusterProfileListResult, error) {
 	var err error
-	var obj model0.StructValueListResult
+	var obj model0.ClusterProfileListResult
 
 	switch c.ClientType {
 
@@ -95,7 +97,7 @@ func (c StructValueClientContext) List(cursorParam *string, includeSystemOwnedPa
 
 func (c StructValueClientContext) Update(clusterProfileIdParam string, clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
 	var err error
-	var obj model0.StructValue
+	var obj *vapiData_.StructValue
 
 	switch c.ClientType {
 
