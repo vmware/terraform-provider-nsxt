@@ -515,6 +515,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_project_ip_address_allocation":                resourceNsxtPolicyProjectIpAddressAllocation(),
 			"nsxt_policy_qos_profile":                                  resourceNsxtPolicyQosProfile(),
 			"nsxt_policy_security_policy":                              resourceNsxtPolicySecurityPolicy(),
+			"nsxt_policy_security_policy_container_cluster":            resourceNsxtPolicySecurityPolicyContainerCluster(),
 			"nsxt_policy_security_policy_rule":                         resourceNsxtPolicySecurityPolicyRule(),
 			"nsxt_policy_segment":                                      resourceNsxtPolicySegment(),
 			"nsxt_policy_segment_port":                                 resourceNsxtPolicySegmentPort(),
