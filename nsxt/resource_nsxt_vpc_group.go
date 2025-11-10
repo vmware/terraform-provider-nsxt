@@ -4,7 +4,12 @@
 
 package nsxt
 
-import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+)
 
 var vpcGroupPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/groups/[group]"
 
@@ -15,7 +20,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: getVpcPathResourceImporter(vpcGroupPathExample),
+			State: nsxtVersionCheckImporter("9.0.0", "VPC Group", getVpcPathResourceImporter(vpcGroupPathExample)),
 		},
 
 		Schema: getPolicyGroupSchema(false),
@@ -23,6 +28,9 @@ func resourceNsxtVPCGroup() *schema.Resource {
 }
 
 func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
+	if !util.NsxVersionHigherOrEqual("9.0.0") {
+		return fmt.Errorf("VPC Group resource requires NSX version 9.0.0 or higher")
+	}
 	return resourceNsxtPolicyGroupGeneralCreate(d, m, false)
 }
 

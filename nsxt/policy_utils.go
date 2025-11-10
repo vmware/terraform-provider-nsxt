@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 // ErrNotAPolicyPath - Define an ignorable error for  policy path importer - to indicate that the given path is not a
@@ -422,6 +423,17 @@ func isValidResourceID(id string) bool {
 		return false
 	}
 	return true
+}
+
+func nsxtVersionCheckImporter(minVersion string, resource string, handler schema.StateFunc) schema.StateFunc {
+	// Check NSX version compatibility for import
+	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		// Check NSX version compatibility for import
+		if !util.NsxVersionHigherOrEqual(minVersion) {
+			return []*schema.ResourceData{d}, fmt.Errorf("%s resource import requires NSX version %s or higher", resource, minVersion)
+		}
+		return handler(d, m)
+	}
 }
 
 // This importer function accepts policy path only as import ID
