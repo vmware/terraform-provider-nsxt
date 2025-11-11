@@ -80,4 +80,3 @@ resource "nsxt_policy_vm_tags" "test" {
 ## Attributes Reference
 
 * `items` - Map of IDs by Display Name.
-* `vif_ids` - VIF attachment IDs of the VM.
