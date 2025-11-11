@@ -26,31 +26,6 @@ resource "nsxt_policy_segment_port" "sample" {
 }
 ```
 
-## Example Usage - Multi-Tenancy
-
-```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-resource "nsxt_policy_segment_port" "sample" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
-  display_name = "segment-port1"
-  description  = "NSX-t Segment port"
-  segment_path = data.nsxt_policy_segment.segment1.path
-  discovery_profile {
-    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.segprofile.path
-    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.segprofile.path
-  }
-  security_profile {
-    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.segprofile.path
-    security_profile_path   = data.nsxt_policy_segment_security_profile.segprofile.path
-  }
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -59,8 +34,6 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `context` - (Optional) The context which the object belongs to
-    * `project_id` - (Required) The ID of the project which the object belongs to
 * `segment_path` - (Optional) Path of the segment port.
 * `attachment` - (Optional) VIF attachment.
 * `discovery_profile` - (Optional) IP and MAC discovery profiles for this segment port.
