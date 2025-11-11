@@ -26,6 +26,31 @@ resource "nsxt_policy_segment_port" "sample" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_segment_port" "sample" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "segment-port1"
+  description  = "NSX-t Segment port"
+  segment_path = data.nsxt_policy_segment.segment1.path
+  discovery_profile {
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.segprofile.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.segprofile.path
+  }
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.segprofile.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.segprofile.path
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
