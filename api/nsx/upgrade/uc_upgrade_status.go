@@ -28,7 +28,7 @@ func NewUcUpgradeStatusClient(sessionContext utl.SessionContext, connector vapiP
 	return &UcUpgradeStatusClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c UcUpgradeStatusClientContext) Get() (nsxModel.UcUpgradeStatus, error) {
+func (c UcUpgradeStatusClientContext) Get() (model0.UcUpgradeStatus, error) {
 	var obj model0.UcUpgradeStatus
 	var err error
 

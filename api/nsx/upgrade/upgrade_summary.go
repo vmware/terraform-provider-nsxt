@@ -28,7 +28,7 @@ func NewSummaryClient(sessionContext utl.SessionContext, connector vapiProtocolC
 	return &UpgradeSummaryClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c UpgradeSummaryClientContext) Get() (nsxModel.UpgradeSummary, error) {
+func (c UpgradeSummaryClientContext) Get() (model0.UpgradeSummary, error) {
 	var obj model0.UpgradeSummary
 	var err error
 
