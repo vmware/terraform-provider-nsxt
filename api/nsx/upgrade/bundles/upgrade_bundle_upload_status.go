@@ -28,7 +28,7 @@ func NewUploadStatusClient(sessionContext utl.SessionContext, connector vapiProt
 	return &UpgradeBundleUploadStatusClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c UpgradeBundleUploadStatusClientContext) Get(bundleIdParam string) (nsxModel.UpgradeBundleUploadStatus, error) {
+func (c UpgradeBundleUploadStatusClientContext) Get(bundleIdParam string) (model0.UpgradeBundleUploadStatus, error) {
 	var obj model0.UpgradeBundleUploadStatus
 	var err error
 
