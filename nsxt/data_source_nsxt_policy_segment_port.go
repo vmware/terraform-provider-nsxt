@@ -19,7 +19,6 @@ func dataSourceNsxtPolicySegmentPort() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false, false),
 			"vif_id": {
 				Type:        schema.TypeString,
 				Description: "Segment Port attachment id",
