@@ -16,6 +16,21 @@ data "nsxt_policy_segment_port" "segmentport1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_segment_port" "segmentport1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "segport1"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Segment Port to retrieve.
