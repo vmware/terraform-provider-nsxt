@@ -28,7 +28,7 @@ func NewVersionClient(sessionContext utl.SessionContext, connector vapiProtocolC
 	return &NodeVersionClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c NodeVersionClientContext) Get() (nsxModel.NodeVersion, error) {
+func (c NodeVersionClientContext) Get() (model0.NodeVersion, error) {
 	var obj model0.NodeVersion
 	var err error
 
