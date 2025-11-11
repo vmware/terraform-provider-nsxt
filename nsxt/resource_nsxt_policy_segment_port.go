@@ -23,6 +23,7 @@ func resourceNsxtPolicySegmentPort() *schema.Resource {
 			"display_name": getDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
+			"context":      getContextSchema(false, false, false),
 			"tag":          getTagsSchema(),
 			"segment_path": {
 				Type:        schema.TypeString,
