@@ -11,12 +11,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
 	segment "github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	port_profiles "github.com/vmware/terraform-provider-nsxt/api/infra/segments/ports"
 	t1_segment "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
-	gm_port_profiles "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments/ports"
-	gm_t1_port_profiles "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/segments/ports"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	port_profiles "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments/ports"
-	t1_port_profiles "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments/ports"
+	t1_port_profiles "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments/ports"
 
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -432,29 +429,16 @@ func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) er
 func (c segmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read Discovery Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
-
+	context := getSessionContext(d, m)
 	var results model.PortDiscoveryProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_port_profiles.NewPortDiscoveryProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortDiscoveryProfileBindingMapListResultBindingType(), model.PortDiscoveryProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortDiscoveryProfileBindingMapListResult)
-	} else {
-		client := port_profiles.NewPortDiscoveryProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
+	client := port_profiles.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.portId, err)
 	}
 
 	config := make(map[string]interface{})
@@ -476,28 +460,16 @@ func (c segmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Resourc
 func (c segmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read QoS Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	var results model.PortQosProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_port_profiles.NewPortQosProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortQosProfileBindingMapListResultBindingType(), model.PortQosProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortQosProfileBindingMapListResult)
-	} else {
-		client := port_profiles.NewPortQosProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
+	client := port_profiles.NewPortQosProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.portId, err)
 	}
 
 	config := make(map[string]interface{})
@@ -520,28 +492,16 @@ func (c segmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData,
 func (c segmentPort) nsxtPolicyPortSegmentSecurityProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read Security Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	var results model.PortSecurityProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_port_profiles.NewPortSecurityProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortSecurityProfileBindingMapListResultBindingType(), model.PortSecurityProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortSecurityProfileBindingMapListResult)
-	} else {
-		client := port_profiles.NewPortSecurityProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.portId, err)
-		}
+	client := port_profiles.NewPortSecurityProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.portId, err)
 	}
 
 	config := make(map[string]interface{})
@@ -563,29 +523,16 @@ func (c segmentPort) nsxtPolicyPortSegmentSecurityProfileRead(d *schema.Resource
 func (c tier1SegmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read Discovery Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
-
+	context := getSessionContext(d, m)
 	var results model.PortDiscoveryProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_t1_port_profiles.NewPortDiscoveryProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortDiscoveryProfileBindingMapListResultBindingType(), model.PortDiscoveryProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortDiscoveryProfileBindingMapListResult)
-	} else {
-		client := t1_port_profiles.NewPortDiscoveryProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
+	client := t1_port_profiles.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.ids.portId, err)
 	}
 
 	config := make(map[string]interface{})
@@ -607,28 +554,16 @@ func (c tier1SegmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Re
 func (c tier1SegmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read QoS Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	var results model.PortQosProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_t1_port_profiles.NewPortQosProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortQosProfileBindingMapListResultBindingType(), model.PortQosProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortQosProfileBindingMapListResult)
-	} else {
-		client := t1_port_profiles.NewPortQosProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
+	client := t1_port_profiles.NewPortQosProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.ids.portId, err)
 	}
 
 	config := make(map[string]interface{})
@@ -651,28 +586,16 @@ func (c tier1SegmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.Resource
 func (c tier1SegmentPort) nsxtPolicyPortSegmentSecurityProfileRead(d *schema.ResourceData, m interface{}) error {
 	errorMessage := "Failed to read Security Profile Map for segment port %s: %s"
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	var results model.PortSecurityProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_t1_port_profiles.NewPortSecurityProfileBindingMapsClient(connector)
-		gmResults, err := client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.PortSecurityProfileBindingMapListResultBindingType(), model.PortSecurityProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.PortSecurityProfileBindingMapListResult)
-	} else {
-		client := t1_port_profiles.NewPortSecurityProfileBindingMapsClient(connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, c.ids.portId, err)
-		}
+	client := t1_port_profiles.NewPortSecurityProfileBindingMapsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	var err error
+	results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, c.ids.portId, err)
 	}
 
 	config := make(map[string]interface{})
