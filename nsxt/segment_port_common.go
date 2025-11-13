@@ -322,7 +322,7 @@ func nsxtPolicyPortSecurityProfileSetInStruct(d *schema.ResourceData) (*data.Str
 	return dataValue.(*data.StructValue), nil
 }
 
-func resourceNsxtPolicySegmentPortExists(d *schema.ResourceData, context utl.SessionContext, connector client.Connector) func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicySegmentPortExists(d *schema.ResourceData) func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	segmentPath := d.Get("segment_path").(string)
 	return func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 		_, err := getSegmentPort(segmentPath, id, context, connector)
