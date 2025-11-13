@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	t0_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
 	t0_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
@@ -20,6 +21,55 @@ import (
 	t1_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*metadata.ExtendedSchema {
+	schema := map[string]*metadata.ExtendedSchema{
+		"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+		"path":         metadata.GetExtendedSchema(getPathSchema()),
+		"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"local_address": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsIPAddress,
+			},
+		},
+		"certificate_path": metadata.GetExtendedSchema(getPolicyPathSchema(false, false, "Policy path referencing site certificate")),
+		"local_id": {
+			Schema: schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+		},
+		"trust_ca_paths": {
+			Schema: schema.Schema{
+				Type:     schema.TypeSet,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
+		},
+		"trust_crl_paths": {
+			Schema: schema.Schema{
+				Type:     schema.TypeSet,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
+		},
+	}
+
+	if isTransitGateway {
+		schema["parent_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent"))
+	} else {
+		schema["service_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"))
+	}
+	return schema
+}
+
+var IPSecVpnLocalEndpointSchema = getIPSecVpnLocalEndpointCommonSchema(false)
 
 func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 	return &schema.Resource{
@@ -31,36 +81,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 			State: nsxtVPNServiceResourceImporter,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
-			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
-			"description":  getDescriptionSchema(),
-			"revision":     getRevisionSchema(),
-			"tag":          getTagsSchema(),
-			"service_path": getPolicyPathSchema(true, true, "Policy path for IPSec VPN service"),
-			"local_address": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.IsIPAddress,
-			},
-			"certificate_path": getPolicyPathSchema(false, false, "Policy path referencing site certificate"),
-			"local_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"trust_ca_paths": {
-				Type:     schema.TypeSet,
-				Elem:     getElemPolicyPathSchema(),
-				Optional: true,
-			},
-			"trust_crl_paths": {
-				Type:     schema.TypeSet,
-				Elem:     getElemPolicyPathSchema(),
-				Optional: true,
-			},
-		},
+		Schema: metadata.GetSchemaFromExtendedSchema(IPSecVpnLocalEndpointSchema),
 
 		CustomizeDiff: validateIPv6LocaleServiceConflict,
 	}
