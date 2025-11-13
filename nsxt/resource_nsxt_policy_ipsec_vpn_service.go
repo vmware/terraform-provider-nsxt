@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	t0_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
@@ -27,6 +28,63 @@ var IPSecVpnServiceIkeLogLevelTypes = []string{
 	model.IPSecVpnService_IKE_LOG_LEVEL_EMERGENCY,
 }
 
+func getIPSecVpnServiceCommonSchema(isExtended bool, isTransitGateway bool) map[string]*metadata.ExtendedSchema {
+	schemaMap := map[string]*metadata.ExtendedSchema{
+		"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+		"path":         metadata.GetExtendedSchema(getPathSchema()),
+		"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"enabled": {
+			Schema: schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Enable/Disable IPSec VPN service.",
+				Optional:    true,
+				Default:     true,
+			},
+		},
+		"ha_sync": {
+			Schema: schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Enable/Disable IPSec VPN service HA state sync.",
+				Optional:    true,
+				Default:     true,
+			},
+		},
+		"ike_log_level": {
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Log level for internet key exchange (IKE).",
+				ValidateFunc: validation.StringInSlice(IPSecVpnServiceIkeLogLevelTypes, false),
+				Optional:     true,
+				Default:      model.IPSecVpnService_IKE_LOG_LEVEL_INFO,
+			},
+		},
+		"bypass_rule": metadata.GetExtendedSchema(getIPSecVPNRulesSchema()),
+	}
+
+	if isTransitGateway {
+		schemaMap["parent_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent"))
+	} else if isExtended {
+		schemaMap["gateway_path"] = metadata.GetExtendedSchema(getPolicyPathSchema(false, true, "Policy path for the gateway."))
+		schemaMap["locale_service_path"] = &metadata.ExtendedSchema{
+			Schema: schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Policy path for the locale service.",
+				Optional:     true,
+				ForceNew:     true,
+				Deprecated:   "Use gateway_path instead.",
+				ValidateFunc: validatePolicyPath(),
+				AtLeastOneOf: []string{"locale_service_path", "gateway_path"},
+			},
+		}
+	}
+	return schemaMap
+}
+
+var IPSecVpnServiceSchemaExt = getIPSecVpnServiceCommonSchema(true, false)
+
 func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPSecVpnServiceCreate,
@@ -37,44 +95,7 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 			State: resourceNsxtPolicyIPSecVpnServiceImport,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
-			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
-			"description":  getDescriptionSchema(),
-			"revision":     getRevisionSchema(),
-			"tag":          getTagsSchema(),
-			"gateway_path": getPolicyPathSchema(false, true, "Policy path for the gateway."),
-			"locale_service_path": {
-				Type:         schema.TypeString,
-				Description:  "Policy path for the locale service.",
-				Optional:     true,
-				ForceNew:     true,
-				Deprecated:   "Use gateway_path instead.",
-				ValidateFunc: validatePolicyPath(),
-				AtLeastOneOf: []string{"locale_service_path", "gateway_path"},
-			},
-			"enabled": {
-				Type:        schema.TypeBool,
-				Description: "Enable/Disable IPSec VPN service.",
-				Optional:    true,
-				Default:     true,
-			},
-			"ha_sync": {
-				Type:        schema.TypeBool,
-				Description: "Enable/Disable IPSec VPN service HA state sync.",
-				Optional:    true,
-				Default:     true,
-			},
-			"ike_log_level": {
-				Type:         schema.TypeString,
-				Description:  "Log level for internet key exchange (IKE).",
-				ValidateFunc: validation.StringInSlice(IPSecVpnServiceIkeLogLevelTypes, false),
-				Optional:     true,
-				Default:      model.IPSecVpnService_IKE_LOG_LEVEL_INFO,
-			},
-			"bypass_rule": getIPSecVPNRulesSchema(),
-		},
+		Schema: metadata.GetSchemaFromExtendedSchema(IPSecVpnServiceSchemaExt),
 	}
 }
 
@@ -279,6 +300,11 @@ func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return handleReadError(d, "IPSecVpnService", id, err)
 	}
+	setIpsecVPNServices(id, d, obj)
+	return nil
+}
+
+func setIpsecVPNServices(id string, d *schema.ResourceData, obj model.IPSecVpnService) {
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -291,7 +317,31 @@ func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}
 	if obj.IkeLogLevel != nil {
 		d.Set("ike_log_level", obj.IkeLogLevel)
 	}
-	return nil
+}
+
+func getIpsecVpnServiceObject(id string, d *schema.ResourceData) model.IPSecVpnService {
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	enabled := d.Get("enabled").(bool)
+	haSync := d.Get("ha_sync").(bool)
+	rules := getIPSecVPNBypassRulesFromSchema(d)
+	tags := getPolicyTagsFromSchema(d)
+
+	ipSecVpnService := model.IPSecVpnService{
+		Id:          &id,
+		DisplayName: &displayName,
+		Description: &description,
+		Tags:        tags,
+		Enabled:     &enabled,
+		HaSync:      &haSync,
+		BypassRules: rules,
+	}
+
+	ikeLogLevel := d.Get("ike_log_level").(string)
+	if ikeLogLevel != "" {
+		ipSecVpnService.IkeLogLevel = &ikeLogLevel
+	}
+	return ipSecVpnService
 }
 
 func resourceNsxtPolicyIPSecVpnServiceCreate(d *schema.ResourceData, m interface{}) error {
@@ -320,27 +370,7 @@ func resourceNsxtPolicyIPSecVpnServiceCreate(d *schema.ResourceData, m interface
 		}
 	}
 
-	displayName := d.Get("display_name").(string)
-	description := d.Get("description").(string)
-	enabled := d.Get("enabled").(bool)
-	haSync := d.Get("ha_sync").(bool)
-	rules := getIPSecVPNBypassRulesFromSchema(d)
-	tags := getPolicyTagsFromSchema(d)
-
-	ipSecVpnService := model.IPSecVpnService{
-		Id:          &id,
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		Enabled:     &enabled,
-		HaSync:      &haSync,
-		BypassRules: rules,
-	}
-
-	ikeLogLevel := d.Get("ike_log_level").(string)
-	if ikeLogLevel != "" {
-		ipSecVpnService.IkeLogLevel = &ikeLogLevel
-	}
+	ipSecVpnService := getIpsecVpnServiceObject(id, d)
 
 	err = patchNsxtPolicyIPSecVpnService(connector, gwID, localeServiceID, ipSecVpnService, isT0)
 	if err != nil {
