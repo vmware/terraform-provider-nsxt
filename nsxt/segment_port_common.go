@@ -244,7 +244,7 @@ func nsxtPolicyPortQosProfileSetInStruct(d *schema.ResourceData) (*data.StructVa
 	}
 
 	childConfig := model.ChildPortQosProfileBindingMap{
-		ResourceType:             "ChildPortQosProfileBindingMap",
+		ResourceType:             "ChildPortQoSProfileBindingMap",
 		PortQosProfileBindingMap: &qosMap,
 		Id:                       &segmentProfileMapID,
 		MarkedForDelete:          &shouldDelete,
