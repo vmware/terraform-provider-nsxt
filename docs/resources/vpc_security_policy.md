@@ -8,7 +8,7 @@ description: A resource to configure a Security Group and its rules within a VPC
 
 This resource provides a method for the management of a VPC Security Policy and rules under it.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

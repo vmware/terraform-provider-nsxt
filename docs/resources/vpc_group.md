@@ -9,7 +9,7 @@ description: A resource to configure a VPC Group and its members.
 This resource provides a method for the management of an inventory Group and its members in a VPC scope. Groups as often
 used as sources and destinations, as well as in the Applied To field, in firewall rules.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

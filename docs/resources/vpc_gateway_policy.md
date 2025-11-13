@@ -8,7 +8,7 @@ description: A resource for VPC Gateway security policies.
 
 This resource provides a method for the management of a VPC Gateway Policy and its Rules.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

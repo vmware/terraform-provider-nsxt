@@ -7,7 +7,7 @@ description: VPC data source.
 # nsxt_vpc
 
 This data source provides information about VPC configured on NSX.
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 

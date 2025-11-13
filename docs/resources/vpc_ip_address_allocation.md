@@ -8,7 +8,7 @@ description: A resource to configure IP Address Allocation from IP block associa
 
 This resource provides a method for allocating IP Address from IP block associated with VPC.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
