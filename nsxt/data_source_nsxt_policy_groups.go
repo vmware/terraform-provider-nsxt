@@ -35,15 +35,28 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 
 	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 
+	boolFalse := false
+	var cursor *string
+	total := 0
 	groupsMap := make(map[string]string)
-	results, err := client.List(domainName, nil, nil, nil, nil, nil, nil, nil)
-	if err != nil {
-		return err
-	}
-	for _, r := range results.Results {
-		groupsMap[*r.DisplayName] = *r.Path
-	}
 
+	for {
+		results, err := client.List(domainName, cursor, nil, nil, nil, nil, &boolFalse, nil)
+		if err != nil {
+			return err
+		}
+		if total == 0 && results.ResultCount != nil {
+			// first response
+			total = int(*results.ResultCount)
+		}
+		for _, r := range results.Results {
+			groupsMap[*r.DisplayName] = *r.Path
+		}
+		cursor = results.Cursor
+		if len(groupsMap) >= total {
+			break
+		}
+	}
 	d.Set("items", groupsMap)
 	d.SetId(newUUID())
 	return nil
