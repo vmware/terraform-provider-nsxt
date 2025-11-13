@@ -117,7 +117,7 @@ func getPolicySegmentPortAttachmentSchema() *schema.Resource {
 func resourceNsxtPolicySegmentPortCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentPortExists(d, context, connector))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentPortExists(d))
 	if err != nil {
 		return err
 	}
