@@ -25,7 +25,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 
   rule {
     display_name       = "allow_icmp"
-    destination_groups = [data.nsxt_policy_groups.items["Cats"], data.nsxt_policy_groups.items["Dogs"]]
+    destination_groups = [data.nsxt_policy_groups.map.items["Cats"], data.nsxt_policy_groups.map.items["Dogs"]]
     action             = "ALLOW"
     services           = [nsxt_policy_service.icmp.path]
     logged             = true
@@ -33,9 +33,9 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 
   rule {
     display_name     = "allow_udp"
-    source_groups    = [data.nsxt_policy_groups.items["Fish"]]
+    source_groups    = [data.nsxt_policy_groups.map.items["Fish"]]
     sources_excluded = true
-    scope            = [data.nsxt_policy_groups.items["Aquarium"]]
+    scope            = [data.nsxt_policy_groups.map.items["Aquarium"]]
     action           = "ALLOW"
     services         = [nsxt_policy_service.udp.path]
     logged           = true
