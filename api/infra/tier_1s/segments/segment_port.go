@@ -71,3 +71,61 @@ func (c SegmentPortClientContext) Update(tier1IdParam string, segmentIdParam str
 	}
 	return obj, err
 }
+
+func (c SegmentPortClientContext) Get(tier1IdParam string, segmentIdParam string, portIdParam string) (model0.SegmentPort, error) {
+	var err error
+	var obj model0.SegmentPort
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		obj, err = client.Get(tier1IdParam, segmentIdParam, portIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client1.PortsClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+func (c SegmentPortClientContext) Patch(tier1IdParam string, segmentIdParam string, portIdParam string, segmentPortParam model0.SegmentPort) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		err = client.Patch(tier1IdParam, segmentIdParam, portIdParam, segmentPortParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client1.PortsClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam, segmentPortParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
+
+func (c SegmentPortClientContext) Delete(tier1IdParam string, segmentIdParam string, portIdParam string) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		err = client.Delete(tier1IdParam, segmentIdParam, portIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client1.PortsClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
