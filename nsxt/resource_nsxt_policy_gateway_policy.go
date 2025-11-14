@@ -27,8 +27,20 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 			State: nsxtDomainResourceImporter,
 		},
 
-		Schema: getPolicyGatewayPolicySchema(false),
+		Schema: getPolicyGatewayPolicySchema(false, true),
 	}
+}
+
+func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGatewayPolicyGeneralCreate(d, m, true)
+}
+
+func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, true)
+}
+
+func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGatewayPolicyGeneralUpdate(d, m, true)
 }
 
 func getGatewayPolicy(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
@@ -125,7 +137,7 @@ func getUpdatedRuleChildren(d *schema.ResourceData) ([]*data.StructValue, error)
 
 }
 
-func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string, isVPC bool) error {
+func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string, isVPC bool, withRule bool) error {
 
 	domain := ""
 	if !isVPC {
@@ -171,19 +183,20 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 		// This is update flow
 		obj.Revision = &revision
 	}
-
-	policyChildren, err := getUpdatedRuleChildren(d)
-	if err != nil {
-		return err
-	}
-	if len(policyChildren) > 0 {
-		obj.Children = policyChildren
+	if withRule {
+		policyChildren, err := getUpdatedRuleChildren(d)
+		if err != nil {
+			return err
+		}
+		if len(policyChildren) > 0 {
+			obj.Children = policyChildren
+		}
 	}
 
 	return gatewayPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
-func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
@@ -192,7 +205,7 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false)
+	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false, withRule)
 	if err != nil {
 		return handleCreateError("Gateway Policy", id, err)
 	}
@@ -200,10 +213,10 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyGatewayPolicyRead(d, m)
+	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
 
-func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyGatewayPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -232,10 +245,13 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		d.Set("tcp_strict", *obj.TcpStrict)
 	}
 	d.Set("revision", obj.Revision)
-	return setPolicyRulesInSchema(d, obj.Rules)
+	if withRule {
+		return setPolicyRulesInSchema(d, obj.Rules)
+	}
+	return nil
 }
 
-func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -243,12 +259,12 @@ func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false)
+	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false, withRule)
 	if err != nil {
 		return handleUpdateError("Gateway Policy", id, err)
 	}
 
-	return resourceNsxtPolicyGatewayPolicyRead(d, m)
+	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
 
 func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}) error {
