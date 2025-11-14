@@ -235,7 +235,7 @@ resource "nsxt_policy_gateway_connection" "test" {
 
 resource "nsxt_policy_ip_block" "extblk" {
   display_name = "ipsec-testing-extblk"
-  cidr         = "10.110.0.10/22"
+  cidr         = "10.110.0.10/32"
   visibility   = "EXTERNAL"
 }
 
