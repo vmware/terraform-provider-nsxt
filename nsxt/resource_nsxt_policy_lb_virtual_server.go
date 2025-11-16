@@ -1661,9 +1661,17 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 
 		This, in turn, should also not trigger the "plan" phase for existing rules, so we also ignore any existing "live"
 		rules unless we find rules to also exist in the resource state.
+
+		However, during import operations, we need to read all existing rules from NSX-T to populate the state correctly.
 	*/
 	rules := d.Get("rule").([]interface{})
-	if len(rules) > 0 {
+	// Check if this is an import operation by looking at the ID in state
+	isImport := d.Id() != "" && len(rules) == 0 && len(obj.Rules) > 0
+
+	if isImport {
+		log.Printf("[DEBUG] Detected import for LB Virtual Server %s: empty state but NSX has %d rules", d.Id(), len(obj.Rules))
+	}
+	if len(rules) > 0 || isImport {
 		setPolicyLbRulesInSchema(d, obj.Rules)
 	} else {
 		log.Printf("[INFO] Ignoring rules since the user did not specify them in configuration")
