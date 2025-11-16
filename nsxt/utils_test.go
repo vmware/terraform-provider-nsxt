@@ -40,7 +40,6 @@ const edgeClusterDefaultName string = "EDGECLUSTER1"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
-const defaultEnforcementPoint string = "default"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
 const defaultTestResourceName string = "terraform-acctest"
