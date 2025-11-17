@@ -48,6 +48,35 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayPolicyRule_importBasic(t *testing.T) {
+
+	name := getAccTestResourceName()
+	locked := "true"
+	seqNum := "1"
+	tcpStrict := "true"
+
+	testruleResourceName := "nsxt_policy_gateway_policy_rule.rule1"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(false, name, locked, seqNum, tcpStrict),
+			},
+			{
+				ResourceName:      testruleResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testruleResourceName),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGatewayPolicyRuleCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
