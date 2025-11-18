@@ -960,6 +960,9 @@ func setUpgradeRunOutput(upgradeClientSet *upgradeClientSet, d *schema.ResourceD
 		if result.Details != nil {
 			elem["details"] = *result.Details
 		}
+		if result.TargetComponentVersion != nil {
+			elem["target_version"] = *result.TargetComponentVersion
+		}
 		groupStatusList, err := upgradeClientSet.GroupStatusClient.Getall(result.ComponentType, nil, nil, nil, nil, nil)
 		if err != nil {
 			return err
@@ -987,11 +990,6 @@ func resourceNsxtUpgradeRunRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleReadError(d, "NsxtUpgradeRun", id, err)
 	}
-	targetVersion, err := getTargetVersion(m)
-	if err != nil {
-		return handleReadError(d, "NsxtUpgradeRun", id, err)
-	}
-	d.Set("target_version", targetVersion)
 	return nil
 }
 
