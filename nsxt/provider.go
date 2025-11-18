@@ -272,6 +272,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_bridge_profile":                             dataSourceNsxtPolicyBridgeProfile(),
 			"nsxt_policy_certificate":                                dataSourceNsxtPolicyCertificate(),
 			"nsxt_policy_container_cluster":                          dataSourceNsxtPolicyContainerCluster(),
+			"nsxt_policy_container_clusters":                         dataSourceNsxtPolicyContainerClusters(),
 			"nsxt_policy_context_profile":                            dataSourceNsxtPolicyContextProfile(),
 			"nsxt_policy_dhcp_server":                                dataSourceNsxtPolicyDhcpServer(),
 			"nsxt_policy_distributed_flood_protection_profile":       dataSourceNsxtPolicyDistributedFloodProtectionProfile(),
