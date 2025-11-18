@@ -1203,6 +1203,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
+		log.Printf("[DEBUG] Retry Context: %v", retryContext)
 		shouldRetry := false
 		if retryContext.Response != nil {
 			for _, code := range c.CommonConfig.RetryStatusCodes {
