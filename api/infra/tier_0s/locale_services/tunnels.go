@@ -33,7 +33,7 @@ func (c TunnelsClientContext) Delete(tier0IdParam string, localeSvcIdParam strin
 	var err error
 
 	switch c.ClientType {
-	
+
 	case utl.Local:
 		client := c.Client.(client0.TunnelsClient)
 		err = client.Delete(tier0IdParam, localeSvcIdParam, tunnelIdParam)
