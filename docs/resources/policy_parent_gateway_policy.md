@@ -33,13 +33,13 @@ resource "nsxt_policy_parent_gateway_policy" "test" {
 }
 
 resource "nsxt_policy_gateway_policy_rule" "rule1" {
-  display_name       = "rule1"
-  description        = "Terraform provisioned gateway Policy Rule"
-  policy_path = nsxt_policy_parent_gateway_policy.test.path
-  sequence_number    = 1
-  action             = "DROP"
-  logged             = true
-  scope              = [data.nsxt_policy_tier0_gateway.t0_pepsi.path]
+  display_name    = "rule1"
+  description     = "Terraform provisioned gateway Policy Rule"
+  policy_path     = nsxt_policy_parent_gateway_policy.test.path
+  sequence_number = 1
+  action          = "DROP"
+  logged          = true
+  scope           = [data.nsxt_policy_tier0_gateway.t0_pepsi.path]
 }
 ```
 
@@ -105,13 +105,13 @@ resource "nsxt_policy_gateway_policy_rule" "rule1" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
-  display_name       = "rule1"
-  description        = "Terraform provisioned gateway Policy Rule"
-  policy_path = nsxt_policy_parent_gateway_policy.test.path
-  sequence_number    = 1
-  action             = "DROP"
-  logged             = true
-  scope              = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+  display_name    = "rule1"
+  description     = "Terraform provisioned gateway Policy Rule"
+  policy_path     = nsxt_policy_parent_gateway_policy.test.path
+  sequence_number = 1
+  action          = "DROP"
+  logged          = true
+  scope           = [data.nsxt_policy_tier1_gateway.t1_gw.path]
 }
 ```
 
