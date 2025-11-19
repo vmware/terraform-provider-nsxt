@@ -46,7 +46,7 @@ func (c UpgradeBundleInfoClientContext) Cancelupload(bundleIdParam string) error
 func (c UpgradeBundleInfoClientContext) Create(upgradeBundleFetchRequestParam model0.UpgradeBundleFetchRequest, installParam *bool) (model0.UpgradeBundleId, error) {
 	var err error
 	var obj model0.UpgradeBundleId
-	
+
 	switch c.ClientType {
 
 	case utl.Local:
