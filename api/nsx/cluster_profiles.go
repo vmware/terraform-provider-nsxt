@@ -32,7 +32,7 @@ func NewClusterProfilesClient(sessionContext utl.SessionContext, connector vapiP
 func (c ClusterProfilesClientContext) Create(clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
 	var err error
 	var obj *vapiData_.StructValue
-	
+
 	switch c.ClientType {
 
 	case utl.Local:
