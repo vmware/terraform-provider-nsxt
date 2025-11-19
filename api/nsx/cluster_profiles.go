@@ -13,9 +13,9 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-type StructValueClientContext utl.ClientContext
+type ClusterProfilesClientContext utl.ClientContext
 
-func NewClusterProfilesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *StructValueClientContext {
+func NewClusterProfilesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *ClusterProfilesClientContext {
 	var client interface{}
 
 	switch sessionContext.ClientType {
@@ -26,13 +26,13 @@ func NewClusterProfilesClient(sessionContext utl.SessionContext, connector vapiP
 	default:
 		return nil
 	}
-	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
+	return &ClusterProfilesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c StructValueClientContext) Create(clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
+func (c ClusterProfilesClientContext) Create(clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
 	var err error
 	var obj *vapiData_.StructValue
-
+	
 	switch c.ClientType {
 
 	case utl.Local:
@@ -45,7 +45,7 @@ func (c StructValueClientContext) Create(clusterProfileParam *vapiData_.StructVa
 	return obj, err
 }
 
-func (c StructValueClientContext) Delete(clusterProfileIdParam string) error {
+func (c ClusterProfilesClientContext) Delete(clusterProfileIdParam string) error {
 	var err error
 
 	switch c.ClientType {
@@ -60,7 +60,7 @@ func (c StructValueClientContext) Delete(clusterProfileIdParam string) error {
 	return err
 }
 
-func (c StructValueClientContext) Get(clusterProfileIdParam string) (*vapiData_.StructValue, error) {
+func (c ClusterProfilesClientContext) Get(clusterProfileIdParam string) (*vapiData_.StructValue, error) {
 	var obj *vapiData_.StructValue
 	var err error
 
@@ -79,7 +79,7 @@ func (c StructValueClientContext) Get(clusterProfileIdParam string) (*vapiData_.
 	return obj, err
 }
 
-func (c StructValueClientContext) List(cursorParam *string, includeSystemOwnedParam *bool, includedFieldsParam *string, pageSizeParam *int64, resourceTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.ClusterProfileListResult, error) {
+func (c ClusterProfilesClientContext) List(cursorParam *string, includeSystemOwnedParam *bool, includedFieldsParam *string, pageSizeParam *int64, resourceTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.ClusterProfileListResult, error) {
 	var err error
 	var obj model0.ClusterProfileListResult
 
@@ -95,7 +95,7 @@ func (c StructValueClientContext) List(cursorParam *string, includeSystemOwnedPa
 	return obj, err
 }
 
-func (c StructValueClientContext) Update(clusterProfileIdParam string, clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
+func (c ClusterProfilesClientContext) Update(clusterProfileIdParam string, clusterProfileParam *vapiData_.StructValue) (*vapiData_.StructValue, error) {
 	var err error
 	var obj *vapiData_.StructValue
 
