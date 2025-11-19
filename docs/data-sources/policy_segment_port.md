@@ -39,6 +39,8 @@ data "nsxt_policy_segment_port" "segmentport1" {
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
 
+Note: Atleast one of vif_id, display_name or id should be set.
+
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
