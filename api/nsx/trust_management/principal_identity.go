@@ -31,7 +31,7 @@ func NewPrincipalIdentitiesClient(sessionContext utl.SessionContext, connector v
 func (c PrincipalIdentityClientContext) Create(principalIdentityParam model0.PrincipalIdentity) (model0.PrincipalIdentity, error) {
 	var err error
 	var obj model0.PrincipalIdentity
-	
+
 	switch c.ClientType {
 
 	case utl.Local:

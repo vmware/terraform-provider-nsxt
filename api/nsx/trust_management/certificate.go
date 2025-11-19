@@ -63,7 +63,7 @@ func (c CertificateClientContext) Fetchpeercertificatechain(tlsServiceEndpointPa
 	var obj model0.PeerCertificateChain
 
 	switch c.ClientType {
-	
+
 	case utl.Local:
 		client := c.Client.(client0.CertificatesClient)
 		obj, err = client.Fetchpeercertificatechain(tlsServiceEndpointParam)
