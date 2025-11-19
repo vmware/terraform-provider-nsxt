@@ -56,5 +56,3 @@ func (c PreUpgradeChecksClientContext) Resolve(preUpgradeCheckIdParam string) er
 	}
 	return err
 }
-
-

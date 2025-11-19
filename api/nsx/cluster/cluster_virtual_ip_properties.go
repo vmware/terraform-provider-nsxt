@@ -66,7 +66,7 @@ func (c ClusterVirtualIpPropertiesClientContext) Setvirtualip(forceParam *string
 func (c ClusterVirtualIpPropertiesClientContext) Clearvirtualip() (model0.ClusterVirtualIpProperties, error) {
 	var err error
 	var obj model0.ClusterVirtualIpProperties
-	
+
 	switch c.ClientType {
 
 	case utl.Local:
@@ -82,7 +82,7 @@ func (c ClusterVirtualIpPropertiesClientContext) Clearvirtualip() (model0.Cluste
 func (c ClusterVirtualIpPropertiesClientContext) Clearvirtualip6() (model0.ClusterVirtualIpProperties, error) {
 	var err error
 	var obj model0.ClusterVirtualIpProperties
-	
+
 	switch c.ClientType {
 
 	case utl.Local:
