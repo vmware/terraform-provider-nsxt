@@ -157,7 +157,7 @@ func (c ClusterConfigClientContext) Removenode(nodeIdParam string, forceParam *s
 
 func (c ClusterConfigClientContext) Summarizeinventorytoremote() error {
 	var err error
-	
+
 	switch c.ClientType {
 
 	case utl.Local:
