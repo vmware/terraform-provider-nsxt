@@ -54,21 +54,18 @@ func listTags(connector client.Connector, scope string) ([]model.TagInfo, error)
 	}
 	var cursor *string
 	var tagsListResults []model.TagInfo
-	total := 0
 	for {
 		tagsList, err := client.List(cursor, nil, nil, nil, nil, &scope, nil, nil, nil, nil)
 		if err != nil {
 			return nil, err
 		}
-		tagsListResults = append(tagsListResults, tagsList.Results...)
-		if total == 0 && tagsList.ResultCount != nil {
-			total = int(*tagsList.ResultCount)
+		if tagsList.Results != nil {
+			tagsListResults = append(tagsListResults, tagsList.Results...)
 		}
 
 		cursor = tagsList.Cursor
-		if len(tagsListResults) >= total {
+		if cursor == nil {
 			return tagsListResults, nil
 		}
 	}
-
 }
