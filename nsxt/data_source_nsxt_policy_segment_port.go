@@ -78,7 +78,7 @@ func dataSourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) 
 	d.Set("display_name", segmentPort.DisplayName)
 	d.Set("description", segmentPort.Description)
 	d.Set("path", segmentPort.Path)
-	if segmentPort.Attachment.Id != nil {
+	if segmentPort.Attachment != nil && segmentPort.Attachment.Id != nil {
 		d.Set("vif_id", segmentPort.Attachment.Id)
 	}
 	d.Set("segment_path", getSegmentPathFromPortPath(*segmentPort.Path))
