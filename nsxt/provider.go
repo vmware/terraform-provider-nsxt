@@ -505,6 +505,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_network_span":                                 resourceNsxtPolicyNetworkSpan(),
 			"nsxt_policy_ospf_area":                                    resourceNsxtPolicyOspfArea(),
 			"nsxt_policy_ospf_config":                                  resourceNsxtPolicyOspfConfig(),
+			"nsxt_policy_parent_gateway_policy":                        resourceNsxtPolicyParentGatewayPolicy(),
 			"nsxt_policy_parent_security_policy":                       resourceNsxtPolicyParentSecurityPolicy(),
 			"nsxt_policy_predefined_gateway_policy":                    resourceNsxtPolicyPredefinedGatewayPolicy(),
 			"nsxt_policy_predefined_security_policy":                   resourceNsxtPolicyPredefinedSecurityPolicy(),
