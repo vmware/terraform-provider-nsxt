@@ -25,6 +25,7 @@ func testAccResourceNsxtPolicyParentGatewayPolicyBasic(t *testing.T, withContext
 	testResourceName := "nsxt_policy_parent_gateway_policy.test"
 
 	name := getAccTestResourceName()
+	ruleName := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	locked := "true"
 	updatedLocked := "false"
@@ -32,6 +33,8 @@ func testAccResourceNsxtPolicyParentGatewayPolicyBasic(t *testing.T, withContext
 	updatedSeqNum := "2"
 	tcpStrict := "true"
 	updatedTCPStrict := "false"
+	action := "REJECT"
+	description := "Terraform provisioned gateway Policy Rule"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -41,7 +44,7 @@ func testAccResourceNsxtPolicyParentGatewayPolicyBasic(t *testing.T, withContext
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(withContext, name, locked, seqNum, tcpStrict),
+				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(withContext, name, locked, seqNum, tcpStrict, ruleName, description, action),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,7 +54,7 @@ func testAccResourceNsxtPolicyParentGatewayPolicyBasic(t *testing.T, withContext
 				),
 			},
 			{
-				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(withContext, updatedName, updatedLocked, updatedSeqNum, updatedTCPStrict),
+				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(withContext, updatedName, updatedLocked, updatedSeqNum, updatedTCPStrict, ruleName, description, action),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -66,7 +69,10 @@ func testAccResourceNsxtPolicyParentGatewayPolicyBasic(t *testing.T, withContext
 
 func TestAccResourceNsxtPolicyParentGatewayPolicy_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	ruleName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_parent_gateway_policy.test"
+	action := "REJECT"
+	description := "Terraform provisioned gateway Policy Rule"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -76,7 +82,7 @@ func TestAccResourceNsxtPolicyParentGatewayPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(false, name, "true", "1", "true"),
+				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(false, name, "true", "1", "true", ruleName, description, action),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -90,7 +96,10 @@ func TestAccResourceNsxtPolicyParentGatewayPolicy_importBasic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyParentGatewayPolicy_importBasic_multitenancy(t *testing.T) {
 	name := getAccTestResourceName()
+	ruleName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_parent_gateway_policy.test"
+	action := "REJECT"
+	description := "Terraform provisioned gateway Policy Rule"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -103,7 +112,7 @@ func TestAccResourceNsxtPolicyParentGatewayPolicy_importBasic_multitenancy(t *te
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(true, name, "true", "1", "true"),
+				Config: testAccNsxtPolicyParentGatewayPolicyTemplate(true, name, "true", "1", "true", ruleName, description, action),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -155,7 +164,7 @@ resource "nsxt_policy_tier1_gateway" "t1_gw" {
 `, getEdgeClusterName(), context)
 }
 
-func testAccNsxtPolicyParentGatewayPolicyTemplate(withContext bool, name, locked, seqNum, tcpStrict string) string {
+func testAccNsxtPolicyParentGatewayPolicyTemplate(withContext bool, name, locked, seqNum, tcpStrict, ruleName, description, action string) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -175,25 +184,5 @@ resource "nsxt_policy_parent_gateway_policy" "test" {
     scope = "color"
     tag   = "orange"
   }
-}`, context, name, locked, seqNum, tcpStrict) + testAccNsxtPolicyGatewayPolicyRuleTemplate(withContext)
-}
-
-func testAccNsxtPolicyGatewayPolicyRuleTemplate(withContext bool) string {
-	context := ""
-	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
-	}
-	return fmt.Sprintf(`
-
-resource "nsxt_policy_gateway_policy_rule" "rule1" {
-  %s
-  display_name       = "rule2"
-  description        = "Terraform provisioned gateway Policy Rule"
-  policy_path = nsxt_policy_parent_gateway_policy.test.path
-  sequence_number    = 1
-  action             = "DROP"
-  logged             = true
-  scope              = [nsxt_policy_tier1_gateway.t1_gw.path]
-}
-`, context)
+}`, context, name, locked, seqNum, tcpStrict) + testAccNsxtPolicyGatewayPolicyRuleTemplate(withContext, ruleName, description, action)
 }
