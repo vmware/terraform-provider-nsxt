@@ -168,7 +168,7 @@ func testAccNsxtPolicyConnectivityPolicyPrerequisites() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_transit_gateway" "default" {
   %s
-  id = "default"
+  is_default = true
 }
 
 resource "nsxt_policy_group" "test" {

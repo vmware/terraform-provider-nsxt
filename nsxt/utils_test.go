@@ -346,7 +346,7 @@ func testAccOnlyMultitenancy(t *testing.T) {
 }
 
 func testAccOnlyVPC(t *testing.T) {
-	testAccNSXVersion(t, "4.1.2")
+	testAccNSXVersion(t, "9.0.0")
 	if !testAccIsVPC() {
 		t.Skipf("This test requires a VPC environment")
 	}
