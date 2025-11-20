@@ -33,6 +33,39 @@ resource "nsxt_policy_gateway_policy_rule" "rule1" {
 }
 ```
 
+## Example Usage - gateway policy with additional rule
+
+```hcl
+resource "nsxt_policy_parent_gateway_policy" "test" {
+  display_name    = "tf-gw-policy"
+  description     = "Terraform provisioned Gateway Policy"
+  category        = "LocalGatewayRules"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "nsxt_policy_gateway_policy_rule" "rule1" {
+  display_name    = "rule1"
+  description     = "Terraform provisioned gateway Policy Rule"
+  policy_path     = nsxt_policy_parent_gateway_policy.test.path
+  sequence_number = 1
+  action          = "DROP"
+  logged          = true
+  scope           = [data.nsxt_policy_tier0_gateway.t0_pepsi.path]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
