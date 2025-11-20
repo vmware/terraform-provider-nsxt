@@ -24,7 +24,7 @@ func testAccResourceNsxtPolicyGatewayPolicyRuleBasic(t *testing.T, withContext b
 	policyResourceName := "nsxt_policy_parent_gateway_policy"
 	testPolicyResourceName := fmt.Sprintf("%s.test", policyResourceName)
 	testruleResourceName := "nsxt_policy_gateway_policy_rule.rule1"
-	fmt.Println(testAccNsxtPolicyParentGatewayPolicyTemplate(withContext, ruleName, locked, seqNum, tcpStrict, ruleName, description, action))
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
