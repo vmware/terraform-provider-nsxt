@@ -970,7 +970,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	isGlobalManager := context.ClientType == utl.Global
 	err := verifyPolicyTier0GatewayConfig(d, isGlobalManager)
 	if err != nil {
@@ -983,14 +983,14 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(commonSessionContext, d, connector, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Using H-API to create Tier0 with ID %s", id)
 
-	err = policyInfraPatch(commonSessionContext, obj, getPolicyConnector(m), false)
+	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Tier0", id, err)
 	}
@@ -1065,7 +1065,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		d.Set("dhcp_config_path", dhcpPaths[0])
 	}
 	// Get the edge cluster Id or locale services
-	localeServices, err := listPolicyTier0GatewayLocaleServices(commonSessionContext, connector, id)
+	localeServices, err := listPolicyTier0GatewayLocaleServices(getSessionContext(d, m), connector, id)
 	if err != nil {
 		return handleReadError(d, "Locale Service for T0", id, err)
 	}
@@ -1164,14 +1164,14 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(commonSessionContext, d, connector, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
 
 	log.Printf("[INFO] Using H-API to update Tier0 with ID %s", id)
 
-	err = policyInfraPatch(commonSessionContext, obj, connector, true)
+	err = policyInfraPatch(getSessionContext(d, m), obj, connector, true)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
@@ -1212,7 +1212,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete Tier0 with ID %s", id)
-	err := policyInfraPatch(commonSessionContext, obj, getPolicyConnector(m), false)
+	err := policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Tier0", id, err)
 	}
