@@ -879,7 +879,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(commonSessionContext, connector)
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -911,7 +911,7 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-	client := domains.NewGroupsClient(commonSessionContext, connector)
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1011,7 +1011,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(commonSessionContext, connector)
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1044,7 +1044,7 @@ func resourceNsxtPolicyGroupGeneralDelete(d *schema.ResourceData, m interface{},
 	failIfSubtreeExists := false
 
 	doDelete := func() error {
-		client := domains.NewGroupsClient(commonSessionContext, connector)
+		client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

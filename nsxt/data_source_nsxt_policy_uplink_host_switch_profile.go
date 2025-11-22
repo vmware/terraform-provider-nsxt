@@ -35,7 +35,7 @@ func dataSourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 func dataSourceNsxtUplinkHostSwitchProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	obj, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE, nil, false)
+	obj, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE, nil, false)
 	if isNotFoundError(err) {
 		return fmt.Errorf("PolicyUplinkHostSwitchProfile with name '%s' was not found, err=%v", d.Get("display_name").(string), err)
 	} else if err != nil {

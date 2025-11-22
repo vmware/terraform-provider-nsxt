@@ -51,7 +51,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 		if memberIndexSet {
 			query["member_index"] = strconv.Itoa(memberIndex.(int))
 		}
-		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), commonSessionContext, "PolicyEdgeNode", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyEdgeNode", query, false)
 		if err != nil {
 			return err
 		}

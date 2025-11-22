@@ -47,7 +47,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	commonProviderConfig := getCommonProviderConfig(m)
 
 	// Get the realization info of this resource

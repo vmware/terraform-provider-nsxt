@@ -77,7 +77,7 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	osPrefix := d.Get("guest_os").(string)
 	vmMap := make(map[string]interface{})
 
-	allVMs, err := listAllPolicyVirtualMachines(commonSessionContext, connector, m)
+	allVMs, err := listAllPolicyVirtualMachines(getSessionContext(d, m), connector, m)
 	if err != nil {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
 	}

@@ -288,7 +288,7 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 		obj.Children = childRules
 	}
 
-	return idsPolicyInfraPatch(commonSessionContext, obj, domain, m)
+	return idsPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
 func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPolicy, domain string, m interface{}) error {
@@ -313,7 +313,7 @@ func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPol
 func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(commonSessionContext, d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(getSessionContext(d, m), d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -338,7 +338,7 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
 	}
-	client := domains.NewIntrusionServicePoliciesClient(commonSessionContext, connector)
+	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -385,7 +385,7 @@ func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewIntrusionServicePoliciesClient(commonSessionContext, connector)
+	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

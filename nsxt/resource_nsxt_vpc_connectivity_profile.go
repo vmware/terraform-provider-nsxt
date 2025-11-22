@@ -229,7 +229,7 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 		return err
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -270,7 +270,7 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 	}
 
 	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "VpcConnectivityProfile", id, err)
@@ -296,7 +296,7 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining VpcConnectivityProfile ID")
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -336,7 +336,7 @@ func resourceNsxtVpcConnectivityProfileDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
 	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
 	err := client.Delete(parents[0], parents[1], id)

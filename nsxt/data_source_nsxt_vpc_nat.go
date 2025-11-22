@@ -51,7 +51,7 @@ func dataSourceNsxtVpcNatRead(d *schema.ResourceData, m interface{}) error {
 	query := make(map[string]string)
 	query["nat_type"] = natType
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "PolicyNat", query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "PolicyNat", query, false)
 	if err != nil {
 		return err
 	}

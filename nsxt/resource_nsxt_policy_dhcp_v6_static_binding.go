@@ -126,7 +126,7 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	if isT0 {
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
 	}
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 
 	if isPolicyGlobalManager(m) && gwID != "" {
 		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
@@ -192,7 +192,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 	converter := bindings.NewTypeConverter()
 	var err error
 	var dhcpObj *data.StructValue
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 
 	if gwID == "" {
 		// infra segment

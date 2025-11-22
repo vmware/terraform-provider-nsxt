@@ -51,7 +51,7 @@ func resourceNsxtVPCSecurityPolicyDelete(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewSecurityPoliciesClient(commonSessionContext, connector)
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
 	err := client.Delete("", id)
 
 	if err != nil {

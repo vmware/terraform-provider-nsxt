@@ -26,7 +26,7 @@ func dataSourceNsxtPolicySiteRead(d *schema.ResourceData, m interface{}) error {
 		return globalManagerOnlyError()
 	}
 
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "Site", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Site", nil)
 	if err != nil {
 		return err
 	}

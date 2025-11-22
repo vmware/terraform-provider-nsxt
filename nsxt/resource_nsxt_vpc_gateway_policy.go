@@ -64,7 +64,7 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicy(commonSessionContext, id, "", connector)
+	obj, err := getGatewayPolicy(getSessionContext(d, m), id, "", connector)
 	if err != nil {
 		return handleReadError(d, "VPC Gateway Policy", id, err)
 	}
@@ -109,7 +109,7 @@ func resourceNsxtVPCGatewayPolicyDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewGatewayPoliciesClient(commonSessionContext, connector)
+	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
 	err := client.Delete("", id)
 	if err != nil {
 		return handleDeleteError("VPC Gateway Policy", id, err)

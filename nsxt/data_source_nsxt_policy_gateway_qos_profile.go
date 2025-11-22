@@ -23,7 +23,7 @@ func dataSourceNsxtPolicyGatewayQosProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyGatewayQosProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "GatewayQosProfile", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "GatewayQosProfile", nil)
 	if err != nil {
 		return err
 	}

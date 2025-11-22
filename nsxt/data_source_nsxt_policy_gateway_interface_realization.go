@@ -73,7 +73,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 
 func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := realizedstate.NewRealizedEntitiesClient(commonSessionContext, connector)
+	client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

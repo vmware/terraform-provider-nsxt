@@ -107,7 +107,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeRead(d *schema.ResourceData,
 	log.Printf("[INFO] Reading ContextProfileCustomAttribute with ID %s", d.Id())
 
 	connector := getPolicyConnector(m)
-	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(commonSessionContext, id, connector)
+	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(getSessionContext(d, m), id, connector)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(commonSessionContext, connector)
+	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -172,7 +172,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(commonSessionContext, connector)
+	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

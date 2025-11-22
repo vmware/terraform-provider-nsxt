@@ -193,7 +193,7 @@ func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, i
 
 func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyContextProfileExists)
 	if err != nil {
@@ -254,7 +254,7 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining ContextProfile ID")
 	}
 
-	client := infra.NewContextProfilesClient(commonSessionContext, connector)
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -276,7 +276,7 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 
 func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ContextProfile ID")
@@ -331,7 +331,7 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 	var err error
 	force := true
-	client := infra.NewContextProfilesClient(commonSessionContext, connector)
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

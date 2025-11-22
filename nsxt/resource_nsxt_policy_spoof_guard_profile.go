@@ -78,7 +78,7 @@ func resourceNsxtPolicySpoofGuardProfilePatch(d *schema.ResourceData, m interfac
 	}
 
 	log.Printf("[INFO] Patching SpoofGuardProfile with ID %s", id)
-	client := infra.NewSpoofguardProfilesClient(commonSessionContext, connector)
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -112,7 +112,7 @@ func resourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining SpoofGuardProfile ID")
 	}
 
-	client := infra.NewSpoofguardProfilesClient(commonSessionContext, connector)
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -155,7 +155,7 @@ func resourceNsxtPolicySpoofGuardProfileDelete(d *schema.ResourceData, m interfa
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewSpoofguardProfilesClient(commonSessionContext, connector)
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
