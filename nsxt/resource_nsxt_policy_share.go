@@ -97,7 +97,7 @@ func resourceNsxtPolicyShareCreate(d *schema.ResourceData, m interface{}) error 
 		SharingStrategy: &sharingStrategy,
 		SharedWith:      sharedWith,
 	}
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	client := infra.NewSharesClient(context, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
@@ -118,7 +118,7 @@ func resourceNsxtPolicyShareRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error obtaining Share ID")
 	}
 
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	client := infra.NewSharesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
@@ -158,7 +158,7 @@ func resourceNsxtPolicyShareUpdate(d *schema.ResourceData, m interface{}) error 
 		SharingStrategy: &sharingStrategy,
 		SharedWith:      sharedWith,
 	}
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	client := infra.NewSharesClient(context, connector)
 	err := client.Patch(id, obj)
 	if err != nil {
@@ -175,7 +175,7 @@ func resourceNsxtPolicyShareDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	client := infra.NewSharesClient(context, connector)
 	err := client.Delete(id)
 

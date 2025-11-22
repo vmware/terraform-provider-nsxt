@@ -139,7 +139,7 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 
 	converter := bindings.NewTypeConverter()
 
@@ -238,7 +238,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
 	}
 
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	if context.ClientType == utl.Global && gwID != "" {
 		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
 	}
@@ -324,7 +324,7 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	_, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
 
 	connector := getPolicyConnector(m)
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	var err error
 	if gwID == "" {
 		// infra segment

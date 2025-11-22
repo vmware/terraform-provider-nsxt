@@ -193,7 +193,7 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 		}
 	}
 
-	return gatewayPolicyInfraPatch(commonSessionContext, obj, domain, m)
+	return gatewayPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
 func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
@@ -224,7 +224,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralRead(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicy(commonSessionContext, id, d.Get("domain").(string), connector)
+	obj, err := getGatewayPolicy(getSessionContext(d, m), id, d.Get("domain").(string), connector)
 	if err != nil {
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
@@ -274,7 +274,7 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewGatewayPoliciesClient(commonSessionContext, connector)
+	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

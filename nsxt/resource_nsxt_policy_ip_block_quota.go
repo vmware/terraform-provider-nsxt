@@ -205,7 +205,7 @@ func resourceNsxtPolicyIpBlockQuotaCreate(d *schema.ResourceData, m interface{})
 
 	log.Printf("[INFO] Creating IpBlockQuota with ID %s", id)
 
-	client := clientLayer.NewLimitsClient(commonSessionContext, connector)
+	client := clientLayer.NewLimitsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return fmt.Errorf("error creating IpBlockQuota with ID %s - operation is not supported with this backend", id)
 	}
@@ -227,7 +227,7 @@ func resourceNsxtPolicyIpBlockQuotaRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining IpBlockQuota ID")
 	}
 
-	client := clientLayer.NewLimitsClient(commonSessionContext, connector)
+	client := clientLayer.NewLimitsClient(getSessionContext(d, m), connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -272,7 +272,7 @@ func resourceNsxtPolicyIpBlockQuotaUpdate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	client := clientLayer.NewLimitsClient(commonSessionContext, connector)
+	client := clientLayer.NewLimitsClient(getSessionContext(d, m), connector)
 	err := client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("IpBlockQuota", id, err)
@@ -289,7 +289,7 @@ func resourceNsxtPolicyIpBlockQuotaDelete(d *schema.ResourceData, m interface{})
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewLimitsClient(commonSessionContext, connector)
+	client := clientLayer.NewLimitsClient(getSessionContext(d, m), connector)
 	err := client.Delete(id)
 
 	if err != nil {

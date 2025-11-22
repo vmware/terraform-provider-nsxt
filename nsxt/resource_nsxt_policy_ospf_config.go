@@ -143,7 +143,7 @@ func resourceNsxtPolicyOspfConfigCreate(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Tier0 Gateway path expected, got %s", gwPath)
 	}
 
-	localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(commonSessionContext, gwID, connector)
+	localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(getSessionContext(d, m), gwID, connector)
 	if err != nil {
 		return fmt.Errorf("Tier0 Gateway path with configured edge cluster expected, got %s", gwPath)
 	}

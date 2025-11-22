@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 func dataSourceNsxtPolicyIPSecVpnTunnelProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "IPSecVpnTunnelProfile", nil, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "IPSecVpnTunnelProfile", nil, false)
 	if err == nil {
 		return nil
 	}
