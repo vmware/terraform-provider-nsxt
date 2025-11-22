@@ -184,7 +184,7 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating QosProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(commonSessionContext, connector)
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -207,7 +207,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining QosProfile ID")
 	}
 
-	client := infra.NewQosProfilesClient(commonSessionContext, connector)
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -238,7 +238,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewQosProfilesClient(commonSessionContext, connector)
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -300,7 +300,7 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(commonSessionContext, connector)
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

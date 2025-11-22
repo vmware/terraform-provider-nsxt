@@ -24,7 +24,7 @@ func dataSourceNsxtPolicyBridgeProfile() *schema.Resource {
 func dataSourceNsxtPolicyBridgeProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, commonSessionContext, "L2BridgeEndpointProfile", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "L2BridgeEndpointProfile", nil)
 	if err != nil {
 		return err
 	}

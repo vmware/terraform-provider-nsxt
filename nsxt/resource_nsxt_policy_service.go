@@ -532,7 +532,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating service with ID %s", id)
 
-	client := infra.NewServicesClient(commonSessionContext, connector)
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -554,7 +554,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining service id")
 	}
 
-	client := infra.NewServicesClient(commonSessionContext, connector)
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -732,7 +732,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// Update the resource using Update to totally replace the list of entries
-	client := infra.NewServicesClient(commonSessionContext, connector)
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -753,7 +753,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	doDelete := func() error {
-		client := infra.NewServicesClient(commonSessionContext, connector)
+		client := infra.NewServicesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

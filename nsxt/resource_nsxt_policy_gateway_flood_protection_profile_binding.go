@@ -99,13 +99,13 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 	}
 	if tier0ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
 			err = bindingClient.Patch(tier0ID, id, obj)
 		} else {
-			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
@@ -116,13 +116,13 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 		}
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
 			err = bindingClient.Patch(tier1ID, id, obj)
 		} else {
-			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
@@ -192,7 +192,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingCreate(d *schema.Reso
 	id := "default"
 	parentPath := d.Get("parent_path").(string)
 
-	exist, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingExists(commonSessionContext, getPolicyConnector(m), parentPath, id)
+	exist, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingExists(getSessionContext(d, m), getPolicyConnector(m), parentPath, id)
 	if err != nil {
 		return err
 	}
@@ -220,7 +220,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingRead(d *schema.Resour
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	binding, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(commonSessionContext, connector, parentPath, id)
+	binding, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(getSessionContext(d, m), connector, parentPath, id)
 	if err != nil {
 		return handleReadError(d, "GatewayFloodProtectionProfileBinding", id, err)
 	}
@@ -275,13 +275,13 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 
 	if tier0ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
 			err = bindingClient.Delete(tier0ID, id)
 		} else {
-			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
@@ -292,13 +292,13 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 		}
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}
 			err = bindingClient.Delete(tier1ID, id)
 		} else {
-			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(commonSessionContext, connector)
+			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
 			if bindingClient == nil {
 				return policyResourceNotSupportedError()
 			}

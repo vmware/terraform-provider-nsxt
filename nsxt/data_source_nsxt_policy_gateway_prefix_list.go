@@ -32,7 +32,7 @@ func dataSourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interfa
 	if len(gwPath) > 0 {
 		query["parent_path"] = fmt.Sprintf("%s*", gwPath)
 	}
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "PrefixList", query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "PrefixList", query, false)
 	if err != nil {
 		return err
 	}

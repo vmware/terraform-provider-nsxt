@@ -143,7 +143,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 		return err
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -181,7 +181,7 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 	}
 
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
 		return handleReadError(d, "VpcIpAddressAllocation", id, err)
@@ -207,7 +207,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining VpcIpAddressAllocation ID")
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -244,7 +244,7 @@ func resourceNsxtVpcIpAddressAllocationDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
