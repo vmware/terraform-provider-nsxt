@@ -121,7 +121,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 
 func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(commonSessionContext, connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -177,7 +177,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(commonSessionContext, connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -215,7 +215,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(commonSessionContext, connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -246,7 +246,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(commonSessionContext, connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

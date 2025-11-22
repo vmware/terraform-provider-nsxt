@@ -293,7 +293,7 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	}
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
-	client := infra.NewSegmentSecurityProfilesClient(commonSessionContext, connector)
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -327,7 +327,7 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining SegmentSecurityProfile ID")
 	}
 
-	client := infra.NewSegmentSecurityProfilesClient(commonSessionContext, connector)
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -373,7 +373,7 @@ func resourceNsxtPolicySegmentSecurityProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewSegmentSecurityProfilesClient(commonSessionContext, connector)
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

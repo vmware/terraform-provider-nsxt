@@ -561,7 +561,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier1GatewayResourceToInfraStruct(commonSessionContext, d, connector, id)
+	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 
 	if err != nil {
 		return err
@@ -569,7 +569,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Using H-API to create Tier1 with ID %s", id)
-	err = policyInfraPatch(commonSessionContext, obj, connector, false)
+	err = policyInfraPatch(getSessionContext(d, m), obj, connector, false)
 	if err != nil {
 		return handleCreateError("Tier1", id, err)
 	}
@@ -588,7 +588,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining Tier1 id")
 	}
 
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	client := infra.NewTier1sClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -718,13 +718,13 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier1GatewayResourceToInfraStruct(commonSessionContext, d, connector, id)
+	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Using H-API to update Tier1 with ID %s", id)
-	err = policyInfraPatch(commonSessionContext, obj, connector, true)
+	err = policyInfraPatch(getSessionContext(d, m), obj, connector, true)
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
@@ -763,7 +763,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete Tier1 with ID %s", id)
-	err := policyInfraPatch(commonSessionContext, obj, getPolicyConnector(m), false)
+	err := policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Tier1", id, err)
 	}

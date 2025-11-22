@@ -25,7 +25,7 @@ func dataSourceNsxtPolicyDistributedFloodProtectionProfile() *schema.Resource {
 func dataSourceNsxtPolicyDistributedFloodProtectionProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, commonSessionContext, "DistributedFloodProtectionProfile", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "DistributedFloodProtectionProfile", nil)
 	if err != nil {
 		return err
 	}

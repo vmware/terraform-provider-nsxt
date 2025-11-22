@@ -23,7 +23,7 @@ func dataSourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "IPDiscoveryProfile", nil)
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "IPDiscoveryProfile", nil)
 	if err != nil {
 		return err
 	}

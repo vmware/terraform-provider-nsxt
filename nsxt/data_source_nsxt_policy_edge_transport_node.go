@@ -29,7 +29,7 @@ func dataSourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "PolicyEdgeTransportNode", nil)
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyEdgeTransportNode", nil)
 	if err != nil {
 		return err
 	}

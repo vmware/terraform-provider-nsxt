@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyShare() *schema.Resource {
 func dataSourceNsxtPolicyShareRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, commonSessionContext, "Share", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Share", nil)
 	if isNotFoundError(err) {
 		return fmt.Errorf("Share with name '%s' was not found", d.Get("display_name").(string))
 	} else if err != nil {

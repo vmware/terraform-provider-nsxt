@@ -95,7 +95,7 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id
 	}
 
 	log.Printf("[INFO] Using selective H-API for policy with ID %s", id)
-	return securityPolicyInfraPatch(commonSessionContext, obj, domain, m)
+	return securityPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
@@ -118,7 +118,7 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewSecurityPoliciesClient(commonSessionContext, connector)
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

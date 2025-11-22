@@ -65,7 +65,7 @@ func resourceNsxtPolicyIPPoolExists(sessionContext utl.SessionContext, id string
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(commonSessionContext, connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -98,7 +98,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(commonSessionContext, connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -132,7 +132,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(commonSessionContext, connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -166,7 +166,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(commonSessionContext, connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

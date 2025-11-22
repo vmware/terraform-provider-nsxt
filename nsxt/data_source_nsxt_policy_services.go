@@ -30,7 +30,7 @@ func dataSourceNsxtPolicyServices() *schema.Resource {
 
 func dataSourceNsxtPolicyServicesRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewServicesClient(commonSessionContext, connector)
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
 
 	servicesMap := make(map[string]string)
 	results, err := client.List(nil, nil, nil, nil, nil, nil, nil)

@@ -37,10 +37,10 @@ func dataSourceNsxtPolicyNetworkSpanRead(d *schema.ResourceData, m interface{}) 
 	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
-		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), commonSessionContext, "NetworkSpan", query)
+		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "NetworkSpan", query)
 		return err
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "NetworkSpan", nil)
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "NetworkSpan", nil)
 	if err != nil {
 		return err
 	}

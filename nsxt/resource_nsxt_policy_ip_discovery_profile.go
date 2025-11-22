@@ -188,7 +188,7 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewIpDiscoveryProfilesClient(commonSessionContext, connector)
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -211,7 +211,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining IPDiscoveryProfile ID")
 	}
 
-	client := infra.NewIpDiscoveryProfilesClient(commonSessionContext, connector)
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -244,7 +244,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpDiscoveryProfilesClient(commonSessionContext, connector)
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -281,7 +281,7 @@ func resourceNsxtPolicyIPDiscoveryProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	boolFalse := false
 
-	client := infra.NewIpDiscoveryProfilesClient(commonSessionContext, connector)
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

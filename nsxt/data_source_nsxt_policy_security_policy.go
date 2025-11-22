@@ -86,7 +86,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	objName := d.Get("display_name").(string)
 
 	var obj model.SecurityPolicy
-	context := commonSessionContext
+	context := getSessionContext(d, m)
 	if objID != "" {
 		// Get by id
 		client := domains.NewSecurityPoliciesClient(context, connector)

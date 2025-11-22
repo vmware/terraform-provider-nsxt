@@ -99,7 +99,7 @@ func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, m interface{
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewDnsForwarderZonesClient(commonSessionContext, connector)
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -136,7 +136,7 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining Dns Forwarder Zone ID")
 	}
 
-	client := infra.NewDnsForwarderZonesClient(commonSessionContext, connector)
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -183,7 +183,7 @@ func resourceNsxtPolicyDNSForwarderZoneDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDnsForwarderZonesClient(commonSessionContext, connector)
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

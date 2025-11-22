@@ -44,10 +44,10 @@ func dataSourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interfac
 	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
-		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), commonSessionContext, "VpcConnectivityProfile", query)
+		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "VpcConnectivityProfile", query)
 		return err
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), commonSessionContext, "VpcConnectivityProfile", nil)
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "VpcConnectivityProfile", nil)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ func dataSourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 func dataSourceNsxtPolicyDistributedVlanConnectionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, commonSessionContext, "DistributedVlanConnection", nil, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "DistributedVlanConnection", nil, false)
 	if err != nil {
 		return err
 	}
