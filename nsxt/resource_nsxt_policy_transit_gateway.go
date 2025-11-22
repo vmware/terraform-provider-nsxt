@@ -257,7 +257,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -306,7 +306,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 	}
 
 	client := clientLayer.NewTransitGatewaysClient(connector)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "TransitGateway", id, err)
@@ -377,7 +377,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining TransitGateway ID")
 	}
 
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags, tagErr := getValidatedTagsFromSchema(d)
@@ -423,7 +423,7 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(commonSessionContext)
+	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
 	client := clientLayer.NewTransitGatewaysClient(connector)
 	err := client.Delete(parents[0], parents[1], id)

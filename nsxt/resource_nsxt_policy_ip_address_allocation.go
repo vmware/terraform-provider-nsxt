@@ -81,7 +81,7 @@ func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionConte
 
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	sessionContext := commonSessionContext
+	sessionContext := getSessionContext(d, m)
 	client := ippools.NewIpAllocationsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -164,7 +164,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(commonSessionContext, connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -198,7 +198,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(commonSessionContext, connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -231,7 +231,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(commonSessionContext, connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -275,7 +275,7 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(commonSessionContext, connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

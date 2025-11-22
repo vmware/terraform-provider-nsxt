@@ -395,7 +395,7 @@ func resourceNsxtPolicyL7AccessProfileCreate(d *schema.ResourceData, m interface
 
 	log.Printf("[INFO] Creating L7AccessProfile with ID %s", id)
 
-	err = policyInfraPatch(commonSessionContext, infraStruct, getPolicyConnector(m), false)
+	err = policyInfraPatch(getSessionContext(d, m), infraStruct, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("L7AccessProfile", id, err)
 	}
@@ -413,7 +413,7 @@ func resourceNsxtPolicyL7AccessProfileRead(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error obtaining L7AccessProfile ID")
 	}
 
-	client := clientLayer.NewL7AccessProfilesClient(commonSessionContext, connector)
+	client := clientLayer.NewL7AccessProfilesClient(getSessionContext(d, m), connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "L7AccessProfile", id, err)
@@ -503,7 +503,7 @@ func resourceNsxtPolicyL7AccessProfileUpdate(d *schema.ResourceData, m interface
 
 	log.Printf("[INFO] Updating L7AccessProfile with ID %s", id)
 
-	err = policyInfraPatch(commonSessionContext, infraStruct, getPolicyConnector(m), false)
+	err = policyInfraPatch(getSessionContext(d, m), infraStruct, getPolicyConnector(m), false)
 	if err != nil {
 		return handleUpdateError("L7AccessProfile", id, err)
 	}
@@ -519,7 +519,7 @@ func resourceNsxtPolicyL7AccessProfileDelete(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewL7AccessProfilesClient(commonSessionContext, connector)
+	client := clientLayer.NewL7AccessProfilesClient(getSessionContext(d, m), connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

@@ -56,7 +56,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resour
 
 func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.ResourceData, m interface{}, id string, isCreate bool) error {
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(commonSessionContext, connector)
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -112,7 +112,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate(d *schema.
 	}
 
 	groupPath := d.Get("group_path").(string)
-	exist, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(commonSessionContext, getPolicyConnector(m), groupPath, id)
+	exist, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(getSessionContext(d, m), getPolicyConnector(m), groupPath, id)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(commonSessionContext, connector)
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -178,7 +178,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingDelete(d *schema.
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(commonSessionContext, connector)
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
