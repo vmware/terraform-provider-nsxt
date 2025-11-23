@@ -7,7 +7,8 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -51,10 +52,13 @@ func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (model0.Glo
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		obj, err = client.Get(globalManagerIdParam)
-		if err != nil {
-			return obj, err
+		gmObj, err1 := client.Get(globalManagerIdParam)
+		if err1 != nil {
+			return obj, err1
 		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.GlobalManagerBindingType(), model0.GlobalManagerBindingType())
+		obj = rawObj.(model0.GlobalManager)
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -70,7 +74,15 @@ func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDele
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.GlobalManagerListResultBindingType(), model0.GlobalManagerListResultBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.GlobalManagerListResult)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +97,11 @@ func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalMan
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		err = client.Patch(globalManagerIdParam, globalManagerParam, forceParam)
+		gmObj, err1 := utl.ConvertModelBindingType(globalManagerParam, model0.GlobalManagerBindingType(), model1.GlobalManagerBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +117,19 @@ func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalMa
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		obj, err = client.Update(globalManagerIdParam, globalManagerParam, forceParam)
+		gmObj, err := utl.ConvertModelBindingType(globalManagerParam, model0.GlobalManagerBindingType(), model1.GlobalManagerBindingType())
+		if err != nil {
+			return obj, err
+		}
+		gmObj, err = client.Update(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.GlobalManagerBindingType(), model0.GlobalManagerBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.GlobalManager)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

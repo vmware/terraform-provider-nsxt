@@ -7,9 +7,9 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -41,13 +41,6 @@ func (c BgpRoutingConfigClientContext) Get(tier0IdParam string, localeServiceIdP
 
 	case utl.Global:
 		client := c.Client.(client0.BgpClient)
-		obj, err = client.Get(tier0IdParam, localeServiceIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.BgpClient)
 		gmObj, err1 := client.Get(tier0IdParam, localeServiceIdParam)
 		if err1 != nil {
 			return obj, err1
@@ -55,6 +48,13 @@ func (c BgpRoutingConfigClientContext) Get(tier0IdParam string, localeServiceIdP
 		var rawObj interface{}
 		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.BgpRoutingConfigBindingType(), model0.BgpRoutingConfigBindingType())
 		obj = rawObj.(model0.BgpRoutingConfig)
+
+	case utl.Local:
+		client := c.Client.(client1.BgpClient)
+		obj, err = client.Get(tier0IdParam, localeServiceIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -69,15 +69,15 @@ func (c BgpRoutingConfigClientContext) Patch(tier0IdParam string, localeServiceI
 
 	case utl.Global:
 		client := c.Client.(client0.BgpClient)
-		err = client.Patch(tier0IdParam, localeServiceIdParam, bgpRoutingConfigParam, overrideParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BgpClient)
 		gmObj, err1 := utl.ConvertModelBindingType(bgpRoutingConfigParam, model0.BgpRoutingConfigBindingType(), model1.BgpRoutingConfigBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(tier0IdParam, localeServiceIdParam, gmObj.(model1.BgpRoutingConfig), overrideParam)
+
+	case utl.Local:
+		client := c.Client.(client1.BgpClient)
+		err = client.Patch(tier0IdParam, localeServiceIdParam, bgpRoutingConfigParam, overrideParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -93,10 +93,6 @@ func (c BgpRoutingConfigClientContext) Update(tier0IdParam string, localeService
 
 	case utl.Global:
 		client := c.Client.(client0.BgpClient)
-		obj, err = client.Update(tier0IdParam, localeServiceIdParam, bgpRoutingConfigParam, overrideParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BgpClient)
 		gmObj, err := utl.ConvertModelBindingType(bgpRoutingConfigParam, model0.BgpRoutingConfigBindingType(), model1.BgpRoutingConfigBindingType())
 		if err != nil {
 			return obj, err
@@ -110,6 +106,10 @@ func (c BgpRoutingConfigClientContext) Update(tier0IdParam string, localeService
 			return obj, err1
 		}
 		obj = obj1.(model0.BgpRoutingConfig)
+
+	case utl.Local:
+		client := c.Client.(client1.BgpClient)
+		obj, err = client.Update(tier0IdParam, localeServiceIdParam, bgpRoutingConfigParam, overrideParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

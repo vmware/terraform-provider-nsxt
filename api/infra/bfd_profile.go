@@ -7,9 +7,9 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -60,13 +60,6 @@ func (c BfdProfileClientContext) Get(bfdProfileIdParam string) (model0.BfdProfil
 
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
-		obj, err = client.Get(bfdProfileIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.BfdProfilesClient)
 		gmObj, err1 := client.Get(bfdProfileIdParam)
 		if err1 != nil {
 			return obj, err1
@@ -74,6 +67,13 @@ func (c BfdProfileClientContext) Get(bfdProfileIdParam string) (model0.BfdProfil
 		var rawObj interface{}
 		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.BfdProfileBindingType(), model0.BfdProfileBindingType())
 		obj = rawObj.(model0.BfdProfile)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdProfilesClient)
+		obj, err = client.Get(bfdProfileIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -89,10 +89,6 @@ func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteO
 
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdProfilesClient)
 		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
@@ -102,6 +98,10 @@ func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteO
 			return obj, err1
 		}
 		obj = obj1.(model0.BfdProfileListResult)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdProfilesClient)
+		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -116,15 +116,15 @@ func (c BfdProfileClientContext) Patch(bfdProfileIdParam string, bfdProfileParam
 
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
-		err = client.Patch(bfdProfileIdParam, bfdProfileParam, overrideParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdProfilesClient)
 		gmObj, err1 := utl.ConvertModelBindingType(bfdProfileParam, model0.BfdProfileBindingType(), model1.BfdProfileBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(bfdProfileIdParam, gmObj.(model1.BfdProfile), overrideParam)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdProfilesClient)
+		err = client.Patch(bfdProfileIdParam, bfdProfileParam, overrideParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -140,10 +140,6 @@ func (c BfdProfileClientContext) Update(bfdProfileIdParam string, bfdProfilePara
 
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
-		obj, err = client.Update(bfdProfileIdParam, bfdProfileParam, overrideParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdProfilesClient)
 		gmObj, err := utl.ConvertModelBindingType(bfdProfileParam, model0.BfdProfileBindingType(), model1.BfdProfileBindingType())
 		if err != nil {
 			return obj, err
@@ -157,6 +153,10 @@ func (c BfdProfileClientContext) Update(bfdProfileIdParam string, bfdProfilePara
 			return obj, err1
 		}
 		obj = obj1.(model0.BfdProfile)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdProfilesClient)
+		obj, err = client.Update(bfdProfileIdParam, bfdProfileParam, overrideParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

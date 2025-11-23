@@ -7,9 +7,9 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -60,13 +60,6 @@ func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam stri
 
 	case utl.Global:
 		client := c.Client.(client0.PrefixListsClient)
-		obj, err = client.Get(tier0IdParam, prefixListIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.PrefixListsClient)
 		gmObj, err1 := client.Get(tier0IdParam, prefixListIdParam)
 		if err1 != nil {
 			return obj, err1
@@ -74,6 +67,13 @@ func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam stri
 		var rawObj interface{}
 		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.PrefixListBindingType(), model0.PrefixListBindingType())
 		obj = rawObj.(model0.PrefixList)
+
+	case utl.Local:
+		client := c.Client.(client1.PrefixListsClient)
+		obj, err = client.Get(tier0IdParam, prefixListIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -89,10 +89,6 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 
 	case utl.Global:
 		client := c.Client.(client0.PrefixListsClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.PrefixListsClient)
 		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
@@ -102,6 +98,10 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 			return obj, err1
 		}
 		obj = obj1.(model0.PrefixListResult)
+
+	case utl.Local:
+		client := c.Client.(client1.PrefixListsClient)
+		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -116,15 +116,15 @@ func (c PrefixListClientContext) Patch(tier0IdParam string, prefixListIdParam st
 
 	case utl.Global:
 		client := c.Client.(client0.PrefixListsClient)
-		err = client.Patch(tier0IdParam, prefixListIdParam, prefixListParam)
-
-	case utl.Local:
-		client := c.Client.(client1.PrefixListsClient)
 		gmObj, err1 := utl.ConvertModelBindingType(prefixListParam, model0.PrefixListBindingType(), model1.PrefixListBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(tier0IdParam, prefixListIdParam, gmObj.(model1.PrefixList))
+
+	case utl.Local:
+		client := c.Client.(client1.PrefixListsClient)
+		err = client.Patch(tier0IdParam, prefixListIdParam, prefixListParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -140,10 +140,6 @@ func (c PrefixListClientContext) Update(tier0IdParam string, prefixListIdParam s
 
 	case utl.Global:
 		client := c.Client.(client0.PrefixListsClient)
-		obj, err = client.Update(tier0IdParam, prefixListIdParam, prefixListParam)
-
-	case utl.Local:
-		client := c.Client.(client1.PrefixListsClient)
 		gmObj, err := utl.ConvertModelBindingType(prefixListParam, model0.PrefixListBindingType(), model1.PrefixListBindingType())
 		if err != nil {
 			return obj, err
@@ -157,6 +153,10 @@ func (c PrefixListClientContext) Update(tier0IdParam string, prefixListIdParam s
 			return obj, err1
 		}
 		obj = obj1.(model0.PrefixList)
+
+	case utl.Local:
+		client := c.Client.(client1.PrefixListsClient)
+		obj, err = client.Update(tier0IdParam, prefixListIdParam, prefixListParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

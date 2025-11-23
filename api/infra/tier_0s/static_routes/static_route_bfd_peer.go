@@ -7,9 +7,9 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/static_routes"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/static_routes"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -60,13 +60,6 @@ func (c StaticRouteBfdPeerClientContext) Get(tier0IdParam string, bfdPeerIdParam
 
 	case utl.Global:
 		client := c.Client.(client0.BfdPeersClient)
-		obj, err = client.Get(tier0IdParam, bfdPeerIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.BfdPeersClient)
 		gmObj, err1 := client.Get(tier0IdParam, bfdPeerIdParam)
 		if err1 != nil {
 			return obj, err1
@@ -74,6 +67,13 @@ func (c StaticRouteBfdPeerClientContext) Get(tier0IdParam string, bfdPeerIdParam
 		var rawObj interface{}
 		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.StaticRouteBfdPeerBindingType(), model0.StaticRouteBfdPeerBindingType())
 		obj = rawObj.(model0.StaticRouteBfdPeer)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdPeersClient)
+		obj, err = client.Get(tier0IdParam, bfdPeerIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -89,10 +89,6 @@ func (c StaticRouteBfdPeerClientContext) List(tier0IdParam string, cursorParam *
 
 	case utl.Global:
 		client := c.Client.(client0.BfdPeersClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdPeersClient)
 		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
@@ -102,6 +98,10 @@ func (c StaticRouteBfdPeerClientContext) List(tier0IdParam string, cursorParam *
 			return obj, err1
 		}
 		obj = obj1.(model0.StaticRouteBfdPeerListResult)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdPeersClient)
+		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -116,15 +116,15 @@ func (c StaticRouteBfdPeerClientContext) Patch(tier0IdParam string, bfdPeerIdPar
 
 	case utl.Global:
 		client := c.Client.(client0.BfdPeersClient)
-		err = client.Patch(tier0IdParam, bfdPeerIdParam, staticRouteBfdPeerParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdPeersClient)
 		gmObj, err1 := utl.ConvertModelBindingType(staticRouteBfdPeerParam, model0.StaticRouteBfdPeerBindingType(), model1.StaticRouteBfdPeerBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(tier0IdParam, bfdPeerIdParam, gmObj.(model1.StaticRouteBfdPeer))
+
+	case utl.Local:
+		client := c.Client.(client1.BfdPeersClient)
+		err = client.Patch(tier0IdParam, bfdPeerIdParam, staticRouteBfdPeerParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -140,10 +140,6 @@ func (c StaticRouteBfdPeerClientContext) Update(tier0IdParam string, bfdPeerIdPa
 
 	case utl.Global:
 		client := c.Client.(client0.BfdPeersClient)
-		obj, err = client.Update(tier0IdParam, bfdPeerIdParam, staticRouteBfdPeerParam)
-
-	case utl.Local:
-		client := c.Client.(client1.BfdPeersClient)
 		gmObj, err := utl.ConvertModelBindingType(staticRouteBfdPeerParam, model0.StaticRouteBfdPeerBindingType(), model1.StaticRouteBfdPeerBindingType())
 		if err != nil {
 			return obj, err
@@ -157,6 +153,10 @@ func (c StaticRouteBfdPeerClientContext) Update(tier0IdParam string, bfdPeerIdPa
 			return obj, err1
 		}
 		obj = obj1.(model0.StaticRouteBfdPeer)
+
+	case utl.Local:
+		client := c.Client.(client1.BfdPeersClient)
+		obj, err = client.Update(tier0IdParam, bfdPeerIdParam, staticRouteBfdPeerParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

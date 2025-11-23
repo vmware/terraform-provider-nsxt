@@ -7,9 +7,9 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -60,13 +60,6 @@ func (c CommunityListClientContext) Get(tier0IdParam string, communityListIdPara
 
 	case utl.Global:
 		client := c.Client.(client0.CommunityListsClient)
-		obj, err = client.Get(tier0IdParam, communityListIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Local:
-		client := c.Client.(client1.CommunityListsClient)
 		gmObj, err1 := client.Get(tier0IdParam, communityListIdParam)
 		if err1 != nil {
 			return obj, err1
@@ -74,6 +67,13 @@ func (c CommunityListClientContext) Get(tier0IdParam string, communityListIdPara
 		var rawObj interface{}
 		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.CommunityListBindingType(), model0.CommunityListBindingType())
 		obj = rawObj.(model0.CommunityList)
+
+	case utl.Local:
+		client := c.Client.(client1.CommunityListsClient)
+		obj, err = client.Get(tier0IdParam, communityListIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -89,10 +89,6 @@ func (c CommunityListClientContext) List(tier0IdParam string, cursorParam *strin
 
 	case utl.Global:
 		client := c.Client.(client0.CommunityListsClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Local:
-		client := c.Client.(client1.CommunityListsClient)
 		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
@@ -102,6 +98,10 @@ func (c CommunityListClientContext) List(tier0IdParam string, cursorParam *strin
 			return obj, err1
 		}
 		obj = obj1.(model0.CommunityListListResult)
+
+	case utl.Local:
+		client := c.Client.(client1.CommunityListsClient)
+		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -116,15 +116,15 @@ func (c CommunityListClientContext) Patch(tier0IdParam string, communityListIdPa
 
 	case utl.Global:
 		client := c.Client.(client0.CommunityListsClient)
-		err = client.Patch(tier0IdParam, communityListIdParam, communityListParam)
-
-	case utl.Local:
-		client := c.Client.(client1.CommunityListsClient)
 		gmObj, err1 := utl.ConvertModelBindingType(communityListParam, model0.CommunityListBindingType(), model1.CommunityListBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(tier0IdParam, communityListIdParam, gmObj.(model1.CommunityList))
+
+	case utl.Local:
+		client := c.Client.(client1.CommunityListsClient)
+		err = client.Patch(tier0IdParam, communityListIdParam, communityListParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -140,10 +140,6 @@ func (c CommunityListClientContext) Update(tier0IdParam string, communityListIdP
 
 	case utl.Global:
 		client := c.Client.(client0.CommunityListsClient)
-		obj, err = client.Update(tier0IdParam, communityListIdParam, communityListParam)
-
-	case utl.Local:
-		client := c.Client.(client1.CommunityListsClient)
 		gmObj, err := utl.ConvertModelBindingType(communityListParam, model0.CommunityListBindingType(), model1.CommunityListBindingType())
 		if err != nil {
 			return obj, err
@@ -157,6 +153,10 @@ func (c CommunityListClientContext) Update(tier0IdParam string, communityListIdP
 			return obj, err1
 		}
 		obj = obj1.(model0.CommunityList)
+
+	case utl.Local:
+		client := c.Client.(client1.CommunityListsClient)
+		obj, err = client.Update(tier0IdParam, communityListIdParam, communityListParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

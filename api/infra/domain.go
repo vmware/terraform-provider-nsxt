@@ -7,7 +7,8 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -51,10 +52,13 @@ func (c DomainClientContext) Get(domainIdParam string) (model0.Domain, error) {
 
 	case utl.Global:
 		client := c.Client.(client0.DomainsClient)
-		obj, err = client.Get(domainIdParam)
-		if err != nil {
-			return obj, err
+		gmObj, err1 := client.Get(domainIdParam)
+		if err1 != nil {
+			return obj, err1
 		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.DomainBindingType(), model0.DomainBindingType())
+		obj = rawObj.(model0.Domain)
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -70,7 +74,15 @@ func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjec
 
 	case utl.Global:
 		client := c.Client.(client0.DomainsClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.DomainListResultBindingType(), model0.DomainListResultBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.DomainListResult)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +97,11 @@ func (c DomainClientContext) Patch(domainIdParam string, domainParam model0.Doma
 
 	case utl.Global:
 		client := c.Client.(client0.DomainsClient)
-		err = client.Patch(domainIdParam, domainParam)
+		gmObj, err1 := utl.ConvertModelBindingType(domainParam, model0.DomainBindingType(), model1.DomainBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(domainIdParam, gmObj.(model1.Domain))
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +117,19 @@ func (c DomainClientContext) Update(domainIdParam string, domainParam model0.Dom
 
 	case utl.Global:
 		client := c.Client.(client0.DomainsClient)
-		obj, err = client.Update(domainIdParam, domainParam)
+		gmObj, err := utl.ConvertModelBindingType(domainParam, model0.DomainBindingType(), model1.DomainBindingType())
+		if err != nil {
+			return obj, err
+		}
+		gmObj, err = client.Update(domainIdParam, gmObj.(model1.Domain))
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.DomainBindingType(), model0.DomainBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.Domain)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
