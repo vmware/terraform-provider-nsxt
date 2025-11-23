@@ -7,7 +7,8 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -51,10 +52,13 @@ func (c DomainDeploymentMapClientContext) Get(domainIdParam string, domainDeploy
 
 	case utl.Global:
 		client := c.Client.(client0.DomainDeploymentMapsClient)
-		obj, err = client.Get(domainIdParam, domainDeploymentMapIdParam)
-		if err != nil {
-			return obj, err
+		gmObj, err1 := client.Get(domainIdParam, domainDeploymentMapIdParam)
+		if err1 != nil {
+			return obj, err1
 		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.DomainDeploymentMapBindingType(), model0.DomainDeploymentMapBindingType())
+		obj = rawObj.(model0.DomainDeploymentMap)
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -70,7 +74,15 @@ func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam
 
 	case utl.Global:
 		client := c.Client.(client0.DomainDeploymentMapsClient)
-		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.DomainDeploymentMapListResultBindingType(), model0.DomainDeploymentMapListResultBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.DomainDeploymentMapListResult)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +97,11 @@ func (c DomainDeploymentMapClientContext) Patch(domainIdParam string, domainDepl
 
 	case utl.Global:
 		client := c.Client.(client0.DomainDeploymentMapsClient)
-		err = client.Patch(domainIdParam, domainDeploymentMapIdParam, domainDeploymentMapParam)
+		gmObj, err1 := utl.ConvertModelBindingType(domainDeploymentMapParam, model0.DomainDeploymentMapBindingType(), model1.DomainDeploymentMapBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(domainIdParam, domainDeploymentMapIdParam, gmObj.(model1.DomainDeploymentMap))
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +117,19 @@ func (c DomainDeploymentMapClientContext) Update(domainIdParam string, domainDep
 
 	case utl.Global:
 		client := c.Client.(client0.DomainDeploymentMapsClient)
-		obj, err = client.Update(domainIdParam, domainDeploymentMapIdParam, domainDeploymentMapParam)
+		gmObj, err := utl.ConvertModelBindingType(domainDeploymentMapParam, model0.DomainDeploymentMapBindingType(), model1.DomainDeploymentMapBindingType())
+		if err != nil {
+			return obj, err
+		}
+		gmObj, err = client.Update(domainIdParam, domainDeploymentMapIdParam, gmObj.(model1.DomainDeploymentMap))
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.DomainDeploymentMapBindingType(), model0.DomainDeploymentMapBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model0.DomainDeploymentMap)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
