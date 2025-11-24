@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicyIPBlock_v910(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "cidrs.0", cidr),
 					resource.TestCheckResourceAttr(testResourceName, "excluded_ips.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "is_subnet_exclusive", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -349,7 +349,7 @@ resource "nsxt_policy_ip_block" "test" {
 }`, context, displayName, cidr, visibility)
 }
 
-func testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(displayName string, cidr string, withContext bool, visibility string, isSubnetExclusive string) string {
+func testAccNSXPolicyIPBlockCreateSubnetExclusiveTemplate(displayName string, cidr string, withContext bool, visibility string, SubnetExclusive string) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -365,8 +365,8 @@ resource "nsxt_policy_ip_block" "test" {
     start = "192.168.1.10"
     end   = "192.168.1.11"
   }
-  is_subnet_exclusive = "%s"
-}`, context, displayName, cidr, visibility, isSubnetExclusive)
+  subnet_exclusive = "%s"
+}`, context, displayName, cidr, visibility, SubnetExclusive)
 }
 
 func testAccNSXPolicyIPBlockCreateV910Template(displayName string, cidr string, withContext, withVisibility bool) string {

@@ -67,7 +67,7 @@ The following arguments are supported:
 * `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
   from respective ip block defined in the parent VPC. The default is 64. Conflicts with `ip_addresses`.
 * `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`. This argument is required when access_mode is set to `Isolated`
-* `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated` or `Private_TGW`. Default is `Private`
+* `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated`, `Private_TGW` or `L2_ONLY`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
     * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
     * `connectivity_state` - (Optional) Connectivity state for the subnet, one of `CONNECTED`, `DISCONNECTED`
@@ -79,7 +79,7 @@ The following arguments are supported:
         * `config_pair` - (Required)
             * `key` - (Required) key for vendor-specific configuration
             * `value` - (Required) value for vendor-specific configuration
-    * `enable_vlan_extension` - (Optional) Enabling VLAN connection for the subnet. The user must configure the exclusive IP block for this subnet. This IP block must be leveraged by a distributed VLAN connection. The default value for this will be false. This attribute is supported with NSX 9.1.0 onwards.
+* `vlan_connection` - (Optional) Distributed VLAN connection path.
 * `dhcp_config` - (Optional) DHCP configuration block
     * `dns_server_preference` - (Optional) DNS server IP preference. Select the preference between the DNS server IPs (from the DHCP config in VPC service profile), and VPC DNS forwarder IP. The preferred DNS server IP config will be attempted first when the system selects the DNS server to forward DNS requests. This can be one of `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER`, `DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS`. The default value is `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER`.
     * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`.
