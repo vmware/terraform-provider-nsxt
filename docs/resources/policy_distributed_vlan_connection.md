@@ -25,19 +25,19 @@ resource "nsxt_policy_distributed_vlan_connection" "test" {
 
 ```hcl
 resource "nsxt_policy_ip_block" "vlan_block" {
-  display_name      = "vlan-extension-block"
-  cidrs             = ["10.66.66.0/24"]
-  visibility        = "EXTERNAL"
-  subnet_exclusive  = true
+  display_name     = "vlan-extension-block"
+  cidrs            = ["10.66.66.0/24"]
+  visibility       = "EXTERNAL"
+  subnet_exclusive = true
 }
 
 resource "nsxt_policy_distributed_vlan_connection" "test" {
-  display_name                 = "test"
-  description                  = "Terraform provisioned Distributed Vlan Connection"
-  gateway_addresses            = ["192.168.2.1/24"]
-  vlan_id                      = 12
-  subnet_extension_connection  = "ENABLED_L2"
-  associated_ip_block_paths    = [nsxt_policy_ip_block.vlan_block.path]
+  display_name                = "test"
+  description                 = "Terraform provisioned Distributed Vlan Connection"
+  gateway_addresses           = ["192.168.2.1/24"]
+  vlan_id                     = 12
+  subnet_extension_connection = "ENABLED_L2"
+  associated_ip_block_paths   = [nsxt_policy_ip_block.vlan_block.path]
 }
 ```
 
