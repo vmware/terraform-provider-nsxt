@@ -54,7 +54,6 @@ The following arguments are supported:
 * `subnet_extension_connection` - (Optional) Controls the connectivity mode for VPC Subnets referencing this distributed VLAN connection. This can be one of `DISABLED`, `ENABLED_L2`, or `ENABLED_L2_AND_L3`. Default is `DISABLED`. This attribute is supported with NSX 9.1.0 onwards.
 * `associated_ip_block_paths` - (Optional) List of IP address block(s) that are associated with the distributed vlan connection. This attribute is supported with NSX 9.1.0 onwards.
 
-
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
