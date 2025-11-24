@@ -34,13 +34,39 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "VlanId",
 		},
 	},
-	"subnet_exclusive_config": {
-		Schema: *subnetExclusiveConfigSchema(),
+	"subnet_extension_connection": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "Controls the connectivity mode for VPC Subnets referencing this distributed VLAN connection. This can be one of DISABLED/ENABLED_L2/ENABLED_L2_AND_L3.",
+			ValidateFunc: validateSubnetExtensionConnection(),
+			Default:      "DISABLED",
+		},
 		Metadata: metadata.Metadata{
 			IntroducedInVersion: "9.1.0",
-			SchemaType:          "struct",
-			SdkFieldName:        "SubnetExclusiveConfig",
-			ReflectType:         reflect.TypeOf(model.SubnetExclusiveConfig{}),
+			SchemaType:          "string",
+			SdkFieldName:        "SubnetExtensionConnection",
+		},
+	},
+	"associated_ip_block_paths": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional:    true,
+			Description: "List of IP address block(s) that are associated with the distributed vlan connection.",
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.1.0",
+			SchemaType:          "list",
+			SdkFieldName:        "AssociatedIpBlockPaths",
 		},
 	},
 	"gateway_addresses": {
@@ -55,73 +81,13 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 					SchemaType: "string",
 				},
 			},
-			Required: true,
+			Optional: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
 			SdkFieldName: "GatewayAddresses",
 		},
 	},
-}
-
-func subnetExclusiveConfigSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "Subnet exclusive config",
-		Optional:    true,
-		ForceNew:    false,
-		MaxItems:    1,
-		Elem: &metadata.ExtendedResource{
-			Schema: map[string]*metadata.ExtendedSchema{
-				"ip_block_path": {
-					Schema: schema.Schema{
-						Type:         schema.TypeString,
-						Required:     true,
-						Description:  "Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.",
-						ValidateFunc: validatePolicyPath(),
-					},
-					Metadata: metadata.Metadata{
-						SchemaType:   "string",
-						SdkFieldName: "IpBlockPath",
-					},
-				},
-				"vlan_extension": vlanExtensionSchema(),
-			},
-		},
-	}
-
-}
-
-func vlanExtensionSchema() *metadata.ExtendedSchema {
-	return &metadata.ExtendedSchema{
-		Schema: schema.Schema{
-			Type:        schema.TypeList,
-			Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
-			Optional:    true,
-			ForceNew:    false,
-			MaxItems:    1,
-			Elem: &metadata.ExtendedResource{
-				Schema: map[string]*metadata.ExtendedSchema{
-					"vpc_gateway_connection_enable": {
-						Schema: schema.Schema{
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.",
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "bool",
-							SdkFieldName: "VpcGatewayConnectionEnable",
-						},
-					},
-				},
-			},
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "struct",
-			SdkFieldName: "VlanExtension",
-			ReflectType:  reflect.TypeOf(model.VlanExtension{}),
-		},
-	}
 }
 
 const distributedVlanConnectionPathExample = "/infra/distributed-vlan-connections/[connection]"
