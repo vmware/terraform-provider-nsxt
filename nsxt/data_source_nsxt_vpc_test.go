@@ -23,7 +23,7 @@ func TestAccDataSourceNsxtVPC_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccOnlyMultitenancy(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "4.1.2")
+			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
