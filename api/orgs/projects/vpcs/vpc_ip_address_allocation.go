@@ -19,7 +19,7 @@ func NewIpAddressAllocationsClient(sessionContext utl.SessionContext, connector 
 
 	switch sessionContext.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client = client0.NewIpAddressAllocationsClient(connector)
 
 	default:
@@ -33,7 +33,7 @@ func (c VpcIpAddressAllocationClientContext) Delete(orgIdParam string, projectId
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam)
 
@@ -49,7 +49,7 @@ func (c VpcIpAddressAllocationClientContext) Get(orgIdParam string, projectIdPar
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam)
 		if err != nil {
@@ -68,7 +68,7 @@ func (c VpcIpAddressAllocationClientContext) List(orgIdParam string, projectIdPa
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -83,7 +83,7 @@ func (c VpcIpAddressAllocationClientContext) Patch(orgIdParam string, projectIdP
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam, vpcIpAddressAllocationParam)
 
@@ -99,7 +99,7 @@ func (c VpcIpAddressAllocationClientContext) Update(orgIdParam string, projectId
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam, vpcIpAddressAllocationParam)
 

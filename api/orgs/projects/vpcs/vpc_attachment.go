@@ -19,7 +19,7 @@ func NewAttachmentsClient(sessionContext utl.SessionContext, connector vapiProto
 
 	switch sessionContext.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client = client0.NewAttachmentsClient(connector)
 
 	default:
@@ -33,7 +33,7 @@ func (c VpcAttachmentClientContext) Delete(orgIdParam string, projectIdParam str
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam)
 
@@ -49,7 +49,7 @@ func (c VpcAttachmentClientContext) Get(orgIdParam string, projectIdParam string
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam)
 		if err != nil {
@@ -68,7 +68,7 @@ func (c VpcAttachmentClientContext) List(orgIdParam string, projectIdParam strin
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -83,7 +83,7 @@ func (c VpcAttachmentClientContext) Patch(orgIdParam string, projectIdParam stri
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
 
@@ -99,7 +99,7 @@ func (c VpcAttachmentClientContext) Update(orgIdParam string, projectIdParam str
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
 
