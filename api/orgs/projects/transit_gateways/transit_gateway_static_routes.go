@@ -108,4 +108,3 @@ func (c TransitGatewayStaticRoutesClientContext) List(orgIdParam string, project
 	}
 	return obj, err
 }
-
