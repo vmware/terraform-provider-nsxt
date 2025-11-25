@@ -169,7 +169,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 	}
 	sitePath := d.Get("site_path").(string)
 
-	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(gwID, connector, isPolicyGlobalManager(m))
+	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(d, m, gwID, connector, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
@@ -216,7 +216,7 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 	_, gwID := parseGatewayPolicyPath(gwPath)
 	serviceID := d.Get("locale_service_id").(string)
 
-	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(gwID, connector, isPolicyGlobalManager(m))
+	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(d, m, gwID, connector, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
