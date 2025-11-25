@@ -19,7 +19,7 @@ func NewSubnetsClient(sessionContext utl.SessionContext, connector vapiProtocolC
 
 	switch sessionContext.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client = client0.NewSubnetsClient(connector)
 
 	default:
@@ -33,7 +33,7 @@ func (c VpcSubnetClientContext) Delete(orgIdParam string, projectIdParam string,
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam)
 
@@ -49,7 +49,7 @@ func (c VpcSubnetClientContext) Get(orgIdParam string, projectIdParam string, vp
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam)
 		if err != nil {
@@ -68,7 +68,7 @@ func (c VpcSubnetClientContext) List(orgIdParam string, projectIdParam string, v
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -83,7 +83,7 @@ func (c VpcSubnetClientContext) Patch(orgIdParam string, projectIdParam string, 
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, vpcSubnetParam)
 
@@ -99,7 +99,7 @@ func (c VpcSubnetClientContext) Update(orgIdParam string, projectIdParam string,
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
+	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, vpcSubnetParam)
 
