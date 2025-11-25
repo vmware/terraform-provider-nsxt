@@ -19,6 +19,9 @@ func NewNatRulesClient(sessionContext utl.SessionContext, connector vapiProtocol
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewNatRulesClient(connector)
+
 	case utl.VPC:
 		client = client0.NewNatRulesClient(connector)
 
@@ -33,6 +36,13 @@ func (c VpcNatRuleClientContext) Get(orgIdParam string, projectIdParam string, v
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
@@ -52,6 +62,10 @@ func (c VpcNatRuleClientContext) Patch(orgIdParam string, projectIdParam string,
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.NatRulesClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam, policyVpcNatRuleParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam, policyVpcNatRuleParam)
@@ -68,6 +82,10 @@ func (c VpcNatRuleClientContext) Update(orgIdParam string, projectIdParam string
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam, policyVpcNatRuleParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam, policyVpcNatRuleParam)
@@ -82,6 +100,10 @@ func (c VpcNatRuleClientContext) Delete(orgIdParam string, projectIdParam string
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.NatRulesClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, natIdParam, natRuleIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
@@ -98,6 +120,10 @@ func (c VpcNatRuleClientContext) List(orgIdParam string, projectIdParam string, 
 	var obj model0.PolicyVpcNatRuleListResult
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
