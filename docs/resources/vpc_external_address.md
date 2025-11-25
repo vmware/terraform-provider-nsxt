@@ -9,7 +9,7 @@ description: A resource to configure a VPC External Address Binding on Port.
 This resource provides a method to configure External Address Binding on Subnet Port under VPC.
 Only single resource should be configured for any given port.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ```hcl
 resource "nsxt_vpc_ip_address_allocation" "test" {

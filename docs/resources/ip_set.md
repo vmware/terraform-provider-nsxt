@@ -8,6 +8,8 @@ description: A resource that can be used to configure an IP set in NSX.
 
 This resources provides a way to configure an IP set in NSX. An IP set is a collection of IP addresses. It is often used in the configuration of the NSX firewall.
 
+This resource is applicable to NSX Policy Manager.
+
 ## Example Usage
 
 ```hcl

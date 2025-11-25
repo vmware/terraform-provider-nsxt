@@ -8,7 +8,7 @@ description: VPC IP address allocation data source.
 
 This data source provides information about IP address allocation under VPC on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ## Example Usage
 
