@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/nat"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/nat"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -42,7 +42,10 @@ func resourceNsxtPolicyTransitGatewayNatRuleExists(sessionContext utl.SessionCon
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewNatRulesClient(connector)
+	client := nat.NewNatRulesClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -88,7 +91,11 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 
 	log.Printf("[INFO] Creating PolicyTransitGatewayNatRule with ID %s", id)
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleCreateError("PolicyTransitGatewayNatRule", id, err)
@@ -107,7 +114,11 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining PolicyTransitGatewayNatRule ID")
 	}
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
@@ -160,7 +171,11 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(true), "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleUpdateError("PolicyTransitGatewayNatRule", id, err)
@@ -182,7 +197,11 @@ func resourceNsxtPolicyTransitGatewayNatRuleDelete(d *schema.ResourceData, m int
 		return pathErr
 	}
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {
