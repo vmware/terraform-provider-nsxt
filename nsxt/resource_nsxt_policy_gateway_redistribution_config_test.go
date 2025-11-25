@@ -143,7 +143,7 @@ func testAccNsxtPolicyTier0CheckRedistributionExists(resourceName string) resour
 
 		testAccNsxtPolicyGatewayRedistributionLocaleService = rs.Primary.Attributes["locale_service_id"]
 		testAccNsxtPolicyGatewayRedistributionGatewayID = rs.Primary.Attributes["gateway_id"]
-		localeService := policyTier0GetLocaleService(testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
+		localeService := policyTier0GetLocaleService(testAccGetSessionContext(), testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
 		if localeService == nil {
 			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", testAccNsxtPolicyGatewayRedistributionLocaleService, testAccNsxtPolicyGatewayRedistributionGatewayID)
 		}
@@ -170,7 +170,7 @@ func testAccNsxtPolicyTier0CheckNoRedistribution(tier0Name string) resource.Test
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
-		localeService := policyTier0GetLocaleService(testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
+		localeService := policyTier0GetLocaleService(testAccGetSessionContext(), testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
 		if localeService == nil {
 			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", testAccNsxtPolicyGatewayRedistributionLocaleService, testAccNsxtPolicyGatewayRedistributionGatewayID)
 		}
