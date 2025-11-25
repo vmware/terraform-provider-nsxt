@@ -11,9 +11,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -206,7 +207,12 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 
-	client := clientLayer.NewGatewayConnectionsClient(connector)
+	// For exists check, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -248,7 +254,11 @@ func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] Creating GatewayConnection with ID %s", id)
 
-	client := clientLayer.NewGatewayConnectionsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("GatewayConnection", id, err)
@@ -267,7 +277,11 @@ func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining GatewayConnection ID")
 	}
 
-	client := clientLayer.NewGatewayConnectionsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -311,7 +325,11 @@ func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interfa
 	if err := metadata.SchemaToStruct(elem, d, gatewayConnectionSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewGatewayConnectionsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("GatewayConnection", id, err)
@@ -328,7 +346,11 @@ func resourceNsxtPolicyGatewayConnectionDelete(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewGatewayConnectionsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(id)
 
 	if err != nil {

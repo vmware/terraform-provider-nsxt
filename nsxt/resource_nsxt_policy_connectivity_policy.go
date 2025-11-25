@@ -15,10 +15,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
 
 var connectivityPolicyConnectivityScopeValues = []string{
@@ -93,7 +93,10 @@ func resourceNsxtPolicyConnectivityPolicyExists(sessionContext utl.SessionContex
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewConnectivityPoliciesClient(connector)
+	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -140,7 +143,11 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating ConnectivityPolicy with ID %s", id)
 
-	client := clientLayer.NewConnectivityPoliciesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("ConnectivityPolicy", id, err)
@@ -159,7 +166,11 @@ func resourceNsxtPolicyConnectivityPolicyRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining ConnectivityPolicy ID")
 	}
 
-	client := clientLayer.NewConnectivityPoliciesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, connectivityPolicyPathExample)
 	if pathErr != nil {
@@ -212,7 +223,11 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err := metadata.SchemaToStruct(elem, d, connectivityPolicySchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewConnectivityPoliciesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("ConnectivityPolicy", id, err)
@@ -234,7 +249,11 @@ func resourceNsxtPolicyConnectivityPolicyDelete(d *schema.ResourceData, m interf
 		return pathErr
 	}
 
-	client := clientLayer.NewConnectivityPoliciesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
