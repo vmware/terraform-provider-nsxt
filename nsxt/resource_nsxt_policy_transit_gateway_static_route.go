@@ -15,9 +15,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
 
 var staticRoutesParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
@@ -117,7 +117,10 @@ func resourceNsxtPolicyTransitGatewayStaticRouteExists(sessionContext utl.Sessio
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewStaticRoutesClient(connector)
+	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -163,7 +166,11 @@ func resourceNsxtPolicyTransitGatewayStaticRouteCreate(d *schema.ResourceData, m
 
 	log.Printf("[INFO] Creating TGW StaticRoute with ID %s", id)
 
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("TGW StaticRoute", id, err)
@@ -182,7 +189,11 @@ func resourceNsxtPolicyTransitGatewayStaticRouteRead(d *schema.ResourceData, m i
 		return fmt.Errorf("Error obtaining TGW StaticRoute ID")
 	}
 
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, staticRoutesParentPathExample)
 	if pathErr != nil {
@@ -235,7 +246,11 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayStaticRouteSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("TGW StaticRoute", id, err)
@@ -257,7 +272,11 @@ func resourceNsxtPolicyTransitGatewayStaticRouteDelete(d *schema.ResourceData, m
 		return pathErr
 	}
 
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
