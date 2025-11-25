@@ -20,6 +20,9 @@ func NewDhcpStaticBindingConfigsClient(sessionContext utl.SessionContext, connec
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewDhcpStaticBindingConfigsClient(connector)
+
 	case utl.VPC:
 		client = client0.NewDhcpStaticBindingConfigsClient(connector)
 
@@ -34,6 +37,13 @@ func (c VpcDhcpStaticBindingClientContext) Get(orgIdParam string, projectIdParam
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
@@ -53,6 +63,10 @@ func (c VpcDhcpStaticBindingClientContext) Delete(orgIdParam string, projectIdPa
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam)
@@ -67,6 +81,10 @@ func (c VpcDhcpStaticBindingClientContext) Patch(orgIdParam string, projectIdPar
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
@@ -84,6 +102,10 @@ func (c VpcDhcpStaticBindingClientContext) Update(orgIdParam string, projectIdPa
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
@@ -99,6 +121,10 @@ func (c VpcDhcpStaticBindingClientContext) List(orgIdParam string, projectIdPara
 	var obj lrmodel0.DhcpStaticBindingConfigListResult
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)

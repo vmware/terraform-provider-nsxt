@@ -19,6 +19,9 @@ func NewSubnetsClient(sessionContext utl.SessionContext, connector vapiProtocolC
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewSubnetsClient(connector)
+
 	case utl.VPC:
 		client = client0.NewSubnetsClient(connector)
 
@@ -32,6 +35,10 @@ func (c VpcSubnetClientContext) Delete(orgIdParam string, projectIdParam string,
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.SubnetsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
@@ -48,6 +55,13 @@ func (c VpcSubnetClientContext) Get(orgIdParam string, projectIdParam string, vp
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.SubnetsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
@@ -68,6 +82,10 @@ func (c VpcSubnetClientContext) List(orgIdParam string, projectIdParam string, v
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.SubnetsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
@@ -82,6 +100,10 @@ func (c VpcSubnetClientContext) Patch(orgIdParam string, projectIdParam string, 
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.SubnetsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, vpcSubnetParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)
@@ -98,6 +120,10 @@ func (c VpcSubnetClientContext) Update(orgIdParam string, projectIdParam string,
 	var obj model0.VpcSubnet
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.SubnetsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, vpcSubnetParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.SubnetsClient)

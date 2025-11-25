@@ -19,6 +19,9 @@ func NewPortsClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewPortsClient(connector)
+
 	case utl.VPC:
 		client = client0.NewPortsClient(connector)
 
@@ -33,6 +36,13 @@ func (c VpcSubnetPortClientContext) Get(orgIdParam string, projectIdParam string
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
@@ -52,6 +62,10 @@ func (c VpcSubnetPortClientContext) Patch(orgIdParam string, projectIdParam stri
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam, vpcSubnetPortParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam, vpcSubnetPortParam)
@@ -68,6 +82,10 @@ func (c VpcSubnetPortClientContext) Update(orgIdParam string, projectIdParam str
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam, vpcSubnetPortParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam, vpcSubnetPortParam)
@@ -82,6 +100,10 @@ func (c VpcSubnetPortClientContext) Delete(orgIdParam string, projectIdParam str
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, portIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
@@ -98,6 +120,10 @@ func (c VpcSubnetPortClientContext) List(orgIdParam string, projectIdParam strin
 	var obj model0.VpcSubnetPortListResult
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.PortsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
