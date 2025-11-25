@@ -6,55 +6,40 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-type StaticRoutesClientContext utl.ClientContext
+type VpcStaticRoutesClientContext utl.ClientContext
 
-func NewStaticRoutesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *StaticRoutesClientContext {
+func NewStaticRoutesClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *VpcStaticRoutesClientContext {
 	var client interface{}
 
 	switch sessionContext.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client = client0.NewStaticRoutesClient(connector)
-
-	case utl.Global:
-		client = client1.NewStaticRoutesClient(connector)
 
 	default:
 		return nil
 	}
-	return &StaticRoutesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
+	return &VpcStaticRoutesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c StaticRoutesClientContext) Get(tier0IdParam string, routeIdParam string) (model0.StaticRoutes, error) {
+func (c VpcStaticRoutesClientContext) Get(orgIdParam string, projectIdParam string, vpcIdParam string, routeIdParam string) (model0.StaticRoutes, error) {
 	var obj model0.StaticRoutes
 	var err error
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.Get(tier0IdParam, routeIdParam)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, routeIdParam)
 		if err != nil {
 			return obj, err
 		}
-
-	case utl.Global:
-		client := c.Client.(client1.StaticRoutesClient)
-		gmObj, err1 := client.Get(tier0IdParam, routeIdParam)
-		if err1 != nil {
-			return obj, err1
-		}
-		var rawObj interface{}
-		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.StaticRoutesBindingType(), model0.StaticRoutesBindingType())
-		obj = rawObj.(model0.StaticRoutes)
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -62,22 +47,14 @@ func (c StaticRoutesClientContext) Get(tier0IdParam string, routeIdParam string)
 	return obj, err
 }
 
-func (c StaticRoutesClientContext) Patch(tier0IdParam string, routeIdParam string, staticRoutesParam model0.StaticRoutes) error {
+func (c VpcStaticRoutesClientContext) Patch(orgIdParam string, projectIdParam string, vpcIdParam string, routeIdParam string, staticRoutesParam model0.StaticRoutes) error {
 	var err error
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		err = client.Patch(tier0IdParam, routeIdParam, staticRoutesParam)
-
-	case utl.Global:
-		client := c.Client.(client1.StaticRoutesClient)
-		gmObj, err1 := utl.ConvertModelBindingType(staticRoutesParam, model0.StaticRoutesBindingType(), model1.StaticRoutesBindingType())
-		if err1 != nil {
-			return err1
-		}
-		err = client.Patch(tier0IdParam, routeIdParam, gmObj.(model1.StaticRoutes))
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,31 +62,15 @@ func (c StaticRoutesClientContext) Patch(tier0IdParam string, routeIdParam strin
 	return err
 }
 
-func (c StaticRoutesClientContext) Update(tier0IdParam string, routeIdParam string, staticRoutesParam model0.StaticRoutes) (model0.StaticRoutes, error) {
+func (c VpcStaticRoutesClientContext) Update(orgIdParam string, projectIdParam string, vpcIdParam string, routeIdParam string, staticRoutesParam model0.StaticRoutes) (model0.StaticRoutes, error) {
 	var err error
 	var obj model0.StaticRoutes
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.Update(tier0IdParam, routeIdParam, staticRoutesParam)
-
-	case utl.Global:
-		client := c.Client.(client1.StaticRoutesClient)
-		gmObj, err := utl.ConvertModelBindingType(staticRoutesParam, model0.StaticRoutesBindingType(), model1.StaticRoutesBindingType())
-		if err != nil {
-			return obj, err
-		}
-		gmObj, err = client.Update(tier0IdParam, routeIdParam, gmObj.(model1.StaticRoutes))
-		if err != nil {
-			return obj, err
-		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.StaticRoutesBindingType(), model0.StaticRoutesBindingType())
-		if err1 != nil {
-			return obj, err1
-		}
-		obj = obj1.(model0.StaticRoutes)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -117,18 +78,14 @@ func (c StaticRoutesClientContext) Update(tier0IdParam string, routeIdParam stri
 	return obj, err
 }
 
-func (c StaticRoutesClientContext) Delete(tier0IdParam string, routeIdParam string) error {
+func (c VpcStaticRoutesClientContext) Delete(orgIdParam string, projectIdParam string, vpcIdParam string, routeIdParam string) error {
 	var err error
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		err = client.Delete(tier0IdParam, routeIdParam)
-
-	case utl.Global:
-		client := c.Client.(client1.StaticRoutesClient)
-		err = client.Delete(tier0IdParam, routeIdParam)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, routeIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -136,27 +93,15 @@ func (c StaticRoutesClientContext) Delete(tier0IdParam string, routeIdParam stri
 	return err
 }
 
-func (c StaticRoutesClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.StaticRoutesListResult, error) {
+func (c VpcStaticRoutesClientContext) List(orgIdParam string, projectIdParam string, vpcIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.StaticRoutesListResult, error) {
 	var err error
 	var obj model0.StaticRoutesListResult
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Global:
-		client := c.Client.(client1.StaticRoutesClient)
-		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-		if err != nil {
-			return obj, err
-		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.StaticRoutesListResultBindingType(), model0.StaticRoutesListResultBindingType())
-		if err1 != nil {
-			return obj, err1
-		}
-		obj = obj1.(model0.StaticRoutesListResult)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

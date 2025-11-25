@@ -11,9 +11,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/nat"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/nat"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -187,7 +187,7 @@ func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, paren
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewNatRulesClient(connector)
+	client := nat.NewNatRulesClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -233,7 +233,8 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 
 	log.Printf("[INFO] Creating PolicyVpcNatRule with ID %s", id)
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleCreateError("PolicyVpcNatRule", id, err)
@@ -252,12 +253,13 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining PolicyVpcNatRule ID")
 	}
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
-		return pathErr
+		return handleReadError(d, "VpcNatRule", id, pathErr)
 	}
+	client := nat.NewNatRulesClient(sessionContext, connector)
 	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err != nil {
 		return handleReadError(d, "PolicyVpcNatRule", id, err)
@@ -305,7 +307,8 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(false), "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -330,7 +333,8 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 		return pathErr
 	}
 
-	client := clientLayer.NewNatRulesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := nat.NewNatRulesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {
