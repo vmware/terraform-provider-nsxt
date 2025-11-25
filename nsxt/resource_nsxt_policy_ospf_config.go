@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
+	ospf_routing_config "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -125,7 +125,8 @@ func policyOspfConfigPatch(d *schema.ResourceData, m interface{}, gwID string, l
 	}
 
 	connector := getPolicyConnector(m)
-	client := locale_services.NewOspfClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf_routing_config.NewOspfClient(sessionContext, connector)
 	_, err := client.Patch(gwID, localeServiceID, obj)
 	return err
 }
@@ -176,7 +177,8 @@ func resourceNsxtPolicyOspfConfigRead(d *schema.ResourceData, m interface{}) err
 
 	localeServiceID := d.Get("locale_service_id").(string)
 
-	client := locale_services.NewOspfClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf_routing_config.NewOspfClient(sessionContext, connector)
 	obj, err := client.Get(gwID, localeServiceID)
 	if err != nil {
 		return handleReadError(d, "Ospf Config", gwID, err)
