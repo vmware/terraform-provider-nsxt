@@ -37,8 +37,6 @@ import (
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 
-var commonSessionContext tf_api.SessionContext
-
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
 	RemoteAuth             bool
@@ -1188,8 +1186,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			return nil, err
 		}
 	}
-
-	commonSessionContext = getSessionContext(d, clients)
 
 	return clients, nil
 }
