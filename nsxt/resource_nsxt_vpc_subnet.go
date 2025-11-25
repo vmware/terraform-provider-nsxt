@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
@@ -570,6 +572,7 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 }
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
+	displayName := d.Get("display_name").(string)
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -577,13 +580,23 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
 
-	client := clientLayer.NewSubnetsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
-	if err != nil {
-		return handleReadError(d, "VpcSubnet", id, err)
-	}
+	val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
+	fmt.Println("*******************  Pooja data output from cache ", val, err)
 
+	var obj model.VpcSubnet
+	converter := bindings.NewTypeConverter()
+	goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcSubnetBindingType())
+	if len(convErrs) == 0 {
+		obj = goVal.(model.VpcSubnet)
+		fmt.Println("resourceNsxtVpcSubnetRead read data from cache displayName ", obj.DisplayName)
+	} else {
+		client := clientLayer.NewSubnetsClient(connector)
+		parents := getVpcParentsFromContext(getSessionContext(d, m))
+		obj, err = client.Get(parents[0], parents[1], parents[2], id)
+		if err != nil {
+			return handleReadError(d, "VpcSubnet", id, err)
+		}
+	}
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("display_name", obj.DisplayName)
