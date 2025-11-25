@@ -19,6 +19,9 @@ func NewStaticRoutesClient(sessionContext utl.SessionContext, connector vapiProt
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewStaticRoutesClient(connector)
+
 	case utl.VPC:
 		client = client0.NewStaticRoutesClient(connector)
 
@@ -33,6 +36,13 @@ func (c VpcStaticRoutesClientContext) Get(orgIdParam string, projectIdParam stri
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, routeIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
@@ -52,6 +62,10 @@ func (c VpcStaticRoutesClientContext) Patch(orgIdParam string, projectIdParam st
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.StaticRoutesClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
@@ -68,6 +82,10 @@ func (c VpcStaticRoutesClientContext) Update(orgIdParam string, projectIdParam s
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, routeIdParam, staticRoutesParam)
@@ -82,6 +100,10 @@ func (c VpcStaticRoutesClientContext) Delete(orgIdParam string, projectIdParam s
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.StaticRoutesClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, routeIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
@@ -98,6 +120,10 @@ func (c VpcStaticRoutesClientContext) List(orgIdParam string, projectIdParam str
 	var obj model0.StaticRoutesListResult
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)

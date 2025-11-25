@@ -19,6 +19,9 @@ func NewIpAddressAllocationsClient(sessionContext utl.SessionContext, connector 
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewIpAddressAllocationsClient(connector)
+
 	case utl.VPC:
 		client = client0.NewIpAddressAllocationsClient(connector)
 
@@ -32,6 +35,10 @@ func (c VpcIpAddressAllocationClientContext) Delete(orgIdParam string, projectId
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
@@ -48,6 +55,13 @@ func (c VpcIpAddressAllocationClientContext) Get(orgIdParam string, projectIdPar
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
@@ -68,6 +82,10 @@ func (c VpcIpAddressAllocationClientContext) List(orgIdParam string, projectIdPa
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
@@ -82,6 +100,10 @@ func (c VpcIpAddressAllocationClientContext) Patch(orgIdParam string, projectIdP
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam, vpcIpAddressAllocationParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
@@ -98,6 +120,10 @@ func (c VpcIpAddressAllocationClientContext) Update(orgIdParam string, projectId
 	var obj model0.VpcIpAddressAllocation
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, ipAddressAllocationIdParam, vpcIpAddressAllocationParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)

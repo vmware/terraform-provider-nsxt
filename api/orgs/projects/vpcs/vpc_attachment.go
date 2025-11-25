@@ -19,6 +19,9 @@ func NewAttachmentsClient(sessionContext utl.SessionContext, connector vapiProto
 
 	switch sessionContext.ClientType {
 
+	case utl.Local:
+		client = client0.NewAttachmentsClient(connector)
+
 	case utl.VPC:
 		client = client0.NewAttachmentsClient(connector)
 
@@ -32,6 +35,10 @@ func (c VpcAttachmentClientContext) Delete(orgIdParam string, projectIdParam str
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.AttachmentsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
@@ -48,6 +55,13 @@ func (c VpcAttachmentClientContext) Get(orgIdParam string, projectIdParam string
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.AttachmentsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
@@ -68,6 +82,10 @@ func (c VpcAttachmentClientContext) List(orgIdParam string, projectIdParam strin
 
 	switch c.ClientType {
 
+	case utl.Local:
+		client := c.Client.(client0.AttachmentsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
@@ -82,6 +100,10 @@ func (c VpcAttachmentClientContext) Patch(orgIdParam string, projectIdParam stri
 	var err error
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.AttachmentsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
@@ -98,6 +120,10 @@ func (c VpcAttachmentClientContext) Update(orgIdParam string, projectIdParam str
 	var obj model0.VpcAttachment
 
 	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.AttachmentsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcAttachmentIdParam, vpcAttachmentParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
