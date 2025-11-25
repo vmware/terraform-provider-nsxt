@@ -611,7 +611,7 @@ func testAccNsxtPolicyTier0Exists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy Tier0 resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyTier0GatewayExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -632,7 +632,7 @@ func testAccNsxtPolicyTier0CheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyTier0GatewayExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}

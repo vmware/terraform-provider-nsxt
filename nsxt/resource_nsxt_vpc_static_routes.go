@@ -10,9 +10,9 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -95,7 +95,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 func resourceNsxtVpcStaticRoutesExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewStaticRoutesClient(connector)
+	client := vpcs.NewStaticRoutesClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -137,7 +137,8 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 
 	log.Printf("[INFO] Creating StaticRoutes with ID %s", id)
 
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewStaticRoutesClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("StaticRoutes", id, err)
@@ -156,8 +157,9 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error obtaining StaticRoutes ID")
 	}
 
-	client := clientLayer.NewStaticRoutesClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
+	client := vpcs.NewStaticRoutesClient(sessionContext, connector)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
 		return handleReadError(d, "StaticRoutes", id, err)
@@ -201,7 +203,8 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 	if err := metadata.SchemaToStruct(elem, d, staticRoutesSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewStaticRoutesClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -222,7 +225,8 @@ func resourceNsxtVpcStaticRoutesDelete(d *schema.ResourceData, m interface{}) er
 	connector := getPolicyConnector(m)
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
-	client := clientLayer.NewStaticRoutesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewStaticRoutesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
