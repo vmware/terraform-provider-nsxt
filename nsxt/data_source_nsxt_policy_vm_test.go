@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,6 +31,7 @@ func TestAccDataSourceNsxtPolicyVM_multitenancy(t *testing.T) {
 }
 func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_vm.test"
+	re, _ := regexp.Compile(`^.*$`)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -44,6 +46,7 @@ func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck
 					resource.TestCheckResourceAttrSet(testResourceName, "external_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "instance_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "tag.#"),
+					resource.TestMatchOutput("vm_vif_id", re),
 				),
 			},
 			{
@@ -70,7 +73,12 @@ func testAccNsxtPolicyVMReadByNameTemplate(withContext bool) string {
 data "nsxt_policy_vm" "test" {
 %s
   display_name = "%s"
-}`, context, getTestVMName())
+}
+
+output "vm_vif_id" {
+  value = data.nsxt_policy_vm.test.vif_ids[0]
+}
+`, context, getTestVMName())
 }
 
 func testAccNsxtPolicyVMReadByIDTemplate(withContext bool) string {

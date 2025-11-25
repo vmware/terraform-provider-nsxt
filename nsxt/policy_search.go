@@ -115,6 +115,24 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
+func searchByContext(connector client.Connector, context utl.SessionContext, query string, additionalQuery *string) ([]*data.StructValue, error) {
+	isGlobal := context.FromGlobal
+	switch context.ClientType {
+	case utl.Local:
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
+	case utl.Global:
+		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy, utl.VPC:
+		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
+	}
+	return nil, errors.New("invalid ClientType")
+}
+
+func listPolicyResources(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
+	return searchByContext(connector, context, query, additionalQuery)
+}
+
 // globalFlag argument is an optional
 func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
