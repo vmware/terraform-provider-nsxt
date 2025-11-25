@@ -108,4 +108,3 @@ func (c TransitGatewayNatRuleClientContext) List(orgIdParam string, projectIdPar
 	}
 	return obj, err
 }
-
