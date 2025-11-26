@@ -430,7 +430,7 @@ func (c *ipsecSessionClient) Get(connector client.Connector, id string) (*data.S
 		}
 		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-		client := tier1ipsecvpnservices.NewSessionsClient(sessionContext, connector)
+	client := tier1ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return nil, fmt.Errorf("unsupported client type")
 	}
@@ -462,7 +462,7 @@ func (c *ipsecSessionClient) Patch(connector client.Connector, id string, obj *d
 		}
 		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 	}
-		client := tier1ipsecvpnservices.NewSessionsClient(sessionContext, connector)
+	client := tier1ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
