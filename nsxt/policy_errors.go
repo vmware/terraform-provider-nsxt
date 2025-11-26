@@ -160,6 +160,14 @@ func logAPIError(message string, err error) error {
 	return err
 }
 
+func isUnauthorizedError(err error) bool {
+	if _, ok := err.(errors.Unauthorized); ok {
+		return true
+	}
+
+	return false
+}
+
 func isNotFoundError(err error) bool {
 	if _, ok := err.(errors.NotFound); ok {
 		return true
