@@ -139,12 +139,12 @@ func resourceNsxtPolicyTransitGatewayStaticRouteCreate(d *schema.ResourceData, m
 	}
 	connector := getPolicyConnector(m)
 
+	parentPath := d.Get("parent_path").(string)
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayStaticRouteExists)
 	if err != nil {
 		return err
 	}
 
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, staticRoutesParentPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -166,7 +166,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteCreate(d *schema.ResourceData, m
 
 	log.Printf("[INFO] Creating TGW StaticRoute with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -189,12 +189,12 @@ func resourceNsxtPolicyTransitGatewayStaticRouteRead(d *schema.ResourceData, m i
 		return fmt.Errorf("Error obtaining TGW StaticRoute ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, staticRoutesParentPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -246,7 +246,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayStaticRouteSchema, "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -272,7 +272,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteDelete(d *schema.ResourceData, m
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")

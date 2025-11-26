@@ -46,7 +46,8 @@ func updatePort(d *schema.ResourceData, m interface{}, deleteFlow bool) error {
 
 	// Get port in order to Update
 	connector := getPolicyConnector(m)
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	portClient := subnets.NewPortsClient(sessionContext, connector)
 	port, err := portClient.Get(parents[0], parents[1], parents[2], parents[3], parents[4])
 	if err != nil {
@@ -87,7 +88,7 @@ func resourceNsxtVpcExternalAddressRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, portPath)
 	portClient := subnets.NewPortsClient(sessionContext, connector)
 	port, err := portClient.Get(parents[0], parents[1], parents[2], parents[3], parents[4])
 	if err != nil {
