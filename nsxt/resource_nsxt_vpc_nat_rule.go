@@ -233,7 +233,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 
 	log.Printf("[INFO] Creating PolicyVpcNatRule with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
@@ -253,8 +253,8 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining PolicyVpcNatRule ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return handleReadError(d, "VpcNatRule", id, pathErr)
@@ -307,7 +307,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(false), "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
@@ -333,7 +333,7 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 

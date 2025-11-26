@@ -291,9 +291,9 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 		return fmt.Errorf("Error obtaining DhcpV4StaticBindingConfig ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
-	client := subnets.NewDhcpStaticBindingConfigsClient(sessionContext, connector)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := subnets.NewDhcpStaticBindingConfigsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -363,7 +363,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return convErrs[0]
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := subnets.NewDhcpStaticBindingConfigsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
 	if err != nil {
@@ -389,7 +389,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := subnets.NewDhcpStaticBindingConfigsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 

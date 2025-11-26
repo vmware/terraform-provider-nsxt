@@ -143,7 +143,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating ConnectivityPolicy with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -166,12 +166,12 @@ func resourceNsxtPolicyConnectivityPolicyRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining ConnectivityPolicy ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, connectivityPolicyPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -223,7 +223,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err := metadata.SchemaToStruct(elem, d, connectivityPolicySchema, "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -249,7 +249,7 @@ func resourceNsxtPolicyConnectivityPolicyDelete(d *schema.ResourceData, m interf
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewConnectivityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
