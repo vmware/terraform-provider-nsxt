@@ -107,7 +107,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating VpcAttachment with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := vpcs.NewAttachmentsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
@@ -127,9 +127,9 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("error obtaining VpcAttachment ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := vpcs.NewAttachmentsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -181,7 +181,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 	if err := metadata.SchemaToStruct(elem, d, vpcAttachmentSchema, "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := vpcs.NewAttachmentsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
@@ -205,7 +205,7 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := vpcs.NewAttachmentsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
