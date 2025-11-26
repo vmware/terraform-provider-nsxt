@@ -78,12 +78,11 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
+	parentPath := d.Get("parent_path").(string)
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayAttachmentExists)
 	if err != nil {
 		return err
 	}
-
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -105,7 +104,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 
 	log.Printf("[INFO] Creating TransitGatewayAttachment with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewAttachmentsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -128,12 +127,12 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 		return fmt.Errorf("Error obtaining TransitGatewayAttachment ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewAttachmentsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -185,7 +184,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayAttachmentSchema, "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewAttachmentsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -211,7 +210,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := transitgateways.NewAttachmentsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")

@@ -91,7 +91,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 
 	log.Printf("[INFO] Creating PolicyTransitGatewayNatRule with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -114,12 +114,12 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining PolicyTransitGatewayNatRule ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -171,7 +171,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 	if err := metadata.SchemaToStruct(elem, d, getPolicyVpcNatRuleSchema(true), "", nil); err != nil {
 		return err
 	}
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -197,7 +197,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleDelete(d *schema.ResourceData, m int
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := nat.NewNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
