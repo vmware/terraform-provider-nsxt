@@ -108,4 +108,3 @@ func (c IPSecVpnServiceClientContext) Update(tier0IdParam string, serviceIdParam
 	}
 	return obj, err
 }
-

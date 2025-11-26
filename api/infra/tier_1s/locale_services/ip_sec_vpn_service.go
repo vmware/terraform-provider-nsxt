@@ -108,4 +108,3 @@ func (c IPSecVpnServiceClientContext) Update(tier1IdParam string, localeServiceI
 	}
 	return obj, err
 }
-
