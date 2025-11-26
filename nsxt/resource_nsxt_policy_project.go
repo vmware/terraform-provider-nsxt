@@ -289,6 +289,10 @@ func getDefaultSpan(connector client.Connector) (string, error) {
 	var cursor *string
 	client := infra2.NewNetworkSpansClient(connector)
 	spanList, err := client.List(cursor, nil, nil, nil, nil, nil)
+	if isUnauthorizedError(err) {
+		log.Printf("[WARNING] user is unauthorized to retrieve the default span")
+		return "", nil
+	}
 	if err != nil {
 		return "", err
 	}
