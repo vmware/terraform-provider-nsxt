@@ -572,24 +572,34 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 }
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
-	displayName := d.Get("display_name").(string)
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
-
-	val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
-	fmt.Println("*******************  Pooja data output from cache ", val, err)
-
+	displayName := d.Get("display_name").(string)
 	var obj model.VpcSubnet
-	converter := bindings.NewTypeConverter()
-	goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcSubnetBindingType())
-	if len(convErrs) == 0 {
-		obj = goVal.(model.VpcSubnet)
-		fmt.Println("resourceNsxtVpcSubnetRead read data from cache displayName ", obj.DisplayName)
-	} else {
+	var err error
+	cacheUsed := false
+
+	if isRefreshPhase(d) {
+		fmt.Println("---------------------> Refresh Phase of plan/apply")
+		val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcSubnetBindingType())
+			if len(convErrs) == 0 {
+				obj = goVal.(model.VpcSubnet)
+				cacheUsed = true
+				fmt.Println("----------------> resourceNsxtVpcSubnetRead read data from cacheused displayName ", cacheUsed, *obj.DisplayName)
+			}
+		} else {
+			cacheUsed = false
+		}
+	}
+	if !cacheUsed {
+		fmt.Println("--------> Using the backend API, regular flow")
 		client := clientLayer.NewSubnetsClient(connector)
 		parents := getVpcParentsFromContext(getSessionContext(d, m))
 		obj, err = client.Get(parents[0], parents[1], parents[2], id)
@@ -597,6 +607,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 			return handleReadError(d, "VpcSubnet", id, err)
 		}
 	}
+
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("display_name", obj.DisplayName)

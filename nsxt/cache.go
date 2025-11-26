@@ -97,3 +97,7 @@ func (c *cache) getListOfPolicyResources(query string, d *schema.ResourceData, c
 	c.data[query] = tmp
 	return nil
 }
+
+func isRefreshPhase(d *schema.ResourceData) bool {
+	return d.Id() != "" && !d.HasChangesExcept()
+}
