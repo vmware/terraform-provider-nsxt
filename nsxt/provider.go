@@ -1361,6 +1361,22 @@ func getParentContext(d *schema.ResourceData, m interface{}, parentPath string) 
 	return getSessionContextHelper(d, m, parentPath)
 }
 
+func getSessionContextFromParentPath(m interface{}, parentPath string) tf_api.SessionContext {
+	var clientType tf_api.ClientType
+	projectID, vpcID := getContextDataFromParentPath(parentPath)
+	if projectID != "" {
+		clientType = tf_api.Multitenancy
+		if vpcID != "" {
+			clientType = tf_api.VPC
+		}
+	} else if isPolicyGlobalManager(m) {
+		clientType = tf_api.Global
+	} else {
+		clientType = tf_api.Local
+	}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType, FromGlobal: false}
+}
+
 func getSessionContextHelper(d *schema.ResourceData, m interface{}, parentPath string) tf_api.SessionContext {
 	var clientType tf_api.ClientType
 	var projectID, vpcID string
