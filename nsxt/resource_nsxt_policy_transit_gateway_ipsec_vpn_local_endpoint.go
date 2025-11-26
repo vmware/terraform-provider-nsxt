@@ -12,7 +12,7 @@ import (
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
-	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/ipsec_vpn_services"
+	ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/ipsec_vpn_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
