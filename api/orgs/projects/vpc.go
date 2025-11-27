@@ -22,6 +22,9 @@ func NewVpcsClient(sessionContext utl.SessionContext, connector vapiProtocolClie
 	case utl.Multitenancy:
 		client = client0.NewVpcsClient(connector)
 
+	case utl.VPC:
+		client = client0.NewVpcsClient(connector)
+
 	default:
 		return nil
 	}
@@ -34,6 +37,10 @@ func (c VpcClientContext) Delete(orgIdParam string, projectIdParam string, vpcId
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcsClient)
+		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, isRecursiveParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcsClient)
 		err = client.Delete(orgIdParam, projectIdParam, vpcIdParam, isRecursiveParam)
 
@@ -56,6 +63,13 @@ func (c VpcClientContext) Get(orgIdParam string, projectIdParam string, vpcIdPar
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client0.VpcsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c VpcClientContext) List(orgIdParam string, projectIdParam string, cursorP
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -87,6 +105,10 @@ func (c VpcClientContext) Patch(orgIdParam string, projectIdParam string, vpcIdP
 		client := c.Client.(client0.VpcsClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.VpcsClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -100,6 +122,10 @@ func (c VpcClientContext) Update(orgIdParam string, projectIdParam string, vpcId
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcIdParam, vpcParam)
 
