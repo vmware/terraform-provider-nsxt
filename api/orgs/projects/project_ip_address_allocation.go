@@ -22,6 +22,9 @@ func NewIpAddressAllocationsClient(sessionContext utl.SessionContext, connector 
 	case utl.Multitenancy:
 		client = client0.NewIpAddressAllocationsClient(connector)
 
+	case utl.VPC:
+		client = client0.NewIpAddressAllocationsClient(connector)
+
 	default:
 		return nil
 	}
@@ -34,6 +37,10 @@ func (c ProjectIpAddressAllocationClientContext) Delete(orgIdParam string, proje
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		err = client.Delete(orgIdParam, projectIdParam, ipAddressAllocationIdParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		err = client.Delete(orgIdParam, projectIdParam, ipAddressAllocationIdParam)
 
@@ -56,6 +63,13 @@ func (c ProjectIpAddressAllocationClientContext) Get(orgIdParam string, projectI
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, ipAddressAllocationIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c ProjectIpAddressAllocationClientContext) List(orgIdParam string, project
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -87,6 +105,10 @@ func (c ProjectIpAddressAllocationClientContext) Patch(orgIdParam string, projec
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		err = client.Patch(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		err = client.Patch(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -100,6 +122,10 @@ func (c ProjectIpAddressAllocationClientContext) Update(orgIdParam string, proje
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.IpAddressAllocationsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.IpAddressAllocationsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, ipAddressAllocationIdParam, projectIpAddressAllocationParam)
 

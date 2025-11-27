@@ -22,6 +22,9 @@ func NewVpcSecurityProfilesClient(sessionContext utl.SessionContext, connector v
 	case utl.Multitenancy:
 		client = client0.NewVpcSecurityProfilesClient(connector)
 
+	case utl.VPC:
+		client = client0.NewVpcSecurityProfilesClient(connector)
+
 	default:
 		return nil
 	}
@@ -35,6 +38,13 @@ func (c VpcSecurityProfileClientContext) Get(orgIdParam string, projectIdParam s
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcSecurityProfilesClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, vpcSecurityProfileIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, vpcSecurityProfileIdParam)
 		if err != nil {
@@ -57,6 +67,10 @@ func (c VpcSecurityProfileClientContext) List(orgIdParam string, projectIdParam 
 		client := c.Client.(client0.VpcSecurityProfilesClient)
 		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.VpcSecurityProfilesClient)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c VpcSecurityProfileClientContext) Patch(orgIdParam string, projectIdParam
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcSecurityProfilesClient)
+		err = client.Patch(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
 		err = client.Patch(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
 
@@ -85,6 +103,10 @@ func (c VpcSecurityProfileClientContext) Update(orgIdParam string, projectIdPara
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.VpcSecurityProfilesClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.VpcSecurityProfilesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, vpcSecurityProfileIdParam, vpcSecurityProfileParam)
 

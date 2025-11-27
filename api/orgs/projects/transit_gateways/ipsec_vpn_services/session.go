@@ -23,6 +23,9 @@ func NewSessionsClient(sessionContext utl.SessionContext, connector vapiProtocol
 	case utl.Multitenancy:
 		client = client0.NewSessionsClient(connector)
 
+	case utl.VPC:
+		client = client0.NewSessionsClient(connector)
+
 	default:
 		return nil
 	}
@@ -35,6 +38,10 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Delete(orgIdParam string, pr
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.SessionsClient)
+		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.SessionsClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
 
@@ -57,6 +64,13 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Get(orgIdParam string, proje
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client0.SessionsClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -70,6 +84,10 @@ func (c TransitGatewayIpsecVpnSessionClientContext) List(orgIdParam string, proj
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.SessionsClient)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.SessionsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -88,6 +106,10 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Patch(orgIdParam string, pro
 		client := c.Client.(client0.SessionsClient)
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.SessionsClient)
+		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -101,6 +123,10 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Update(orgIdParam string, pr
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.SessionsClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.SessionsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
