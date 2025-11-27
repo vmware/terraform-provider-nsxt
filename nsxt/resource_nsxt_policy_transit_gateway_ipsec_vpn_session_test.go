@@ -469,7 +469,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionExists(displayName string, resourceName 
 			return fmt.Errorf("Policy TGWIPSecVpnSession resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -491,7 +491,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}

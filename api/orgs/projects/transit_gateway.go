@@ -22,6 +22,9 @@ func NewTransitGatewaysClient(sessionContext utl.SessionContext, connector vapiP
 	case utl.Multitenancy:
 		client = client0.NewTransitGatewaysClient(connector)
 
+	case utl.VPC:
+		client = client0.NewTransitGatewaysClient(connector)
+
 	default:
 		return nil
 	}
@@ -34,6 +37,10 @@ func (c TransitGatewayClientContext) Delete(orgIdParam string, projectIdParam st
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.TransitGatewaysClient)
+		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.TransitGatewaysClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam)
 
@@ -56,6 +63,13 @@ func (c TransitGatewayClientContext) Get(orgIdParam string, projectIdParam strin
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client0.TransitGatewaysClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c TransitGatewayClientContext) List(orgIdParam string, projectIdParam stri
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.TransitGatewaysClient)
+		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.TransitGatewaysClient)
 		obj, err = client.List(orgIdParam, projectIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -87,6 +105,10 @@ func (c TransitGatewayClientContext) Patch(orgIdParam string, projectIdParam str
 		client := c.Client.(client0.TransitGatewaysClient)
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.TransitGatewaysClient)
+		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -100,6 +122,10 @@ func (c TransitGatewayClientContext) Update(orgIdParam string, projectIdParam st
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.TransitGatewaysClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.TransitGatewaysClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, transitGatewayParam)
 
