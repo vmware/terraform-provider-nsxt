@@ -199,7 +199,7 @@ func testAccNsxtVpcNatRuleExists(displayName string, resourceName string) resour
 
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtPolicyVpcNatRuleExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyVpcNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -222,7 +222,7 @@ func testAccNsxtVpcNatRuleCheckDestroy(state *terraform.State, displayName strin
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtPolicyVpcNatRuleExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyVpcNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}

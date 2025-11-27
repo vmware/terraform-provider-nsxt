@@ -112,7 +112,7 @@ func testAccNsxtPolicyTransitGatewayAttachmentExists(displayName string, resourc
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -134,7 +134,7 @@ func testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state *terraform.Stat
 
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
