@@ -48,3 +48,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the Virtual Machine.
 * `tag` - A list of scope + tag pairs associated with this Virtual Machine.
+* `vif_ids` - VIF attachment IDs of the VM.
