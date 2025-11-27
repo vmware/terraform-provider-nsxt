@@ -22,6 +22,9 @@ func NewStaticRoutesClient(sessionContext utl.SessionContext, connector vapiProt
 	case utl.Multitenancy:
 		client = client0.NewStaticRoutesClient(connector)
 
+	case utl.VPC:
+		client = client0.NewStaticRoutesClient(connector)
+
 	default:
 		return nil
 	}
@@ -35,6 +38,13 @@ func (c TransitGatewayStaticRoutesClientContext) Get(orgIdParam string, projectI
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam)
 		if err != nil {
@@ -56,6 +66,10 @@ func (c TransitGatewayStaticRoutesClientContext) Patch(orgIdParam string, projec
 		client := c.Client.(client0.StaticRoutesClient)
 		obj, err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam, staticRoutesParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam, staticRoutesParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c TransitGatewayStaticRoutesClientContext) Update(orgIdParam string, proje
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam, staticRoutesParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam, staticRoutesParam)
 
@@ -87,6 +105,10 @@ func (c TransitGatewayStaticRoutesClientContext) Delete(orgIdParam string, proje
 		client := c.Client.(client0.StaticRoutesClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.StaticRoutesClient)
+		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, routeIdParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -100,6 +122,10 @@ func (c TransitGatewayStaticRoutesClientContext) List(orgIdParam string, project
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.StaticRoutesClient)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 

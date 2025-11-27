@@ -22,6 +22,9 @@ func NewNatRulesClient(sessionContext utl.SessionContext, connector vapiProtocol
 	case utl.Multitenancy:
 		client = client0.NewNatRulesClient(connector)
 
+	case utl.VPC:
+		client = client0.NewNatRulesClient(connector)
+
 	default:
 		return nil
 	}
@@ -35,6 +38,13 @@ func (c TransitGatewayNatRuleClientContext) Get(orgIdParam string, projectIdPara
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
 		if err != nil {
@@ -56,6 +66,10 @@ func (c TransitGatewayNatRuleClientContext) Patch(orgIdParam string, projectIdPa
 		client := c.Client.(client0.NatRulesClient)
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.NatRulesClient)
+		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -69,6 +83,10 @@ func (c TransitGatewayNatRuleClientContext) Update(orgIdParam string, projectIdP
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
 
@@ -87,6 +105,10 @@ func (c TransitGatewayNatRuleClientContext) Delete(orgIdParam string, projectIdP
 		client := c.Client.(client0.NatRulesClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
 
+	case utl.VPC:
+		client := c.Client.(client0.NatRulesClient)
+		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -100,6 +122,10 @@ func (c TransitGatewayNatRuleClientContext) List(orgIdParam string, projectIdPar
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.NatRulesClient)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 

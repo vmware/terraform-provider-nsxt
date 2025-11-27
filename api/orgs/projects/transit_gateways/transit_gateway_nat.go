@@ -22,6 +22,9 @@ func NewNatClient(sessionContext utl.SessionContext, connector vapiProtocolClien
 	case utl.Multitenancy:
 		client = client0.NewNatClient(connector)
 
+	case utl.VPC:
+		client = client0.NewNatClient(connector)
+
 	default:
 		return nil
 	}
@@ -41,6 +44,13 @@ func (c TransitGatewayNatClientContext) Get(orgIdParam string, projectIdParam st
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client0.NatClient)
+		obj, err = client.Get(orgIdParam, projectIdParam, tgwIdParam, natIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -54,6 +64,10 @@ func (c TransitGatewayNatClientContext) List(orgIdParam string, projectIdParam s
 	switch c.ClientType {
 
 	case utl.Multitenancy:
+		client := c.Client.(client0.NatClient)
+		obj, err = client.List(orgIdParam, projectIdParam, tgwIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
 		client := c.Client.(client0.NatClient)
 		obj, err = client.List(orgIdParam, projectIdParam, tgwIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
