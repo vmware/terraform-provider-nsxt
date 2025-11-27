@@ -269,7 +269,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(displayName string, res
 
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -292,7 +292,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state *terraform.
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
