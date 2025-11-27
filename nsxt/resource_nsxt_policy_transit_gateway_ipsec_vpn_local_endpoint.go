@@ -74,7 +74,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m 
 
 	log.Printf("[INFO] Creating TransitGatewayIPSecVpnLocalEndpoint with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -98,12 +98,12 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointRead(d *schema.ResourceData, m in
 		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnLocalEndpoint ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -147,7 +147,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointUpdate(d *schema.ResourceData, m 
 	revision := int64(d.Get("revision").(int))
 	obj.Revision = &revision
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -173,7 +173,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointDelete(d *schema.ResourceData, m 
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")

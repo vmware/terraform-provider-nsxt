@@ -77,7 +77,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating TransitGatewayIPSecVpnSession with ID %s", id)
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -100,12 +100,12 @@ func resourceNsxtPolicyTGWIPSecVpnSessionRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("error obtaining TransitGatewayIPSecVpnSession ID")
 	}
 
-	sessionContext := getSessionContext(d, m)
+	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, tgwIPSecVpnSessionPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -138,7 +138,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
@@ -165,7 +165,7 @@ func resourceNsxtPolicyTGWIPSecVpnSessionDelete(d *schema.ResourceData, m interf
 		return pathErr
 	}
 
-	sessionContext := getSessionContext(d, m)
+	sessionContext := getParentContext(d, m, parentPath)
 	client := ipsecvpnservices.NewSessionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
