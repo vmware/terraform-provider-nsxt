@@ -15,13 +15,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	tier0_localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -682,25 +681,9 @@ func getComputedGatewayIDSchema() *schema.Schema {
 	}
 }
 
-func policyTier0GetLocaleService(gwID string, localeServiceID string, connector client.Connector, isGlobalManager bool) *model.LocaleServices {
-	if isGlobalManager {
-		nsxClient := gm_tier0s.NewLocaleServicesClient(connector)
-		gmObj, err := nsxClient.Get(gwID, localeServiceID)
-		if err != nil {
-			log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
-			return nil
-		}
-
-		convObj, convErr := convertModelBindingType(gmObj, gm_model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
-		if convErr != nil {
-			log.Printf("[DEBUG] Failed to convert locale service %s for gateway %s: %s", gwID, localeServiceID, convErr)
-			return nil
-		}
-		obj := convObj.(model.LocaleServices)
-		return &obj
-	}
-	nsxClient := tier_0s.NewLocaleServicesClient(connector)
-	obj, err := nsxClient.Get(gwID, localeServiceID)
+func policyTier0GetLocaleService(context utl.SessionContext, gwID string, localeServiceID string, connector client.Connector, isGlobalManager bool) *model.LocaleServices {
+	tier0LocaleservicesClient := tier0_localeservices.NewLocaleServicesClient(context, connector)
+	obj, err := tier0LocaleservicesClient.Get(gwID, localeServiceID)
 	if err != nil {
 		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
 		return nil

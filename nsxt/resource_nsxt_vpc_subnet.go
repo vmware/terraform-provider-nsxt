@@ -13,10 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/subnets"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -487,7 +487,7 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewSubnetsClient(connector)
+	client := vpcs.NewSubnetsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -533,7 +533,8 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
-	client := clientLayer.NewSubnetsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewSubnetsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("VpcSubnet", id, err)
@@ -577,8 +578,9 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
 
-	client := clientLayer.NewSubnetsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
 		return handleReadError(d, "VpcSubnet", id, err)
@@ -637,7 +639,8 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		obj.SubnetDhcpConfig.DhcpServerAdditionalConfig = nil
 	}
 
-	client := clientLayer.NewSubnetsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := vpcs.NewSubnetsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -656,7 +659,8 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
 
 	// Wait until potential VM ports are deleted
 	pendingStates := []string{"pending"}
@@ -665,7 +669,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			portsClient := subnets.NewPortsClient(connector)
+			portsClient := subnets.NewPortsClient(sessionContext, connector)
 			ports, err := portsClient.List(parents[0], parents[1], parents[2], id, nil, nil, nil, nil, nil, nil)
 			if err != nil {
 				return ports, "error", logAPIError("Error listing VPC subnet ports", err)
@@ -688,7 +692,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Failed to get port information for subnet %s: %v", id, err)
 	}
 
-	client := clientLayer.NewSubnetsClient(connector)
+	client := vpcs.NewSubnetsClient(sessionContext, connector)
 	err = client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
