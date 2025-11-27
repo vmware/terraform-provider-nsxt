@@ -38,7 +38,7 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 	d.Set("nsx_id", ruleName)
-	_, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d, m, policyPath))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d, m, policyPath))
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	d.SetId(ruleName)
+	d.SetId(id)
 
 	return resourceNsxtPolicyGatewayPolicyRuleRead(d, m)
 }
