@@ -350,6 +350,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_high_availability_profile":             dataSourceNsxtPolicyEdgeHighAvailabilityProfile(),
 			"nsxt_policy_edge_transport_node_realization":            dataSourceNsxtPolicyEdgeTransportNodeRealization(),
 			"nsxt_policy_segment_port":                               dataSourceNsxtPolicySegmentPort(),
+			"nsxt_policy_container_cluster":                          dataSourceNsxtPolicyContainerCluster(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
