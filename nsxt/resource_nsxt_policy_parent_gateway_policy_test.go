@@ -152,16 +152,11 @@ func testAccNsxtPolicyT1GwDataSourceTemplate(withContext bool) string {
 	}
 	return fmt.Sprintf(`
 
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
-
 resource "nsxt_policy_tier1_gateway" "t1_gw" {
   %s
   display_name      = "t1-gw-policy-rule-test"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
-`, getEdgeClusterName(), context)
+`, context)
 }
 
 func testAccNsxtPolicyParentGatewayPolicyTemplate(withContext bool, name, locked, seqNum, tcpStrict, ruleName, description, action string) string {
