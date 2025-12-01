@@ -32,24 +32,25 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 	projectID := getProjectIDFromResourcePath(policyPath)
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
-	d.Set("nsx_id", ruleName)
+
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d, m, policyPath))
 	if err != nil {
 		return err
 	}
 
+	d.Set("nsx_id", id)
 	if err := setSecurityOrGatewayPolicyRuleContext(d, projectID); err != nil {
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	log.Printf("[INFO] Creating Gateway Policy Rule with ID %s under policy %s", ruleName, policyPath)
+	log.Printf("[INFO] Creating Gateway Policy Rule with ID %s under policy %s", id, policyPath)
 	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
-	rule := securityAndGatewayPolicyRuleSchemaToModel(d, ruleName)
-	err = client.Patch(domain, policyID, ruleName, rule)
+	rule := securityAndGatewayPolicyRuleSchemaToModel(d, id)
+	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
