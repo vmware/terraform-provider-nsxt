@@ -198,6 +198,47 @@ When the ESXi software is not upgraded, the finalization stage will fail. There 
 the NSX management plane, the Edge appliances and the NSX bits on the ESXi hosts, and postpone the ESXi OS upgrade to
 a later time.
 
+### Upgrading Global Manager
+
+NSX Global Manager upgrade is similar to Local Manager. Yet, Global Manager has no Edge or Host components and therefore
+Doesn't allow the configuration of these components in upgrade groups in the `nsxt_upgrade_run` resource.
+
+The example below uses Terraform to upgrade a Global Manager.
+
+```hcl
+provider "nsxt" {
+  host                 = "global.manager.somedomain.org"
+  username             = "admin"
+  password             = "AdminPassword"
+  allow_unverified_ssl = true
+  global_manager       = true // This is required to indicate that we upgrade a Global Manager
+}
+
+resource "nsxt_upgrade_prepare" "gm_prepare_res" {
+  upgrade_bundle_url    = var.upgrade_bundle_url
+  accept_user_agreement = true
+}
+
+resource "nsxt_upgrade_precheck_acknowledge" "gm_precheck_ack" {
+  provider = nsxt.gm_nsxt
+
+  precheck_ids   = var.gm_precheck_warns
+  target_version = nsxt_upgrade_prepare.gm_prepare_res.target_version
+}
+
+data "nsxt_upgrade_prepare_ready" "gm_ready" {
+  provider = nsxt.gm_nsxt
+
+  upgrade_prepare_id = nsxt_upgrade_prepare.gm_prepare_res.id
+  depends_on         = [nsxt_upgrade_precheck_acknowledge.gm_precheck_ack]
+}
+
+resource "nsxt_upgrade_run" "gm_run" {
+  provider                 = nsxt.gm_nsxt
+  upgrade_prepare_ready_id = data.nsxt_upgrade_prepare_ready.gm_ready.id
+}
+```
+
 ### Post upgrade checks
 
 Upgrade post check data sources can be used to examine the results of the edge and host upgrades, to conclude if the
