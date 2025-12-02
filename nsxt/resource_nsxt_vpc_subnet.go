@@ -572,6 +572,7 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 }
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
+	fmt.Println("-----> resourceNsxtVpcSubnetRead called with Cache_Enabled ", IsCacheEnabled())
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -583,7 +584,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	var err error
 	cacheUsed := false
 
-	if isRefreshPhase(d) {
+	if isRefreshPhase(d) && IsCacheEnabled() {
 		fmt.Println("---------------------> Refresh Phase of plan/apply")
 		val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
 		if err == nil {

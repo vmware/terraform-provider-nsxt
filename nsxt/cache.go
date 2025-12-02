@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -100,4 +101,11 @@ func (c *cache) getListOfPolicyResources(query string, d *schema.ResourceData, c
 
 func isRefreshPhase(d *schema.ResourceData) bool {
 	return d.Id() != "" && !d.HasChangesExcept()
+}
+
+// SetCacheEnabled allows enabling/disabling cache for benchmarking
+var cacheEnabled = os.Getenv("NSXT_ENABLE_CACHE") == "true"
+
+func IsCacheEnabled() bool {
+	return cacheEnabled
 }
