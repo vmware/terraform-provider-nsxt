@@ -118,7 +118,8 @@ func testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName string, pr
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return testAccNsxtPolicySegmentImportTemplate(tzName, segmentName, withContext) + segmentProfilesDataSourceTemplates(profilesPrefix+"create", "profile1", withContext) + segmentProfilesDataSourceTemplates(profilesPrefix+"update", "profile2", withContext) + fmt.Sprintf(`
+
+	tfConfigTemp := segmentProfilesDataSourceTemplates(profilesPrefix+"create", "profile1", withContext) + segmentProfilesDataSourceTemplates(profilesPrefix+"update", "profile2", withContext) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment_port" "test" {
   %s
@@ -135,6 +136,10 @@ resource "nsxt_policy_segment_port" "test" {
   }
 }
 `, context, segmentPortName, resourceTag, resourceTag, resourceTag, resourceTag)
+	if withContext {
+		return testAccNsxtPolicySegmentNoTransportZoneTemplate(segmentName, "12.12.2.1/24", withContext) + tfConfigTemp
+	}
+	return testAccNsxtPolicySegmentImportTemplate(tzName, segmentName, withContext) + tfConfigTemp
 }
 
 func segmentProfilesDataSourceTemplates(name string, resourceTag string, withContext bool) string {
