@@ -30,7 +30,10 @@ func testAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, segmentName)

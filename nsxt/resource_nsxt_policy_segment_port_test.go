@@ -12,6 +12,7 @@ import (
 func TestAccResourceNsxtPolicySegmentPort_basic(t *testing.T) {
 	testAccResourceNsxtPolicySegmentPort_basic(t, false, func() {
 		testAccPreCheck(t)
+    testAccOnlyLocalManager(t)
 	})
 }
 
@@ -19,6 +20,7 @@ func TestAccResourceNsxtPolicySegmentPort_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicySegmentPort_basic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+    testAccOnlyLocalManager(t)
 	})
 }
 
