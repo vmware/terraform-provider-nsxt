@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -101,6 +102,7 @@ func TestAccResourceNsxtPolicyTransitGateway_withSpan(t *testing.T) {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
 			testAccNSXVersion(t, "9.1.0")
+			testAccEnvDefined(t, "NSXT_TEST_NETWORK_SPAN")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -267,15 +269,14 @@ func testAccNsxtPolicyTransitGatewayWithSpanTemplate(createFlow bool) string {
 		attrMap = accTestTransitGatewayUpdateAttributes
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_network_span" "netspan" {
+data "nsxt_policy_network_span" "netspan" {
   display_name = "%s"
-  exclusive    = true
 }
 
 resource "nsxt_policy_project" "test" {
   display_name = "%s"
   vc_folder = true
-  default_span_path = nsxt_policy_network_span.netspan.path
+  default_span_path = data.nsxt_policy_network_span.netspan.path
 }
 
 resource "nsxt_policy_transit_gateway" "test" {
@@ -289,7 +290,7 @@ resource "nsxt_policy_transit_gateway" "test" {
 
   span {
     cluster_based_span {
-      span_path = nsxt_policy_network_span.netspan.path
+      span_path = data.nsxt_policy_network_span.netspan.path
     }
   }
   tag {
@@ -305,7 +306,7 @@ data "nsxt_policy_transit_gateway" "test" {
 
   display_name = "%s"
   depends_on   = [nsxt_policy_transit_gateway.test]
-}`, staticObjDisplayName, staticObjDisplayName, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], attrMap["display_name"])
+}`, os.Getenv("NSXT_TEST_NETWORK_SPAN"), staticObjDisplayName, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyTransitGatewayMinimalistic() string {

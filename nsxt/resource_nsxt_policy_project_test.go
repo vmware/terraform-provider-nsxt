@@ -7,6 +7,7 @@ package nsxt
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"testing"
 	"text/template"
@@ -422,6 +423,7 @@ func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.0")
+			testAccEnvDefined(t, "NSXT_TEST_NETWORK_SPAN")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -741,10 +743,10 @@ resource "nsxt_policy_project" "test" {
 
 func testAccNsxtPolicyProjectDefaultSpanCheckTemplate(displayName string, isUpdate bool) string {
 	defaultSpan := "span-default"
-	nonDefaultSpan := "span-non-default"
-	spanConstruct := constructSpanForProject("nsxt_policy_network_span.def.path", "nsxt_policy_network_span.nondef.path")
+	nonDefaultSpan := os.Getenv("NSXT_TEST_NETWORK_SPAN")
+	spanConstruct := constructSpanForProject("data.nsxt_policy_network_span.def.path", "data.nsxt_policy_network_span.nondef.path")
 	if isUpdate {
-		spanConstruct = constructSpanForProject("", "nsxt_policy_network_span.def.path")
+		spanConstruct = constructSpanForProject("data.nsxt_policy_network_span.def.path", "")
 	}
 	projectTemplate := fmt.Sprintf(`
 
@@ -759,10 +761,10 @@ resource "nsxt_policy_project" "test" {
 }
 
 func constructSpanForProject(customDefaultSpan, nonDefaultSpan string) string {
-	if customDefaultSpan == "" {
+	if nonDefaultSpan == "" {
 		return fmt.Sprintf(`
-non_default_span_paths = [%s]
-`, nonDefaultSpan)
+default_span_path = %s
+`, customDefaultSpan)
 	} else {
 		return fmt.Sprintf(`
 default_span_path = %s
@@ -773,17 +775,15 @@ non_default_span_paths = [%s]
 
 func testAccNsxtPolicyNetworkSpan(defaultSpan, nonDefaultSpan string) string {
 	return fmt.Sprintf(`
-resource "nsxt_policy_network_span" "def" {
-  display_name = "%s"
-
+data "nsxt_policy_network_span" "def" {
+  is_default = true
 }
 
-resource "nsxt_policy_network_span" "nondef" {
+data "nsxt_policy_network_span" "nondef" {
   display_name = "%s"
-
 }
 
-`, defaultSpan, nonDefaultSpan)
+`, nonDefaultSpan)
 }
 
 func testAccNsxtCheckSpanPath(resourceName string, isSpanNsxDefault bool) resource.TestCheckFunc {
