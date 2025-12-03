@@ -351,6 +351,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_transport_node_realization":            dataSourceNsxtPolicyEdgeTransportNodeRealization(),
 			"nsxt_policy_segment_port":                               dataSourceNsxtPolicySegmentPort(),
 			"nsxt_policy_container_cluster":                          dataSourceNsxtPolicyContainerCluster(),
+			"nsxt_policy_container_clusters":                         dataSourceNsxtPolicyContainerClusters(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
