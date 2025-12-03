@@ -96,6 +96,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -227,6 +228,7 @@ resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
   vlan_id = "%s"
   gateway_addresses = ["192.168.1.1/24"]
+  subnet_extension_connection = "DISABLED"
 }
 
 data "nsxt_policy_distributed_vlan_connection" "test" {
