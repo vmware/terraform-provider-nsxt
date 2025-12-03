@@ -537,6 +537,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_connection":                           resourceNsxtPolicyGatewayConnection(),
 			"nsxt_policy_distributed_vlan_connection":                  resourceNsxtPolicyDistributedVlanConnection(),
 			"nsxt_policy_parent_gateway_policy":                        resourceNsxtPolicyParentGatewayPolicy(),
+			"nsxt_policy_security_policy_container_cluster":            resourceNsxtPolicySecurityPolicyContainerCluster(),
 			"nsxt_vpc":                                   resourceNsxtVpc(),
 			"nsxt_vpc_attachment":                        resourceNsxtVpcAttachment(),
 			"nsxt_vpc_nat_rule":                          resourceNsxtPolicyVpcNatRule(),
