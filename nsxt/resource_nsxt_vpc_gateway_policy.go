@@ -28,7 +28,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 			State: getVpcPathResourceImporter(vpcGatewayPolicyPathExample),
 		},
 
-		Schema: getPolicyGatewayPolicySchema(true),
+		Schema: getPolicyGatewayPolicySchema(true, true),
 	}
 }
 
@@ -41,7 +41,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 
-	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true)
+	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true, true)
 	if err != nil {
 		return handleCreateError("VPC Gateway Policy", id, err)
 	}
@@ -90,7 +90,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
 
-	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true)
+	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true, true)
 	if err != nil {
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
