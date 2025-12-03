@@ -82,14 +82,7 @@ An existing segment port can be [imported][docs-import] into this resource, via 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_segment_port.segmentport1 GW_ID/SEGMENT_ID/ID
-```
-
-The above command imports the segment port named `segmentport1` with the NSX Gateway ID `GW_ID`, Segment ID `SEGMENT_ID` and Port ID `ID`.
-
-```shell
 terraform import nsxt_policy_segment_port.segmentport1 POLICY_PATH
 ```
 
-The above command imports the segment port named `segmentport1` with the policy path `POLICY_PATH`.
-Note: for multitenancy projects only the later form is usable.
+The above command imports the segment port resource named `segmentport1` with the policy path `POLICY_PATH`.
