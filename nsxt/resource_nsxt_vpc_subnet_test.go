@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -107,6 +108,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 
 func TestAccResourceNsxtVpcSubnet910_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
+	vlanExtResourcesname := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -164,6 +166,13 @@ func TestAccResourceNsxtVpcSubnet910_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetVLANExtensionTemplate(vlanExtResourcesname),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "vlan_connection"),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", vlanExtResourcesname+"-vpc-subnet"),
 				),
 			},
 		},
@@ -497,6 +506,45 @@ resource "nsxt_vpc_subnet" "test" {
     tag   = "tag1"
   }
 }`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["access_mode"], dnsPref)
+}
+
+func testAccNsxtVpcSubnetVLANExtensionTemplate(vlanExtResourcesname string) string {
+	template := `
+resource "nsxt_policy_project" "vpc_project" {
+  nsx_id       = "${NAME}-proj"
+  display_name = "${NAME}-proj"
+  description  = "Vlan extension Project"
+  tgw_external_connections = [nsxt_policy_distributed_vlan_connection.test.path]
+}
+
+resource "nsxt_vpc" "test" {
+  context {
+    project_id = nsxt_policy_project.vpc_project.id
+  }
+
+  display_name = "${NAME}-vpc"
+  description  = "Terraform provisioned VPC"
+
+}
+
+resource "nsxt_policy_distributed_vlan_connection" "test" {
+  display_name      = "${NAME}-dvc"
+  vlan_id           = 888
+  subnet_extension_connection = "ENABLED_L2"
+}
+
+resource "nsxt_vpc_subnet" "test" {
+  context {
+    project_id = nsxt_policy_project.vpc_project.id
+    vpc_id = nsxt_vpc.test.id
+  }
+  display_name = "${NAME}-vpc-subnet"
+
+  ip_addresses = ["192.168.240.0/26"]
+  access_mode  = "L2_Only"
+  vlan_connection = nsxt_policy_distributed_vlan_connection.test.path
+}`
+	return strings.ReplaceAll(template, "${NAME}", vlanExtResourcesname)
 }
 
 func testAccNsxtVpcSubnetSizeTemplate(createFlow bool, isNSXGt910 bool) string {

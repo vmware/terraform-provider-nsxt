@@ -21,6 +21,26 @@ resource "nsxt_policy_distributed_vlan_connection" "test" {
 }
 ```
 
+## Example Usage - With VLAN Extension (NSX 9.1.0+)
+
+```hcl
+resource "nsxt_policy_ip_block" "vlan_block" {
+  display_name     = "vlan-extension-block"
+  cidrs            = ["10.66.66.0/24"]
+  visibility       = "EXTERNAL"
+  subnet_exclusive = true
+}
+
+resource "nsxt_policy_distributed_vlan_connection" "test" {
+  display_name                = "test"
+  description                 = "Terraform provisioned Distributed Vlan Connection"
+  gateway_addresses           = ["192.168.2.1/24"]
+  vlan_id                     = 12
+  subnet_extension_connection = "ENABLED_L2"
+  associated_ip_block_paths   = [nsxt_policy_ip_block.vlan_block.path]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -30,11 +50,9 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `vlan_id` - (Required) Vlan id for external gateway traffic.
-* `gateway_addresses` - (Required) List of gateway addresses in CIDR format. Only one gateway IP CIDR is allowed for subnet exclusive configuration.
-* `subnet_exclusive_config` - (Optional) Subnet exclusive config. This attribute is supported with NSX 9.1.0 onwards.
-    * `ip_block_path` - (Required) Policy path of the IP block. This IP block must be marked as reserved for VLAN extension.
-    * `vlan_extension` - Specifies whether VLAN extension and VPC gateway connectivity are enabled for the VPC subnet.
-          * `vpc_gateway_connection_enable` - This configuration controls whether the VLAN extension subnet connects to the VPC gateway.
+* `gateway_addresses` - (Optional) List of gateway addresses in CIDR format. Only one gateway IP CIDR is allowed for subnet exclusive configuration.
+* `subnet_extension_connection` - (Optional) Controls the connectivity mode for VPC Subnets referencing this distributed VLAN connection. This can be one of `DISABLED`, `ENABLED_L2`, or `ENABLED_L2_AND_L3`. Default is `DISABLED`. This attribute is supported with NSX 9.1.0 onwards.
+* `associated_ip_block_paths` - (Optional) List of IP address block(s) that are associated with the distributed vlan connection. This attribute is supported with NSX 9.1.0 onwards.
 
 ## Attributes Reference
 

@@ -28,6 +28,7 @@ var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_PUBLIC,
 	model.VpcSubnet_ACCESS_MODE_ISOLATED,
 	model.VpcSubnet_ACCESS_MODE_PRIVATE_TGW,
+	model.VpcSubnet_ACCESS_MODE_L2_ONLY,
 }
 
 var vpcSubnetConnectivityStateValues = []string{
@@ -208,17 +209,6 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 							ReflectType:  reflect.TypeOf(model.StaticIpAllocation{}),
 						},
 					},
-					"enable_vlan_extension": {
-						Schema: schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							IntroducedInVersion: "9.1.0",
-							SchemaType:          "bool",
-							SdkFieldName:        "EnableVlanExtension",
-						},
-					},
 				},
 			},
 			Optional: true,
@@ -228,6 +218,20 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			SchemaType:   "struct",
 			SdkFieldName: "AdvancedConfig",
 			ReflectType:  reflect.TypeOf(model.SubnetAdvancedConfig{}),
+		},
+	},
+	"vlan_connection": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			ForceNew:     true,
+			ValidateFunc: validatePolicyPath(),
+			Description:  "Distributed VLAN connection path.",
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.1.0",
+			SchemaType:          "string",
+			SdkFieldName:        "VlanConnection",
 		},
 	},
 	"ipv4_subnet_size": {

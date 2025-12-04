@@ -65,7 +65,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				},
 				ConflictsWith: []string{"cidr"},
 			},
-			"is_subnet_exclusive": {
+			"subnet_exclusive": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "If this property is set to true, then this block is reserved for direct vlan extension use case",
@@ -124,7 +124,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		if len(d.Get("cidrs").([]interface{})) > 0 {
 			d.Set("cidrs", block.Cidrs)
 		}
-		d.Set("is_subnet_exclusive", block.IsSubnetExclusive)
+		d.Set("subnet_exclusive", block.IsSubnetExclusive)
 		d.Set("range", setAllocationRangeListInSchema(block.Ranges))
 		d.Set("excluded_ips", setAllocationRangeListInSchema(block.ExcludedIps))
 		if block.Cidr != nil {
@@ -155,7 +155,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
 	cidrs := getStringListFromSchemaList(d, "cidrs")
-	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
+	isSubnetExclusive := d.Get("subnet_exclusive").(bool)
 	ranges := getAllocationRangeListFromSchema(d.Get("range").([]interface{}))
 	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
@@ -210,7 +210,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
 	cidrs := getStringListFromSchemaList(d, "cidrs")
-	isSubnetExclusive := d.Get("is_subnet_exclusive").(bool)
+	isSubnetExclusive := d.Get("subnet_exclusive").(bool)
 	ranges := getAllocationRangeListFromSchema(d.Get("range").([]interface{}))
 	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 

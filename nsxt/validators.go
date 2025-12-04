@@ -373,6 +373,12 @@ func validateSSLProtocols() schema.SchemaValidateFunc {
 	return validation.StringInSlice(supportedSSLProtocols, false)
 }
 
+var supportedSubnetExtensionConnectionValues = []string{"DISABLED", "ENABLED_L2", "ENABLED_L2_AND_L3"}
+
+func validateSubnetExtensionConnection() schema.SchemaValidateFunc {
+	return validation.StringInSlice(supportedSubnetExtensionConnectionValues, false)
+}
+
 func validatePolicySourceDestinationGroups() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)

@@ -96,6 +96,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -137,10 +138,8 @@ func TestAccResourceNsxtPolicyDistributedVlanConnectionWithVlanExtension(t *test
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "subnet_exclusive_config.0.ip_block_path"),
-					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.0.vlan_extension.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "subnet_exclusive_config.0.vlan_extension.0.vpc_gateway_connection_enable", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_extension_connection", "ENABLED_L2_AND_L3"),
+					resource.TestCheckResourceAttrSet(testResourceName, "associated_ip_block_paths.0"),
 				),
 			},
 		},
@@ -229,6 +228,7 @@ resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
   vlan_id = "%s"
   gateway_addresses = ["192.168.1.1/24"]
+  subnet_extension_connection = "DISABLED"
 }
 
 data "nsxt_policy_distributed_vlan_connection" "test" {
@@ -247,7 +247,7 @@ resource "nsxt_policy_ip_block" "big_corp_vlan" {
   display_name        = "%s"
   cidrs               = ["10.66.66.0/24"]
   visibility          = "EXTERNAL"
-  is_subnet_exclusive = true
+  subnet_exclusive = true
 }
 
 resource "nsxt_policy_distributed_vlan_connection" "big_corp_vlan" {
@@ -255,12 +255,8 @@ resource "nsxt_policy_distributed_vlan_connection" "big_corp_vlan" {
   description       = "%s"
   gateway_addresses = ["%s"]
   vlan_id           = %s
-  subnet_exclusive_config {
-    vlan_extension  {
-      vpc_gateway_connection_enable = true
-    }
-    ip_block_path   = nsxt_policy_ip_block.big_corp_vlan.path
-  }
+  subnet_extension_connection = "ENABLED_L2_AND_L3"
+  associated_ip_block_paths = [nsxt_policy_ip_block.big_corp_vlan.path]
 }
 `, attrMap["display_name"], attrMap["display_name"], attrMap["description"], attrMap["gateway_addresses"], attrMap["vlan_id"])
 }
