@@ -206,19 +206,13 @@ func getSegmentPortPathOrIDResourceImporter(d *schema.ResourceData, m interface{
 	var policyPath = d.Id()
 	var segmentPath string
 	policyPathSegs := strings.Split(policyPath, "/")
-
-	if len(policyPathSegs) == 3 {
-		segmentPath = "/infra/tier-1s/" + policyPathSegs[0] + "/segments/" + policyPathSegs[1]
-	} else if len(policyPathSegs) == 2 {
-		segmentPath = "/infra/segments/" + policyPathSegs[0]
-	} else if len(policyPathSegs) > 5 {
-		segmentPath = strings.Join(policyPathSegs[:len(policyPathSegs)-2], "/")
-	} else {
-		return []*schema.ResourceData{}, fmt.Errorf("Invalid policy path")
-	}
-
-	d.SetId(policyPathSegs[len(policyPathSegs)-1])
+	segmentPath = strings.Join(policyPathSegs[:len(policyPathSegs)-2], "/")
 
 	d.Set("segment_path", segmentPath)
-	return []*schema.ResourceData{d}, nil
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err != nil {
+		return nil, err
+	}
+	d.SetId(policyPathSegs[len(policyPathSegs)-1])
+	return rd, nil
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -17,6 +18,7 @@ func dataSourceNsxtPolicySegmentPort() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
+			"context":      getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: false, AllowDefaultProject: false, FromGlobal: true}),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"vif_id": {
