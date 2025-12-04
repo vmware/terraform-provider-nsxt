@@ -20,7 +20,6 @@ func TestAccResourceNsxtPolicySegmentPort_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicySegmentPort_basic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
-		testAccOnlyLocalManager(t)
 	})
 }
 
