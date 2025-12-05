@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -35,7 +35,7 @@ func (c L2VPNServiceClientContext) Delete(tier0IdParam string, localeServiceIdPa
 
 	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		err = client.Delete(tier0IdParam, serviceIdParam)
+		err = client.Delete(tier0IdParam, localeServiceIdParam, serviceIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -51,7 +51,7 @@ func (c L2VPNServiceClientContext) Get(tier0IdParam string, localeServiceIdParam
 
 	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.Get(tier0IdParam, serviceIdParam)
+		obj, err = client.Get(tier0IdParam, localeServiceIdParam, serviceIdParam)
 		if err != nil {
 			return obj, err
 		}
@@ -70,7 +70,7 @@ func (c L2VPNServiceClientContext) List(tier0IdParam string, localeServiceIdPara
 
 	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -85,7 +85,7 @@ func (c L2VPNServiceClientContext) Patch(tier0IdParam string, localeServiceIdPar
 
 	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		err = client.Patch(tier0IdParam, serviceIdParam, l2VPNServiceParam)
+		err = client.Patch(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -101,7 +101,7 @@ func (c L2VPNServiceClientContext) Update(tier0IdParam string, localeServiceIdPa
 
 	case utl.Local:
 		client := c.Client.(client2.L2vpnServicesClient)
-		obj, err = client.Update(tier0IdParam, serviceIdParam, l2VPNServiceParam)
+		obj, err = client.Update(tier0IdParam, localeServiceIdParam, serviceIdParam, l2VPNServiceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
