@@ -11,11 +11,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -198,7 +198,7 @@ func resourceNsxtPolicyTransitGateway() *schema.Resource {
 func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewTransitGatewaysClient(connector)
+	client := projects.NewTransitGatewaysClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -286,7 +286,8 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	log.Printf("[INFO] Creating TransitGateway with ID %s", id)
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := projects.NewTransitGatewaysClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("TransitGateway", id, err)
@@ -305,8 +306,9 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining TransitGateway ID")
 	}
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "TransitGateway", id, err)
@@ -407,7 +409,8 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := projects.NewTransitGatewaysClient(sessionContext, connector)
 	_, err = client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleUpdateError("TransitGateway", id, err)
@@ -423,9 +426,10 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
+	client := projects.NewTransitGatewaysClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id)
 
 	if err != nil {

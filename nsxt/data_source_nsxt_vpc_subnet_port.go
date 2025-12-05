@@ -10,10 +10,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/subnets"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func dataSourceNsxtVpcSubnetPort() *schema.Resource {
@@ -42,7 +44,7 @@ func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 
 var vpcSubnetPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]"
 
-func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.VpcSubnetPort, error) {
+func listVpcSubnetPorts(sessionContext utl.SessionContext, connector client.Connector, subnetPath string) ([]model.VpcSubnetPort, error) {
 
 	var results []model.VpcSubnetPort
 	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4, vpcSubnetPathExample)
@@ -56,7 +58,7 @@ func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.
 	var ports model.VpcSubnetPortListResult
 
 	for {
-		portClient := subnets.NewPortsClient(connector)
+		portClient := subnets.NewPortsClient(sessionContext, connector)
 		if portClient == nil {
 			return results, policyResourceNotSupportedError()
 		}
@@ -91,7 +93,8 @@ func dataSourceNsxtVpcSubnetPortRead(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("failed to list port attachments for VM id %s", externalID)
 	}
 
-	ports, portsErr := listVpcSubnetPorts(connector, subnetPath)
+	sessionContext := getSessionContext(d, m)
+	ports, portsErr := listVpcSubnetPorts(sessionContext, connector, subnetPath)
 	if portsErr != nil {
 		return portsErr
 	}
