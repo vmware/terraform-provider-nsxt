@@ -10,12 +10,11 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/search"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
-	lm_search "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -171,9 +170,9 @@ func searchByContext(connector client.Connector, context utl.SessionContext, que
 	isGlobal := context.FromGlobal
 	switch context.ClientType {
 	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
+		return searchLMPolicyResources(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery), isGlobal)
 	case utl.Global:
-		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+		return searchGMPolicyResources(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Multitenancy, utl.VPC:
 		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
@@ -193,12 +192,12 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 
 func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND display_name:%s*", resourceType, escapeSpecialCharacters(displayName))
-	return searchLM(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	return searchLM(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
 func listInventoryResourcesByAnyFieldAndType(connector client.Connector, context utl.SessionContext, anyField string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND %s", resourceType, escapeSpecialCharacters(anyField))
-	return searchLM(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	return searchLM(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
 func escapeSpecialCharacters(str string) string {
@@ -232,8 +231,8 @@ func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 	return query
 }
 
-func searchGMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
-	client := search.NewQueryClient(connector)
+func searchGMPolicyResources(context utl.SessionContext, connector client.Connector, query string) ([]*data.StructValue, error) {
+	client := search.NewQueryClient(context, connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
@@ -258,8 +257,8 @@ func searchGMPolicyResources(connector client.Connector, query string) ([]*data.
 	}
 }
 
-func searchLM(connector client.Connector, query string) ([]*data.StructValue, error) {
-	client := lm_search.NewQueryClient(connector)
+func searchLM(context utl.SessionContext, connector client.Connector, query string) ([]*data.StructValue, error) {
+	client := search.NewQueryClient(context, connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
@@ -281,14 +280,14 @@ func searchLM(connector client.Connector, query string) ([]*data.StructValue, er
 	}
 }
 
-func searchLMPolicyResources(connector client.Connector, query string, isGlobal bool) ([]*data.StructValue, error) {
+func searchLMPolicyResources(context utl.SessionContext, connector client.Connector, query string, isGlobal bool) ([]*data.StructValue, error) {
 	// Make sure global objects are not found (path needs to start with infra)
 	if isGlobal {
 		query = query + " AND path:\\/global-infra*"
 	} else {
 		query = query + " AND path:\\/infra*"
 	}
-	return searchLM(connector, query)
+	return searchLM(context, connector, query)
 }
 
 func searchMultitenancyResources(connector client.Connector, context utl.SessionContext, query string) ([]*data.StructValue, error) {
@@ -297,5 +296,5 @@ func searchMultitenancyResources(connector client.Connector, context utl.Session
 	} else {
 		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", utl.DefaultOrgID, context.ProjectID)
 	}
-	return searchLM(connector, query)
+	return searchLM(context, connector, query)
 }
