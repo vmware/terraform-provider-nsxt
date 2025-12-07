@@ -1,6 +1,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -8,6 +9,19 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentPort_basic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccDataSourceNsxtPolicySegmentPort_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentPort_basic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, preCheck func()) {
 	segmentName := getAccTestResourceName()
 	segmentPortName := getAccTestResourceName()
 	profilesPrefix := getAccTestResourceName()
@@ -16,14 +30,14 @@ func TestAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, segmentName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag),
+				Config: testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -33,11 +47,16 @@ func TestAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag string) string {
-	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag) + `
+func testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext) + fmt.Sprintf(`
 
 data "nsxt_policy_segment_port" "segmentport1" {
+	%s
 	display_name = nsxt_policy_segment_port.test.display_name
 }
-`
+`, context)
 }
