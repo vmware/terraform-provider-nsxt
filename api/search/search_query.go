@@ -21,14 +21,11 @@ func NewQueryClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 
 	switch sessionContext.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy, utl.VPC:
 		client = client0.NewQueryClient(connector)
 
 	case utl.Global:
 		client = client1.NewQueryClient(connector)
-
-	case utl.Multitenancy:
-		client = client0.NewQueryClient(connector)
 
 	default:
 		return nil
@@ -42,7 +39,7 @@ func (c SearchQueryClientContext) List(queryParam string, cursorParam *string, i
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy, utl.VPC:
 		client := c.Client.(client0.QueryClient)
 		obj, err = client.List(queryParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -57,10 +54,6 @@ func (c SearchQueryClientContext) List(queryParam string, cursorParam *string, i
 			return obj, err1
 		}
 		obj = obj1.(model0.SearchResponse)
-
-	case utl.Multitenancy:
-		client := c.Client.(client0.QueryClient)
-		obj, err = client.List(queryParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
