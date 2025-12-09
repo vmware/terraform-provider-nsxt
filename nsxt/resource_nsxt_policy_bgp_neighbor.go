@@ -30,6 +30,10 @@ var bgpNeighborConfigRouteFilteringAddressFamilyValues = []string{
 	model.BgpRouteFiltering_ADDRESS_FAMILY_IPV6,
 	model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN,
 }
+var bgpNeighborLocalAsConfigAsPathModifierTypeValues = []string{
+	"NO_PREPEND",
+	"NO_PREPEND_REPLACE_AS",
+}
 
 func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 	return &schema.Resource{
@@ -183,6 +187,28 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 					},
 				},
 			},
+			"neighbor_local_as_config": {
+				Type:        schema.TypeList,
+				Description: "BGP neighbor local-as configuration",
+				Optional:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"as_path_modifier_type": {
+							Type:         schema.TypeString,
+							Description:  "AS_PATH modifier type for BGP local AS",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice(bgpNeighborLocalAsConfigAsPathModifierTypeValues, false),
+						},
+						"local_as_num": {
+							Type:         schema.TypeString,
+							Description:  "BGP neighbor local-as number in ASPLAIN/ASDOT Format",
+							Required:     true,
+							ValidateFunc: validateASPlainOrDot,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -282,21 +308,37 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 		rFilters = append(rFilters, filterStruct)
 	}
 
+	var neighborLocalAsConfig *model.BgpNeighborLocalAsConfig
+	for _, localAsConfig := range d.Get("neighbor_local_as_config").([]interface{}) {
+		data := localAsConfig.(map[string]interface{})
+		localAsNum := data["local_as_num"].(string)
+
+		neighborLocalAsConfig = &model.BgpNeighborLocalAsConfig{
+			LocalAsNum: &localAsNum,
+		}
+
+		if asPathModifierType, ok := data["as_path_modifier_type"].(string); ok && asPathModifierType != "" {
+			neighborLocalAsConfig.AsPathModifierType = &asPathModifierType
+		}
+		break
+	}
+
 	neighborStruct = model.BgpNeighborConfig{
-		DisplayName:         &displayName,
-		Description:         &description,
-		Tags:                tags,
-		AllowAsIn:           &allowAsIn,
-		Bfd:                 bfdConfig,
-		GracefulRestartMode: &gracefulRestartMode,
-		HoldDownTime:        &holdDownTime,
-		KeepAliveTime:       &keepAliveTime,
-		MaximumHopLimit:     &maximumHopLimit,
-		NeighborAddress:     &neighborAddress,
-		RemoteAsNum:         &remoteAsNum,
-		RouteFiltering:      rFilters,
-		SourceAddresses:     sourceAddresses,
-		Id:                  &id,
+		DisplayName:           &displayName,
+		Description:           &description,
+		Tags:                  tags,
+		AllowAsIn:             &allowAsIn,
+		Bfd:                   bfdConfig,
+		GracefulRestartMode:   &gracefulRestartMode,
+		HoldDownTime:          &holdDownTime,
+		KeepAliveTime:         &keepAliveTime,
+		MaximumHopLimit:       &maximumHopLimit,
+		NeighborAddress:       &neighborAddress,
+		RemoteAsNum:           &remoteAsNum,
+		RouteFiltering:        rFilters,
+		SourceAddresses:       sourceAddresses,
+		NeighborLocalAsConfig: neighborLocalAsConfig,
+		Id:                    &id,
 	}
 
 	if d.HasChange("password") {
@@ -457,6 +499,19 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 		rFilters = append(rFilters, rf)
 	}
 	d.Set("route_filtering", rFilters)
+
+	var neighborLocalAsConfigs []interface{}
+	if obj.NeighborLocalAsConfig != nil {
+		localAsConfig := make(map[string]interface{})
+		if obj.NeighborLocalAsConfig.LocalAsNum != nil {
+			localAsConfig["local_as_num"] = *obj.NeighborLocalAsConfig.LocalAsNum
+		}
+		if obj.NeighborLocalAsConfig.AsPathModifierType != nil {
+			localAsConfig["as_path_modifier_type"] = *obj.NeighborLocalAsConfig.AsPathModifierType
+		}
+		neighborLocalAsConfigs = append(neighborLocalAsConfigs, localAsConfig)
+	}
+	d.Set("neighbor_local_as_config", neighborLocalAsConfigs)
 
 	return nil
 }
