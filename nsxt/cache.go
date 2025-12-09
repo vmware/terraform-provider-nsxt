@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	api "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -60,7 +61,14 @@ func (c *cache) getQueryResult(query string, displayName string) *data.StructVal
 	return nil
 }
 
+func trackTime(start time.Time, name string) {
+	elapsed := time.Since(start).Seconds()
+	fmt.Printf("-------------------------------------------> %s  took %v \n", name, elapsed)
+}
+
 func (c *cache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
+	start := time.Now()
+	defer trackTime(start, fmt.Sprint("Time taken to populate the cache "))
 	c.cacheMis += 1
 	fmt.Println("cacheMis ", c.cacheMis)
 	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType)

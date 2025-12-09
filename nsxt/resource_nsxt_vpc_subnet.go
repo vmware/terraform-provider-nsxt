@@ -570,9 +570,15 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 
 	return nil
 }
+func TrackTime(start time.Time, name string) {
+	elapsed := time.Since(start).Seconds()
+	fmt.Printf("-------------------------------------------> %s  took %v \n", name, elapsed)
+}
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
-	fmt.Println("-----> resourceNsxtVpcSubnetRead called with Cache_Enabled ", IsCacheEnabled())
+	start := time.Now()
+	defer TrackTime(start, fmt.Sprintf("Read with cache %v", IsCacheEnabled()))
+
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -585,6 +591,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	cacheUsed := false
 
 	if isRefreshPhase(d) && IsCacheEnabled() {
+		roundTripStart := time.Now()
 		fmt.Println("---------------------> Refresh Phase of plan/apply")
 		val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
 		if err == nil {
@@ -598,8 +605,11 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		} else {
 			cacheUsed = false
 		}
+		TrackTime(roundTripStart, fmt.Sprint("API cache roundtrip time taken "))
 	}
+
 	if !cacheUsed {
+		tripTime := time.Now()
 		fmt.Println("--------> Using the backend API, regular flow")
 		client := clientLayer.NewSubnetsClient(connector)
 		parents := getVpcParentsFromContext(getSessionContext(d, m))
@@ -607,6 +617,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return handleReadError(d, "VpcSubnet", id, err)
 		}
+		TrackTime(tripTime, fmt.Sprint("API without cache roundtrip time taken "))
 	}
 
 	setPolicyTagsInSchema(d, obj.Tags)
