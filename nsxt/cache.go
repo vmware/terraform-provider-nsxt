@@ -33,7 +33,7 @@ func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 			return nil
 		}
 		resource := dataValue.(model.PolicyConfigResource)
-		if resource.DisplayName != nil {
+		if resource.DisplayName != nil { //TBD: DisplayName will be changed to ID
 			ret[*resource.DisplayName] = obj
 		}
 	}
