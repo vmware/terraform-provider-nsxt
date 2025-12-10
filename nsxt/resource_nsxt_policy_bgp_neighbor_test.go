@@ -23,6 +23,8 @@ var accTestPolicyBgpNeighborConfigCreateAttributes = map[string]string{
 	"neighbor_address":      "12.12.12.12",
 	"password":              "test-create",
 	"remote_as_num":         "12000012",
+	"local_as_num":          "65001",
+	"as_path_modifier_type": "NO_PREPEND",
 }
 
 var accTestPolicyBgpNeighborConfigUpdateAttributes = map[string]string{
@@ -36,6 +38,8 @@ var accTestPolicyBgpNeighborConfigUpdateAttributes = map[string]string{
 	"neighbor_address":      "12.12.12.13",
 	"password":              "test-update",
 	"remote_as_num":         "12.013",
+	"local_as_num":          "65002",
+	"as_path_modifier_type": "NO_PREPEND_REPLACE_AS",
 }
 
 func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
@@ -66,6 +70,9 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.0", sourceAddress),
 					resource.TestCheckResourceAttr(testResourceName, "bfd_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.local_as_num", accTestPolicyBgpNeighborConfigCreateAttributes["local_as_num"]),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.as_path_modifier_type", accTestPolicyBgpNeighborConfigCreateAttributes["as_path_modifier_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "password"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -90,6 +97,9 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.0", sourceAddress),
 					resource.TestCheckResourceAttr(testResourceName, "bfd_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.local_as_num", accTestPolicyBgpNeighborConfigUpdateAttributes["local_as_num"]),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.as_path_modifier_type", accTestPolicyBgpNeighborConfigUpdateAttributes["as_path_modifier_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "password"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -129,6 +139,9 @@ func TestAccResourceNsxtPolicyBgpNeighbor_globalManager(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.0", sourceAddress),
 					resource.TestCheckResourceAttr(testResourceName, "bfd_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.local_as_num", accTestPolicyBgpNeighborConfigCreateAttributes["local_as_num"]),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.as_path_modifier_type", accTestPolicyBgpNeighborConfigCreateAttributes["as_path_modifier_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "password"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -153,6 +166,9 @@ func TestAccResourceNsxtPolicyBgpNeighbor_globalManager(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "source_addresses.0", sourceAddress),
 					resource.TestCheckResourceAttr(testResourceName, "bfd_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.local_as_num", accTestPolicyBgpNeighborConfigUpdateAttributes["local_as_num"]),
+					resource.TestCheckResourceAttr(testResourceName, "neighbor_local_as_config.0.as_path_modifier_type", accTestPolicyBgpNeighborConfigUpdateAttributes["as_path_modifier_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "password"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -479,11 +495,16 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   password              = "%s"
   source_addresses      = nsxt_policy_tier0_gateway_interface.test.ip_addresses
 
+  neighbor_local_as_config {
+    local_as_num          = "%s"
+    as_path_modifier_type = "%s"
+  }
+
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, getEdgeClusterName(), getVlanTransportZoneName(), subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"])
+}`, getEdgeClusterName(), getVlanTransportZoneName(), subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"], attrMap["local_as_num"], attrMap["as_path_modifier_type"])
 }
 
 func testAccNsxtPolicyBgpNeighborMinimalistic() string {
@@ -752,11 +773,16 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   password              = "%s"
   source_addresses      = nsxt_policy_tier0_gateway_interface.test.ip_addresses
 
+  neighbor_local_as_config {
+    local_as_num          = "%s"
+    as_path_modifier_type = "%s"
+  }
+
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"])
+}`, subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"], attrMap["local_as_num"], attrMap["as_path_modifier_type"])
 }
 
 func testAccNsxtPolicyBgpNeighborGMImportTemplate() string {
