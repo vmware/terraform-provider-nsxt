@@ -1,0 +1,139 @@
+terraform {
+  required_providers {
+    nsxt = {
+      source  = "vmware/nsxtlocal"
+      version = ">=9.0.0"
+    }
+  }
+}
+
+provider "nsxt" {
+  host                 = "10.70.189.86"
+  username             = "admin"
+  password             = "H3_Ggk.-jrPSAaBR"
+  allow_unverified_ssl = true
+  max_retries          = 2
+}
+
+data "nsxt_policy_tier0_gateway" "main_tier0" {
+  id = "pepsi"
+}
+
+resource "nsxt_policy_project" "dev_project" {
+  display_name = "dev-project"
+  description  = "Development"
+  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.main_tier0.path]
+}
+
+variable "vpc_count" {
+  type    = number
+  default = 1
+}
+
+variable "subnet_count" {
+  type    = number
+  default = 10
+}
+
+variable "vpc_prefix" {
+  type        = string
+  default     = "vpc"
+  description = "Prefix for all VPC names"
+}
+
+
+variable "base_cidr" {
+  type    = string
+  #default = "192.168.0.0/16"
+  default = "10.0.0.0/8"
+}
+
+locals {
+  # number of bits to split VPCs
+  vpc_bits = 10 # 2^10 = 1024 > 1000
+
+  # number of bits to split subnets
+  subnet_bits = 10 # 2^10 = 1024 > 1000
+    
+  vpc_list = [
+    for i in range(var.vpc_count) :
+    {
+      name       = "${var.vpc_prefix}-${i}"
+      #cidr_block = cidrsubnet(var.base_cidr, 8, i)
+      cidr_block = cidrsubnet(var.base_cidr, local.vpc_bits, i)
+    }
+  ]
+
+  subnet_list = [
+    for vpc in local.vpc_list :
+    [
+      for j in range(var.subnet_count) :
+      {
+        vpc_name     = vpc.name
+        subnet_name  = "${vpc.name}-subnet-${j}"
+        cidr_block   = cidrsubnet(vpc.cidr_block, local.subnet_bits, j)
+        subnet_size  = 16
+       # cidr_block   = cidrsubnet(vpc.cidr_block, 8, j)
+      #  subnet_size  = 32
+        access_mode  = "Private"
+      }
+    ]
+  ]
+}
+
+locals {
+  all_subnets = flatten(local.subnet_list)
+}
+
+resource "nsxt_vpc" "dev_vpc" {
+for_each = {
+    for v in local.vpc_list :
+    v.name => v
+  }
+
+  context {
+    project_id = nsxt_policy_project.dev_project.id
+  }
+  display_name = each.value.name
+  description  = "VPC for applications"
+  private_ips  = [each.value.cidr_block]
+
+  depends_on = [
+    nsxt_policy_project.dev_project
+  ]
+}
+
+
+# VPC Subnets using VPC's private IP space
+resource "nsxt_vpc_subnet" "dev_private" {
+  for_each = {
+    for s in local.all_subnets :
+    s.subnet_name => s
+  }
+
+  context {
+    project_id = nsxt_policy_project.dev_project.id
+    vpc_id     = nsxt_vpc.dev_vpc[each.value.vpc_name].id
+  }
+
+  display_name     = each.value.subnet_name
+  description      = "dev VPC subnet"
+  ipv4_subnet_size = each.value.subnet_size
+  access_mode      = each.value.access_mode
+}
+
+output "vpc_ids" {
+  description = "Map of all VPC names to their IDs"
+  value = {
+    for k, v in nsxt_vpc.dev_vpc :
+    k => v.id
+  }
+}
+
+output "subnet_ids" {
+  description = "Map of all subnet names to their IDs"
+  value = {
+    for k, s in nsxt_vpc_subnet.dev_private :
+    k => s.id
+  }
+}
