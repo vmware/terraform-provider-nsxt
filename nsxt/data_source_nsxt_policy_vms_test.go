@@ -32,7 +32,7 @@ func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preChec
 	testResourceName := "data.nsxt_policy_vms.test"
 	checkDataSourceName := "data.nsxt_policy_vm.check"
 	checkResourceName := "nsxt_policy_group.check"
-
+	re, _ := regexp.Compile(`^.*$`)
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
@@ -42,6 +42,7 @@ func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preChec
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "bios_id"),
+					resource.TestMatchOutput("vm_vif_id", re),
 				),
 			},
 			{
@@ -49,6 +50,7 @@ func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preChec
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "external_id"),
+					resource.TestMatchOutput("vm_vif_id", re),
 				),
 			},
 			{
@@ -56,6 +58,7 @@ func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preChec
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "instance_id"),
+					resource.TestMatchOutput("vm_vif_id", re),
 				),
 			},
 		},
@@ -112,7 +115,12 @@ data "nsxt_policy_vm" "check" {
 resource "nsxt_policy_group" "check" {
 %s
   display_name = data.nsxt_policy_vms.test.items["%s"]
-}`, context, valueType, context, getTestVMName(), context, getTestVMName())
+}
+
+output "vm_vif_id" {
+  value = data.nsxt_policy_vm.check.vif_ids[0]
+}
+`, context, valueType, context, getTestVMName(), context, getTestVMName())
 }
 
 func testAccNsxtPolicyVMsTemplateFilter() string {

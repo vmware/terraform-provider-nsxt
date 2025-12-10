@@ -16,6 +16,7 @@ import (
 
 var defaultDomain = "default"
 var defaultSite = "default"
+var defaultEnforcementPoint = "default"
 var securityPolicyCategoryValues = []string{"Ethernet", "Emergency", "Infrastructure", "Environment", "Application"}
 var securityPolicyDirectionValues = []string{model.Rule_DIRECTION_IN, model.Rule_DIRECTION_OUT, model.Rule_DIRECTION_IN_OUT}
 var securityPolicyIPProtocolValues = []string{"NONE", model.Rule_IP_PROTOCOL_IPV4, model.Rule_IP_PROTOCOL_IPV6, model.Rule_IP_PROTOCOL_IPV4_IPV6}
@@ -331,15 +332,19 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 	return ruleSchema
 }
 
-func getPolicyGatewayPolicySchema(isVPC bool) map[string]*schema.Schema {
-	secPolicy := getPolicySecurityPolicySchema(false, true, true, isVPC)
+func getPolicyGatewayPolicySchema(isVPC bool, withRule bool) map[string]*schema.Schema {
+	secPolicy := getPolicySecurityPolicySchema(false, true, withRule, isVPC)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
 	if !isVPC {
 		secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryWritableValues, false)
 	}
-	// GW Policy rules require scope to be set
-	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(!isVPC, false, true)
+	if withRule {
+		// GW Policy rules require scope to be set
+		secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(!isVPC, false, true)
+	} else {
+		delete(secPolicy, "rule")
+	}
 	return secPolicy
 }
 

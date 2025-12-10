@@ -40,7 +40,6 @@ const edgeClusterDefaultName string = "EDGECLUSTER1"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
-const defaultEnforcementPoint string = "default"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
 const defaultTestResourceName string = "terraform-acctest"
@@ -346,7 +345,7 @@ func testAccOnlyMultitenancy(t *testing.T) {
 }
 
 func testAccOnlyVPC(t *testing.T) {
-	testAccNSXVersion(t, "4.1.2")
+	testAccNSXVersion(t, "9.0.0")
 	if !testAccIsVPC() {
 		t.Skipf("This test requires a VPC environment")
 	}

@@ -1,8 +1,13 @@
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
+
 package nsxt
 
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	gatewaypolicies "github.com/vmware/terraform-provider-nsxt/api/infra/domains/gateway_policies"
@@ -17,7 +22,7 @@ func resourceNsxtPolicyGatewayRulePolicy() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayPolicyRuleUpdate,
 		Delete: resourceNsxtPolicyGatewayPolicyRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtDomainResourceImporter,
+			State: nsxtGatewayPolicyRuleImporter,
 		},
 
 		Schema: getSecurityPolicyAndGatewayRuleSchema(false, false, false, true),
@@ -32,29 +37,30 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 	projectID := getProjectIDFromResourcePath(policyPath)
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
-	d.Set("nsx_id", ruleName)
-	_, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d, m, policyPath))
+
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d, m, policyPath))
 	if err != nil {
 		return err
 	}
 
+	d.Set("nsx_id", id)
 	if err := setSecurityOrGatewayPolicyRuleContext(d, projectID); err != nil {
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	log.Printf("[INFO] Creating Gateway Policy Rule with ID %s under policy %s", ruleName, policyPath)
+	log.Printf("[INFO] Creating Gateway Policy Rule with ID %s under policy %s", id, policyPath)
 	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
-	rule := securityAndGatewayPolicyRuleSchemaToModel(d, ruleName)
-	err = client.Patch(domain, policyID, ruleName, rule)
+	rule := securityAndGatewayPolicyRuleSchemaToModel(d, id)
+	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	d.SetId(ruleName)
+	d.SetId(id)
 
 	return resourceNsxtPolicyGatewayPolicyRuleRead(d, m)
 }
@@ -161,4 +167,18 @@ func resourceNsxtPolicyGatewayPolicyRuleDelete(d *schema.ResourceData, m interfa
 		return policyResourceNotSupportedError()
 	}
 	return client.Delete(domain, policyID, id)
+}
+
+func nsxtGatewayPolicyRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err != nil {
+		return rd, err
+	}
+	ruleIdx := strings.Index(importID, "rule")
+	if ruleIdx <= 0 {
+		return nil, fmt.Errorf("invalid path of Security Policy Rule to import")
+	}
+	d.Set("policy_path", importID[:ruleIdx-1])
+	return []*schema.ResourceData{d}, nil
 }

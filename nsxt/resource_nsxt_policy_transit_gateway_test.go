@@ -6,11 +6,16 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var staticObjDisplayName = getAccTestResourceName()
 
 var accTestTransitGatewayCreateAttributes = map[string]string{
 	"display_name":    getAccTestResourceName(),
@@ -97,6 +102,7 @@ func TestAccResourceNsxtPolicyTransitGateway_withSpan(t *testing.T) {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
 			testAccNSXVersion(t, "9.1.0")
+			testAccEnvDefined(t, "NSXT_TEST_NETWORK_SPAN")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -192,7 +198,8 @@ func testAccNsxtPolicyTransitGatewayExists(displayName string, resourceName stri
 			return fmt.Errorf("Policy TransitGateway resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionProjectContext(), resourceID, connector)
+		projectID := strings.Split(rs.Primary.Attributes["path"], "/")[4]
+		exists, err := resourceNsxtPolicyTransitGatewayExists(tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -213,7 +220,8 @@ func testAccNsxtPolicyTransitGatewayCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionProjectContext(), resourceID, connector)
+		projectID := strings.Split(rs.Primary.Attributes["path"], "/")[4]
+		exists, err := resourceNsxtPolicyTransitGatewayExists(tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}, resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -261,20 +269,28 @@ func testAccNsxtPolicyTransitGatewayWithSpanTemplate(createFlow bool) string {
 		attrMap = accTestTransitGatewayUpdateAttributes
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_network_span" "netspan" {
-  display_name = "test_span"
-  exclusive    = true
+data "nsxt_policy_network_span" "netspan" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_project" "test" {
+  display_name = "%s"
+  vc_folder = true
+  default_span_path = data.nsxt_policy_network_span.netspan.path
 }
 
 resource "nsxt_policy_transit_gateway" "test" {
-%s
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
   display_name    = "%s"
   description     = "%s"
   transit_subnets = ["%s"]
 
   span {
     cluster_based_span {
-      span_path = nsxt_policy_network_span.netspan.path
+      span_path = data.nsxt_policy_network_span.netspan.path
     }
   }
   tag {
@@ -284,11 +300,13 @@ resource "nsxt_policy_transit_gateway" "test" {
 }
 
 data "nsxt_policy_transit_gateway" "test" {
-%s
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
   display_name = "%s"
   depends_on   = [nsxt_policy_transit_gateway.test]
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
-		testAccNsxtProjectContext(), attrMap["display_name"])
+}`, os.Getenv("NSXT_TEST_NETWORK_SPAN"), staticObjDisplayName, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyTransitGatewayMinimalistic() string {
