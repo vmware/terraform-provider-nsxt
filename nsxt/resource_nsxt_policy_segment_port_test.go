@@ -76,6 +76,7 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 func TestAccResourceNsxtPolicySegmentPort_importBasic(t *testing.T) {
 	testAccResourceNsxtPolicySegmentPort_importBasic(t, false, func() {
 		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
 	})
 }
 

@@ -11,6 +11,7 @@ import (
 func TestAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicySegmentPort_basic(t, false, func() {
 		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
 	})
 }
 
