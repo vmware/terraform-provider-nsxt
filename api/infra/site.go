@@ -52,28 +52,28 @@ func (c SiteClientContext) Delete(siteIdParam string, forceParam *bool) error {
 	return err
 }
 
-func (c SiteClientContext) Get(siteIdParam string) (model0.Site, error) {
-	var obj model0.Site
+func (c SiteClientContext) Get(siteIdParam string) (model1.Site, error) {
+	var obj model1.Site
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		obj, err = client.Get(siteIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.Global:
-		client := c.Client.(client1.SitesClient)
-		gmObj, err1 := client.Get(siteIdParam)
+		lmObj, err1 := client.Get(siteIdParam)
 		if err1 != nil {
 			return obj, err1
 		}
 		var rawObj interface{}
-		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SiteBindingType(), model0.SiteBindingType())
-		obj = rawObj.(model0.Site)
+		rawObj, err = utl.ConvertModelBindingType(lmObj, model0.SiteBindingType(), model1.SiteBindingType())
+		obj = rawObj.(model1.Site)
+
+	case utl.Global:
+		client := c.Client.(client1.SitesClient)
+		obj, err = client.Get(siteIdParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -81,27 +81,27 @@ func (c SiteClientContext) Get(siteIdParam string) (model0.Site, error) {
 	return obj, err
 }
 
-func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.SiteListResult, error) {
+func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model1.SiteListResult, error) {
 	var err error
-	var obj model0.SiteListResult
+	var obj model1.SiteListResult
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.Global:
-		client := c.Client.(client1.SitesClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		lmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.SiteListResultBindingType(), model0.SiteListResultBindingType())
+		obj1, err1 := utl.ConvertModelBindingType(lmObj, model0.SiteListResultBindingType(), model1.SiteListResultBindingType())
 		if err1 != nil {
 			return obj, err1
 		}
-		obj = obj1.(model0.SiteListResult)
+		obj = obj1.(model1.SiteListResult)
+
+	case utl.Global:
+		client := c.Client.(client1.SitesClient)
+		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -109,22 +109,23 @@ func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjects
 	return obj, err
 }
 
-func (c SiteClientContext) Patch(siteIdParam string, siteParam model0.Site) error {
+func (c SiteClientContext) Patch(siteIdParam string, siteParam model1.Site) error {
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		err = client.Patch(siteIdParam, siteParam)
-
-	case utl.Global:
-		client := c.Client.(client1.SitesClient)
-		gmObj, err1 := utl.ConvertModelBindingType(siteParam, model0.SiteBindingType(), model1.SiteBindingType())
+		lmObj, err1 := utl.ConvertModelBindingType(siteParam, model1.SiteBindingType(), model0.SiteBindingType())
 		if err1 != nil {
 			return err1
 		}
-		err = client.Patch(siteIdParam, gmObj.(model1.Site))
+		// err = client.Patch(siteIdParam, gmObj.(model1.Site))
+		err = client.Patch(siteIdParam, lmObj.(model0.Site))
+
+	case utl.Global:
+		client := c.Client.(client1.SitesClient)
+		err = client.Patch(siteIdParam, siteParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -132,31 +133,35 @@ func (c SiteClientContext) Patch(siteIdParam string, siteParam model0.Site) erro
 	return err
 }
 
-func (c SiteClientContext) Update(siteIdParam string, siteParam model0.Site) (model0.Site, error) {
+func (c SiteClientContext) Update(siteIdParam string, siteParam model1.Site) (model1.Site, error) {
 	var err error
-	var obj model0.Site
+	var obj model1.Site
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		obj, err = client.Update(siteIdParam, siteParam)
-
-	case utl.Global:
-		client := c.Client.(client1.SitesClient)
-		gmObj, err := utl.ConvertModelBindingType(siteParam, model0.SiteBindingType(), model1.SiteBindingType())
-		if err != nil {
-			return obj, err
-		}
-		gmObj, err = client.Update(siteIdParam, gmObj.(model1.Site))
-		if err != nil {
-			return obj, err
-		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.SiteBindingType(), model0.SiteBindingType())
+		lmobj, err1 := utl.ConvertModelBindingType(siteParam, model1.SiteBindingType(), model0.SiteBindingType())
 		if err1 != nil {
 			return obj, err1
 		}
-		obj = obj1.(model0.Site)
+
+		lmobj, err = client.Update(siteIdParam, lmobj.(model0.Site))
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(lmobj, model0.SiteBindingType(), model1.SiteBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(model1.Site)
+
+	case utl.Global:
+		client := c.Client.(client1.SitesClient)
+		obj, err = client.Update(siteIdParam, siteParam)
+		if err != nil {
+			return obj, err
+		}
 
 	default:
 		err = errors.New("invalid infrastructure for model")

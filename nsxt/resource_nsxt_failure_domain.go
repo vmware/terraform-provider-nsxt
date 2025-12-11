@@ -10,8 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
+	"github.com/vmware/terraform-provider-nsxt/api/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var edgeServices = []string{
@@ -54,7 +56,8 @@ func resourceNsxtFailureDomainRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("error obtaining FailureDomain ID")
 	}
 
-	client := nsx.NewFailureDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewFailureDomainsClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "FailureDomain", id, err)
@@ -104,7 +107,8 @@ func failureDomainSchemaToModel(d *schema.ResourceData) model.FailureDomain {
 
 func resourceNsxtFailureDomainCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewFailureDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewFailureDomainsClient(sessionContext, connector)
 
 	failureDomain := failureDomainSchemaToModel(d)
 	displayName := d.Get("display_name").(string)
@@ -125,7 +129,8 @@ func resourceNsxtFailureDomainUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	client := nsx.NewFailureDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewFailureDomainsClient(sessionContext, connector)
 
 	failureDomain := failureDomainSchemaToModel(d)
 	revision := int64(d.Get("revision").(int))
@@ -145,7 +150,8 @@ func resourceNsxtFailureDomainDelete(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("error obtaining FailureDomain ID")
 	}
 	connector := getPolicyConnector(m)
-	client := nsx.NewFailureDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewFailureDomainsClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("FailureDomain", id, err)

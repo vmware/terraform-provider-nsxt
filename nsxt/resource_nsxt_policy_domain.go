@@ -9,13 +9,15 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_domain "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // This resource is supported only for Policy Global Manager
@@ -51,12 +53,12 @@ func resourceNsxtPolicyDomain() *schema.Resource {
 
 func resourceNsxtPolicyDomainExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	if isGlobalManager {
-		client := gm_infra.NewDomainsClient(connector)
-		_, err = client.Get(id)
-	} else {
+	if !isGlobalManager {
 		return false, fmt.Errorf("Domain resource is not supported for local manager")
 	}
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewDomainsClient(sessionContext, connector)
+	_, err = client.Get(id)
 
 	if err == nil {
 		return true, nil
@@ -223,7 +225,8 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
 	}
 
-	client := gm_infra.NewDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewDomainsClient(sessionContext, connector)
 	gmObj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Domain", id, err)
@@ -312,7 +315,8 @@ func resourceNsxtPolicyDomainDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := gm_infra.NewDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewDomainsClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Domain", id, err)

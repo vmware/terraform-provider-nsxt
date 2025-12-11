@@ -11,12 +11,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var policyEdgeNodeFormFactorValues = []string{
@@ -660,7 +662,8 @@ func resourceNsxtPolicyEdgeTransportNodeExists(siteID, epID, tzID string, connec
 	var err error
 
 	// Check site existence first
-	siteClient := infra.NewSitesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	siteClient := infra.NewSitesClient(sessionContext, connector)
 	_, err = siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("failed to read site %s", siteID)
@@ -668,7 +671,7 @@ func resourceNsxtPolicyEdgeTransportNodeExists(siteID, epID, tzID string, connec
 	}
 
 	// Check (ep, htn) existence. In case of ep not found, NSX returns BAD_REQUEST
-	htnClient := enforcement_points.NewEdgeTransportNodesClient(connector)
+	htnClient := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
 	_, err = htnClient.Get(siteID, epID, tzID)
 	if err == nil {
 		return true, nil
@@ -1191,7 +1194,8 @@ func getVMDeploymentConfigFromSchema(iVmDeploymentCfg interface{}) (*data.Struct
 func policyEdgeTransportNodePredeployedPatch(siteID, epID, etnID string, d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
-	etnClient := enforcement_points.NewEdgeTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	etnClient := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
 
 	obj, err := etnClient.Get(siteID, epID, etnID)
 	if err != nil {
@@ -1268,7 +1272,8 @@ func policyEdgeTransportNodePatch(siteID, epID, etnID string, d *schema.Resource
 	}
 
 	connector := getPolicyConnector(m)
-	etnClient := enforcement_points.NewEdgeTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	etnClient := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
 	return etnClient.Patch(siteID, epID, etnID, obj)
 }
 
@@ -1533,7 +1538,8 @@ func setPolicyIPAssignmentsInSchema(specs []*data.StructValue) (interface{}, err
 
 func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewEdgeTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
@@ -1697,7 +1703,8 @@ func resourceNsxtPolicyEdgeTransportNodeUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyEdgeTransportNodeDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewEdgeTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {

@@ -9,9 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var globalManagerModeValues = []string{
@@ -83,7 +85,8 @@ func getGlobalManagerFromSchema(d *schema.ResourceData) gm_model.GlobalManager {
 }
 
 func resourceNsxtPolicyGlobalManagerExists(id string, connector client.Connector, isGlobal bool) (bool, error) {
-	client := global_infra.NewGlobalManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewGlobalManagersClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -106,7 +109,8 @@ func resourceNsxtPolicyGlobalManagerCreate(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := global_infra.NewGlobalManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewGlobalManagersClient(sessionContext, connector)
 	gm := getGlobalManagerFromSchema(d)
 
 	err = client.Patch(id, gm, nil)
@@ -127,7 +131,8 @@ func resourceNsxtPolicyGlobalManagerRead(d *schema.ResourceData, m interface{}) 
 	if id == "" {
 		return fmt.Errorf("error obtaining GlobalManager ID")
 	}
-	client := global_infra.NewGlobalManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewGlobalManagersClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "GlobalManager", id, err)
@@ -155,13 +160,14 @@ func resourceNsxtPolicyGlobalManagerUpdate(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := global_infra.NewGlobalManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewGlobalManagersClient(sessionContext, connector)
 
-	obj := getGlobalManagerFromSchema(d)
+	gmObj := getGlobalManagerFromSchema(d)
 	revision := int64(d.Get("revision").(int))
-	obj.Revision = &revision
+	gmObj.Revision = &revision
 
-	_, err := client.Update(id, obj, nil)
+	_, err := client.Update(id, gmObj, nil)
 	if err != nil {
 		return handleUpdateError("GlobalManager", id, err)
 	}
@@ -175,7 +181,8 @@ func resourceNsxtPolicyGlobalManagerDelete(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("error obtaining GlobalManager ID")
 	}
 	connector := getPolicyConnector(m)
-	client := global_infra.NewGlobalManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := infra.NewGlobalManagersClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("GlobalManager", id, err)

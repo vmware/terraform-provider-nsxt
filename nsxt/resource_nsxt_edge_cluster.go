@@ -10,10 +10,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var failureDomainAllocationOptions = []string{
@@ -116,7 +118,8 @@ func resourceNsxtEdgeCluster() *schema.Resource {
 
 func resourceNsxtEdgeClusterCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewEdgeClustersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewEdgeClustersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -205,7 +208,8 @@ func resourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewEdgeClustersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewEdgeClustersClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "EdgeCluster", id, err)
@@ -289,7 +293,8 @@ func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewEdgeClustersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewEdgeClustersClient(sessionContext, connector)
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
@@ -325,7 +330,8 @@ func resourceNsxtEdgeClusterDelete(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewEdgeClustersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := nsx.NewEdgeClustersClient(sessionContext, connector)
 
 	err := client.Delete(id)
 	if err != nil {

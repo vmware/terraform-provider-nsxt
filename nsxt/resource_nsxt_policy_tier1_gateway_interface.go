@@ -12,14 +12,14 @@ import (
 	"strings"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	gm_tier1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
-	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
@@ -199,35 +199,24 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	}
 
 	var obj model.Tier1Interface
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewInterfacesClient(connector)
-		gmObj, err := client.Get(tier1ID, localeServiceID, id)
-		if err != nil {
-			return handleReadError(d, "Tier1 Interface", id, err)
-		}
-		lmObj, err1 := convertModelBindingType(gmObj, gm_model.Tier1InterfaceBindingType(), model.Tier1InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		obj = lmObj.(model.Tier1Interface)
-		tier1Client := gm_tier1s.NewLocaleServicesClient(connector)
-		localeService, err := tier1Client.Get(tier1ID, localeServiceID)
-		if err != nil {
-			return err
-		}
-		sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
-		d.Set("site_path", sitePath)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		obj, err = client.Get(tier1ID, localeServiceID, id)
-		if err != nil {
-			return handleReadError(d, "Tier1 Interface", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := localeservices.NewInterfacesClient(sessionContext, connector)
+	obj, err := client.Get(tier1ID, localeServiceID, id)
+	if err != nil {
+		return handleReadError(d, "Tier1 Interface", id, err)
+	}
+	tier1Client := tier1s.NewLocaleServicesClient(sessionContext, connector)
+	localeService, err := tier1Client.Get(tier1ID, localeServiceID)
+	if err != nil {
+		return err
+	}
+	sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
+	d.Set("site_path", sitePath)
 
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)

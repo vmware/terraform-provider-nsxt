@@ -44,21 +44,15 @@ func (c GlobalManagerClientContext) Delete(globalManagerIdParam string) error {
 	return err
 }
 
-func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (model0.GlobalManager, error) {
-	var obj model0.GlobalManager
+func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (model1.GlobalManager, error) {
+	var obj model1.GlobalManager
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		gmObj, err1 := client.Get(globalManagerIdParam)
-		if err1 != nil {
-			return obj, err1
-		}
-		var rawObj interface{}
-		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.GlobalManagerBindingType(), model0.GlobalManagerBindingType())
-		obj = rawObj.(model0.GlobalManager)
+		obj, err = client.Get(globalManagerIdParam)
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
@@ -90,18 +84,19 @@ func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDele
 	return obj, err
 }
 
-func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalManagerParam model0.GlobalManager, forceParam *bool) error {
+func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalManagerParam model1.GlobalManager, forceParam *bool) error {
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		gmObj, err1 := utl.ConvertModelBindingType(globalManagerParam, model0.GlobalManagerBindingType(), model1.GlobalManagerBindingType())
-		if err1 != nil {
-			return err1
-		}
-		err = client.Patch(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
+		// gmObj, err1 := utl.ConvertModelBindingType(globalManagerParam, model0.GlobalManagerBindingType(), model1.GlobalManagerBindingType())
+		// if err1 != nil {
+		// 	return err1
+		// }
+		// err = client.Patch(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
+		err = client.Patch(globalManagerIdParam, globalManagerParam, forceParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -109,9 +104,9 @@ func (c GlobalManagerClientContext) Patch(globalManagerIdParam string, globalMan
 	return err
 }
 
-func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalManagerParam model0.GlobalManager, forceParam *bool) (model0.GlobalManager, error) {
+func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalManagerParam model1.GlobalManager, forceParam *bool) (model1.GlobalManager, error) {
 	var err error
-	var obj model0.GlobalManager
+	var obj model1.GlobalManager
 
 	switch c.ClientType {
 
@@ -121,15 +116,10 @@ func (c GlobalManagerClientContext) Update(globalManagerIdParam string, globalMa
 		if err != nil {
 			return obj, err
 		}
-		gmObj, err = client.Update(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
+		obj, err = client.Update(globalManagerIdParam, gmObj.(model1.GlobalManager), forceParam)
 		if err != nil {
 			return obj, err
 		}
-		obj1, err1 := utl.ConvertModelBindingType(gmObj, model1.GlobalManagerBindingType(), model0.GlobalManagerBindingType())
-		if err1 != nil {
-			return obj, err1
-		}
-		obj = obj1.(model0.GlobalManager)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
