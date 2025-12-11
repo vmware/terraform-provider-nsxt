@@ -9,9 +9,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyEvpnTenant() *schema.Resource {
@@ -57,7 +59,8 @@ func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 
 func resourceNsxtPolicyEvpnTenantExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := infra.NewEvpnTenantConfigsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -119,7 +122,8 @@ func policyEvpnTenantPatch(id string, d *schema.ResourceData, m interface{}) err
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewEvpnTenantConfigsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -151,7 +155,8 @@ func resourceNsxtPolicyEvpnTenantRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining Evpn Tenant ID")
 	}
 
-	client := infra.NewEvpnTenantConfigsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Evpn Tenant", id, err)
@@ -197,7 +202,8 @@ func resourceNsxtPolicyEvpnTenantDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewEvpnTenantConfigsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {
