@@ -7,7 +7,7 @@ dist/
 # Ignore editor directories.
 .idea/
 .vscode/
-
+.cursor/
 # Ignore temporary editor files.
 *~
 

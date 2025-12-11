@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var policyEvpnConfigTypeValues = []string{
@@ -55,8 +57,8 @@ func resourceNsxtPolicyEvpnConfig() *schema.Resource {
 	}
 }
 
-func policyEvpnConfigGet(connector client.Connector, gwID string) (model.EvpnConfig, error) {
-	client := tier_0s.NewEvpnClient(connector)
+func policyEvpnConfigGet(connector client.Connector, gwID string, sessionContext utl.SessionContext) (model.EvpnConfig, error) {
+	client := tier_0s.NewEvpnClient(sessionContext, connector)
 	return client.Get(gwID)
 }
 
@@ -72,7 +74,8 @@ func resourceNsxtPolicyEvpnConfigRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Tier0 gateway path expected, got %s", gwPolicyPath)
 	}
 
-	obj, err := policyEvpnConfigGet(connector, gwID)
+	sessionContext := getSessionContext(d, m)
+	obj, err := policyEvpnConfigGet(connector, gwID, sessionContext)
 
 	if err != nil {
 		return handleReadError(d, "Evpn Config", gwID, err)
@@ -122,7 +125,8 @@ func patchNsxtPolicyEvpnConfig(connector client.Connector, d *schema.ResourceDat
 		mode := model.EvpnConfig_MODE_DISABLE
 		obj.Mode = &mode
 	}
-	client := tier_0s.NewEvpnClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := tier_0s.NewEvpnClient(sessionContext, connector)
 	return client.Patch(gwID, obj)
 }
 
