@@ -210,14 +210,20 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleReadError(d, "Tier1 Interface", id, err)
 	}
-	tier1Client := tier1s.NewLocaleServicesClient(sessionContext, connector)
-	localeService, err := tier1Client.Get(tier1ID, localeServiceID)
-	if err != nil {
-		return err
+	if isPolicyGlobalManager(m) {
+		tier1Client := tier1s.NewLocaleServicesClient(sessionContext, connector)
+		if tier1Client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
+		localeService, err := tier1Client.Get(tier1ID, localeServiceID)
+		if err != nil {
+			return err
+		}
+		if localeService.EdgeClusterPath != nil {
+			sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
+			d.Set("site_path", sitePath)
+		}
 	}
-	sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
-	d.Set("site_path", sitePath)
-
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
