@@ -10,9 +10,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ospf"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ospf"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var ospfAreaTypeValues = []string{
@@ -82,8 +84,8 @@ func resourceNsxtPolicyOspfArea() *schema.Resource {
 }
 
 func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector client.Connector) (bool, error) {
-
-	client := ospf.NewAreasClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := ospf.NewAreasClient(sessionContext, connector)
 	_, err := client.Get(gwID, localeServiceID, areaID)
 	if err == nil {
 		return true, nil
@@ -145,7 +147,8 @@ func policyOspfAreaPatch(d *schema.ResourceData, m interface{}, id string) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := ospf.NewAreasClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf.NewAreasClient(sessionContext, connector)
 	_, err := client.Patch(gwID, localeServiceID, id, obj)
 	return err
 }
@@ -185,7 +188,8 @@ func resourceNsxtPolicyOspfAreaRead(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Expecting OSPF config path, got %s", ospfPath)
 	}
 
-	client := ospf.NewAreasClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf.NewAreasClient(sessionContext, connector)
 	obj, err := client.Get(gwID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "Ospf Area", id, err)
@@ -237,7 +241,8 @@ func resourceNsxtPolicyOspfAreaDelete(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Expecting OSPF config path, got %s", ospfPath)
 	}
 
-	client := ospf.NewAreasClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf.NewAreasClient(sessionContext, connector)
 	err := client.Delete(gwID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Ospf Area", id, err)
@@ -257,7 +262,8 @@ func resourceNsxtPolicyOspfAreaImport(d *schema.ResourceData, m interface{}) ([]
 	serviceID := s[1]
 	areaID := s[2]
 	connector := getPolicyConnector(m)
-	client := ospf.NewAreasClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ospf.NewAreasClient(sessionContext, connector)
 
 	area, err := client.Get(gwID, serviceID, areaID)
 	if err != nil {

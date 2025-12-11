@@ -11,13 +11,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var gatewayPrefixListActionTypeValues = []string{
@@ -154,13 +153,14 @@ func resourceNsxtPolicyGatewayPrefixListDelete(d *schema.ResourceData, m interfa
 	}
 
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		client := gm_tier_0s.NewPrefixListsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewPrefixListsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+	err = client.Delete(gwID, id)
 	if err != nil {
 		return handleDeleteError("Gateway Prefix List", id, err)
 	}
@@ -185,25 +185,16 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 
 	var obj model.PrefixList
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		var gmObj gm_model.PrefixList
-		var rawObj interface{}
-		client := gm_tier_0s.NewPrefixListsClient(connector)
-		gmObj, err = client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Prefix List", id, err)
-		}
-		rawObj, err = convertModelBindingType(gmObj, gm_model.PrefixListBindingType(), model.PrefixListBindingType())
-		if err != nil {
-			return handleReadError(d, "Gateway Prefix List", id, err)
-		}
-		obj = rawObj.(model.PrefixList)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewPrefixListsClient(connector)
-		obj, err = client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Prefix List", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+	obj, err = client.Get(gwID, id)
+	if err != nil {
+		return handleReadError(d, "Gateway Prefix List", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -219,15 +210,13 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 }
 
 func patchNsxtPolicyGatewayPrefixList(connector client.Connector, gwID string, prefixList model.PrefixList, isGlobalManager bool) error {
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		rawObj, err := convertModelBindingType(prefixList, model.PrefixListBindingType(), gm_model.PrefixListBindingType())
-		if err != nil {
-			return err
-		}
-		client := gm_tier_0s.NewPrefixListsClient(connector)
-		return client.Patch(gwID, *prefixList.Id, rawObj.(gm_model.PrefixList))
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewPrefixListsClient(connector)
+	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
 	return client.Patch(gwID, *prefixList.Id, prefixList)
 }
 
@@ -247,13 +236,14 @@ func resourceNsxtPolicyGatewayPrefixListCreate(d *schema.ResourceData, m interfa
 		id = newUUID()
 	} else {
 		var err error
+		var sessionContext utl.SessionContext
 		if isGlobalManager {
-			client := gm_tier_0s.NewPrefixListsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Global}
 		} else {
-			client := tier_0s.NewPrefixListsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
+		client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Gateway Prefix List with nsx_id '%s' already exists", id)
 		} else if !isNotFoundError(err) {
@@ -335,21 +325,13 @@ func resourceNsxtPolicyTier0GatewayImporter(d *schema.ResourceData, m interface{
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		t0Client := gm_infra.NewTier0sClient(connector)
-		t0gw, err := t0Client.Get(gwID)
-		if err != nil {
-			return nil, err
-		}
-		d.Set("gateway_path", t0gw.Path)
-	} else {
-		t0Client := infra.NewTier0sClient(connector)
-		t0gw, err := t0Client.Get(gwID)
-		if err != nil {
-			return nil, err
-		}
-		d.Set("gateway_path", t0gw.Path)
+	sessionContext := getSessionContext(d, m)
+	t0Client := infra.NewTier0sClient(sessionContext, connector)
+	t0gw, err := t0Client.Get(gwID)
+	if err != nil {
+		return nil, err
 	}
+	d.Set("gateway_path", t0gw.Path)
 	d.SetId(s[1])
 
 	return []*schema.ResourceData{d}, nil

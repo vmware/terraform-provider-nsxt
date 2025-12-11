@@ -13,10 +13,12 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/host_transport_nodes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	model2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyHostTransportNode() *schema.Resource {
@@ -70,7 +72,8 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 
 func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	htnClient := enforcement_points.NewHostTransportNodesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
@@ -110,7 +113,8 @@ func resourceNsxtPolicyHostTransportNodeExists(siteID, epID, tzID string, connec
 	var err error
 
 	// Check site existence first
-	siteClient := infra.NewSitesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	siteClient := infra.NewSitesClient(sessionContext, connector)
 	_, err = siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("failed to read site %s", siteID)
@@ -118,7 +122,7 @@ func resourceNsxtPolicyHostTransportNodeExists(siteID, epID, tzID string, connec
 	}
 
 	// Check (ep, htn) existence. In case of ep not found, NSX returns BAD_REQUEST
-	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
+	htnClient := enforcement_points.NewHostTransportNodesClient(sessionContext, connector)
 	_, err = htnClient.Get(siteID, epID, tzID)
 	if err == nil {
 		return true, nil
@@ -133,7 +137,8 @@ func resourceNsxtPolicyHostTransportNodeExists(siteID, epID, tzID string, connec
 
 func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	htnClient := enforcement_points.NewHostTransportNodesClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -235,7 +240,8 @@ func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID 
 
 func resourceNsxtPolicyHostTransportNodeDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	htnClient := enforcement_points.NewHostTransportNodesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
