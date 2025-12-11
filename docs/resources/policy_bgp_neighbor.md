@@ -13,9 +13,31 @@ This resource is applicable to NSX Global Manager and NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+data "nsxt_policy_transport_zone" "test" {
+  display_name = "1-transportzone-98"
+}
+
+resource "nsxt_policy_vlan_segment" "test" {
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  display_name        = "Acceptance Test"
+  vlan_ids            = [11]
+  subnet {
+    cidr = "10.2.2.2/24"
+  }
+}
+
+resource "nsxt_policy_tier0_gateway_interface" "test" {
+  display_name = "terraformt0gwintf"
+  type         = "EXTERNAL"
+  description  = "Acceptance Test"
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  segment_path = nsxt_policy_vlan_segment.test.path
+  subnets      = ["1.1.12.2/24"]
+}
+
 resource "nsxt_policy_gateway_prefix_list" "test" {
   display_name = "prefix_list"
-  gateway_path = "nsxt_policy_tier0_gateway.testresource.path"
+  gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
     action  = "DENY"
@@ -33,9 +55,9 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   graceful_restart_mode = "HELPER_ONLY"
   hold_down_time        = 300
   keep_alive_time       = 100
-  neighbor_address      = "12.12.11.23"
+  neighbor_address      = "1.1.12.23"
   password              = "passw0rd"
-  remote_as_num         = "60000"
+  remote_as_num         = "60005"
   source_addresses      = nsxt_policy_tier0_gateway_interface.testresource.ip_addresses
 
   bfd_config {
@@ -49,6 +71,11 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     maximum_routes   = 20
     in_route_filter  = nsxt_policy_gateway_prefix_list.test.path
     out_route_filter = nsxt_policy_gateway_prefix_list.test.path
+  }
+
+  neighbor_local_as_config {
+    local_as_num          = "65001"
+    as_path_modifier_type = "NO_PREPEND"
   }
 }
 ```
@@ -83,6 +110,9 @@ The following arguments are supported:
     * `in_route_filter`- (Optional) Path of prefix-list or route map to filter routes for IN direction.
     * `out_route_filter`- (Optional) Path of prefix-list or route map to filter routes for OUT direction.
     * `maximum_routes` - (Optional) Maximum number of routes for the address family. Note this property is only available starting with NSX version 3.0.0.
+* `neighbor_local_as_config` - (Optional) BGP neighbor local-as configuration.
+    * `local_as_num` - (Required) BGP neighbor local-as number in ASPLAIN/ASDOT Format.
+    * `as_path_modifier_type` - (Optional) AS_PATH modifier type for BGP local AS. Must be one of `NO_PREPEND` or `NO_PREPEND_REPLACE_AS`.
 
 ## Attributes Reference
 
