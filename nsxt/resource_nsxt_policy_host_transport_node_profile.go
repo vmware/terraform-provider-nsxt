@@ -8,9 +8,11 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var hostTransportNodeProfilePathExample = "/infra/host-transport-node-profiles/[profile]"
@@ -44,7 +46,8 @@ func resourceNsxtPolicyHostTransportNodeProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicyHostTransportNodeProfileExists(id string, connector client.Connector, isGlobal bool) (bool, error) {
-	client := infra.NewHostTransportNodeProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostTransportNodeProfilesClient(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -60,7 +63,8 @@ func resourceNsxtPolicyHostTransportNodeProfileExists(id string, connector clien
 
 func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewHostTransportNodeProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostTransportNodeProfilesClient(sessionContext, connector)
 
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyHostTransportNodeProfileExists)
 	if err != nil {
@@ -97,7 +101,8 @@ func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m 
 
 func resourceNsxtPolicyHostTransportNodeProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewHostTransportNodeProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostTransportNodeProfilesClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -126,7 +131,8 @@ func resourceNsxtPolicyHostTransportNodeProfileRead(d *schema.ResourceData, m in
 
 func resourceNsxtPolicyHostTransportNodeProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewHostTransportNodeProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostTransportNodeProfilesClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -169,7 +175,8 @@ func resourceNsxtPolicyHostTransportNodeProfileDelete(d *schema.ResourceData, m 
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewHostTransportNodeProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostTransportNodeProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Policy Host Transport Node Profile", id, err)

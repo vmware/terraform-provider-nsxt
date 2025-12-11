@@ -9,9 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var cryptoProtocolsValues = []string{"TLS_V1", "TLS_V1_1", "TLS_V1_2"}
@@ -92,7 +94,8 @@ func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 }
 
 func resourceNsxtPolicyMetadataProxyExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewMetadataProxiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewMetadataProxiesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -139,7 +142,8 @@ func resourceNsxtPolicyMetadataProxyCreate(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewMetadataProxiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewMetadataProxiesClient(sessionContext, connector)
 	obj := getMetadataProxyFromSchema(d)
 	err = client.Patch(id, obj)
 	if err != nil {
@@ -159,7 +163,8 @@ func resourceNsxtPolicyMetadataProxyRead(d *schema.ResourceData, m interface{}) 
 	if id == "" {
 		return fmt.Errorf("Error obtaining PolicyMetadataProxy ID")
 	}
-	client := infra.NewMetadataProxiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewMetadataProxiesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "PolicyMetadataProxy", id, err)
@@ -187,7 +192,8 @@ func resourceNsxtPolicyMetadataProxyUpdate(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewMetadataProxiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewMetadataProxiesClient(sessionContext, connector)
 
 	obj := getMetadataProxyFromSchema(d)
 	revision := int64(d.Get("revision").(int))
@@ -206,7 +212,8 @@ func resourceNsxtPolicyMetadataProxyDelete(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("error obtaining PolicyMetadataProxy ID")
 	}
 	connector := getPolicyConnector(m)
-	client := infra.NewMetadataProxiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewMetadataProxiesClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("PolicyMetadataProxy", id, err)
