@@ -14,12 +14,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	t0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	t0_locale_service "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
+	t1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	t1_locale_service "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-
-	client0_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	client0_tier_1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
-	client0_t1_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 )
 
 var L2VpnServiceModes = []string{
@@ -82,20 +81,17 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 func getNsxtPolicyL2VpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool, sessionContext utl.SessionContext) (model.L2VPNService, error) {
 	if localeServiceID == "" {
 		if isT0 {
-			// Note: wrapper doesn't exist yet for tier_0s.NewL2vpnServicesClient, using SDK directly
-			client := client0_tier_0s.NewL2vpnServicesClient(connector)
+			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
 			return client.Get(gwID, serviceID)
 		}
-		// Note: wrapper doesn't exist yet for tier_1s.NewL2vpnServicesClient, using SDK directly
-		client := client0_tier_1s.NewL2vpnServicesClient(connector)
+		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Get(gwID, serviceID)
 	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Get(gwID, localeServiceID, serviceID)
 	}
-	// Note: wrapper doesn't exist yet for t1_locale_service.NewL2vpnServicesClient, using SDK directly
-	client := client0_t1_locale_service.NewL2vpnServicesClient(connector)
+	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
@@ -103,20 +99,17 @@ func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, locale
 	id := *l2VpnService.Id
 	if localeServiceID == "" {
 		if isT0 {
-			// Note: wrapper doesn't exist yet for tier_0s.NewL2vpnServicesClient, using SDK directly
-			client := client0_tier_0s.NewL2vpnServicesClient(connector)
+			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
 			return client.Patch(gwID, id, l2VpnService)
 		}
-		// Note: wrapper doesn't exist yet for tier_1s.NewL2vpnServicesClient, using SDK directly
-		client := client0_tier_1s.NewL2vpnServicesClient(connector)
+		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Patch(gwID, id, l2VpnService)
 	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Patch(gwID, localeServiceID, id, l2VpnService)
 	}
-	// Note: wrapper doesn't exist yet for t1_locale_service.NewL2vpnServicesClient, using SDK directly
-	client := client0_t1_locale_service.NewL2vpnServicesClient(connector)
+	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 	return client.Patch(gwID, localeServiceID, id, l2VpnService)
 
 }
@@ -124,20 +117,17 @@ func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, locale
 func deleteNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string, sessionContext utl.SessionContext) error {
 	if localeServiceID == "" {
 		if isT0 {
-			// Note: wrapper doesn't exist yet for tier_0s.NewL2vpnServicesClient, using SDK directly
-			client := client0_tier_0s.NewL2vpnServicesClient(connector)
+			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
 			return client.Delete(gwID, id)
 		}
-		// Note: wrapper doesn't exist yet for tier_1s.NewL2vpnServicesClient, using SDK directly
-		client := client0_tier_1s.NewL2vpnServicesClient(connector)
+		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Delete(gwID, id)
 	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 		return client.Delete(gwID, localeServiceID, id)
 	}
-	// Note: wrapper doesn't exist yet for t1_locale_service.NewL2vpnServicesClient, using SDK directly
-	client := client0_t1_locale_service.NewL2vpnServicesClient(connector)
+	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
 	return client.Delete(gwID, localeServiceID, id)
 }
 
