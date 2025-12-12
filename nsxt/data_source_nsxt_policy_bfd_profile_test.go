@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyBfdProfile_basic(t *testing.T) {
@@ -62,19 +62,9 @@ func testAccDataSourceNsxtPolicyBfdProfileCreate(name string) error {
 	uuid, _ := uuid.NewRandom()
 	id := uuid.String()
 
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.BfdProfileBindingType(), gm_model.BfdProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-
-		client := gm_infra.NewBfdProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.BfdProfile), nil)
-
-	} else {
-		client := infra.NewBfdProfilesClient(connector)
-		err = client.Patch(id, obj, nil)
-	}
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewBfdProfilesClient(sessionContext, connector)
+	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return fmt.Errorf("Error during Bfd Profile creation: %v", err)
 	}
@@ -92,13 +82,9 @@ func testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name string) error {
 	if err != nil {
 		return nil
 	}
-	if testAccIsGlobalManager() {
-		client := gm_infra.NewBfdProfilesClient(connector)
-		err = client.Delete(objID, nil)
-	} else {
-		client := infra.NewBfdProfilesClient(connector)
-		err = client.Delete(objID, nil)
-	}
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewBfdProfilesClient(sessionContext, connector)
+	err = client.Delete(objID, nil)
 	if err != nil {
 		return fmt.Errorf("Error during Bfd Profile deletion: %v", err)
 	}

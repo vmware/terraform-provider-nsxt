@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
+
+	"github.com/vmware/terraform-provider-nsxt/api/orgs"
 )
 
 const defaultOrgID = "default"
@@ -70,7 +71,8 @@ func getSiteInfoSchema() *schema.Schema {
 }
 func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewProjectsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := orgs.NewProjectsClient(sessionContext, connector)
 
 	// As Project resource type paths reside under project and not under /infra or /global_infra or such, and since
 	// this data source fetches extra attributes, e.g site_info and tier0_gateway_paths, it's simpler to implement using .List()

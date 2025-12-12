@@ -7,8 +7,10 @@ package nsxt
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func dataSourceNsxtTags() *schema.Resource {
@@ -48,7 +50,8 @@ func dataSourceNsxtTagsRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func listTags(connector client.Connector, scope string) ([]model.TagInfo, error) {
-	client := infra.NewTagsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewTagsClient(sessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

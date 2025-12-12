@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var accTestPolicyLBPoolCreateAttributes = map[string]string{
@@ -231,7 +232,8 @@ func testAccNsxtPolicyLBPoolExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewLbPoolsClient(connector)
+		sessionContext := testAccGetSessionContext()
+		nsxClient := infra.NewLbPoolsClient(sessionContext, connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -254,7 +256,8 @@ func testAccNsxtPolicyLBPoolExists(resourceName string) resource.TestCheckFunc {
 
 func testAccNsxtPolicyLBPoolCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewLbPoolsClient(connector)
+	sessionContext := testAccGetSessionContext()
+	nsxClient := infra.NewLbPoolsClient(sessionContext, connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_pool" {
