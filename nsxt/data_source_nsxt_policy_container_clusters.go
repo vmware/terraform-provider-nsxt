@@ -29,7 +29,8 @@ func dataSourceNsxtPolicyContainerClustersRead(d *schema.ResourceData, m interfa
 	connector := getPolicyConnector(m)
 
 	groupsMap := make(map[string]string)
-	results, err := listClusterControlPlanes(defaultSite, defaultEnforcementPoint, connector)
+	sessionContext := getSessionContext(d, m)
+	results, err := listClusterControlPlanes(defaultSite, defaultEnforcementPoint, connector, sessionContext)
 	if err != nil {
 		return err
 	}
