@@ -19,7 +19,7 @@ func NewProjectsClient(sessionContext utl.SessionContext, connector vapiProtocol
 
 	switch sessionContext.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client = client0.NewProjectsClient(connector)
 
 	default:
@@ -33,7 +33,7 @@ func (c ProjectClientContext) Delete(orgIdParam string, projectIdParam string, i
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
 		err = client.Delete(orgIdParam, projectIdParam, isRecursiveParam)
 
@@ -49,7 +49,7 @@ func (c ProjectClientContext) Get(orgIdParam string, projectIdParam string, shor
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, shortFormatParam)
 		if err != nil {
@@ -68,7 +68,7 @@ func (c ProjectClientContext) List(orgIdParam string, cursorParam *string, inclu
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
 		obj, err = client.List(orgIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, instanceIdParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -83,7 +83,7 @@ func (c ProjectClientContext) Patch(orgIdParam string, projectIdParam string, pr
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
 		err = client.Patch(orgIdParam, projectIdParam, projectParam)
 
@@ -99,7 +99,7 @@ func (c ProjectClientContext) Update(orgIdParam string, projectIdParam string, p
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, projectParam)
 
