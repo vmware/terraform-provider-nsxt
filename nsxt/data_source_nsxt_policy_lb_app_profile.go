@@ -12,8 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lbAppProfileTypeValues = []string{"HTTP", "TCP", "UDP", "ANY"}
@@ -64,7 +65,8 @@ func policyLbAppProfileConvert(obj *data.StructValue, requestedType string) (*mo
 
 func dataSourceNsxtPolicyLBAppProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewLbAppProfilesClient(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objTypeValue, typeSet := d.GetOk("type")
