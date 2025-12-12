@@ -10,9 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 )
 
 var transitGatewayNatTypes = []string{
