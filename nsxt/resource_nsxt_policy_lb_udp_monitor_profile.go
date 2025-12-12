@@ -11,8 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func resourceNsxtPolicyLBUdpMonitorProfile() *schema.Resource {
@@ -88,7 +89,8 @@ func resourceNsxtPolicyLBUdpMonitorProfilePatch(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error converting LBUdpMonitorProfile %s", errs[0])
 	}
 
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewLbMonitorProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -120,7 +122,8 @@ func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining LBUdpMonitorProfile ID")
 	}
 
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewLbMonitorProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBUdpMonitorProfile", id, err)
