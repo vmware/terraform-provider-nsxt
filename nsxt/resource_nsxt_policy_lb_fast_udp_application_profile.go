@@ -12,8 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lbUdpApplicationProfilePathExample = "/infra/lb-app-profiles/[profile]"
@@ -77,7 +78,8 @@ func resourceNsxtPolicyLBUdpApplicationProfilePatch(d *schema.ResourceData, m in
 		return fmt.Errorf("Error converting LBUdpProfile %s", errs[0])
 	}
 
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewLbAppProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -109,7 +111,8 @@ func resourceNsxtPolicyLBUdpApplicationProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining LBUdpProfile ID")
 	}
 
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewLbAppProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBUdpProfile", id, err)
