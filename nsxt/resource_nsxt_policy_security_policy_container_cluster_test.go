@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -96,7 +97,9 @@ func testAccNsxtPolicySecurityPolicyContainerClusterExists(resourceName string, 
 			return fmt.Errorf("Policy SecurityPolicyContainerCluster resource ID not set in resources")
 		}
 		policyPath := rs.Primary.Attributes["policy_path"]
-		exists, err := resourceNsxtPolicySecurityPolicyContainerClusterExists(resourceID, connector, policyPath)
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		exists, err := resourceNsxtPolicySecurityPolicyContainerClusterExists(resourceID, connector, policyPath, sessionContext)
 		if err != nil {
 			return err
 		}
@@ -117,7 +120,9 @@ func testAccNsxtPolicySecurityPolicyContainerClusterCheckDestroy(state *terrafor
 
 		resourceID := rs.Primary.Attributes["id"]
 		policyPath := rs.Primary.Attributes["policy_path"]
-		exists, err := resourceNsxtPolicySecurityPolicyContainerClusterExists(resourceID, connector, policyPath)
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		exists, err := resourceNsxtPolicySecurityPolicyContainerClusterExists(resourceID, connector, policyPath, sessionContext)
 		if err != nil {
 			return err
 		}
