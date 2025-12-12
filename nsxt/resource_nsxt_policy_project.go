@@ -515,8 +515,7 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
-	var err error
-	err = client.Delete(utl.DefaultOrgID, id, nil)
+	err := client.Delete(utl.DefaultOrgID, id, nil)
 
 	if err != nil {
 		return handleDeleteError("Project", id, err)
