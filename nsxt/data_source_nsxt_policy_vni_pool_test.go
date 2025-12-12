@@ -10,8 +10,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var accTestPolicyVniPoolName = getAccTestDataSourceName()
@@ -51,7 +52,8 @@ func testAccDataSourceNsxtPolicyVniPoolConfigCreate() error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 
 	displayName := accTestPolicyVniPoolName
 	description := accTestPolicyVniPoolName
@@ -79,7 +81,8 @@ func testAccDataSourceNsxtPolicyVniPoolConfigDelete() error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
