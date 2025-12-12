@@ -21,8 +21,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/vmware/go-vmware-nsxt/trust"
@@ -30,6 +28,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -111,7 +110,8 @@ func getTier0RouterName() string {
 func getTier0RouterPath(connector client.Connector) string {
 	// Retrieve Tier0 path
 	routerName := getTier0RouterName()
-	t0client := infra.NewTier0sClient(connector)
+	sessionContext := testAccGetSessionContext()
+	t0client := infra.NewTier0sClient(sessionContext, connector)
 	tier0, _ := t0client.Get(routerName)
 
 	return *tier0.Path

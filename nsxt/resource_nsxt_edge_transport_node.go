@@ -20,10 +20,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	mpmodel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/transport_nodes"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"golang.org/x/exp/maps"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -1160,7 +1161,8 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfig
 
 func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
 	connector := getPolicyConnector(m)
-	client := infra.NewHostSwitchProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewHostSwitchProfilesClient(sessionContext, connector)
 	t := true
 	// we retrieve a list of profiles instead of using Get(), as the id could be either MP id or Policy id
 	list, err := client.List(nil, nil, nil, nil, &t, nil, nil, nil, nil, nil, nil, nil)
