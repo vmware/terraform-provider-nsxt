@@ -18,8 +18,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
@@ -199,12 +197,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	}
 
 	var obj model.Tier1Interface
-	var sessionContext utl.SessionContext
-	if isPolicyGlobalManager(m) {
-		sessionContext = utl.SessionContext{ClientType: utl.Global}
-	} else {
-		sessionContext = utl.SessionContext{ClientType: utl.Local}
-	}
+	sessionContext := getSessionContext(d, m)
 	client := localeservices.NewInterfacesClient(sessionContext, connector)
 	obj, err := client.Get(tier1ID, localeServiceID, id)
 	if err != nil {
