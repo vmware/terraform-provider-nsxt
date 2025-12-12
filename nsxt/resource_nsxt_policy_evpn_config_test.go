@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -175,7 +176,8 @@ func testAccNsxtPolicyEvpnConfigExists(displayName string, resourceName string) 
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
-		sessionContext := getSessionContext(nil, testAccProvider.Meta())
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
 		_, err := policyEvpnConfigGet(connector, gwID, sessionContext)
 		if err != nil {
 			return err
@@ -196,7 +198,8 @@ func testAccNsxtPolicyEvpnConfigCheckDestroy(state *terraform.State, displayName
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
-		sessionContext := getSessionContext(nil, testAccProvider.Meta())
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
 		_, err := policyEvpnConfigGet(connector, gwID, sessionContext)
 		if err == nil {
 			return fmt.Errorf("Policy Gateway Route Map %s still exists", displayName)
