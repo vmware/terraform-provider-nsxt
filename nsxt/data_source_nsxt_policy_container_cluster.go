@@ -10,8 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func dataSourceNsxtPolicyContainerCluster() *schema.Resource {
@@ -27,8 +29,8 @@ func dataSourceNsxtPolicyContainerCluster() *schema.Resource {
 	}
 }
 
-func listClusterControlPlanes(siteID, epID string, connector client.Connector) ([]model.ClusterControlPlane, error) {
-	client := enforcement_points.NewClusterControlPlanesClient(connector)
+func listClusterControlPlanes(siteID, epID string, connector client.Connector, sessionContext utl.SessionContext) ([]model.ClusterControlPlane, error) {
+	client := enforcement_points.NewClusterControlPlanesClient(sessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -58,7 +60,8 @@ func listClusterControlPlanes(siteID, epID string, connector client.Connector) (
 
 func dataSourceNsxtPolicyContainerClusterRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewClusterControlPlanesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := enforcement_points.NewClusterControlPlanesClient(sessionContext, connector)
 
 	// As Project resource type paths reside under project and not under /infra or /global_infra or such, and since
 	// this data source fetches extra attributes, e.g site_info and tier0_gateway_paths, it's simpler to implement using .List()
@@ -79,7 +82,7 @@ func dataSourceNsxtPolicyContainerClusterRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining ClusterControlPlane ID or name during read")
 	} else {
 		// Get by full name/prefix
-		objList, err := listClusterControlPlanes(defaultSite, defaultEnforcementPoint, connector)
+		objList, err := listClusterControlPlanes(defaultSite, defaultEnforcementPoint, connector, sessionContext)
 		if err != nil {
 			return handleListError("ClusterControlPlane", err)
 		}
