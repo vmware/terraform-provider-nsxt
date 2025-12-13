@@ -13,9 +13,9 @@ import (
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	nsxt "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	orgroot "github.com/vmware/terraform-provider-nsxt/api"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -476,7 +476,10 @@ func securityPolicyInfraPatch(context utl.SessionContext, policy model.SecurityP
 			Children:     []*data.StructValue{childVPC},
 		}
 
-		client := nsxt.NewOrgRootClient(connector)
+		client := orgroot.NewOrgRootClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Patch(orgRoot, nil)
 	}
 

@@ -12,8 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	lm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 )
 
 var policyTransportZoneTransportTypes = []string{
@@ -100,7 +101,8 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		return nil
 	}
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewTransportZonesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := enforcement_points.NewTransportZonesClient(sessionContext, connector)
 
 	// TODO: support non-default site and enforcement point possibly as a triple; site/point/tz_id
 	objID := d.Get("id").(string)
