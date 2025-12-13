@@ -10,11 +10,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var gatewayQosProfileExcessActionValues = []string{
@@ -60,13 +60,14 @@ func resourceNsxtPolicyGatewayQosProfile() *schema.Resource {
 
 func resourceNsxtPolicyGatewayQosProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		client := gm_infra.NewGatewayQosProfilesClient(connector)
-		_, err = client.Get(id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := infra.NewGatewayQosProfilesClient(connector)
-		_, err = client.Get(id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -100,16 +101,13 @@ func resourceNsxtPolicyGatewayQosProfilePatch(d *schema.ResourceData, m interfac
 	}
 
 	log.Printf("[INFO] Patching GatewayQosProfile with ID %s", id)
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.GatewayQosProfileBindingType(), gm_model.GatewayQosProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewGatewayQosProfilesClient(connector)
-		return client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-
-	client := infra.NewGatewayQosProfilesClient(connector)
+	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
 	return client.Patch(id, obj, nil)
 }
 
@@ -141,25 +139,17 @@ func resourceNsxtPolicyGatewayQosProfileRead(d *schema.ResourceData, m interface
 	}
 
 	var obj model.GatewayQosProfile
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewGatewayQosProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "GatewayQosProfile", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.GatewayQosProfileBindingType(), model.GatewayQosProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.GatewayQosProfile)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := infra.NewGatewayQosProfilesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "GatewayQosProfile", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	var err error
+	obj, err = client.Get(id)
+	if err != nil {
+		return handleReadError(d, "GatewayQosProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -199,13 +189,14 @@ func resourceNsxtPolicyGatewayQosProfileDelete(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewGatewayQosProfilesClient(connector)
-		err = client.Delete(id, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := infra.NewGatewayQosProfilesClient(connector)
-		err = client.Delete(id, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	err = client.Delete(id, nil)
 
 	if err != nil {
 		return handleDeleteError("GatewayQosProfile", id, err)

@@ -13,11 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/l2vpn_services"
-	t0_l2vpn_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/l2vpn_services"
-	t1_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/l2vpn_services"
-	t1_l2vpn_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/l2vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	t0_l2vpn_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/l2vpn_services"
+	t0_l2vpn_nested_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/l2vpn_services"
+	t1_l2vpn_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/l2vpn_services"
+	t1_l2vpn_nested_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/l2vpn_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var L2VpnSessionTCPSegmentClampingDirection = []string{
@@ -109,7 +111,8 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 	if id == "" {
 		id = newUUID()
 	}
-	_, err = resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector)
+	sessionContext := getSessionContext(d, m)
+	_, err = resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector, sessionContext)
 	if err == nil {
 		return fmt.Errorf("L2VpnSession with nsx_id '%s' already exists.'", id)
 	} else if !isNotFoundError(err) {
@@ -155,18 +158,18 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 
 	if isT0 {
 		if localeServiceID == "" {
-			client := t0_l2vpn_services.NewSessionsClient(connector)
+			client := t0_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, serviceID, id, obj)
 		} else {
-			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t0_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
 		}
 	} else {
 		if localeServiceID == "" {
-			client := t1_l2vpn_services.NewSessionsClient(connector)
+			client := t1_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, serviceID, id, obj)
 		} else {
-			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t1_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
 		}
 	}
@@ -214,21 +217,22 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining L2VPNSession ID")
 	}
 
+	sessionContext := getSessionContext(d, m)
 	var obj model.L2VPNSession
 	if isT0 {
 		if localeServiceID == "" {
-			client := t0_l2vpn_services.NewSessionsClient(connector)
+			client := t0_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			obj, err = client.Get(gwID, serviceID, id)
 		} else {
-			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t0_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			obj, err = client.Get(gwID, localeServiceID, serviceID, id)
 		}
 	} else {
 		if localeServiceID == "" {
-			client := t1_l2vpn_services.NewSessionsClient(connector)
+			client := t1_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			obj, err = client.Get(gwID, serviceID, id)
 		} else {
-			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t1_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			obj, err = client.Get(gwID, localeServiceID, serviceID, id)
 		}
 	}
@@ -268,22 +272,22 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector client.Connector, sessionContext utl.SessionContext) (bool, error) {
 	var err error
 	if isT0 {
 		if localeServiceID == "" {
-			client := t0_l2vpn_services.NewSessionsClient(connector)
+			client := t0_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			_, err = client.Get(gwID, serviceID, sessionID)
 		} else {
-			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t0_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
 		}
 	} else {
 		if localeServiceID == "" {
-			client := t1_l2vpn_services.NewSessionsClient(connector)
+			client := t1_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			_, err = client.Get(gwID, serviceID, sessionID)
 		} else {
-			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t1_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
 		}
 	}
@@ -351,20 +355,21 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 			obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
 		}
 	}
+	sessionContext := getSessionContext(d, m)
 	if isT0 {
 		if localeServiceID == "" {
-			client := t0_l2vpn_services.NewSessionsClient(connector)
+			client := t0_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, serviceID, id, obj)
 		} else {
-			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t0_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
 		}
 	} else {
 		if localeServiceID == "" {
-			client := t1_l2vpn_services.NewSessionsClient(connector)
+			client := t1_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, serviceID, id, obj)
 		} else {
-			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t1_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
 		}
 	}
@@ -390,20 +395,21 @@ func resourceNsxtPolicyL2VPNSessionDelete(d *schema.ResourceData, m interface{})
 	}
 
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 	if isT0 {
 		if localeServiceID == "" {
-			client := t0_l2vpn_services.NewSessionsClient(connector)
+			client := t0_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Delete(gwID, serviceID, id)
 		} else {
-			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t0_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Delete(gwID, localeServiceID, serviceID, id)
 		}
 	} else {
 		if localeServiceID == "" {
-			client := t1_l2vpn_services.NewSessionsClient(connector)
+			client := t1_l2vpn_services.NewSessionsClient(sessionContext, connector)
 			err = client.Delete(gwID, serviceID, id)
 		} else {
-			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			client := t1_l2vpn_nested_services.NewSessionsClient(sessionContext, connector)
 			err = client.Delete(gwID, localeServiceID, serviceID, id)
 		}
 	}

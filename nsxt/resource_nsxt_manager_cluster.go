@@ -20,7 +20,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 const nodeConnectivityInitialDelay int = 20
@@ -130,7 +132,8 @@ func getNodeConnectivityStateConf(connector client.Connector, delay int, interva
 		Pending: []string{"notyet"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
-			siteClient := infra.NewSitesClient(connector)
+			sessionContext := utl.SessionContext{ClientType: utl.Local}
+			siteClient := infra.NewSitesClient(sessionContext, connector)
 			// We use default site API to probe NSX manager API endpoint readiness,
 			// since it may take a while to auto-generate default site after API is responsive
 			resp, err := siteClient.Get("default")

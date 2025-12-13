@@ -11,11 +11,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/nsx/fabric"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accessLevelForOidcValues = []string{
@@ -219,7 +221,8 @@ func resourceNsxtComputeManager() *schema.Resource {
 
 func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := fabric.NewComputeManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := fabric.NewComputeManagersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -378,7 +381,8 @@ func resourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := fabric.NewComputeManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := fabric.NewComputeManagersClient(sessionContext, connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -503,7 +507,8 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := fabric.NewComputeManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := fabric.NewComputeManagersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -566,7 +571,8 @@ func resourceNsxtComputeManagerDelete(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := fabric.NewComputeManagersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := fabric.NewComputeManagersClient(sessionContext, connector)
 
 	err := client.Delete(id)
 	if err != nil {

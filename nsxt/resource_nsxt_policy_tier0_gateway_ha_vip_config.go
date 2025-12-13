@@ -10,10 +10,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 )
 
 var interfacePathLen = 8
@@ -151,20 +150,12 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigCreate(d *schema.ResourceData, m i
 
 	id := newUUID()
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		// Use patch to only update the relevant fields
-		rawObj, err1 := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
-
-	} else {
-		client := tier_0s.NewLocaleServicesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
+	sessionContext := getSessionContext(d, m)
+	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
 	}
+	err := client.Patch(tier0ID, localeServiceID, serviceStruct)
 	if err != nil {
 		return handleCreateError("Tier0 HA Vip config", id, err)
 	}
@@ -186,25 +177,14 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	var obj model.LocaleServices
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		gmObj, err1 := client.Get(tier0ID, localeServiceID)
-		if err1 != nil {
-			return handleReadError(d, "Tier0 HA Vip config", id, err1)
-		}
-		lmObj, err2 := convertModelBindingType(gmObj, model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
-		if err2 != nil {
-			return err2
-		}
-		obj = lmObj.(model.LocaleServices)
-	} else {
-		var err error
-		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err = client.Get(tier0ID, localeServiceID)
-		if err != nil {
-			return handleReadError(d, "Tier0 HA Vip config", id, err)
-		}
+	sessionContext := getSessionContext(d, m)
+	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	obj, err := client.Get(tier0ID, localeServiceID)
+	if err != nil {
+		return handleReadError(d, "Tier0 HA Vip config", id, err)
 	}
 
 	// Set the ha config values in the scheme
@@ -276,20 +256,12 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigUpdate(d *schema.ResourceData, m i
 		HaVipConfigs: haVipConfigs,
 	}
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		// Use patch to only update the relevant fields
-		rawObj, err1 := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
-
-	} else {
-		client := tier_0s.NewLocaleServicesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
+	sessionContext := getSessionContext(d, m)
+	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
 	}
+	err := client.Patch(tier0ID, localeServiceID, serviceStruct)
 	if err != nil {
 		return handleUpdateError("Tier0 HA Vip config", id, err)
 	}
@@ -309,17 +281,11 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m i
 
 	// Update the locale service with empty HaVipConfigs using get/post
 	doUpdate := func() error {
-		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewLocaleServicesClient(connector)
-			gmObj, err := client.Get(tier0ID, localeServiceID)
-			if err != nil {
-				return err
-			}
-			gmObj.HaVipConfigs = nil
-			_, err = client.Update(tier0ID, localeServiceID, gmObj)
-			return err
+		sessionContext := getSessionContext(d, m)
+		client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
 		}
-		client := tier_0s.NewLocaleServicesClient(connector)
 		obj, err := client.Get(tier0ID, localeServiceID)
 		if err != nil {
 			return err
@@ -348,19 +314,14 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigImport(d *schema.ResourceData, m i
 	tier0ID := s[0]
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		obj, err := client.Get(tier0ID, localeServiceID)
-		if err != nil || obj.HaVipConfigs == nil {
-			return nil, err
-		}
-	} else {
-		var err error
-		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err := client.Get(tier0ID, localeServiceID)
-		if err != nil || obj.HaVipConfigs == nil {
-			return nil, err
-		}
+	sessionContext := getSessionContext(d, m)
+	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
+	obj, err := client.Get(tier0ID, localeServiceID)
+	if err != nil || obj.HaVipConfigs == nil {
+		return nil, err
 	}
 
 	d.Set("tier0_id", tier0ID)

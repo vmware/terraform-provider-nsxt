@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var accTestPolicyLBVirtualServerCreateAttributes = map[string]string{
@@ -716,7 +717,8 @@ func testAccNsxtPolicyLBVirtualServerExists(resourceName string) resource.TestCh
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewLbVirtualServersClient(connector)
+		sessionContext := testAccGetSessionContext()
+		nsxClient := infra.NewLbVirtualServersClient(sessionContext, connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -739,7 +741,8 @@ func testAccNsxtPolicyLBVirtualServerExists(resourceName string) resource.TestCh
 
 func testAccNsxtPolicyLBVirtualServerCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewLbVirtualServersClient(connector)
+	sessionContext := testAccGetSessionContext()
+	nsxClient := infra.NewLbVirtualServersClient(sessionContext, connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_virtual_server" {

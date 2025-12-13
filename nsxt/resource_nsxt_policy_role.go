@@ -11,9 +11,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/aaa"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/aaa"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var featurePermissionTypes = []string{
@@ -81,7 +83,8 @@ func resourceNsxtPolicyUserManagementRole() *schema.Resource {
 
 func resourceNsxtPolicyUserManagementRoleExists(id string, connector client.Connector) (bool, error) {
 	var err error
-	roleClient := aaa.NewRolesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	roleClient := aaa.NewRolesClient(sessionContext, connector)
 	_, err = roleClient.Get(id)
 	if err == nil {
 		return true, nil
@@ -151,7 +154,8 @@ func policyUserManagementRoleUpdate(id string, d *schema.ResourceData, m interfa
 	validateObj := nsxModel.FeaturePermissionArray{
 		FeaturePermissions: features,
 	}
-	roleClient := aaa.NewRolesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	roleClient := aaa.NewRolesClient(sessionContext, connector)
 	reco, err := roleClient.Validate(validateObj)
 	if err != nil {
 		log.Printf("[ERROR] Error validating RoleWithFeatures with ID %s", id)
@@ -206,7 +210,8 @@ func resourceNsxtPolicyUserManagementRoleCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyUserManagementRoleRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	roleClient := aaa.NewRolesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	roleClient := aaa.NewRolesClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -247,7 +252,8 @@ func resourceNsxtPolicyUserManagementRoleUpdate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyUserManagementRoleDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	roleClient := aaa.NewRolesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	roleClient := aaa.NewRolesClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {

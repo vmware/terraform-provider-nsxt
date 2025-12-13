@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var vniPoolPathExample = "/infra/vni-pools/[pool]"
@@ -52,7 +54,8 @@ func resourceNsxtPolicyVniPool() *schema.Resource {
 
 func resourceNsxtPolicyVniPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -83,7 +86,8 @@ func policyVniPoolPatch(id string, d *schema.ResourceData, m interface{}) error 
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -114,7 +118,8 @@ func resourceNsxtPolicyVniPoolRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining VNI Pool ID")
 	}
 
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "VNI Pool", id, err)
@@ -156,7 +161,8 @@ func resourceNsxtPolicyVniPoolDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := infra.NewVniPoolsClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {
