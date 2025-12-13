@@ -13,8 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/transport_node_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	transport_node_collections "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/transport_node_collections"
 )
 
 func dataSourceNsxtPolicyHostTransportNodeCollectionRealization() *schema.Resource {
@@ -56,7 +57,8 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 		return localManagerOnlyError()
 	}
 	connector := getPolicyConnector(m)
-	client := transport_node_collections.NewStateClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := transport_node_collections.NewStateClient(sessionContext, connector)
 
 	path := d.Get("path").(string)
 	delay := d.Get("delay").(int)

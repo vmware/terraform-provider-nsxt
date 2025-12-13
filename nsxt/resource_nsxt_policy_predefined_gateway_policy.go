@@ -11,13 +11,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	nsxt "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	orgroot "github.com/vmware/terraform-provider-nsxt/api"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -278,7 +278,10 @@ func gatewayPolicyInfraPatch(context utl.SessionContext, policy model.GatewayPol
 			Children:     []*data.StructValue{childVPC},
 		}
 
-		client := nsxt.NewOrgRootClient(connector)
+		client := orgroot.NewOrgRootClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Patch(orgRoot, nil)
 	}
 	childDomain, err := createChildDomainWithGatewayPolicy(domain, *policy.Id, policy)
