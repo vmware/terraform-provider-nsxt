@@ -135,7 +135,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		}
 
 		timeout := d.Get("timeout").(int)
-		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, *obj.Path, timeout)
+		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, m, *obj.Path, timeout)
 		entity, err := stateConf.WaitForState()
 		if err != nil {
 			// Clean up NSX allocation

@@ -6,9 +6,11 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -23,8 +25,11 @@ func NewSegmentQosProfileBindingMapsClient(sessionContext utl.SessionContext, co
 	case utl.Local:
 		client = client0.NewSegmentQosProfileBindingMapsClient(connector)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client = client1.NewSegmentQosProfileBindingMapsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewSegmentQosProfileBindingMapsClient(connector)
 
 	default:
 		return nil
@@ -45,8 +50,18 @@ func (c SegmentQosProfileBindingMapClientContext) Get(segmentIdParam string, seg
 			return obj, err
 		}
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentQosProfileBindingMapsClient)
+		gmObj, err1 := client.Get(segmentIdParam, segmentQosProfileBindingMapIdParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentQosProfileBindingMapBindingType(), model0.SegmentQosProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentQosProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentQosProfileBindingMapsClient)
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentQosProfileBindingMapIdParam)
 		if err != nil {
 			return obj, err
@@ -67,8 +82,12 @@ func (c SegmentQosProfileBindingMapClientContext) Delete(segmentIdParam string, 
 		client := c.Client.(client0.SegmentQosProfileBindingMapsClient)
 		err = client.Delete(segmentIdParam, segmentQosProfileBindingMapIdParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentQosProfileBindingMapsClient)
+		err = client.Delete(segmentIdParam, segmentQosProfileBindingMapIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentQosProfileBindingMapsClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentQosProfileBindingMapIdParam)
 
 	default:
@@ -86,8 +105,16 @@ func (c SegmentQosProfileBindingMapClientContext) Patch(segmentIdParam string, s
 		client := c.Client.(client0.SegmentQosProfileBindingMapsClient)
 		err = client.Patch(segmentIdParam, segmentQosProfileBindingMapIdParam, segmentQosProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentQosProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentQosProfileBindingMapParam, model0.SegmentQosProfileBindingMapBindingType(), model1.SegmentQosProfileBindingMapBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(segmentIdParam, segmentQosProfileBindingMapIdParam, gmObj.(model1.SegmentQosProfileBindingMap))
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentQosProfileBindingMapsClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentQosProfileBindingMapIdParam, segmentQosProfileBindingMapParam)
 
 	default:
@@ -106,8 +133,22 @@ func (c SegmentQosProfileBindingMapClientContext) Update(segmentIdParam string, 
 		client := c.Client.(client0.SegmentQosProfileBindingMapsClient)
 		obj, err = client.Update(segmentIdParam, segmentQosProfileBindingMapIdParam, segmentQosProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentQosProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentQosProfileBindingMapParam, model0.SegmentQosProfileBindingMapBindingType(), model1.SegmentQosProfileBindingMapBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		gmResult, err2 := client.Update(segmentIdParam, segmentQosProfileBindingMapIdParam, gmObj.(model1.SegmentQosProfileBindingMap))
+		if err2 != nil {
+			return obj, err2
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmResult, model1.SegmentQosProfileBindingMapBindingType(), model0.SegmentQosProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentQosProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentQosProfileBindingMapsClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentQosProfileBindingMapIdParam, segmentQosProfileBindingMapParam)
 
 	default:
@@ -126,8 +167,18 @@ func (c SegmentQosProfileBindingMapClientContext) List(segmentIdParam string, cu
 		client := c.Client.(client0.SegmentQosProfileBindingMapsClient)
 		obj, err = client.List(segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentQosProfileBindingMapsClient)
+		gmObj, err1 := client.List(segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentQosProfileBindingMapListResultBindingType(), model0.SegmentQosProfileBindingMapListResultBindingType())
+		obj = rawObj.(model0.SegmentQosProfileBindingMapListResult)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentQosProfileBindingMapsClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

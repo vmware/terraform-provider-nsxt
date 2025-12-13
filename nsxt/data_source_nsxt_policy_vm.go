@@ -97,7 +97,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("bios_id", computeIDMap[nsxtPolicyBiosUUIDKey])
 	d.Set("instance_id", computeIDMap[nsxtPolicyInstanceUUIDKey])
 
-	vifList, err := listPolicyVifAttachmentsForVM(m, *vmModel.ExternalId)
+	vifList, err := listPolicyVifAttachmentsForVM(m, *vmModel.ExternalId, context)
 	if err != nil {
 		return fmt.Errorf("Error getting the VIF attachment ids for the VM : %v", err)
 	}

@@ -10,10 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_domain "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -116,7 +116,11 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		// Delete old existing locations
 		connector := getPolicyConnector(m)
 		converter := bindings.NewTypeConverter()
-		dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
+		sessionContext := utl.SessionContext{ClientType: utl.Global}
+		dmClient := domains.NewDomainDeploymentMapsClient(sessionContext, connector)
+		if dmClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		// Get all current locations
 		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -133,11 +137,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 			if !found {
 				// Remove the unused deployment map
 				toDelete := true
-				lmObj, err2 := convertModelBindingType(objInList, gm_model.DomainDeploymentMapBindingType(), model.DomainDeploymentMapBindingType())
-				if err2 != nil {
-					return err2
-				}
-				deleteObj := lmObj.(model.DomainDeploymentMap)
+				deleteObj := objInList
 				childMap := model.ChildDomainDeploymentMap{
 					Id:                  objInList.Id,
 					ResourceType:        "ChildDomainDeploymentMap",
@@ -246,7 +246,10 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("revision", obj.Revision)
 
 	// Also read deployment maps
-	dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
+	dmClient := domains.NewDomainDeploymentMapsClient(sessionContext, connector)
+	if dmClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Domain", err)

@@ -88,12 +88,12 @@ func dataSourceNsxtVpcSubnetPortRead(d *schema.ResourceData, m interface{}) erro
 
 	externalID := d.Get("vm_id").(string)
 	subnetPath := d.Get("subnet_path").(string)
-	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
+	sessionContext := getSessionContext(d, m)
+	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID, sessionContext)
 	if err != nil {
 		return fmt.Errorf("failed to list port attachments for VM id %s", externalID)
 	}
 
-	sessionContext := getSessionContext(d, m)
 	ports, portsErr := listVpcSubnetPorts(sessionContext, connector, subnetPath)
 	if portsErr != nil {
 		return portsErr
