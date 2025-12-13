@@ -6,9 +6,11 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -23,8 +25,11 @@ func NewSegmentDiscoveryProfileBindingMapsClient(sessionContext utl.SessionConte
 	case utl.Local:
 		client = client0.NewSegmentDiscoveryProfileBindingMapsClient(connector)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client = client1.NewSegmentDiscoveryProfileBindingMapsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewSegmentDiscoveryProfileBindingMapsClient(connector)
 
 	default:
 		return nil
@@ -45,8 +50,18 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) Get(infraSegmentIdParam 
 			return obj, err
 		}
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
+		gmObj, err1 := client.Get(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentDiscoveryProfileBindingMapBindingType(), model0.SegmentDiscoveryProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentDiscoveryProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam)
 		if err != nil {
 			return obj, err
@@ -67,8 +82,12 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) Delete(infraSegmentIdPar
 		client := c.Client.(client0.SegmentDiscoveryProfileBindingMapsClient)
 		err = client.Delete(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
+		err = client.Delete(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam)
 
 	default:
@@ -86,8 +105,16 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) Patch(infraSegmentIdPara
 		client := c.Client.(client0.SegmentDiscoveryProfileBindingMapsClient)
 		err = client.Patch(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, segmentDiscoveryProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentDiscoveryProfileBindingMapParam, model0.SegmentDiscoveryProfileBindingMapBindingType(), model1.SegmentDiscoveryProfileBindingMapBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, gmObj.(model1.SegmentDiscoveryProfileBindingMap))
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, segmentDiscoveryProfileBindingMapParam)
 
 	default:
@@ -106,8 +133,22 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) Update(infraSegmentIdPar
 		client := c.Client.(client0.SegmentDiscoveryProfileBindingMapsClient)
 		obj, err = client.Update(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, segmentDiscoveryProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentDiscoveryProfileBindingMapParam, model0.SegmentDiscoveryProfileBindingMapBindingType(), model1.SegmentDiscoveryProfileBindingMapBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		gmResult, err2 := client.Update(infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, gmObj.(model1.SegmentDiscoveryProfileBindingMap))
+		if err2 != nil {
+			return obj, err2
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmResult, model1.SegmentDiscoveryProfileBindingMapBindingType(), model0.SegmentDiscoveryProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentDiscoveryProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, segmentDiscoveryProfileBindingMapIdParam, segmentDiscoveryProfileBindingMapParam)
 
 	default:
@@ -126,8 +167,18 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) List(infraSegmentIdParam
 		client := c.Client.(client0.SegmentDiscoveryProfileBindingMapsClient)
 		obj, err = client.List(infraSegmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
+		gmObj, err1 := client.List(infraSegmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentDiscoveryProfileBindingMapListResultBindingType(), model0.SegmentDiscoveryProfileBindingMapListResultBindingType())
+		obj = rawObj.(model0.SegmentDiscoveryProfileBindingMapListResult)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

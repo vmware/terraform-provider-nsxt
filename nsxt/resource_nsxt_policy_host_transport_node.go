@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/host_transport_nodes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
+	host_transport_nodes "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/host_transport_nodes"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	model2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -213,13 +213,14 @@ func resourceNsxtPolicyHostTransportNodeUpdate(d *schema.ResourceData, m interfa
 	return resourceNsxtPolicyHostTransportNodeRead(d, m)
 }
 
-func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID string) *resource.StateChangeConf {
+func getHostTransportNodeStateConf(connector client.Connector, d *schema.ResourceData, m interface{}, id, siteID, epID string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {
-			client := host_transport_nodes.NewStateClient(connector)
-			_, err := client.Get(siteID, epID, id)
+			sessionContext := getSessionContext(d, m)
+			client := host_transport_nodes.NewStateClient(sessionContext, connector)
+			err := client.Get(siteID, epID, id)
 
 			if isNotFoundError(err) {
 				return "success", "success", nil
@@ -260,7 +261,7 @@ func resourceNsxtPolicyHostTransportNodeDelete(d *schema.ResourceData, m interfa
 		log.Printf("[INFO] Removing NSX from host HostTransportNode with ID %s", id)
 
 		// Busy-wait until removal is complete
-		stateConf := getHostTransportNodeStateConf(connector, id, siteID, epID)
+		stateConf := getHostTransportNodeStateConf(connector, d, m, id, siteID, epID)
 		_, err := stateConf.WaitForState()
 		if err != nil {
 			return fmt.Errorf("failed to remove NSX bits from hosts: %v", err)

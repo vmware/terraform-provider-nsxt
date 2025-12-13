@@ -22,8 +22,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -1173,28 +1171,14 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 	errorMessage := "Failed to read Discovery Profile Map for segment %s: %s"
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
-	var results model.SegmentDiscoveryProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewSegmentDiscoveryProfileBindingMapsClient(connector)
-		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentDiscoveryProfileBindingMapListResultBindingType(), model.SegmentDiscoveryProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
-	} else {
-		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(getSessionContext(d, m), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(segmentID, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
+	sessionContext := getSessionContext(d, m)
+	client := segments.NewSegmentDiscoveryProfileBindingMapsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	results, err := client.List(segmentID, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, segmentID, err)
 	}
 
 	config := make(map[string]interface{})
@@ -1217,28 +1201,14 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 	errorMessage := "Failed to read QoS Profile Map for segment %s: %s"
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
-	var results model.SegmentQosProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewSegmentQosProfileBindingMapsClient(connector)
-		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentQosProfileBindingMapListResultBindingType(), model.SegmentQosProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
-	} else {
-		client := segments.NewSegmentQosProfileBindingMapsClient(getSessionContext(d, m), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
+	sessionContext := getSessionContext(d, m)
+	client := segments.NewSegmentQosProfileBindingMapsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	results, err := client.List(segmentID, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, segmentID, err)
 	}
 
 	config := make(map[string]interface{})
@@ -1262,28 +1232,14 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 	errorMessage := "Failed to read Security Profile Map for segment %s: %s"
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
-	var results model.SegmentSecurityProfileBindingMapListResult
-	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewSegmentSecurityProfileBindingMapsClient(connector)
-		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
-		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentSecurityProfileBindingMapListResultBindingType(), model.SegmentSecurityProfileBindingMapListResultBindingType())
-		if err != nil {
-			return err
-		}
-		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
-	} else {
-		client := segments.NewSegmentSecurityProfileBindingMapsClient(getSessionContext(d, m), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		var err error
-		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf(errorMessage, segmentID, err)
-		}
+	sessionContext := getSessionContext(d, m)
+	client := segments.NewSegmentSecurityProfileBindingMapsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	results, err := client.List(segmentID, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf(errorMessage, segmentID, err)
 	}
 
 	config := make(map[string]interface{})
@@ -1545,26 +1501,17 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 		Refresh: func() (interface{}, string, error) {
 			var ports interface{}
 			var numOfPorts int
-			if isPolicyGlobalManager(m) {
-				portsClient := gm_segments.NewPortsClient(connector)
-				gmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
-				if err != nil {
-					return gmPorts, "error", logAPIError("Error listing segment ports", err)
-				}
-				numOfPorts = len(gmPorts.Results)
-				ports = gmPorts
-			} else {
-				portsClient := segments.NewPortsClient(getSessionContext(d, m), connector)
-				if portsClient == nil {
-					return nil, "error", policyResourceNotSupportedError()
-				}
-				lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
-				if err != nil {
-					return lmPorts, "error", logAPIError("Error listing segment ports", err)
-				}
-				numOfPorts = len(lmPorts.Results)
-				ports = lmPorts
+			sessionContext := getSessionContext(d, m)
+			portsClient := segments.NewPortsClient(sessionContext, connector)
+			if portsClient == nil {
+				return nil, "error", policyResourceNotSupportedError()
 			}
+			lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+			if err != nil {
+				return lmPorts, "error", logAPIError("Error listing segment ports", err)
+			}
+			numOfPorts = len(lmPorts.Results)
+			ports = lmPorts
 
 			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, numOfPorts)
 
