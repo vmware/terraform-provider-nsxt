@@ -19,7 +19,7 @@ func NewOrgRootClient(sessionContext utl.SessionContext, connector vapiProtocolC
 
 	switch sessionContext.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.VPC:
 		client = client0.NewOrgRootClient(connector)
 
 	default:
@@ -34,7 +34,7 @@ func (c OrgRootClientContext) Get(basePathParam *string, filterParam *string, ty
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.VPC:
 		client := c.Client.(client0.OrgRootClient)
 		obj, err = client.Get(basePathParam, filterParam, typeFilterParam)
 		if err != nil {
@@ -52,7 +52,7 @@ func (c OrgRootClientContext) Patch(orgRootParam model0.OrgRoot, enforceRevision
 
 	switch c.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.VPC:
 		client := c.Client.(client0.OrgRootClient)
 		err = client.Patch(orgRootParam, enforceRevisionCheckParam)
 
