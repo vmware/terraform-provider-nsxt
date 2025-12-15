@@ -15,11 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	infra_api "github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
-
-var cliHostSwitchProfilesClient2 = infra_api.NewHostSwitchProfilesClient
 
 var vtepHAHostSwitchProfilePathExample = "/infra/host-switch-profiles/[profile]"
 
@@ -84,7 +81,7 @@ func resourceNsxtVtepHAHostSwitchProfile() *schema.Resource {
 
 func resourceNsxtVtepHAHostSwitchProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliHostSwitchProfilesClient2(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -131,7 +128,7 @@ func resourceNsxtVtepHAHostSwitchProfileCreate(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient2(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	vtepHAHostSwitchProfile := vtepHAHostSwitchProfileSchemaToModel(d)
@@ -159,7 +156,7 @@ func resourceNsxtVtepHAHostSwitchProfileRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining VtepHAHostSwitchProfile ID")
 	}
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient2(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	structValue, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "VtepHAHostSwitchProfile", id, err)
@@ -207,7 +204,7 @@ func resourceNsxtVtepHAHostSwitchProfileUpdate(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient2(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	vtepHAHostSwitchProfile := vtepHAHostSwitchProfileSchemaToModel(d)
@@ -233,7 +230,7 @@ func resourceNsxtVtepHAHostSwitchProfileDelete(d *schema.ResourceData, m interfa
 	}
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient2(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("VtepHAHostSwitchProfile", id, err)

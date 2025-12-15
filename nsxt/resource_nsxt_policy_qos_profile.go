@@ -19,6 +19,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliQosProfilesClient = infra.NewQosProfilesClient
+
 var rateLimiterResourceTypes = []string{
 	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER,
 	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER,
@@ -72,7 +74,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicyQosProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewQosProfilesClient(sessionContext, connector)
+	client := cliQosProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -184,7 +186,7 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating QosProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	client := cliQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -207,7 +209,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining QosProfile ID")
 	}
 
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	client := cliQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -238,7 +240,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	client := cliQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -300,7 +302,7 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	client := cliQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

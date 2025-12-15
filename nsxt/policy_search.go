@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-nsxt/api/search"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -232,7 +231,7 @@ func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 }
 
 func searchGMPolicyResources(context utl.SessionContext, connector client.Connector, query string) ([]*data.StructValue, error) {
-	client := search.NewQueryClient(context, connector)
+	client := cliQueryClient(context, connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
@@ -258,7 +257,7 @@ func searchGMPolicyResources(context utl.SessionContext, connector client.Connec
 }
 
 func searchLM(context utl.SessionContext, connector client.Connector, query string) ([]*data.StructValue, error) {
-	client := search.NewQueryClient(context, connector)
+	client := cliQueryClient(context, connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0

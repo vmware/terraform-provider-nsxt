@@ -10,15 +10,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/subnets"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
-
-var cliSubnetPortsClient = subnets.NewPortsClient
 
 func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 	return &schema.Resource{
@@ -60,7 +57,7 @@ func listVpcSubnetPorts(sessionContext utl.SessionContext, connector client.Conn
 	var ports model.VpcSubnetPortListResult
 
 	for {
-		portClient := cliSubnetPortsClient(sessionContext, connector)
+		portClient := cliVpcSubnetPortsClient(sessionContext, connector)
 		if portClient == nil {
 			return results, policyResourceNotSupportedError()
 		}

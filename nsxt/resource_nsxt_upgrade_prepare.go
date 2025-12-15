@@ -17,13 +17,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/bundles"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/eula"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/pre_upgrade_checks"
 )
+
+var cliUpgradeBundlesClient = upgrade.NewBundlesClient
+var cliEulaAcceptClient = eula.NewAcceptClient
+var cliPreUpgradeChecksFailuresClient = pre_upgrade_checks.NewFailuresClient
+var cliBundlesUploadStatusClient = bundles.NewUploadStatusClient
+var cliUcUpgradeStatusClient = upgrade.NewUcUpgradeStatusClient
 
 var precheckComponentTypes = []string{"EDGE", "HOST", "MP"}
 
@@ -168,7 +173,7 @@ func isVCF9HostUpgrade(m interface{}, targetVersion string) (bool, error) {
 		return false, nil
 	}
 	connector := getPolicyConnector(m)
-	client := upgrade.NewStatusSummaryClient(connector)
+	client := cliUpgradeStatusSummaryClient(connector)
 	statusSummary, err := client.Get(nil, nil, nil)
 	if err != nil {
 		return false, err
@@ -200,7 +205,7 @@ func isVCF9HostUpgrade(m interface{}, targetVersion string) (bool, error) {
 
 func getSummaryInfo(m interface{}) (string, bool, error) {
 	connector := getPolicyConnector(m)
-	summaryClient := upgrade.NewSummaryClient(connector)
+	summaryClient := cliUpgradeSummaryClient(connector)
 	summary, err := summaryClient.Get()
 	if err != nil {
 		return "", false, err
@@ -311,7 +316,7 @@ func uploadUpgradeBundle(d *schema.ResourceData, m interface{}, bundleType strin
 	userName := c.NsxtClientConfig.UserName
 	password := c.NsxtClientConfig.Password
 	connector := getPolicyConnector(m)
-	summaryClient := upgrade.NewSummaryClient(connector)
+	summaryClient := cliUpgradeSummaryClient(connector)
 	summary, err := summaryClient.Get()
 	if err != nil {
 		return err
@@ -340,7 +345,7 @@ func uploadUpgradeBundle(d *schema.ResourceData, m interface{}, bundleType strin
 		}
 		url = precheckBundleURL
 	}
-	client := upgrade.NewBundlesClient(connector)
+	client := cliUpgradeBundlesClient(connector)
 	bundleFetchRequest := nsxModel.UpgradeBundleFetchRequest{
 		Url: &url,
 	}
@@ -364,7 +369,7 @@ func acceptUserAgreement(d *schema.ResourceData, m interface{}) error {
 	if !acceptUserAgreement {
 		return fmt.Errorf("To proceed with upgrade, you must accept user agreement")
 	}
-	client := eula.NewAcceptClient(connector)
+	client := cliEulaAcceptClient(connector)
 	err := client.Create()
 	if err != nil {
 		return err
@@ -374,7 +379,7 @@ func acceptUserAgreement(d *schema.ResourceData, m interface{}) error {
 
 func upgradeUc(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	summaryClient := upgrade.NewSummaryClient(connector)
+	summaryClient := cliUpgradeSummaryClient(connector)
 	summary, err := summaryClient.Get()
 	if err != nil {
 		return err
@@ -383,7 +388,7 @@ func upgradeUc(d *schema.ResourceData, m interface{}) error {
 		log.Printf("Upgrade coordinator already upgraded")
 		return nil
 	}
-	client := nsx.NewUpgradeClient(connector)
+	client := cliUpgradeClient(connector)
 	err = client.Upgradeuc()
 	if err != nil {
 		return err
@@ -394,7 +399,7 @@ func upgradeUc(d *schema.ResourceData, m interface{}) error {
 
 func executePreupgradeChecks(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewUpgradeClient(connector)
+	client := cliUpgradeClient(connector)
 	err := client.Executepreupgradechecks(nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return err
@@ -412,7 +417,7 @@ func executePreupgradeChecks(d *schema.ResourceData, m interface{}) error {
 
 func getPrecheckErrors(m interface{}, typeParam *string) ([]nsxModel.UpgradeCheckFailure, error) {
 	connector := getPolicyConnector(m)
-	client := pre_upgrade_checks.NewFailuresClient(connector)
+	client := cliPreUpgradeChecksFailuresClient(connector)
 	resultList, err := client.List(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, typeParam, nil, nil)
 	if err != nil {
 		return nil, err
@@ -438,7 +443,7 @@ func setFailedPrechecksInSchema(d *schema.ResourceData, precheckErrors []nsxMode
 
 func waitForBundleUpload(m interface{}, bundleID string, timeout int) error {
 	connector := getPolicyConnector(m)
-	client := bundles.NewUploadStatusClient(connector)
+	client := cliBundlesUploadStatusClient(connector)
 	pendingStates := []string{
 		nsxModel.UpgradeBundleUploadStatus_STATUS_UPLOADING,
 		nsxModel.UpgradeBundleUploadStatus_STATUS_VERIFYING,
@@ -477,7 +482,7 @@ func waitForBundleUpload(m interface{}, bundleID string, timeout int) error {
 
 func waitForUcUpgrade(m interface{}, timeout int) error {
 	connector := getPolicyConnector(m)
-	client := upgrade.NewUcUpgradeStatusClient(connector)
+	client := cliUcUpgradeStatusClient(connector)
 	pendingStates := []string{
 		nsxModel.UcUpgradeStatus_STATE_NOT_STARTED,
 		nsxModel.UcUpgradeStatus_STATE_IN_PROGRESS,
@@ -517,7 +522,7 @@ func waitForUcUpgrade(m interface{}, timeout int) error {
 
 func waitForPrecheckComplete(m interface{}, componentType string, timeout int) error {
 	connector := getPolicyConnector(m)
-	client := upgrade.NewStatusSummaryClient(connector)
+	client := cliUpgradeStatusSummaryClient(connector)
 	pendingStates := []string{
 		nsxModel.UpgradeChecksExecutionStatus_STATUS_NOT_STARTED,
 		nsxModel.UpgradeChecksExecutionStatus_STATUS_IN_PROGRESS,

@@ -13,7 +13,6 @@ import (
 	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	realized_enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state/enforcement_points"
 	realized_virtual_machines "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state/virtual_machines"
-	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -30,7 +29,6 @@ var (
 	nsxtPolicyInstanceUUIDKey = "instanceUuid"
 )
 
-var cliSegmentsPortsClient = segments.NewPortsClient
 var cliT1SegmentsPortsClient = t1_segments.NewPortsClient
 var cliVifsClient = realized_enforcement_points.NewVifsClient
 var cliVirtualMachinesClient = realized_enforcement_points.NewVirtualMachinesClient
@@ -134,7 +132,7 @@ func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Conn
 
 	for {
 		if len(gwID) == 0 {
-			client := cliSegmentsPortsClient(context, connector)
+			client := cliPortsClient(context, connector)
 			if client == nil {
 				return nil, policyResourceNotSupportedError()
 			}
@@ -336,7 +334,7 @@ func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Con
 					port.Tags = tags
 					log.Printf("[DEBUG] Updating port %s with %d tags", *port.Path, len(tags))
 					if len(gwID) == 0 {
-						client := cliSegmentsPortsClient(context, connector)
+						client := cliPortsClient(context, connector)
 						if client == nil {
 							return policyResourceNotSupportedError()
 						}

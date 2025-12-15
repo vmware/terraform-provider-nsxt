@@ -15,11 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	infra_api "github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
-
-var cliHostSwitchProfilesClient3 = infra_api.NewHostSwitchProfilesClient
 
 var lacpLoadBalanceAlgorithms = []string{
 	model.Lag_LOAD_BALANCE_ALGORITHM_SRCMAC,
@@ -280,7 +277,7 @@ func setUplinkHostSwitchProfileSchema(d *schema.ResourceData, profile model.Poli
 func resourceNsxtUplinkHostSwitchProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliHostSwitchProfilesClient3(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	structValue, err := client.Get(id)
 	if err == nil {
 		converter := bindings.NewTypeConverter()
@@ -312,7 +309,7 @@ func resourceNsxtUplinkHostSwitchProfileRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining UplinkHostSwitchProfile ID")
 	}
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient3(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	structValue, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "UplinkHostSwitchProfile", id, err)
@@ -444,7 +441,7 @@ func resourceNsxtUplinkHostSwitchProfileCreate(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient3(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	uplinkHostSwitchProfile := uplinkHostSwitchProfileSchemaToModel(d)
@@ -472,7 +469,7 @@ func resourceNsxtUplinkHostSwitchProfileUpdate(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient3(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	uplinkHostSwitchProfile := uplinkHostSwitchProfileSchemaToModel(d)
@@ -498,7 +495,7 @@ func resourceNsxtUplinkHostSwitchProfileDelete(d *schema.ResourceData, m interfa
 	}
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliHostSwitchProfilesClient3(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("UplinkHostSwitchProfile", id, err)

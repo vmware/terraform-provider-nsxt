@@ -15,7 +15,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -89,7 +88,7 @@ func getDistributedFloodProtectionProfile() map[string]*schema.Schema {
 
 func resourceNsxtPolicyFloodProtectionProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 
-	client := infra.NewFloodProtectionProfilesClient(sessionContext, connector)
+	client := cliFloodProtectionProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -147,7 +146,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfilePatch(d *schema.Resource
 	profileStruct := profileValue.(*data.StructValue)
 
 	log.Printf("[INFO] Patching DistributedFloodProtectionProfile with ID %s", id)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	client := cliFloodProtectionProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -182,7 +181,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileRead(d *schema.ResourceD
 		return fmt.Errorf("Error obtaining FloodProtectionProfile ID")
 	}
 
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	client := cliFloodProtectionProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -236,7 +235,7 @@ func resourceNsxtPolicyFloodProtectionProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	client := cliFloodProtectionProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

@@ -9,7 +9,6 @@ import (
 	"net"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 )
 
 func dataSourceNsxtManagementCluster() *schema.Resource {
@@ -32,7 +31,7 @@ func dataSourceNsxtManagementCluster() *schema.Resource {
 
 func dataSourceNsxtManagementClusterRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 
 	hostIP, err := net.LookupIP(m.(nsxtClients).Host[len("https://"):])
 	if err != nil {
