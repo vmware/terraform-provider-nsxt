@@ -21,9 +21,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliClusterClient = nsx.NewClusterClient
 
 const nodeConnectivityInitialDelay int = 20
 const nodeConnectivityInterval int = 16
@@ -133,7 +134,7 @@ func getNodeConnectivityStateConf(connector client.Connector, delay int, interva
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {
 			sessionContext := utl.SessionContext{ClientType: utl.Local}
-			siteClient := infra.NewSitesClient(sessionContext, connector)
+			siteClient := cliSitesClient(sessionContext, connector)
 			// We use default site API to probe NSX manager API endpoint readiness,
 			// since it may take a while to auto-generate default site after API is responsive
 			resp, err := siteClient.Get("default")
@@ -247,7 +248,7 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 	// function return values are:
 	// clusterID, certSha256Thumbprint, hostIP, error
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 	c := m.(nsxtClients)
 	minRetryInterval := c.CommonConfig.MinRetryInterval
 	maxRetryInterval := c.CommonConfig.MaxRetryInterval
@@ -345,7 +346,7 @@ func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode 
 	log.Printf("[INFO] Cluster %s. Joining node %s", clusterID, guestNode.IPAddress)
 	newNsxClients := c.(nsxtClients)
 	connector := getStandalonePolicyConnector(newNsxClients, true)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 	username, password := getHostCredential(m)
 	hostIP := getMatchingIPVersion(guestNode.IPAddress, hostIPs)
 	if hostIP == "" {
@@ -413,7 +414,7 @@ func isMatchingNode(node nsxModel.ClusterNodeInfo, address string) bool {
 func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 	clusterConfig, err := client.Get()
 	if err != nil {
 		return handleReadError(d, "ManagerCluster", id, err)
@@ -451,7 +452,7 @@ func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) err
 	}
 	id := d.Id()
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 
 	clusterID, certSha256Thumbprint, hostIPs, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
@@ -507,7 +508,7 @@ func getClusterNodesIPs(nodes interface{}) []string {
 
 func resourceNsxtManagerClusterDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterClient(connector)
+	client := cliClusterClient(connector)
 	nodes := getClusterNodesFromSchema(d)
 	force := "true"
 	gracefulShutdown := "true"

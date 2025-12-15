@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliTier0LocaleServicesClient = tier0_localeservices.NewLocaleServicesClient
+
 func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyTier0GatewayRead,
@@ -68,7 +70,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 
 func getPolicyTier0GatewayLocaleServiceEntry(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
-	client := tier0_localeservices.NewLocaleServicesClient(context, connector)
+	client := cliTier0LocaleServicesClient(context, connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
 	if err == nil {
 		return &obj, nil

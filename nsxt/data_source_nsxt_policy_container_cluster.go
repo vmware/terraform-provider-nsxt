@@ -16,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliClusterControlPlanesClient = enforcement_points.NewClusterControlPlanesClient
+
 func dataSourceNsxtPolicyContainerCluster() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyContainerClusterRead,
@@ -30,7 +32,7 @@ func dataSourceNsxtPolicyContainerCluster() *schema.Resource {
 }
 
 func listClusterControlPlanes(siteID, epID string, connector client.Connector, sessionContext utl.SessionContext) ([]model.ClusterControlPlane, error) {
-	client := enforcement_points.NewClusterControlPlanesClient(sessionContext, connector)
+	client := cliClusterControlPlanesClient(sessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -61,7 +63,7 @@ func listClusterControlPlanes(siteID, epID string, connector client.Connector, s
 func dataSourceNsxtPolicyContainerClusterRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewClusterControlPlanesClient(sessionContext, connector)
+	client := cliClusterControlPlanesClient(sessionContext, connector)
 
 	// As Project resource type paths reside under project and not under /infra or /global_infra or such, and since
 	// this data source fetches extra attributes, e.g site_info and tier0_gateway_paths, it's simpler to implement using .List()

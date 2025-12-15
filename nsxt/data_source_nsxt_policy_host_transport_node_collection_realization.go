@@ -18,6 +18,8 @@ import (
 	transport_node_collections "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/transport_node_collections"
 )
 
+var cliTransportNodeCollectionStateClient = transport_node_collections.NewStateClient
+
 func dataSourceNsxtPolicyHostTransportNodeCollectionRealization() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead,
@@ -58,7 +60,7 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 	}
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := transport_node_collections.NewStateClient(sessionContext, connector)
+	client := cliTransportNodeCollectionStateClient(sessionContext, connector)
 
 	path := d.Get("path").(string)
 	delay := d.Get("delay").(int)

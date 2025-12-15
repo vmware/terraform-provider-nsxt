@@ -25,6 +25,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliSegmentsClient = infra.NewSegmentsClient
+var cliSegmentDiscoveryProfileBindingMapsClient = segments.NewSegmentDiscoveryProfileBindingMapsClient
+var cliSegmentQosProfileBindingMapsClient = segments.NewSegmentQosProfileBindingMapsClient
+var cliSegmentSecurityProfileBindingMapsClient = segments.NewSegmentSecurityProfileBindingMapsClient
+var cliTier1SegmentsClient = tier1s.NewSegmentsClient
+var cliPortsClient = segments.NewPortsClient
+
 var connectivityValues = []string{
 	model.SegmentAdvancedConfig_CONNECTIVITY_ON,
 	model.SegmentAdvancedConfig_CONNECTIVITY_OFF,
@@ -1177,7 +1184,7 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
 	sessionContext := getSessionContext(d, m)
-	client := segments.NewSegmentDiscoveryProfileBindingMapsClient(sessionContext, connector)
+	client := cliSegmentDiscoveryProfileBindingMapsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1207,7 +1214,7 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
 	sessionContext := getSessionContext(d, m)
-	client := segments.NewSegmentQosProfileBindingMapsClient(sessionContext, connector)
+	client := cliSegmentQosProfileBindingMapsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1238,7 +1245,7 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 	connector := getPolicyConnector(m)
 	segmentID := d.Id()
 	sessionContext := getSessionContext(d, m)
-	client := segments.NewSegmentSecurityProfileBindingMapsClient(sessionContext, connector)
+	client := cliSegmentSecurityProfileBindingMapsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1301,7 +1308,7 @@ func setSegmentBridgeConfigInSchema(d *schema.ResourceData, obj *model.Segment) 
 
 func nsxtPolicyGetSegment(context utl.SessionContext, connector client.Connector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	if !isFixed {
-		client := infra.NewSegmentsClient(context, connector)
+		client := cliSegmentsClient(context, connector)
 		if client == nil {
 			return model.Segment{}, policyResourceNotSupportedError()
 		}
@@ -1316,7 +1323,7 @@ func nsxtPolicyGetSegment(context utl.SessionContext, connector client.Connector
 		return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
 	}
 
-	client := tier1s.NewSegmentsClient(context, connector)
+	client := cliTier1SegmentsClient(context, connector)
 	if client == nil {
 		return model.Segment{}, policyResourceNotSupportedError()
 	}
@@ -1507,7 +1514,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 			var ports interface{}
 			var numOfPorts int
 			sessionContext := getSessionContext(d, m)
-			portsClient := segments.NewPortsClient(sessionContext, connector)
+			portsClient := cliPortsClient(sessionContext, connector)
 			if portsClient == nil {
 				return nil, "error", policyResourceNotSupportedError()
 			}

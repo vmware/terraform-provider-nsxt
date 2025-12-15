@@ -13,6 +13,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliOspfClient = ospf_routing_config.NewOspfClient
+
 func resourceNsxtPolicyOspfConfig() *schema.Resource {
 
 	return &schema.Resource{
@@ -126,7 +128,7 @@ func policyOspfConfigPatch(d *schema.ResourceData, m interface{}, gwID string, l
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := ospf_routing_config.NewOspfClient(sessionContext, connector)
+	client := cliOspfClient(sessionContext, connector)
 	_, err := client.Patch(gwID, localeServiceID, obj)
 	return err
 }
@@ -178,7 +180,7 @@ func resourceNsxtPolicyOspfConfigRead(d *schema.ResourceData, m interface{}) err
 	localeServiceID := d.Get("locale_service_id").(string)
 
 	sessionContext := getSessionContext(d, m)
-	client := ospf_routing_config.NewOspfClient(sessionContext, connector)
+	client := cliOspfClient(sessionContext, connector)
 	obj, err := client.Get(gwID, localeServiceID)
 	if err != nil {
 		return handleReadError(d, "Ospf Config", gwID, err)

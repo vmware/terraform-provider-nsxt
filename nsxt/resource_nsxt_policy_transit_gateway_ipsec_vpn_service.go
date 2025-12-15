@@ -11,6 +11,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliTransitGatewayIpsecVpnServicesClient = transitgateways.NewIpsecVpnServicesClient
+
 var twIpsecVpnParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
 
 var transitGatewayIpsecVpnServiceSchema = getIPSecVpnServiceCommonSchema(false, true)
@@ -44,7 +46,7 @@ func resourceNsxtPolicyTGWIPSecVpnServicesCreate(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewIpsecVpnServicesClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnServicesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -67,7 +69,7 @@ func resourceNsxtPolicyTGWIPSecVpnServicesRead(d *schema.ResourceData, m interfa
 
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewIpsecVpnServicesClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnServicesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -101,7 +103,7 @@ func resourceNsxtPolicyTGWIPSecVpnServicesUpdate(d *schema.ResourceData, m inter
 	ipSecVpnService.Revision = &revision
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewIpsecVpnServicesClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnServicesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -127,7 +129,7 @@ func resourceNsxtPolicyTGWIPSecVpnServicesDelete(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewIpsecVpnServicesClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnServicesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -146,7 +148,7 @@ func resourceNsxtPolicyTGWIPSecVpnServicesExists(sessionContext utl.SessionConte
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := transitgateways.NewIpsecVpnServicesClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnServicesClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}

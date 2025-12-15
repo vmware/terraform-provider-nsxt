@@ -18,6 +18,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliProjectIpAddressAllocationsClient = projects.NewIpAddressAllocationsClient
+
 var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -85,7 +87,7 @@ func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 func resourceNsxtPolicyProjectIpAddressAllocationExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := projects.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -125,7 +127,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	log.Printf("[INFO] Creating ProjectIpAddressAllocation with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("ProjectIpAddressAllocation", id, err)
@@ -145,7 +147,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
@@ -193,7 +195,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 
 	// Only the above attributes can be updated, others force recreation
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -215,7 +217,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationDelete(d *schema.ResourceData, 
 	sessionContext := getSessionContext(d, m)
 	parents := getVpcParentsFromContext(sessionContext)
 
-	client := projects.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id)
 
 	if err != nil {

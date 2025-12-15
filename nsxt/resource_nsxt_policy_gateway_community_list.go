@@ -16,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliCommunityListsClient = tier_0s.NewCommunityListsClient
+
 func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayCommunityListCreate,
@@ -55,7 +57,7 @@ func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, con
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+	client := cliCommunityListsClient(sessionContext, connector)
 	_, err = client.Get(tier0Id, id)
 	if err == nil {
 		return true, nil
@@ -89,7 +91,7 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 		} else {
 			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
-		client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+		client := cliCommunityListsClient(sessionContext, connector)
 		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Community List with ID '%s' already exists on Tier0 Gateway %s", id, gwID)
@@ -119,7 +121,7 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+	client := cliCommunityListsClient(sessionContext, connector)
 	err = client.Patch(gwID, id, obj)
 	if err != nil {
 		return handleCreateError("Community List", id, err)
@@ -151,7 +153,7 @@ func resourceNsxtPolicyGatewayCommunityListRead(d *schema.ResourceData, m interf
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+	client := cliCommunityListsClient(sessionContext, connector)
 	obj, err := client.Get(gwID, id)
 	if err != nil {
 		return handleReadError(d, "Gateway Community List", id, err)
@@ -201,7 +203,7 @@ func resourceNsxtPolicyGatewayCommunityListUpdate(d *schema.ResourceData, m inte
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+	client := cliCommunityListsClient(sessionContext, connector)
 	_, err = client.Update(gwID, id, obj)
 	if err != nil {
 		return handleCreateError("Gateway Community List", id, err)
@@ -229,7 +231,7 @@ func resourceNsxtPolicyGatewayCommunityListDelete(d *schema.ResourceData, m inte
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewCommunityListsClient(sessionContext, connector)
+	client := cliCommunityListsClient(sessionContext, connector)
 	err = client.Delete(gwID, id)
 
 	if err != nil {

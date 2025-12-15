@@ -19,6 +19,8 @@ import (
 	edge_clusters "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/edge_clusters"
 )
 
+var cliEdgeNodesClient = edge_clusters.NewEdgeNodesClient
+
 func dataSourceNsxtPolicyEdgeNode() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyEdgeNodeRead,
@@ -69,7 +71,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	// Local manager
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := edge_clusters.NewEdgeNodesClient(sessionContext, connector)
+	client := cliEdgeNodesClient(sessionContext, connector)
 	var obj model.PolicyEdgeNode
 	edgeClusterID := getPolicyIDFromPath(edgeClusterPath)
 	objID := d.Get("id").(string)

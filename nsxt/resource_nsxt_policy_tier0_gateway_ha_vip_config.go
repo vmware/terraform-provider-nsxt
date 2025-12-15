@@ -11,8 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 )
 
 var interfacePathLen = 8
@@ -151,7 +149,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigCreate(d *schema.ResourceData, m i
 	id := newUUID()
 
 	sessionContext := getSessionContext(d, m)
-	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	client := cliTier0LocaleServicesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -178,7 +176,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m int
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	client := cliTier0LocaleServicesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -257,7 +255,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigUpdate(d *schema.ResourceData, m i
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	client := cliTier0LocaleServicesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -282,7 +280,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m i
 	// Update the locale service with empty HaVipConfigs using get/post
 	doUpdate := func() error {
 		sessionContext := getSessionContext(d, m)
-		client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+		client := cliTier0LocaleServicesClient(sessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -315,7 +313,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigImport(d *schema.ResourceData, m i
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+	client := cliTier0LocaleServicesClient(sessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

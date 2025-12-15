@@ -20,6 +20,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliTunnelsClient = locale_services.NewTunnelsClient
+
 func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier0GatewayGRETunnelCreate,
@@ -233,7 +235,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelExists(id, localeServicePath string,
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := locale_services.NewTunnelsClient(sessionContext, connector)
+	client := cliTunnelsClient(sessionContext, connector)
 	_, err = client.Get(tier0id, localeSvcID, id)
 
 	if isNotFoundError(err) {
@@ -258,7 +260,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := locale_services.NewTunnelsClient(sessionContext, connector)
+	client := cliTunnelsClient(sessionContext, connector)
 
 	obj, err := tier0GatewayGRETunnelFromSchema(d)
 	if err != nil {
@@ -292,7 +294,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelRead(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := locale_services.NewTunnelsClient(sessionContext, connector)
+	client := cliTunnelsClient(sessionContext, connector)
 	obj, err := client.Get(tier0id, localeSvcID, id)
 	if err != nil {
 		return handleReadError(d, "GreTunnel", id, err)
@@ -355,7 +357,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := locale_services.NewTunnelsClient(sessionContext, connector)
+	client := cliTunnelsClient(sessionContext, connector)
 
 	obj, err := tier0GatewayGRETunnelFromSchema(d)
 	if err != nil {
@@ -385,7 +387,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelDelete(d *schema.ResourceData, m int
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := locale_services.NewTunnelsClient(sessionContext, connector)
+	client := cliTunnelsClient(sessionContext, connector)
 
 	log.Printf("[INFO] Deleting GRE Tunnel with ID %s", id)
 	err = client.Delete(tier0id, localeSvcID, id)

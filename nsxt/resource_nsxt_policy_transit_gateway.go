@@ -22,6 +22,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliTransitGatewaysClient = projects.NewTransitGatewaysClient
+
 var transitGatewayHaModeValues = []string{
 	model.TransitGatewayHighAvailabilityConfig_HA_MODE_ACTIVE,
 	model.TransitGatewayHighAvailabilityConfig_HA_MODE_STANDBY,
@@ -198,7 +200,7 @@ func resourceNsxtPolicyTransitGateway() *schema.Resource {
 func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	client := cliTransitGatewaysClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -287,7 +289,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 	log.Printf("[INFO] Creating TransitGateway with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	client := cliTransitGatewaysClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("TransitGateway", id, err)
@@ -307,7 +309,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	client := cliTransitGatewaysClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
@@ -410,7 +412,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	client := cliTransitGatewaysClient(sessionContext, connector)
 	_, err = client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleUpdateError("TransitGateway", id, err)
@@ -429,7 +431,7 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	sessionContext := getSessionContext(d, m)
 	parents := getVpcParentsFromContext(sessionContext)
 
-	client := projects.NewTransitGatewaysClient(sessionContext, connector)
+	client := cliTransitGatewaysClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id)
 
 	if err != nil {

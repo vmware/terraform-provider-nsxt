@@ -18,6 +18,9 @@ import (
 	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 )
 
+var cliSegmentsDhcpStaticBindingConfigsClient = segments.NewDhcpStaticBindingConfigsClient
+var cliT1SegmentsDhcpStaticBindingConfigsClient = t1_segments.NewDhcpStaticBindingConfigsClient
+
 func resourceNsxtPolicyDhcpV6StaticBinding() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDhcpV6StaticBindingCreate,
@@ -137,7 +140,7 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -145,7 +148,7 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 
 	// fixed segment
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -196,14 +199,14 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		dhcpObj, err = client.Get(segmentID, id)
 	} else {
 		// fixed segment
-		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

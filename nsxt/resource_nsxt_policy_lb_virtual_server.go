@@ -21,6 +21,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliLbVirtualServersClient = infra.NewLbVirtualServersClient
+
 var lbClientSSLModeValues = []string{
 	model.LBClientSslProfileBinding_CLIENT_AUTH_REQUIRED,
 	model.LBClientSslProfileBinding_CLIENT_AUTH_IGNORE,
@@ -1529,7 +1531,7 @@ func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model
 func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	// For exists check, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewLbVirtualServersClient(sessionContext, connector)
+	client := cliLbVirtualServersClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -1549,7 +1551,7 @@ func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connect
 func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbVirtualServersClient(sessionContext, connector)
+	client := cliLbVirtualServersClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -1624,7 +1626,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbVirtualServersClient(sessionContext, connector)
+	client := cliLbVirtualServersClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -1693,7 +1695,7 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbVirtualServersClient(sessionContext, connector)
+	client := cliLbVirtualServersClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -1799,7 +1801,7 @@ func resourceNsxtPolicyLBVirtualServerDelete(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbVirtualServersClient(sessionContext, connector)
+	client := cliLbVirtualServersClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
