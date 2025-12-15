@@ -10,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func dataSourceNsxtPolicyIPBlock() *schema.Resource {
@@ -30,7 +28,7 @@ func dataSourceNsxtPolicyIPBlock() *schema.Resource {
 
 func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	client := cliIpBlocksClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

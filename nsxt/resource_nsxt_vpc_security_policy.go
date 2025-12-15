@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -51,7 +50,7 @@ func resourceNsxtVPCSecurityPolicyDelete(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesClient(getSessionContext(d, m), connector)
 	err := client.Delete("", id)
 
 	if err != nil {

@@ -10,13 +10,20 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
-	segment "github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	port_profiles "github.com/vmware/terraform-provider-nsxt/api/infra/segments/ports"
 	t1_segment "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	t1_port_profiles "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments/ports"
 
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliT1SegmentPortsClient = t1_segment.NewPortsClient
+var cliPortDiscoveryProfileBindingMapsClient = port_profiles.NewPortDiscoveryProfileBindingMapsClient
+var cliPortQosProfileBindingMapsClient = port_profiles.NewPortQosProfileBindingMapsClient
+var cliPortSecurityProfileBindingMapsClient = port_profiles.NewPortSecurityProfileBindingMapsClient
+var cliT1PortDiscoveryProfileBindingMapsClient = t1_port_profiles.NewPortDiscoveryProfileBindingMapsClient
+var cliT1PortQosProfileBindingMapsClient = t1_port_profiles.NewPortQosProfileBindingMapsClient
+var cliT1PortSecurityProfileBindingMapsClient = t1_port_profiles.NewPortSecurityProfileBindingMapsClient
 
 func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
 	description := d.Get("description").(string)
@@ -394,10 +401,10 @@ func getSegmentPort(segmentPath, segmentPortId string, context utl.SessionContex
 		if t1Id == "" {
 			return model.SegmentPort{}, fmt.Errorf("Error getting the tier1 gateway ID : %v", err)
 		}
-		portsT1Client := t1_segment.NewPortsClient(context, connector)
+		portsT1Client := cliT1SegmentPortsClient(context, connector)
 		segPort, err = portsT1Client.Get(t1Id, segmentId, segmentPortId)
 	} else {
-		portsClient := segment.NewPortsClient(context, connector)
+		portsClient := cliPortsClient(context, connector)
 		segPort, err = portsClient.Get(segmentId, segmentPortId)
 	}
 	return segPort, err
@@ -479,7 +486,7 @@ func (c segmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Resourc
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortDiscoveryProfileBindingMapListResult
-	client := port_profiles.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+	client := cliPortDiscoveryProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -510,7 +517,7 @@ func (c segmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData,
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortQosProfileBindingMapListResult
-	client := port_profiles.NewPortQosProfileBindingMapsClient(context, connector)
+	client := cliPortQosProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -542,7 +549,7 @@ func (c segmentPort) nsxtPolicyPortSegmentSecurityProfileRead(d *schema.Resource
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortSecurityProfileBindingMapListResult
-	client := port_profiles.NewPortSecurityProfileBindingMapsClient(context, connector)
+	client := cliPortSecurityProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -573,7 +580,7 @@ func (c tier1SegmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Re
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortDiscoveryProfileBindingMapListResult
-	client := t1_port_profiles.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+	client := cliT1PortDiscoveryProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -604,7 +611,7 @@ func (c tier1SegmentPort) nsxtPolicySegmentPortQosProfileRead(d *schema.Resource
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortQosProfileBindingMapListResult
-	client := t1_port_profiles.NewPortQosProfileBindingMapsClient(context, connector)
+	client := cliT1PortQosProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -636,7 +643,7 @@ func (c tier1SegmentPort) nsxtPolicyPortSegmentSecurityProfileRead(d *schema.Res
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 	var results model.PortSecurityProfileBindingMapListResult
-	client := t1_port_profiles.NewPortSecurityProfileBindingMapsClient(context, connector)
+	client := cliT1PortSecurityProfileBindingMapsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
