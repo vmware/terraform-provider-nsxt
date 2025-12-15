@@ -124,7 +124,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		if len(d.Get("cidrs").([]interface{})) > 0 {
 			d.Set("cidrs", block.Cidrs)
 		}
-		d.Set("subnet_exclusive", block.IsSubnetExclusive)
+		d.Set("subnet_exclusive", block.SubnetExclusive)
 		d.Set("range", setAllocationRangeListInSchema(block.Ranges))
 		d.Set("excluded_ips", setAllocationRangeListInSchema(block.ExcludedIps))
 		if block.Cidr != nil {
@@ -155,7 +155,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
 	cidrs := getStringListFromSchemaList(d, "cidrs")
-	isSubnetExclusive := d.Get("subnet_exclusive").(bool)
+	subnetExclusive := d.Get("subnet_exclusive").(bool)
 	ranges := getAllocationRangeListFromSchema(d.Get("range").([]interface{}))
 	excludedIPs := getAllocationRangeListFromSchema(d.Get("excluded_ips").([]interface{}))
 
@@ -175,7 +175,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		obj.Cidr = &cidr
 	}
 	if util.NsxVersionHigherOrEqual("9.1.0") {
-		obj.IsSubnetExclusive = &isSubnetExclusive
+		obj.SubnetExclusive = &subnetExclusive
 	}
 
 	// Create the resource using PATCH
@@ -232,7 +232,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		obj.Cidr = &cidr
 	}
 	if util.NsxVersionHigherOrEqual("9.1.0") {
-		obj.IsSubnetExclusive = &isSubnetExclusive
+		obj.SubnetExclusive = &isSubnetExclusive
 	}
 
 	_, err := client.Update(id, obj)
