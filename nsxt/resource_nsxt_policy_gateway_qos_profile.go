@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliGatewayQosProfilesClient = infra.NewGatewayQosProfilesClient
+
 var gatewayQosProfileExcessActionValues = []string{
 	model.GatewayQosProfile_EXCESS_ACTION_DROP,
 }
@@ -66,7 +68,7 @@ func resourceNsxtPolicyGatewayQosProfileExists(id string, connector client.Conne
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	client := cliGatewayQosProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -107,7 +109,7 @@ func resourceNsxtPolicyGatewayQosProfilePatch(d *schema.ResourceData, m interfac
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	client := cliGatewayQosProfilesClient(sessionContext, connector)
 	return client.Patch(id, obj, nil)
 }
 
@@ -145,7 +147,7 @@ func resourceNsxtPolicyGatewayQosProfileRead(d *schema.ResourceData, m interface
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	client := cliGatewayQosProfilesClient(sessionContext, connector)
 	var err error
 	obj, err = client.Get(id)
 	if err != nil {
@@ -195,7 +197,7 @@ func resourceNsxtPolicyGatewayQosProfileDelete(d *schema.ResourceData, m interfa
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	client := cliGatewayQosProfilesClient(sessionContext, connector)
 	err = client.Delete(id, nil)
 
 	if err != nil {

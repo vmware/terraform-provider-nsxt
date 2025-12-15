@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliNetworkSpansClient = infra.NewNetworkSpansClient
+
 var networkSpanPathExample = getMultitenancyPathExample("/infra/network-spans/[networkSpan]")
 
 var networkSpanSchema = map[string]*metadata.ExtendedSchema{
@@ -59,7 +61,7 @@ func resourceNsxtPolicyNetworkSpanExists(id string, connector client.Connector, 
 
 	// For exists check, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -104,7 +106,7 @@ func resourceNsxtPolicyNetworkSpanCreate(d *schema.ResourceData, m interface{}) 
 	log.Printf("[INFO] Creating NetworkSpan with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -127,7 +129,7 @@ func resourceNsxtPolicyNetworkSpanRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -175,7 +177,7 @@ func resourceNsxtPolicyNetworkSpanUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -196,7 +198,7 @@ func resourceNsxtPolicyNetworkSpanDelete(d *schema.ResourceData, m interface{}) 
 	connector := getPolicyConnector(m)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliEvpnClient = tier_0s.NewEvpnClient
+
 var policyEvpnConfigTypeValues = []string{
 	model.EvpnConfig_MODE_INLINE,
 	model.EvpnConfig_MODE_ROUTE_SERVER,
@@ -58,7 +60,7 @@ func resourceNsxtPolicyEvpnConfig() *schema.Resource {
 }
 
 func policyEvpnConfigGet(connector client.Connector, gwID string, sessionContext utl.SessionContext) (model.EvpnConfig, error) {
-	client := tier_0s.NewEvpnClient(sessionContext, connector)
+	client := cliEvpnClient(sessionContext, connector)
 	return client.Get(gwID)
 }
 
@@ -126,7 +128,7 @@ func patchNsxtPolicyEvpnConfig(connector client.Connector, d *schema.ResourceDat
 		obj.Mode = &mode
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := tier_0s.NewEvpnClient(sessionContext, connector)
+	client := cliEvpnClient(sessionContext, connector)
 	return client.Patch(gwID, obj)
 }
 

@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliRoleBindingsClient = aaa.NewRoleBindingsClient
+
 var roleBindingUserTypes = []string{
 	nsxModel.RoleBinding_TYPE_LOCAL_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_USER,
@@ -280,7 +282,7 @@ func getExistingRoleBinding(rbClient *aaa.RoleBindingClientContext, username, us
 func overwriteRoleBinding(d *schema.ResourceData, m interface{}, existingRoleBinding *nsxModel.RoleBinding) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 	id := d.Id()
 
 	existingRoles := make(rolesForPath)
@@ -305,7 +307,7 @@ func overwriteRoleBinding(d *schema.ResourceData, m interface{}, existingRoleBin
 func revertRoleBinding(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 
 	id := d.Id()
 	boolTrue := true
@@ -347,7 +349,7 @@ func revertRoleBinding(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtPolicyUserManagementRoleBindingCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 
 	roleBindingType := d.Get("type").(string)
 	overwriteLocaluser := d.Get("overwrite_local_user").(bool)
@@ -384,7 +386,7 @@ func resourceNsxtPolicyUserManagementRoleBindingCreate(d *schema.ResourceData, m
 func resourceNsxtPolicyUserManagementRoleBindingRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -427,7 +429,7 @@ func resourceNsxtPolicyUserManagementRoleBindingUpdate(d *schema.ResourceData, m
 	log.Printf("[INFO] Updateing RoleBinding with ID %s", id)
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 	obj := getRoleBindingObject(d, rolesForPath{})
 	_, err := rbClient.Update(id, *obj)
 	if err != nil {
@@ -440,7 +442,7 @@ func resourceNsxtPolicyUserManagementRoleBindingUpdate(d *schema.ResourceData, m
 func resourceNsxtPolicyUserManagementRoleBindingDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	rbClient := aaa.NewRoleBindingsClient(sessionContext, connector)
+	rbClient := cliRoleBindingsClient(sessionContext, connector)
 
 	id := d.Id()
 	if id == "" {

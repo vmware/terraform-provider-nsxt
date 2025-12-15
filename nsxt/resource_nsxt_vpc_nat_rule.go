@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliVpcNatRulesClient = nat.NewNatRulesClient
+
 var policyVpcNatRuleActionValues = []string{
 	model.PolicyVpcNatRule_ACTION_SNAT,
 	model.PolicyVpcNatRule_ACTION_DNAT,
@@ -187,7 +189,7 @@ func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, paren
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliVpcNatRulesClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -234,7 +236,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	log.Printf("[INFO] Creating PolicyVpcNatRule with ID %s", id)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliVpcNatRulesClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		return handleCreateError("PolicyVpcNatRule", id, err)
@@ -259,7 +261,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 	if pathErr != nil {
 		return handleReadError(d, "VpcNatRule", id, pathErr)
 	}
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliVpcNatRulesClient(sessionContext, connector)
 	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err != nil {
 		return handleReadError(d, "PolicyVpcNatRule", id, err)
@@ -308,7 +310,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliVpcNatRulesClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -334,7 +336,7 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliVpcNatRulesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {

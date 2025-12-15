@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 )
 
+var cliGatewayPoliciesRulesClient = gatewaypolicies.NewRulesClient
+
 func resourceNsxtPolicyGatewayRulePolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayPolicyRuleCreate,
@@ -49,7 +51,7 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] Creating Gateway Policy Rule with ID %s under policy %s", id, policyPath)
-	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -73,7 +75,7 @@ func resourceNsxtPolicyGatewayPolicyRuleExistsPartial(d *schema.ResourceData, m 
 }
 
 func resourceNsxtPolicyGatewayPolicyRuleExists(sessionContext utl.SessionContext, id string, policyPath string, connector client.Connector) (bool, error) {
-	client := gatewaypolicies.NewRulesClient(sessionContext, connector)
+	client := cliGatewayPoliciesRulesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -109,7 +111,7 @@ func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface
 		return handleReadError(d, "GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -135,7 +137,7 @@ func resourceNsxtPolicyGatewayPolicyRuleUpdate(d *schema.ResourceData, m interfa
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -162,7 +164,7 @@ func resourceNsxtPolicyGatewayPolicyRuleDelete(d *schema.ResourceData, m interfa
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := gatewaypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

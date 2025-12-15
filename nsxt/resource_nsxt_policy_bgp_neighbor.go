@@ -19,6 +19,8 @@ import (
 	bgp "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/bgp"
 )
 
+var cliBgpNeighborsClient = bgp.NewNeighborsClient
+
 var bgpNeighborConfigGracefulRestartModeValues = []string{
 	model.BgpNeighborConfig_GRACEFUL_RESTART_MODE_HELPER_ONLY,
 	model.BgpNeighborConfig_GRACEFUL_RESTART_MODE_GR_AND_HELPER,
@@ -194,7 +196,7 @@ func resourceNsxtPolicyBgpNeighborParseIDs(bgpPath string) (string, string) {
 
 func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector client.Connector, d *schema.ResourceData, m interface{}) (bool, error) {
 	sessionContext := getSessionContext(d, m)
-	client := bgp.NewNeighborsClient(sessionContext, connector)
+	client := cliBgpNeighborsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -318,7 +320,7 @@ func resourceNsxtPolicyBgpNeighborConvertAndPatch(id string, d *schema.ResourceD
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating BgpNeighbor with ID %s", id)
 	sessionContext := getSessionContext(d, m)
-	client := bgp.NewNeighborsClient(sessionContext, connector)
+	client := cliBgpNeighborsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -377,7 +379,7 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := bgp.NewNeighborsClient(sessionContext, connector)
+	client := cliBgpNeighborsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -469,7 +471,7 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := bgp.NewNeighborsClient(sessionContext, connector)
+	client := cliBgpNeighborsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -495,7 +497,7 @@ func resourceNsxtPolicyBgpNeighborImport(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := bgp.NewNeighborsClient(sessionContext, connector)
+	client := cliBgpNeighborsClient(sessionContext, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

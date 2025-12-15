@@ -9,7 +9,6 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -20,6 +19,8 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
+
+var cliPolicyEdgeClustersClient = enforcement_points.NewEdgeClustersClient
 
 var policyEdgeClusterSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -166,14 +167,14 @@ func resourceNsxtPolicyEdgeCluster() *schema.Resource {
 func resourceNsxtPolicyEdgeClusterExists(siteID, epID, id string, connector client.Connector) (bool, error) {
 	// Check site existence first
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	siteClient := infra.NewSitesClient(sessionContext, connector)
+	siteClient := cliSitesClient(sessionContext, connector)
 	_, err := siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("failed to read site %s", siteID)
 		return false, logAPIError(msg, err)
 	}
 
-	client := enforcement_points.NewEdgeClustersClient(sessionContext, connector)
+	client := cliPolicyEdgeClustersClient(sessionContext, connector)
 	_, err = client.Get(siteID, epID, id)
 	if err == nil {
 		return true, nil
@@ -253,7 +254,7 @@ func resourceNsxtPolicyEdgeClusterCreate(d *schema.ResourceData, m interface{}) 
 	log.Printf("[INFO] Creating PolicyEdgeCluster with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClustersClient(sessionContext, connector)
+	client := cliPolicyEdgeClustersClient(sessionContext, connector)
 	err = client.Patch(siteID, epID, id, obj)
 	if err != nil {
 		return handleCreateError("PolicyEdgeCluster", id, err)
@@ -273,7 +274,7 @@ func resourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) er
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClustersClient(sessionContext, connector)
+	client := cliPolicyEdgeClustersClient(sessionContext, connector)
 	obj, err := client.Get(siteID, epID, id)
 	if err != nil {
 		return handleReadError(d, "PolicyEdgeCluster", id, err)
@@ -369,7 +370,7 @@ func resourceNsxtPolicyEdgeClusterUpdate(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClustersClient(sessionContext, connector)
+	client := cliPolicyEdgeClustersClient(sessionContext, connector)
 	_, err = client.Update(siteID, epID, id, obj)
 	if err != nil {
 		return handleUpdateError("PolicyEdgeCluster", id, err)
@@ -386,7 +387,7 @@ func resourceNsxtPolicyEdgeClusterDelete(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClustersClient(sessionContext, connector)
+	client := cliPolicyEdgeClustersClient(sessionContext, connector)
 	err = client.Delete(siteID, epID, id, nil)
 
 	if err != nil {

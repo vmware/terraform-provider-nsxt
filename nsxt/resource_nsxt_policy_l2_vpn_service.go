@@ -21,6 +21,11 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliT0L2vpnServicesClient = t0s.NewL2vpnServicesClient
+var cliT1L2vpnServicesClient = t1s.NewL2vpnServicesClient
+var cliT0LocaleServiceL2vpnServicesClient = t0_locale_service.NewL2vpnServicesClient
+var cliT1LocaleServiceL2vpnServicesClient = t1_locale_service.NewL2vpnServicesClient
+
 var L2VpnServiceModes = []string{
 	model.L2VPNService_MODE_SERVER,
 	model.L2VPNService_MODE_CLIENT,
@@ -81,17 +86,17 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 func getNsxtPolicyL2VpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool, sessionContext utl.SessionContext) (model.L2VPNService, error) {
 	if localeServiceID == "" {
 		if isT0 {
-			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
+			client := cliT0L2vpnServicesClient(sessionContext, connector)
 			return client.Get(gwID, serviceID)
 		}
-		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT1L2vpnServicesClient(sessionContext, connector)
 		return client.Get(gwID, serviceID)
 	}
 	if isT0 {
-		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT0LocaleServiceL2vpnServicesClient(sessionContext, connector)
 		return client.Get(gwID, localeServiceID, serviceID)
 	}
-	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+	client := cliT1LocaleServiceL2vpnServicesClient(sessionContext, connector)
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
@@ -99,17 +104,17 @@ func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, locale
 	id := *l2VpnService.Id
 	if localeServiceID == "" {
 		if isT0 {
-			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
+			client := cliT0L2vpnServicesClient(sessionContext, connector)
 			return client.Patch(gwID, id, l2VpnService)
 		}
-		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT1L2vpnServicesClient(sessionContext, connector)
 		return client.Patch(gwID, id, l2VpnService)
 	}
 	if isT0 {
-		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT0LocaleServiceL2vpnServicesClient(sessionContext, connector)
 		return client.Patch(gwID, localeServiceID, id, l2VpnService)
 	}
-	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+	client := cliT1LocaleServiceL2vpnServicesClient(sessionContext, connector)
 	return client.Patch(gwID, localeServiceID, id, l2VpnService)
 
 }
@@ -117,17 +122,17 @@ func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, locale
 func deleteNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string, sessionContext utl.SessionContext) error {
 	if localeServiceID == "" {
 		if isT0 {
-			client := t0s.NewL2vpnServicesClient(sessionContext, connector)
+			client := cliT0L2vpnServicesClient(sessionContext, connector)
 			return client.Delete(gwID, id)
 		}
-		client := t1s.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT1L2vpnServicesClient(sessionContext, connector)
 		return client.Delete(gwID, id)
 	}
 	if isT0 {
-		client := t0_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+		client := cliT0LocaleServiceL2vpnServicesClient(sessionContext, connector)
 		return client.Delete(gwID, localeServiceID, id)
 	}
-	client := t1_locale_service.NewL2vpnServicesClient(sessionContext, connector)
+	client := cliT1LocaleServiceL2vpnServicesClient(sessionContext, connector)
 	return client.Delete(gwID, localeServiceID, id)
 }
 
