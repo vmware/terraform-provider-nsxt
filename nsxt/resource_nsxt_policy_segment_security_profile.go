@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliSegmentSecurityProfilesClient = infra.NewSegmentSecurityProfilesClient
+
 var segmentSecurityProfileSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -255,7 +257,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicySegmentSecurityProfileExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewSegmentSecurityProfilesClient(context, connector)
+	client := cliSegmentSecurityProfilesClient(context, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -293,7 +295,7 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	}
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	client := cliSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -327,7 +329,7 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining SegmentSecurityProfile ID")
 	}
 
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	client := cliSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -373,7 +375,7 @@ func resourceNsxtPolicySegmentSecurityProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	client := cliSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

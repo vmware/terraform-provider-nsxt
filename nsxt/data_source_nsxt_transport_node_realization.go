@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/transport_nodes"
 )
 
 func dataSourceNsxtTransportNodeRealization() *schema.Resource {
@@ -51,7 +50,7 @@ func dataSourceNsxtTransportNodeRealization() *schema.Resource {
 
 func dataSourceNsxtTransportNodeRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := transport_nodes.NewStateClient(connector)
+	client := cliTransportNodeStateClient(connector)
 
 	id := d.Get("id").(string)
 	delay := d.Get("delay").(int)

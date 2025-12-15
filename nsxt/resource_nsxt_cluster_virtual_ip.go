@@ -16,6 +16,8 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliApiVirtualIpClient = cluster.NewApiVirtualIpClient
+
 var DefaultIPv4VirtualAddress = "0.0.0.0"
 
 var DefaultIPv6VirtualAddress = "::"
@@ -76,7 +78,7 @@ func resourceNsxtClusterVirtualIPRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")
 	}
 	connector := getPolicyConnector(m)
-	client := cluster.NewApiVirtualIpClient(connector)
+	client := cliApiVirtualIpClient(connector)
 
 	obj, err := client.Get()
 	if err != nil {
@@ -91,7 +93,7 @@ func resourceNsxtClusterVirtualIPRead(d *schema.ResourceData, m interface{}) err
 
 func setClusterVirtualIP(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cluster.NewApiVirtualIpClient(connector)
+	client := cliApiVirtualIpClient(connector)
 	force := d.Get("force").(bool)
 	ipAddress := d.Get("ip_address").(string)
 	ipv6Address := d.Get("ipv6_address").(string)
@@ -130,7 +132,7 @@ func resourceNsxtClusterVirtualIPDelete(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")
 	}
 	connector := getPolicyConnector(m)
-	client := cluster.NewApiVirtualIpClient(connector)
+	client := cliApiVirtualIpClient(connector)
 	_, err := client.Clearvirtualip()
 	if err != nil {
 		log.Printf("[WARNING] Failed to clear virtual ip: %v", err)

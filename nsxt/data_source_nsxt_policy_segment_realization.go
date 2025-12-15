@@ -13,9 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 )
+
+var cliSegmentStateClient = segments.NewStateClient
 
 func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 	return &schema.Resource{
@@ -62,7 +63,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// verifying segment realization on hypervisor
 	segmentID := getPolicyIDFromPath(path)
 	enforcementPointPath := getPolicyEnforcementPointPath(m)
-	client := segments.NewStateClient(context, connector)
+	client := cliSegmentStateClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -107,7 +108,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// We need to fetch network name to use in vSphere provider. However, state API does not
 	// return it in details yet. For now, we'll use segment display name, since its always
 	// translates to network name
-	segClient := infra.NewSegmentsClient(context, connector)
+	segClient := cliSegmentsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

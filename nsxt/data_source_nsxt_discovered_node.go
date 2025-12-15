@@ -12,6 +12,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliDiscoveredNodesClient = fabric.NewDiscoveredNodesClient
+
 func dataSourceNsxtDiscoveredNode() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtDiscoveredNodeRead,
@@ -40,7 +42,7 @@ func dataSourceNsxtDiscoveredNode() *schema.Resource {
 
 func dataSourceNsxtDiscoveredNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	discoveredNodeClient := fabric.NewDiscoveredNodesClient(connector)
+	discoveredNodeClient := cliDiscoveredNodesClient(connector)
 
 	objID := d.Get("id").(string)
 	ipAddress := d.Get("ip_address").(string)

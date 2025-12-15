@@ -18,9 +18,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
-	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -93,7 +90,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 
 func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	client := cliIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -139,7 +136,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	client := cliIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -177,7 +174,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	client := cliIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -208,7 +205,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	client := cliIpSubnetsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -233,7 +230,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 // NOTE: This will not be needed when IPAM is handled by NSXT Policy
 func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(sessionContext utl.SessionContext, d *schema.ResourceData, connector client.Connector) error {
 
-	client := realizedstate.NewRealizedEntitiesClient(sessionContext, connector)
+	client := cliRealizedEntitiesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -291,7 +288,7 @@ func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{})
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

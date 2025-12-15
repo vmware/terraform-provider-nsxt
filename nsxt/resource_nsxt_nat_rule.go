@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliMpNatRulesClient = nat.NewRulesClient
+
 var natRuleActionValues = []string{
 	model.NatRule_ACTION_SNAT,
 	model.NatRule_ACTION_DNAT,
@@ -113,7 +115,7 @@ func resourceNsxtNatRule() *schema.Resource {
 
 func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nat.NewRulesClient(connector)
+	client := cliMpNatRulesClient(connector)
 
 	logicalRouterID := d.Get("logical_router_id").(string)
 	if logicalRouterID == "" {
@@ -169,7 +171,7 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nat.NewRulesClient(connector)
+	client := cliMpNatRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -217,7 +219,7 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nat.NewRulesClient(connector)
+	client := cliMpNatRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -279,7 +281,7 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nat.NewRulesClient(connector)
+	client := cliMpNatRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {

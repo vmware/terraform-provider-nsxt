@@ -35,6 +35,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+var cliLicensesClient = nsx.NewLicensesClient
+
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 
 // Provider configuration that is shared for policy and MP
@@ -1082,7 +1084,7 @@ func (processor sessionHeaderProcessor) Process(req *http.Request) error {
 
 func getLicenses(connector client.Connector) ([]string, error) {
 	var licenseList []string
-	client := nsx.NewLicensesClient(connector)
+	client := cliLicensesClient(connector)
 	list, err := client.List()
 	if err != nil {
 		return licenseList, fmt.Errorf("Error during license create: %v", err)
@@ -1101,7 +1103,7 @@ func getLicenses(connector client.Connector) ([]string, error) {
 }
 
 func applyLicense(connector client.Connector, licenseKey string) error {
-	client := nsx.NewLicensesClient(connector)
+	client := cliLicensesClient(connector)
 	license := model.License{LicenseKey: &licenseKey}
 	_, err := client.Create(license)
 	if err != nil {

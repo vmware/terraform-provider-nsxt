@@ -19,6 +19,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliIntrusionServiceProfilesClient = services.NewProfilesClient
+
 var idsProfileSeverityValues = []string{
 	model.IdsProfile_PROFILE_SEVERITY_MEDIUM,
 	model.IdsProfile_PROFILE_SEVERITY_HIGH,
@@ -338,7 +340,7 @@ func setIdsProfileSignaturesInSchema(profileList []model.IdsProfileLocalSignatur
 
 func resourceNsxtPolicyIntrusionServiceProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := services.NewProfilesClient(sessionContext, connector)
+	client := cliIntrusionServiceProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -384,7 +386,7 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServiceProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -407,7 +409,7 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Ids Profile ID")
 	}
 
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServiceProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -466,7 +468,7 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServiceProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -489,7 +491,7 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 
 	connector := getPolicyConnector(m)
 	var err error
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServiceProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

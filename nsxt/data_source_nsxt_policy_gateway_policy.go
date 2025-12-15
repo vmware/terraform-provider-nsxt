@@ -15,7 +15,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -45,7 +44,7 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 
 // Local Manager Only
 func listGatewayPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.GatewayPolicy, error) {
-	client := domains.NewGatewayPoliciesClient(context, connector)
+	client := cliGatewayPoliciesClient(context, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -107,7 +106,7 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 	var obj model.GatewayPolicy
 	if objID != "" {
 		// Get by id
-		client := domains.NewGatewayPoliciesClient(context, connector)
+		client := cliGatewayPoliciesClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
