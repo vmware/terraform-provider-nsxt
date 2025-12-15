@@ -13,7 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -55,7 +54,7 @@ func resourceNsxtPolicyVniPool() *schema.Resource {
 func resourceNsxtPolicyVniPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewVniPoolsClient(sessionContext, connector)
+	client := cliVniPoolsClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -87,7 +86,7 @@ func policyVniPoolPatch(id string, d *schema.ResourceData, m interface{}) error 
 
 	// Create the resource using PATCH
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewVniPoolsClient(sessionContext, connector)
+	client := cliVniPoolsClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -119,7 +118,7 @@ func resourceNsxtPolicyVniPoolRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewVniPoolsClient(sessionContext, connector)
+	client := cliVniPoolsClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "VNI Pool", id, err)
@@ -162,7 +161,7 @@ func resourceNsxtPolicyVniPoolDelete(d *schema.ResourceData, m interface{}) erro
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewVniPoolsClient(sessionContext, connector)
+	client := cliVniPoolsClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {

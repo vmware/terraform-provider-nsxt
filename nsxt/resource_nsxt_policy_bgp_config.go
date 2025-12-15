@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -68,7 +67,7 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 	}
 	serviceID := d.Get("locale_service_id").(string)
 
-	client := localeservices.NewBgpClient(sessionContext, connector)
+	client := cliBgpClient(sessionContext, connector)
 	lmRoutingConfig, err := client.Get(gwID, serviceID)
 	if err != nil {
 		return handleReadError(d, "BGP Config", serviceID, err)
@@ -194,7 +193,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		localeServiceID = *localeService.Id
 	}
 
-	client := localeservices.NewBgpClient(context, connector)
+	client := cliBgpClient(context, connector)
 	err = client.Patch(gwID, localeServiceID, *obj, nil)
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
@@ -227,7 +226,7 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 	}
 
 	obj.Revision = &revision
-	client := localeservices.NewBgpClient(sessionContext, connector)
+	client := cliBgpClient(sessionContext, connector)
 	_, err = client.Update(gwID, serviceID, *obj, nil)
 
 	if err != nil {

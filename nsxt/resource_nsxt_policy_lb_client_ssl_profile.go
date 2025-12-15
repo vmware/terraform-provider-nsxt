@@ -13,7 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -83,7 +82,7 @@ func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 func resourceNsxtPolicyLBClientSslProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -124,7 +123,7 @@ func resourceNsxtPolicyLBClientSslProfilePatch(d *schema.ResourceData, m interfa
 	log.Printf("[INFO] Patching LBClientSslProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -157,7 +156,7 @@ func resourceNsxtPolicyLBClientSslProfileRead(d *schema.ResourceData, m interfac
 
 	var obj model.LBClientSslProfile
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	var err error
 	obj, err = client.Get(id)
 	if err != nil {
@@ -208,7 +207,7 @@ func resourceNsxtPolicyLBClientSslProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 	var err error
-	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	err = client.Delete(id, &forceParam)
 
 	if err != nil {

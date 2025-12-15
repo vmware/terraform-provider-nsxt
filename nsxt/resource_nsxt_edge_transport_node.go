@@ -28,6 +28,10 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliHostSwitchProfilesClient = infra.NewHostSwitchProfilesClient
+var cliTransportNodesClient = nsx.NewTransportNodesClient
+var cliTransportNodeStateClient = transport_nodes.NewStateClient
+
 var ipAssignmentTypes = []string{
 	"assigned_by_dhcp",
 	"no_ipv4",
@@ -926,7 +930,7 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 
 func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	nodeID := d.Get("node_id").(string)
 	if nodeID != "" {
@@ -1160,7 +1164,7 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfig
 func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewHostSwitchProfilesClient(sessionContext, connector)
+	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	t := true
 	// we retrieve a list of profiles instead of using Get(), as the id could be either MP id or Policy id
 	list, err := client.List(nil, nil, nil, nil, &t, nil, nil, nil, nil, nil, nil, nil)
@@ -1660,7 +1664,7 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "TransportNode", id, err)
@@ -2097,7 +2101,7 @@ func resourceNsxtEdgeTransportNodeUpdate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	obj, err := getTransportNodeFromSchema(d, m)
 	if err != nil {
@@ -2119,7 +2123,7 @@ func getTransportNodeStateConf(connector client.Connector, id string) *resource.
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {
-			client := transport_nodes.NewStateClient(connector)
+			client := cliTransportNodeStateClient(connector)
 
 			_, err := client.Get(id)
 
@@ -2148,7 +2152,7 @@ func resourceNsxtEdgeTransportNodeDelete(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	err := client.Delete(id, nil, nil)
 	if err != nil {

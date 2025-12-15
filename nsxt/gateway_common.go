@@ -15,7 +15,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	tier0_localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -23,6 +22,9 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliGlobalInfraClient = global_policy.NewGlobalInfraClient
+var cliInfraClient = nsx_policy.NewInfraClient
 
 var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{
 	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_STATIC,
@@ -444,7 +446,7 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector client.Connector, enforceRevision bool) error {
 	switch context.ClientType {
 	case utl.Global:
-		infraClient := global_policy.NewGlobalInfraClient(connector)
+		infraClient := cliGlobalInfraClient(connector)
 		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
 		if err != nil {
 			return err
@@ -458,7 +460,7 @@ func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector cli
 		}
 	}
 
-	infraClient := nsx_policy.NewInfraClient(context, connector)
+	infraClient := cliInfraClient(context, connector)
 	if infraClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -682,7 +684,7 @@ func getComputedGatewayIDSchema() *schema.Schema {
 }
 
 func policyTier0GetLocaleService(context utl.SessionContext, gwID string, localeServiceID string, connector client.Connector, isGlobalManager bool) *model.LocaleServices {
-	tier0LocaleservicesClient := tier0_localeservices.NewLocaleServicesClient(context, connector)
+	tier0LocaleservicesClient := cliTier0LocaleServicesClient(context, connector)
 	obj, err := tier0LocaleservicesClient.Get(gwID, localeServiceID)
 	if err != nil {
 		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)

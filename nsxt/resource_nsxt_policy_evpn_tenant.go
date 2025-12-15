@@ -16,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliEvpnTenantConfigsClient = infra.NewEvpnTenantConfigsClient
+
 func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyEvpnTenantCreate,
@@ -60,7 +62,7 @@ func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 func resourceNsxtPolicyEvpnTenantExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
+	client := cliEvpnTenantConfigsClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -123,7 +125,7 @@ func policyEvpnTenantPatch(id string, d *schema.ResourceData, m interface{}) err
 
 	// Create the resource using PATCH
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
+	client := cliEvpnTenantConfigsClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -156,7 +158,7 @@ func resourceNsxtPolicyEvpnTenantRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
+	client := cliEvpnTenantConfigsClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Evpn Tenant", id, err)
@@ -203,7 +205,7 @@ func resourceNsxtPolicyEvpnTenantDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewEvpnTenantConfigsClient(sessionContext, connector)
+	client := cliEvpnTenantConfigsClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {

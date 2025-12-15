@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliGatewayConnectionsClient = infra.NewGatewayConnectionsClient
+
 var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -209,7 +211,7 @@ func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Conne
 
 	// For exists check, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	client := cliGatewayConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -255,7 +257,7 @@ func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interfa
 	log.Printf("[INFO] Creating GatewayConnection with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	client := cliGatewayConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -278,7 +280,7 @@ func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	client := cliGatewayConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -326,7 +328,7 @@ func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interfa
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	client := cliGatewayConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -347,7 +349,7 @@ func resourceNsxtPolicyGatewayConnectionDelete(d *schema.ResourceData, m interfa
 	connector := getPolicyConnector(m)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewGatewayConnectionsClient(sessionContext, connector)
+	client := cliGatewayConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

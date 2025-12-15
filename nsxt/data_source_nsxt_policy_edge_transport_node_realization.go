@@ -17,6 +17,8 @@ import (
 	edge_transport_nodes "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/edge_transport_nodes"
 )
 
+var cliEdgeTransportNodeStateClient = edge_transport_nodes.NewStateClient
+
 func dataSourceNsxtPolicyEdgeTransportNodeRealization() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyEdgeTransportNodeRealizationRead,
@@ -58,7 +60,7 @@ func getEdgeTransportNodeKeysFromPath(path string) (string, string, string) {
 func dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := edge_transport_nodes.NewStateClient(sessionContext, connector)
+	client := cliEdgeTransportNodeStateClient(sessionContext, connector)
 
 	id := d.Get("id").(string)
 	if id == "" {

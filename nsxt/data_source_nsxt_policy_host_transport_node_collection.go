@@ -10,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 )
 
 func dataSourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
@@ -58,7 +56,7 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData,
 	}
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewTransportNodeCollectionsClient(sessionContext, connector)
+	client := cliTransportNodeCollectionsClient(sessionContext, connector)
 
 	var obj model.HostTransportNodeCollection
 	if objID != "" {

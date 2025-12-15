@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliVpcIpAddressAllocationsClient = vpcs.NewIpAddressAllocationsClient
+
 var vpcIpAddressAllocationIpAddressTypeValues = []string{
 	model.VpcIpAddressAllocation_IP_ADDRESS_TYPE_IPV4,
 	model.VpcIpAddressAllocation_IP_ADDRESS_TYPE_IPV6,
@@ -119,7 +121,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 func resourceNsxtVpcIpAddressAllocationExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := vpcs.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -162,7 +164,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	log.Printf("[INFO] Creating VpcIpAddressAllocation with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("VpcIpAddressAllocation", id, err)
@@ -182,7 +184,7 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
@@ -228,7 +230,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -250,7 +252,7 @@ func resourceNsxtVpcIpAddressAllocationDelete(d *schema.ResourceData, m interfac
 	sessionContext := getSessionContext(d, m)
 	parents := getVpcParentsFromContext(sessionContext)
 
-	client := vpcs.NewIpAddressAllocationsClient(sessionContext, connector)
+	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {

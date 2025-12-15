@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliIpsecVpnTunnelProfilesClient = infra.NewIpsecVpnTunnelProfilesClient
+
 var ipSecVpnTunnelProfileDfPolicyValues = []string{
 	model.IPSecVpnTunnelProfile_DF_POLICY_COPY,
 	model.IPSecVpnTunnelProfile_DF_POLICY_CLEAR,
@@ -115,7 +117,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 
 func resourceNsxtPolicyIPSecVpnTunnelProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewIpsecVpnTunnelProfilesClient(sessionContext, connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -165,7 +167,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileCreate(d *schema.ResourceData, m int
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnTunnelProfile with ID %s", id)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewIpsecVpnTunnelProfilesClient(sessionContext, connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("IPSecVpnTunnelProfile", id, err)
@@ -186,7 +188,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileRead(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewIpsecVpnTunnelProfilesClient(sessionContext, connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IPSecVpnTunnelProfile", id, err)
@@ -241,7 +243,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileUpdate(d *schema.ResourceData, m int
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewIpsecVpnTunnelProfilesClient(sessionContext, connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err := client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("IPSecVpnTunnelProfile", id, err)
@@ -258,7 +260,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileDelete(d *schema.ResourceData, m int
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewIpsecVpnTunnelProfilesClient(sessionContext, connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {

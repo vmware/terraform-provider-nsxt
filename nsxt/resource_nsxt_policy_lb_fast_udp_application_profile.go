@@ -13,8 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lbUdpApplicationProfilePathExample = "/infra/lb-app-profiles/[profile]"
@@ -79,7 +77,7 @@ func resourceNsxtPolicyLBUdpApplicationProfilePatch(d *schema.ResourceData, m in
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbAppProfilesClient(sessionContext, connector)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -112,7 +110,7 @@ func resourceNsxtPolicyLBUdpApplicationProfileRead(d *schema.ResourceData, m int
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbAppProfilesClient(sessionContext, connector)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBUdpProfile", id, err)

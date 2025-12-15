@@ -15,11 +15,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliTransportNodeCollectionsClient = enforcement_points.NewTransportNodeCollectionsClient
+var cliComputeCollectionMemberStatusClient = compute_collections.NewMemberStatusClient
 
 const removeOnDestroyDefault = true
 
@@ -133,7 +135,7 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 func resourceNsxtPolicyHostTransportNodeCollectionExists(siteID, epID, id string, connector client.Connector) (bool, error) {
 	// Check site existence first
 	siteSessionContext := utl.SessionContext{ClientType: utl.Local}
-	siteClient := infra.NewSitesClient(siteSessionContext, connector)
+	siteClient := cliSitesClient(siteSessionContext, connector)
 	_, err := siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to read site %s", siteID)
@@ -141,7 +143,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionExists(siteID, epID, id string
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := enforcement_points.NewTransportNodeCollectionsClient(sessionContext, connector)
+	client := cliTransportNodeCollectionsClient(sessionContext, connector)
 	_, err = client.Get(siteID, epID, id)
 	if err == nil {
 		return true, nil
@@ -218,7 +220,7 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		obj.Revision = &revision
 	}
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewTransportNodeCollectionsClient(sessionContext, connector)
+	client := cliTransportNodeCollectionsClient(sessionContext, connector)
 	_, err := client.Update(siteID, epID, id, obj, &isCreate, nil)
 
 	return err
@@ -263,7 +265,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionCreate(d *schema.ResourceData,
 func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewTransportNodeCollectionsClient(sessionContext, connector)
+	client := cliTransportNodeCollectionsClient(sessionContext, connector)
 	// (TODO) Reusing this code here - maybe worthwhile renaming this func as it's usable for other resources
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
@@ -337,7 +339,7 @@ func getComputeCollectionMemberStateConf(connector client.Connector, id string) 
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {
-			client := compute_collections.NewMemberStatusClient(connector)
+			client := cliComputeCollectionMemberStatusClient(connector)
 			statuses, err := client.List(id)
 			if err != nil {
 				log.Printf("[DEBUG]: NSX Failed to retrieve compute collection member statuses: %v", err)
@@ -359,7 +361,7 @@ func getComputeCollectionMemberStateConf(connector client.Connector, id string) 
 func resourceNsxtPolicyHostTransportNodeCollectionDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewTransportNodeCollectionsClient(sessionContext, connector)
+	client := cliTransportNodeCollectionsClient(sessionContext, connector)
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
 		return err

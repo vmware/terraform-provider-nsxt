@@ -12,7 +12,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -109,7 +108,7 @@ func resourceNsxtVPCGatewayPolicyDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesClient(getSessionContext(d, m), connector)
 	err := client.Delete("", id)
 	if err != nil {
 		return handleDeleteError("VPC Gateway Policy", id, err)

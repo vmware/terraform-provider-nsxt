@@ -14,10 +14,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTransportZonesClient = enforcement_points.NewTransportZonesClient
 
 var defaultInfraSitePath = "/infra/sites/default"
 
@@ -88,7 +89,7 @@ func resourceNsxtPolicyTransportZoneExists(siteID, epID, tzID string, connector 
 
 	// Check site existence first
 	siteSessionContext := utl.SessionContext{ClientType: utl.Local}
-	siteClient := infra.NewSitesClient(siteSessionContext, connector)
+	siteClient := cliSitesClient(siteSessionContext, connector)
 	_, err = siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to read site %s", siteID)
@@ -97,7 +98,7 @@ func resourceNsxtPolicyTransportZoneExists(siteID, epID, tzID string, connector 
 
 	// Check (ep, tz) existence. In case of ep not found, NSX returns BAD_REQUEST
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	tzClient := enforcement_points.NewTransportZonesClient(sessionContext, connector)
+	tzClient := cliTransportZonesClient(sessionContext, connector)
 	_, err = tzClient.Get(siteID, epID, tzID)
 	if err == nil {
 		return true, nil
@@ -148,7 +149,7 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 
 	// Create the resource using PATCH
 	sessionContext := getSessionContext(d, m)
-	tzClient := enforcement_points.NewTransportZonesClient(sessionContext, connector)
+	tzClient := cliTransportZonesClient(sessionContext, connector)
 	_, err := tzClient.Patch(siteID, epID, tzID, obj)
 	return err
 }
@@ -212,7 +213,7 @@ func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}
 func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	tzClient := enforcement_points.NewTransportZonesClient(sessionContext, connector)
+	tzClient := cliTransportZonesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
@@ -262,7 +263,7 @@ func resourceNsxtPolicyTransportZoneUpdate(d *schema.ResourceData, m interface{}
 func resourceNsxtPolicyTransportZoneDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	tzClient := enforcement_points.NewTransportZonesClient(sessionContext, connector)
+	tzClient := cliTransportZonesClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {

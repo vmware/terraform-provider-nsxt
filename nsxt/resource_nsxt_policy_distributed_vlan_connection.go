@@ -18,6 +18,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliDistributedVlanConnectionsClient = infra.NewDistributedVlanConnectionsClient
+
 var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -111,7 +113,7 @@ func resourceNsxtPolicyDistributedVlanConnectionExists(id string, connector clie
 
 	// For exists check, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewDistributedVlanConnectionsClient(sessionContext, connector)
+	client := cliDistributedVlanConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -153,7 +155,7 @@ func resourceNsxtPolicyDistributedVlanConnectionCreate(d *schema.ResourceData, m
 	log.Printf("[INFO] Creating DistributedVlanConnection with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewDistributedVlanConnectionsClient(sessionContext, connector)
+	client := cliDistributedVlanConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -176,7 +178,7 @@ func resourceNsxtPolicyDistributedVlanConnectionRead(d *schema.ResourceData, m i
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewDistributedVlanConnectionsClient(sessionContext, connector)
+	client := cliDistributedVlanConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -224,7 +226,7 @@ func resourceNsxtPolicyDistributedVlanConnectionUpdate(d *schema.ResourceData, m
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewDistributedVlanConnectionsClient(sessionContext, connector)
+	client := cliDistributedVlanConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -245,7 +247,7 @@ func resourceNsxtPolicyDistributedVlanConnectionDelete(d *schema.ResourceData, m
 	connector := getPolicyConnector(m)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewDistributedVlanConnectionsClient(sessionContext, connector)
+	client := cliDistributedVlanConnectionsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
