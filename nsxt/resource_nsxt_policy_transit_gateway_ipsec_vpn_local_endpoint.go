@@ -17,6 +17,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliTransitGatewayIpsecVpnLocalEndpointsClient = ipsecvpnservices.NewLocalEndpointsClient
+
 var iPSecVpnLocalEndpointPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]/ipsec-vpn-local-endpoints/[ipsec-vpn-local-endpoint]"
 
 var tGwiPSecVpnLocalEndpointSchema = getIPSecVpnLocalEndpointCommonSchema(true)
@@ -40,7 +42,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointExists(sessionContext utl.Session
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -75,7 +77,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m 
 	log.Printf("[INFO] Creating TransitGatewayIPSecVpnLocalEndpoint with ID %s", id)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -100,7 +102,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointRead(d *schema.ResourceData, m in
 
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -148,7 +150,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointUpdate(d *schema.ResourceData, m 
 	obj.Revision = &revision
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -174,7 +176,7 @@ func resourceNsxtPolicyTGWIPSecVpnLocalEndpointDelete(d *schema.ResourceData, m 
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := ipsecvpnservices.NewLocalEndpointsClient(sessionContext, connector)
+	client := cliTransitGatewayIpsecVpnLocalEndpointsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

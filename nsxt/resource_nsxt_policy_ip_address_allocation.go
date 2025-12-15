@@ -21,6 +21,9 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliIpPoolsClient = infra.NewIpPoolsClient
+var cliIpAllocationsClient = ippools.NewIpAllocationsClient
+
 var addressRealizationTimeoutDefault = 1200
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
@@ -62,7 +65,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 }
 
 func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionContext, poolID string, allocationID string, connector client.Connector) (bool, error) {
-	client := ippools.NewIpAllocationsClient(sessionContext, connector)
+	client := cliIpAllocationsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -82,7 +85,7 @@ func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionConte
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := ippools.NewIpAllocationsClient(sessionContext, connector)
+	client := cliIpAllocationsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -164,7 +167,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	client := cliIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -198,7 +201,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	client := cliIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -231,7 +234,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	client := cliIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -275,7 +278,7 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

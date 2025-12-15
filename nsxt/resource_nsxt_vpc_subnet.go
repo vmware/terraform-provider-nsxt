@@ -23,6 +23,9 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliVpcSubnetsClient = vpcs.NewSubnetsClient
+var cliVpcSubnetPortsClient = subnets.NewPortsClient
+
 var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_PRIVATE,
 	model.VpcSubnet_ACCESS_MODE_PUBLIC,
@@ -491,7 +494,7 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	client := cliVpcSubnetsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -538,7 +541,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	client := cliVpcSubnetsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("VpcSubnet", id, err)
@@ -583,7 +586,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	client := cliVpcSubnetsClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], parents[2], id)
 	if err != nil {
@@ -644,7 +647,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	client := cliVpcSubnetsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -673,7 +676,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			portsClient := subnets.NewPortsClient(sessionContext, connector)
+			portsClient := cliVpcSubnetPortsClient(sessionContext, connector)
 			ports, err := portsClient.List(parents[0], parents[1], parents[2], id, nil, nil, nil, nil, nil, nil)
 			if err != nil {
 				return ports, "error", logAPIError("Error listing VPC subnet ports", err)
@@ -696,7 +699,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Failed to get port information for subnet %s: %v", id, err)
 	}
 
-	client := vpcs.NewSubnetsClient(sessionContext, connector)
+	client := cliVpcSubnetsClient(sessionContext, connector)
 	err = client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {

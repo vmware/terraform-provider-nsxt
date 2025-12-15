@@ -14,6 +14,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliTransitGatewayNatClient = transitgateways.NewNatClient
+
 var transitGatewayNatTypes = []string{
 	model.PolicyNat_NAT_TYPE_USER,
 	model.PolicyNat_NAT_TYPE_DEFAULT,
@@ -54,7 +56,7 @@ func dataSourceNsxtPolicyTransitGatewayNatRead(d *schema.ResourceData, m interfa
 	natType := d.Get("nat_type").(string)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewNatClient(sessionContext, connector)
+	client := cliTransitGatewayNatClient(sessionContext, connector)
 
 	// Nat type is the ID
 	obj, err := client.Get(parents[0], parents[1], parents[2], natType)

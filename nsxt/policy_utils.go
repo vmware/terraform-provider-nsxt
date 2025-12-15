@@ -609,9 +609,11 @@ func commaSeparatedStringToStringList(commaString string) []string {
 	return strList
 }
 
+var cliRealizedEntitiesClient = realized_state.NewRealizedEntitiesClient
+
 func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, m interface{}, realizedEntityPath string, timeout int) *resource.StateChangeConf {
 	sessionContext := getSessionContext(d, m)
-	client := realized_state.NewRealizedEntitiesClient(sessionContext, connector)
+	client := cliRealizedEntitiesClient(sessionContext, connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
 	stateConf := &resource.StateChangeConf{

@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 )
 
 var rtepAssignments = []string{
@@ -64,7 +62,7 @@ func setNsxtPolicyEdgeTransportNodeRTEP(d *schema.ResourceData, m interface{}, o
 	sessionContext := getSessionContext(d, m)
 
 	tnPath := d.Get("edge_transport_node_path").(string)
-	client := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
+	client := cliEdgeTransportNodesClient(sessionContext, connector)
 
 	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
 	obj, err := client.Get(siteID, epID, edgeID)
@@ -138,7 +136,7 @@ func resourceNsxtPolicyEdgeTransportNodeRTEPRead(d *schema.ResourceData, m inter
 	sessionContext := getSessionContext(d, m)
 
 	tnPath := d.Get("edge_transport_node_path").(string)
-	client := enforcement_points.NewEdgeTransportNodesClient(sessionContext, connector)
+	client := cliEdgeTransportNodesClient(sessionContext, connector)
 
 	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
 	obj, err := client.Get(siteID, epID, edgeID)

@@ -20,6 +20,9 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliDomainsClient = infra.NewDomainsClient
+var cliDomainDeploymentMapsClient = domains.NewDomainDeploymentMapsClient
+
 // This resource is supported only for Policy Global Manager
 func resourceNsxtPolicyDomain() *schema.Resource {
 	return &schema.Resource{
@@ -57,7 +60,7 @@ func resourceNsxtPolicyDomainExists(id string, connector client.Connector, isGlo
 		return false, fmt.Errorf("Domain resource is not supported for local manager")
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewDomainsClient(sessionContext, connector)
+	client := cliDomainsClient(sessionContext, connector)
 	_, err = client.Get(id)
 
 	if err == nil {
@@ -117,7 +120,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		connector := getPolicyConnector(m)
 		converter := bindings.NewTypeConverter()
 		sessionContext := utl.SessionContext{ClientType: utl.Global}
-		dmClient := domains.NewDomainDeploymentMapsClient(sessionContext, connector)
+		dmClient := cliDomainDeploymentMapsClient(sessionContext, connector)
 		if dmClient == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -226,7 +229,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewDomainsClient(sessionContext, connector)
+	client := cliDomainsClient(sessionContext, connector)
 	gmObj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Domain", id, err)
@@ -246,7 +249,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("revision", obj.Revision)
 
 	// Also read deployment maps
-	dmClient := domains.NewDomainDeploymentMapsClient(sessionContext, connector)
+	dmClient := cliDomainDeploymentMapsClient(sessionContext, connector)
 	if dmClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -319,7 +322,7 @@ func resourceNsxtPolicyDomainDelete(d *schema.ResourceData, m interface{}) error
 
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewDomainsClient(sessionContext, connector)
+	client := cliDomainsClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Domain", id, err)

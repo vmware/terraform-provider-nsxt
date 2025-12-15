@@ -21,6 +21,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliLbPoolsClient = infra.NewLbPoolsClient
+
 var lbPoolAlgorithmValues = []string{
 	model.LBPool_ALGORITHM_IP_HASH,
 	model.LBPool_ALGORITHM_WEIGHTED_ROUND_ROBIN,
@@ -416,7 +418,7 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 
 func resourceNsxtPolicyLBPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewLbPoolsClient(sessionContext, connector)
+	client := cliLbPoolsClient(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -433,7 +435,7 @@ func resourceNsxtPolicyLBPoolExists(id string, connector client.Connector, isGlo
 func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbPoolsClient(sessionContext, connector)
+	client := cliLbPoolsClient(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -495,7 +497,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbPoolsClient(sessionContext, connector)
+	client := cliLbPoolsClient(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -561,7 +563,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbPoolsClient(sessionContext, connector)
+	client := cliLbPoolsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -626,7 +628,7 @@ func resourceNsxtPolicyLBPoolDelete(d *schema.ResourceData, m interface{}) error
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbPoolsClient(sessionContext, connector)
+	client := cliLbPoolsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

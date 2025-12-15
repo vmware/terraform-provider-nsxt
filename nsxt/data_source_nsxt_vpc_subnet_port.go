@@ -18,6 +18,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliSubnetPortsClient = subnets.NewPortsClient
+
 func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtVpcSubnetPortRead,
@@ -58,7 +60,7 @@ func listVpcSubnetPorts(sessionContext utl.SessionContext, connector client.Conn
 	var ports model.VpcSubnetPortListResult
 
 	for {
-		portClient := subnets.NewPortsClient(sessionContext, connector)
+		portClient := cliSubnetPortsClient(sessionContext, connector)
 		if portClient == nil {
 			return results, policyResourceNotSupportedError()
 		}

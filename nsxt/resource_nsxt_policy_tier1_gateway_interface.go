@@ -20,6 +20,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliTier1InterfacesClient = localeservices.NewInterfacesClient
+var cliTier1LocaleServicesClient = tier1s.NewLocaleServicesClient
+var cliTier1sClient = infra.NewTier1sClient
+
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier1GatewayInterfaceCreate,
@@ -120,7 +124,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		id = newUUID()
 	} else {
 		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -169,7 +173,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -198,13 +202,13 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	var obj model.Tier1Interface
 	sessionContext := getSessionContext(d, m)
-	client := localeservices.NewInterfacesClient(sessionContext, connector)
+	client := cliTier1InterfacesClient(sessionContext, connector)
 	obj, err := client.Get(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "Tier1 Interface", id, err)
 	}
 	if isPolicyGlobalManager(m) {
-		tier1Client := tier1s.NewLocaleServicesClient(sessionContext, connector)
+		tier1Client := cliTier1LocaleServicesClient(sessionContext, connector)
 		if tier1Client == nil {
 			return fmt.Errorf("unsupported client type")
 		}
@@ -295,7 +299,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -319,7 +323,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	}
 
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -358,7 +362,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
-	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+	client := cliTier1sClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

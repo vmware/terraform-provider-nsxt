@@ -13,8 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lBHttpProfileXForwardedForValues = []string{
@@ -155,7 +153,7 @@ func resourceNsxtPolicyLBHttpApplicationProfilePatch(d *schema.ResourceData, m i
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbAppProfilesClient(sessionContext, connector)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -188,7 +186,7 @@ func resourceNsxtPolicyLBHttpApplicationProfileRead(d *schema.ResourceData, m in
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbAppProfilesClient(sessionContext, connector)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpProfile", id, err)

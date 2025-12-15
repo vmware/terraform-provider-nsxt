@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliRouteMapsClient = tier_0s.NewRouteMapsClient
+
 func resourceNsxtPolicyGatewayRouteMap() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayRouteMapCreate,
@@ -150,7 +152,7 @@ func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connecto
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewRouteMapsClient(sessionContext, connector)
+	client := cliRouteMapsClient(sessionContext, connector)
 	_, err = client.Get(tier0Id, id)
 	if err == nil {
 		return true, nil
@@ -250,7 +252,7 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewRouteMapsClient(sessionContext, connector)
+	client := cliRouteMapsClient(sessionContext, connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -275,7 +277,7 @@ func resourceNsxtPolicyGatewayRouteMapCreate(d *schema.ResourceData, m interface
 		} else {
 			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
-		client := tier_0s.NewRouteMapsClient(sessionContext, connector)
+		client := cliRouteMapsClient(sessionContext, connector)
 		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Route Map with ID '%s' already exists on Tier0 Gateway %s", id, gwID)
@@ -316,7 +318,7 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewRouteMapsClient(sessionContext, connector)
+	client := cliRouteMapsClient(sessionContext, connector)
 	obj, err := client.Get(gwID, id)
 	if err != nil {
 		return handleReadError(d, "Gateway Route Map", id, err)
@@ -406,7 +408,7 @@ func resourceNsxtPolicyGatewayRouteMapDelete(d *schema.ResourceData, m interface
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewRouteMapsClient(sessionContext, connector)
+	client := cliRouteMapsClient(sessionContext, connector)
 	err = client.Delete(gwID, id)
 
 	if err != nil {

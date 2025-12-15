@@ -9,8 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 )
 
 func resourceNsxtPolicyParentSecurityPolicy() *schema.Resource {
@@ -76,7 +74,7 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, is
 	if id == "" {
 		return nil, fmt.Errorf("Error obtaining Security Policy id")
 	}
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

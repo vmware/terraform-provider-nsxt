@@ -11,6 +11,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/subnets"
 )
 
+var cliVpcSubnetPortsClient2 = subnets.NewPortsClient
+
 var vpcSubnetPortPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]/ports/[port]"
 
 func resourceNsxtVpcExternalAddress() *schema.Resource {
@@ -48,7 +50,7 @@ func updatePort(d *schema.ResourceData, m interface{}, deleteFlow bool) error {
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	portClient := subnets.NewPortsClient(sessionContext, connector)
+	portClient := cliVpcSubnetPortsClient2(sessionContext, connector)
 	port, err := portClient.Get(parents[0], parents[1], parents[2], parents[3], parents[4])
 	if err != nil {
 		return err
@@ -89,7 +91,7 @@ func resourceNsxtVpcExternalAddressRead(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	sessionContext := getParentContext(d, m, portPath)
-	portClient := subnets.NewPortsClient(sessionContext, connector)
+	portClient := cliVpcSubnetPortsClient2(sessionContext, connector)
 	port, err := portClient.Get(parents[0], parents[1], parents[2], parents[3], parents[4])
 	if err != nil {
 		return handleReadError(d, "External Address", "", err)

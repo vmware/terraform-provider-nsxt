@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
@@ -177,7 +176,7 @@ func getSiteFromSchema(d *schema.ResourceData) gm_model.Site {
 
 func resourceNsxtPolicySiteExists(id string, connector client.Connector, isGlobal bool) (bool, error) {
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewSitesClient(sessionContext, connector)
+	client := cliSitesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -201,7 +200,7 @@ func resourceNsxtPolicySiteCreate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewSitesClient(sessionContext, connector)
+	client := cliSitesClient(sessionContext, connector)
 	site := getSiteFromSchema(d)
 
 	err = client.Patch(id, site)
@@ -223,7 +222,7 @@ func resourceNsxtPolicySiteRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("error obtaining Site ID")
 	}
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewSitesClient(sessionContext, connector)
+	client := cliSitesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Site", id, err)
@@ -253,7 +252,7 @@ func resourceNsxtPolicySiteUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewSitesClient(sessionContext, connector)
+	client := cliSitesClient(sessionContext, connector)
 
 	obj := getSiteFromSchema(d)
 	revision := int64(d.Get("revision").(int))
@@ -274,7 +273,7 @@ func resourceNsxtPolicySiteDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
-	client := infra.NewSitesClient(sessionContext, connector)
+	client := cliSitesClient(sessionContext, connector)
 	err := client.Delete(id, nil)
 	if err != nil {
 		return handleDeleteError("Site", id, err)

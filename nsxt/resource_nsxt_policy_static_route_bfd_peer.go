@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliBfdPeersClient = static_routes.NewBfdPeersClient
+
 func resourceNsxtPolicyStaticRouteBfdPeer() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyStaticRouteBfdPeerCreate,
@@ -69,7 +71,7 @@ func resourceNsxtPolicyStaticRouteBfdPeerExists(gwID string, id string, connecto
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := static_routes.NewBfdPeersClient(sessionContext, connector)
+	client := cliBfdPeersClient(sessionContext, connector)
 	_, err = client.Get(gwID, id)
 	if err == nil {
 		return true, nil
@@ -114,7 +116,7 @@ func policyStaticRouteBfdPeerPatch(d *schema.ResourceData, m interface{}, gwID s
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := static_routes.NewBfdPeersClient(sessionContext, connector)
+	client := cliBfdPeersClient(sessionContext, connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -170,7 +172,7 @@ func resourceNsxtPolicyStaticRouteBfdPeerRead(d *schema.ResourceData, m interfac
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := static_routes.NewBfdPeersClient(sessionContext, connector)
+	client := cliBfdPeersClient(sessionContext, connector)
 	obj, err := client.Get(gwID, id)
 	if err != nil {
 		return handleReadError(d, "Gateway BFD Peer", id, err)
@@ -223,7 +225,7 @@ func resourceNsxtPolicyStaticRouteBfdPeerDelete(d *schema.ResourceData, m interf
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := static_routes.NewBfdPeersClient(sessionContext, connector)
+	client := cliBfdPeersClient(sessionContext, connector)
 	err = client.Delete(gwID, id)
 
 	if err != nil {

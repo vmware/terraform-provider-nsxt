@@ -18,6 +18,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliEdgeClustersClient = nsx.NewEdgeClustersClient
+
 var failureDomainAllocationOptions = []string{
 	"enable",
 	"disable",
@@ -119,7 +121,7 @@ func resourceNsxtEdgeCluster() *schema.Resource {
 func resourceNsxtEdgeClusterCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := nsx.NewEdgeClustersClient(sessionContext, connector)
+	client := cliEdgeClustersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -209,7 +211,7 @@ func resourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := nsx.NewEdgeClustersClient(sessionContext, connector)
+	client := cliEdgeClustersClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "EdgeCluster", id, err)
@@ -294,7 +296,7 @@ func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := nsx.NewEdgeClustersClient(sessionContext, connector)
+	client := cliEdgeClustersClient(sessionContext, connector)
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
@@ -331,7 +333,7 @@ func resourceNsxtEdgeClusterDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := nsx.NewEdgeClustersClient(sessionContext, connector)
+	client := cliEdgeClustersClient(sessionContext, connector)
 
 	err := client.Delete(id)
 	if err != nil {

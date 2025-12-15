@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -22,6 +21,9 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliBgpClient = localeservices.NewBgpClient
+var cliTier0sClient = infra.NewTier0sClient
 
 var haModeValues = []string{
 	model.Tier0_HA_MODE_ACTIVE,
@@ -367,7 +369,7 @@ func getTier0AdvancedConfigSchema() *schema.Schema {
 }
 
 func listGlobalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
-	client := tier_0s.NewLocaleServicesClient(context, connector)
+	client := cliTier0LocaleServicesClient(context, connector)
 	markForDelete := false
 	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 	if err != nil {
@@ -383,7 +385,7 @@ func listGlobalManagerTier0GatewayLocaleServices(context utl.SessionContext, con
 }
 
 func listLocalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
-	client := tier_0s.NewLocaleServicesClient(context, connector)
+	client := cliTier0LocaleServicesClient(context, connector)
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
@@ -399,7 +401,7 @@ func listPolicyTier0GatewayLocaleServices(context utl.SessionContext, connector 
 
 func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier0 for the edge-cluster id
-	client := tier_0s.NewLocaleServicesClient(context, connector)
+	client := cliTier0LocaleServicesClient(context, connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
 	if err == nil {
 		return &obj, nil
@@ -477,7 +479,7 @@ func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]i
 func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, m interface{}, connector client.Connector, localeService model.LocaleServices) error {
 	var bgpConfigs []map[string]interface{}
 	context := getSessionContext(d, m)
-	client := localeservices.NewBgpClient(context, connector)
+	client := cliBgpClient(context, connector)
 
 	t0Id := d.Id()
 	bgpConfig, err := client.Get(t0Id, *localeService.Id)
@@ -576,7 +578,7 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 
 func resourceNsxtPolicyTier0GatewayExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := infra.NewTier0sClient(context, connector)
+	client := cliTier0sClient(context, connector)
 	_, err = client.Get(id)
 
 	if err == nil {
@@ -592,7 +594,7 @@ func resourceNsxtPolicyTier0GatewayExists(context utl.SessionContext, id string,
 
 func resourceNsxtPolicyTier0GatewayIsVrf(d *schema.ResourceData, m interface{}, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	context := getSessionContext(d, m)
-	client := infra.NewTier0sClient(context, connector)
+	client := cliTier0sClient(context, connector)
 	obj, err := client.Get(id)
 
 	if err == nil {
@@ -995,7 +997,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 
 	var obj model.Tier0
 	context := getSessionContext(d, m)
-	client := infra.NewTier0sClient(context, connector)
+	client := cliTier0sClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Tier0", id, err)

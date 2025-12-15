@@ -13,8 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lbMonitorTypeValues = []string{"HTTP", "HTTPS", "TCP", "UDP", "ICMP", "PASSIVE", "ANY"}
@@ -69,7 +67,7 @@ func policyLbMonitorConvert(obj *data.StructValue, requestedType string) (*model
 func dataSourceNsxtPolicyLBMonitorRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbMonitorProfilesClient(sessionContext, connector)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objTypeValue, typeSet := d.GetOk("type")
