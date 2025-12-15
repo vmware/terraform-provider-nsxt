@@ -20,6 +20,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliComputeManagersClient = fabric.NewComputeManagersClient
+
 var accessLevelForOidcValues = []string{
 	model.ComputeManager_ACCESS_LEVEL_FOR_OIDC_FULL,
 	model.ComputeManager_ACCESS_LEVEL_FOR_OIDC_LIMITED,
@@ -222,7 +224,7 @@ func resourceNsxtComputeManager() *schema.Resource {
 func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := fabric.NewComputeManagersClient(sessionContext, connector)
+	client := cliComputeManagersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -382,7 +384,7 @@ func resourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := fabric.NewComputeManagersClient(sessionContext, connector)
+	client := cliComputeManagersClient(sessionContext, connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -508,7 +510,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := fabric.NewComputeManagersClient(sessionContext, connector)
+	client := cliComputeManagersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -572,7 +574,7 @@ func resourceNsxtComputeManagerDelete(d *schema.ResourceData, m interface{}) err
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := fabric.NewComputeManagersClient(sessionContext, connector)
+	client := cliComputeManagersClient(sessionContext, connector)
 
 	err := client.Delete(id)
 	if err != nil {

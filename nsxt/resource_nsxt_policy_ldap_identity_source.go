@@ -20,6 +20,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliLdapIdentitySourcesClient = aaa.NewLdapIdentitySourcesClient
+
 const (
 	activeDirectoryType = "ActiveDirectory"
 	openLdapType        = "OpenLdap"
@@ -186,7 +188,7 @@ func resourceNsxtPolicyLdapIdentitySourceExists(id string, connector client.Conn
 	var err error
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	ldapClient := aaa.NewLdapIdentitySourcesClient(sessionContext, connector)
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	_, err = ldapClient.Get(id)
 	if err == nil {
 		return true, nil
@@ -201,7 +203,7 @@ func resourceNsxtPolicyLdapIdentitySourceExists(id string, connector client.Conn
 func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, m interface{}, id string) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	ldapClient := aaa.NewLdapIdentitySourcesClient(sessionContext, connector)
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 	serverType := d.Get("type").(string)
 
@@ -298,7 +300,7 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	ldapClient := aaa.NewLdapIdentitySourcesClient(sessionContext, connector)
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	structObj, err := ldapClient.Get(id)
 	if err != nil {
 		return handleReadError(d, "LDAPIdentitySource", id, err)
@@ -356,7 +358,7 @@ func resourceNsxtPolicyLdapIdentitySourceDelete(d *schema.ResourceData, m interf
 
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	ldapClient := aaa.NewLdapIdentitySourcesClient(sessionContext, connector)
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	if err := ldapClient.Delete(id); err != nil {
 		return handleDeleteError("LDAPIdentitySource", id, err)
 	}

@@ -14,7 +14,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
@@ -145,7 +144,7 @@ func resourceNsxtPolicyLBServerSslProfile() *schema.Resource {
 func resourceNsxtPolicyLBServerSslProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewLbServerSslProfilesClient(sessionContext, connector)
+	client := cliLbServerSslProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -184,7 +183,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Creating LBServerSslProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbServerSslProfilesClient(sessionContext, connector)
+	client := cliLbServerSslProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("LBServerSslProfile", id, err)
@@ -204,7 +203,7 @@ func resourceNsxtPolicyLBServerSslProfileRead(d *schema.ResourceData, m interfac
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbServerSslProfilesClient(sessionContext, connector)
+	client := cliLbServerSslProfilesClient(sessionContext, connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -249,7 +248,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbServerSslProfilesClient(sessionContext, connector)
+	client := cliLbServerSslProfilesClient(sessionContext, connector)
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("LBServerSslProfile", id, err)
@@ -267,7 +266,7 @@ func resourceNsxtPolicyLBServerSslProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbServerSslProfilesClient(sessionContext, connector)
+	client := cliLbServerSslProfilesClient(sessionContext, connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

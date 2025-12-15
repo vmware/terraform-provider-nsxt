@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliTransitGatewayNatRulesClient = nat.NewNatRulesClient
+
 var transitGatewayNatPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[gateway]/nat/[type]"
 
 func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
@@ -42,7 +44,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleExists(sessionContext utl.SessionCon
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -92,7 +94,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Creating PolicyTransitGatewayNatRule with ID %s", id)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -116,7 +118,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -172,7 +174,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 		return err
 	}
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -198,7 +200,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleDelete(d *schema.ResourceData, m int
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

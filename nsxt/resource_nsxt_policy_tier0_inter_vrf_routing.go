@@ -13,6 +13,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliInterVrfRoutingClient = tier_0s.NewInterVrfRoutingClient
+
 var routeAdvertisementTypesValues = []string{
 	"TIER0_STATIC",
 	"TIER0_CONNECTED",
@@ -234,7 +236,7 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 func resourceNsxtPolicyTier0InterVRFRoutingCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := tier_0s.NewInterVrfRoutingClient(sessionContext, connector)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -272,7 +274,7 @@ func resourceNsxtPolicyTier0InterVRFRoutingCreate(d *schema.ResourceData, m inte
 func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := tier_0s.NewInterVrfRoutingClient(sessionContext, connector)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -335,7 +337,7 @@ func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interf
 func resourceNsxtPolicyTier0InterVRFRoutingUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := tier_0s.NewInterVrfRoutingClient(sessionContext, connector)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -363,7 +365,7 @@ func resourceNsxtPolicyTier0InterVRFRoutingUpdate(d *schema.ResourceData, m inte
 func resourceNsxtPolicyTier0InterVRFRoutingDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := tier_0s.NewInterVrfRoutingClient(sessionContext, connector)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)

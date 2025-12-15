@@ -11,13 +11,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliPrefixListsClient = tier_0s.NewPrefixListsClient
 
 var gatewayPrefixListActionTypeValues = []string{
 	model.PrefixEntry_ACTION_PERMIT,
@@ -159,7 +160,7 @@ func resourceNsxtPolicyGatewayPrefixListDelete(d *schema.ResourceData, m interfa
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+	client := cliPrefixListsClient(sessionContext, connector)
 	err = client.Delete(gwID, id)
 	if err != nil {
 		return handleDeleteError("Gateway Prefix List", id, err)
@@ -191,7 +192,7 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+	client := cliPrefixListsClient(sessionContext, connector)
 	obj, err = client.Get(gwID, id)
 	if err != nil {
 		return handleReadError(d, "Gateway Prefix List", id, err)
@@ -216,7 +217,7 @@ func patchNsxtPolicyGatewayPrefixList(connector client.Connector, gwID string, p
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+	client := cliPrefixListsClient(sessionContext, connector)
 	return client.Patch(gwID, *prefixList.Id, prefixList)
 }
 
@@ -242,7 +243,7 @@ func resourceNsxtPolicyGatewayPrefixListCreate(d *schema.ResourceData, m interfa
 		} else {
 			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
-		client := tier_0s.NewPrefixListsClient(sessionContext, connector)
+		client := cliPrefixListsClient(sessionContext, connector)
 		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Gateway Prefix List with nsx_id '%s' already exists", id)
@@ -326,7 +327,7 @@ func resourceNsxtPolicyTier0GatewayImporter(d *schema.ResourceData, m interface{
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	t0Client := infra.NewTier0sClient(sessionContext, connector)
+	t0Client := cliTier0sClient(sessionContext, connector)
 	t0gw, err := t0Client.Get(gwID)
 	if err != nil {
 		return nil, err

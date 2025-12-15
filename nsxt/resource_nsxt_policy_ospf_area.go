@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliOspfAreasClient = ospf.NewAreasClient
+
 var ospfAreaTypeValues = []string{
 	model.OspfAreaConfig_AREA_TYPE_NORMAL,
 	model.OspfAreaConfig_AREA_TYPE_NSSA,
@@ -85,7 +87,7 @@ func resourceNsxtPolicyOspfArea() *schema.Resource {
 
 func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector client.Connector) (bool, error) {
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := ospf.NewAreasClient(sessionContext, connector)
+	client := cliOspfAreasClient(sessionContext, connector)
 	_, err := client.Get(gwID, localeServiceID, areaID)
 	if err == nil {
 		return true, nil
@@ -148,7 +150,7 @@ func policyOspfAreaPatch(d *schema.ResourceData, m interface{}, id string) error
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := ospf.NewAreasClient(sessionContext, connector)
+	client := cliOspfAreasClient(sessionContext, connector)
 	_, err := client.Patch(gwID, localeServiceID, id, obj)
 	return err
 }
@@ -189,7 +191,7 @@ func resourceNsxtPolicyOspfAreaRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := ospf.NewAreasClient(sessionContext, connector)
+	client := cliOspfAreasClient(sessionContext, connector)
 	obj, err := client.Get(gwID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "Ospf Area", id, err)
@@ -242,7 +244,7 @@ func resourceNsxtPolicyOspfAreaDelete(d *schema.ResourceData, m interface{}) err
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := ospf.NewAreasClient(sessionContext, connector)
+	client := cliOspfAreasClient(sessionContext, connector)
 	err := client.Delete(gwID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Ospf Area", id, err)
@@ -263,7 +265,7 @@ func resourceNsxtPolicyOspfAreaImport(d *schema.ResourceData, m interface{}) ([]
 	areaID := s[2]
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := ospf.NewAreasClient(sessionContext, connector)
+	client := cliOspfAreasClient(sessionContext, connector)
 
 	area, err := client.Get(gwID, serviceID, areaID)
 	if err != nil {

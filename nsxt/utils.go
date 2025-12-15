@@ -25,6 +25,9 @@ import (
 	mp_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliVersionClient = node_api.NewVersionClient
+var cliQueryClient = search_api.NewQueryClient
+
 var adminStateValues = []string{"UP", "DOWN"}
 
 func interface2StringList(configured []interface{}) []string {
@@ -574,7 +577,7 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 
 func getNSXVersion(connector client.Connector) (string, error) {
 	sessionContext := api_util.SessionContext{ClientType: api_util.Local}
-	client := node_api.NewVersionClient(sessionContext, connector)
+	client := cliVersionClient(sessionContext, connector)
 	version, err := client.Get()
 	if err != nil {
 		return "", logAPIError("Failed to retrieve NSX version, please check connectivity and authentication settings of the provider", err)
@@ -598,7 +601,7 @@ func initNSXVersionVMC(clients interface{}) {
 
 	connector := getPolicyConnector(clients)
 	sessionContext := api_util.SessionContext{ClientType: api_util.Local}
-	client := search_api.NewQueryClient(sessionContext, connector)
+	client := cliQueryClient(sessionContext, connector)
 	var cursor *string
 	query := "resource_type:dummy"
 	_, err := client.List(query, cursor, nil, nil, nil, nil)

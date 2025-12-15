@@ -17,10 +17,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	orgroot "github.com/vmware/terraform-provider-nsxt/api"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliGatewayPoliciesClient = domains.NewGatewayPoliciesClient
 
 func resourceNsxtPolicyPredefinedGatewayPolicy() *schema.Resource {
 	return &schema.Resource{
@@ -278,7 +279,7 @@ func gatewayPolicyInfraPatch(context utl.SessionContext, policy model.GatewayPol
 			Children:     []*data.StructValue{childVPC},
 		}
 
-		client := orgroot.NewOrgRootClient(context, connector)
+		client := cliOrgRootClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -433,7 +434,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

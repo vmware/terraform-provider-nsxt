@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliDhcpServerConfigsClient = infra.NewDhcpServerConfigsClient
+
 var dhcpServerPathExample = getMultitenancyPathExample("/infra/dhcp-servers/[dhcp-server]")
 
 func resourceNsxtPolicyDhcpServer() *schema.Resource {
@@ -72,7 +74,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 
 func resourceNsxtPolicyDhcpServerExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 
-	client := infra.NewDhcpServerConfigsClient(sessionContext, connector)
+	client := cliDhcpServerConfigsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -130,7 +132,7 @@ func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) e
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating DhcpServer with ID %s", id)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpServerConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -153,7 +155,7 @@ func resourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining DhcpServer ID")
 	}
 
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpServerConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -179,7 +181,7 @@ func resourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyDhcpServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpServerConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -206,7 +208,7 @@ func resourceNsxtPolicyDhcpServerDelete(d *schema.ResourceData, m interface{}) e
 
 	var err error
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpServerConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

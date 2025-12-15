@@ -16,11 +16,11 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	tier0localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0InterfacesClient = tier0localeservices.NewInterfacesClient
 
 var gatewayInterfaceTypeValues = []string{
 	model.Tier0Interface_TYPE_SERVICE,
@@ -304,7 +304,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		} else {
 			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
-		client := tier0localeservices.NewInterfacesClient(sessionContext, connector)
+		client := cliTier0InterfacesClient(sessionContext, connector)
 		if client == nil {
 			return fmt.Errorf("unsupported client type")
 		}
@@ -370,7 +370,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier0localeservices.NewInterfacesClient(sessionContext, connector)
+	client := cliTier0InterfacesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -406,7 +406,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier0localeservices.NewInterfacesClient(sessionContext, connector)
+	client := cliTier0InterfacesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -415,7 +415,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 		return handleReadError(d, "Tier0 Interface", id, err)
 	}
 	if isPolicyGlobalManager(m) {
-		tier0Client := tier0s.NewLocaleServicesClient(sessionContext, connector)
+		tier0Client := cliTier0LocaleServicesClient(sessionContext, connector)
 		if tier0Client == nil {
 			return fmt.Errorf("unsupported client type")
 		}
@@ -558,7 +558,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier0localeservices.NewInterfacesClient(sessionContext, connector)
+	client := cliTier0InterfacesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -586,7 +586,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier0localeservices.NewInterfacesClient(sessionContext, connector)
+	client := cliTier0InterfacesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -614,7 +614,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceImport(d *schema.ResourceData, m int
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := infra.NewTier0sClient(sessionContext, connector)
+	client := cliTier0sClient(sessionContext, connector)
 	if client == nil {
 		return nil, fmt.Errorf("unsupported client type")
 	}

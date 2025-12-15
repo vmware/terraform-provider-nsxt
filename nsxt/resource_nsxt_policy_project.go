@@ -15,11 +15,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliProjectsClient = orgs.NewProjectsClient
+var cliVpcSecurityProfilesClient = projects.NewVpcSecurityProfilesClient
 
 func resourceNsxtPolicyProject() *schema.Resource {
 	return &schema.Resource{
@@ -167,7 +169,7 @@ func resourceNsxtPolicyProjectExists(id string, connector client.Connector, isGl
 	var err error
 	// For exists check, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := orgs.NewProjectsClient(sessionContext, connector)
+	client := cliProjectsClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -281,7 +283,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	log.Printf("[INFO] Patching Project with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := orgs.NewProjectsClient(sessionContext, connector)
+	client := cliProjectsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -300,7 +302,7 @@ func getDefaultSpan(connector client.Connector) (string, error) {
 	var cursor *string
 	// For getDefaultSpan, we use Local client type as default
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := infra.NewNetworkSpansClient(sessionContext, connector)
+	client := cliNetworkSpansClient(sessionContext, connector)
 	if client == nil {
 		return "", fmt.Errorf("unsupported client type")
 	}
@@ -341,7 +343,7 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 
 	// For VPC security profile, we use Multitenancy client type
 	sessionContext := utl.SessionContext{ClientType: utl.Multitenancy}
-	client := projects.NewVpcSecurityProfilesClient(sessionContext, connector)
+	client := cliVpcSecurityProfilesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -363,7 +365,7 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
 	// For VPC security profile, we use Multitenancy client type
 	sessionContext := utl.SessionContext{ClientType: utl.Multitenancy}
-	client := projects.NewVpcSecurityProfilesClient(sessionContext, connector)
+	client := cliVpcSecurityProfilesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -419,7 +421,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	var obj model.Project
 	sessionContext := getSessionContext(d, m)
-	client := orgs.NewProjectsClient(sessionContext, connector)
+	client := cliProjectsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -511,7 +513,7 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := orgs.NewProjectsClient(sessionContext, connector)
+	client := cliProjectsClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

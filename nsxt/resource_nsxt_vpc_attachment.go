@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliVpcAttachmentsClient = vpcs.NewAttachmentsClient
+
 var vpcPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]"
 
 var vpcAttachmentSchema = map[string]*metadata.ExtendedSchema{
@@ -61,7 +63,7 @@ func resourceNsxtVpcAttachmentExists(sessionContext utl.SessionContext, parentPa
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -108,7 +110,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Creating VpcAttachment with ID %s", id)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("VpcAttachment", id, err)
@@ -129,7 +131,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -182,7 +184,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 	sessionContext := getParentContext(d, m, parentPath)
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("VpcAttachment", id, err)
@@ -206,7 +208,7 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := vpcs.NewAttachmentsClient(sessionContext, connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {

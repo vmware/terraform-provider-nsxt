@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliTransitGatewayStaticRoutesClient = transitgateways.NewStaticRoutesClient
+
 var staticRoutesParentPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[transit-gateway]"
 
 var transitGatewayStaticRouteSchema = map[string]*metadata.ExtendedSchema{
@@ -117,7 +119,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteExists(sessionContext utl.Sessio
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	client := cliTransitGatewayStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -167,7 +169,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteCreate(d *schema.ResourceData, m
 	log.Printf("[INFO] Creating TGW StaticRoute with ID %s", id)
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	client := cliTransitGatewayStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -191,7 +193,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteRead(d *schema.ResourceData, m i
 
 	parentPath := d.Get("parent_path").(string)
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	client := cliTransitGatewayStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -247,7 +249,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteUpdate(d *schema.ResourceData, m
 		return err
 	}
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	client := cliTransitGatewayStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -273,7 +275,7 @@ func resourceNsxtPolicyTransitGatewayStaticRouteDelete(d *schema.ResourceData, m
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := transitgateways.NewStaticRoutesClient(sessionContext, connector)
+	client := cliTransitGatewayStaticRoutesClient(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

@@ -19,6 +19,9 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliSitesClient = infra.NewSitesClient
+var cliEdgeClusterHighAvailabilityProfilesClient = enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient
+
 var policyEdgeHighAvailabilityProfileSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -134,7 +137,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfile() *schema.Resource {
 func resourceNsxtPolicyEdgeHighAvailabilityProfileExists(siteID, epID, id string, connector client.Connector) (bool, error) {
 	// Check site existence first
 	siteSessionContext := utl.SessionContext{ClientType: utl.Local}
-	siteClient := infra.NewSitesClient(siteSessionContext, connector)
+	siteClient := cliSitesClient(siteSessionContext, connector)
 	_, err := siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("failed to read site %s", siteID)
@@ -142,7 +145,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileExists(siteID, epID, id string
 	}
 
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
+	client := cliEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
 	_, err = client.Get(siteID, epID, id)
 	if err == nil {
 		return true, nil
@@ -197,7 +200,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileCreate(d *schema.ResourceData,
 	log.Printf("[INFO] Creating PolicyEdgeHighAvailabilityProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
+	client := cliEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
 	err = client.Patch(siteID, epID, id, obj)
 	if err != nil {
 		return handleCreateError("PolicyEdgeHighAvailabilityProfile", id, err)
@@ -216,7 +219,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileRead(d *schema.ResourceData, m
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
+	client := cliEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
 	obj, err := client.Get(siteID, epID, id)
 	if err != nil {
 		return handleReadError(d, "PolicyEdgeHighAvailabilityProfile", id, err)
@@ -259,7 +262,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileUpdate(d *schema.ResourceData,
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
+	client := cliEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
 	_, err = client.Update(siteID, epID, id, obj)
 	if err != nil {
 		return handleUpdateError("PolicyEdgeHighAvailabilityProfile", id, err)
@@ -276,7 +279,7 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileDelete(d *schema.ResourceData,
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := enforcement_points.NewEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
+	client := cliEdgeClusterHighAvailabilityProfilesClient(sessionContext, connector)
 	err = client.Delete(siteID, epID, id)
 
 	if err != nil {

@@ -20,6 +20,9 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliSecurityPoliciesClient = domains.NewSecurityPoliciesClient
+var cliOrgRootClient = orgroot.NewOrgRootClient
+
 func resourceNsxtPolicyPredefinedSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyPredefinedSecurityPolicyCreate,
@@ -391,7 +394,7 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -476,7 +479,7 @@ func securityPolicyInfraPatch(context utl.SessionContext, policy model.SecurityP
 			Children:     []*data.StructValue{childVPC},
 		}
 
-		client := orgroot.NewOrgRootClient(context, connector)
+		client := cliOrgRootClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

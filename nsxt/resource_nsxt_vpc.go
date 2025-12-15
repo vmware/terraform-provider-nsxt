@@ -21,6 +21,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliVpcsClient = projects.NewVpcsClient
+
 var vpcIPAddressTypeValues = []string{
 	model.Vpc_IP_ADDRESS_TYPE_IPV4,
 }
@@ -175,7 +177,7 @@ func resourceNsxtVpc() *schema.Resource {
 func resourceNsxtVpcExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := projects.NewVpcsClient(sessionContext, connector)
+	client := cliVpcsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -218,7 +220,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Creating Vpc with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewVpcsClient(sessionContext, connector)
+	client := cliVpcsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("Vpc", id, err)
@@ -239,7 +241,7 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewVpcsClient(sessionContext, connector)
+	client := cliVpcsClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
@@ -285,7 +287,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := projects.NewVpcsClient(sessionContext, connector)
+	client := cliVpcsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -307,7 +309,7 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	sessionContext := getSessionContext(d, m)
 	parents := getVpcParentsFromContext(sessionContext)
 
-	client := projects.NewVpcsClient(sessionContext, connector)
+	client := cliVpcsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id, nil)
 
 	if err != nil {

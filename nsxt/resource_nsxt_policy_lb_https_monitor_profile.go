@@ -12,8 +12,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var lBServerSslProfileBindingServerAuthValues = []string{
@@ -106,7 +104,7 @@ func resourceNsxtPolicyLBHttpsMonitorProfilePatch(d *schema.ResourceData, m inte
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbMonitorProfilesClient(sessionContext, connector)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -139,7 +137,7 @@ func resourceNsxtPolicyLBHttpsMonitorProfileRead(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := infra.NewLbMonitorProfilesClient(sessionContext, connector)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpsMonitorProfile", id, err)
