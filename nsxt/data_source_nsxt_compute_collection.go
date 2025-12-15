@@ -12,6 +12,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliComputeCollectionsClient = fabric.NewComputeCollectionsClient
+
 func dataSourceNsxtComputeCollection() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtComputeCollectionRead,
@@ -47,7 +49,7 @@ func nullIfEmpty(s string) *string {
 
 func dataSourceNsxtComputeCollectionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := fabric.NewComputeCollectionsClient(connector)
+	client := cliComputeCollectionsClient(connector)
 	objID := d.Get("id").(string)
 
 	objName := nullIfEmpty(d.Get("display_name").(string))

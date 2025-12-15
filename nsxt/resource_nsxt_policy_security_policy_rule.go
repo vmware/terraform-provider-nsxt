@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliSecurityPoliciesRulesClient = securitypolicies.NewRulesClient
+
 func resourceNsxtPolicySecurityPolicyRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySecurityPolicyRuleCreate,
@@ -49,7 +51,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Creating Security Policy Rule with ID %s under policy %s", id, policyPath)
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -143,7 +145,7 @@ func resourceNsxtPolicySecurityPolicyRuleExistsPartial(d *schema.ResourceData, m
 }
 
 func resourceNsxtPolicySecurityPolicyRuleExists(sessionContext utl.SessionContext, id string, policyPath string, connector client.Connector) (bool, error) {
-	client := securitypolicies.NewRulesClient(sessionContext, connector)
+	client := cliSecurityPoliciesRulesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -179,7 +181,7 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -243,7 +245,7 @@ func resourceNsxtPolicySecurityPolicyRuleUpdate(d *schema.ResourceData, m interf
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -269,7 +271,7 @@ func resourceNsxtPolicySecurityPolicyRuleDelete(d *schema.ResourceData, m interf
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesRulesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

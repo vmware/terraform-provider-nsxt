@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliGroupsClient = domains.NewGroupsClient
+
 var conditionKeyValues = []string{
 	model.Condition_KEY_TAG,
 	model.Condition_KEY_NAME,
@@ -333,7 +335,7 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 }
 
 func resourceNsxtPolicyGroupExistsInDomain(sessionContext utl.SessionContext, id string, domain string, connector client.Connector) (bool, error) {
-	client := domains.NewGroupsClient(sessionContext, connector)
+	client := cliGroupsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -879,7 +881,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	client := cliGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -911,7 +913,7 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	client := cliGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1011,7 +1013,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	client := cliGroupsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -1044,7 +1046,7 @@ func resourceNsxtPolicyGroupGeneralDelete(d *schema.ResourceData, m interface{},
 	failIfSubtreeExists := false
 
 	doDelete := func() error {
-		client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+		client := cliGroupsClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

@@ -189,7 +189,7 @@ func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, paren
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := cliVpcNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -261,7 +261,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 	if pathErr != nil {
 		return handleReadError(d, "VpcNatRule", id, pathErr)
 	}
-	client := cliVpcNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err != nil {
 		return handleReadError(d, "PolicyVpcNatRule", id, err)
@@ -336,7 +336,7 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	sessionContext := getParentContext(d, m, parentPath)
-	client := cliVpcNatRulesClient(sessionContext, connector)
+	client := cliTransitGatewayNatRulesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {

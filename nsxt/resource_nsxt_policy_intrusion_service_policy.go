@@ -18,6 +18,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliIntrusionServicePoliciesClient = domains.NewIntrusionServicePoliciesClient
+
 // TODO: revisit with new SDK if constant is available
 var policyIntrusionServiceRuleActionValues = []string{model.IdsRule_ACTION_DETECT, "DETECT_PREVENT"}
 
@@ -47,7 +49,7 @@ func getIdsProfilesSchema() *schema.Schema {
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
-	client := domains.NewIntrusionServicePoliciesClient(sessionContext, connector)
+	client := cliIntrusionServicePoliciesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -338,7 +340,7 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
 	}
-	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -385,7 +387,7 @@ func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
+	client := cliIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

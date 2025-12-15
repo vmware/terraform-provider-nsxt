@@ -17,6 +17,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliComputeManagerStateClient = compute_managers.NewStateClient
+var cliComputeManagerStatusClient = compute_managers.NewStatusClient
+
 func dataSourceNsxtComputeManagerRealization() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtComputeManagerRealizationRead,
@@ -80,7 +83,7 @@ func dataSourceNsxtComputeManagerRealizationWait(d *schema.ResourceData, connect
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
 
-	client := compute_managers.NewStateClient(connector)
+	client := cliComputeManagerStateClient(connector)
 
 	pendingStates := []string{
 		model.ConfigurationState_STATE_PENDING,
@@ -129,7 +132,7 @@ func dataSourceNsxtComputeManagerRegistrationWait(d *schema.ResourceData, connec
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
 
-	client := compute_managers.NewStatusClient(connector)
+	client := cliComputeManagerStatusClient(connector)
 
 	pendingStates := []string{
 		model.ComputeManagerStatus_CONNECTION_STATUS_CONNECTING,
