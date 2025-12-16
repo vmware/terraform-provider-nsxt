@@ -105,28 +105,28 @@ func nsxtPolicySegmentPortAttachmentConfigSetInStruct(d *schema.ResourceData, ob
 	}
 	attachment := attachmentObj[0].(map[string]interface{})
 	attachmentId := attachment["id"].(string)
-	attachmentStruct :=  &model.PortAttachment{
+	attachmentStruct := &model.PortAttachment{
 		Id: &attachmentId,
 	}
-	
+
 	if val, ok := attachment["allocate_addresses"].(string); ok && val != "" {
 		attachmentStruct.AllocateAddresses = &val
 	}
-	
+
 	if val, ok := attachment["app_id"].(string); ok && val != "" {
 		attachmentStruct.AppId = &val
 	}
-	
+
 	attachmentStruct.EvpnVlans = interface2StringList(attachment["evpn_vlans"].([]interface{}))
-	
+
 	if val, ok := attachment["hyperbus_mode"].(string); ok && val != "" {
 		attachmentStruct.HyperbusMode = &val
 	}
-	
+
 	if val, ok := attachment["type"].(string); ok && val != "" {
 		attachmentStruct.Type_ = &val
 	}
-	
+
 	if val, ok := attachment["traffic_tag"].(int); ok && val != 0 {
 		tag := int64(val)
 		attachmentStruct.TrafficTag = &tag
