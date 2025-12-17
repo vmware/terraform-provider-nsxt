@@ -100,7 +100,6 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 func nsxtPolicySegmentPortAttachmentConfigSetInStruct(d *schema.ResourceData, obj *model.SegmentPort) {
 	attachmentObj := d.Get("attachment").([]interface{})
 	if len(attachmentObj) == 0 {
-		obj.Attachment = &model.PortAttachment{}
 		return
 	}
 	attachment := attachmentObj[0].(map[string]interface{})
