@@ -33,7 +33,7 @@ data "nsxt_policy_mac_discovery_profile" "mac_profile" {
 resource "nsxt_policy_segment_port_binding" "existing_port_binding" {
   segment_port_id = data.nsxt_policy_segment_port.existing_port.id
   segment_path    = data.nsxt_policy_segment.segment1.path
-  
+
   discovery_profile {
     ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.ip_profile.path
     mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.mac_profile.path
@@ -52,15 +52,15 @@ resource "nsxt_policy_segment_port_binding" "port1_binding" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
-  
+
   segment_port_id = "port1"
   segment_path    = data.nsxt_policy_segment.segment1.path
-  
+
   discovery_profile {
     ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.profile1.path
     mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.profile1.path
   }
-  
+
   security_profile {
     spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.profile1.path
     security_profile_path   = data.nsxt_policy_segment_security_profile.profile1.path
