@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func TestAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T) {
@@ -49,7 +49,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 				// Create
 				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentPortBindingExists(testResourceName),
+					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"create"),
@@ -62,7 +62,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 				// Update
 				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, updateResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentPortBindingExists(testResourceName),
+					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"update"),
@@ -75,7 +75,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 	})
 }
 
-func testAccNsxtPolicySegmentPortBindingExists(resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicySegmentPortBindingExists(resourceName string, withContext bool) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -88,9 +88,18 @@ func testAccNsxtPolicySegmentPortBindingExists(resourceName string) resource.Tes
 
 		connector := getPolicyConnector(testAccProvider.Meta())
 		segmentPath := rs.Primary.Attributes["segment_path"]
-
-		d := &schema.ResourceData{}
-		_, err := getSegmentPort(segmentPath, resourceID, getSessionContext(d, testAccProvider.Meta()), connector)
+		var context utl.SessionContext
+		if withContext {
+			context = utl.SessionContext{
+				ProjectID:  "test",
+				ClientType: utl.Multitenancy,
+			}
+		} else {
+			context = utl.SessionContext{
+				ClientType: utl.Local,
+			}
+		}
+		_, err := getSegmentPort(segmentPath, resourceID, context, connector)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Segment Port Binding ID %s. Error: %v", resourceID, err)
 		}
