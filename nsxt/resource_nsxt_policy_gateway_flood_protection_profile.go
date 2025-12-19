@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
+var cliFloodProtectionProfilesClient = infra.NewFloodProtectionProfilesClient
+
 var gatewayFloodProtectionProfilePathExample = getMultitenancyPathExample("/infra/flood-protection-profiles/[profile]")
 
 func resourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
@@ -86,7 +88,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfilePatch(d *schema.ResourceData
 	profileStruct := profileValue.(*data.StructValue)
 
 	log.Printf("[INFO] Patching GatewayFloodProtectionProfile with ID %s", id)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	client := cliFloodProtectionProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -121,7 +123,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileRead(d *schema.ResourceData,
 		return fmt.Errorf("Error obtaining FloodProtectionProfile ID")
 	}
 
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	client := cliFloodProtectionProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

@@ -14,6 +14,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra/settings/firewall/security"
 )
 
+var cliExcludeListClient = security.NewExcludeListClient
+
 func resourceNsxtPolicyFirewallExcludeListMember() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyFirewallExcludeListMemberCreate,
@@ -45,7 +47,7 @@ func memberInList(member string, members []string) int {
 
 func resourceNsxtPolicyFirewallExcludeListMemberExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 
-	client := security.NewExcludeListClient(sessionContext, connector)
+	client := cliExcludeListClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -69,7 +71,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberCreate(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		client := cliExcludeListClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -107,7 +109,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberRead(d *schema.ResourceData, m i
 	connector := getPolicyConnector(m)
 	member := d.Id()
 
-	client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+	client := cliExcludeListClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -129,7 +131,7 @@ func resourceNsxtPolicyFirewallExcludeListMemberDelete(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		client := cliExcludeListClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

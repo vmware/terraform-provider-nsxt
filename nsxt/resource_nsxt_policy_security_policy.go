@@ -12,7 +12,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -30,7 +29,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 }
 
 func getSecurityPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.SecurityPolicy, error) {
-	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
+	client := cliSecurityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return model.SecurityPolicy{}, policyResourceNotSupportedError()
 	}
@@ -39,7 +38,7 @@ func getSecurityPolicyInDomain(sessionContext utl.SessionContext, id string, dom
 }
 
 func resourceNsxtPolicySecurityPolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
-	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
+	client := cliSecurityPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -118,7 +117,7 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	client := cliSecurityPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

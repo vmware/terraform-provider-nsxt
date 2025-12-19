@@ -13,7 +13,6 @@ import (
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -104,7 +103,8 @@ func resourceNsxtPolicyLBGenericPersistenceProfileCreate(d *schema.ResourceData,
 
 	log.Printf("[INFO] Creating LBGenericPersistenceProfile with ID %s", id)
 
-	client := clientLayer.NewLbPersistenceProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("LBGenericPersistenceProfile", id, err)
@@ -124,7 +124,8 @@ func resourceNsxtPolicyLBGenericPersistenceProfileRead(d *schema.ResourceData, m
 		return fmt.Errorf("Error obtaining LBGenericPersistenceProfile ID")
 	}
 
-	client := clientLayer.NewLbPersistenceProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 
 	genObj, err := client.Get(id)
 	if err != nil {
@@ -181,7 +182,8 @@ func resourceNsxtPolicyLBGenericPersistenceProfileUpdate(d *schema.ResourceData,
 		return fmt.Errorf("Profile %s is not of type LBGenericPersistenceProfile %s", id, errs[0])
 	}
 
-	client := clientLayer.NewLbPersistenceProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 	_, err := client.Update(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleUpdateError("LBGenericPersistenceProfile", id, err)
@@ -197,8 +199,8 @@ func resourceNsxtPolicyLBGenericPersistenceProfileDelete(d *schema.ResourceData,
 	}
 
 	connector := getPolicyConnector(m)
-
-	client := clientLayer.NewLbPersistenceProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

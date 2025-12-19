@@ -9,12 +9,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliCommunityListsClient = tier_0s.NewCommunityListsClient
 
 func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 	return &schema.Resource{
@@ -49,13 +51,14 @@ func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 
 func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		client := gm_tier0s.NewCommunityListsClient(connector)
-		_, err = client.Get(tier0Id, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewCommunityListsClient(connector)
-		_, err = client.Get(tier0Id, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	_, err = client.Get(tier0Id, id)
 	if err == nil {
 		return true, nil
 	}
@@ -82,13 +85,14 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 		id = newUUID()
 	} else {
 		var err error
+		var sessionContext utl.SessionContext
 		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewCommunityListsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Global}
 		} else {
-			client := tier_0s.NewCommunityListsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
+		client := cliCommunityListsClient(sessionContext, connector)
+		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Community List with ID '%s' already exists on Tier0 Gateway %s", id, gwID)
 		} else if !isNotFoundError(err) {
@@ -111,17 +115,14 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 	var err error
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Gateway Community List with ID %s", id)
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.CommunityListBindingType(), gm_model.CommunityListBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_tier0s.NewCommunityListsClient(connector)
-		err = client.Patch(gwID, id, gmObj.(gm_model.CommunityList))
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewCommunityListsClient(connector)
-		err = client.Patch(gwID, id, obj)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	err = client.Patch(gwID, id, obj)
 	if err != nil {
 		return handleCreateError("Community List", id, err)
 	}
@@ -146,25 +147,16 @@ func resourceNsxtPolicyGatewayCommunityListRead(d *schema.ResourceData, m interf
 	}
 
 	var obj model.CommunityList
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewCommunityListsClient(connector)
-		gmObj, err := client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Community List", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.CommunityListBindingType(), model.CommunityListBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.CommunityList)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewCommunityListsClient(connector)
-		var err error
-		obj, err = client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Community List", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	obj, err := client.Get(gwID, id)
+	if err != nil {
+		return handleReadError(d, "Gateway Community List", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -205,17 +197,14 @@ func resourceNsxtPolicyGatewayCommunityListUpdate(d *schema.ResourceData, m inte
 
 	var err error
 	log.Printf("[INFO] Updating Gateway Community List with ID %s", id)
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.CommunityListBindingType(), gm_model.CommunityListBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_tier0s.NewCommunityListsClient(connector)
-		_, err = client.Update(gwID, id, gmObj.(gm_model.CommunityList))
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewCommunityListsClient(connector)
-		_, err = client.Update(gwID, id, obj)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	_, err = client.Update(gwID, id, obj)
 	if err != nil {
 		return handleCreateError("Gateway Community List", id, err)
 	}
@@ -236,13 +225,14 @@ func resourceNsxtPolicyGatewayCommunityListDelete(d *schema.ResourceData, m inte
 
 	connector := getPolicyConnector(m)
 	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewCommunityListsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewCommunityListsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	err = client.Delete(gwID, id)
 
 	if err != nil {
 		return handleDeleteError("GatewayCommunityList", id, err)

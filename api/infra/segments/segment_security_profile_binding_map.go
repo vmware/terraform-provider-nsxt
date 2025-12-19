@@ -6,9 +6,11 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -23,8 +25,11 @@ func NewSegmentSecurityProfileBindingMapsClient(sessionContext utl.SessionContex
 	case utl.Local:
 		client = client0.NewSegmentSecurityProfileBindingMapsClient(connector)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client = client1.NewSegmentSecurityProfileBindingMapsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewSegmentSecurityProfileBindingMapsClient(connector)
 
 	default:
 		return nil
@@ -45,8 +50,18 @@ func (c SegmentSecurityProfileBindingMapClientContext) Get(segmentIdParam string
 			return obj, err
 		}
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentSecurityProfileBindingMapsClient)
+		gmObj, err1 := client.Get(segmentIdParam, segmentSecurityProfileBindingMapIdParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentSecurityProfileBindingMapBindingType(), model0.SegmentSecurityProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentSecurityProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentSecurityProfileBindingMapsClient)
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentSecurityProfileBindingMapIdParam)
 		if err != nil {
 			return obj, err
@@ -67,8 +82,12 @@ func (c SegmentSecurityProfileBindingMapClientContext) Delete(segmentIdParam str
 		client := c.Client.(client0.SegmentSecurityProfileBindingMapsClient)
 		err = client.Delete(segmentIdParam, segmentSecurityProfileBindingMapIdParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentSecurityProfileBindingMapsClient)
+		err = client.Delete(segmentIdParam, segmentSecurityProfileBindingMapIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentSecurityProfileBindingMapsClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentSecurityProfileBindingMapIdParam)
 
 	default:
@@ -86,8 +105,16 @@ func (c SegmentSecurityProfileBindingMapClientContext) Patch(segmentIdParam stri
 		client := c.Client.(client0.SegmentSecurityProfileBindingMapsClient)
 		err = client.Patch(segmentIdParam, segmentSecurityProfileBindingMapIdParam, segmentSecurityProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentSecurityProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentSecurityProfileBindingMapParam, model0.SegmentSecurityProfileBindingMapBindingType(), model1.SegmentSecurityProfileBindingMapBindingType())
+		if err1 != nil {
+			return err1
+		}
+		err = client.Patch(segmentIdParam, segmentSecurityProfileBindingMapIdParam, gmObj.(model1.SegmentSecurityProfileBindingMap))
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentSecurityProfileBindingMapsClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentSecurityProfileBindingMapIdParam, segmentSecurityProfileBindingMapParam)
 
 	default:
@@ -106,8 +133,22 @@ func (c SegmentSecurityProfileBindingMapClientContext) Update(segmentIdParam str
 		client := c.Client.(client0.SegmentSecurityProfileBindingMapsClient)
 		obj, err = client.Update(segmentIdParam, segmentSecurityProfileBindingMapIdParam, segmentSecurityProfileBindingMapParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentSecurityProfileBindingMapsClient)
+		gmObj, err1 := utl.ConvertModelBindingType(segmentSecurityProfileBindingMapParam, model0.SegmentSecurityProfileBindingMapBindingType(), model1.SegmentSecurityProfileBindingMapBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		gmResult, err2 := client.Update(segmentIdParam, segmentSecurityProfileBindingMapIdParam, gmObj.(model1.SegmentSecurityProfileBindingMap))
+		if err2 != nil {
+			return obj, err2
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmResult, model1.SegmentSecurityProfileBindingMapBindingType(), model0.SegmentSecurityProfileBindingMapBindingType())
+		obj = rawObj.(model0.SegmentSecurityProfileBindingMap)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentSecurityProfileBindingMapsClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentSecurityProfileBindingMapIdParam, segmentSecurityProfileBindingMapParam)
 
 	default:
@@ -126,8 +167,18 @@ func (c SegmentSecurityProfileBindingMapClientContext) List(segmentIdParam strin
 		client := c.Client.(client0.SegmentSecurityProfileBindingMapsClient)
 		obj, err = client.List(segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.SegmentSecurityProfileBindingMapsClient)
+		gmObj, err1 := client.List(segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentSecurityProfileBindingMapListResultBindingType(), model0.SegmentSecurityProfileBindingMapListResultBindingType())
+		obj = rawObj.(model0.SegmentSecurityProfileBindingMapListResult)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SegmentSecurityProfileBindingMapsClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, segmentIdParam, cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

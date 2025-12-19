@@ -17,8 +17,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
-	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -77,14 +75,14 @@ func getPolicyDchpStaticBindingOnSegment(context utl.SessionContext, id string, 
 		return nil, fmt.Errorf("Invalid Segment Path %s", segmentPath)
 	}
 	if context.ClientType == utl.Global || gwID == "" {
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return nil, policyResourceNotSupportedError()
 		}
 		return client.Get(segmentID, id)
 	}
 
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -159,7 +157,7 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -167,7 +165,7 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 
 	// fixed segment
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -245,14 +243,14 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		dhcpObj, err = client.Get(segmentID, id)
 	} else {
 		// fixed segment
-		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -328,14 +326,14 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	var err error
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		err = client.Delete(segmentID, id)
 	} else {
 		// fixed segment
-		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

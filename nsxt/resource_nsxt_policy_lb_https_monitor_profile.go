@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -104,7 +103,8 @@ func resourceNsxtPolicyLBHttpsMonitorProfilePatch(d *schema.ResourceData, m inte
 		return fmt.Errorf("LBMonitorProfile %s is not of type LBHttpsMonitorProfile %s", id, errs[0])
 	}
 
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -136,7 +136,8 @@ func resourceNsxtPolicyLBHttpsMonitorProfileRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining LBHttpsMonitorProfile ID")
 	}
 
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpsMonitorProfile", id, err)

@@ -15,11 +15,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0StaticRoutesClient = tier0s.NewStaticRoutesClient
+var cliTier1StaticRoutesClient = tier1s.NewStaticRoutesClient
 
 func resourceNsxtPolicyStaticRoute() *schema.Resource {
 	return &schema.Resource{
@@ -82,13 +84,13 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 
 func patchNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector client.Connector, gwID string, route model.StaticRoutes, isT0 bool) error {
 	if isT0 {
-		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		routeClient := cliTier0StaticRoutesClient(sessionContext, connector)
 		if routeClient == nil {
 			return policyResourceNotSupportedError()
 		}
 		return routeClient.Patch(gwID, *route.Id, route)
 	}
-	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	routeClient := cliTier1StaticRoutesClient(sessionContext, connector)
 	if routeClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -97,13 +99,13 @@ func patchNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector cli
 
 func deleteNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, routeID string) error {
 	if isT0 {
-		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		routeClient := cliTier0StaticRoutesClient(sessionContext, connector)
 		if routeClient == nil {
 			return policyResourceNotSupportedError()
 		}
 		return routeClient.Delete(gwID, routeID)
 	}
-	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	routeClient := cliTier1StaticRoutesClient(sessionContext, connector)
 	if routeClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -112,13 +114,13 @@ func deleteNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector cl
 
 func getNsxtPolicyStaticRouteByID(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, routeID string) (model.StaticRoutes, error) {
 	if isT0 {
-		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		routeClient := cliTier0StaticRoutesClient(sessionContext, connector)
 		if routeClient == nil {
 			return model.StaticRoutes{}, policyResourceNotSupportedError()
 		}
 		return routeClient.Get(gwID, routeID)
 	}
-	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	routeClient := cliTier1StaticRoutesClient(sessionContext, connector)
 	if routeClient == nil {
 		return model.StaticRoutes{}, policyResourceNotSupportedError()
 	}
@@ -371,7 +373,7 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	t0Client := cliTier0sClient(getSessionContext(d, m), connector)
 	if t0Client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -380,7 +382,7 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1Client := cliTier1sClient(getSessionContext(d, m), connector)
 		if t1Client == nil {
 			return nil, policyResourceNotSupportedError()
 		}

@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 var accTestPolicyLBServiceCreateAttributes = map[string]string{
@@ -121,7 +122,8 @@ func testAccNsxtPolicyLBServiceExists(resourceName string) resource.TestCheckFun
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewLbServicesClient(connector)
+		sessionContext := testAccGetSessionContext()
+		nsxClient := infra.NewLbServicesClient(sessionContext, connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -144,7 +146,8 @@ func testAccNsxtPolicyLBServiceExists(resourceName string) resource.TestCheckFun
 
 func testAccNsxtPolicyLBServiceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewLbServicesClient(connector)
+	sessionContext := testAccGetSessionContext()
+	nsxClient := infra.NewLbServicesClient(sessionContext, connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_service" {

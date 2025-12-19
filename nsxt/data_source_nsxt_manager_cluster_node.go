@@ -13,6 +13,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliClusterNodesClient = cluster.NewNodesClient
+
 func dataSourceNsxtManagerClusterNode() *schema.Resource {
 	return &schema.Resource{
 		Read:               dataSourceNsxtManagerClusterNodeRead,
@@ -48,7 +50,7 @@ func dataSourceNsxtManagerClusterNode() *schema.Resource {
 
 func dataSourceNsxtManagerClusterNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cluster.NewNodesClient(connector)
+	client := cliClusterNodesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

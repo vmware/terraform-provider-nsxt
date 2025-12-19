@@ -21,6 +21,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliL7AccessProfilesClient = clientLayer.NewL7AccessProfilesClient
+
 var l7AccessProfileDefaultActionValues = []string{
 	model.L7AccessProfile_DEFAULT_ACTION_ALLOW,
 	model.L7AccessProfile_DEFAULT_ACTION_REJECT,
@@ -192,7 +194,7 @@ func resourceNsxtPolicyL7AccessProfile() *schema.Resource {
 
 func resourceNsxtPolicyL7AccessProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := clientLayer.NewL7AccessProfilesClient(sessionContext, connector)
+	client := cliL7AccessProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -413,7 +415,7 @@ func resourceNsxtPolicyL7AccessProfileRead(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error obtaining L7AccessProfile ID")
 	}
 
-	client := clientLayer.NewL7AccessProfilesClient(getSessionContext(d, m), connector)
+	client := cliL7AccessProfilesClient(getSessionContext(d, m), connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "L7AccessProfile", id, err)
@@ -519,7 +521,7 @@ func resourceNsxtPolicyL7AccessProfileDelete(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewL7AccessProfilesClient(getSessionContext(d, m), connector)
+	client := cliL7AccessProfilesClient(getSessionContext(d, m), connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

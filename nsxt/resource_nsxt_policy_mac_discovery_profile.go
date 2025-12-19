@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var cliMacDiscoveryProfilesClient = infra.NewMacDiscoveryProfilesClient
+
 var macDiscoveryProfileMacLimitPolicyValues = []string{
 	model.MacDiscoveryProfile_MAC_LIMIT_POLICY_ALLOW,
 	model.MacDiscoveryProfile_MAC_LIMIT_POLICY_DROP,
@@ -143,7 +145,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 
 func resourceNsxtPolicyMacDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := infra.NewMacDiscoveryProfilesClient(sessionContext, connector)
+	client := cliMacDiscoveryProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -187,7 +189,7 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -210,7 +212,7 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining MacDiscoveryProfile ID")
 	}
 
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -259,7 +261,7 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 
 	// Update the resource using PATCH
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -279,7 +281,7 @@ func resourceNsxtPolicyMacDiscoveryProfileDelete(d *schema.ResourceData, m inter
 
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

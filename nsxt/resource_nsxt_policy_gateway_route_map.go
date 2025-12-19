@@ -10,12 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliRouteMapsClient = tier_0s.NewRouteMapsClient
 
 func resourceNsxtPolicyGatewayRouteMap() *schema.Resource {
 	return &schema.Resource{
@@ -144,13 +146,14 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 
 func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		client := gm_tier0s.NewRouteMapsClient(connector)
-		_, err = client.Get(tier0Id, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewRouteMapsClient(connector)
-		_, err = client.Get(tier0Id, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliRouteMapsClient(sessionContext, connector)
+	_, err = client.Get(tier0Id, id)
 	if err == nil {
 		return true, nil
 	}
@@ -243,15 +246,13 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 		Entries:     entries,
 	}
 
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		gmObj, convErr := convertModelBindingType(obj, model.Tier0RouteMapBindingType(), gm_model.Tier0RouteMapBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_tier0s.NewRouteMapsClient(connector)
-		return client.Patch(gwID, id, gmObj.(gm_model.Tier0RouteMap))
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-	client := tier_0s.NewRouteMapsClient(connector)
+	client := cliRouteMapsClient(sessionContext, connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -270,13 +271,14 @@ func resourceNsxtPolicyGatewayRouteMapCreate(d *schema.ResourceData, m interface
 		id = newUUID()
 	} else {
 		var err error
+		var sessionContext utl.SessionContext
 		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewRouteMapsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Global}
 		} else {
-			client := tier_0s.NewRouteMapsClient(connector)
-			_, err = client.Get(gwID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
+		client := cliRouteMapsClient(sessionContext, connector)
+		_, err = client.Get(gwID, id)
 		if err == nil {
 			return fmt.Errorf("Route Map with ID '%s' already exists on Tier0 Gateway %s", id, gwID)
 		} else if !isNotFoundError(err) {
@@ -310,25 +312,16 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 	}
 
 	var obj model.Tier0RouteMap
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewRouteMapsClient(connector)
-		gmObj, err := client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Route Map", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.Tier0RouteMapBindingType(), model.Tier0RouteMapBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.Tier0RouteMap)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewRouteMapsClient(connector)
-		var err error
-		obj, err = client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway Route Map", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliRouteMapsClient(sessionContext, connector)
+	obj, err := client.Get(gwID, id)
+	if err != nil {
+		return handleReadError(d, "Gateway Route Map", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -409,13 +402,14 @@ func resourceNsxtPolicyGatewayRouteMapDelete(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewRouteMapsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := tier_0s.NewRouteMapsClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliRouteMapsClient(sessionContext, connector)
+	err = client.Delete(gwID, id)
 
 	if err != nil {
 		return handleDeleteError("Gateway Route Map", id, err)

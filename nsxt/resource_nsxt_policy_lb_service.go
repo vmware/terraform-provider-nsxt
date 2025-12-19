@@ -13,9 +13,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliLbServicesClient = infra.NewLbServicesClient
 
 var lBServiceErrorLogLevelValues = []string{
 	model.LBService_ERROR_LOG_LEVEL_ERROR,
@@ -78,7 +82,8 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewLbServicesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliLbServicesClient(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -94,7 +99,8 @@ func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, is
 
 func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewLbServicesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbServicesClient(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -142,7 +148,8 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewLbServicesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbServicesClient(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -175,7 +182,8 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewLbServicesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbServicesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -224,7 +232,8 @@ func resourceNsxtPolicyLBServiceDelete(d *schema.ResourceData, m interface{}) er
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewLbServicesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbServicesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

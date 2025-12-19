@@ -10,10 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	locale_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliEvpnTunnelEndpointsClient = locale_services.NewEvpnTunnelEndpointsClient
 
 func resourceNsxtPolicyEvpnTunnelEndpoint() *schema.Resource {
 	return &schema.Resource{
@@ -78,12 +82,14 @@ func policyEvpnTunnelEndpointPatch(d *schema.ResourceData, m interface{}, gwID s
 		obj.Mtu = &mtu
 	}
 
-	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliEvpnTunnelEndpointsClient(sessionContext, connector)
 	return client.Patch(gwID, localeServiceID, id, obj)
 }
 
 func resourceNsxtPolicyEvpnTunnelEndpointExists(connector client.Connector, gwID string, localeServiceID string, id string) (bool, error) {
-	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliEvpnTunnelEndpointsClient(sessionContext, connector)
 	_, err := client.Get(gwID, localeServiceID, id)
 
 	if err == nil {
@@ -140,7 +146,8 @@ func resourceNsxtPolicyEvpnTunnelEndpointRead(d *schema.ResourceData, m interfac
 	gwID := d.Get("gateway_id").(string)
 	localeServiceID := d.Get("locale_service_id").(string)
 
-	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliEvpnTunnelEndpointsClient(sessionContext, connector)
 	obj, err := client.Get(gwID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "EVPN Tunnel Endpoint", id, err)
@@ -190,7 +197,8 @@ func resourceNsxtPolicyEvpnTunnelEndpointDelete(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliEvpnTunnelEndpointsClient(sessionContext, connector)
 	err := client.Delete(gwID, localeServiceID, id)
 
 	if err != nil {

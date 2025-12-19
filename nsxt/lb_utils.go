@@ -13,9 +13,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliLbAppProfilesClient = infra.NewLbAppProfilesClient
+var cliLbMonitorProfilesClient = infra.NewLbMonitorProfilesClient
+var cliLbPersistenceProfilesClient = infra.NewLbPersistenceProfilesClient
+var cliLbServerSslProfilesClient = infra.NewLbServerSslProfilesClient
+var cliLbClientSslProfilesClient = infra.NewLbClientSslProfilesClient
 
 // Helpers for common LB monitor schema settings
 func getLbMonitorFallCountSchema() *schema.Schema {
@@ -243,7 +251,8 @@ func resourceNsxtLbMonitorDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtPolicyLBAppProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -264,7 +273,8 @@ func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{})
 
 	connector := getPolicyConnector(m)
 	forceParam := true
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	err := client.Delete(id, &forceParam)
 	if err != nil {
 		return handleDeleteError("LBAppProfile", id, err)
@@ -273,7 +283,8 @@ func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtPolicyLBMonitorProfileExistsWrapper(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -293,7 +304,8 @@ func resourceNsxtPolicyLBMonitorProfileDelete(d *schema.ResourceData, m interfac
 	}
 	connector := getPolicyConnector(m)
 	forceParam := true
-	client := infra.NewLbMonitorProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	err := client.Delete(id, &forceParam)
 	if err != nil {
 		return handleDeleteError("LBMonitorProfile", id, err)
