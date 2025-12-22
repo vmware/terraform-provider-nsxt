@@ -58,7 +58,7 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   neighbor_address      = "1.1.12.23"
   password              = "passw0rd"
   remote_as_num         = "60005"
-  source_addresses      = nsxt_policy_tier0_gateway_interface.testresource.ip_addresses
+  source_addresses      = nsxt_policy_tier0_gateway_interface.test.ip_addresses
 
   bfd_config {
     enabled  = true
