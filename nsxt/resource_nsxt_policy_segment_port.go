@@ -154,6 +154,18 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 	d.Set("nsx_id", id)
 	d.Set("path", segPort.Path)
 	d.Set("revision", segPort.Revision)
+
+	if segPort.Attachment != nil {
+		attachment := make(map[string]interface{})
+		attachment["allocate_addresses"] = segPort.Attachment.AllocateAddresses
+		attachment["app_id"] = segPort.Attachment.AppId
+		attachment["evpn_vlans"] = segPort.Attachment.EvpnVlans
+		attachment["hyperbus_mode"] = segPort.Attachment.HyperbusMode
+		attachment["type"] = segPort.Attachment.Type_
+		attachment["id"] = segPort.Attachment.Id
+		attachment["traffic_tag"] = segPort.Attachment.TrafficTag
+	}
+
 	err = nsxtPolicySegmentPortProfilesRead(d, m)
 	if err != nil {
 		return err
