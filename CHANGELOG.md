@@ -1,3 +1,27 @@
+## 3.11.0 (December 16, 2025)
+
+BUG FIXES:
+* `resource/nsxt_policy_bgp_neighbor`: Fix maximum password length to match NSX spec ([#1870](https://github.com/vmware/terraform-provider-nsxt/pull/1870))
+* `resource/nsxt_policy_tier0_gateway`: Fix inter_sr_ibgp value check issue ([#1772](https://github.com/vmware/terraform-provider-nsxt/pull/1772))
+* `resource/nsxt_policy_predefined_gateway_policy`: Ignore gateway policy default rule order ([#1781](https://github.com/vmware/terraform-provider-nsxt/pull/1781))
+* `resource/nsxt_policy_vlan_segment`: Interface conversion error when applying config to VLAN Backed ([#1837](https://github.com/vmware/terraform-provider-nsxt/pull/1837))
+* `resource/nsxt_policy_tier0_gateway_interface`: Read edge_cluster_member_index from the state to fix import of resource_nsxt_policy_tier0_gateway_interface ([#1853](https://github.com/vmware/terraform-provider-nsxt/pull/1853))
+* `resource/nsxt_policy_lb_virtual_server`: Add a check to ensure that LB rules for virtual servers are imported ([#1868](https://github.com/vmware/terraform-provider-nsxt/pull/1868))
+* `resource/nsxt_upgrade_run`: Set upgrade target version correctly ([#1887](https://github.com/vmware/terraform-provider-nsxt/pull/1887))
+* `data/nsxt_policy_groups`: Use cursor to support over 1000 groups ([#1876](https://github.com/vmware/terraform-provider-nsxt/pull/1876))
+
+IMPROVEMENTS:
+* Update Resource Documentation to Include NSX-T Version Information ([#1804](https://github.com/vmware/terraform-provider-nsxt/pull/1804))
+* `resource/nsxt_policy_segment_port`: Policy Segment Port resource ([#1856](https://github.com/vmware/terraform-provider-nsxt/pull/1856))
+* `data/nsxt_policy_segment_port`: Policy Segment Port data source ([#1856](https://github.com/vmware/terraform-provider-nsxt/pull/1856))
+* `resource/nsxt_policy_gateway_policy_rule`: Allow definition of Gateway Policy Rule outside the policy scope  ([#1808](https://github.com/vmware/terraform-provider-nsxt/pull/1808))
+* `resource/nsxt_policy_parent_gateway_policy`: Parent Gateway Policy for external Gateway Policy Rule ([#1886](https://github.com/vmware/terraform-provider-nsxt/pull/1886))
+
+EXPERIMENTAL FEATURES:
+* `data/nsxt_policy_container_cluster`: Add nsxt_policy_container_cluster data source to look up an Antrea container cluster ([#1873](https://github.com/vmware/terraform-provider-nsxt/pull/1873))
+* `nsxt_policy_security_policy_container_cluster`: Add nsxt_policy_security_policy_container_cluster resource to associate an Antrea container cluster with a security policy ([#1875](https://github.com/vmware/terraform-provider-nsxt/pull/1875)) 
+* `data/nsxt_policy_container_clusters`: Add nsxt_policy_container_clusters data source to retrieve a map of Antrea container clusters ([#1889](https://github.com/vmware/terraform-provider-nsxt/pull/1889))
+
 ## 3.10.0 (September 10, 2025)
 
 BUG FIXES:
