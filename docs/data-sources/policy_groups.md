@@ -9,6 +9,8 @@ description: A policy groups data source. This data source builds "display name 
 This data source builds a "name to paths" map of the whole policy Groups table. Such map can be referenced in configuration to obtain object identifier attributes by display name at a cost of single roundtrip to NSX, which improves apply and refresh
 time at scale, compared to multiple instances of `nsxt_policy_group` data source.
 
+~> **NOTE:** If multiple groups with the same display name exist, only one will be included in the map.
+
 ## Example Usage
 
 ```hcl
