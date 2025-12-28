@@ -16,15 +16,9 @@ func resourceNsxtPolicySegmentPortBinding() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error { return nil },
 		Schema: map[string]*schema.Schema{
 			"context": getContextSchema(false, false, false),
-			"segment_port_id": {
+			"segment_port_path": {
 				Type:        schema.TypeString,
-				Description: "ID of the segment port",
-				Required:    true,
-				ForceNew:    true,
-			},
-			"segment_path": {
-				Type:        schema.TypeString,
-				Description: "Path of the segment",
+				Description: "Policy path of the segment port",
 				Required:    true,
 				ForceNew:    true,
 			},
@@ -56,8 +50,12 @@ func resourceNsxtPolicySegmentPortBinding() *schema.Resource {
 func resourceNsxtPolicySegmentPortBindingCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
-	segmentPortID := d.Get("segment_port_id").(string)
-	segmentPath := d.Get("segment_path").(string)
+	segmentPortPath := d.Get("segment_port_path").(string)
+	segmentPortID := getPolicyIDFromPath(segmentPortPath)
+	segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+	if err != nil {
+		return fmt.Errorf("Error parsing Segment Port Path: %v", err)
+	}
 
 	segmentPort, err := getSegmentPort(segmentPath, segmentPortID, context, connector)
 	if err != nil {
@@ -81,10 +79,14 @@ func resourceNsxtPolicySegmentPortBindingCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicySegmentPortBindingRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	segmentPortID := d.Get("segment_port_id").(string)
-	segmentPath := d.Get("segment_path").(string)
+	segmentPortPath := d.Get("segment_port_path").(string)
+	segmentPortID := getPolicyIDFromPath(segmentPortPath)
+	segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+	if err != nil {
+		return fmt.Errorf("Error parsing Segment Port Path: %v", err)
+	}
 
-	_, err := getSegmentPort(segmentPath, segmentPortID, getSessionContext(d, m), connector)
+	_, err = getSegmentPort(segmentPath, segmentPortID, getSessionContext(d, m), connector)
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -105,8 +107,12 @@ func resourceNsxtPolicySegmentPortBindingUpdate(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
 
-	segmentPortID := d.Get("segment_port_id").(string)
-	segmentPath := d.Get("segment_path").(string)
+	segmentPortPath := d.Get("segment_port_path").(string)
+	segmentPortID := getPolicyIDFromPath(segmentPortPath)
+	segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+	if err != nil {
+		return fmt.Errorf("Error parsing Segment Port Path: %v", err)
+	}
 	segmentPort, err := getSegmentPort(segmentPath, segmentPortID, context, connector)
 	if err != nil {
 		return fmt.Errorf("Error getting Segment Port: %v", err)
@@ -126,9 +132,13 @@ func resourceNsxtPolicySegmentPortBindingUpdate(d *schema.ResourceData, m interf
 }
 
 func policySegmentPortBindingResourceToInfraStruct(segmentPort model.SegmentPort, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
-	segmentPath := d.Get("segment_path").(string)
+	segmentPortPath := d.Get("segment_port_path").(string)
+	segmentPath, err := getParameterFromPolicyPath("/segments/", "/ports/", segmentPortPath)
+	if err != nil {
+		return model.Infra{}, err
+	}
 
-	err := nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
+	err = nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
 	if err != nil {
 		return model.Infra{}, err
 	}

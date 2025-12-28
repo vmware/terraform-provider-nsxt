@@ -424,6 +424,10 @@ func getT1IdFromSegPath(segPortPath string) string {
 	return ""
 }
 
+func getPolicySegmentPathFromPortPath(segmentPortPath string) (string, error) {
+	return getParameterFromPolicyPath("", "/ports/", segmentPortPath)
+}
+
 type segmentConfig interface {
 	nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error
 	nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData, m interface{}) error

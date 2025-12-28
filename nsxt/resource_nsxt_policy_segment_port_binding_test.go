@@ -49,8 +49,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"create"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"create"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.spoofguard_profile_path", mtPrefix+"/infra/spoofguard-profiles/"+profilesPrefix+"create"),
@@ -62,8 +61,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, updateResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"update"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"update"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.spoofguard_profile_path", mtPrefix+"/infra/spoofguard-profiles/"+profilesPrefix+"update"),
@@ -80,14 +78,20 @@ func testAccNsxtPolicySegmentPortBindingExists(resourceName string, withContext 
 		if !ok {
 			return fmt.Errorf("Policy Segment Port Binding resource %s not found in resources", resourceName)
 		}
-		resourceID := rs.Primary.Attributes["segment_port_id"]
+		segmentPortPath := rs.Primary.Attributes["segment_port_path"]
+		segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+		resourceID := getPolicyIDFromPath(segmentPortPath)
 		if resourceID == "" {
 			return fmt.Errorf("Policy Segment Port Binding resource ID not set in resources")
 		}
 
 		connector := getPolicyConnector(testAccProvider.Meta())
-		segmentPath := rs.Primary.Attributes["segment_path"]
-		_, err := getSegmentPort(segmentPath, resourceID, testAccGetSessionContext(), connector)
+
+		if err != nil {
+			return fmt.Errorf("Error while parsing policy Segment Port Path %s. Error: %v", segmentPortPath, err)
+		}
+
+		_, err = getSegmentPort(segmentPath, resourceID, testAccGetSessionContext(), connector)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Segment Port Binding ID %s. Error: %v", resourceID, err)
 		}
@@ -117,8 +121,7 @@ resource "nsxt_policy_segment_port" "test" {
 
 resource "nsxt_policy_segment_port_binding" "test" {
   %s
-  segment_port_id = nsxt_policy_segment_port.test.id
-  segment_path = nsxt_policy_segment.test.path
+  segment_port_path = nsxt_policy_segment_port.test.path
   discovery_profile {
     ip_discovery_profile_path = nsxt_policy_ip_discovery_profile.%s.path
     mac_discovery_profile_path = nsxt_policy_mac_discovery_profile.%s.path
