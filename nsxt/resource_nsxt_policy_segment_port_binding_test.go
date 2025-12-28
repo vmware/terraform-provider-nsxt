@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func TestAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T) {
@@ -88,18 +87,7 @@ func testAccNsxtPolicySegmentPortBindingExists(resourceName string, withContext 
 
 		connector := getPolicyConnector(testAccProvider.Meta())
 		segmentPath := rs.Primary.Attributes["segment_path"]
-		var context utl.SessionContext
-		if withContext {
-			context = utl.SessionContext{
-				ProjectID:  "test",
-				ClientType: utl.Multitenancy,
-			}
-		} else {
-			context = utl.SessionContext{
-				ClientType: utl.Local,
-			}
-		}
-		_, err := getSegmentPort(segmentPath, resourceID, context, connector)
+		_, err := getSegmentPort(segmentPath, resourceID, testAccGetSessionContext(), connector)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Segment Port Binding ID %s. Error: %v", resourceID, err)
 		}
