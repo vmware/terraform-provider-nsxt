@@ -19,6 +19,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliContextProfilesClient = infra.NewContextProfilesClient
+var cliContextProfileAttributesClient = cont_prof.NewAttributesClient
+var cliContextProfileCustomAttributesClient = custom_attr.NewDefaultClient
+
 var attributeKeyMap = map[string]string{
 	"app_id":       model.PolicyAttributes_KEY_APP_ID,
 	"custom_url":   model.PolicyAttributes_KEY_CUSTOM_URL,
@@ -174,7 +178,7 @@ func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.S
 }
 
 func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewContextProfilesClient(sessionContext, connector)
+	client := cliContextProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -232,7 +236,7 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating ContextProfile with ID %s", id)
-	client := infra.NewContextProfilesClient(context, connector)
+	client := cliContextProfilesClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -254,7 +258,7 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining ContextProfile ID")
 	}
 
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	client := cliContextProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -309,7 +313,7 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	}
 
 	// Update the resource using PATCH
-	client := infra.NewContextProfilesClient(context, connector)
+	client := cliContextProfilesClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -331,7 +335,7 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 	var err error
 	force := true
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	client := cliContextProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -407,7 +411,7 @@ func listSystemAttributesWithKey(context utl.SessionContext, attributeKey *strin
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
 	var policyContextProfileListResult model.PolicyContextProfileListResult
-	client := cont_prof.NewAttributesClient(context, connector)
+	client := cliContextProfileAttributesClient(context, connector)
 	if client == nil {
 		return policyContextProfileListResult, policyResourceNotSupportedError()
 	}
@@ -419,7 +423,7 @@ func listCustomAttributesWithKey(context utl.SessionContext, attributeKey *strin
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
 	var policyContextProfileListResult model.PolicyContextProfileListResult
-	client := custom_attr.NewDefaultClient(context, connector)
+	client := cliContextProfileCustomAttributesClient(context, connector)
 	if client == nil {
 		return policyContextProfileListResult, policyResourceNotSupportedError()
 	}

@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
+var cliClusterProfilesClient = nsx.NewClusterProfilesClient
+
 func resourceNsxtEdgeHighAvailabilityProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtEdgeHighAvailabilityProfileCreate,
@@ -63,7 +65,7 @@ func resourceNsxtEdgeHighAvailabilityProfile() *schema.Resource {
 
 func resourceNsxtEdgeHighAvailabilityProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewClusterProfilesClient(connector)
+	client := cliClusterProfilesClient(connector)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
@@ -110,7 +112,7 @@ func resourceNsxtEdgeHighAvailabilityProfileRead(d *schema.ResourceData, m inter
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
 	}
-	client := nsx.NewClusterProfilesClient(connector)
+	client := cliClusterProfilesClient(connector)
 	structValue, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Edge High Availability Profile", id, err)
@@ -141,7 +143,7 @@ func resourceNsxtEdgeHighAvailabilityProfileUpdate(d *schema.ResourceData, m int
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
 	}
-	client := nsx.NewClusterProfilesClient(connector)
+	client := cliClusterProfilesClient(connector)
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -186,7 +188,7 @@ func resourceNsxtEdgeHighAvailabilityProfileDelete(d *schema.ResourceData, m int
 		return fmt.Errorf("error obtaining logical object id")
 	}
 
-	client := nsx.NewClusterProfilesClient(connector)
+	client := cliClusterProfilesClient(connector)
 
 	err := client.Delete(id)
 	if err != nil {

@@ -10,14 +10,16 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliVpcAttachmentsClient = vpcs.NewAttachmentsClient
 
 var vpcPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]"
 
@@ -61,7 +63,7 @@ func resourceNsxtVpcAttachmentExists(sessionContext utl.SessionContext, parentPa
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewAttachmentsClient(connector)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -107,7 +109,8 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating VpcAttachment with ID %s", id)
 
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("VpcAttachment", id, err)
@@ -126,8 +129,9 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("error obtaining VpcAttachment ID")
 	}
 
-	client := clientLayer.NewAttachmentsClient(connector)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -179,7 +183,8 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 	if err := metadata.SchemaToStruct(elem, d, vpcAttachmentSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("VpcAttachment", id, err)
@@ -202,7 +207,8 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 		return pathErr
 	}
 
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {

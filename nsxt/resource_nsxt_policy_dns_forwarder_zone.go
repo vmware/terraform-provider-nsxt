@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliDnsForwarderZonesClient = infra.NewDnsForwarderZonesClient
+
 var dnsForwarderZonePath = getMultitenancyPathExample("/infra/dns-forwarder-zones/[profile]")
 
 func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
@@ -59,7 +61,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 }
 
 func resourceNsxtPolicyDNSForwarderZoneExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewDnsForwarderZonesClient(sessionContext, connector)
+	client := cliDnsForwarderZonesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -99,7 +101,7 @@ func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, m interface{
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	client := cliDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -136,7 +138,7 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining Dns Forwarder Zone ID")
 	}
 
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	client := cliDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -183,7 +185,7 @@ func resourceNsxtPolicyDNSForwarderZoneDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	client := cliDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
@@ -27,7 +26,8 @@ func dataSourceNsxtFailureDomain() *schema.Resource {
 
 func dataSourceNsxtFailureDomainRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewFailureDomainsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliFailureDomainsClient(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

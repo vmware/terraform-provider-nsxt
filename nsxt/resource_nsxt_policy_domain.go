@@ -9,14 +9,19 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_domain "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliDomainsClient = infra.NewDomainsClient
+var cliDomainDeploymentMapsClient = domains.NewDomainDeploymentMapsClient
 
 // This resource is supported only for Policy Global Manager
 func resourceNsxtPolicyDomain() *schema.Resource {
@@ -51,12 +56,12 @@ func resourceNsxtPolicyDomain() *schema.Resource {
 
 func resourceNsxtPolicyDomainExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	if isGlobalManager {
-		client := gm_infra.NewDomainsClient(connector)
-		_, err = client.Get(id)
-	} else {
+	if !isGlobalManager {
 		return false, fmt.Errorf("Domain resource is not supported for local manager")
 	}
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := cliDomainsClient(sessionContext, connector)
+	_, err = client.Get(id)
 
 	if err == nil {
 		return true, nil
@@ -114,7 +119,11 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		// Delete old existing locations
 		connector := getPolicyConnector(m)
 		converter := bindings.NewTypeConverter()
-		dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
+		sessionContext := utl.SessionContext{ClientType: utl.Global}
+		dmClient := cliDomainDeploymentMapsClient(sessionContext, connector)
+		if dmClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		// Get all current locations
 		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -131,11 +140,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 			if !found {
 				// Remove the unused deployment map
 				toDelete := true
-				lmObj, err2 := convertModelBindingType(objInList, gm_model.DomainDeploymentMapBindingType(), model.DomainDeploymentMapBindingType())
-				if err2 != nil {
-					return err2
-				}
-				deleteObj := lmObj.(model.DomainDeploymentMap)
+				deleteObj := objInList
 				childMap := model.ChildDomainDeploymentMap{
 					Id:                  objInList.Id,
 					ResourceType:        "ChildDomainDeploymentMap",
@@ -223,7 +228,8 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
 	}
 
-	client := gm_infra.NewDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := cliDomainsClient(sessionContext, connector)
 	gmObj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Domain", id, err)
@@ -243,7 +249,10 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("revision", obj.Revision)
 
 	// Also read deployment maps
-	dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
+	dmClient := cliDomainDeploymentMapsClient(sessionContext, connector)
+	if dmClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Domain", err)
@@ -312,7 +321,8 @@ func resourceNsxtPolicyDomainDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := gm_infra.NewDomainsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Global}
+	client := cliDomainsClient(sessionContext, connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Domain", id, err)

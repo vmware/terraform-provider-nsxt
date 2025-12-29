@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 )
 
 var (
@@ -43,7 +42,7 @@ func dataSourceNsxtEdgeUpgradeGroupRead(d *schema.ResourceData, m interface{}) e
 
 func upgradeGroupRead(d *schema.ResourceData, m interface{}, groupType string) error {
 	connector := getPolicyConnector(m)
-	client := upgrade.NewUpgradeUnitGroupsClient(connector)
+	client := cliUpgradeUnitGroupsClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

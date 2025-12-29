@@ -13,12 +13,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	t0_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
-	t1_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	tier0localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
+	tier1ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
+	tier1localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0IpsecVpnLocaleServicesClient = tier0localeservices.NewIpsecVpnServicesClient
+var cliTier0IpsecVpnServicesClient = tier0ipsecvpnservices.NewIpsecVpnServicesClient
+var cliTier1IpsecVpnLocaleServicesClient = tier1localeservices.NewIpsecVpnServicesClient
+var cliTier1IpsecVpnServicesClient = tier1ipsecvpnservices.NewIpsecVpnServicesClient
 
 var IPSecVpnServiceIkeLogLevelTypes = []string{
 	model.IPSecVpnService_IKE_LOG_LEVEL_DEBUG,
@@ -100,58 +107,100 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 }
 
 func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
+	// For service lookup, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
-			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
+			if client == nil {
+				return model.IPSecVpnService{}, fmt.Errorf("unsupported client type")
+			}
 			return client.Get(gwID, serviceID)
 		}
-		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		client := cliTier1IpsecVpnServicesClient(sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnService{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(gwID, serviceID)
 	}
 	if isT0 {
-		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
+		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnService{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(gwID, localeServiceID, serviceID)
 	}
-	client := t1_locale_service.NewIpsecVpnServicesClient(connector)
+	client := cliTier1IpsecVpnLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return model.IPSecVpnService{}, fmt.Errorf("unsupported client type")
+	}
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
 func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
+	// For service patch, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
-			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Patch(gwID, id, ipSecVpnService)
 		}
-		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		client := cliTier1IpsecVpnServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(gwID, id, ipSecVpnService)
 	}
 	if isT0 {
-		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
+		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(gwID, localeServiceID, id, ipSecVpnService)
 	}
-	client := t1_locale_service.NewIpsecVpnServicesClient(connector)
+	client := cliTier1IpsecVpnLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Patch(gwID, localeServiceID, id, ipSecVpnService)
 }
 
 func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
+	// For service update, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
-			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			_, err := client.Update(gwID, id, ipSecVpnService)
 			return err
 		}
-		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		client := cliTier1IpsecVpnServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		_, err := client.Update(gwID, id, ipSecVpnService)
 		return err
 	}
 	if isT0 {
-		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
+		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		_, err := client.Update(gwID, localeServiceID, id, ipSecVpnService)
 		return err
 	}
-	client := t1_locale_service.NewIpsecVpnServicesClient(connector)
+	client := cliTier1IpsecVpnLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(gwID, localeServiceID, id, ipSecVpnService)
 	return err
 }
@@ -180,19 +229,33 @@ func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface
 }
 
 func deleteNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
+	// For service delete, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
-			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Delete(gwID, id)
 		}
-		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		client := cliTier1IpsecVpnServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(gwID, id)
 	}
 	if isT0 {
-		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
+		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(gwID, localeServiceID, id)
 	}
-	client := t1_locale_service.NewIpsecVpnServicesClient(connector)
+	client := cliTier1IpsecVpnLocaleServicesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Delete(gwID, localeServiceID, id)
 }
 

@@ -11,16 +11,18 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects/vpcs/subnets"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliVpcSubnetDhcpStaticBindingConfigsClient = subnets.NewDhcpStaticBindingConfigsClient
 
 var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -218,7 +220,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(sessionContext utl.Ses
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -271,7 +273,8 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 		return convErrs[0]
 	}
 
-	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("DhcpV4StaticBindingConfig", id, err)
@@ -290,8 +293,9 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 		return fmt.Errorf("Error obtaining DhcpV4StaticBindingConfig ID")
 	}
 
-	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -361,7 +365,8 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return convErrs[0]
 	}
 
-	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -386,7 +391,8 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData
 		return pathErr
 	}
 
-	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {

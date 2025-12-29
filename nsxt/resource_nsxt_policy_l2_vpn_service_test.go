@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -343,7 +344,9 @@ func testAccNsxtPolicyL2VpnServiceExists(displayName string, resourceName string
 		if err != nil && gatewayPath == "" {
 			return fmt.Errorf("Invalid locale service path %s", localeServicePath)
 		}
-		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager(), sessionContext)
 		if err1 != nil {
 			return fmt.Errorf("Policy L2VpnService %s does not exist", displayName)
 		}
@@ -371,7 +374,9 @@ func testAccNsxtPolicyL2VpnServiceCheckDestroy(state *terraform.State, displayNa
 			return nil
 		}
 
-		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager(), sessionContext)
 		if err1 == nil {
 			return fmt.Errorf("Policy L2VpnService %s still exists", displayName)
 		}

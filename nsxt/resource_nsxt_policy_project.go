@@ -13,11 +13,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	infra2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+
+	"github.com/vmware/terraform-provider-nsxt/api/orgs"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliProjectsClient = orgs.NewProjectsClient
+var cliVpcSecurityProfilesClient = projects.NewVpcSecurityProfilesClient
 
 func resourceNsxtPolicyProject() *schema.Resource {
 	return &schema.Resource{
@@ -163,8 +167,13 @@ func resourceNsxtPolicyProject() *schema.Resource {
 
 func resourceNsxtPolicyProjectExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := infra.NewProjectsClient(connector)
-	_, err = client.Get(defaultOrgID, id, nil)
+	// For exists check, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliProjectsClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
+	_, err = client.Get(utl.DefaultOrgID, id, nil)
 
 	if err == nil {
 		return true, nil
@@ -273,8 +282,12 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 	log.Printf("[INFO] Patching Project with ID %s", id)
 
-	client := infra.NewProjectsClient(connector)
-	err := client.Patch(defaultOrgID, id, obj)
+	sessionContext := getSessionContext(d, m)
+	client := cliProjectsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	err := client.Patch(utl.DefaultOrgID, id, obj)
 	if err != nil {
 		return err
 	}
@@ -287,7 +300,12 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 func getDefaultSpan(connector client.Connector) (string, error) {
 	var cursor *string
-	client := infra2.NewNetworkSpansClient(connector)
+	// For getDefaultSpan, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return "", fmt.Errorf("unsupported client type")
+	}
 	spanList, err := client.List(cursor, nil, nil, nil, nil, nil)
 	if isUnauthorizedError(err) {
 		log.Printf("[WARNING] user is unauthorized to retrieve the default span")
@@ -323,8 +341,13 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 		}
 	}
 
-	client := projects.NewVpcSecurityProfilesClient(connector)
-	objSec, err := client.Get(defaultOrgID, projectID, "default")
+	// For VPC security profile, we use Multitenancy client type
+	sessionContext := utl.SessionContext{ClientType: utl.Multitenancy}
+	client := cliVpcSecurityProfilesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	objSec, err := client.Get(utl.DefaultOrgID, projectID, "default")
 	if isNotFoundError(err) {
 		return fmt.Errorf("failed to fetch the details of the VPC security profile: %v", err)
 	}
@@ -336,12 +359,17 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 			Enabled: &enabled,
 		},
 	}
-	return client.Patch(defaultOrgID, projectID, "default", obj)
+	return client.Patch(utl.DefaultOrgID, projectID, "default", obj)
 }
 
 func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
-	client := projects.NewVpcSecurityProfilesClient(connector)
-	obj, err := client.Get(defaultOrgID, projectID, "default")
+	// For VPC security profile, we use Multitenancy client type
+	sessionContext := utl.SessionContext{ClientType: utl.Multitenancy}
+	client := cliVpcSecurityProfilesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	obj, err := client.Get(utl.DefaultOrgID, projectID, "default")
 	if isNotFoundError(err) {
 		return nil
 	}
@@ -392,9 +420,13 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	var obj model.Project
-	client := infra.NewProjectsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliProjectsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	var err error
-	obj, err = client.Get(defaultOrgID, id, nil)
+	obj, err = client.Get(utl.DefaultOrgID, id, nil)
 	if err != nil {
 		return handleReadError(d, "Project", id, err)
 	}
@@ -480,9 +512,12 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	client := infra.NewProjectsClient(connector)
-	err = client.Delete(defaultOrgID, id, nil)
+	sessionContext := getSessionContext(d, m)
+	client := cliProjectsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	err := client.Delete(utl.DefaultOrgID, id, nil)
 
 	if err != nil {
 		return handleDeleteError("Project", id, err)

@@ -12,15 +12,17 @@ import (
 	"strings"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	gm_tier1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
-	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliTier1InterfacesClient = localeservices.NewInterfacesClient
+var cliTier1LocaleServicesClient = tier1s.NewLocaleServicesClient
+var cliTier1sClient = infra.NewTier1sClient
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 	return &schema.Resource{
@@ -122,7 +124,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		id = newUUID()
 	} else {
 		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -171,7 +173,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -199,36 +201,26 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	}
 
 	var obj model.Tier1Interface
+	sessionContext := getSessionContext(d, m)
+	client := cliTier1InterfacesClient(sessionContext, connector)
+	obj, err := client.Get(tier1ID, localeServiceID, id)
+	if err != nil {
+		return handleReadError(d, "Tier1 Interface", id, err)
+	}
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewInterfacesClient(connector)
-		gmObj, err := client.Get(tier1ID, localeServiceID, id)
-		if err != nil {
-			return handleReadError(d, "Tier1 Interface", id, err)
+		tier1Client := cliTier1LocaleServicesClient(sessionContext, connector)
+		if tier1Client == nil {
+			return fmt.Errorf("unsupported client type")
 		}
-		lmObj, err1 := convertModelBindingType(gmObj, gm_model.Tier1InterfaceBindingType(), model.Tier1InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		obj = lmObj.(model.Tier1Interface)
-		tier1Client := gm_tier1s.NewLocaleServicesClient(connector)
 		localeService, err := tier1Client.Get(tier1ID, localeServiceID)
 		if err != nil {
 			return err
 		}
-		sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
-		d.Set("site_path", sitePath)
-	} else {
-		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		obj, err = client.Get(tier1ID, localeServiceID, id)
-		if err != nil {
-			return handleReadError(d, "Tier1 Interface", id, err)
+		if localeService.EdgeClusterPath != nil {
+			sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
+			d.Set("site_path", sitePath)
 		}
 	}
-
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -307,7 +299,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -331,7 +323,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	}
 
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -370,7 +362,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
-	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+	client := cliTier1sClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

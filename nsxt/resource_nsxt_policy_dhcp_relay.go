@@ -16,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliDhcpRelayConfigsClient = infra.NewDhcpRelayConfigsClient
+
 var dhcpRelayPathExample = getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")
 
 func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
@@ -49,7 +51,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 }
 
 func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewDhcpRelayConfigsClient(sessionContext, connector)
+	client := cliDhcpRelayConfigsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -68,7 +70,7 @@ func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, 
 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -106,7 +108,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -135,7 +137,7 @@ func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -176,7 +178,7 @@ func resourceNsxtPolicyDhcpRelayConfigDelete(d *schema.ResourceData, m interface
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	client := cliDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

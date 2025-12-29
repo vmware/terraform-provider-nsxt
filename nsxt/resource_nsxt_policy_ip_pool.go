@@ -12,7 +12,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -46,7 +45,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 }
 
 func resourceNsxtPolicyIPPoolExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewIpPoolsClient(sessionContext, connector)
+	client := cliIpPoolsClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -65,7 +64,7 @@ func resourceNsxtPolicyIPPoolExists(sessionContext utl.SessionContext, id string
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -98,7 +97,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -132,7 +131,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -166,7 +165,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	client := cliIpPoolsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

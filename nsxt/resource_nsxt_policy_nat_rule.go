@@ -22,6 +22,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliTier0NatRulesClient = t0nat.NewNatRulesClient
+var cliTier1NatRulesClient = t1nat.NewNatRulesClient
+
 var policyNATRuleActionTypeValues = []string{
 	model.PolicyNatRule_ACTION_SNAT,
 	model.PolicyNatRule_ACTION_DNAT,
@@ -166,13 +169,13 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 
 func deleteNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, natType string, ruleID string) error {
 	if isT0 {
-		client := t0nat.NewNatRulesClient(sessionContext, connector)
+		client := cliTier0NatRulesClient(sessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		return client.Delete(gwID, natType, ruleID)
 	}
-	client := t1nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTier1NatRulesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -208,13 +211,13 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 
 func getNsxtPolicyNATRuleByID(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, natType string, ruleID string) (model.PolicyNatRule, error) {
 	if isT0 {
-		client := t0nat.NewNatRulesClient(sessionContext, connector)
+		client := cliTier0NatRulesClient(sessionContext, connector)
 		if client == nil {
 			return model.PolicyNatRule{}, policyResourceNotSupportedError()
 		}
 		return client.Get(gwID, natType, ruleID)
 	}
-	client := t1nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTier1NatRulesClient(sessionContext, connector)
 	if client == nil {
 		return model.PolicyNatRule{}, policyResourceNotSupportedError()
 	}
@@ -234,13 +237,13 @@ func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.
 	}
 
 	if isT0 {
-		client := t0nat.NewNatRulesClient(sessionContext, connector)
+		client := cliTier0NatRulesClient(sessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		return client.Patch(gwID, natType, *rule.Id, rule)
 	}
-	client := t1nat.NewNatRulesClient(sessionContext, connector)
+	client := cliTier1NatRulesClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

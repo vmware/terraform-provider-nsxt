@@ -11,10 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
@@ -62,19 +61,9 @@ func testAccDataSourceNsxtPolicyTier0GatewayCreate(name string) error {
 	uuid, _ := uuid.NewRandom()
 	id := uuid.String()
 
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.Tier0BindingType(), gm_model.Tier0BindingType())
-		if convErr != nil {
-			return convErr
-		}
-
-		client := gm_infra.NewTier0sClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Tier0))
-
-	} else {
-		client := infra.NewTier0sClient(connector)
-		err = client.Patch(id, obj)
-	}
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewTier0sClient(sessionContext, connector)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return fmt.Errorf("Error during Tier0 creation: %v", err)
 	}
@@ -88,10 +77,11 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 	}
 
 	// Find the object by name
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewTier0sClient(sessionContext, connector)
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "Tier0")
 		if err == nil {
-			client := gm_infra.NewTier0sClient(connector)
 			err := client.Delete(objID)
 			if err != nil {
 				return handleDeleteError("Tier0", objID, err)
@@ -99,7 +89,6 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 			return nil
 		}
 	} else {
-		client := infra.NewTier0sClient(connector)
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading Tier0s: %v", err)

@@ -6,8 +6,6 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func dataSourceNsxtPolicyServices() *schema.Resource {
@@ -30,7 +28,7 @@ func dataSourceNsxtPolicyServices() *schema.Resource {
 
 func dataSourceNsxtPolicyServicesRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cliServicesClient(getSessionContext(d, m), connector)
 
 	servicesMap := make(map[string]string)
 	results, err := client.List(nil, nil, nil, nil, nil, nil, nil)
