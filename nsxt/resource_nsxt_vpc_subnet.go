@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
@@ -572,20 +574,54 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 
 	return nil
 }
+func TrackTime(start time.Time, name string) {
+	elapsed := time.Since(start).Seconds()
+	fmt.Printf("-------------------------------------------> %s  took %v \n", name, elapsed)
+}
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
+	start := time.Now()
+	defer TrackTime(start, fmt.Sprintf("Read with cache %v", IsCacheEnabled()))
+
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
+	displayName := d.Get("display_name").(string)
+	var obj model.VpcSubnet
+	var err error
+	cacheUsed := false
 
-	client := clientLayer.NewSubnetsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
-	if err != nil {
-		return handleReadError(d, "VpcSubnet", id, err)
+	if isRefreshPhase(d) && IsCacheEnabled() {
+		roundTripStart := time.Now()
+		fmt.Println("---------------------> Refresh Phase of plan/apply")
+		val, err := gcache.readCache(displayName, "VpcSubnet", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcSubnetBindingType())
+			if len(convErrs) == 0 {
+				obj = goVal.(model.VpcSubnet)
+				cacheUsed = true
+				fmt.Println("----------------> resourceNsxtVpcSubnetRead read data from cacheused displayName ", cacheUsed, *obj.DisplayName)
+			}
+		} else {
+			cacheUsed = false
+		}
+		TrackTime(roundTripStart, fmt.Sprint("API cache roundtrip time taken "))
+	}
+
+	if !cacheUsed {
+		tripTime := time.Now()
+		fmt.Println("--------> Using the backend API, regular flow")
+		client := clientLayer.NewSubnetsClient(connector)
+		parents := getVpcParentsFromContext(getSessionContext(d, m))
+		obj, err = client.Get(parents[0], parents[1], parents[2], id)
+		if err != nil {
+			return handleReadError(d, "VpcSubnet", id, err)
+		}
+		TrackTime(tripTime, fmt.Sprint("API without cache roundtrip time taken "))
 	}
 
 	setPolicyTagsInSchema(d, obj.Tags)
