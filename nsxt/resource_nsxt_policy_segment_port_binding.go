@@ -95,7 +95,7 @@ func resourceNsxtPolicySegmentPortBindingRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error getting Segment Port: %v", err)
 	}
 
-	err = nsxtPolicySegmentPortProfilesRead(d, m)
+	err = nsxtPolicySegmentPortProfilesRead(d, m, true)
 	if err != nil {
 		return err
 	}
