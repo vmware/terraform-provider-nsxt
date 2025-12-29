@@ -13,7 +13,7 @@ func resourceNsxtPolicySegmentPortProfileBindings() *schema.Resource {
 		Create: resourceNsxtPolicySegmentPortProfileBindingsCreate,
 		Read:   resourceNsxtPolicySegmentPortProfileBindingsRead,
 		Update: resourceNsxtPolicySegmentPortProfileBindingsUpdate,
-		Delete: func(d *schema.ResourceData, m interface{}) error { return nil },
+		Delete: resourceNsxtPolicySegmentPortProfileBindingsDelete,
 		Schema: map[string]*schema.Schema{
 			"context": getContextSchema(false, false, false),
 			"segment_port_path": {
@@ -131,22 +131,62 @@ func resourceNsxtPolicySegmentPortProfileBindingsUpdate(d *schema.ResourceData, 
 	return resourceNsxtPolicySegmentPortProfileBindingsRead(d, m)
 }
 
+func resourceNsxtPolicySegmentPortProfileBindingsDelete(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
+
+	segmentPortPath := d.Get("segment_port_path").(string)
+	segmentPortID := getPolicyIDFromPath(segmentPortPath)
+	segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+	if err != nil {
+		return fmt.Errorf("Error parsing Segment Port Path: %v", err)
+	}
+	segmentPort, err := getSegmentPort(segmentPath, segmentPortID, context, connector)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("Error getting Segment Port: %v", err)
+	}
+
+	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d, true)
+	if err != nil {
+		return err
+	}
+
+	err = policyInfraPatch(context, obj, connector, false)
+	if err != nil {
+		return handleDeleteError("SegmentPortProfileBindings", segmentPortID, err)
+	}
+
+	return nil
+}
+
 func policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort model.SegmentPort, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
 	segmentPortPath := d.Get("segment_port_path").(string)
+	markedForDelete := false
 	segmentPath, err := getParameterFromPolicyPath("/segments/", "/ports/", segmentPortPath)
 	if err != nil {
 		return model.Infra{}, err
 	}
 
-	err = nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
-	if err != nil {
-		return model.Infra{}, err
+	if isDestroy {
+		// For delete operation, set empty profile bindings
+		err = nsxtPolicySegmentPortProfilesSetEmptyInStruct(&segmentPort)
+		if err != nil {
+			return model.Infra{}, err
+		}
+	} else {
+		err = nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
+		if err != nil {
+			return model.Infra{}, err
+		}
 	}
 
 	childSegmentPort := model.ChildSegmentPort{
 		SegmentPort:     &segmentPort,
 		ResourceType:    "ChildSegmentPort",
-		MarkedForDelete: &isDestroy,
+		MarkedForDelete: &markedForDelete,
 	}
 
 	// Segment
