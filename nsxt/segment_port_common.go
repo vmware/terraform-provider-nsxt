@@ -444,9 +444,17 @@ type tier1SegmentPort struct {
 	ids            *segmentPort
 }
 
-func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) error {
+func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}, isBindingResource bool) error {
 	var config segmentConfig
-	segmentPath := d.Get("segment_path").(string)
+	var segmentPath string
+	if isBindingResource {
+		segmentPortPath := d.Get("segment_port_path").(string)
+		pathParts := strings.Split(segmentPortPath, "/")
+		segmentPath = strings.Join(pathParts[:len(pathParts)-2], "/")
+	} else {
+		segmentPath = d.Get("segment_path").(string)
+	}
+
 	s := segmentPort{
 		segmentId: getSegmentIdFromSegPath(segmentPath),
 		portId:    d.Id(),
