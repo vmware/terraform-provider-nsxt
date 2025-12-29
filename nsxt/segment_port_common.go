@@ -217,10 +217,10 @@ func nsxtPolicySegmentPortProfilesSetEmptyInStruct(obj *model.SegmentPort) error
 
 	securityResourceType := "PortSecurityProfileBindingMap"
 	securityMap := model.PortSecurityProfileBindingMap{
-		ResourceType:                &securityResourceType,
-		Id:                          &segmentProfileMapID,
-		SegmentSecurityProfilePath:  &emptyString,
-		SpoofguardProfilePath:       &emptyString,
+		ResourceType:               &securityResourceType,
+		Id:                         &segmentProfileMapID,
+		SegmentSecurityProfilePath: &emptyString,
+		SpoofguardProfilePath:      &emptyString,
 	}
 
 	childSecurityConfig := model.ChildPortSecurityProfileBindingMap{
