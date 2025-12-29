@@ -44,3 +44,12 @@ In addition to arguments listed above, the following attributes are exported:
 * `edge_cluster_path` - The path of the Edge cluster where this Tier-0 gateway is placed. This attribute is not set for NSX Global Manager, where gateway can span across multiple sites.
 * `path` - The NSX path of the policy resource.
 * `is_global` - Set to true to get global objects from the local NSX manager.
+* `vrf_config` - VRF config for VRF Tier0. This clause is supported with NSX 3.0.0 onwards.
+    * `gateway_path` - Default Tier0 path. Cannot be modified after realization.
+    * `evpn_transit_vni` - L3 VNI associated with the VRF for overlay traffic. VNI must be unique and belong to configured VNI pool.
+    * `route_distinguisher` - Route distinguisher. Format: `<ASN>:<number>` or `<IPAddress>:<number>`.
+    * `route_target` - Only one target is supported.
+        * `auto_mode` - When true, import and export targets should not be specified.
+        * `address_family` - Address family, currently only `L2VPN_EVPN` is supported, which is the default.
+        * `import_targets` - List of import route targets. Format: `<ASN>:<number>`.
+        * `export_targets` - List of export route targets. Format: `<ASN>:<number>`.
