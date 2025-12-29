@@ -9,25 +9,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T) {
-	testAccResourceNsxtPolicySegmentPortBinding_basic(t, false, func() {
+func TestAccResourceNsxtPolicySegmentPortProfileBindings_basic(t *testing.T) {
+	testAccResourceNsxtPolicySegmentPortProfileBindings_basic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
 	})
 }
 
-func TestAccResourceNsxtPolicySegmentPortBinding_multitenancy(t *testing.T) {
-	testAccResourceNsxtPolicySegmentPortBinding_basic(t, true, func() {
+func TestAccResourceNsxtPolicySegmentPortProfileBindings_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySegmentPortProfileBindings_basic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
 	})
 }
 
-func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext bool, preCheck func()) {
+func testAccResourceNsxtPolicySegmentPortProfileBindings_basic(t *testing.T, withContext bool, preCheck func()) {
 	segmentName := getAccTestResourceName()
 	segmentPortName := getAccTestResourceName()
 	profilesPrefix := getAccTestResourceName()
-	testResourceName := "nsxt_policy_segment_port_binding.test"
+	testResourceName := "nsxt_policy_segment_port_profile_bindings.test"
 	createResourceTag := "profile1"
 	updateResourceTag := "profile2"
 	tzName := getOverlayTransportZoneName()
@@ -46,9 +46,9 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
+				Config: testAccResourceNsxtPolicySegmentPortProfileBindingsTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
+					testAccNsxtPolicySegmentPortProfileBindingsExists(testResourceName, withContext),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"create"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"create"),
@@ -58,9 +58,9 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 			},
 			{
 				// Update
-				Config: testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName, profilesPrefix, segmentPortName, updateResourceTag, withContext),
+				Config: testAccResourceNsxtPolicySegmentPortProfileBindingsTemplate(tzName, segmentName, profilesPrefix, segmentPortName, updateResourceTag, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentPortBindingExists(testResourceName, withContext),
+					testAccNsxtPolicySegmentPortProfileBindingsExists(testResourceName, withContext),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_port_path"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.ip_discovery_profile_path", mtPrefix+"/infra/ip-discovery-profiles/"+profilesPrefix+"update"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"update"),
@@ -72,7 +72,7 @@ func testAccResourceNsxtPolicySegmentPortBinding_basic(t *testing.T, withContext
 	})
 }
 
-func testAccNsxtPolicySegmentPortBindingExists(resourceName string, withContext bool) resource.TestCheckFunc {
+func testAccNsxtPolicySegmentPortProfileBindingsExists(resourceName string, withContext bool) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -100,7 +100,7 @@ func testAccNsxtPolicySegmentPortBindingExists(resourceName string, withContext 
 	}
 }
 
-func testAccResourceNsxtPolicySegmentPortBindingTemplate(tzName, segmentName string, profilesPrefix string, segmentPortName string, resourceTag string, withContext bool) string {
+func testAccResourceNsxtPolicySegmentPortProfileBindingsTemplate(tzName, segmentName string, profilesPrefix string, segmentPortName string, resourceTag string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -119,7 +119,7 @@ resource "nsxt_policy_segment_port" "test" {
   }
 }
 
-resource "nsxt_policy_segment_port_binding" "test" {
+resource "nsxt_policy_segment_port_profile_bindings" "test" {
   %s
   segment_port_path = nsxt_policy_segment_port.test.path
   discovery_profile {

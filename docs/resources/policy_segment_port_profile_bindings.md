@@ -1,10 +1,10 @@
 ---
 subcategory: "Segments"
-page_title: "NSXT: nsxt_policy_segment_port_binding"
+page_title: "NSXT: nsxt_policy_segment_port_profile_bindings"
 description: A resource to configure profile bindings for an existing Segment Port.
 ---
 
-# nsxt_policy_segment_port_binding
+# nsxt_policy_segment_port_profile_bindings
 
 This resource provides a method for managing profile bindings (discovery, QoS, and security profiles) for an existing Segment Port. This resource is useful when you need to modify the profiles of a segment port that was created outside of Terraform or by another resource.
 
@@ -30,7 +30,7 @@ data "nsxt_policy_mac_discovery_profile" "mac_profile" {
   display_name = "default-mac-discovery-profile"
 }
 
-resource "nsxt_policy_segment_port_binding" "existing_port_binding" {
+resource "nsxt_policy_segment_port_profile_bindings" "existing_port_binding" {
   segment_port_id = data.nsxt_policy_segment_port.existing_port.id
   segment_path    = data.nsxt_policy_segment.segment1.path
 
@@ -48,7 +48,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-resource "nsxt_policy_segment_port_binding" "port1_binding" {
+resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
