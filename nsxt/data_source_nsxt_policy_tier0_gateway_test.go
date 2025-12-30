@@ -117,9 +117,44 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 	return fmt.Errorf("Error while deleting Tier0 '%s': resource not found", name)
 }
 
+func TestAccDataSourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
+	name := getAccTestDataSourceName()
+	testResourceName := "data.nsxt_policy_tier0_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0GatewayWithVRFTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vrf_config.0.gateway_path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyTier0GatewayReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+}`, name)
+}
+
+func testAccNsxtPolicyTier0GatewayWithVRFTemplate(name string) string {
+	return testAccNsxtPolicyTier0WithVRFTemplate(name, true, true, true) + fmt.Sprintf(`
+data "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_tier0_gateway.test]
 }`, name)
 }
