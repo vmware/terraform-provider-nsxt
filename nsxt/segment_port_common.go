@@ -54,7 +54,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 	// Segment
 	child, err := vAPIConversion(childSegmentPort, model.ChildSegmentPortBindingType())
 	if err != nil {
-		return model.Infra{}, fmt.Errorf("Error handling the SegmentPort hierarchial API construction : %v", err)
+		return model.Infra{}, fmt.Errorf("Error handling the SegmentPort hierarchical API construction : %v", err)
 	}
 	segmentChildren := []*data.StructValue{child}
 	segmentId := getSegmentIdFromSegPath(segmentPath)
@@ -69,7 +69,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 	// Tier1
 	child, err = vAPIConversion(childSegment, model.ChildResourceReferenceBindingType())
 	if err != nil {
-		return model.Infra{}, fmt.Errorf("Error handling the Tier1 gw hierarchial API construction : %v", err)
+		return model.Infra{}, fmt.Errorf("Error handling the Tier1 gw hierarchical API construction : %v", err)
 	}
 	if isT1Segment(segmentPath) {
 		t1Children := []*data.StructValue{child}
@@ -84,7 +84,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 
 		child, err = vAPIConversion(childTier1Gw, model.ChildResourceReferenceBindingType())
 		if err != nil {
-			return model.Infra{}, fmt.Errorf("Error handling the Infra hierarchial API construction : %v", err)
+			return model.Infra{}, fmt.Errorf("Error handling the Infra hierarchical API construction : %v", err)
 		}
 	}
 	// Infra
