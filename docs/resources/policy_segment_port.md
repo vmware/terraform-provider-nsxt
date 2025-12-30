@@ -67,7 +67,7 @@ The following arguments are supported:
     * `app_id` - (Optional) ID used to identify/look up a child attachment behind a parent attachment.
     * `evpn_vlans` - (Optional) EVPN tenant VLAN IDs the Parent logical-port serves.
     * `hyperbus_mode` - (Optional) ID used to identify/look up a child attachment behind a parent attachment.
-    * `type` - (Optional) Type of port attachment. `PARENT` type is automatically set if evpn_vlans or hyperbus_mode is configured. `INDEPENDENT` type is automatically set for ports that belong to Segment of type DVPortgroup. `STATIC` type is deprecated.
+    * `type` - (Optional) Type of port attachment. Valid values are `PARENT`, `CHILD`, `INDEPENDENT`, `STATIC`.
     * `id` - (Optional) VIF UUID on NSX Manager. If the attachement type is `PARENT`, this property is required.
     * `traffic_tag` - (Optional) VIF UUID on NSX Manager. If the attachement type is `PARENT`, this property is required.
 * `discovery_profile` - (Optional) IP and MAC discovery profiles for this segment port.
