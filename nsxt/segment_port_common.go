@@ -38,6 +38,8 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 		obj.Description = &description
 	}
 
+	nsxtPolicySegmentPortAttachmentConfigSetInStruct(d, &obj)
+
 	err := nsxtPolicySegmentPortProfilesSetInStruct(d, &obj)
 	if err != nil {
 		return model.Infra{}, err
@@ -93,6 +95,44 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 	}
 
 	return infraStruct, nil
+}
+
+func nsxtPolicySegmentPortAttachmentConfigSetInStruct(d *schema.ResourceData, obj *model.SegmentPort) {
+	attachmentObj := d.Get("attachment").([]interface{})
+	if len(attachmentObj) == 0 {
+		return
+	}
+	attachment := attachmentObj[0].(map[string]interface{})
+	attachmentId := attachment["id"].(string)
+	attachmentStruct := &model.PortAttachment{
+		Id: &attachmentId,
+	}
+
+	if val, ok := attachment["allocate_addresses"].(string); ok && val != "" {
+		attachmentStruct.AllocateAddresses = &val
+	}
+
+	if val, ok := attachment["app_id"].(string); ok && val != "" {
+		attachmentStruct.AppId = &val
+	}
+
+	attachmentStruct.EvpnVlans = interface2StringList(attachment["evpn_vlans"].([]interface{}))
+
+	if val, ok := attachment["hyperbus_mode"].(string); ok && val != "" {
+		attachmentStruct.HyperbusMode = &val
+	}
+
+	if val, ok := attachment["type"].(string); ok && val != "" {
+		attachmentStruct.Type_ = &val
+	}
+
+	if val, ok := attachment["traffic_tag"].(int); ok && val != 0 {
+		tag := int64(val)
+		attachmentStruct.TrafficTag = &tag
+	}
+
+	obj.Attachment = attachmentStruct
+
 }
 
 func vAPIConversion(golangValue interface{}, bindingType bindings.BindingType) (*data.StructValue, error) {

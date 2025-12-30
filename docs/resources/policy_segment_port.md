@@ -63,6 +63,13 @@ The following arguments are supported:
     * `project_id` - (Required) The ID of the project which the object belongs to
 * `segment_path` - (Required) Path of the segment port.
 * `attachment` - (Optional) VIF attachment.
+    * `allocate_addresses` - (Optional) Indicate how IP will be allocated for the port. Allowed values are `IP_POOL`, `MAC_POOL`, `BOTH`, `DHCP`, `DHCPV6`, `SLAAC`, `NONE`.
+    * `app_id` - (Optional) ID used to identify/look up a child attachment behind a parent attachment.
+    * `evpn_vlans` - (Optional) EVPN tenant VLAN IDs the Parent logical-port serves.
+    * `hyperbus_mode` - (Optional) ID used to identify/look up a child attachment behind a parent attachment.
+    * `type` - (Optional) Type of port attachment. Valid values are `PARENT`, `CHILD`, `INDEPENDENT`, `STATIC`.
+    * `id` - (Optional) VIF UUID on NSX Manager. If the attachement type is `PARENT`, this property is required.
+    * `traffic_tag` - (Optional) VIF UUID on NSX Manager. If the attachement type is `PARENT`, this property is required.
 * `discovery_profile` - (Optional) IP and MAC discovery profiles for this segment port.
 * `qos_profile` - (Optional) QoS profiles for this segment port.
 * `security_profile` - (Optional) Security profiles for this segment port.
