@@ -32,7 +32,7 @@ data "nsxt_policy_mac_discovery_profile" "mac_profile" {
 
 resource "nsxt_policy_segment_port_profile_bindings" "existing_port_binding" {
   segment_port_path = data.nsxt_policy_segment_port.existing_port.path
-  segment_path    = data.nsxt_policy_segment.segment1.path
+  segment_path      = data.nsxt_policy_segment.segment1.path
 
   discovery_profile {
     ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.ip_profile.path
@@ -54,7 +54,7 @@ resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
   }
 
   segment_port_path = data.nsxt_policy_segment_port.existing_port.path
-  segment_path    = data.nsxt_policy_segment.segment1.path
+  segment_path      = data.nsxt_policy_segment.segment1.path
 
   discovery_profile {
     ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.profile1.path
