@@ -31,7 +31,7 @@ data "nsxt_policy_mac_discovery_profile" "mac_profile" {
 }
 
 resource "nsxt_policy_segment_port_profile_bindings" "existing_port_binding" {
-  segment_port_id = data.nsxt_policy_segment_port.existing_port.id
+  segment_port_path = data.nsxt_policy_segment_port.existing_port.path
   segment_path    = data.nsxt_policy_segment.segment1.path
 
   discovery_profile {
@@ -53,7 +53,7 @@ resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
     project_id = data.nsxt_policy_project.demoproj.id
   }
 
-  segment_port_id = "port1"
+  segment_port_path = data.nsxt_policy_segment_port.existing_port.path
   segment_path    = data.nsxt_policy_segment.segment1.path
 
   discovery_profile {
@@ -72,8 +72,7 @@ resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
 
 The following arguments are supported:
 
-* `segment_port_id` - (Required) The ID of the existing segment port to bind profiles to. Changing this forces a new resource to be created.
-* `segment_path` - (Required) The policy path of the segment that contains the port. Changing this forces a new resource to be created.
+* `segment_port_path` - (Required) The path of the existing segment port to bind profiles to.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
 * `discovery_profile` - (Optional) IP and MAC discovery profiles for this segment port.
@@ -89,7 +88,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Segment Port (same as `segment_port_id`).
+* `id` - ID of the Segment Port.
 * `discovery_profile`:
     * `binding_map_path` - Policy path of the discovery profile binding map.
     * `revision` - Revision number of the binding map.
