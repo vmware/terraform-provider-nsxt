@@ -325,6 +325,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_security_policy":                            dataSourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_segment":                                    dataSourceNsxtPolicySegment(),
 			"nsxt_policy_segment_port":                               dataSourceNsxtPolicySegmentPort(),
+			"nsxt_policy_segment_ports":                              dataSourceNsxtPolicySegmentPorts(),
 			"nsxt_policy_segment_realization":                        dataSourceNsxtPolicySegmentRealization(),
 			"nsxt_policy_segment_security_profile":                   dataSourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_service":                                    dataSourceNsxtPolicyService(),

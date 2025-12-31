@@ -517,15 +517,18 @@ type tier1SegmentPort struct {
 	ids            *segmentPort
 }
 
-func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}, isBindingResource bool) error {
+func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) error {
 	var config segmentConfig
 	var segmentPath string
-	if isBindingResource {
-		segmentPortPath := d.Get("segment_port_path").(string)
+
+	if segmentPathValue, ok := d.GetOk("segment_path"); ok {
+		segmentPath = segmentPathValue.(string)
+	} else if segmentPortPathValue, ok := d.GetOk("segment_port_path"); ok {
+		segmentPortPath := segmentPortPathValue.(string)
 		pathParts := strings.Split(segmentPortPath, "/")
 		segmentPath = strings.Join(pathParts[:len(pathParts)-2], "/")
 	} else {
-		segmentPath = d.Get("segment_path").(string)
+		return fmt.Errorf("neither segment_path nor segment_port_path found in resource data")
 	}
 
 	s := segmentPort{
