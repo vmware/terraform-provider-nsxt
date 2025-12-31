@@ -101,4 +101,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Resource Lifecycle
 
-~> **NOTE:** This resource manages profile bindings for an existing segment port. When the resource is destroyed (via `terraform destroy` or resource removal), the profile bindings are **not** removed from the segment port. This is by design to prevent unintended changes to existing infrastructure. If you need to remove profile bindings, you must do so manually or by updating the segment port directly.
+~> **NOTE:** This resource manages profile bindings for an existing segment port. When the resource is destroyed (via `terraform destroy` or resource removal), the profile bindings are set to the segment defaults.
