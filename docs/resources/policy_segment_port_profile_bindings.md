@@ -8,7 +8,8 @@ description: A resource to configure profile bindings for an existing Segment Po
 
 This resource provides a method for managing profile bindings (discovery, QoS, and security profiles) for an existing Segment Port. This resource is useful when you need to modify the profiles of a segment port that was created outside of Terraform or by another resource.
 
-~> **NOTE:** This resource modifies an existing segment port's profile bindings. It does not create a new segment port. The segment port must already exist.
+~> **NOTE:** This resource modifies an existing segment port's profile bindings. It does not create a new segment port. The segment port must already exist. Also try not to use this resource to modify the segment ports created using nsxt_policy_segment_port in the same terraform config. It will lead to conflicts.
+
 
 ## Example Usage
 
