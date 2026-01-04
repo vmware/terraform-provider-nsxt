@@ -10,7 +10,6 @@ This resource provides a method for managing profile bindings (discovery, QoS, a
 
 ~> **NOTE:** This resource modifies an existing segment port's profile bindings. It does not create a new segment port. The segment port must already exist. Also try not to use this resource to modify the segment ports created using nsxt_policy_segment_port in the same terraform config. It will lead to conflicts.
 
-
 ## Example Usage
 
 ```hcl
