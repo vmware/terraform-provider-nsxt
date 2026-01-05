@@ -102,3 +102,27 @@ In addition to arguments listed above, the following attributes are exported:
 ## Resource Lifecycle
 
 ~> **NOTE:** This resource manages profile bindings for an existing segment port. When the resource is destroyed (via `terraform destroy` or resource removal), the profile bindings are set to the segment defaults.
+
+## Importing
+
+An existing segment port's profile bindings can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/cli/import
+
+```
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings SEGMENT_PORT_PATH
+```
+
+The above command imports the profile bindings for the segment port named `port1_bindings` using its policy path.
+
+For example:
+
+```
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /infra/segments/segment1/ports/port1
+```
+
+For multitenancy environments:
+
+```
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /orgs/default/projects/project1/infra/segments/segment1/ports/port1
+```

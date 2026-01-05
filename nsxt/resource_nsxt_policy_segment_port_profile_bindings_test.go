@@ -68,6 +68,13 @@ func testAccResourceNsxtPolicySegmentPortProfileBindings_basic(t *testing.T, wit
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", mtPrefix+"/infra/segment-security-profiles/"+profilesPrefix+"update"),
 				),
 			},
+			{
+				// Import
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicySegmentPortProfileBindingsImportIDFunc(testResourceName),
+			},
 		},
 	})
 }
@@ -136,4 +143,20 @@ resource "nsxt_policy_segment_port_profile_bindings" "test" {
 		return testAccNsxtPolicySegmentNoTransportZoneTemplate(segmentName, "12.12.2.1/24", withContext) + tfConfigTemp
 	}
 	return testAccNsxtPolicySegmentImportTemplate(tzName, segmentName, withContext) + tfConfigTemp
+}
+
+func testAccResourceNsxtPolicySegmentPortProfileBindingsImportIDFunc(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource %s not found in state", resourceName)
+		}
+
+		segmentPortPath := rs.Primary.Attributes["segment_port_path"]
+		if segmentPortPath == "" {
+			return "", fmt.Errorf("segment_port_path not set for resource %s", resourceName)
+		}
+
+		return segmentPortPath, nil
+	}
 }

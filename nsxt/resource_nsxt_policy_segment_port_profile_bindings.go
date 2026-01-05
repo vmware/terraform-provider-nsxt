@@ -14,6 +14,9 @@ func resourceNsxtPolicySegmentPortProfileBindings() *schema.Resource {
 		Read:   resourceNsxtPolicySegmentPortProfileBindingsRead,
 		Update: resourceNsxtPolicySegmentPortProfileBindingsUpdate,
 		Delete: resourceNsxtPolicySegmentPortProfileBindingsDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtPolicySegmentPortProfileBindingsImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"context": getContextSchema(false, false, false),
 			"segment_port_path": {
@@ -233,4 +236,43 @@ func policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort model.Seg
 	}
 
 	return infraStruct, nil
+}
+
+func resourceNsxtPolicySegmentPortProfileBindingsImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	segmentPortPath := importID
+
+	segmentPortID := getPolicyIDFromPath(segmentPortPath)
+	if segmentPortID == "" {
+		return nil, fmt.Errorf("invalid segment port path %s: cannot extract port ID", importID)
+	}
+
+	segmentPath, err := getPolicySegmentPathFromPortPath(segmentPortPath)
+	if err != nil {
+		return nil, fmt.Errorf("invalid segment port path %s: %v", importID, err)
+	}
+
+	d.Set("segment_port_path", segmentPortPath)
+
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err != nil {
+		return nil, err
+	}
+
+	d.SetId(segmentPortID)
+
+	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
+
+	_, err = getSegmentPort(segmentPath, segmentPortID, context, connector)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve segment port %s: %v", segmentPortID, err)
+	}
+
+	err = nsxtPolicySegmentPortProfilesRead(d, m)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read profile bindings for segment port %s: %v", segmentPortID, err)
+	}
+
+	return rd, nil
 }
