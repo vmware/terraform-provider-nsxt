@@ -78,6 +78,17 @@ func getPolicySegmentPortAttachmentSchema() *schema.Resource {
 				Description: "ID used to identify/look up a child attachment behind a parent attachment",
 				Optional:    true,
 			},
+			"context_id": {
+				Type:        schema.TypeString,
+				Description: "If type is CHILD and the parent port is on the same segment as the child port, then this field should be VIF ID of the parent port. If type is CHILD and the parent port is on a different segment, then this field should be policy path of the parent port. If type is INDEPENDENT/STATIC, then this field should be transport node ID.",
+				Optional:    true,
+			},
+			"context_type": {
+				Type:        schema.TypeString,
+				Description: "Set to PARENT when type field is CHILD. Read only field.",
+				Optional:    true,
+				Computed:    true,
+			},
 			"evpn_vlans": {
 				Type:        schema.TypeList,
 				Description: "Evpn tenant VLAN IDs the Parent logical-port serves.",
@@ -159,6 +170,8 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 		attachment := make(map[string]interface{})
 		attachment["allocate_addresses"] = segPort.Attachment.AllocateAddresses
 		attachment["app_id"] = segPort.Attachment.AppId
+		attachment["context_id"] = segPort.Attachment.ContextId
+		attachment["context_type"] = segPort.Attachment.ContextType
 		attachment["evpn_vlans"] = segPort.Attachment.EvpnVlans
 		attachment["hyperbus_mode"] = segPort.Attachment.HyperbusMode
 		attachment["type"] = segPort.Attachment.Type_

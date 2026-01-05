@@ -37,6 +37,12 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 		projectID := os.Getenv("NSXT_PROJECT_ID")
 		mtPrefix = "/orgs/default/projects/" + projectID
 	}
+	// Attachment field values
+	attachmentID := "vif-uuid-001"
+	attachmentType := "PARENT"
+	allocateAddresses := "DHCP"
+	hyperbusMode := "DISABLE"
+	childAttachmentID := "vif-uuid-002"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -47,7 +53,7 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
+				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext, attachmentID, attachmentType, allocateAddresses, hyperbusMode, childAttachmentID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", segmentPortName),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -55,11 +61,16 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"create"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.spoofguard_profile_path", mtPrefix+"/infra/spoofguard-profiles/"+profilesPrefix+"create"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", mtPrefix+"/infra/segment-security-profiles/"+profilesPrefix+"create"),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.id", attachmentID),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.type", attachmentType),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.allocate_addresses", allocateAddresses),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.hyperbus_mode", hyperbusMode),
+					resource.TestCheckResourceAttr("nsxt_policy_segment_port.test_child", "attachment.0.context_id", attachmentID),
 				),
 			},
 			{
 				// Update
-				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, updatedSegmentPortName, updateResourceTag, withContext),
+				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, updatedSegmentPortName, updateResourceTag, withContext, attachmentID, attachmentType, allocateAddresses, hyperbusMode, childAttachmentID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedSegmentPortName),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -67,6 +78,11 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.0.mac_discovery_profile_path", mtPrefix+"/infra/mac-discovery-profiles/"+profilesPrefix+"update"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.spoofguard_profile_path", mtPrefix+"/infra/spoofguard-profiles/"+profilesPrefix+"update"),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", mtPrefix+"/infra/segment-security-profiles/"+profilesPrefix+"update"),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.id", attachmentID),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.type", attachmentType),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.allocate_addresses", allocateAddresses),
+					resource.TestCheckResourceAttr(testResourceName, "attachment.0.hyperbus_mode", hyperbusMode),
+					resource.TestCheckResourceAttr("nsxt_policy_segment_port.test_child", "attachment.0.context_id", attachmentID),
 				),
 			},
 		},
@@ -94,6 +110,12 @@ func testAccResourceNsxtPolicySegmentPort_importBasic(t *testing.T, withContext 
 	testResourceName := "nsxt_policy_segment_port.test"
 	createResourceTag := "profile1"
 	tzName := getOverlayTransportZoneName()
+	// Attachment field values
+	attachmentID := "vif-uuid-001"
+	attachmentType := "PARENT"
+	allocateAddresses := "DHCP"
+	hyperbusMode := "DISABLE"
+	childAttachmentID := "vif-uuid-002"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -103,7 +125,7 @@ func testAccResourceNsxtPolicySegmentPort_importBasic(t *testing.T, withContext 
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
+				Config: testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext, attachmentID, attachmentType, allocateAddresses, hyperbusMode, childAttachmentID),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -115,7 +137,7 @@ func testAccResourceNsxtPolicySegmentPort_importBasic(t *testing.T, withContext 
 	})
 }
 
-func testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName string, profilesPrefix string, segmentPortName string, resourceTag string, withContext bool) string {
+func testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName string, profilesPrefix string, segmentPortName string, resourceTag string, withContext bool, attachmentID string, attachmentType string, allocateAddresses string, hyperbusMode string, childAttachmentID string) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -136,8 +158,30 @@ resource "nsxt_policy_segment_port" "test" {
     spoofguard_profile_path = nsxt_policy_spoofguard_profile.%s.path
     security_profile_path = nsxt_policy_segment_security_profile.%s.path
   }
+  attachment {
+    id                 = "%s"
+    type               = "%s"
+    allocate_addresses = "%s"
+    hyperbus_mode      = "%s"
+  }
 }
-`, context, segmentPortName, resourceTag, resourceTag, resourceTag, resourceTag)
+
+resource "nsxt_policy_segment_port" "test_child" {
+	%s
+    display_name = "port_attach_test-child"
+    description  = "Child Port with Attachment"
+    segment_path = nsxt_policy_segment.test.path
+    
+    attachment {
+		id                 = "%s"
+		context_id         = "%s"
+		type               = "CHILD"
+		allocate_addresses = "DHCP"
+		hyperbus_mode      = "DISABLE"
+    }
+    depends_on = [ nsxt_policy_segment_port.test ]
+}
+`, context, segmentPortName, resourceTag, resourceTag, resourceTag, resourceTag, attachmentID, attachmentType, allocateAddresses, hyperbusMode, context, childAttachmentID, attachmentID)
 	if withContext {
 		return testAccNsxtPolicySegmentNoTransportZoneTemplate(segmentName, "12.12.2.1/24", withContext) + tfConfigTemp
 	}
