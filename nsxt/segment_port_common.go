@@ -116,6 +116,14 @@ func nsxtPolicySegmentPortAttachmentConfigSetInStruct(d *schema.ResourceData, ob
 		attachmentStruct.AppId = &val
 	}
 
+	if val, ok := attachment["context_id"].(string); ok && val != "" {
+		attachmentStruct.ContextId = &val
+	}
+
+	if val, ok := attachment["context_type"].(string); ok && val != "" {
+		attachmentStruct.ContextType = &val
+	}
+
 	attachmentStruct.EvpnVlans = interface2StringList(attachment["evpn_vlans"].([]interface{}))
 
 	if val, ok := attachment["hyperbus_mode"].(string); ok && val != "" {

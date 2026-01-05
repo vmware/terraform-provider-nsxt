@@ -29,6 +29,12 @@ func testAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool
 	testResourceName := "data.nsxt_policy_segment_port.segmentport1"
 	createResourceTag := "profile1"
 	tzName := getOverlayTransportZoneName()
+	// Attachment field values
+	attachmentID := "vif-uuid-001"
+	attachmentType := "PARENT"
+	allocateAddresses := "DHCP"
+	hyperbusMode := "DISABLE"
+	childAttachmentID := "vif-uuid-002"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -38,7 +44,7 @@ func testAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
+				Config: testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext, attachmentID, attachmentType, allocateAddresses, hyperbusMode, childAttachmentID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -48,12 +54,12 @@ func testAccDataSourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool
 	})
 }
 
-func testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag string, withContext bool) string {
+func testAccDataSourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag string, withContext bool, attachmentID string, attachmentType string, allocateAddresses string, hyperbusMode string, childAttachmentID string) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext) + fmt.Sprintf(`
+	return testAccResourceNsxtPolicySegmentPortTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext, attachmentID, attachmentType, allocateAddresses, hyperbusMode, childAttachmentID) + fmt.Sprintf(`
 
 data "nsxt_policy_segment_port" "segmentport1" {
 	%s
