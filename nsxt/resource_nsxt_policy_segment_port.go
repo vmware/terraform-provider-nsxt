@@ -164,6 +164,9 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 		attachment["type"] = segPort.Attachment.Type_
 		attachment["id"] = segPort.Attachment.Id
 		attachment["traffic_tag"] = segPort.Attachment.TrafficTag
+		d.Set("attachment", []map[string]interface{}{attachment})
+	} else {
+		d.Set("attachment", []map[string]interface{}{})
 	}
 
 	err = nsxtPolicySegmentPortProfilesRead(d, m)
@@ -190,7 +193,7 @@ func resourceNsxtPolicySegmentPortUpdate(d *schema.ResourceData, m interface{}) 
 
 	err = policyInfraPatch(context, obj, connector, false)
 	if err != nil {
-		return handleCreateError("SegmentPort", id, err)
+		return handleUpdateError("SegmentPort", id, err)
 	}
 
 	return resourceNsxtPolicySegmentPortRead(d, m)
@@ -208,7 +211,7 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 
 	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
-		return handleCreateError("SegmentPort", id, err)
+		return handleDeleteError("SegmentPort", id, err)
 	}
 
 	return nil
