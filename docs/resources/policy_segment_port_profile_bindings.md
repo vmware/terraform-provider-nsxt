@@ -109,7 +109,7 @@ An existing segment port's profile bindings can be [imported][docs-import] into 
 
 [docs-import]: https://www.terraform.io/cli/import
 
-```
+```shell
 terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings SEGMENT_PORT_PATH
 ```
 
@@ -117,12 +117,12 @@ The above command imports the profile bindings for the segment port named `port1
 
 For example:
 
-```
+```shell
 terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /infra/segments/segment1/ports/port1
 ```
 
 For multitenancy environments:
 
-```
+```shell
 terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /orgs/default/projects/project1/infra/segments/segment1/ports/port1
 ```
