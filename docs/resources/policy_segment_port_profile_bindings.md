@@ -69,6 +69,7 @@ resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
 ```
 
 ## Example Usage - Using nsxt_policy_segment_ports data source
+
 ```hcl
 data "nsxt_policy_segment_ports" "test" {
   display_name = "segment-port1"
