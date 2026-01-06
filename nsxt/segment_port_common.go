@@ -187,81 +187,8 @@ func nsxtPolicySegmentPortProfilesSetInStruct(d *schema.ResourceData, obj *model
 
 }
 
-func nsxtPolicySegmentPortProfilesSetEmptyInStruct(obj *model.SegmentPort) error {
-	children := []*data.StructValue{}
-	converter := bindings.NewTypeConverter()
-	segmentProfileMapID := "default"
-	markedForDelete := false
-
-	discoveryResourceType := "PortDiscoveryProfileBindingMap"
-	emptyString := ""
-	discoveryMap := model.PortDiscoveryProfileBindingMap{
-		ResourceType:            &discoveryResourceType,
-		Id:                      &segmentProfileMapID,
-		IpDiscoveryProfilePath:  &emptyString,
-		MacDiscoveryProfilePath: &emptyString,
-	}
-
-	childDiscoveryConfig := model.ChildPortDiscoveryProfileBindingMap{
-		ResourceType:                   "ChildPortDiscoveryProfileBindingMap",
-		PortDiscoveryProfileBindingMap: &discoveryMap,
-		Id:                             &segmentProfileMapID,
-		MarkedForDelete:                &markedForDelete,
-	}
-
-	dataValue, errors := converter.ConvertToVapi(childDiscoveryConfig, model.ChildPortDiscoveryProfileBindingMapBindingType())
-	if errors != nil {
-		return fmt.Errorf("Error converting empty discovery profile binding map: %v", errors[0])
-	}
-	children = append(children, dataValue.(*data.StructValue))
-
-	securityResourceType := "PortSecurityProfileBindingMap"
-	securityMap := model.PortSecurityProfileBindingMap{
-		ResourceType:               &securityResourceType,
-		Id:                         &segmentProfileMapID,
-		SegmentSecurityProfilePath: &emptyString,
-		SpoofguardProfilePath:      &emptyString,
-	}
-
-	childSecurityConfig := model.ChildPortSecurityProfileBindingMap{
-		ResourceType:                  "ChildPortSecurityProfileBindingMap",
-		PortSecurityProfileBindingMap: &securityMap,
-		Id:                            &segmentProfileMapID,
-		MarkedForDelete:               &markedForDelete,
-	}
-
-	dataValue, errors = converter.ConvertToVapi(childSecurityConfig, model.ChildPortSecurityProfileBindingMapBindingType())
-	if errors != nil {
-		return fmt.Errorf("Error converting empty security profile binding map: %v", errors[0])
-	}
-	children = append(children, dataValue.(*data.StructValue))
-
-	qosResourceType := "PortQoSProfileBindingMap"
-	qosMap := model.PortQosProfileBindingMap{
-		ResourceType:   &qosResourceType,
-		Id:             &segmentProfileMapID,
-		QosProfilePath: &emptyString,
-	}
-
-	childQosConfig := model.ChildPortQosProfileBindingMap{
-		ResourceType:             "ChildPortQoSProfileBindingMap",
-		PortQosProfileBindingMap: &qosMap,
-		Id:                       &segmentProfileMapID,
-		MarkedForDelete:          &markedForDelete,
-	}
-
-	dataValue, errors = converter.ConvertToVapi(childQosConfig, model.ChildPortQosProfileBindingMapBindingType())
-	if errors != nil {
-		return fmt.Errorf("Error converting empty QoS profile binding map: %v", errors[0])
-	}
-	children = append(children, dataValue.(*data.StructValue))
-
-	obj.Children = children
-	return nil
-}
-
 func nsxtPolicyPortDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	ipDiscoveryProfilePath := ""
 	macDiscoveryProfilePath := ""
@@ -324,7 +251,7 @@ func nsxtPolicyPortDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data.St
 }
 
 func nsxtPolicyPortQosProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	qosProfilePath := ""
 	revision := int64(0)
@@ -381,7 +308,7 @@ func nsxtPolicyPortQosProfileSetInStruct(d *schema.ResourceData) (*data.StructVa
 }
 
 func nsxtPolicyPortSecurityProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	spoofguardProfilePath := ""
 	securityProfilePath := ""

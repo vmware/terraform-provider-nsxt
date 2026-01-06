@@ -2,8 +2,10 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments/ports"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -65,7 +67,7 @@ func resourceNsxtPolicySegmentPortProfileBindingsCreate(d *schema.ResourceData, 
 		return fmt.Errorf("Error getting Segment Port %s: %v", segmentPortID, err)
 	}
 
-	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d, false)
+	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d)
 	if err != nil {
 		return err
 	}
@@ -121,7 +123,7 @@ func resourceNsxtPolicySegmentPortProfileBindingsUpdate(d *schema.ResourceData, 
 		return fmt.Errorf("Error getting Segment Port: %v", err)
 	}
 
-	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d, false)
+	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d)
 	if err != nil {
 		return err
 	}
@@ -144,28 +146,50 @@ func resourceNsxtPolicySegmentPortProfileBindingsDelete(d *schema.ResourceData, 
 	if err != nil {
 		return fmt.Errorf("Error parsing Segment Port Path: %v", err)
 	}
-	segmentPort, err := getSegmentPort(segmentPath, segmentPortID, context, connector)
+	err = nsxtPolicySegmentPortProfilesRead(d, m)
 	if err != nil {
-		if isNotFoundError(err) {
-			return nil
+		return fmt.Errorf("Error reading the segment port profiles: %v", err)
+	}
+	segmentId := getSegmentIdFromSegPath(segmentPath)
+	securityProfileBindingMapID := getBindingMapID(d, "security_profile")
+	if securityProfileBindingMapID != "" {
+		securityProfileClient := ports.NewPortSecurityProfileBindingMapsClient(context, connector)
+		err = securityProfileClient.Delete(segmentId, segmentPortID, securityProfileBindingMapID)
+		if err != nil {
+			return fmt.Errorf("Error deleting the security profile: %v", err)
 		}
-		return fmt.Errorf("Error getting Segment Port: %v", err)
 	}
-
-	obj, err := policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort, d, true)
-	if err != nil {
-		return err
+	discoveryProfileBindingMapID := getBindingMapID(d, "discovery_profile")
+	if discoveryProfileBindingMapID != "" {
+		discoveryProfileClient := ports.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+		err = discoveryProfileClient.Delete(segmentId, segmentPortID, discoveryProfileBindingMapID)
+		if err != nil {
+			return fmt.Errorf("Error deleting the discovery profile: %v", err)
+		}
 	}
-
-	err = policyInfraPatch(context, obj, connector, false)
-	if err != nil {
-		return handleDeleteError("SegmentPortProfileBindings", segmentPortID, err)
+	qosProfileBindingMapID := getBindingMapID(d, "qos_profile")
+	if qosProfileBindingMapID != "" {
+		qosProfileClient := ports.NewPortQosProfileBindingMapsClient(context, connector)
+		err = qosProfileClient.Delete(segmentId, segmentPortID, qosProfileBindingMapID)
+		if err != nil {
+			return fmt.Errorf("Error deleting the qos profile: %v", err)
+		}
 	}
 
 	return nil
 }
 
-func policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort model.SegmentPort, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
+func getBindingMapID(d *schema.ResourceData, profileType string) string {
+	profiles := d.Get(profileType).([]interface{})
+	if len(profiles) == 0 || profiles[0] == nil {
+		return ""
+	}
+	bindingMapPath := profiles[0].(map[string]interface{})["binding_map_path"].(string)
+	pathSplit := strings.Split(bindingMapPath, "/")
+	return pathSplit[len(pathSplit)-1]
+}
+
+func policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort model.SegmentPort, d *schema.ResourceData) (model.Infra, error) {
 	segmentPortPath := d.Get("segment_port_path").(string)
 	markedForDelete := false
 	segmentPath, err := getParameterFromPolicyPath("/segments/", "/ports/", segmentPortPath)
@@ -173,17 +197,9 @@ func policySegmentPortProfileBindingsResourceToInfraStruct(segmentPort model.Seg
 		return model.Infra{}, err
 	}
 
-	if isDestroy {
-		// For delete operation, set empty profile bindings
-		err = nsxtPolicySegmentPortProfilesSetEmptyInStruct(&segmentPort)
-		if err != nil {
-			return model.Infra{}, err
-		}
-	} else {
-		err = nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
-		if err != nil {
-			return model.Infra{}, err
-		}
+	err = nsxtPolicySegmentPortProfilesSetInStruct(d, &segmentPort)
+	if err != nil {
+		return model.Infra{}, err
 	}
 
 	childSegmentPort := model.ChildSegmentPort{
