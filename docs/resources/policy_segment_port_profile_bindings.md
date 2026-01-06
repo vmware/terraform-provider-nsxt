@@ -68,6 +68,33 @@ resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
 }
 ```
 
+## Example Usage - Using nsxt_policy_segment_ports data source
+```hcl
+data "nsxt_policy_segment_ports" "test" {
+  display_name = "segment-port1"
+}
+
+resource "nsxt_policy_segment_port_profile_bindings" "test" {
+  count = length(data.nsxt_policy_segment_ports.test.items)
+
+  segment_port_path = data.nsxt_policy_segment_ports.test.items[count.index].path
+
+  discovery_profile {
+    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.profile.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.profile.path
+  }
+
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.profile.path
+    security_profile_path = data.nsxt_policy_segment_security_profile.profile.path
+  }
+
+  qos_profile {
+    qos_profile_path = data.nsxt_policy_qos_profile.profile.path
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

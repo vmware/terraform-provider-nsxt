@@ -68,8 +68,43 @@ func testAccResourceNsxtPolicySegmentPortProfileBindings_basic(t *testing.T, wit
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", mtPrefix+"/infra/segment-security-profiles/"+profilesPrefix+"update"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySegmentPortProfileBindings_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicySegmentPortProfileBindings_importBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySegmentPortProfileBindings_importBasic_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySegmentPortProfileBindings_importBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicySegmentPortProfileBindings_importBasic(t *testing.T, withContext bool, preCheck func()) {
+	segmentName := getAccTestResourceName()
+	segmentPortName := getAccTestResourceName()
+	profilesPrefix := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment_port_profile_bindings.test"
+	createResourceTag := "profile1"
+	tzName := getOverlayTransportZoneName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, segmentName)
+		},
+		Steps: []resource.TestStep{
 			{
-				// Import
+				Config: testAccResourceNsxtPolicySegmentPortProfileBindingsTemplate(tzName, segmentName, profilesPrefix, segmentPortName, createResourceTag, withContext),
+			},
+			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
