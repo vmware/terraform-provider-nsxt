@@ -206,24 +206,57 @@ func shouldIgnoreScope(scope string, scopesToIgnore []string) bool {
 func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {
 	var tagList []map[string]interface{}
 	var ignoredTagList []map[string]interface{}
+
 	scopesToIgnore := getTagScopesToIgnore(d)
+	seen := make(map[string]struct{})
+
 	for _, tag := range tags {
-		elem := make(map[string]interface{})
-		elem["scope"] = tag.Scope
-		elem["tag"] = tag.Tag
-		if tag.Scope != nil && shouldIgnoreScope(*tag.Scope, scopesToIgnore) {
+		scope, tagValue := "", ""
+		if tag.Scope != nil {
+			scope = *tag.Scope
+		}
+		if tag.Tag != nil {
+			tagValue = *tag.Tag
+		}
+
+		key := scope + ":" + tagValue
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+
+		elem := map[string]interface{}{
+			"scope": scope,
+			"tag":   tagValue,
+		}
+
+		if isProviderOwnedScope(scope) {
+			tagList = append(tagList, elem)
+			continue
+		}
+
+		if scope != "" && shouldIgnoreScope(scope, scopesToIgnore) {
 			ignoredTagList = append(ignoredTagList, elem)
 		} else {
 			tagList = append(tagList, elem)
 		}
 	}
-	err := d.Set(schemaName, tagList)
-	if err != nil {
+
+	if err := d.Set(schemaName, tagList); err != nil {
 		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
 	}
 
 	if len(scopesToIgnore) > 0 {
 		setIgnoredTagsInSchema(d, scopesToIgnore, ignoredTagList)
+	}
+}
+
+func isProviderOwnedScope(scope string) bool {
+	switch scope {
+	case "managed-by", "tf-run-id":
+		return true
+	default:
+		return false
 	}
 }
 

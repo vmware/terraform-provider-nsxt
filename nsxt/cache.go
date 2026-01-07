@@ -3,6 +3,7 @@ package nsxt
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -37,7 +38,6 @@ func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 			ret[*resource.DisplayName] = obj
 		}
 	}
-	fmt.Println("conver to map ", ret)
 	return ret
 }
 
@@ -54,26 +54,24 @@ func getQueryString(resourceType string, context utl.SessionContext) string {
 	}
 }
 
-func (c *cache) getQueryResult(query string, displayName string) *data.StructValue {
+func (c *cache) getQueryResult(query string, displayName string) (*data.StructValue, error) {
 	if val, ok := c.data[query]; ok {
-		return val[displayName]
+		return val[displayName], nil
 	}
-	return nil
+	return nil, fmt.Errorf("element is not found")
 }
 
 func trackTime(start time.Time, name string) {
-	elapsed := time.Since(start).Seconds()
-	fmt.Printf("-------------------------------------------> %s  took %v \n", name, elapsed)
+	_ = time.Since(start).Seconds()
+	_ = name
 }
 
 func (c *cache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
 	start := time.Now()
-	defer trackTime(start, fmt.Sprint("Time taken to populate the cache "))
+	defer trackTime(start, fmt.Sprint("One Time taken to populate the cache "))
 	c.cacheMis += 1
-	fmt.Println("cacheMis ", c.cacheMis)
 	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType)
 	if err != nil {
-		fmt.Println("failed to read the cache", err)
 		return err
 	}
 	return nil
@@ -83,24 +81,23 @@ func (c *cache) readCache(displayName string, resourceType string, d *schema.Res
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	query := getQueryString(resourceType, getSessionContext(d, m))
-	if val := c.getQueryResult(query, displayName); val != nil {
+	if val, _ := c.getQueryResult(query, displayName); val != nil {
 		c.cacheHit += 1
-		fmt.Println("cacheHit ", c.cacheHit)
 		return val, nil
 	}
 	err := c.writeCache(query, resourceType, d, m, connector)
 	if err != nil {
 		return nil, err
 	}
-	return c.getQueryResult(query, displayName), nil
+	return c.getQueryResult(query, displayName)
 }
 
 func (c *cache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context api.SessionContext, resourceType string) error {
-	resultList, err := listPolicyResources(connector, context, resourceType, nil)
+	additionalQuery := buildTagQuery(d)
+	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
 	if err != nil {
 		return fmt.Errorf("error listing resource %s %w", resourceType, err)
 	}
-	fmt.Println("listPolicyResources ", resultList)
 	tmp := converListToMap(resultList)
 	//convert list to map
 	c.data[query] = tmp
@@ -116,4 +113,48 @@ var cacheEnabled = os.Getenv("NSXT_ENABLE_CACHE") == "true"
 
 func IsCacheEnabled() bool {
 	return cacheEnabled
+}
+
+// buildTagQuery extracts tags from resource data and builds NSX-T search query string
+func buildTagQuery(d *schema.ResourceData) string {
+	if d == nil {
+		return ""
+	}
+	tags, exists := d.GetOk("tag")
+	if !exists {
+		return ""
+	}
+
+	// Tags are stored as *schema.Set
+	tagSet, ok := tags.(*schema.Set)
+	if !ok {
+		return ""
+	}
+	if tagSet.Len() == 0 {
+		return ""
+	}
+
+	var tagQueries []string
+	for _, tagInterface := range tagSet.List() {
+		tagMap := tagInterface.(map[string]interface{})
+
+		// Extract scope and tag values
+		scope, hasScope := tagMap["scope"]
+		tag, hasTag := tagMap["tag"]
+
+		// Build query parts for scope and tag
+		if hasScope && scope != nil && scope.(string) != "" {
+			tagQueries = append(tagQueries, fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters(scope.(string))))
+		}
+		if hasTag && tag != nil && tag.(string) != "" {
+			tagQueries = append(tagQueries, fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(tag.(string))))
+		}
+	}
+
+	if len(tagQueries) == 0 {
+		return ""
+	}
+
+	// Join all tag queries with AND
+	return strings.Join(tagQueries, " AND ")
 }

@@ -70,6 +70,7 @@ type nsxtClients struct {
 	PolicyEnforcementPoint string
 	PolicyGlobalManager    bool
 	DefaultSpanPath        string
+	Runtime                *providerRuntimeContext
 }
 
 // Provider for VMWare NSX-T
@@ -552,6 +553,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_vni_pool":                                     resourceNsxtPolicyVniPool(),
 			"nsxt_policy_vtep_ha_host_switch_profile":                  resourceNsxtVtepHAHostSwitchProfile(),
 			"nsxt_principal_identity":                                  resourceNsxtPrincipalIdentity(),
+			"nsxt_provider_context":                                    resourceNsxtProviderContext(),
 			"nsxt_qos_switching_profile":                               removedResourceWrapper(resourceNsxtQosSwitchingProfile, "nsxt_qos_switching_profile"),
 			"nsxt_spoofguard_switching_profile":                        removedResourceWrapper(resourceNsxtSpoofGuardSwitchingProfile, "nsxt_spoofguard_switching_profile"),
 			"nsxt_static_route":                                        removedResourceWrapper(resourceNsxtStaticRoute, "nsxt_static_route"),
@@ -1168,6 +1170,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	commonConfig := initCommonConfig(d)
 	clients := nsxtClients{
 		CommonConfig: commonConfig,
+		Runtime:      newProviderRuntimeContext(),
 	}
 
 	err := configureNsxtClient(d, &clients)

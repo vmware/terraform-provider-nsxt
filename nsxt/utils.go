@@ -132,25 +132,29 @@ func getRevisionSchema() *schema.Schema {
 // utilities to define & handle tags
 func getTagsSchemaInternal(required bool, forceNew bool) *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeSet,
-		Description: "Set of opaque identifiers meaningful to the user",
-		Optional:    !required,
-		Required:    required,
-		ForceNew:    forceNew,
+		Type:     schema.TypeSet,
+		Optional: !required,
+		Required: required,
+		Computed: true,  // REQUIRED
+		ForceNew: false, // safer for injected tags
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"scope": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ForceNew: forceNew,
 				},
 				"tag": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ForceNew: forceNew,
 				},
 			},
 		},
+		Set: schema.HashResource(&schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"scope": {Type: schema.TypeString},
+				"tag":   {Type: schema.TypeString},
+			},
+		}),
 	}
 }
 
