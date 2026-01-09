@@ -49,6 +49,7 @@ type commonProviderConfig struct {
 	Username               string
 	Password               string
 	LicenseKeys            []string
+	contextID              string
 }
 
 type nsxtClients struct {
@@ -81,6 +82,11 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_ALLOW_UNVERIFIED_SSL", false),
+			},
+			"context_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_CONTEXT_ID", ""),
 			},
 			"username": {
 				Type:        schema.TypeString,
@@ -1138,6 +1144,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	}
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+	contextId := d.Get("context_id").(string)
 
 	statuses := d.Get("retry_on_status_codes").([]interface{})
 	retryStatuses := make([]int, 0, len(statuses))
@@ -1161,6 +1168,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		Username:               username,
 		Password:               password,
 		LicenseKeys:            licenses,
+		contextID:              contextId,
 	}
 }
 
