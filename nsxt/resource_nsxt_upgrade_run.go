@@ -22,6 +22,14 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+var cliUpgradeSummaryClient = upgrade.NewSummaryClient
+var cliUpgradeUnitGroupsClient = upgrade.NewUpgradeUnitGroupsClient
+var cliUpgradeSettingsClient = plan.NewSettingsClient
+var cliUpgradePlanClient = upgrade.NewPlanClient
+var cliUpgradeStatusSummaryClient = upgrade.NewStatusSummaryClient
+var cliUpgradeClient = nsx.NewUpgradeClient
+var cliUpgradeUnitGroupsStatusClient = upgrade.NewUpgradeUnitGroupsStatusClient
+
 // Order matters
 var upgradeComponentList = []string{
 	edgeUpgradeGroup,
@@ -90,7 +98,7 @@ type upgradeClientSet struct {
 
 func getTargetVersion(m interface{}) (string, error) {
 	connector := getPolicyConnector(m)
-	client := upgrade.NewSummaryClient(connector)
+	client := cliUpgradeSummaryClient(connector)
 	obj, err := client.Get()
 	if err != nil {
 		return "", err
@@ -110,12 +118,12 @@ func getUpgradeComponentList(targetVersion string) []string {
 
 func newUpgradeClientSet(connector client.Connector, d *schema.ResourceData) *upgradeClientSet {
 	return &upgradeClientSet{
-		GroupClient:       upgrade.NewUpgradeUnitGroupsClient(connector),
-		SettingClient:     plan.NewSettingsClient(connector),
-		PlanClient:        upgrade.NewPlanClient(connector),
-		StatusClient:      upgrade.NewStatusSummaryClient(connector),
-		UpgradeClient:     nsx.NewUpgradeClient(connector),
-		GroupStatusClient: upgrade.NewUpgradeUnitGroupsStatusClient(connector),
+		GroupClient:       cliUpgradeUnitGroupsClient(connector),
+		SettingClient:     cliUpgradeSettingsClient(connector),
+		PlanClient:        cliUpgradePlanClient(connector),
+		StatusClient:      cliUpgradeStatusSummaryClient(connector),
+		UpgradeClient:     cliUpgradeClient(connector),
+		GroupStatusClient: cliUpgradeUnitGroupsStatusClient(connector),
 
 		Timeout:    d.Get("timeout").(int),
 		Delay:      d.Get("delay").(int),

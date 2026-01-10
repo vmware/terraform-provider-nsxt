@@ -10,14 +10,16 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliVpcConnectivityProfilesClient = projects.NewVpcConnectivityProfilesClient
 
 var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -205,7 +207,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 func resourceNsxtVpcConnectivityProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
+	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -250,7 +252,8 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 
 	log.Printf("[INFO] Creating VpcConnectivityProfile with ID %s", id)
 
-	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("VpcConnectivityProfile", id, err)
@@ -269,8 +272,9 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining VpcConnectivityProfile ID")
 	}
 
-	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
+	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "VpcConnectivityProfile", id, err)
@@ -317,7 +321,8 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 	if err := metadata.SchemaToStruct(elem, d, vpcConnectivityProfileSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -336,9 +341,10 @@ func resourceNsxtVpcConnectivityProfileDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
 
-	client := clientLayer.NewVpcConnectivityProfilesClient(connector)
+	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id)
 
 	if err != nil {

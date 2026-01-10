@@ -14,11 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_bgp "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services/bgp"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	bgp "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/bgp"
 )
+
+var cliBgpNeighborsClient = bgp.NewNeighborsClient
 
 var bgpNeighborConfigGracefulRestartModeValues = []string{
 	model.BgpNeighborConfig_GRACEFUL_RESTART_MODE_HELPER_ONLY,
@@ -219,16 +220,13 @@ func resourceNsxtPolicyBgpNeighborParseIDs(bgpPath string) (string, string) {
 	return t0ID, lsID
 }
 
-func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector client.Connector) (bool, error) {
-
-	var err error
-	if isGlobalManager {
-		client := gm_bgp.NewNeighborsClient(connector)
-		_, err = client.Get(t0ID, localeServiceID, neighborID)
-	} else {
-		client := bgp.NewNeighborsClient(connector)
-		_, err = client.Get(t0ID, localeServiceID, neighborID)
+func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector client.Connector, d *schema.ResourceData, m interface{}) (bool, error) {
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
 	}
+	_, err := client.Get(t0ID, localeServiceID, neighborID)
 	if err == nil {
 		return true, nil
 	}
@@ -363,18 +361,12 @@ func resourceNsxtPolicyBgpNeighborConvertAndPatch(id string, d *schema.ResourceD
 	connector := getPolicyConnector(m)
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating BgpNeighbor with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.BgpNeighborConfigBindingType(), gm_model.BgpNeighborConfigBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_bgp.NewNeighborsClient(connector)
-		err = client.Patch(t0ID, serviceID, id, gmObj.(gm_model.BgpNeighborConfig), nil)
-
-	} else {
-		client := bgp.NewNeighborsClient(connector)
-		err = client.Patch(t0ID, serviceID, id, obj, nil)
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
 	}
+	err = client.Patch(t0ID, serviceID, id, obj, nil)
 	if err != nil {
 		return handleCreateError("BgpNeighbor", id, err)
 	}
@@ -395,7 +387,7 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 	if t0ID == "" || serviceID == "" {
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
-	exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, id, isGlobalManager, connector)
+	exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, id, isGlobalManager, connector, d, m)
 	if err != nil {
 		return err
 	}
@@ -428,26 +420,14 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
 
-	var obj model.BgpNeighborConfig
-	if isPolicyGlobalManager(m) {
-		client := gm_bgp.NewNeighborsClient(connector)
-		gmObj, err := client.Get(t0ID, serviceID, id)
-		if err != nil {
-			return handleReadError(d, "BgpNeighbor", id, err)
-		}
-		lmObj, err := convertModelBindingType(gmObj, gm_model.BgpNeighborConfigBindingType(), model.BgpNeighborConfigBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.BgpNeighborConfig)
-
-	} else {
-		var err error
-		client := bgp.NewNeighborsClient(connector)
-		obj, err = client.Get(t0ID, serviceID, id)
-		if err != nil {
-			return handleReadError(d, "BgpNeighbor", id, err)
-		}
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	obj, err := client.Get(t0ID, serviceID, id)
+	if err != nil {
+		return handleReadError(d, "BgpNeighbor", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -545,14 +525,12 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_bgp.NewNeighborsClient(connector)
-		err = client.Delete(t0ID, serviceID, id, nil)
-	} else {
-		client := bgp.NewNeighborsClient(connector)
-		err = client.Delete(t0ID, serviceID, id, nil)
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
 	}
+	err := client.Delete(t0ID, serviceID, id, nil)
 	if err != nil {
 		return handleDeleteError("BgpNeighbor", id, err)
 	}
@@ -573,21 +551,16 @@ func resourceNsxtPolicyBgpNeighborImport(d *schema.ResourceData, m interface{}) 
 	var parentPath string
 
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		client := gm_bgp.NewNeighborsClient(connector)
-		neighbor, err := client.Get(tier0ID, serviceID, neighborID)
-		if err != nil {
-			return nil, err
-		}
-		parentPath = *neighbor.ParentPath
-	} else {
-		client := bgp.NewNeighborsClient(connector)
-		neighbor, err := client.Get(tier0ID, serviceID, neighborID)
-		if err != nil {
-			return nil, err
-		}
-		parentPath = *neighbor.ParentPath
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
 	}
+	neighbor, err := client.Get(tier0ID, serviceID, neighborID)
+	if err != nil {
+		return nil, err
+	}
+	parentPath = *neighbor.ParentPath
 	d.Set("bgp_path", parentPath)
 
 	d.SetId(neighborID)

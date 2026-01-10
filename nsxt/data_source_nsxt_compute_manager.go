@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
@@ -32,7 +31,7 @@ func dataSourceNsxtComputeManager() *schema.Resource {
 
 func dataSourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := fabric.NewComputeManagersClient(connector)
+	client := cliComputeManagersClient(getSessionContext(d, m), connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

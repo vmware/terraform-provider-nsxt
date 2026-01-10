@@ -15,6 +15,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 )
 
+var cliUpgradeChecksInfoClient = upgrade.NewUpgradeChecksInfoClient
+var cliPreUpgradeChecksClient = upgrade.NewPreUpgradeChecksClient
+
 func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtUpgradePrecheckAcknowledgeCreate,
@@ -68,7 +71,7 @@ func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 func validatePrecheckIDs(m interface{}, precheckIDs []string) error {
 	var validChecks []string
 	connector := getPolicyConnector(m)
-	client := upgrade.NewUpgradeChecksInfoClient(connector)
+	client := cliUpgradeChecksInfoClient(connector)
 	checkInfoResults, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return err
@@ -122,7 +125,7 @@ func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 		warns = append(warns, *warn.Id)
 	}
 
-	client := upgrade.NewPreUpgradeChecksClient(connector)
+	client := cliPreUpgradeChecksClient(connector)
 	for _, precheckID := range precheckIDs {
 		if slices.Contains(warns, precheckID) {
 			err := client.Acknowledge(precheckID)

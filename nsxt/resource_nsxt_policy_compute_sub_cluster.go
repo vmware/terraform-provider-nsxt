@@ -11,10 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
+	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliSubClustersClient = enforcement_points.NewSubClustersClient
 
 func resourceNsxtPolicyComputeSubCluster() *schema.Resource {
 	return &schema.Resource{
@@ -68,7 +71,8 @@ func resourceNsxtPolicyComputeSubCluster() *schema.Resource {
 
 func resourceNsxtPolicyComputeSubClusterRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	scClient := enforcement_points.NewSubClustersClient(connector)
+	sessionContext := getSessionContext(d, m)
+	scClient := cliSubClustersClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
@@ -97,13 +101,14 @@ func resourceNsxtPolicyComputeSubClusterRead(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyComputeSubClusterExists(siteID, epID, id string, connector client.Connector) (bool, error) {
 	// Check site existence first
-	siteClient := infra.NewSitesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	siteClient := cliSitesClient(sessionContext, connector)
 	_, err := siteClient.Get(siteID)
 	if err != nil {
 		msg := fmt.Sprintf("failed to read site %s", siteID)
 		return false, logAPIError(msg, err)
 	}
-	scClient := enforcement_points.NewSubClustersClient(connector)
+	scClient := cliSubClustersClient(sessionContext, connector)
 	_, err = scClient.Get(siteID, epID, id)
 
 	if err == nil {
@@ -119,7 +124,8 @@ func resourceNsxtPolicyComputeSubClusterExists(siteID, epID, id string, connecto
 
 func policyComputeSubClusterPatch(siteID, epID, id string, d *schema.ResourceData, m interface{}, isUpdate bool, isDelete bool) error {
 	connector := getPolicyConnector(m)
-	scClient := enforcement_points.NewSubClustersClient(connector)
+	sessionContext := getSessionContext(d, m)
+	scClient := cliSubClustersClient(sessionContext, connector)
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -210,7 +216,8 @@ func resourceNsxtPolicyComputeSubClusterUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyComputeSubClusterDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	htnClient := enforcement_points.NewSubClustersClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	htnClient := cliSubClustersClient(sessionContext, connector)
 
 	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {

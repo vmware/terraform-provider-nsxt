@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliSharesClient = infra.NewSharesClient
+
 var sharingStrategyVals = []string{
 	model.Share_SHARING_STRATEGY_ALL_DESCENDANTS,
 	model.Share_SHARING_STRATEGY_NONE_DESCENDANTS,
@@ -62,7 +64,7 @@ func resourceNsxtPolicyShare() *schema.Resource {
 
 func resourceNsxtPolicyShareExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := infra.NewSharesClient(context, connector)
+	client := cliSharesClient(context, connector)
 	_, err = client.Get(id)
 
 	if err == nil {
@@ -98,7 +100,7 @@ func resourceNsxtPolicyShareCreate(d *schema.ResourceData, m interface{}) error 
 		SharedWith:      sharedWith,
 	}
 	context := getSessionContext(d, m)
-	client := infra.NewSharesClient(context, connector)
+	client := cliSharesClient(context, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Share", id, err)
@@ -119,7 +121,7 @@ func resourceNsxtPolicyShareRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	context := getSessionContext(d, m)
-	client := infra.NewSharesClient(context, connector)
+	client := cliSharesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Share", id, err)
@@ -159,7 +161,7 @@ func resourceNsxtPolicyShareUpdate(d *schema.ResourceData, m interface{}) error 
 		SharedWith:      sharedWith,
 	}
 	context := getSessionContext(d, m)
-	client := infra.NewSharesClient(context, connector)
+	client := cliSharesClient(context, connector)
 	err := client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Share", id, err)
@@ -176,7 +178,7 @@ func resourceNsxtPolicyShareDelete(d *schema.ResourceData, m interface{}) error 
 
 	connector := getPolicyConnector(m)
 	context := getSessionContext(d, m)
-	client := infra.NewSharesClient(context, connector)
+	client := cliSharesClient(context, connector)
 	err := client.Delete(id)
 
 	if err != nil {

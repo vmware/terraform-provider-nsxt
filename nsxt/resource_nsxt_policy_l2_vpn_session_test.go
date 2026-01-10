@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -225,7 +226,9 @@ func testAccNsxtPolicyL2VpnSessionExists(displayName string, resourceName string
 			return fmt.Errorf("Policy L2VpnSession resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, resourceID, connector)
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, resourceID, connector, sessionContext)
 		if err != nil {
 			return err
 		}
@@ -252,7 +255,9 @@ func testAccNsxtPolicyL2VpnSessionCheckDestroy(state *terraform.State, displayNa
 			return err
 		}
 
-		exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, resourceID, connector)
+		d := &schema.ResourceData{}
+		sessionContext := getSessionContext(d, testAccProvider.Meta())
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, resourceID, connector, sessionContext)
 		if err == nil {
 			return err
 		}

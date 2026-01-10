@@ -9,9 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
+	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliInterVrfRoutingClient = tier_0s.NewInterVrfRoutingClient
 
 var routeAdvertisementTypesValues = []string{
 	"TIER0_STATIC",
@@ -233,7 +235,8 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 
 func resourceNsxtPolicyTier0InterVRFRoutingCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := tier_0s.NewInterVrfRoutingClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -270,7 +273,8 @@ func resourceNsxtPolicyTier0InterVRFRoutingCreate(d *schema.ResourceData, m inte
 
 func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := tier_0s.NewInterVrfRoutingClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -332,7 +336,8 @@ func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyTier0InterVRFRoutingUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := tier_0s.NewInterVrfRoutingClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -359,7 +364,8 @@ func resourceNsxtPolicyTier0InterVRFRoutingUpdate(d *schema.ResourceData, m inte
 
 func resourceNsxtPolicyTier0InterVRFRoutingDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := tier_0s.NewInterVrfRoutingClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliInterVrfRoutingClient(sessionContext, connector)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
