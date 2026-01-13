@@ -14,38 +14,18 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-data "nsxt_vpc" "demovpc" {
+resource "nsxt_vpc_group" "" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
-  display_name = "vpc1"
-}
-
-resource "nsxt_vpc_group" "group1" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
 
-  display_name = "tf-group1"
-  description  = "Terraform provisioned Group"
+  display_name = "pets"
+  description  = "Terraform provisioned VPC group"
 
   criteria {
-    condition {
-      key         = "Name"
-      member_type = "VirtualMachine"
-      operator    = "STARTSWITH"
-      value       = "public"
-    }
-    condition {
-      key         = "OSName"
-      member_type = "VirtualMachine"
-      operator    = "CONTAINS"
-      value       = "Ubuntu"
+    ipaddress_expression {
+      ip_addresses = ["10.1.0.10"]
     }
   }
 }

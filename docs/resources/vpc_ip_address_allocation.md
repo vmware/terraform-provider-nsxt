@@ -13,13 +13,16 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-resource "nsxt_vpc_ip_address_allocation" "nat" {
+resource "nsxt_vpc_ip_address_allocation" "test" {
   context {
-    project_id = data.nsxt_policy_project.dev.id
+    project_id = nsxt_policy_project.test.id
     vpc_id     = nsxt_vpc.test.id
   }
-  display_name    = "nat"
-  allocation_size = 1
+  display_name    = "test"
+  ip_address_block_visibility = "EXTERNAL"
+  ip_block        = nsxt_policy_ip_block.test.path
+  description     = "Terraform provisioned VPC IP address allocation"
+  allocation_size = 2
 }
 ```
 

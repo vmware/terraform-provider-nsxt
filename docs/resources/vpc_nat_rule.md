@@ -13,31 +13,21 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-resource "nsxt_vpc_ip_address_allocation" "nat" {
-  context {
-    project_id = data.nsxt_policy_project.dev.id
-    vpc_id     = nsxt_vpc.vpc1.id
-  }
-  display_name    = "for-nat"
-  allocation_size = 1
-}
-
 data "nsxt_vpc_nat" "test" {
   context {
-    project_id = data.nsxt_policy_project.dev.id
-    vpc_id     = nsxt_vpc.vpc1.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
-  nat_type = "USER"
+  nat_type = "DEFAULT"
 }
 
 resource "nsxt_vpc_nat_rule" "test" {
-  display_name        = "test"
-  description         = "terraform provisioned nat rule for vpc"
   parent_path         = data.nsxt_vpc_nat.test.path
-  destination_network = nsxt_vpc_ip_address_allocation.nat.allocation_ips
-  action              = "DNAT"
-  source_network      = "10.205.1.13"
-  translated_network  = "2.2.2.13"
+  display_name        = "test"
+  description         = "Terraform provisioned VPC NAT rule"
+  action              = "SNAT"
+  source_network      = nsxt_vpc.test.private_ips[0]
+  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
 }
 ```
 

@@ -13,34 +13,30 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-data "nsxt_vpc" "demovpc" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
-  display_name = "vpc1"
-}
-
-data "nsxt_vpc_subnet" "test" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
-  }
-  display_name = "subnet1"
-}
-
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
-  parent_path     = data.nsxt_vpc_subnet.test.path
-  display_name    = "test"
-  description     = "Terraform provisioned DhcpV4StaticBindingConfig"
-  gateway_address = "192.168.240.1"
-  host_name       = "host.example.org"
-  mac_address     = "10:0e:00:11:22:02"
-  lease_time      = 162
-  ip_address      = "192.168.240.41"
+  parent_path     = nsxt_vpc_subnet.dhcptest.path
+  display_name    = "test-web-server-binding"
+  description     = "Static DHCP binding for web server"
+  
+  mac_address     = "00:50:56:11:22:33"
+  ip_address      = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 10)
+  gateway_address = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 1)
+  host_name       = "test-web01.dev.example.com"
+  lease_time      = 86400
+
+  options {
+    option121 {
+      static_route {
+        network  = "0.0.0.0/0"
+        next_hop = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 2)
+      }
+    }
+    
+    other {
+      code   = 6   # DNS servers
+      values = ["8.8.8.8", "8.8.4.4"]
+    }
+  }
 }
 ```
 

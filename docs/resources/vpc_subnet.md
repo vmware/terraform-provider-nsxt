@@ -13,44 +13,52 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
 
-data "nsxt_vpc" "demovpc" {
+resource "nsxt_vpc_subnet" "test" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
-  display_name = "vpc1"
-}
-
-// This will create an isolated subnet, which requires
-// a CIDR to be specified in ip_addresses
-resource "nsxt_vpc_subnet" "test_isolated" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
 
-  display_name = "test-subnet-isolated"
-  description  = "Test Isolated VPC subnet"
-  ip_addresses = ["192.168.240.0/24"]
+  display_name = "test"
+  description  = "Terraform provisioned VPC subnet"
+  ipv4_subnet_size = 32
+  access_mode       = "Public"
+  depends_on = [ nsxt_vpc_attachment.test ]
+}
+
+resource "nsxt_vpc_subnet" "dhcptest" {
+  context {
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
+  }
+
+  display_name = "test"
+  description  = "Terraform provisioned VPC subnet"
+  ip_addresses = [cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0)]
+  access_mode  = "Private"
+
+  dhcp_config {
+    mode = "DHCP_SERVER"
+    dhcp_server_additional_config {
+      reserved_ip_ranges = ["${cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 10)}-${cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 14)}"]
+    }
+  }
+  depends_on = [ nsxt_vpc_attachment.test ]
+}
+
+resource "nsxt_vpc_subnet" "testisotated" {
+  context {
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
+  }
+
+  display_name = "test"
+  description  = "Terraform provisioned VPC subnet"
+  ip_addresses = ["192.168.240.0/26"]
   access_mode  = "Isolated"
 }
 
-// This will create a private subnet. A CIDR will be
-// automatically cut from the VPC's private IP ranges.
-resource "nsxt_vpc_subnet" "test_private" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
-  }
-
-  display_name     = "test-subnet-private"
-  description      = "Test Private VPC subnet"
-  ipv4_subnet_size = 32
-  access_mode      = "Private"
-}
 ```
 
 ~> **NOTE:** In some cases, subnet creation will depend on VPC attachment. If both resources are being created within same apply,
