@@ -13,8 +13,6 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-
-
 resource "nsxt_vpc_security_policy" "testpolicy1" {
   context {
     project_id = nsxt_policy_project.test.id
