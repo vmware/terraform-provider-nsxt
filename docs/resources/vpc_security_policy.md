@@ -57,6 +57,7 @@ resource "nsxt_vpc_security_policy" "testpolicy1" {
   }
 }
 ```
+
 -> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
 
 ## Argument Reference
