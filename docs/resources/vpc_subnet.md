@@ -20,11 +20,11 @@ resource "nsxt_vpc_subnet" "test" {
     vpc_id     = nsxt_vpc.test.id
   }
 
-  display_name = "test"
-  description  = "Terraform provisioned VPC subnet"
+  display_name     = "test"
+  description      = "Terraform provisioned VPC subnet"
   ipv4_subnet_size = 32
-  access_mode       = "Public"
-  depends_on = [ nsxt_vpc_attachment.test ]
+  access_mode      = "Public"
+  depends_on       = [nsxt_vpc_attachment.test]
 }
 
 resource "nsxt_vpc_subnet" "dhcptest" {
@@ -44,7 +44,7 @@ resource "nsxt_vpc_subnet" "dhcptest" {
       reserved_ip_ranges = ["${cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 10)}-${cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 14)}"]
     }
   }
-  depends_on = [ nsxt_vpc_attachment.test ]
+  depends_on = [nsxt_vpc_attachment.test]
 }
 
 resource "nsxt_vpc_subnet" "testisotated" {

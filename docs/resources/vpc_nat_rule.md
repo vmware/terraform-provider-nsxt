@@ -22,12 +22,12 @@ data "nsxt_vpc_nat" "test" {
 }
 
 resource "nsxt_vpc_nat_rule" "test" {
-  parent_path         = data.nsxt_vpc_nat.test.path
-  display_name        = "test"
-  description         = "Terraform provisioned VPC NAT rule"
-  action              = "SNAT"
-  source_network      = nsxt_vpc.test.private_ips[0]
-  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
+  parent_path        = data.nsxt_vpc_nat.test.path
+  display_name       = "test"
+  description        = "Terraform provisioned VPC NAT rule"
+  action             = "SNAT"
+  source_network     = nsxt_vpc.test.private_ips[0]
+  translated_network = nsxt_vpc_ip_address_allocation.test.allocation_ips
 }
 ```
 

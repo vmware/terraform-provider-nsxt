@@ -21,7 +21,7 @@ resource "nsxt_vpc_connectivity_profile" "test" {
   display_name         = "dev-connectivity-profile"
   description          = "Connectivity profile for development VPCs"
   transit_gateway_path = nsxt_policy_transit_gateway.test.path
-  external_ip_blocks = [nsxt_policy_ip_block.test.path]
+  external_ip_blocks   = [nsxt_policy_ip_block.test.path]
 
   service_gateway {
     enable             = true

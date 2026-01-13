@@ -14,10 +14,10 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 
 ```hcl
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
-  parent_path     = nsxt_vpc_subnet.dhcptest.path
-  display_name    = "test-web-server-binding"
-  description     = "Static DHCP binding for web server"
-  
+  parent_path  = nsxt_vpc_subnet.dhcptest.path
+  display_name = "test-web-server-binding"
+  description  = "Static DHCP binding for web server"
+
   mac_address     = "00:50:56:11:22:33"
   ip_address      = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 10)
   gateway_address = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 1)
@@ -31,9 +31,9 @@ resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
         next_hop = cidrhost(cidrsubnet(nsxt_vpc.test.private_ips[0], 12, 0), 2)
       }
     }
-    
+
     other {
-      code   = 6   # DNS servers
+      code   = 6 # DNS servers
       values = ["8.8.8.8", "8.8.4.4"]
     }
   }

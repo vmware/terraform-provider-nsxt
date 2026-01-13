@@ -35,7 +35,7 @@ resource "nsxt_vpc_security_policy" "testpolicy1" {
         protocol = "ICMPv4"
       }
     }
-    logged             = true
+    logged = true
   }
 
   rule {
@@ -50,9 +50,9 @@ resource "nsxt_vpc_security_policy" "testpolicy1" {
         destination_ports = ["53"]
       }
     }
-    logged           = true
-    disabled         = true
-    notes            = "Disabled by starfish for debugging"
+    logged   = true
+    disabled = true
+    notes    = "Disabled by starfish for debugging"
   }
   lifecycle {
     create_before_destroy = true
