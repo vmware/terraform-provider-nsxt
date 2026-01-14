@@ -373,11 +373,9 @@ func getIPSecVPNRulesSchema() *schema.Schema {
 					Optional: true,
 				},
 				"action": {
-					Type:         schema.TypeString,
-					Description:  "PROTECT - Protect rules are defined per policy based IPSec VPN session. BYPASS - Bypass rules are defined per IPSec VPN service and affects all policy based IPSec VPN sessions. Bypass rules are prioritized over protect rules.",
-					Default:      model.IPSecVpnRule_ACTION_PROTECT,
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(IPSecRulesActionValues, false),
+					Type:        schema.TypeString,
+					Description: "PROTECT - Protect rules are defined per policy based IPSec VPN session. BYPASS - Bypass rules are defined per IPSec VPN service and affects all policy based IPSec VPN sessions. Bypass rules are prioritized over protect rules.",
+					Computed:    true,
 				},
 			},
 		},
@@ -514,7 +512,6 @@ func getIPSecVPNRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRule {
 		var ruleList []model.IPSecVpnRule
 		for _, rule := range rules {
 			data := rule.(map[string]interface{})
-			action := data["action"].(string)
 			sourceRanges := interface2StringList(data["sources"].(*schema.Set).List())
 			destinationRanges := interface2StringList(data["destinations"].(*schema.Set).List())
 
@@ -546,7 +543,6 @@ func getIPSecVPNRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRule {
 				ruleID = newUUID()
 			}
 			elem := model.IPSecVpnRule{
-				Action:       &action,
 				Sources:      sourceIPSecVpnSubnetList,
 				Destinations: destinationIPSecVpnSubnetList,
 				UniqueId:     &ruleID,

@@ -226,7 +226,6 @@ func getIPSecVPNBypassRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRu
 		var ruleList []model.IPSecVpnRule
 		for _, rule := range rules {
 			data := rule.(map[string]interface{})
-			action := data["action"].(string)
 			sourceRanges := interface2StringList(data["sources"].(*schema.Set).List())
 			destinationRanges := interface2StringList(data["destinations"].(*schema.Set).List())
 			/// Source Subnets
@@ -256,7 +255,6 @@ func getIPSecVPNBypassRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRu
 				ruleID = newUUID()
 			}
 			elem := model.IPSecVpnRule{
-				Action:       &action,
 				Sources:      sourceIPSecVpnSubnetList,
 				Destinations: destinationIPSecVpnSubnetList,
 				UniqueId:     &ruleID,
