@@ -13,34 +13,23 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
+resource "nsxt_vpc_service_profile" "test" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
+    project_id = nsxt_policy_project.test.id
   }
-
-  display_name = "vpc1"
-  description  = "Terraform provisioned Vpc Service Profile"
-
-  mac_discovery_profile = nsxt_policy_mac_discovery_profile.for_vpc1.path
-  spoof_guard_profile   = nsxt_policy_spoof_guard_profile.for_vpc1.path
-  ip_discovery_profile  = nsxt_policy_ip_discovery_profile.for_vpc1.path
-  qos_profile           = nsxt_policy_qos_profile.for_vpc1.path
-
+  display_name = "test-vpc-service-profile"
+  description  = "Terraform provisioned VPC service profile"
   dhcp_config {
     dhcp_server_config {
       ntp_servers = ["20.2.60.5"]
-      lease_time  = 50840
+      lease_time  = 86400
 
       dns_client_config {
-        dns_server_ips = ["10.204.2.20"]
+        dns_server_ips = ["8.8.8.8", "8.8.4.4"]
       }
 
       advanced_config {
-        is_distributed_dhcp = false
+        is_distributed_dhcp = true
       }
     }
   }

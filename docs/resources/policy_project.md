@@ -14,6 +14,18 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_project" "test" {
+  display_name        = "test-project"
+  description         = "Development"
+  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.main_tier0.path]
+
+  external_ipv4_blocks = [nsxt_policy_ip_block.test.path]
+
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.edge_cluster.path]
+  }
+}
+
+resource "nsxt_policy_project" "testsample" {
   display_name        = "test"
   description         = "Terraform provisioned Project"
   short_id            = "test"

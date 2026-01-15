@@ -15,18 +15,14 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ```hcl
 resource "nsxt_vpc" "test" {
   context {
-    project_id = "test_proj"
+    project_id = nsxt_policy_project.test.id
   }
 
-  display_name = "test"
-  description  = "Terraform provisioned VPC"
-
-  private_ips = ["192.168.55.0/24"]
-  short_id    = "vpc-tf"
-
-  load_balancer_vpc_endpoint {
-    enabled = false
-  }
+  display_name        = "test-vpc"
+  description         = "Terraform provisioned VPC"
+  private_ips         = ["10.1.0.0/16"]
+  short_id            = "vpc-test"
+  vpc_service_profile = nsxt_vpc_service_profile.test.path
 }
 ```
 
