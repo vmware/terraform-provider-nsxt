@@ -22,7 +22,6 @@ var accTestPolicyTGWIPSecVpnServicesCreateAttributes = map[string]string{
 	"ike_log_level": "INFO",
 	"sources":       "192.168.10.0/24",
 	"destinations":  "192.169.10.0/24",
-	"action":        "BYPASS",
 }
 
 var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
@@ -33,7 +32,6 @@ var accTestPolicyTGWIPSecVpnServicesUpdateAttributes = map[string]string{
 	"ike_log_level": "INFO",
 	"sources":       "192.170.10.0/24",
 	"destinations":  "192.171.10.0/24",
-	"action":        "BYPASS",
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
@@ -62,7 +60,6 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTGWIPSecVpnServicesCreateAttributes["sources"]),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTGWIPSecVpnServicesCreateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTGWIPSecVpnServicesCreateAttributes["action"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -81,7 +78,6 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["sources"]),
 					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyTGWIPSecVpnServicesUpdateAttributes["action"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -197,14 +193,13 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   bypass_rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"])
 }
 
 func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(displayName string) string {
