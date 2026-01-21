@@ -15,18 +15,16 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ```hcl
 resource "nsxt_vpc_static_route" "test" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
 
   display_name = "test"
-  description  = "Terraform provisioned StaticRoutes"
-
-  network = "3.3.3.0/24"
+  description  = "Terraform provisioned VPC static route"
+  network      = cidrsubnet(nsxt_vpc.test.private_ips[0], 1, 1)
 
   next_hop {
-    ip_address     = "10.230.3.1"
-    admin_distance = 4
+    ip_address = "3.1.1.1"
   }
 }
 ```

@@ -13,40 +13,34 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-data "nsxt_vpc" "demovpc" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
-  display_name = "vpc1"
-}
-
 resource "nsxt_vpc_gateway_policy" "test" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
-  display_name    = "tf-gw-policy"
-  description     = "Terraform provisioned Gateway Policy"
+
+  display_name    = "test-web-gateway-policy"
+  description     = "Gateway policy for development web VPC"
   locked          = false
-  sequence_number = 3
+  sequence_number = 1
   stateful        = true
   tcp_strict      = false
 
-  tag {
-    scope = "color"
-    tag   = "orange"
+  rule {
+    display_name       = "allow_inbound_web"
+    description        = "Allow inbound web traffic"
+    action             = "ALLOW"
+    direction          = "IN"
+    destination_groups = [nsxt_vpc_group.test.path]
+    logged             = true
   }
 
   rule {
-    display_name       = "rule1"
-    destination_groups = [nsxt_vpc_group.group1.path, nsxt_vpc_group.group2.path]
-    disabled           = true
-    action             = "DROP"
-    logged             = true
+    display_name = "allow_outbound_all"
+    description  = "Allow all outbound traffic"
+    action       = "ALLOW"
+    direction    = "OUT"
+    logged       = false
   }
 
   lifecycle {
@@ -54,8 +48,6 @@ resource "nsxt_vpc_gateway_policy" "test" {
   }
 }
 ```
-
--> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
 
 ## Argument Reference
 
