@@ -198,6 +198,5 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
 }
 data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
   id = nsxt_policy_ipsec_vpn_dpd_profile.test.id
-  depends_on   = [nsxt_policy_ipsec_vpn_dpd_profile.test]
 }`, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"])
 }

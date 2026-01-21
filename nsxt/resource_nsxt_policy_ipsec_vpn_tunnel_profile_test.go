@@ -207,6 +207,5 @@ resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
 }
 data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
   id = nsxt_policy_ipsec_vpn_tunnel_profile.test.id
-  depends_on   = [nsxt_policy_ipsec_vpn_tunnel_profile.test]
 }`, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], "AES_GCM_192", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"])
 }
