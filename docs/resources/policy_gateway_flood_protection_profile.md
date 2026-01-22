@@ -65,10 +65,10 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
-* `icmp_active_flow_limit` - (Optional) Active ICMP connections limit. If this field is empty, firewall will not set a limit to active ICMP connections. Minimum: 1, Maximum: 1000000.
-* `other_active_conn_limit` - (Optional) Timeout after first TN. If this field is empty, firewall will not set a limit to other active connections. besides UDP, ICMP and half open TCP connections. Minimum: 1, Maximum: 1000000.
-* `tcp_half_open_conn_limit` - (Optional) Active half open TCP connections limit. If this field is empty, firewall will not set a limit to half open TCP connections. Minimum: 1, Maximum: 1000000.
-* `udp_active_flow_limit` - (Optional) Active UDP connections limit. If this field is empty, firewall will not set a limit to active UDP connections. Minimum: 1, Maximum: 1000000.
+* `icmp_active_flow_limit` - (Optional) Active ICMP connections limit. If this field is empty, firewall will not set a limit to active ICMP connections. Minimum: 0, Maximum: 1000000.
+* `other_active_conn_limit` - (Optional) Timeout after first TN. If this field is empty, firewall will not set a limit to other active connections. besides UDP, ICMP and half open TCP connections. Minimum: 0, Maximum: 1000000.
+* `tcp_half_open_conn_limit` - (Optional) Active half open TCP connections limit. If this field is empty, firewall will not set a limit to half open TCP connections. Minimum: 0, Maximum: 1000000.
+* `udp_active_flow_limit` - (Optional) Active UDP connections limit. If this field is empty, firewall will not set a limit to active UDP connections. Minimum: 0, Maximum: 1000000.
 * `nat_active_conn_limit` - (Optional) Maximum limit of active NAT connections. The maximum limit of active NAT connections. This limit only apply to EDGE components (such as, gateway). If this property is omitted, or set to null, then there is no limit on the specific component. Meanwhile there is an implicit limit which depends on the underlying hardware resource. Minimum: 1, Maximum: 4294967295, Default: 4294967295
 
 ## Attributes Reference

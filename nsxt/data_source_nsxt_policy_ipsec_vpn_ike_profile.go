@@ -17,7 +17,7 @@ func dataSourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 		},
 	}

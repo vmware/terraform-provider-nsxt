@@ -85,6 +85,7 @@ func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 		},
@@ -194,5 +195,8 @@ func testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
   display_name = "%s"
+}
+data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+  id = nsxt_policy_ipsec_vpn_dpd_profile.test.id
 }`, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"])
 }

@@ -23,7 +23,6 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
   bypass_rule {
     sources      = ["192.168.10.0/24"]
     destinations = ["192.169.10.0/24"]
-    action       = "BYPASS"
   }
 }
 ```
@@ -44,7 +43,7 @@ The following arguments are supported:
 * `bypass_rule` - (Optional) Set the bypass rules for this IPSec VPN Service.
     * `sources` - (Required) List of source subnets. Subnet format is ipv4 or IPv6 CIDR.
     * `destinations` - (Required) List of destination subnets. Subnet format is ipv4 or IPv6 CIDR.
-    * `action` - (Required) `PROTECT` or `BYPASS`.
+    * `action` - (Computed) The effective rule action, always returned as BYPASS for service-level rules.
 
 ## Attributes Reference
 

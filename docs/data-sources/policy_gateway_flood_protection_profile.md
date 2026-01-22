@@ -12,7 +12,7 @@ This data source is applicable to NSX Global Manager and NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_gateway_flood_protection_profile" "test" {
+data "nsxt_policy_gateway_flood_protection_profile" "test" {
   display_name = "test"
 }
 ```
@@ -24,7 +24,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-resource "nsxt_policy_gateway_flood_protection_profile" "test" {
+data "nsxt_policy_gateway_flood_protection_profile" "test" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }

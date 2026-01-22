@@ -825,7 +825,6 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
   rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
 
   tag {
@@ -834,7 +833,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
   }
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
 func testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplateWithComplianceSuite(isT0 bool) string {
@@ -887,7 +886,6 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
   rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
 
   tag {
@@ -896,7 +894,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
   }
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+			attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
 // Ipv6 test cases
@@ -929,7 +927,6 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 	rule {
 		sources             = ["%s"]
 		destinations        = ["%s"]
-		action              = "%s"
 	  }
 
 	tag {
@@ -938,7 +935,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 	  }
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
 func testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0 bool, useCert bool) string {

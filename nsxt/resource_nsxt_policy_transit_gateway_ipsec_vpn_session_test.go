@@ -54,7 +54,6 @@ var accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes = map[string]stri
 	"connection_initiation_mode": "RESPOND_ONLY",
 	"sources":                    "192.170.10.0/24",
 	"destinations":               "192.171.10.0/24",
-	"action":                     "PROTECT",
 }
 
 var accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes = map[string]string{
@@ -69,7 +68,6 @@ var accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes = map[string]stri
 	"connection_initiation_mode": "RESPOND_ONLY",
 	"sources":                    "192.172.10.0/24",
 	"destinations":               "192.173.10.0/24",
-	"action":                     "PROTECT",
 }
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
@@ -201,8 +199,6 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.sources.0", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["sources"]),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.destinations.0", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", accTestPolicyTGWIPSecVpnSessionPolicyBasedCreateAttributes["action"]),
-
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -226,8 +222,6 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.sources.0", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["sources"]),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.destinations.0", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["destinations"]),
-					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", accTestPolicyTGWIPSecVpnSessionPolicyBasedUpdateAttributes["action"]),
-
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -266,7 +260,6 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
 
   tag {
@@ -275,7 +268,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_session" "test" {
   }
 }`, displayName, attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
 func testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(createFlow bool, displayName string) string {

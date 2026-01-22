@@ -89,6 +89,7 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 		},
@@ -201,5 +202,8 @@ resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
   display_name          = "%s"
   dh_groups             = ["%s"]
   encryption_algorithms = ["%s"]
+}
+data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+  id = nsxt_policy_ipsec_vpn_ike_profile.test.id
 }`, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], accTestPolicyIPSecVpnIkeProfileUpdateAttributes["dh_groups"], "AES_GCM_192")
 }

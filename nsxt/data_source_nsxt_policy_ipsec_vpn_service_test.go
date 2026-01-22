@@ -74,7 +74,7 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
   locale_service_path = one(nsxt_policy_tier0_gateway.test.locale_service).path
 }`, name) + `
 data "nsxt_policy_ipsec_vpn_service" "test" {
-  display_name = nsxt_policy_ipsec_vpn_service.test.display_name
+  id = nsxt_policy_ipsec_vpn_service.test.id
   gateway_path = nsxt_policy_tier0_gateway.test.path
 }`
 }

@@ -4,6 +4,9 @@ terraform-provider-nsxt*
 # Ignore distribution directories.
 dist/
 
+# Ignore cursor files.
+.cursor/
+
 # Ignore editor directories.
 .idea/
 .vscode/

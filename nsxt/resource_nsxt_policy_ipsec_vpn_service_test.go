@@ -351,14 +351,13 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
   bypass_rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+}`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"])
 }
 
 func getGatewayOrLocaleServicePath(useGatewayPath bool, isT0 bool) string {

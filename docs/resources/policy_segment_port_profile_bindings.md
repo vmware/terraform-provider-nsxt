@@ -1,0 +1,156 @@
+---
+subcategory: "Segments"
+page_title: "NSXT: nsxt_policy_segment_port_profile_bindings"
+description: A resource to configure profile bindings for an existing Segment Port.
+---
+
+# nsxt_policy_segment_port_profile_bindings
+
+This resource provides a method for managing profile bindings (discovery, QoS, and security profiles) for an existing Segment Port. This resource is useful when you need to modify the profiles of a segment port that was created outside of Terraform or by another resource.
+
+~> **NOTE:** This resource modifies an existing segment port's profile bindings. It does not create a new segment port. The segment port must already exist. Also try not to use this resource to modify the segment ports created using nsxt_policy_segment_port in the same terraform config. It will lead to conflicts.
+
+## Example Usage
+
+```hcl
+data "nsxt_policy_segment" "segment1" {
+  display_name = "existing-segment"
+}
+
+data "nsxt_policy_segment_port" "existing_port" {
+  display_name = "existing-port"
+  segment_path = data.nsxt_policy_segment.segment1.path
+}
+
+data "nsxt_policy_ip_discovery_profile" "ip_profile" {
+  display_name = "default-ip-discovery-profile"
+}
+
+data "nsxt_policy_mac_discovery_profile" "mac_profile" {
+  display_name = "default-mac-discovery-profile"
+}
+
+resource "nsxt_policy_segment_port_profile_bindings" "existing_port_binding" {
+  segment_port_path = data.nsxt_policy_segment_port.existing_port.path
+  segment_path      = data.nsxt_policy_segment.segment1.path
+
+  discovery_profile {
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.ip_profile.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.mac_profile.path
+  }
+}
+```
+
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_segment_port_profile_bindings" "port1_binding" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
+  segment_port_path = data.nsxt_policy_segment_port.existing_port.path
+  segment_path      = data.nsxt_policy_segment.segment1.path
+
+  discovery_profile {
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.profile1.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.profile1.path
+  }
+
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.profile1.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.profile1.path
+  }
+}
+```
+
+## Example Usage - Using nsxt_policy_segment_ports data source
+
+```hcl
+data "nsxt_policy_segment_ports" "test" {
+  display_name = "segment-port1"
+}
+
+resource "nsxt_policy_segment_port_profile_bindings" "test" {
+  count = length(data.nsxt_policy_segment_ports.test.items)
+
+  segment_port_path = data.nsxt_policy_segment_ports.test.items[count.index].path
+
+  discovery_profile {
+    ip_discovery_profile_path  = data.nsxt_policy_ip_discovery_profile.profile.path
+    mac_discovery_profile_path = data.nsxt_policy_mac_discovery_profile.profile.path
+  }
+
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.profile.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.profile.path
+  }
+
+  qos_profile {
+    qos_profile_path = data.nsxt_policy_qos_profile.profile.path
+  }
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `segment_port_path` - (Required) The path of the existing segment port to bind profiles to.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
+* `discovery_profile` - (Optional) IP and MAC discovery profiles for this segment port.
+    * `ip_discovery_profile_path` - (Optional) Policy path of the IP Discovery Profile to bind.
+    * `mac_discovery_profile_path` - (Optional) Policy path of the MAC Discovery Profile to bind.
+* `qos_profile` - (Optional) QoS profile for this segment port.
+    * `qos_profile_path` - (Required) Policy path of the QoS Profile to bind.
+* `security_profile` - (Optional) Security profiles for this segment port.
+    * `spoofguard_profile_path` - (Optional) Policy path of the Spoofguard Profile to bind.
+    * `security_profile_path` - (Optional) Policy path of the Segment Security Profile to bind.
+
+## Attributes Reference
+
+In addition to arguments listed above, the following attributes are exported:
+
+* `id` - ID of the Segment Port.
+* `discovery_profile`:
+    * `binding_map_path` - Policy path of the discovery profile binding map.
+    * `revision` - Revision number of the binding map.
+* `qos_profile`:
+    * `binding_map_path` - Policy path of the QoS profile binding map.
+    * `revision` - Revision number of the binding map.
+* `security_profile`:
+    * `binding_map_path` - Policy path of the security profile binding map.
+    * `revision` - Revision number of the binding map.
+
+## Resource Lifecycle
+
+~> **NOTE:** This resource manages profile bindings for an existing segment port. When the resource is destroyed (via `terraform destroy` or resource removal), the profile bindings are set to the segment defaults.
+
+## Importing
+
+An existing segment port's profile bindings can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/cli/import
+
+```shell
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings SEGMENT_PORT_PATH
+```
+
+The above command imports the profile bindings for the segment port named `port1_bindings` using its policy path.
+
+For example:
+
+```shell
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /infra/segments/segment1/ports/port1
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_segment_port_profile_bindings.port1_bindings /orgs/default/projects/project1/infra/segments/segment1/ports/port1
+```

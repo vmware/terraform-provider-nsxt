@@ -18,7 +18,7 @@ func dataSourceNsxtPolicyIPSecVpnService() *schema.Resource {
 			"id":           getDataSourceIDSchema(),
 			"gateway_path": getPolicyPathSchema(false, false, "Gateway path"),
 			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 		},
 	}
