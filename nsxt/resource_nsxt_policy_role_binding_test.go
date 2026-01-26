@@ -33,6 +33,11 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_PASSWORD")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_URL")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_DOMAIN")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_BASE_DN")
 			testAccOnlyLocalManager(t)
 		},
 		Providers: testAccProviders,
@@ -41,7 +46,7 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType, "false", ""),
+				Config: testAccNsxtPolicyRoleBindingLdapCreate(getTestLdapUser(), userType, identType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingCreateAttributes["display_name"]),
@@ -61,7 +66,7 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyRoleBindingUpdate(getTestLdapUser(), userType, identType, "false", ""),
+				Config: testAccNsxtPolicyRoleBindingLdapUpdate(getTestLdapUser(), userType, identType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingUpdateAttributes["display_name"]),
@@ -145,6 +150,11 @@ func TestAccResourceNsxtPolicyRoleBinding_import_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_PASSWORD")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_URL")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_DOMAIN")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_BASE_DN")
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.0.0")
 		},
@@ -154,12 +164,13 @@ func TestAccResourceNsxtPolicyRoleBinding_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType, "false", ""),
+				Config: testAccNsxtPolicyRoleBindingLdapCreate(getTestLdapUser(), userType, identType),
 			},
 			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"overwrite_local_user"},
 			},
 		},
 	})
@@ -214,6 +225,26 @@ func testAccNsxtPolicyRoleBindingCheckDestroy(state *terraform.State, displayNam
 		return fmt.Errorf("RoleBinding %s still exists", displayName)
 	}
 	return nil
+}
+
+func testAccNsxtPolicyRoleBindingLdapCreate(user, userType, identType string) string {
+	return testAccNsxtPolicyLdapIdentitySourceCreate(
+		openLdapType,
+		getTestLdapDomain(),
+		getTestLdapBaseDN(),
+		getTestLdapAdminUser(),
+		getTestLdapAdminPassword(),
+		getTestLdapURL()) + testAccNsxtPolicyRoleBindingCreate(user, userType, identType, "false", "nsxt_policy_ldap_identity_source.test")
+}
+
+func testAccNsxtPolicyRoleBindingLdapUpdate(user, userType, identType string) string {
+	return testAccNsxtPolicyLdapIdentitySourceCreate(
+		openLdapType,
+		getTestLdapDomain(),
+		getTestLdapBaseDN(),
+		getTestLdapAdminUser(),
+		getTestLdapAdminPassword(),
+		getTestLdapURL()) + testAccNsxtPolicyRoleBindingUpdate(user, userType, identType, "false", "nsxt_policy_ldap_identity_source.test")
 }
 
 func testAccNsxtPolicyRoleBindingLocalOverwrite(user string) string {
