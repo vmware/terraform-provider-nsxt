@@ -26,6 +26,7 @@ resource "nsxt_policy_transport_zone" "vlan_transport_zone" {
   transport_type              = "VLAN_BACKED"
   is_default                  = true
   uplink_teaming_policy_names = ["teaming-1"]
+  authorized_vlans            = ["100", "110-120"]
   site_path                   = "/infra/sites/default"
   enforcement_point           = "default"
 
@@ -47,6 +48,7 @@ resource "nsxt_policy_transport_zone" "vlan_transport_zone" {
 * `uplink_teaming_policy_names` - (Optional) The names of switching uplink teaming policies that all transport nodes in this transport zone support. Uplink teaming policies are only valid for `VLAN_BACKED` transport zones.
 * `site_path` - (Optional) The path of the site which the Transport Zone belongs to. `path` field of the existing `nsxt_policy_site` can be used here.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Transport Zone.
+* `authorized_vlans` - (Optional) This field lists vlan ids allowed on logical network entities, eg. Segments, bridges, etc. created under this transport zone. Can be empty, VLAN id or a range of VLAN ids specified with '-' in between. An empty list allows all vlan ids.
 
 ## Attributes Reference
 
