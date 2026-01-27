@@ -18,12 +18,15 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	node_api "github.com/vmware/terraform-provider-nsxt/api/nsx/node"
+	search_api "github.com/vmware/terraform-provider-nsxt/api/search"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	mp_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 )
+
+var cliVersionClient = node_api.NewVersionClient
+var cliQueryClient = search_api.NewQueryClient
 
 var adminStateValues = []string{"UP", "DOWN"}
 
@@ -573,7 +576,8 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 }
 
 func getNSXVersion(connector client.Connector) (string, error) {
-	client := node.NewVersionClient(connector)
+	sessionContext := api_util.SessionContext{ClientType: api_util.Local}
+	client := cliVersionClient(sessionContext, connector)
 	version, err := client.Get()
 	if err != nil {
 		return "", logAPIError("Failed to retrieve NSX version, please check connectivity and authentication settings of the provider", err)
@@ -596,7 +600,8 @@ func initNSXVersionVMC(clients interface{}) {
 	util.NsxVersion = "3.0.0"
 
 	connector := getPolicyConnector(clients)
-	client := search.NewQueryClient(connector)
+	sessionContext := api_util.SessionContext{ClientType: api_util.Local}
+	client := cliQueryClient(sessionContext, connector)
 	var cursor *string
 	query := "resource_type:dummy"
 	_, err := client.List(query, cursor, nil, nil, nil, nil)

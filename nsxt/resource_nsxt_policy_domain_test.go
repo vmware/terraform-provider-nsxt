@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
@@ -119,7 +120,8 @@ func testAccNsxtPolicyDomainExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy domain resource ID not set in resources")
 		}
 
-		nsxClient := gm_infra.NewDomainsClient(connector)
+		sessionContext := testAccGetSessionContext()
+		nsxClient := infra.NewDomainsClient(sessionContext, connector)
 		_, err := nsxClient.Get(resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy domain ID %s. Error: %v", resourceID, err)
@@ -138,7 +140,8 @@ func testAccNsxtPolicyDomainCheckDestroy(state *terraform.State, displayName str
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		nsxClient := gm_infra.NewDomainsClient(connector)
+		sessionContext := testAccGetSessionContext()
+		nsxClient := infra.NewDomainsClient(sessionContext, connector)
 		_, err := nsxClient.Get(resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy domain %s still exists", displayName)

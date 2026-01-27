@@ -10,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
@@ -75,20 +73,12 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.GatewayQosProfileBindingType(), gm_model.GatewayQosProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewGatewayQosProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
-	} else {
-		client := infra.NewGatewayQosProfilesClient(testAccGetSessionContext(), connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		err = client.Patch(id, obj, nil)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
 	}
+	err = client.Patch(id, obj, nil)
 
 	if err != nil {
 		return handleCreateError("GatewayQosProfile", id, err)
@@ -106,7 +96,8 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "GatewayQosProfile")
 		if err == nil {
-			client := gm_infra.NewGatewayQosProfilesClient(connector)
+			sessionContext := testAccGetSessionContext()
+			client := infra.NewGatewayQosProfilesClient(sessionContext, connector)
 			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("GatewayQosProfile", objID, err)

@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 )
 
+var cliNodeUsersClient = node.NewUsersClient
+
 func resourceNsxtUsers() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtNodeUserCreate,
@@ -113,7 +115,7 @@ func validateUsername() schema.SchemaValidateFunc {
 
 func resourceNsxtNodeUserCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := node.NewUsersClient(connector)
+	client := cliNodeUsersClient(connector)
 
 	fullName := d.Get("full_name").(string)
 	passwordChangeFrequency := int64(d.Get("password_change_frequency").(int))
@@ -143,7 +145,7 @@ func resourceNsxtNodeUserCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := node.NewUsersClient(connector)
+	client := cliNodeUsersClient(connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -172,7 +174,7 @@ func resourceNsxtNodeUserRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := node.NewUsersClient(connector)
+	client := cliNodeUsersClient(connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -228,7 +230,7 @@ func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := node.NewUsersClient(connector)
+	client := cliNodeUsersClient(connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")

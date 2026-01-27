@@ -22,6 +22,8 @@ import (
 
 var servicePathExample = getMultitenancyPathExample("/infra/services/[service]")
 
+var cliServicesClient = infra.NewServicesClient
+
 func getIcmpEntrySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
@@ -478,7 +480,7 @@ func getServiceEntriesFromSchema(d interface{}) ([]*data.StructValue, error) {
 }
 
 func resourceNsxtPolicyServiceExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewServicesClient(sessionContext, connector)
+	client := cliServicesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -532,7 +534,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating service with ID %s", id)
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cliServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -554,7 +556,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining service id")
 	}
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cliServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -732,7 +734,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// Update the resource using Update to totally replace the list of entries
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	client := cliServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -753,7 +755,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	doDelete := func() error {
-		client := infra.NewServicesClient(getSessionContext(d, m), connector)
+		client := cliServicesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
