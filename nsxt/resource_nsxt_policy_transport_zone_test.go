@@ -15,15 +15,17 @@ import (
 )
 
 var accTestPolicyTransportZoneCreateAttributes = map[string]string{
-	"display_name":   getAccTestResourceName(),
-	"description":    "terraform created",
-	"transport_type": lm_model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
+	"display_name":     getAccTestResourceName(),
+	"description":      "terraform created",
+	"transport_type":   lm_model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
+	"authorized_vlans": "[\"100\",\"110-120\"]",
 }
 
 var accTestPolicyTransportZoneUpdateAttributes = map[string]string{
-	"display_name":   getAccTestResourceName(),
-	"description":    "terraform updated",
-	"transport_type": lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_BACKED,
+	"display_name":     getAccTestResourceName(),
+	"description":      "terraform updated",
+	"transport_type":   lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_BACKED,
+	"authorized_vlans": "[]",
 }
 
 func TestAccResourceNsxtPolicyTransportZone_basic(t *testing.T) {
@@ -177,23 +179,24 @@ func testAccNsxtPolicyTransportZoneCreate() string {
 	attrMap := accTestPolicyTransportZoneCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_transport_zone" "test" {
-  display_name   = "%s"
-  description    = "%s"
-  transport_type = "%s"
-
+  display_name    = "%s"
+  description     = "%s"
+  transport_type  = "%s"
+  authorized_vlans = %s
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["transport_type"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["transport_type"], attrMap["authorized_vlans"])
 }
 
 func testAccNsxtPolicyTransportZoneUpdate() string {
 	attrMap := accTestPolicyTransportZoneUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_transport_zone" "test" {
-  display_name   = "%s"
-  description    = "%s"
-  transport_type = "%s"
-}`, attrMap["display_name"], attrMap["description"], attrMap["transport_type"])
+  display_name     = "%s"
+  description      = "%s"
+  transport_type   = "%s"
+  authorized_vlans = %s
+}`, attrMap["display_name"], attrMap["description"], attrMap["transport_type"], attrMap["authorized_vlans"])
 }

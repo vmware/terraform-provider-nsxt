@@ -77,6 +77,14 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				Description: "Computed ID of the realized object",
 				Computed:    true,
 			},
+			"authorized_vlans": {
+				Type:        schema.TypeList,
+				Description: "This field lists vlan ids allowed on logical network entities, eg. Segments, bridges, etc. created under this transport zone. Can be empty, VLAN id or a range of VLAN ids specified with '-' in between. An empty list allows all vlan ids.",
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -127,6 +135,7 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 	isDefault := d.Get("is_default").(bool)
 	transportType := d.Get("transport_type").(string)
 	uplinkTeamingNames := getStringListFromSchemaList(d, "uplink_teaming_policy_names")
+	authorizedVlans := getStringListFromSchemaList(d, "authorized_vlans")
 
 	if len(uplinkTeamingNames) > 0 && transportType != model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED {
 		// uplink_teaming_policy_names only valid for VLAN_BACKED TZ
@@ -140,6 +149,7 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 		IsDefault:                &isDefault,
 		TzType:                   &transportType,
 		UplinkTeamingPolicyNames: uplinkTeamingNames,
+		AuthorizedVlans:          authorizedVlans,
 	}
 
 	// Create the resource using PATCH
@@ -233,6 +243,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	d.Set("is_default", obj.IsDefault)
 	d.Set("transport_type", obj.TzType)
 	d.Set("uplink_teaming_policy_names", obj.UplinkTeamingPolicyNames)
+	d.Set("authorized_vlans", obj.AuthorizedVlans)
 	d.Set("realized_id", obj.RealizationId)
 
 	return nil
