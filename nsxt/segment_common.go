@@ -718,6 +718,11 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 
 	if (tzPath == "") && context.ClientType == utl.Local && !isFixed {
 		return model.Infra{}, fmt.Errorf("transport_zone_path needs to be specified for infra segment on local manager")
+	} else if tzPath != "" && context.ClientType == utl.Multitenancy && d.HasChange("transport_zone_path") {
+		// For multitenancy segments, the TZ can only be the default TZ. The provider cannot validate that the specified segment
+		// is the default one - since the user might not have the permissions to lookup the TZ (if the user is a project admin
+		// for example. And since NSX populates this attribute, validate that the value which was set by NSX isn't modified here.
+		return model.Infra{}, fmt.Errorf("transport_zone_path cannot be specified for project based segments")
 	}
 
 	obj := model.Segment{

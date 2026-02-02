@@ -107,7 +107,7 @@ The following arguments are supported:
 * `ignore_tags` - (Optional) A list of tag scopes that provider should ignore, more specifically, it should not detect drift when tags with such scope are present on NSX, and it should not overwrite them when applying its own tags. This feature is useful for external network with VCD scenario.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `domain_name`- (Optional) DNS domain names.
-* `transport_zone_path` - (Optional) Policy path to the VLAN backed transport zone. This property is required for NSX Local Manager, and should not be specified for NSX Global Manager, where NSX will automatically assign default transport zone on each site.
+* `transport_zone_path` - (Optional) Policy path to the Overlay transport zone. This property is required for NSX Local Manager, and should not be specified for NSX Global Manager or for multitenancy use cases, where NSX will automatically assign default transport zone on each site.
 * `vlan_ids` - (Optional) List of VLAN IDs or VLAN ranges.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Optional) Subnet configuration block.
