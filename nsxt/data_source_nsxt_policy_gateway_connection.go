@@ -16,7 +16,7 @@ func dataSourceNsxtPolicyGatewayConnection() *schema.Resource {
 			"id":           getDataSourceIDSchema(),
 			"tier0_path":   getPolicyPathSchema(false, false, "Tier0 Gateway path"),
 			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 		},
 	}
