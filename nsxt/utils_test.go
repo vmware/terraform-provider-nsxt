@@ -208,16 +208,16 @@ func getTestLdapUser() string {
 	return os.Getenv("NSXT_TEST_LDAP_USER")
 }
 
-func getTestLdapPassword() string {
-	return os.Getenv("NSXT_TEST_LDAP_PASSWORD")
+func getTestLdapAdminUser() string {
+	return os.Getenv("NSXT_TEST_LDAP_ADMIN_USER")
+}
+
+func getTestLdapAdminPassword() string {
+	return os.Getenv("NSXT_TEST_LDAP_ADMIN_PASSWORD")
 }
 
 func getTestLdapURL() string {
 	return os.Getenv("NSXT_TEST_LDAP_URL")
-}
-
-func getTestLdapCert() string {
-	return os.Getenv("NSXT_TEST_LDAP_CERT")
 }
 
 func getTestLdapDomain() string {
