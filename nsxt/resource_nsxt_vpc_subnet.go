@@ -534,9 +534,10 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
 	}
-	runID := m.(nsxtClients).CommonConfig.contextID
-	managedDefaults := getProviderManagedDefaultTags(runID)
-	obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+
+	// runID := m.(nsxtClients).CommonConfig.contextID
+	// managedDefaults := getProviderManagedDefaultTags(runID)
+	// obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	client := clientLayer.NewSubnetsClient(connector)
@@ -589,10 +590,19 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		id,
 		"VpcSubnet",
 		model.VpcSubnetBindingType(),
-		func() (model.VpcSubnet, error) {
+		func() (*model.VpcSubnet, error) {
 			client := clientLayer.NewSubnetsClient(connector)
 			parents := getVpcParentsFromContext(getSessionContext(d, m))
-			return client.Get(parents[0], parents[1], parents[2], id)
+			readObj, err := client.Get(parents[0], parents[1], parents[2], id)
+			if err != nil {
+				return nil, err
+			}
+			return &readObj, nil
+		},
+		func(patchObj *model.VpcSubnet) error {
+			client := clientLayer.NewSubnetsClient(connector)
+			parents := getVpcParentsFromContext(getSessionContext(d, m))
+			return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
 		},
 	)
 
@@ -608,7 +618,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	// Depending on subnet type, this attribute might not be sent back by NSX
 	// If not provided by NSX, the next line will explicitly assign empty list to ip_blocks
 	d.Set("ip_blocks", obj.IpBlocks)
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcSubnetSchema, "", nil)
 }
 
@@ -646,9 +656,9 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 
 	// Provider-managed default tags are immutable and authoritative.
 	// Always regenerate them to ensure they're present, even if removed out-of-band.
-	runID := m.(nsxtClients).CommonConfig.contextID
-	managedDefaults := getProviderManagedDefaultTags(runID)
-	obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+	// runID := m.(nsxtClients).CommonConfig.contextID
+	// managedDefaults := getProviderManagedDefaultTags(runID)
+	// obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
 
 	// Since dhcp block is Computed (sent back by NSX even if not specified), we need to
 	// explicitly clear out additional DHCP config in case of DHCP RELAY mode, otherwise
