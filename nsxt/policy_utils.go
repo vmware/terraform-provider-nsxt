@@ -213,7 +213,7 @@ func shouldIgnoreScope(scope string, scopesToIgnore []string) bool {
 }
 
 const (
-	managedDefaultTagScopeManagedBy = "managed-by"
+	managedDefaultTagScopeManagedBy = "nsx-tf/managed-by"
 	managedDefaultTagScopeRunID     = "tf-run-id"
 )
 
