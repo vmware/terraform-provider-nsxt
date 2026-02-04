@@ -362,11 +362,11 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
 		sessionContext = utl.SessionContext{ClientType: utl.Global}
-		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		obj = gmObj.(model.Tier0Interface)
+		// gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
+		// if err1 != nil {
+		// 	return err1
+		// }
+		// obj = gmObj.(model.Tier0Interface)
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
