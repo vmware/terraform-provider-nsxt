@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	tier0localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
@@ -550,11 +549,11 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
 		sessionContext = utl.SessionContext{ClientType: utl.Global}
-		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		obj = gmObj.(model.Tier0Interface)
+		// gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
+		// if err1 != nil {
+		// 	return err1
+		// }
+		// obj = gmObj.(model.Tier0Interface)
 	} else {
 		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
