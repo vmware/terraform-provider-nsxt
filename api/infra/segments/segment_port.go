@@ -6,9 +6,11 @@ import (
 	"errors"
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	model1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -23,8 +25,11 @@ func NewPortsClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	case utl.Local:
 		client = client0.NewPortsClient(connector)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client = client1.NewPortsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewPortsClient(connector)
 
 	default:
 		return nil
@@ -45,8 +50,18 @@ func (c SegmentPortClientContext) Get(segmentIdParam string, portIdParam string)
 			return obj, err
 		}
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.PortsClient)
+		gmObj, err1 := client.Get(segmentIdParam, portIdParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentPortBindingType(), model0.SegmentPortBindingType())
+		obj = rawObj.(model0.SegmentPort)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.PortsClient)
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentIdParam, portIdParam)
 		if err != nil {
 			return obj, err
@@ -67,8 +82,12 @@ func (c SegmentPortClientContext) Patch(segmentIdParam string, portIdParam strin
 		client := c.Client.(client0.PortsClient)
 		err = client.Patch(segmentIdParam, portIdParam, segmentPortParam)
 
+	case utl.Global:
+		// Global Manager PortsClient doesn't support Patch
+		return errors.New("Patch operation not supported for Global Manager")
+
 	case utl.Multitenancy:
-		client := c.Client.(client1.PortsClient)
+		client := c.Client.(client2.PortsClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, segmentIdParam, portIdParam, segmentPortParam)
 
 	default:
@@ -87,8 +106,12 @@ func (c SegmentPortClientContext) Update(segmentIdParam string, portIdParam stri
 		client := c.Client.(client0.PortsClient)
 		obj, err = client.Update(segmentIdParam, portIdParam, segmentPortParam)
 
+	case utl.Global:
+		// Global Manager PortsClient doesn't support Update
+		return obj, errors.New("Update operation not supported for Global Manager")
+
 	case utl.Multitenancy:
-		client := c.Client.(client1.PortsClient)
+		client := c.Client.(client2.PortsClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, segmentIdParam, portIdParam, segmentPortParam)
 
 	default:
@@ -106,8 +129,12 @@ func (c SegmentPortClientContext) Delete(segmentIdParam string, portIdParam stri
 		client := c.Client.(client0.PortsClient)
 		err = client.Delete(segmentIdParam, portIdParam)
 
+	case utl.Global:
+		// Global Manager PortsClient doesn't support Delete
+		return errors.New("Delete operation not supported for Global Manager")
+
 	case utl.Multitenancy:
-		client := c.Client.(client1.PortsClient)
+		client := c.Client.(client2.PortsClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, segmentIdParam, portIdParam)
 
 	default:
@@ -126,8 +153,18 @@ func (c SegmentPortClientContext) List(segmentIdParam string, cursorParam *strin
 		client := c.Client.(client0.PortsClient)
 		obj, err = client.List(segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
-	case utl.Multitenancy:
+	case utl.Global:
 		client := c.Client.(client1.PortsClient)
+		gmObj, err1 := client.List(segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err1 != nil {
+			return obj, err1
+		}
+		var rawObj interface{}
+		rawObj, err = utl.ConvertModelBindingType(gmObj, model1.SegmentPortListResultBindingType(), model0.SegmentPortListResultBindingType())
+		obj = rawObj.(model0.SegmentPortListResult)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.PortsClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

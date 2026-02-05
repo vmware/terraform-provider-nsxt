@@ -10,12 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	static_routes "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/static_routes"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_static_routes "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/static_routes"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/static_routes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliBfdPeersClient = static_routes.NewBfdPeersClient
 
 func resourceNsxtPolicyStaticRouteBfdPeer() *schema.Resource {
 	return &schema.Resource{
@@ -63,13 +65,14 @@ func resourceNsxtPolicyStaticRouteBfdPeer() *schema.Resource {
 
 func resourceNsxtPolicyStaticRouteBfdPeerExists(gwID string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
+	var sessionContext utl.SessionContext
 	if isGlobalManager {
-		client := gm_static_routes.NewBfdPeersClient(connector)
-		_, err = client.Get(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := static_routes.NewBfdPeersClient(connector)
-		_, err = client.Get(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliBfdPeersClient(sessionContext, connector)
+	_, err = client.Get(gwID, id)
 	if err == nil {
 		return true, nil
 	}
@@ -107,16 +110,13 @@ func policyStaticRouteBfdPeerPatch(d *schema.ResourceData, m interface{}, gwID s
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Gateway BFD Peer with ID %s", id)
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.StaticRouteBfdPeerBindingType(), gm_model.StaticRouteBfdPeerBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_static_routes.NewBfdPeersClient(connector)
-		return client.Patch(gwID, id, gmObj.(gm_model.StaticRouteBfdPeer))
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
-
-	client := static_routes.NewBfdPeersClient(connector)
+	client := cliBfdPeersClient(sessionContext, connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -166,25 +166,16 @@ func resourceNsxtPolicyStaticRouteBfdPeerRead(d *schema.ResourceData, m interfac
 	}
 
 	var obj model.StaticRouteBfdPeer
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_static_routes.NewBfdPeersClient(connector)
-		gmObj, err := client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway BFD Peer", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.StaticRouteBfdPeerBindingType(), model.StaticRouteBfdPeerBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.StaticRouteBfdPeer)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := static_routes.NewBfdPeersClient(connector)
-		var err error
-		obj, err = client.Get(gwID, id)
-		if err != nil {
-			return handleReadError(d, "Gateway BFD Peer", id, err)
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliBfdPeersClient(sessionContext, connector)
+	obj, err := client.Get(gwID, id)
+	if err != nil {
+		return handleReadError(d, "Gateway BFD Peer", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -228,13 +219,14 @@ func resourceNsxtPolicyStaticRouteBfdPeerDelete(d *schema.ResourceData, m interf
 
 	connector := getPolicyConnector(m)
 	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_static_routes.NewBfdPeersClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := static_routes.NewBfdPeersClient(connector)
-		err = client.Delete(gwID, id)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliBfdPeersClient(sessionContext, connector)
+	err = client.Delete(gwID, id)
 
 	if err != nil {
 		return handleDeleteError("Static Route Bfd Peer", id, err)

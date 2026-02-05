@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"golang.org/x/exp/slices"
 )
 
@@ -34,7 +33,7 @@ func dataSourceNsxtUpgradePrepareReady() *schema.Resource {
 func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
 	precheckText := ""
 	connector := getPolicyConnector(m)
-	client := upgrade.NewUpgradeChecksInfoClient(connector)
+	client := cliUpgradeChecksInfoClient(connector)
 	checkInfoResults, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return "", err

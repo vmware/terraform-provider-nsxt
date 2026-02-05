@@ -10,9 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 )
+
+var cliTransitGatewayNatClient = transitgateways.NewNatClient
 
 var transitGatewayNatTypes = []string{
 	model.PolicyNat_NAT_TYPE_USER,
@@ -53,7 +55,8 @@ func dataSourceNsxtPolicyTransitGatewayNatRead(d *schema.ResourceData, m interfa
 
 	natType := d.Get("nat_type").(string)
 
-	client := clientLayer.NewNatClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliTransitGatewayNatClient(sessionContext, connector)
 
 	// Nat type is the ID
 	obj, err := client.Get(parents[0], parents[1], parents[2], natType)

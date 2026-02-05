@@ -15,12 +15,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
-	t0_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
-	t1_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
-	t1_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	tier0localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ipsec_vpn_services"
+	tier1ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
+	tier1localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/ipsec_vpn_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0LocaleServiceIpsecVpnLocalEndpointsClient = tier0localeservicesipsec.NewLocalEndpointsClient
+var cliTier0IpsecVpnLocalEndpointsClient = tier0ipsecvpnservices.NewLocalEndpointsClient
+var cliTier1LocaleServiceIpsecVpnLocalEndpointsClient = tier1localeservicesipsec.NewLocalEndpointsClient
+var cliTier1IpsecVpnLocalEndpointsClient = tier1ipsecvpnservices.NewLocalEndpointsClient
 
 func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*metadata.ExtendedSchema {
 	schema := map[string]*metadata.ExtendedSchema{
@@ -109,20 +116,34 @@ func newLocalEndpointClient(servicePath string) (*localEndpointClient, error) {
 }
 
 func (c *localEndpointClient) Get(connector client.Connector, id string) (model.IPSecVpnLocalEndpoint, error) {
+	// For local endpoint get, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+			}
 			return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.serviceID, id)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(sessionContext, connector)
+	if client == nil {
+		return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+	}
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
@@ -133,21 +154,35 @@ func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpn
 	var cursor string
 	var result model.IPSecVpnLocalEndpointListResult
 	var err error
+	// For local endpoint list, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		} else {
-			client := t0_service.NewLocalEndpointsClient(connector)
+			client := cliTier0IpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		}
 
 	} else {
 		if len(c.localeServiceID) > 0 {
-			client := t1_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		} else {
-			client := t1_service.NewLocalEndpointsClient(connector)
+			client := cliTier0IpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		}
 	}
@@ -156,38 +191,66 @@ func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpn
 }
 
 func (c *localEndpointClient) Patch(connector client.Connector, id string, obj model.IPSecVpnLocalEndpoint) error {
+	// For local endpoint patch, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.serviceID, id, obj)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Patch(c.gwID, c.serviceID, id, obj)
 }
 
 func (c *localEndpointClient) Delete(connector client.Connector, id string) error {
+	// For local endpoint delete, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.serviceID, id)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Delete(c.gwID, c.serviceID, id)
 }
 

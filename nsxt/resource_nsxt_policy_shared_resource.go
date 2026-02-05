@@ -12,6 +12,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliSharedResourcesClient = shares.NewResourcesClient
+
 func resourceNsxtPolicySharedResource() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySharedResourceCreate,
@@ -87,7 +89,7 @@ func resourceNsxtPolicySharedResourceCreate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
-	client := shares.NewResourcesClient(context, connector)
+	client := cliSharedResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
 		return handleCreateError("Shared Resource", id, err)
@@ -110,7 +112,7 @@ func resourceNsxtPolicySharedResourceRead(d *schema.ResourceData, m interface{})
 	sharePath := d.Get("share_path").(string)
 	shareID := getPolicyIDFromPath(sharePath)
 	context := getParentContext(d, m, sharePath)
-	client := shares.NewResourcesClient(context, connector)
+	client := cliSharedResourcesClient(context, connector)
 	obj, err := client.Get(shareID, id)
 	if err != nil {
 		return handleReadError(d, "Shared Resource", id, err)
@@ -162,7 +164,7 @@ func resourceNsxtPolicySharedResourceUpdate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
-	client := shares.NewResourcesClient(context, connector)
+	client := cliSharedResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
 		return handleCreateError("Shared Resource", id, err)
@@ -184,7 +186,7 @@ func resourceNsxtPolicySharedResourceDelete(d *schema.ResourceData, m interface{
 
 	connector := getPolicyConnector(m)
 	context := getParentContext(d, m, sharePath)
-	client := shares.NewResourcesClient(context, connector)
+	client := cliSharedResourcesClient(context, connector)
 	err := client.Delete(shareID, id)
 
 	if err != nil {

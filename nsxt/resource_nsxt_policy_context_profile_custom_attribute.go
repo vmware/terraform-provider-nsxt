@@ -19,6 +19,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliDefaultClient = infra.NewDefaultClient
+
 var customAttributeKeys = []string{
 	model.PolicyCustomAttributes_KEY_DOMAIN_NAME,
 	model.PolicyCustomAttributes_KEY_CUSTOM_URL,
@@ -67,7 +69,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.Se
 
 	key, attribute := splitCustomAttributeID(id)
 	source := model.PolicyCustomAttributes_ATTRIBUTE_SOURCE_CUSTOM
-	client := infra.NewDefaultClient(sessionContext, connector)
+	client := cliDefaultClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -136,7 +138,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	client := cliDefaultClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -172,7 +174,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	client := cliDefaultClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -87,7 +86,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 	}
 
 	doPatch := func() error {
-		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+		client := cliTier0LocaleServicesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -159,7 +158,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigRead(d *schema.ResourceData, m
 		return fmt.Errorf("Error obtaining Tier0 Gateway id or Locale Service id")
 	}
 
-	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	client := cliTier0LocaleServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -213,7 +212,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 
 	// Update the locale service with empty Redistribution config using get/post
 	doUpdate := func() error {
-		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+		client := cliTier0LocaleServicesClient(getSessionContext(d, m), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -246,7 +245,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigImport(d *schema.ResourceData,
 	gwID := s[0]
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
-	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	client := cliTier0LocaleServicesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}

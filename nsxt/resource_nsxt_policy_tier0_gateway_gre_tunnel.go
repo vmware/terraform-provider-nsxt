@@ -11,12 +11,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	locale_services "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTunnelsClient = locale_services.NewTunnelsClient
 
 func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 	return &schema.Resource{
@@ -230,7 +234,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelExists(id, localeServicePath string,
 		return false, fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
 
-	client := locale_services.NewTunnelsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTunnelsClient(sessionContext, connector)
 	_, err = client.Get(tier0id, localeSvcID, id)
 
 	if isNotFoundError(err) {
@@ -254,7 +259,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 	if !isT0 {
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
-	client := locale_services.NewTunnelsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTunnelsClient(sessionContext, connector)
 
 	obj, err := tier0GatewayGRETunnelFromSchema(d)
 	if err != nil {
@@ -287,7 +293,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
 
-	client := locale_services.NewTunnelsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTunnelsClient(sessionContext, connector)
 	obj, err := client.Get(tier0id, localeSvcID, id)
 	if err != nil {
 		return handleReadError(d, "GreTunnel", id, err)
@@ -349,7 +356,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelUpdate(d *schema.ResourceData, m int
 	if !isT0 {
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
-	client := locale_services.NewTunnelsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTunnelsClient(sessionContext, connector)
 
 	obj, err := tier0GatewayGRETunnelFromSchema(d)
 	if err != nil {
@@ -378,7 +386,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelDelete(d *schema.ResourceData, m int
 	if !isT0 {
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
-	client := locale_services.NewTunnelsClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTunnelsClient(sessionContext, connector)
 
 	log.Printf("[INFO] Deleting GRE Tunnel with ID %s", id)
 	err = client.Delete(tier0id, localeSvcID, id)

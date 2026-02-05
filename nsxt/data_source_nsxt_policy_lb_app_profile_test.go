@@ -12,8 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyLBAppProfile_basic(t *testing.T) {
@@ -69,7 +70,8 @@ func testAccDataSourceNsxtPolicyLBAppProfileCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewLbAppProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	displayName := name
@@ -101,7 +103,8 @@ func testAccDataSourceNsxtPolicyLBAppProfileDeleteByName(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewLbAppProfilesClient(sessionContext, connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

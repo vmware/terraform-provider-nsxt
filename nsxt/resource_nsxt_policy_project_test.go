@@ -14,9 +14,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
+	"github.com/vmware/terraform-provider-nsxt/api/orgs"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -496,7 +496,8 @@ func testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(resourceName string, ex
 		}
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := projects.NewVpcSecurityProfilesClient(connector)
+		sessionContext := testAccGetMultitenancyContext()
+		client := projects.NewVpcSecurityProfilesClient(sessionContext, connector)
 		obj, err := client.Get(defaultOrgID, resourceID, "default")
 		if err != nil {
 			return err
@@ -804,7 +805,8 @@ func testAccNsxtCheckSpanPath(resourceName string, isSpanNsxDefault bool) resour
 		} else {
 			defaultSpan = rs.Primary.Attributes["default_span_path"]
 		}
-		client := infra.NewProjectsClient(connector)
+		sessionContext := testAccGetMultitenancyContext()
+		client := orgs.NewProjectsClient(sessionContext, connector)
 		project, err := client.Get(defaultOrgID, resourceID, nil)
 		if err != nil {
 			return fmt.Errorf("Error retreiving the project %v", resourceID)

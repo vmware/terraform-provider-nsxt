@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
@@ -202,7 +200,7 @@ func getAdvRulesSchema() *schema.Schema {
 }
 
 func listTier1GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
-	client := tier1s.NewLocaleServicesClient(context, connector)
+	client := cliTier1LocaleServicesClient(context, connector)
 	if client == nil {
 		return model.LocaleServicesListResult{}, policyResourceNotSupportedError()
 	}
@@ -217,7 +215,7 @@ func listPolicyTier1GatewayLocaleServices(context utl.SessionContext, connector 
 
 func getPolicyTier1GatewayLocaleServiceEntry(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
-	client := tier1s.NewLocaleServicesClient(context, connector)
+	client := cliTier1LocaleServicesClient(context, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -264,7 +262,7 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(context utl.SessionContext, d
 }
 
 func resourceNsxtPolicyTier1GatewayExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewTier1sClient(context, connector)
+	client := cliTier1sClient(context, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -589,7 +587,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	context := getSessionContext(d, m)
-	client := infra.NewTier1sClient(context, connector)
+	client := cliTier1sClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

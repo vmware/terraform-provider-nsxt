@@ -9,11 +9,19 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	trust_management_wrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management"
+	principal_identities_wrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management/principal_identities"
 	mpModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management/principal_identities"
 	policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliPrincipalIdentityWithCertificateClient = principal_identities_wrapper.NewWithCertificateClient
+var cliPrincipalIdentitiesClient = trust_management_wrapper.NewPrincipalIdentitiesClient
+var cliMpPrincipalIdentitiesClient = trust_management.NewPrincipalIdentitiesClient
+var cliCertificatesClient = trust_management_wrapper.NewCertificatesClient
 
 func resourceNsxtPrincipalIdentity() *schema.Resource {
 	return &schema.Resource{
@@ -116,7 +124,8 @@ func convertToPolicyRolesForPath(mpRolesForPath []mpModel.RolesForPath) []policy
 
 func resourceNsxtPrincipalIdentityCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := principal_identities.NewWithCertificateClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliPrincipalIdentityWithCertificateClient(sessionContext, connector)
 
 	tags := getMPTagsFromSchema(d)
 	isProtected := d.Get("is_protected").(bool)
@@ -145,7 +154,8 @@ func resourceNsxtPrincipalIdentityCreate(d *schema.ResourceData, m interface{}) 
 
 func resourceNsxtPrincipalIdentityRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := trust_management.NewPrincipalIdentitiesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliPrincipalIdentitiesClient(sessionContext, connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -166,7 +176,7 @@ func resourceNsxtPrincipalIdentityRead(d *schema.ResourceData, m interface{}) er
 
 func resourceNsxtPrincipalIdentityDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	piClient := trust_management.NewPrincipalIdentitiesClient(connector)
+	piClient := cliMpPrincipalIdentitiesClient(connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -182,7 +192,8 @@ func resourceNsxtPrincipalIdentityDelete(d *schema.ResourceData, m interface{}) 
 
 	// Clean up underlying cert imported by NSX if exists
 	if len(certID) > 0 {
-		certClient := trust_management.NewCertificatesClient(connector)
+		sessionContext := utl.SessionContext{ClientType: utl.Local}
+		certClient := cliCertificatesClient(sessionContext, connector)
 		err := certClient.Delete(certID)
 		if err != nil {
 			return handleDeleteError("Certificate", certID, err)
