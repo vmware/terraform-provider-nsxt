@@ -35,6 +35,7 @@ func TestAccDataSourceNsxtPolicyClusterSecurityConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(testResourceName, "cluster_id", resourceName, "cluster_id"),
 					resource.TestCheckResourceAttrPair(testResourceName, "dfw_enabled", resourceName, "dfw_enabled"),
 					resource.TestCheckResourceAttrPair(testResourceName, "display_name", resourceName, "display_name"),
+					resource.TestCheckResourceAttrPair(testResourceName, "description", resourceName, "description"),
 					resource.TestCheckResourceAttrPair(testResourceName, "path", resourceName, "path"),
 				),
 			},
