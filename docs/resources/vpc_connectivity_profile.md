@@ -15,20 +15,23 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ```hcl
 resource "nsxt_vpc_connectivity_profile" "test" {
   context {
-    project_id = "dev"
+    project_id = nsxt_policy_project.test.id
   }
 
-  display_name = "test"
-  description  = "Terraform provisioned profile"
+  display_name         = "dev-connectivity-profile"
+  description          = "Connectivity profile for development VPCs"
+  transit_gateway_path = nsxt_policy_transit_gateway.test.path
+  external_ip_blocks   = [nsxt_policy_ip_block.test.path]
 
-  transit_gateway_path = nsxt_policy_transit_gateway.gw1.path
   service_gateway {
+    enable             = true
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.edge_cluster.path]
     nat_config {
       enable_default_snat = true
     }
-    enable = true
   }
 }
+
 ```
 
 ## Argument Reference

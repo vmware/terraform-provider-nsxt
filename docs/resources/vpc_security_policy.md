@@ -13,49 +13,45 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_project" "demoproj" {
-  display_name = "demoproj"
-}
-
-data "nsxt_vpc" "demovpc" {
+resource "nsxt_vpc_security_policy" "testpolicy1" {
   context {
-    project_id = data.nsxt_policy_project.demoproj.id
+    project_id = nsxt_policy_project.test.id
+    vpc_id     = nsxt_vpc.test.id
   }
-  display_name = "vpc1"
-}
-
-resource "nsxt_vpc_security_policy" "policy1" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_vpc.demovpc.id
-  }
-  display_name = "policy1"
-  description  = "Terraform provisioned Security Policy"
+  display_name = "test"
+  description  = "Terraform provisioned VPC security policy"
   locked       = false
   stateful     = true
   tcp_strict   = false
-  scope        = [nsxt_policy_group.pets.path]
-
+  scope        = [nsxt_vpc_group.test.path]
   rule {
     display_name       = "block_icmp"
-    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    destination_groups = [nsxt_vpc_group.cats.path, nsxt_vpc_group.dogs.path]
     action             = "DROP"
-    services           = [nsxt_policy_service.icmp.path]
-    logged             = true
+    service_entries {
+      icmp_entry {
+        protocol = "ICMPv4"
+      }
+    }
+    logged = true
   }
 
   rule {
     display_name     = "allow_udp"
-    source_groups    = [nsxt_policy_group.fish.path]
+    source_groups    = [nsxt_vpc_group.fish.path]
     sources_excluded = true
-    scope            = [nsxt_policy_group.aquarium.path]
+    scope            = [nsxt_vpc_group.aquarium.path]
     action           = "ALLOW"
-    services         = [nsxt_policy_service.udp.path]
-    logged           = true
-    disabled         = true
-    notes            = "Disabled by starfish for debugging"
+    service_entries {
+      l4_port_set_entry {
+        protocol          = "UDP"
+        destination_ports = ["53"]
+      }
+    }
+    logged   = true
+    disabled = true
+    notes    = "Disabled by starfish for debugging"
   }
-
   lifecycle {
     create_before_destroy = true
   }

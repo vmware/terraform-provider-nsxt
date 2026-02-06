@@ -29,6 +29,12 @@ resource "nsxt_ip_block_subnet" "ip_block_subnet" {
   size        = 16
 }
 
+resource "nsxt_policy_ip_block" "test" {
+  display_name = "test-external-ip-block"
+  description  = "Public IP address pool for development environment external services and NAT translations"
+  cidr         = "203.0.114.0/24"
+  visibility   = "EXTERNAL"
+}
 ```
 
 ## Argument Reference

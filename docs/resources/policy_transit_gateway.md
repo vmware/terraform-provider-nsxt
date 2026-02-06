@@ -16,7 +16,22 @@ In NSX 9.1 onwards, users can create and delete TGWs
 ## Example Usage
 
 ```hcl
+
 resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name = "test-transit-gateway"
+  description  = "Development transit gateway for VPC connectivity"
+
+  high_availability_config {
+    ha_mode            = "ACTIVE_STANDBY"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.edge_cluster.path]
+  }
+}
+
+resource "nsxt_policy_transit_gateway" "testsample" {
   context {
     project_id = "dev"
   }
