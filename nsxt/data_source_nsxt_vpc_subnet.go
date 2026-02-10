@@ -34,19 +34,24 @@ func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	}
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
 
-	// Try serving from cache when the caller specified an ID.
+	// Try serving from cache when the caller specified an ID or display name.
 	// Data sources don't participate in refresh phase detection the same way resources do,
 	// so we call cache directly here while reusing the same cache storage and conversion.
-	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "VpcSubnet", d, m, connector)
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "VpcSubnet", d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcSubnetBindingType())
 			if len(convErrs) == 0 {
 				obj, ok := goVal.(model.VpcSubnet)
 				if ok {
-					id := objID
+					id := lookupKey
 					if obj.Id != nil {
 						id = *obj.Id
 					}
