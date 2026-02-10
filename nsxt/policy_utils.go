@@ -242,40 +242,6 @@ func getProviderManagedDefaultTags(runID string) []model.Tag {
 	}
 }
 
-func policyTagsFromInterface(in interface{}) []model.Tag {
-	if in == nil {
-		return nil
-	}
-	set, ok := in.(*schema.Set)
-	if !ok || set == nil {
-		return nil
-	}
-	items := set.List()
-	tags := make([]model.Tag, 0, len(items))
-	for _, item := range items {
-		data, ok := item.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		scope := data["scope"].(string)
-		tag := data["tag"].(string)
-		// Keep consistent with existing tag schema behavior (optional fields):
-		// allow empty scope/tag values.
-		tags = append(tags, model.Tag{Scope: &scope, Tag: &tag})
-	}
-	return tags
-}
-
-func filterManagedDefaultTags(tags []model.Tag) []model.Tag {
-	res := make([]model.Tag, 0)
-	for _, t := range tags {
-		if isManagedDefaultTag(t) {
-			res = append(res, t)
-		}
-	}
-	return res
-}
-
 // mergeManagedDefaultAndUserTags ensures:
 // - managed default tags are always present (if provided)
 // - user tags cannot override managed default tags by scope

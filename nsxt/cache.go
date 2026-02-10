@@ -30,11 +30,8 @@ type typeScopedCache struct {
 
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 
-// SetCacheEnabled allows enabling/disabling cache for benchmarking
-var cacheEnabled = os.Getenv("NSXT_ENABLE_CACHE") == "true"
-
 func IsCacheEnabled() bool {
-	return cacheEnabled
+	return os.Getenv("NSXT_ENABLE_CACHE") == "true"
 }
 
 func isGlobalSearchCacheMode() bool {
@@ -56,7 +53,9 @@ func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 		resource := dataValue.(model.PolicyConfigResource)
 		if resource.Id != nil {
 			ret[*resource.Id] = obj
-		} else if resource.DisplayName != nil {
+		}
+		if resource.DisplayName != nil {
+			// Keep DisplayName as an alias key for data source lookups.
 			ret[*resource.DisplayName] = obj
 		}
 	}
@@ -122,7 +121,6 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	defer tc.mu.Unlock()
 
 	query := getCacheQueryKey(resourceType, d, m)
-	fmt.Println("search query ", query)
 	if val, _ := tc.getQueryResult(query, resourceID); val != nil {
 		tc.cacheHit += 1
 		return val, nil
@@ -137,7 +135,6 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context api.SessionContext, resourceType string, runID string) error {
 	// Now we have access to the proper runID passed from writeCache
 	additionalQuery := buildTagQuery(d, runID)
-	fmt.Println("-----> additional query ", additionalQuery)
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
 	if err != nil {
 		return fmt.Errorf("error listing resource %s %w", resourceType, err)
@@ -151,11 +148,9 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {
 	cacheUsed := false
 	cacheAttempted := false
-	fmt.Println("--->cache is invoked")
 	if isRefreshPhase(d) && IsCacheEnabled() {
 		cacheAttempted = true
 		val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
-		fmt.Println("----> read the cache ,", val)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), bindingType)
@@ -163,7 +158,6 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 				typedVal, ok := goVal.(T)
 				if ok {
 					cacheUsed = true
-					fmt.Println("cache used")
 					return &typedVal, cacheUsed, cacheAttempted, nil
 				}
 			}
@@ -172,23 +166,16 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 
 	obj, err := backendRead()
 	if err != nil {
-		fmt.Println("backendRead error ", err)
 		return nil, cacheUsed, cacheAttempted, err
 	}
 
 	// Handle tag-based cache mode: validate and patch provider-managed tags if missing
 	if !isGlobalSearchCacheMode() {
-		fmt.Println("isGlobalSearchCacheMode check tag")
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, d, m, patchFunc)
 		if patchErr != nil {
 			// Log the error but don't fail the read operation
 			fmt.Printf("[WARN] Failed to patch provider-managed tags for %s %s: %v\n", resourceType, resourceID, patchErr)
-		} //else if patchedObj != nil {
-		// Return the patched object if patching was successful
-		// 	if typedObj, ok := patchedObj.(T); ok {
-		// 		obj = typedObj
-		// 	}
-		// }
+		}
 	}
 
 	return obj, cacheUsed, cacheAttempted, nil
@@ -201,17 +188,40 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	if d == nil {
 		return ""
 	}
+
+	shouldAddProviderTags := !isGlobalSearchCacheMode() && runID != ""
+	providerManagedTagQueries := func() []string {
+		return []string{
+			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("nsx-tf/managed-by")),
+			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters("terraform")),
+			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("tf-run-id")),
+			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(runID)),
+		}
+	}
+	providerManagedTagQuery := func() string {
+		return strings.Join(providerManagedTagQueries(), " AND ")
+	}
+
 	tags, exists := d.GetOk("tag")
 	if !exists {
+		if shouldAddProviderTags {
+			return providerManagedTagQuery()
+		}
 		return ""
 	}
 
 	// Tags are stored as *schema.Set
 	tagSet, ok := tags.(*schema.Set)
 	if !ok {
+		if shouldAddProviderTags {
+			return providerManagedTagQuery()
+		}
 		return ""
 	}
 	if tagSet.Len() == 0 {
+		if shouldAddProviderTags {
+			return providerManagedTagQuery()
+		}
 		return ""
 	}
 
@@ -225,7 +235,6 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 		// Build query parts for scope and tag
 		if hasScope && scope != nil && scope.(string) != "" {
 			scopeStr := escapeSpecialCharacters(scope.(string))
-			fmt.Println("----> scoper str ", scopeStr)
 			if isManagedDefaultTagScope(&scopeStr) {
 				managedTagPresent = true
 			}
@@ -235,18 +244,10 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 			tagQueries = append(tagQueries, fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(tag.(string))))
 		}
 	}
-	fmt.Println("---> add the tags ", isGlobalSearchCacheMode(), managedTagPresent)
 	// In tag search mode (not global search cache mode), automatically append provider-managed tags if not present
 	if !isGlobalSearchCacheMode() && !managedTagPresent && runID != "" {
-		fmt.Println("---> add the tags ")
 		// Append provider-managed tags: managed-by=terraform and tf-run-id=<runID>
-		providerManagedQueries := []string{
-			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("nsx-tf/managed-by")),
-			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters("terraform")),
-			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("tf-run-id")),
-			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(runID)),
-		}
-		tagQueries = append(tagQueries, providerManagedQueries...)
+		tagQueries = append(tagQueries, providerManagedTagQueries()...)
 	}
 
 	if len(tagQueries) == 0 {
@@ -259,7 +260,6 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
 func ensureProviderManagedTagsWithPatchFunc[T any](obj T, d *schema.ResourceData, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
-	fmt.Println("----> ensureProviderManagedTagsWithPatchFunc ")
 	// Use reflection to check if the object has a Tags field
 	objValue := reflect.ValueOf(obj)
 	for objValue.IsValid() && objValue.Kind() == reflect.Ptr {
@@ -312,7 +312,6 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, d *schema.ResourceData
 	}
 
 	if !needsPatch {
-		fmt.Println("---> Needs patch is ", needsPatch)
 		return nil, nil
 	}
 
@@ -337,6 +336,7 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, d *schema.ResourceData
 			if err != nil {
 				return nil, fmt.Errorf("failed to patch tags to NSX API: %w", err)
 			}
+			fmt.Println("pathc func success")
 		}
 
 		return obj, nil
