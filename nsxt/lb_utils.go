@@ -42,15 +42,6 @@ func getLbMonitorIntervalSchema() *schema.Schema {
 	}
 }
 
-func getLbMonitorPortSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Description:  "If the monitor port is specified, it would override pool member port setting for healthcheck. A port range is not supported",
-		Optional:     true,
-		ValidateFunc: validateSinglePort(),
-	}
-}
-
 func getLbMonitorRiseCountSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeInt,

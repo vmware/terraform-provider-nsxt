@@ -113,23 +113,6 @@ func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
 	return true
 }
 
-func validatePortAddress() schema.SchemaValidateFunc {
-	// Expects ip_address/prefix (prefix < 32)
-	return func(i interface{}, k string) (s []string, es []error) {
-		v, ok := i.(string)
-		if !ok {
-			es = append(es, fmt.Errorf("expected type of %s to be string", k))
-			return
-		}
-
-		if !isCidr(v, false, true) {
-			es = append(es, fmt.Errorf(
-				"expected %s to contain a valid port address/prefix, got: %s", k, v))
-		}
-		return
-	}
-}
-
 func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
@@ -161,22 +144,6 @@ func validateCidrOrIPOrRangeList() schema.SchemaValidateFunc {
 					"expected %s to contain a list of valid CIDRs or IPs or Ranges, got: %s", k, t))
 				return
 			}
-		}
-		return
-	}
-}
-
-func validateIPOrRange() schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (s []string, es []error) {
-		v, ok := i.(string)
-		if !ok {
-			es = append(es, fmt.Errorf("expected type of %s to be string", k))
-			return
-		}
-
-		if !isSingleIP(v) && !isIPRange(v) {
-			es = append(es, fmt.Errorf(
-				"expected %s to contain a valid IP or Range, got: %s", k, v))
 		}
 		return
 	}
@@ -281,22 +248,6 @@ func validateIPorASNPair(i interface{}, k string) (s []string, es []error) {
 	}
 
 	return
-}
-
-func validateIPRange() schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (s []string, es []error) {
-		v, ok := i.(string)
-		if !ok {
-			es = append(es, fmt.Errorf("expected type of %s to be string", k))
-			return
-		}
-
-		if !isIPRange(v) {
-			es = append(es, fmt.Errorf(
-				"expected %s to contain a valid IP range, got: %s", k, v))
-		}
-		return
-	}
 }
 
 func validateCidr() schema.SchemaValidateFunc {
