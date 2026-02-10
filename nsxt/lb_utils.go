@@ -7,11 +7,9 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -129,57 +127,6 @@ func getLbMonitorResponseStatusCodesSchema() *schema.Schema {
 	}
 }
 
-func isLbMonitorDataRequired(protocol string) bool {
-	return protocol == "udp"
-}
-
-func getLbMonitorSendDescription(protocol string) string {
-	if protocol == "tcp" {
-		return "If both send and receive are not specified, then just a TCP connection is established (3-way handshake) to validate server is healthy, no data is sent."
-	}
-
-	return "The data to be sent to the monitored server."
-}
-
-// The only differences between tcp and udp monitors are required vs. optional data fields,
-// and their descriptions
-func getLbL4MonitorSchema(protocol string) map[string]*schema.Schema {
-	dataRequired := isLbMonitorDataRequired(protocol)
-
-	return map[string]*schema.Schema{
-		"revision": getRevisionSchema(),
-		"description": {
-			Type:        schema.TypeString,
-			Description: "Description of this resource",
-			Optional:    true,
-		},
-		"display_name": {
-			Type:        schema.TypeString,
-			Description: "The display name of this resource. Defaults to ID if not set",
-			Optional:    true,
-			Computed:    true,
-		},
-		"tag":          getTagsSchema(),
-		"fall_count":   getLbMonitorFallCountSchema(),
-		"interval":     getLbMonitorIntervalSchema(),
-		"monitor_port": getLbMonitorPortSchema(),
-		"rise_count":   getLbMonitorRiseCountSchema(),
-		"timeout":      getLbMonitorTimeoutSchema(),
-		"receive": {
-			Type:        schema.TypeString,
-			Description: "Expected data, if specified, can be anywhere in the response and it has to be a string, regular expressions are not supported",
-			Optional:    !dataRequired,
-			Required:    dataRequired,
-		},
-		"send": {
-			Type:        schema.TypeString,
-			Description: getLbMonitorSendDescription(protocol),
-			Optional:    !dataRequired,
-			Required:    dataRequired,
-		},
-	}
-}
-
 func getLbHTTPHeaderSchema(description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
@@ -200,54 +147,6 @@ func getLbHTTPHeaderSchema(description string) *schema.Schema {
 			},
 		},
 	}
-}
-
-func getLbHTTPHeaderFromSchema(d *schema.ResourceData, attrName string) []loadbalancer.LbHttpRequestHeader {
-	headers := d.Get(attrName).(*schema.Set).List()
-	var headerList []loadbalancer.LbHttpRequestHeader
-	for _, header := range headers {
-		data := header.(map[string]interface{})
-		elem := loadbalancer.LbHttpRequestHeader{
-			HeaderName:  data["name"].(string),
-			HeaderValue: data["value"].(string)}
-
-		headerList = append(headerList, elem)
-	}
-	return headerList
-}
-
-func setLbHTTPHeaderInSchema(d *schema.ResourceData, attrName string, headers []loadbalancer.LbHttpRequestHeader) {
-	var headerList []map[string]string
-	for _, header := range headers {
-		elem := make(map[string]string)
-		elem["name"] = header.HeaderName
-		elem["value"] = header.HeaderValue
-		headerList = append(headerList, elem)
-	}
-	d.Set(attrName, headerList)
-}
-
-func resourceNsxtLbMonitorDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return resourceNotSupportedError()
-	}
-
-	id := d.Id()
-	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
-	}
-
-	resp, err := nsxClient.ServicesApi.DeleteLoadBalancerMonitor(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbMonitor delete: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbMonitor %s not found", id)
-		d.SetId("")
-	}
-	return nil
 }
 
 func resourceNsxtPolicyLBAppProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
