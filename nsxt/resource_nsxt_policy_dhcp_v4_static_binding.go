@@ -63,8 +63,59 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.IsMACAddress,
 			},
-			"dhcp_option_121":     getDhcpOptions121Schema(),
-			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
+			"dhcp_option_121":     getPolicyDhcpOptions121Schema(),
+			"dhcp_generic_option": getPolicyDhcpGenericOptionsSchema(),
+		},
+	}
+}
+
+func getPolicyDhcpOptions121Schema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "DHCP classless static routes",
+		Optional:    true,
+		Computed:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"network": {
+					Type:         schema.TypeString,
+					Description:  "Destination in cidr",
+					Required:     true,
+					ValidateFunc: validateIPCidr(),
+				},
+				"next_hop": {
+					Type:         schema.TypeString,
+					Description:  "Next hop IP",
+					Required:     true,
+					ValidateFunc: validateSingleIP(),
+				},
+			},
+		},
+	}
+}
+
+func getPolicyDhcpGenericOptionsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Generic DHCP options",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"code": {
+					Type:         schema.TypeInt,
+					Description:  "DHCP option code, [0-255]",
+					Required:     true,
+					ValidateFunc: validation.IntBetween(0, 255),
+				},
+				"values": {
+					Type:        schema.TypeList,
+					Description: "DHCP option values",
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
 		},
 	}
 }

@@ -27,6 +27,13 @@ var rateLimiterResourceTypes = []string{
 	model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER,
 }
 
+var ingressRateShaperIndex = 0
+var ingressBroadcastRateShaperIndex = 1
+var egressRateShaperIndex = 2
+
+var rateShaperSchemaNames = []string{"ingress_rate_shaper", "ingress_broadcast_rate_shaper", "egress_rate_shaper"}
+var rateShaperScales = []string{"mbps", "kbps", "mbps"}
+
 var qosProfilePathExample = getMultitenancyPathExample("/infra/qos-profiles/[profile]")
 
 func resourceNsxtPolicyQosProfile() *schema.Resource {
@@ -69,6 +76,40 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 			"ingress_rate_shaper":           getQosRateShaperSchema(ingressRateShaperIndex),
 			"ingress_broadcast_rate_shaper": getQosRateShaperSchema(ingressBroadcastRateShaperIndex),
 			"egress_rate_shaper":            getQosRateShaperSchema(egressRateShaperIndex),
+		},
+	}
+}
+
+func getQosRateShaperSchema(index int) *schema.Schema {
+	scale := rateShaperScales[index]
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		MaxItems: 1,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Description: "Whether this rate shaper is enabled",
+					Optional:    true,
+					Default:     true,
+				},
+				fmt.Sprintf("average_bw_%s", scale): {
+					Type:        schema.TypeInt,
+					Description: fmt.Sprintf("Average Bandwidth in %s", scale),
+					Optional:    true,
+				},
+				"burst_size": {
+					Type:        schema.TypeInt,
+					Description: "Burst size in bytes",
+					Optional:    true,
+				},
+				fmt.Sprintf("peak_bw_%s", scale): {
+					Type:        schema.TypeInt,
+					Description: fmt.Sprintf("Peak Bandwidth in %s", scale),
+					Optional:    true,
+				},
+			},
 		},
 	}
 }

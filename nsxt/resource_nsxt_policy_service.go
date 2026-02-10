@@ -20,6 +20,12 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var icmpProtocolValues = []string{"ICMPv4", "ICMPv6"}
+
+var protocolValues = []string{"TCP", "UDP"}
+
+var algTypeValues = []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
+
 var servicePathExample = getMultitenancyPathExample("/infra/services/[service]")
 
 var cliServicesClient = infra.NewServicesClient

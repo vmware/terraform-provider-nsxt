@@ -37,11 +37,9 @@ func testAccResourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, pr
 	// There is a NSX bug that messes up dependencies for QoS profiles
 	// until the bug fixed, QoS tests need to avoid parallelization
 	resource.Test(t, resource.TestCase{
-		PreCheck:  preCheck,
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXQosSwitchingProfileCheckDestroy(state, updatedName)
-		},
+		PreCheck:     preCheck,
+		Providers:    testAccProviders,
+		CheckDestroy: func(state *terraform.State) error { return testAccNSXPolicyQosProfileCheckDestroy(state, updatedName) },
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyQosProfileBasicTemplate(name, cos, peak, "ingress", withContext),
@@ -115,20 +113,24 @@ func testAccResourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, pr
 }
 
 func TestAccResourceNsxtPolicyQosProfile_importBasic(t *testing.T) {
+	resourceName := "nsxt_policy_qos_profile.test"
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_qos_profile.test"
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyQosProfileCheckDestroy(state, name)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: func(state *terraform.State) error { return testAccNSXPolicyQosProfileCheckDestroy(state, name) },
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "display_name", name),
+					resource.TestCheckResourceAttr(resourceName, "description", "test description"),
+					resource.TestCheckResourceAttr(resourceName, "dscp_trusted", "false"),
+				),
 			},
 			{
-				ResourceName:      testResourceName,
+				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
