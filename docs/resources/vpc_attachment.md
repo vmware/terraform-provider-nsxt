@@ -13,26 +13,19 @@ This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.
 ## Example Usage
 
 ```hcl
-data "nsxt_vpc" "test" {
-  context {
-    project_id = data.nsxt_policy_project.dev.id
-  }
-  display_name = "test"
-}
-
-data "nsxt_vpc_connectivity_profile" "test" {
-  context {
-    project_id = data.nsxt_policy_project.dev.id
-  }
-  display_name = "test"
-}
-
 resource "nsxt_vpc_attachment" "test" {
-  display_name             = "test"
+  display_name             = "testVpcAttachment"
   description              = "terraform provisioned vpc attachment"
-  parent_path              = data.nsxt_vpc.test.path
-  vpc_connectivity_profile = data.nsxt_vpc_connectivity_profile.test.path
+  parent_path              = nsxt_vpc.test.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
+
+  depends_on = [
+    nsxt_vpc.test,
+    nsxt_vpc_connectivity_profile.test,
+    nsxt_policy_transit_gateway.test
+  ]
 }
+
 ```
 
 ## Argument Reference

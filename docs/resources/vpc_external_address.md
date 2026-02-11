@@ -12,31 +12,14 @@ Only single resource should be configured for any given port.
 This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
 ```hcl
-resource "nsxt_vpc_ip_address_allocation" "test" {
-  context {
-    project_id = "Dev_project"
-    vpc_id     = "dev_vpc"
-  }
-  display_name    = "external"
-  allocation_size = 1
-}
-
-data "nsxt_policy_vm" "vm1" {
-  context {
-    project_id = "Dev_project"
-    vpc_id     = "dev_vpc"
-  }
-  display_name = "myvm-1"
-}
-
 data "nsxt_vpc_subnet_port" "test" {
   subnet_path = nsxt_vpc_subnet.test.path
-  vm_id       = data.nsxt_policy_vm.vm1.instance_id
+  vm_id       = var.vm_id
 }
 
 resource "nsxt_vpc_external_address" "test" {
   parent_path                = data.nsxt_vpc_subnet_port.test.path
-  allocated_external_ip_path = nsxt_vpc_ip_address_allocation.test.path
+  allocated_external_ip_path = data.nsxt_vpc_ip_address_allocation.test.path
 }
 ```
 
