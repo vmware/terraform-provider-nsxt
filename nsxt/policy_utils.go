@@ -123,16 +123,8 @@ func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 	var tagList []map[string]interface{}
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
-		if tag.Scope != nil {
-			elem["scope"] = *tag.Scope
-		} else {
-			elem["scope"] = ""
-		}
-		if tag.Tag != nil {
-			elem["tag"] = *tag.Tag
-		} else {
-			elem["tag"] = ""
-		}
+		elem["scope"] = tag.Scope
+		elem["tag"] = tag.Tag
 		tagList = append(tagList, elem)
 	}
 	return tagList
@@ -271,16 +263,8 @@ func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, s
 	scopesToIgnore := getTagScopesToIgnore(d)
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
-		if tag.Scope != nil {
-			elem["scope"] = *tag.Scope
-		} else {
-			elem["scope"] = ""
-		}
-		if tag.Tag != nil {
-			elem["tag"] = *tag.Tag
-		} else {
-			elem["tag"] = ""
-		}
+		elem["scope"] = tag.Scope
+		elem["tag"] = tag.Tag
 		if tag.Scope != nil && shouldIgnoreScope(*tag.Scope, scopesToIgnore) {
 			ignoredTagList = append(ignoredTagList, elem)
 		} else {
