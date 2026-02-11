@@ -123,7 +123,7 @@ func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 		}}
 		called := false
 
-		patched, err := ensureProviderManagedTagsWithPatchFunc(obj, nil, m, func(o *testTagObj) error {
+		patched, err := ensureProviderManagedTagsWithPatchFunc(obj, m, func(o *testTagObj) error {
 			called = true
 			return nil
 		})
@@ -146,7 +146,7 @@ func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 		}}
 		called := false
 
-		patched, err := ensureProviderManagedTagsWithPatchFunc(obj, nil, m, func(o *testTagObj) error {
+		patched, err := ensureProviderManagedTagsWithPatchFunc(obj, m, func(o *testTagObj) error {
 			called = true
 			return nil
 		})
