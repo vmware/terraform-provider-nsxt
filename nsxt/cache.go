@@ -2,13 +2,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -85,6 +85,7 @@ func (c *resourceTypeCache) getQueryResult(query string, resourceID string) (*da
 func (c *resourceTypeCache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
 	c.cacheMis += 1
 	runID := m.(nsxtClients).CommonConfig.contextID
+	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query)
 	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType, runID)
 	if err != nil {
 		return err
@@ -123,8 +124,10 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	query := getCacheQueryKey(resourceType, d, m)
 	if val, _ := tc.getQueryResult(query, resourceID); val != nil {
 		tc.cacheHit += 1
+		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis)
 		return val, nil
 	}
+	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis)
 	err := tc.writeCache(query, resourceType, d, m, connector)
 	if err != nil {
 		return nil, err
@@ -132,7 +135,7 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	return tc.getQueryResult(query, resourceID)
 }
 
-func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context api.SessionContext, resourceType string, runID string) error {
+func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
 	// Now we have access to the proper runID passed from writeCache
 	additionalQuery := buildTagQuery(d, runID)
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
@@ -171,10 +174,10 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 
 	// Handle tag-based cache mode: validate and patch provider-managed tags if missing
 	if !isGlobalSearchCacheMode() {
-		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, d, m, patchFunc)
+		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
 			// Log the error but don't fail the read operation
-			fmt.Printf("[WARN] Failed to patch provider-managed tags for %s %s: %v\n", resourceType, resourceID, patchErr)
+			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr)
 		}
 	}
 
@@ -259,7 +262,7 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 }
 
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
-func ensureProviderManagedTagsWithPatchFunc[T any](obj T, d *schema.ResourceData, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
+func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
 	// Use reflection to check if the object has a Tags field
 	objValue := reflect.ValueOf(obj)
 	for objValue.IsValid() && objValue.Kind() == reflect.Ptr {
@@ -336,11 +339,11 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, d *schema.ResourceData
 			if err != nil {
 				return nil, fmt.Errorf("failed to patch tags to NSX API: %w", err)
 			}
-			fmt.Println("pathc func success")
+			log.Printf("[DEBUG] Patched provider-managed tags successfully")
 		}
 
 		return obj, nil
 	}
 
-	return nil, fmt.Errorf("Tags field is not settable")
+	return nil, fmt.Errorf("Provider managed tags field is not settable")
 }
