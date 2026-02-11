@@ -99,6 +99,11 @@ func getPoolMembersSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"display_name": {
+					Type:        schema.TypeString,
+					Description: "Pool member display name",
+					Optional:    true,
+				},
 				"admin_state": {
 					Type:         schema.TypeString,
 					Description:  "Member admin state",
