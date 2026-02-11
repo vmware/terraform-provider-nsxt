@@ -13,14 +13,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0InterfacesClient = tier0localeservices.NewInterfacesClient
 
 var gatewayInterfaceTypeValues = []string{
 	model.Tier0Interface_TYPE_SERVICE,
@@ -297,14 +296,18 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		id = newUUID()
 	} else {
 		var err error
+		// For exists check, we use appropriate client type based on manager type
+		var sessionContext utl.SessionContext
 		if isPolicyGlobalManager(m) {
-			client := gm_locale_services.NewInterfacesClient(connector)
-			_, err = client.Get(tier0ID, localeServiceID, id)
-
+			sessionContext = utl.SessionContext{ClientType: utl.Global}
 		} else {
-			client := locale_services.NewInterfacesClient(connector)
-			_, err = client.Get(tier0ID, localeServiceID, id)
+			sessionContext = utl.SessionContext{ClientType: utl.Local}
 		}
+		client := cliTier0InterfacesClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
+		_, err = client.Get(tier0ID, localeServiceID, id)
 		if err == nil {
 			return fmt.Errorf("Interface with ID '%s' already exists on Tier0 Gateway %s", id, tier0ID)
 		} else if !isNotFoundError(err) {
@@ -355,17 +358,22 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_locale_services.NewInterfacesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface), nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+		// gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
+		// if err1 != nil {
+		// 	return err1
+		// }
+		// obj = gmObj.(model.Tier0Interface)
 	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliTier0InterfacesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
 
 	if err != nil {
 		return handleCreateError("Tier0 Interface", id, err)
@@ -391,27 +399,31 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	var obj model.Tier0Interface
 	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewInterfacesClient(connector)
-		gmObj, err1 := client.Get(tier0ID, localeServiceID, id)
-		if err1 != nil {
-			return handleReadError(d, "Tier0 Interface", id, err1)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliTier0InterfacesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	obj, err = client.Get(tier0ID, localeServiceID, id)
+	if err != nil {
+		return handleReadError(d, "Tier0 Interface", id, err)
+	}
+	if isPolicyGlobalManager(m) {
+		tier0Client := cliTier0LocaleServicesClient(sessionContext, connector)
+		if tier0Client == nil {
+			return fmt.Errorf("unsupported client type")
 		}
-		lmObj, err2 := convertModelBindingType(gmObj, model.Tier0InterfaceBindingType(), model.Tier0InterfaceBindingType())
-		if err2 != nil {
-			return err2
-		}
-		obj = lmObj.(model.Tier0Interface)
-		tier0Client := gm_tier0s.NewLocaleServicesClient(connector)
 		localeService, err := tier0Client.Get(tier0ID, localeServiceID)
 		if err != nil {
 			return err
 		}
 		sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
 		d.Set("site_path", sitePath)
-	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		obj, err = client.Get(tier0ID, localeServiceID, id)
 	}
 	if err != nil {
 		return handleReadError(d, "Tier0 Interface", id, err)
@@ -534,17 +546,22 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		return handleUpdateError("Tier0 Interface", id, err)
 	}
 
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_locale_services.NewInterfacesClient(connector)
-		_, err = client.Update(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface), nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+		// gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
+		// if err1 != nil {
+		// 	return err1
+		// }
+		// obj = gmObj.(model.Tier0Interface)
 	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		_, err = client.Update(tier0ID, localeServiceID, id, obj, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliTier0InterfacesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	_, err = client.Update(tier0ID, localeServiceID, id, obj, nil)
 	if err != nil {
 		return handleUpdateError("Tier0 Interface", id, err)
 	}
@@ -562,14 +579,17 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 	if id == "" || tier0ID == "" || localeServiceID == "" {
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
-	var err error
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewInterfacesClient(connector)
-		err = client.Delete(tier0ID, localeServiceID, id, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		err = client.Delete(tier0ID, localeServiceID, id, nil)
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
 	}
+	client := cliTier0InterfacesClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
+	err := client.Delete(tier0ID, localeServiceID, id, nil)
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)
 	}
@@ -587,26 +607,20 @@ func resourceNsxtPolicyTier0GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier0GW model.Tier0
+	var sessionContext utl.SessionContext
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewTier0sClient(connector)
-		gmObj, err1 := client.Get(gwID)
-		if err1 != nil {
-			return nil, err1
-		}
-
-		convertedObj, err2 := convertModelBindingType(gmObj, model.Tier0BindingType(), model.Tier0BindingType())
-		if err2 != nil {
-			return nil, err2
-		}
-
-		tier0GW = convertedObj.(model.Tier0)
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
 	} else {
-		client := infra.NewTier0sClient(connector)
-		var err error
-		tier0GW, err = client.Get(gwID)
-		if err != nil {
-			return nil, err
-		}
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliTier0sClient(sessionContext, connector)
+	if client == nil {
+		return nil, fmt.Errorf("unsupported client type")
+	}
+	var err error
+	tier0GW, err = client.Get(gwID)
+	if err != nil {
+		return nil, err
 	}
 
 	d.Set("gateway_path", tier0GW.Path)

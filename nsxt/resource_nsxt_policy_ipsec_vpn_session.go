@@ -18,12 +18,19 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
-	t0_ipsec_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
-	t1_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
-	t1_ipsec_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	tier0localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ipsec_vpn_services"
+	tier1ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
+	tier1localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/ipsec_vpn_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0LocaleServiceIpsecVpnSessionsClient = tier0localeservicesipsec.NewSessionsClient
+var cliTier0IpsecVpnSessionsClient = tier0ipsecvpnservices.NewSessionsClient
+var cliTier1LocaleServiceIpsecVpnSessionsClient = tier1localeservicesipsec.NewSessionsClient
+var cliTier1IpsecVpnSessionsClient = tier1ipsecvpnservices.NewSessionsClient
 
 const policyBasedIPSecVpnSession string = "PolicyBased"
 const routeBasedIPSecVpnSession string = "RouteBased"
@@ -404,57 +411,99 @@ func newIpsecSessionClient(servicePath string) (*ipsecSessionClient, error) {
 }
 
 func (c *ipsecSessionClient) Get(connector client.Connector, id string) (*data.StructValue, error) {
+	// For session get, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_ipsec_services.NewSessionsClient(connector)
+		client := cliTier0IpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return nil, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.serviceID, id)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return nil, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_ipsec_services.NewSessionsClient(connector)
+	client := cliTier1IpsecVpnSessionsClient(sessionContext, connector)
+	if client == nil {
+		return nil, fmt.Errorf("unsupported client type")
+	}
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
 func (c *ipsecSessionClient) Patch(connector client.Connector, id string, obj *data.StructValue) error {
+	// For session patch, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 		}
-		client := t0_ipsec_services.NewSessionsClient(connector)
+		client := cliTier0IpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.serviceID, id, obj)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 	}
-	client := t1_ipsec_services.NewSessionsClient(connector)
+	client := cliTier1IpsecVpnSessionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Patch(c.gwID, c.serviceID, id, obj)
 }
 
 func (c *ipsecSessionClient) Delete(connector client.Connector, id string) error {
+	// For session delete, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_ipsec_services.NewSessionsClient(connector)
+		client := cliTier0IpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.serviceID, id)
 
 	}
 
 	if len(c.localeServiceID) > 0 {
-		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		client := cliTier1LocaleServiceIpsecVpnSessionsClient(sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_ipsec_services.NewSessionsClient(connector)
+	client := cliTier1IpsecVpnSessionsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Delete(c.gwID, c.serviceID, id)
 }
 

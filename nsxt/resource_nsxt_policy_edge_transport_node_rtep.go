@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -60,9 +59,10 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 
 func setNsxtPolicyEdgeTransportNodeRTEP(d *schema.ResourceData, m interface{}, op string) error {
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	tnPath := d.Get("edge_transport_node_path").(string)
-	client := enforcement_points.NewEdgeTransportNodesClient(connector)
+	client := cliEdgeTransportNodesClient(sessionContext, connector)
 
 	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
 	obj, err := client.Get(siteID, epID, edgeID)
@@ -133,9 +133,10 @@ func resourceNsxtPolicyEdgeTransportNodeRTEPCreate(d *schema.ResourceData, m int
 
 func resourceNsxtPolicyEdgeTransportNodeRTEPRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	tnPath := d.Get("edge_transport_node_path").(string)
-	client := enforcement_points.NewEdgeTransportNodesClient(connector)
+	client := cliEdgeTransportNodesClient(sessionContext, connector)
 
 	siteID, epID, edgeID := getEdgeTransportNodeKeysFromPath(tnPath)
 	obj, err := client.Get(siteID, epID, edgeID)

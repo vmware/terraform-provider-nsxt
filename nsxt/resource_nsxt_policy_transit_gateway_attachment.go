@@ -12,11 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 
+	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
+
+var cliTransitGatewayAttachmentsClient = transitgateways.NewAttachmentsClient
 
 var transitGatewayAttachmentSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -59,7 +61,10 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewAttachmentsClient(connector)
+	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -75,12 +80,11 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
+	parentPath := d.Get("parent_path").(string)
 	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayAttachmentExists)
 	if err != nil {
 		return err
 	}
-
-	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -102,7 +106,11 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 
 	log.Printf("[INFO] Creating TransitGatewayAttachment with ID %s", id)
 
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("TransitGatewayAttachment", id, err)
@@ -121,8 +129,12 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 		return fmt.Errorf("Error obtaining TransitGatewayAttachment ID")
 	}
 
-	client := clientLayer.NewAttachmentsClient(connector)
 	parentPath := d.Get("parent_path").(string)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
@@ -174,7 +186,11 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayAttachmentSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
@@ -196,7 +212,11 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 		return pathErr
 	}
 
-	client := clientLayer.NewAttachmentsClient(connector)
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {

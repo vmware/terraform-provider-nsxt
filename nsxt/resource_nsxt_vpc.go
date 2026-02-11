@@ -12,14 +12,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliVpcsClient = projects.NewVpcsClient
 
 var vpcIPAddressTypeValues = []string{
 	model.Vpc_IP_ADDRESS_TYPE_IPV4,
@@ -175,7 +177,7 @@ func resourceNsxtVpc() *schema.Resource {
 func resourceNsxtVpcExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewVpcsClient(connector)
+	client := cliVpcsClient(sessionContext, connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -217,7 +219,8 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Creating Vpc with ID %s", id)
 
-	client := clientLayer.NewVpcsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcsClient(sessionContext, connector)
 	err = client.Patch(parents[0], parents[1], id, obj)
 	if err != nil {
 		return handleCreateError("Vpc", id, err)
@@ -237,8 +240,9 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Vpc ID")
 	}
 
-	client := clientLayer.NewVpcsClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcsClient(sessionContext, connector)
+	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "Vpc", id, err)
@@ -282,7 +286,8 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 	if err := metadata.SchemaToStruct(elem, d, vpcSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewVpcsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVpcsClient(sessionContext, connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
 	if err != nil {
 		// Trigger partial update to avoid terraform updating state based on failed intent
@@ -301,9 +306,10 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
 
-	client := clientLayer.NewVpcsClient(connector)
+	client := cliVpcsClient(sessionContext, connector)
 	err := client.Delete(parents[0], parents[1], id, nil)
 
 	if err != nil {

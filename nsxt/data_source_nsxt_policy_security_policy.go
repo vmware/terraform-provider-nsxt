@@ -13,7 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -47,7 +46,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 
 // Local Manager Only
 func listSecurityPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.SecurityPolicy, error) {
-	client := domains.NewSecurityPoliciesClient(context, connector)
+	client := cliSecurityPoliciesClient(context, connector)
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -89,7 +88,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	context := getSessionContext(d, m)
 	if objID != "" {
 		// Get by id
-		client := domains.NewSecurityPoliciesClient(context, connector)
+		client := cliSecurityPoliciesClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

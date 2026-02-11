@@ -133,7 +133,8 @@ func testAccNsxtPolicyTransitGatewayStaticRouteExists(displayName string, resour
 			return fmt.Errorf("Policy ransitGatewayStaticRoute resource ID not set in resources")
 		}
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -154,7 +155,8 @@ func testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state *terraform.Sta
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(sessionContext, parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}

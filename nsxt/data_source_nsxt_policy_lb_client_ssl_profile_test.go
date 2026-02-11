@@ -10,8 +10,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyLBClientSslProfile_basic(t *testing.T) {
@@ -47,7 +48,8 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewLbClientSslProfilesClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
 
 	displayName := name
 	description := name
@@ -71,7 +73,8 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileDeleteByName(name string) erro
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewLbClientSslProfilesClient(connector)
+	sessionContext := testAccGetSessionContext()
+	client := infra.NewLbClientSslProfilesClient(sessionContext, connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

@@ -11,12 +11,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/api/aaa"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/aaa"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliLdapIdentitySourcesClient = aaa.NewLdapIdentitySourcesClient
 
 const (
 	activeDirectoryType = "ActiveDirectory"
@@ -183,7 +187,8 @@ func setLdapServersInSchema(d *schema.ResourceData, nsxLdapServerList []nsxModel
 func resourceNsxtPolicyLdapIdentitySourceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 
-	ldapClient := aaa.NewLdapIdentitySourcesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	_, err = ldapClient.Get(id)
 	if err == nil {
 		return true, nil
@@ -197,7 +202,8 @@ func resourceNsxtPolicyLdapIdentitySourceExists(id string, connector client.Conn
 
 func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, m interface{}, id string) error {
 	connector := getPolicyConnector(m)
-	ldapClient := aaa.NewLdapIdentitySourcesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 	serverType := d.Get("type").(string)
 
@@ -293,7 +299,8 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("error obtaining LDAPIdentitySource ID")
 	}
 
-	ldapClient := aaa.NewLdapIdentitySourcesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	structObj, err := ldapClient.Get(id)
 	if err != nil {
 		return handleReadError(d, "LDAPIdentitySource", id, err)
@@ -350,7 +357,8 @@ func resourceNsxtPolicyLdapIdentitySourceDelete(d *schema.ResourceData, m interf
 	}
 
 	connector := getPolicyConnector(m)
-	ldapClient := aaa.NewLdapIdentitySourcesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	ldapClient := cliLdapIdentitySourcesClient(sessionContext, connector)
 	if err := ldapClient.Delete(id); err != nil {
 		return handleDeleteError("LDAPIdentitySource", id, err)
 	}

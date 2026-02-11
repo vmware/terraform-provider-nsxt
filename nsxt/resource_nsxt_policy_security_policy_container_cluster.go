@@ -10,9 +10,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains/security_policies"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	security_policies "github.com/vmware/terraform-provider-nsxt/api/infra/domains/security_policies"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliContainerClusterSpanClient = security_policies.NewContainerClusterSpanClient
 
 func resourceNsxtPolicySecurityPolicyContainerCluster() *schema.Resource {
 	return &schema.Resource{
@@ -42,14 +46,15 @@ func resourceNsxtPolicySecurityPolicyContainerCluster() *schema.Resource {
 
 func resourceNsxtPolicySecurityPolicyContainerClusterExistsPartial(d *schema.ResourceData, m interface{}, policyPath string) func(string, client.Connector, bool) (bool, error) {
 	return func(id string, connector client.Connector, isGlobal bool) (bool, error) {
-		return resourceNsxtPolicySecurityPolicyContainerClusterExists(id, connector, policyPath)
+		sessionContext := getSessionContext(d, m)
+		return resourceNsxtPolicySecurityPolicyContainerClusterExists(id, connector, policyPath, sessionContext)
 	}
 }
 
-func resourceNsxtPolicySecurityPolicyContainerClusterExists(id string, connector client.Connector, policyPath string) (bool, error) {
+func resourceNsxtPolicySecurityPolicyContainerClusterExists(id string, connector client.Connector, policyPath string, sessionContext utl.SessionContext) (bool, error) {
 	var err error
 
-	client := security_policies.NewContainerClusterSpanClient(connector)
+	client := cliContainerClusterSpanClient(sessionContext, connector)
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
@@ -67,7 +72,8 @@ func resourceNsxtPolicySecurityPolicyContainerClusterExists(id string, connector
 
 func resourceNsxtPolicySecurityPolicyContainerClusterCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := security_policies.NewContainerClusterSpanClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliContainerClusterSpanClient(sessionContext, connector)
 
 	policyPath := d.Get("policy_path").(string)
 	domain := getDomainFromResourcePath(policyPath)
@@ -112,7 +118,8 @@ func resourceNsxtPolicySecurityPolicyContainerClusterRead(d *schema.ResourceData
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := security_policies.NewContainerClusterSpanClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliContainerClusterSpanClient(sessionContext, connector)
 
 	obj, err := client.Get(domain, policyID, id)
 	if err != nil {
@@ -156,7 +163,8 @@ func resourceNsxtPolicySecurityPolicyContainerClusterUpdate(d *schema.ResourceDa
 		ContainerClusterPath: &containerClusterPath,
 	}
 
-	client := security_policies.NewContainerClusterSpanClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliContainerClusterSpanClient(sessionContext, connector)
 	_, err := client.Update(domain, policyID, id, obj)
 	if err != nil {
 		return handleUpdateError("SecurityPolicyContainerCluster", id, err)
@@ -175,8 +183,9 @@ func resourceNsxtPolicySecurityPolicyContainerClusterDelete(d *schema.ResourceDa
 	policyID := getPolicyIDFromPath(policyPath)
 
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
-	client := security_policies.NewContainerClusterSpanClient(connector)
+	client := cliContainerClusterSpanClient(sessionContext, connector)
 	err := client.Delete(domain, policyID, id)
 
 	if err != nil {

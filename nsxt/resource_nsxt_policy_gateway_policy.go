@@ -13,7 +13,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -44,7 +43,7 @@ func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}
 }
 
 func getGatewayPolicy(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
-	client := domains.NewGatewayPoliciesClient(sessionContext, connector)
+	client := cliGatewayPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return model.GatewayPolicy{}, policyResourceNotSupportedError()
 	}
@@ -274,7 +273,7 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	client := cliGatewayPoliciesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

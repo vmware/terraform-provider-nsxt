@@ -10,11 +10,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tier0_localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliTier0LocaleServicesClient = tier0_localeservices.NewLocaleServicesClient
 
 func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 	return &schema.Resource{
@@ -68,7 +70,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 
 func getPolicyTier0GatewayLocaleServiceEntry(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
-	client := tier_0s.NewLocaleServicesClient(connector)
+	client := cliTier0LocaleServicesClient(context, connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
 	if err == nil {
 		return &obj, nil

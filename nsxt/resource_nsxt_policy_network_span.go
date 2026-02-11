@@ -12,12 +12,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+var cliNetworkSpansClient = infra.NewNetworkSpansClient
 
 var networkSpanPathExample = getMultitenancyPathExample("/infra/network-spans/[networkSpan]")
 
@@ -56,7 +59,12 @@ func resourceNsxtPolicyNetworkSpan() *schema.Resource {
 func resourceNsxtPolicyNetworkSpanExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 
-	client := infra.NewNetworkSpansClient(connector)
+	// For exists check, we use Local client type as default
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return false, fmt.Errorf("unsupported client type")
+	}
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -97,7 +105,11 @@ func resourceNsxtPolicyNetworkSpanCreate(d *schema.ResourceData, m interface{}) 
 
 	log.Printf("[INFO] Creating NetworkSpan with ID %s", id)
 
-	client := infra.NewNetworkSpansClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("NetworkSpan", id, err)
@@ -116,7 +128,11 @@ func resourceNsxtPolicyNetworkSpanRead(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("Error obtaining NetworkSpan ID")
 	}
 
-	client := infra.NewNetworkSpansClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -160,7 +176,11 @@ func resourceNsxtPolicyNetworkSpanUpdate(d *schema.ResourceData, m interface{}) 
 	if err := metadata.SchemaToStruct(elem, d, networkSpanSchema, "", nil); err != nil {
 		return err
 	}
-	client := infra.NewNetworkSpansClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("NetworkSpan", id, err)
@@ -177,7 +197,11 @@ func resourceNsxtPolicyNetworkSpanDelete(d *schema.ResourceData, m interface{}) 
 
 	connector := getPolicyConnector(m)
 
-	client := infra.NewNetworkSpansClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliNetworkSpansClient(sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	err := client.Delete(id)
 
 	if err != nil {

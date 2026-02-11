@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -153,7 +152,8 @@ func resourceNsxtPolicyLBHttpApplicationProfilePatch(d *schema.ResourceData, m i
 		return fmt.Errorf("Error converting LBHttpProfile %s", errs[0])
 	}
 
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
@@ -185,7 +185,8 @@ func resourceNsxtPolicyLBHttpApplicationProfileRead(d *schema.ResourceData, m in
 		return fmt.Errorf("Error obtaining LBHttpProfile ID")
 	}
 
-	client := infra.NewLbAppProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbAppProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpProfile", id, err)

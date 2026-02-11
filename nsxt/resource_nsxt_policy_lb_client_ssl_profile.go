@@ -11,8 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var lBClientSslProfileCipherGroupLabelValues = []string{
@@ -80,7 +81,8 @@ func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 
 func resourceNsxtPolicyLBClientSslProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := infra.NewLbClientSslProfilesClient(connector)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -120,7 +122,8 @@ func resourceNsxtPolicyLBClientSslProfilePatch(d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] Patching LBClientSslProfile with ID %s", id)
 
-	client := infra.NewLbClientSslProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
@@ -152,7 +155,8 @@ func resourceNsxtPolicyLBClientSslProfileRead(d *schema.ResourceData, m interfac
 	}
 
 	var obj model.LBClientSslProfile
-	client := infra.NewLbClientSslProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	var err error
 	obj, err = client.Get(id)
 	if err != nil {
@@ -201,8 +205,9 @@ func resourceNsxtPolicyLBClientSslProfileDelete(d *schema.ResourceData, m interf
 
 	forceParam := true
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 	var err error
-	client := infra.NewLbClientSslProfilesClient(connector)
+	client := cliLbClientSslProfilesClient(sessionContext, connector)
 	err = client.Delete(id, &forceParam)
 
 	if err != nil {

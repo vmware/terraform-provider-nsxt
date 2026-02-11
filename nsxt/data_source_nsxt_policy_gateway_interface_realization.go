@@ -13,8 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 )
 
 func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
@@ -73,7 +71,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 
 func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+	client := cliRealizedEntitiesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

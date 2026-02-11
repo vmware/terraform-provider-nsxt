@@ -18,9 +18,9 @@ import (
 	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	realized_state "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -609,8 +609,11 @@ func commaSeparatedStringToStringList(commaString string) []string {
 	return strList
 }
 
-func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string, timeout int) *resource.StateChangeConf {
-	client := realized_state.NewRealizedEntitiesClient(connector)
+var cliRealizedEntitiesClient = realized_state.NewRealizedEntitiesClient
+
+func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, m interface{}, realizedEntityPath string, timeout int) *resource.StateChangeConf {
+	sessionContext := getSessionContext(d, m)
+	client := cliRealizedEntitiesClient(sessionContext, connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
 	stateConf := &resource.StateChangeConf{

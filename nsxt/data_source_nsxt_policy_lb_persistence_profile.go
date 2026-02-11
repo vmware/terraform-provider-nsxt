@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -55,7 +54,8 @@ func dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(profile model.LBPersist
 
 func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewLbPersistenceProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	objID := d.Get("id").(string)

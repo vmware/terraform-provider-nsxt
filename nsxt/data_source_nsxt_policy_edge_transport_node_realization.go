@@ -12,9 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_transport_nodes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	edge_transport_nodes "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points/edge_transport_nodes"
 )
+
+var cliEdgeTransportNodeStateClient = edge_transport_nodes.NewStateClient
 
 func dataSourceNsxtPolicyEdgeTransportNodeRealization() *schema.Resource {
 	return &schema.Resource{
@@ -56,7 +59,8 @@ func getEdgeTransportNodeKeysFromPath(path string) (string, string, string) {
 
 func dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := edge_transport_nodes.NewStateClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliEdgeTransportNodeStateClient(sessionContext, connector)
 
 	id := d.Get("id").(string)
 	if id == "" {

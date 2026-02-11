@@ -9,9 +9,11 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var cliVniPoolsClient = infra.NewVniPoolsClient
 
 func dataSourceNsxtPolicyVniPool() *schema.Resource {
 	return &schema.Resource{
@@ -38,7 +40,8 @@ func dataSourceNsxtPolicyVniPool() *schema.Resource {
 
 func dataSourceNsxtPolicyVniPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewVniPoolsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliVniPoolsClient(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

@@ -19,6 +19,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliTier0DnsForwarderClient = tier0s.NewDnsForwarderClient
+var cliTier1DnsForwarderClient = tier1s.NewDnsForwarderClient
+
 var gatewayDNSForwarderLogLevelTypeValues = []string{
 	model.PolicyDnsForwarder_LOG_LEVEL_DEBUG,
 	model.PolicyDnsForwarder_LOG_LEVEL_INFO,
@@ -84,14 +87,14 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 func policyGatewayDNSForwarderGet(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool) (model.PolicyDnsForwarder, error) {
 	var emptyFwdr model.PolicyDnsForwarder
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		client := cliTier0DnsForwarderClient(sessionContext, connector)
 		if client == nil {
 			return emptyFwdr, policyResourceNotSupportedError()
 		}
 
 		return client.Get(gwID)
 	}
-	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+	client := cliTier1DnsForwarderClient(sessionContext, connector)
 	if client == nil {
 		return emptyFwdr, policyResourceNotSupportedError()
 	}
@@ -164,13 +167,13 @@ func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, conne
 	}
 
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		client := cliTier0DnsForwarderClient(sessionContext, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		return client.Patch(gwID, obj)
 	}
-	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+	client := cliTier1DnsForwarderClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -195,13 +198,13 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 	}
 
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(context, connector)
+		client := cliTier0DnsForwarderClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		_, err = client.Get(gwID)
 	} else {
-		client := tier1s.NewDnsForwarderClient(context, connector)
+		client := cliTier1DnsForwarderClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -262,13 +265,13 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 	}
 
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(context, connector)
+		client := cliTier0DnsForwarderClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
 		err = client.Delete(gwID)
 	} else {
-		client := tier1s.NewDnsForwarderClient(context, connector)
+		client := cliTier1DnsForwarderClient(context, connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}

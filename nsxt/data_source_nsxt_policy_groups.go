@@ -6,8 +6,6 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 )
 
 func dataSourceNsxtPolicyGroups() *schema.Resource {
@@ -33,7 +31,7 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	domainName := d.Get("domain").(string)
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	client := cliGroupsClient(getSessionContext(d, m), connector)
 
 	boolFalse := false
 	var cursor *string

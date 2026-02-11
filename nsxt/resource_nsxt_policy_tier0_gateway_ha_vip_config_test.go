@@ -170,7 +170,7 @@ func testAccNsxtPolicyTier0HAVipConfigExists(resourceName string) resource.TestC
 
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
 		gwID := rs.Primary.Attributes["tier0_id"]
-		localeService := policyTier0GetLocaleService(gwID, localeServiceID, connector, testAccIsGlobalManager())
+		localeService := policyTier0GetLocaleService(testAccGetSessionContext(), gwID, localeServiceID, connector, testAccIsGlobalManager())
 		if localeService == nil {
 			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", localeServiceID, gwID)
 		}

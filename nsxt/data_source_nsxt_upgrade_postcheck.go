@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/upgrade_unit_groups"
 )
 
+var cliUpgradeUnitGroupsAggregateInfoClient = upgrade_unit_groups.NewAggregateInfoClient
+
 var (
 	// Default waiting setup in seconds
 	defaultUpgradePostcheckInterval = 30
@@ -94,7 +96,7 @@ func dataSourceNsxtUpgradePostCheck() *schema.Resource {
 
 func dataSourceNsxtUpgradePostCheckRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	aggregateInfoClient := upgrade_unit_groups.NewAggregateInfoClient(connector)
+	aggregateInfoClient := cliUpgradeUnitGroupsAggregateInfoClient(connector)
 	component := d.Get("type").(string)
 	timeout := d.Get("timeout").(int)
 	interval := d.Get("interval").(int)

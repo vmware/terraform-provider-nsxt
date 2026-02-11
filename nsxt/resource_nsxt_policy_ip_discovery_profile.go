@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var cliIpDiscoveryProfilesClient = infra.NewIpDiscoveryProfilesClient
+
 var ipDiscoveryProfilePathExample = getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")
 
 func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
@@ -158,7 +160,7 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 }
 
 func resourceNsxtPolicyIPDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := infra.NewIpDiscoveryProfilesClient(sessionContext, connector)
+	client := cliIpDiscoveryProfilesClient(sessionContext, connector)
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -188,7 +190,7 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -211,7 +213,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining IPDiscoveryProfile ID")
 	}
 
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -244,7 +246,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -281,7 +283,7 @@ func resourceNsxtPolicyIPDiscoveryProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	boolFalse := false
 
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	client := cliIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

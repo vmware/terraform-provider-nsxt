@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
@@ -53,7 +52,7 @@ func resourceNsxtEdgeTransportNodeRTEP() *schema.Resource {
 
 func resourceNsxtEdgeTransportNodeRTEPCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	id := d.Get("edge_id").(string)
 
@@ -95,7 +94,7 @@ func resourceNsxtEdgeTransportNodeRTEPCreate(d *schema.ResourceData, m interface
 
 func resourceNsxtEdgeTransportNodeRTEPRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	id := d.Get("edge_id").(string)
 
@@ -122,7 +121,7 @@ func resourceNsxtEdgeTransportNodeRTEPRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtEdgeTransportNodeRTEPUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	id := d.Get("edge_id").(string)
 
@@ -161,7 +160,7 @@ func resourceNsxtEdgeTransportNodeRTEPUpdate(d *schema.ResourceData, m interface
 
 func resourceNsxtEdgeTransportNodeRTEPDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := nsx.NewTransportNodesClient(connector)
+	client := cliTransportNodesClient(connector)
 
 	id := d.Get("edge_id").(string)
 

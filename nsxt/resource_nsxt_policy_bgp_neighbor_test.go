@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -461,7 +462,8 @@ func testAccNsxtPolicyBgpNeighborExists(resourceName string) resource.TestCheckF
 		bgpPath := rs.Primary.Attributes["bgp_path"]
 		t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
 
-		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		d := &schema.ResourceData{}
+		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector, d, testAccProvider.Meta().(nsxtClients))
 		if err != nil {
 			return err
 		}
@@ -484,7 +486,8 @@ func testAccNsxtPolicyBgpNeighborCheckDestroy(state *terraform.State, displayNam
 		resourceID := rs.Primary.Attributes["id"]
 		bgpPath := rs.Primary.Attributes["bgp_path"]
 		t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
-		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		d := &schema.ResourceData{}
+		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector, d, testAccProvider.Meta().(nsxtClients))
 		if err != nil {
 			return err
 		}

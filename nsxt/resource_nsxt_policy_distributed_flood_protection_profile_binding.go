@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var cliFirewallFloodProtectionProfileBindingMapsClient = groups.NewFirewallFloodProtectionProfileBindingMapsClient
+
 func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate,
@@ -56,7 +58,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resour
 
 func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.ResourceData, m interface{}, id string, isCreate bool) error {
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	bindingClient := cliFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -86,7 +88,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.R
 }
 
 func resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(sessionContext utl.SessionContext, connector client.Connector, groupPath, id string) (bool, error) {
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(sessionContext, connector)
+	bindingClient := cliFirewallFloodProtectionProfileBindingMapsClient(sessionContext, connector)
 	if bindingClient == nil {
 		return false, policyResourceNotSupportedError()
 	}
@@ -138,7 +140,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	bindingClient := cliFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -178,7 +180,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingDelete(d *schema.
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	bindingClient := cliFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
 	if bindingClient == nil {
 		return policyResourceNotSupportedError()
 	}
