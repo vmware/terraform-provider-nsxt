@@ -123,8 +123,16 @@ func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 	var tagList []map[string]interface{}
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
-		elem["scope"] = tag.Scope
-		elem["tag"] = tag.Tag
+		if tag.Scope != nil {
+			elem["scope"] = *tag.Scope
+		} else {
+			elem["scope"] = ""
+		}
+		if tag.Tag != nil {
+			elem["tag"] = *tag.Tag
+		} else {
+			elem["tag"] = ""
+		}
 		tagList = append(tagList, elem)
 	}
 	return tagList
@@ -203,14 +211,76 @@ func shouldIgnoreScope(scope string, scopesToIgnore []string) bool {
 	return false
 }
 
+const (
+	managedDefaultTagScopeManagedBy = "nsx-tf/managed-by"
+	managedDefaultTagScopeRunID     = "tf-run-id"
+)
+
+func isManagedDefaultTagScope(scope *string) bool {
+	if scope == nil {
+		return false
+	}
+	return *scope == managedDefaultTagScopeManagedBy || *scope == managedDefaultTagScopeRunID
+}
+
+func isManagedDefaultTag(tag model.Tag) bool {
+	return isManagedDefaultTagScope(tag.Scope)
+}
+
+func getProviderManagedDefaultTags(runID string) []model.Tag {
+	if runID == "" {
+		return nil
+	}
+	managedByScope := managedDefaultTagScopeManagedBy
+	managedByTag := "terraform"
+	runIDScope := managedDefaultTagScopeRunID
+	runIDTag := runID
+
+	return []model.Tag{
+		{Scope: &managedByScope, Tag: &managedByTag},
+		{Scope: &runIDScope, Tag: &runIDTag},
+	}
+}
+
+// mergeManagedDefaultAndUserTags ensures:
+// - managed default tags are always present (if provided)
+// - user tags cannot override managed default tags by scope
+func mergeManagedDefaultAndUserTags(managedDefaults []model.Tag, userTags []model.Tag) []model.Tag {
+	res := make([]model.Tag, 0, len(managedDefaults)+len(userTags))
+	res = append(res, managedDefaults...)
+
+	for _, t := range userTags {
+		if isManagedDefaultTag(t) {
+			continue
+		}
+		res = append(res, t)
+	}
+	return res
+}
+
+func getPolicyTagsWithProviderManagedDefaults(d *schema.ResourceData, m interface{}) []model.Tag {
+	userTags := getPolicyTagsFromSchema(d)
+	runID := m.(nsxtClients).CommonConfig.contextID
+	managedDefaults := getProviderManagedDefaultTags(runID)
+	return mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+}
+
 func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {
 	var tagList []map[string]interface{}
 	var ignoredTagList []map[string]interface{}
 	scopesToIgnore := getTagScopesToIgnore(d)
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
-		elem["scope"] = tag.Scope
-		elem["tag"] = tag.Tag
+		if tag.Scope != nil {
+			elem["scope"] = *tag.Scope
+		} else {
+			elem["scope"] = ""
+		}
+		if tag.Tag != nil {
+			elem["tag"] = *tag.Tag
+		} else {
+			elem["tag"] = ""
+		}
 		if tag.Scope != nil && shouldIgnoreScope(*tag.Scope, scopesToIgnore) {
 			ignoredTagList = append(ignoredTagList, elem)
 		} else {
