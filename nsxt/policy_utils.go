@@ -258,6 +258,13 @@ func mergeManagedDefaultAndUserTags(managedDefaults []model.Tag, userTags []mode
 	return res
 }
 
+func getPolicyTagsWithProviderManagedDefaults(d *schema.ResourceData, m interface{}) []model.Tag {
+	userTags := getPolicyTagsFromSchema(d)
+	runID := m.(nsxtClients).CommonConfig.contextID
+	managedDefaults := getProviderManagedDefaultTags(runID)
+	return mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+}
+
 func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {
 	var tagList []map[string]interface{}
 	var ignoredTagList []map[string]interface{}
