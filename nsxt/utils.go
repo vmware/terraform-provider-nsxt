@@ -581,7 +581,7 @@ func getNSXVersion(connector client.Connector) (string, error) {
 
 	}
 	log.Printf("[DEBUG] NSX version is %s", *version.NodeVersion)
-	return *version.NodeVersion, nil
+	return *version.ProductVersion, nil
 }
 
 func initNSXVersion(connector client.Connector) error {

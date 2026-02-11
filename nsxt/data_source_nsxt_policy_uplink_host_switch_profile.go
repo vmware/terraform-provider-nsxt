@@ -21,7 +21,7 @@ func dataSourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 			"realized_id": {
 				Type:        schema.TypeString,

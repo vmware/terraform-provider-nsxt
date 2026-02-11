@@ -277,6 +277,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_bfd_profile":                                dataSourceNsxtPolicyBfdProfile(),
 			"nsxt_policy_bridge_profile":                             dataSourceNsxtPolicyBridgeProfile(),
 			"nsxt_policy_certificate":                                dataSourceNsxtPolicyCertificate(),
+			"nsxt_policy_cluster_security_config":                    dataSourceNsxtPolicyClusterSecurityConfig(),
 			"nsxt_policy_container_cluster":                          dataSourceNsxtPolicyContainerCluster(),
 			"nsxt_policy_container_clusters":                         dataSourceNsxtPolicyContainerClusters(),
 			"nsxt_policy_context_profile":                            dataSourceNsxtPolicyContextProfile(),
@@ -304,6 +305,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_host_transport_node_collection":             dataSourceNsxtPolicyHostTransportNodeCollection(),
 			"nsxt_policy_host_transport_node_collection_realization": dataSourceNsxtPolicyHostTransportNodeCollectionRealization(),
 			"nsxt_policy_host_transport_node_profile":                dataSourceNsxtPolicyHostTransportNodeProfile(),
+			"nsxt_policy_idps_cluster_config":                        dataSourceNsxtPolicyIdpsClusterConfig(),
+			"nsxt_policy_idps_settings":                              dataSourceNsxtPolicyIdpsSettings(),
 			"nsxt_policy_intrusion_service_profile":                  dataSourceNsxtPolicyIntrusionServiceProfile(),
 			"nsxt_policy_ip_block":                                   dataSourceNsxtPolicyIPBlock(),
 			"nsxt_policy_ip_discovery_profile":                       dataSourceNsxtPolicyIPDiscoveryProfile(),
@@ -331,6 +334,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_security_policy":                            dataSourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_segment":                                    dataSourceNsxtPolicySegment(),
 			"nsxt_policy_segment_port":                               dataSourceNsxtPolicySegmentPort(),
+			"nsxt_policy_segment_ports":                              dataSourceNsxtPolicySegmentPorts(),
 			"nsxt_policy_segment_realization":                        dataSourceNsxtPolicySegmentRealization(),
 			"nsxt_policy_segment_security_profile":                   dataSourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_service":                                    dataSourceNsxtPolicyService(),
@@ -433,6 +437,7 @@ func Provider() *schema.Provider {
 			"nsxt_ns_service_group":                                    removedResourceWrapper(resourceNsxtNsServiceGroup, "nsxt_ns_service_group"),
 			"nsxt_policy_bgp_config":                                   resourceNsxtPolicyBgpConfig(),
 			"nsxt_policy_bgp_neighbor":                                 resourceNsxtPolicyBgpNeighbor(),
+			"nsxt_policy_cluster_security_config":                      resourceNsxtPolicyClusterSecurityConfig(),
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
 			"nsxt_policy_connectivity_policy":                          resourceNsxtPolicyConnectivityPolicy(),
 			"nsxt_policy_constraint":                                   resourceNsxtPolicyConstraint(),
@@ -472,6 +477,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_host_transport_node":                          resourceNsxtPolicyHostTransportNode(),
 			"nsxt_policy_host_transport_node_collection":               resourceNsxtPolicyHostTransportNodeCollection(),
 			"nsxt_policy_host_transport_node_profile":                  resourceNsxtPolicyHostTransportNodeProfile(),
+			"nsxt_policy_idps_cluster_config":                          resourceNsxtPolicyIdpsClusterConfig(),
+			"nsxt_policy_idps_settings":                                resourceNsxtPolicyIdpsSettings(),
 			"nsxt_policy_intrusion_service_policy":                     resourceNsxtPolicyIntrusionServicePolicy(),
 			"nsxt_policy_intrusion_service_profile":                    resourceNsxtPolicyIntrusionServiceProfile(),
 			"nsxt_policy_ip_address_allocation":                        resourceNsxtPolicyIPAddressAllocation(),
@@ -526,6 +533,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_security_policy_rule":                         resourceNsxtPolicySecurityPolicyRule(),
 			"nsxt_policy_segment":                                      resourceNsxtPolicySegment(),
 			"nsxt_policy_segment_port":                                 resourceNsxtPolicySegmentPort(),
+			"nsxt_policy_segment_port_profile_bindings":                resourceNsxtPolicySegmentPortProfileBindings(),
 			"nsxt_policy_segment_security_profile":                     resourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_service":                                      resourceNsxtPolicyService(),
 			"nsxt_policy_share":                                        resourceNsxtPolicyShare(),
@@ -1190,9 +1198,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	connector := getPolicyConnector(clients)
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		clients.DefaultSpanPath, err = getDefaultSpan(connector)
-		if isNotFoundError(err) {
-			return clients, nil
-		}
 		if err != nil {
 			return nil, err
 		}

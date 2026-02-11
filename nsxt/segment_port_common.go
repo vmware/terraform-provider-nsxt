@@ -54,7 +54,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 	// Segment
 	child, err := vAPIConversion(childSegmentPort, model.ChildSegmentPortBindingType())
 	if err != nil {
-		return model.Infra{}, fmt.Errorf("Error handling the SegmentPort hierarchial API construction : %v", err)
+		return model.Infra{}, fmt.Errorf("Error handling the SegmentPort hierarchical API construction : %v", err)
 	}
 	segmentChildren := []*data.StructValue{child}
 	segmentId := getSegmentIdFromSegPath(segmentPath)
@@ -69,7 +69,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 	// Tier1
 	child, err = vAPIConversion(childSegment, model.ChildResourceReferenceBindingType())
 	if err != nil {
-		return model.Infra{}, fmt.Errorf("Error handling the Tier1 gw hierarchial API construction : %v", err)
+		return model.Infra{}, fmt.Errorf("Error handling the Tier1 gw hierarchical API construction : %v", err)
 	}
 	if isT1Segment(segmentPath) {
 		t1Children := []*data.StructValue{child}
@@ -84,7 +84,7 @@ func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, i
 
 		child, err = vAPIConversion(childTier1Gw, model.ChildResourceReferenceBindingType())
 		if err != nil {
-			return model.Infra{}, fmt.Errorf("Error handling the Infra hierarchial API construction : %v", err)
+			return model.Infra{}, fmt.Errorf("Error handling the Infra hierarchical API construction : %v", err)
 		}
 	}
 	// Infra
@@ -188,7 +188,7 @@ func nsxtPolicySegmentPortProfilesSetInStruct(d *schema.ResourceData, obj *model
 }
 
 func nsxtPolicyPortDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	ipDiscoveryProfilePath := ""
 	macDiscoveryProfilePath := ""
@@ -251,7 +251,7 @@ func nsxtPolicyPortDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data.St
 }
 
 func nsxtPolicyPortQosProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	qosProfilePath := ""
 	revision := int64(0)
@@ -308,7 +308,7 @@ func nsxtPolicyPortQosProfileSetInStruct(d *schema.ResourceData) (*data.StructVa
 }
 
 func nsxtPolicyPortSecurityProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
-	segmentProfileMapID := "default"
+	segmentProfileMapID := newUUID()
 
 	spoofguardProfilePath := ""
 	securityProfilePath := ""
@@ -424,6 +424,10 @@ func getT1IdFromSegPath(segPortPath string) string {
 	return ""
 }
 
+func getPolicySegmentPathFromPortPath(segmentPortPath string) (string, error) {
+	return getParameterFromPolicyPath("", "/ports/", segmentPortPath)
+}
+
 type segmentConfig interface {
 	nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error
 	nsxtPolicySegmentPortQosProfileRead(d *schema.ResourceData, m interface{}) error
@@ -442,7 +446,18 @@ type tier1SegmentPort struct {
 
 func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) error {
 	var config segmentConfig
-	segmentPath := d.Get("segment_path").(string)
+	var segmentPath string
+
+	if segmentPathValue, ok := d.GetOk("segment_path"); ok {
+		segmentPath = segmentPathValue.(string)
+	} else if segmentPortPathValue, ok := d.GetOk("segment_port_path"); ok {
+		segmentPortPath := segmentPortPathValue.(string)
+		pathParts := strings.Split(segmentPortPath, "/")
+		segmentPath = strings.Join(pathParts[:len(pathParts)-2], "/")
+	} else {
+		return fmt.Errorf("neither segment_path nor segment_port_path found in resource data")
+	}
+
 	s := segmentPort{
 		segmentId: getSegmentIdFromSegPath(segmentPath),
 		portId:    d.Id(),

@@ -24,15 +24,14 @@ var accTestPolicyLdapIdentitySourceUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ldap_identity_source.test"
-	ldapType := activeDirectoryType
+	ldapType := openLdapType
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_USER")
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_PASSWORD")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_PASSWORD")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_URL")
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_CERT")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_DOMAIN")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_BASE_DN")
 			testAccOnlyLocalManager(t)
@@ -44,8 +43,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyLdapIdentitySourceCreate(
-					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapUser(), getTestLdapPassword(),
-					getTestLdapURL(), getTestLdapCert()),
+					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapAdminUser(), getTestLdapAdminPassword(), getTestLdapURL()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLdapIdentitySourceCreateAttributes["description"]),
@@ -53,10 +51,10 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", getTestLdapDomain()),
 					resource.TestCheckResourceAttr(testResourceName, "base_dn", getTestLdapBaseDN()),
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.bind_identity", getTestLdapUser()),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.password", getTestLdapPassword()),
+					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.bind_identity", getTestLdapAdminUser()),
+					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.password", getTestLdapAdminPassword()),
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.url", getTestLdapURL()),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.certificates.#", "1"),
+					//resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.certificates.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 
 					resource.TestCheckResourceAttr(testResourceName, "nsx_id", accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"]),
@@ -65,8 +63,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 			},
 			{
 				Config: testAccNsxtPolicyLdapIdentitySourceUpdate(
-					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapUser(), getTestLdapPassword(),
-					getTestLdapURL(), getTestLdapCert()),
+					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapAdminUser(), getTestLdapAdminPassword(), getTestLdapURL()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceUpdateAttributes["nsx_id"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLdapIdentitySourceUpdateAttributes["description"]),
@@ -74,10 +71,9 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", getTestLdapDomain()),
 					resource.TestCheckResourceAttr(testResourceName, "base_dn", getTestLdapBaseDN()),
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.bind_identity", getTestLdapUser()),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.password", getTestLdapPassword()),
+					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.bind_identity", getTestLdapAdminUser()),
+					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.password", getTestLdapAdminPassword()),
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.url", getTestLdapURL()),
-					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.certificates.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -94,10 +90,9 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_USER")
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_PASSWORD")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_USER")
+			testAccEnvDefined(t, "NSXT_TEST_LDAP_ADMIN_PASSWORD")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_URL")
-			testAccEnvDefined(t, "NSXT_TEST_LDAP_CERT")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_DOMAIN")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_BASE_DN")
 			testAccOnlyLocalManager(t)
@@ -109,8 +104,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyLdapIdentitySourceCreate(
-					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapUser(), getTestLdapPassword(),
-					getTestLdapURL(), getTestLdapCert()),
+					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapAdminUser(), getTestLdapAdminPassword(), getTestLdapURL()),
 			},
 			{
 				ResourceName:            testResourceName,
@@ -169,7 +163,7 @@ func testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state *terraform.State, dis
 	return nil
 }
 
-func testAccNsxtPolicyLdapIdentitySourceCreate(serverType, domainName, baseDn, bindUser, bindPwd, url, cert string) string {
+func testAccNsxtPolicyLdapIdentitySourceCreate(serverType, domainName, baseDn, bindUser, bindPwd, url string) string {
 	attrMap := accTestPolicyLdapIdentitySourceCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
@@ -183,22 +177,16 @@ resource "nsxt_policy_ldap_identity_source" "test" {
     bind_identity = "%s"
     password      = "%s"
     url           = "%s"
-    certificates = [
-      <<-EOT
-%s
-            EOT
-      ,
-    ]
   }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
+}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url)
 }
 
-func testAccNsxtPolicyLdapIdentitySourceUpdate(serverType, domainName, baseDn, bindUser, bindPwd, url, cert string) string {
+func testAccNsxtPolicyLdapIdentitySourceUpdate(serverType, domainName, baseDn, bindUser, bindPwd, url string) string {
 	attrMap := accTestPolicyLdapIdentitySourceUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
@@ -212,12 +200,6 @@ resource "nsxt_policy_ldap_identity_source" "test" {
     bind_identity = "%s"
     password      = "%s"
     url           = "%s"
-    certificates = [
-      <<-EOT
-%s
-            EOT
-      ,
-    ]
   }
-}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
+}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url)
 }

@@ -18,7 +18,7 @@ func dataSourceNsxtComputeCollection() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
 			"origin_type": {
 				Type:        schema.TypeString,
 				Optional:    true,

@@ -492,6 +492,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 				Type:        schema.TypeList,
 				Description: "Enhanced Networking Stack enabled HostSwitch CPU configuration",
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"num_lcores": {
@@ -689,6 +690,7 @@ func getIPAssignmentSchema(required bool) *schema.Schema {
 		MaxItems:    1,
 		Required:    required,
 		Optional:    !required,
+		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"assigned_by_dhcp": {
