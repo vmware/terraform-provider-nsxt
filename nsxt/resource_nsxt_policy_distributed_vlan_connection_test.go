@@ -122,6 +122,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnectionWithVlanExtension(t *test
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
