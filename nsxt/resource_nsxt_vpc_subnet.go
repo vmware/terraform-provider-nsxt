@@ -522,12 +522,11 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	userTags := getPolicyTagsFromSchema(d)
 
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
-		Tags:        userTags,
+		Tags:        nil,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -535,9 +534,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	// runID := m.(nsxtClients).CommonConfig.contextID
-	// managedDefaults := getProviderManagedDefaultTags(runID)
-	// obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+	obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	client := clientLayer.NewSubnetsClient(connector)
@@ -638,14 +635,13 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	userTags := getPolicyTagsFromSchema(d)
 
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
-		Tags:        userTags,
+		Tags:        nil,
 		Revision:    &revision,
 	}
 
@@ -654,11 +650,8 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	// Provider-managed default tags are immutable and authoritative.
-	// Always regenerate them to ensure they're present, even if removed out-of-band.
-	// runID := m.(nsxtClients).CommonConfig.contextID
-	// managedDefaults := getProviderManagedDefaultTags(runID)
-	// obj.Tags = mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+	// Always regenerate Provider-managed default tags  to ensure they're present
+	obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	// Since dhcp block is Computed (sent back by NSX even if not specified), we need to
 	// explicitly clear out additional DHCP config in case of DHCP RELAY mode, otherwise
