@@ -732,7 +732,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_vpc(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersion(t, "9.2.0")
+			testAccNSXVersion(t, "9.3.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
