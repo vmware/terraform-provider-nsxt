@@ -282,6 +282,15 @@ func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, s
 }
 
 func getPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
+	if d == nil {
+		return nil
+	}
+	// When tag schema is Optional+Computed, d.Get("tag") may still carry tags from prior state
+	// even if the user removed the tag block from configuration.
+	// In that case, return an empty slice so PATCH clears tags as expected.
+	if _, ok := d.GetOk("tag"); !ok {
+		return []model.Tag{}
+	}
 	tags, _ := getCustomizedPolicyTagsFromSchema(d, "tag")
 	return tags
 }
