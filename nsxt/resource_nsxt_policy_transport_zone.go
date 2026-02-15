@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -154,7 +155,10 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 		IsDefault:                &isDefault,
 		TzType:                   &transportType,
 		UplinkTeamingPolicyNames: uplinkTeamingNames,
-		AuthorizedVlans:          authorizedVlans,
+	}
+
+	if util.NsxVersionHigherOrEqual("4.1.1") {
+		obj.AuthorizedVlans = authorizedVlans
 	}
 
 	// Create the resource using PATCH
