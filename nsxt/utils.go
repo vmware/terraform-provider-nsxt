@@ -116,7 +116,7 @@ func getTagsSchemaInternal(required bool, forceNew bool) *schema.Schema {
 		Optional:    !required,
 		Required:    required,
 		ForceNew:    forceNew,
-		Computed:    true,
+		Computed:    false,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"scope": {
