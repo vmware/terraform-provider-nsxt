@@ -64,7 +64,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `context` - (Optional) Policy context for this resource.
-  * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped service paths.
+    * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped service paths.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ike_profile_path` - (Optional) Policy path referencing IKE profile. Note that if user wants to create session with `compliance_suite`, then this field should not be configured, the provider will use the default Profile for each compliance suite type.
 * `tunnel_profile_path` - (Optional) Policy path referencing Tunnel profile to be used. Note that if user wants to create session with `compliance_suite`, then this field should not be configured, the provider will use the default Profile for each compliance suite type.

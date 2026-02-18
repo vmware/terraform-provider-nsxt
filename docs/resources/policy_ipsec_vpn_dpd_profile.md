@@ -31,7 +31,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `context` - (Optional) Policy context for this resource.
-  * `project_id` - (Optional) Project ID for multitenancy.
+    * `project_id` - (Optional) Project ID for multitenancy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `dpd_probe_mode` - (Optional) DPD Probe Mode, one of `PERIODIC`, `ON_DEMAND`. Periodic mode is used to query the liveliness of the peer at regular intervals (`dpd_probe_interval` seconds). On-demand mode would trigger DPD message if there is traffic to send to the peer AND the peer was idle for `dpd_probe_interval` seconds. Default is `PERIODIC`.
 * `dpd_probe_interval` - (Optional) Probe interval in seconds. Default is 60.
