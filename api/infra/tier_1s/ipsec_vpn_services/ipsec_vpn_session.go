@@ -9,6 +9,7 @@ import (
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/ipsec_vpn_services"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -22,6 +23,9 @@ func NewSessionsClient(sessionContext utl.SessionContext, connector vapiProtocol
 
 	case utl.Local:
 		client = client0.NewSessionsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewSessionsClient(connector)
 
 	default:
 		return nil
@@ -37,6 +41,10 @@ func (c IpsecVpnSessionClientContext) Delete(tier1IdParam string, serviceIdParam
 	case utl.Local:
 		client := c.Client.(client0.SessionsClient)
 		err = client.Delete(tier1IdParam, serviceIdParam, sessionIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, sessionIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -57,6 +65,13 @@ func (c IpsecVpnSessionClientContext) Get(tier1IdParam string, serviceIdParam st
 			return obj, err
 		}
 
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, sessionIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -73,6 +88,10 @@ func (c IpsecVpnSessionClientContext) List(tier1IdParam string, serviceIdParam s
 		client := c.Client.(client0.SessionsClient)
 		obj, err = client.List(tier1IdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -87,6 +106,10 @@ func (c IpsecVpnSessionClientContext) Patch(tier1IdParam string, serviceIdParam 
 	case utl.Local:
 		client := c.Client.(client0.SessionsClient)
 		err = client.Patch(tier1IdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -104,6 +127,10 @@ func (c IpsecVpnSessionClientContext) Showsensitivedata(tier1IdParam string, ser
 		client := c.Client.(client0.SessionsClient)
 		obj, err = client.Showsensitivedata(tier1IdParam, serviceIdParam, sessionIdParam)
 
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		obj, err = client.Showsensitivedata(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, sessionIdParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -119,6 +146,10 @@ func (c IpsecVpnSessionClientContext) Update(tier1IdParam string, serviceIdParam
 	case utl.Local:
 		client := c.Client.(client0.SessionsClient)
 		obj, err = client.Update(tier1IdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.SessionsClient)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, tier1IdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

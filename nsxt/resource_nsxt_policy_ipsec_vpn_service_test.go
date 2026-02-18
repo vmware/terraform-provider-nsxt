@@ -104,6 +104,60 @@ func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPSecVpnService_tier1_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_ipsec_vpn_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnServiceCheckDestroy(state, accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnServiceCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnServiceCreateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyIPSecVpnServiceCreateAttributes["ha_sync"]),
+					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyIPSecVpnServiceCreateAttributes["ike_log_level"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyIPSecVpnServiceCreateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyIPSecVpnServiceCreateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyIPSecVpnServiceCreateAttributes["action"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnServiceUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnServiceUpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "ha_sync", accTestPolicyIPSecVpnServiceUpdateAttributes["ha_sync"]),
+					resource.TestCheckResourceAttr(testResourceName, "ike_log_level", accTestPolicyIPSecVpnServiceUpdateAttributes["ike_log_level"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.sources.0", accTestPolicyIPSecVpnServiceUpdateAttributes["sources"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.destinations.0", accTestPolicyIPSecVpnServiceUpdateAttributes["destinations"]),
+					resource.TestCheckResourceAttr(testResourceName, "bypass_rule.0.action", accTestPolicyIPSecVpnServiceUpdateAttributes["action"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyIPSecVpnService_withGateway(t *testing.T) {
 	testResourceName := "nsxt_policy_ipsec_vpn_service.test"
 
@@ -289,6 +343,11 @@ func testAccNsxtPolicyIPSecVpnServiceExists(displayName string, resourceName str
 		if gatewayPath == "" && localeServicePath == "" {
 			return fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
 		}
+		parentPath := gatewayPath
+		if parentPath == "" {
+			parentPath = localeServicePath
+		}
+		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
 		if localeServiceID == "" {
 			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
@@ -296,7 +355,7 @@ func testAccNsxtPolicyIPSecVpnServiceExists(displayName string, resourceName str
 		if err != nil && gatewayPath == "" {
 			return fmt.Errorf("Invalid locale service path %s", localeServicePath)
 		}
-		_, err1 := getNsxtPolicyIPSecVpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+		_, err1 := getNsxtPolicyIPSecVpnServiceByID(sessionContext, connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
 		if err1 != nil {
 			return fmt.Errorf("Policy IPSecVpnService %s does not exist", displayName)
 		}
@@ -316,6 +375,11 @@ func testAccNsxtPolicyIPSecVpnServiceCheckDestroy(state *terraform.State, displa
 		resourceID := rs.Primary.Attributes["id"]
 		localeServicePath := rs.Primary.Attributes["locale_service_path"]
 		gatewayPath := rs.Primary.Attributes["gateway_path"]
+		parentPath := gatewayPath
+		if parentPath == "" {
+			parentPath = localeServicePath
+		}
+		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
 		if localeServiceID == "" {
 			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
@@ -324,7 +388,7 @@ func testAccNsxtPolicyIPSecVpnServiceCheckDestroy(state *terraform.State, displa
 			return nil
 		}
 
-		_, err1 := getNsxtPolicyIPSecVpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
+		_, err1 := getNsxtPolicyIPSecVpnServiceByID(sessionContext, connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
 		if err1 == nil {
 			return fmt.Errorf("Policy IPSecVpnService %s still exists", displayName)
 		}
@@ -381,4 +445,46 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
   display_name = "%s"
 	 %s
 }`, accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
+}
+
+func testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyIPSecVpnServiceCreateAttributes
+	} else {
+		attrMap = accTestPolicyIPSecVpnServiceUpdateAttributes
+	}
+	context := testAccNsxtPolicyMultitenancyContext()
+	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() + fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_service" "test" {
+%s
+  display_name  = "%s"
+  description   = "%s"
+  gateway_path  = nsxt_policy_tier1_gateway.test.path
+  enabled       = "%s"
+  ha_sync       = "%s"
+  ike_log_level = "%s"
+  bypass_rule {
+    sources      = ["%s"]
+    destinations = ["%s"]
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"])
+}
+
+func testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
+resource "nsxt_policy_tier1_gateway" "test" {
+%s
+  description  = "Acceptance Test"
+  display_name = "%s"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  }
+}`, context, testAccNsxtPolicyVPNGatewayHelperName)
 }

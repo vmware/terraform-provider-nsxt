@@ -8,6 +8,7 @@ import (
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -21,6 +22,9 @@ func NewIpsecVpnIkeProfilesClient(sessionContext utl.SessionContext, connector v
 
 	case utl.Local:
 		client = client0.NewIpsecVpnIkeProfilesClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewIpsecVpnIkeProfilesClient(connector)
 
 	default:
 		return nil
@@ -36,6 +40,10 @@ func (c IPSecVpnIkeProfileClientContext) Delete(ikeProfileIdParam string) error 
 	case utl.Local:
 		client := c.Client.(client0.IpsecVpnIkeProfilesClient)
 		err = client.Delete(ikeProfileIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.IpsecVpnIkeProfilesClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, ikeProfileIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -56,6 +64,13 @@ func (c IPSecVpnIkeProfileClientContext) Get(ikeProfileIdParam string) (model0.I
 			return obj, err
 		}
 
+	case utl.Multitenancy:
+		client := c.Client.(client2.IpsecVpnIkeProfilesClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, ikeProfileIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -72,6 +87,10 @@ func (c IPSecVpnIkeProfileClientContext) List(cursorParam *string, includeMarkFo
 		client := c.Client.(client0.IpsecVpnIkeProfilesClient)
 		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
+	case utl.Multitenancy:
+		client := c.Client.(client2.IpsecVpnIkeProfilesClient)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -86,6 +105,10 @@ func (c IPSecVpnIkeProfileClientContext) Patch(ikeProfileIdParam string, ipSecVp
 	case utl.Local:
 		client := c.Client.(client0.IpsecVpnIkeProfilesClient)
 		err = client.Patch(ikeProfileIdParam, ipSecVpnIkeProfileParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.IpsecVpnIkeProfilesClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, ikeProfileIdParam, ipSecVpnIkeProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -102,6 +125,10 @@ func (c IPSecVpnIkeProfileClientContext) Update(ikeProfileIdParam string, ipSecV
 	case utl.Local:
 		client := c.Client.(client0.IpsecVpnIkeProfilesClient)
 		obj, err = client.Update(ikeProfileIdParam, ipSecVpnIkeProfileParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.IpsecVpnIkeProfilesClient)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, ikeProfileIdParam, ipSecVpnIkeProfileParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
