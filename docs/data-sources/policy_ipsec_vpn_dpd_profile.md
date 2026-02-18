@@ -20,6 +20,8 @@ data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
 
 ## Argument Reference
 
+* `context` - (Optional) Policy context for this data source.
+  * `project_id` - (Optional) Project ID for multitenancy.
 * `id` - (Optional) The ID of IPSec VPN DPD profile to retrieve.
 * `display_name` - (Optional) The Display Name of the IPSec VPN DPD profile.
 
