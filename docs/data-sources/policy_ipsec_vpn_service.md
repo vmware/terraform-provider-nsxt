@@ -20,6 +20,8 @@ data "nsxt_policy_ipsec_vpn_service" "test" {
 
 ## Argument Reference
 
+* `context` - (Optional) Policy context for this data source.
+  * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped paths.
 * `id` - (Optional) The ID of IPSec VPN Service to retrieve.
 * `display_name` - (Optional) The Display Name of the IPSec VPN Service.
 * `gateway_path` - (Optional) Gateway Path for this Service.

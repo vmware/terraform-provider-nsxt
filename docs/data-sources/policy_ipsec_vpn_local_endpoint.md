@@ -28,6 +28,8 @@ data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 
 ## Argument Reference
 
+* `context` - (Optional) Policy context for this data source.
+  * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped service paths.
 * `id` - (Optional) The ID of Local Endpoint to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Local Endpoint to retrieve.
 * `service_path` - (Optional) Service Path for this Local Endpoint.
