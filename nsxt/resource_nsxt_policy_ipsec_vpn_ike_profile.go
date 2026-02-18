@@ -68,6 +68,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(false, false, false),
 			"dh_groups": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
@@ -128,9 +129,21 @@ func resourceNsxtPolicyIPSecVpnIkeProfileCreate(d *schema.ResourceData, m interf
 	}
 
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnIkeProfileExists)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
+		_, err := client.Get(id)
+		if err == nil {
+			return true, nil
+		}
+		if isNotFoundError(err) {
+			return false, nil
+		}
+		return false, logAPIError("Error retrieving resource", err)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -157,7 +170,6 @@ func resourceNsxtPolicyIPSecVpnIkeProfileCreate(d *schema.ResourceData, m interf
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnIkeProfile with ID %s", id)
-	sessionContext := getSessionContext(d, m)
 	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {

@@ -41,6 +41,7 @@ func resourceNsxtPolicyIPSecVpnDpdProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(false, false, false),
 			"dpd_probe_interval": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -88,9 +89,21 @@ func resourceNsxtPolicyIPSecVpnDpdProfileCreate(d *schema.ResourceData, m interf
 	}
 
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnDpdProfileExists)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
+		_, err := client.Get(id)
+		if err == nil {
+			return true, nil
+		}
+		if isNotFoundError(err) {
+			return false, nil
+		}
+		return false, logAPIError("Error retrieving resource", err)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -115,7 +128,6 @@ func resourceNsxtPolicyIPSecVpnDpdProfileCreate(d *schema.ResourceData, m interf
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnDpdProfile with ID %s", id)
-	sessionContext := getSessionContext(d, m)
 	client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {

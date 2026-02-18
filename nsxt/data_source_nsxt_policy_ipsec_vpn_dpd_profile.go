@@ -19,6 +19,7 @@ func dataSourceNsxtPolicyIPSecVpnDpdProfile() *schema.Resource {
 			"path":         getPathSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
+			"context":      getContextSchema(false, false, false),
 		},
 	}
 }
