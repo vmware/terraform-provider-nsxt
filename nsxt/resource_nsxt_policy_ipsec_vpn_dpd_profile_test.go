@@ -92,6 +92,55 @@ func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_ipsec_vpn_dpd_profile.test"
+	testDataSourceName := "data.nsxt_policy_ipsec_vpn_dpd_profile.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) }, // testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnDpdProfileCheckDestroy(state, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnDpdProfileMultitenancyTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnDpdProfileExists(accTestPolicyIPSecVpnDpdProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnDpdProfileCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnDpdProfileCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "dpd_probe_interval", accTestPolicyIPSecVpnDpdProfileCreateAttributes["dpd_probe_interval"]),
+					resource.TestCheckResourceAttr(testResourceName, "dpd_probe_mode", accTestPolicyIPSecVpnDpdProfileCreateAttributes["dpd_probe_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnDpdProfileCreateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "retry_count", accTestPolicyIPSecVpnDpdProfileCreateAttributes["retry_count"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnDpdProfileMultitenancyTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnDpdProfileExists(accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "dpd_probe_interval", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["dpd_probe_interval"]),
+					resource.TestCheckResourceAttr(testResourceName, "dpd_probe_mode", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["dpd_probe_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "retry_count", accTestPolicyIPSecVpnDpdProfileUpdateAttributes["retry_count"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ipsec_vpn_dpd_profile.test"
@@ -189,6 +238,37 @@ data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_ipsec_vpn_dpd_profile.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["dpd_probe_interval"], attrMap["dpd_probe_mode"], attrMap["enabled"], attrMap["retry_count"], attrMap["display_name"])
+}
+
+func testAccNsxtPolicyIPSecVpnDpdProfileMultitenancyTemplate(createFlow bool) string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyIPSecVpnDpdProfileCreateAttributes
+	} else {
+		attrMap = accTestPolicyIPSecVpnDpdProfileUpdateAttributes
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+%s
+  display_name       = "%s"
+  description        = "%s"
+  dpd_probe_interval = %s
+  dpd_probe_mode     = "%s"
+  enabled            = %s
+  retry_count        = %s
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+%s
+  display_name = "%s"
+  depends_on   = [nsxt_policy_ipsec_vpn_dpd_profile.test]
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["dpd_probe_interval"], attrMap["dpd_probe_mode"], attrMap["enabled"], attrMap["retry_count"], context, attrMap["display_name"])
 }
 
 func testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic() string {
