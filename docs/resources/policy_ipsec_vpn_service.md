@@ -34,6 +34,8 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) Policy context for this resource.
+    * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped paths.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `locale_service_path` - (Deprecated) Path of the gateway locale service associated with the IPSec VPN Service.
 * `gateway_path` - (Optional) Path of gateway associated with the IPSec VPN Service. Note that at least one of `gateway_path` and `locale_service_path` must be specified for the IPSec VPN Service object.

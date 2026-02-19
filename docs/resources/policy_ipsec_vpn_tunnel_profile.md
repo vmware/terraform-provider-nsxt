@@ -31,6 +31,8 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) Policy context for this resource.
+    * `project_id` - (Optional) Project ID for multitenancy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `digest_algorithms` - (Required) Set of algorithms to be used for message digest during IKE negotiation. Default is `SHA2_256`.
 * `dh_groups` - (Required) Diffie-Hellman group to be used if PFS is enabled. Default is GROUP14.

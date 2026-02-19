@@ -43,6 +43,7 @@ func getIPSecVpnServiceCommonSchema(isExtended bool, isTransitGateway bool) map[
 		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 		"enabled": {
 			Schema: schema.Schema{
 				Type:        schema.TypeBool,
@@ -106,9 +107,36 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 	}
 }
 
-func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
-	// For service lookup, we use Local client type as default
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
+func extractProjectIDFromPolicyPath(path string) string {
+	// Example: /orgs/default/projects/<project-id>/infra/...
+	segs := strings.Split(path, "/")
+	for i := 0; i < len(segs)-1; i++ {
+		if segs[i] == "projects" && i+1 < len(segs) {
+			return segs[i+1]
+		}
+	}
+	return ""
+}
+
+func getIPSecVpnServiceSessionContext(d *schema.ResourceData, m interface{}, gatewayPath string, localeServicePath string) utl.SessionContext {
+	sessionContext := getSessionContext(d, m)
+	// If user passed a project-scoped path, infer multitenancy even if context block is missing
+	path := gatewayPath
+	if path == "" {
+		path = localeServicePath
+	}
+	if strings.HasPrefix(path, "/orgs/") {
+		if sessionContext.ProjectID == "" {
+			sessionContext.ProjectID = extractProjectIDFromPolicyPath(path)
+		}
+		if sessionContext.ProjectID != "" {
+			sessionContext.ClientType = utl.Multitenancy
+		}
+	}
+	return sessionContext
+}
+
+func getNsxtPolicyIPSecVpnServiceByID(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
 	if localeServiceID == "" {
 		if isT0 {
 			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
@@ -122,6 +150,9 @@ func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, i
 			return model.IPSecVpnService{}, fmt.Errorf("unsupported client type")
 		}
 		return client.Get(gwID, serviceID)
+	}
+	if sessionContext.ClientType == utl.Multitenancy {
+		return model.IPSecVpnService{}, fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN services")
 	}
 	if isT0 {
 		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
@@ -137,10 +168,8 @@ func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, i
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
-func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
+func patchNsxtPolicyIPSecVpnService(sessionContext utl.SessionContext, connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
-	// For service patch, we use Local client type as default
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
 			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
@@ -154,6 +183,9 @@ func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, loc
 			return fmt.Errorf("unsupported client type")
 		}
 		return client.Patch(gwID, id, ipSecVpnService)
+	}
+	if sessionContext.ClientType == utl.Multitenancy {
+		return fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN services")
 	}
 	if isT0 {
 		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
@@ -169,10 +201,8 @@ func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, loc
 	return client.Patch(gwID, localeServiceID, id, ipSecVpnService)
 }
 
-func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
+func updateNsxtPolicyIPSecVpnService(sessionContext utl.SessionContext, connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
-	// For service update, we use Local client type as default
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	if localeServiceID == "" {
 		if isT0 {
 			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
@@ -188,6 +218,9 @@ func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, lo
 		}
 		_, err := client.Update(gwID, id, ipSecVpnService)
 		return err
+	}
+	if sessionContext.ClientType == utl.Multitenancy {
+		return fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN services")
 	}
 	if isT0 {
 		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
@@ -207,30 +240,31 @@ func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, lo
 
 func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
-	s := strings.Split(importID, "/")
 	err := fmt.Errorf("Expected policy path for the IPSec VPN Service, got %s", importID)
-	// The policy path of IPSec VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/ipsec-vpn-services/ccc
-	// or /infra/tier-0s/aaa/ipsec-vpn-services/bbb
-	if len(s) != 8 && len(s) != 6 {
+	// Supported policy paths:
+	// - /infra/tier-0s/<gw>/locale-services/<ls>/ipsec-vpn-services/<svc>
+	// - /infra/tier-0s/<gw>/ipsec-vpn-services/<svc>
+	// - /orgs/<org>/projects/<project>/infra/tier-1s/<gw>/ipsec-vpn-services/<svc>
+	if !strings.Contains(importID, "/ipsec-vpn-services/") {
 		return nil, err
 	}
-	useLocaleService := len(s) == 8
-	d.SetId(s[len(s)-1])
-	s = strings.Split(importID, "/ipsec-vpn-services/")
-	if len(s) != 2 {
+	parts := strings.Split(importID, "/ipsec-vpn-services/")
+	if len(parts) != 2 {
 		return []*schema.ResourceData{d}, err
 	}
-	if useLocaleService {
-		d.Set("locale_service_path", s[0])
+	if parts[1] == "" {
+		return []*schema.ResourceData{d}, err
+	}
+	d.SetId(parts[1])
+	if strings.Contains(parts[0], "/locale-services/") {
+		d.Set("locale_service_path", parts[0])
 	} else {
-		d.Set("gateway_path", s[0])
+		d.Set("gateway_path", parts[0])
 	}
 	return []*schema.ResourceData{d}, nil
 }
 
-func deleteNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
-	// For service delete, we use Local client type as default
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
+func deleteNsxtPolicyIPSecVpnService(sessionContext utl.SessionContext, connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
 	if localeServiceID == "" {
 		if isT0 {
 			client := cliTier0IpsecVpnServicesClient(sessionContext, connector)
@@ -244,6 +278,9 @@ func deleteNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, lo
 			return fmt.Errorf("unsupported client type")
 		}
 		return client.Delete(gwID, id)
+	}
+	if sessionContext.ClientType == utl.Multitenancy {
+		return fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN services")
 	}
 	if isT0 {
 		client := cliTier0IpsecVpnLocaleServicesClient(sessionContext, connector)
@@ -357,7 +394,8 @@ func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}
 	if localeServiceID == "" {
 		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
-	obj, err := getNsxtPolicyIPSecVpnServiceByID(connector, gwID, isT0, localeServiceID, id, isPolicyGlobalManager(m))
+	sessionContext := getIPSecVpnServiceSessionContext(d, m, gatewayPath, localeServicePath)
+	obj, err := getNsxtPolicyIPSecVpnServiceByID(sessionContext, connector, gwID, isT0, localeServiceID, id, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleReadError(d, "IPSecVpnService", id, err)
 	}
@@ -418,12 +456,13 @@ func resourceNsxtPolicyIPSecVpnServiceCreate(d *schema.ResourceData, m interface
 	if localeServiceID == "" {
 		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
+	sessionContext := getIPSecVpnServiceSessionContext(d, m, gatewayPath, localeServicePath)
 	isGlobalManager := isPolicyGlobalManager(m)
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
 	} else {
-		_, err := getNsxtPolicyIPSecVpnServiceByID(connector, gwID, isT0, localeServiceID, id, isGlobalManager)
+		_, err := getNsxtPolicyIPSecVpnServiceByID(sessionContext, connector, gwID, isT0, localeServiceID, id, isGlobalManager)
 		if err == nil {
 			return fmt.Errorf("IPSecVpnService with nsx_id '%s' already exists", id)
 		} else if !isNotFoundError(err) {
@@ -433,7 +472,7 @@ func resourceNsxtPolicyIPSecVpnServiceCreate(d *schema.ResourceData, m interface
 
 	ipSecVpnService := getIpsecVpnServiceObject(id, d)
 
-	err = patchNsxtPolicyIPSecVpnService(connector, gwID, localeServiceID, ipSecVpnService, isT0)
+	err = patchNsxtPolicyIPSecVpnService(sessionContext, connector, gwID, localeServiceID, ipSecVpnService, isT0)
 	if err != nil {
 		return handleCreateError("IPSecVpnService", id, err)
 	}
@@ -460,6 +499,7 @@ func resourceNsxtPolicyIPSecVpnServiceUpdate(d *schema.ResourceData, m interface
 	if localeServiceID == "" {
 		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
+	sessionContext := getIPSecVpnServiceSessionContext(d, m, gatewayPath, localeServicePath)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -485,7 +525,7 @@ func resourceNsxtPolicyIPSecVpnServiceUpdate(d *schema.ResourceData, m interface
 	}
 
 	log.Printf("[INFO] Updating IPSecVpnService with ID %s", id)
-	err = updateNsxtPolicyIPSecVpnService(connector, gwID, localeServiceID, ipSecVpnService, isT0)
+	err = updateNsxtPolicyIPSecVpnService(sessionContext, connector, gwID, localeServiceID, ipSecVpnService, isT0)
 	if err != nil {
 		return handleUpdateError("IPSecVpnService", id, err)
 	}
@@ -510,8 +550,9 @@ func resourceNsxtPolicyIPSecVpnServiceDelete(d *schema.ResourceData, m interface
 	if localeServiceID == "" {
 		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
+	sessionContext := getIPSecVpnServiceSessionContext(d, m, gatewayPath, localeServicePath)
 
-	err = deleteNsxtPolicyIPSecVpnService(getPolicyConnector(m), gwID, localeServiceID, isT0, id)
+	err = deleteNsxtPolicyIPSecVpnService(sessionContext, getPolicyConnector(m), gwID, localeServiceID, isT0, id)
 	if err != nil {
 		return handleDeleteError("IPSecVpnService", id, err)
 	}

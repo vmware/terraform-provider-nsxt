@@ -98,6 +98,59 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_ipsec_vpn_tunnel_profile.test"
+	testDataSourceName := "data.nsxt_policy_ipsec_vpn_tunnel_profile.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMultitenancyTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "df_policy", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["df_policy"]),
+					resource.TestCheckResourceAttr(testResourceName, "dh_groups.0", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["dh_groups"]),
+					resource.TestCheckResourceAttr(testResourceName, "digest_algorithms.0", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["digest_algorithms"]),
+					resource.TestCheckResourceAttr(testResourceName, "enable_perfect_forward_secrecy", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["enable_perfect_forward_secrecy"]),
+					resource.TestCheckResourceAttr(testResourceName, "encryption_algorithms.0", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["encryption_algorithms"]),
+					resource.TestCheckResourceAttr(testResourceName, "sa_life_time", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["sa_life_time"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMultitenancyTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "df_policy", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["df_policy"]),
+					resource.TestCheckResourceAttr(testResourceName, "dh_groups.0", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"]),
+					resource.TestCheckResourceAttr(testResourceName, "digest_algorithms.0", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["digest_algorithms"]),
+					resource.TestCheckResourceAttr(testResourceName, "enable_perfect_forward_secrecy", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["enable_perfect_forward_secrecy"]),
+					resource.TestCheckResourceAttr(testResourceName, "encryption_algorithms.0", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["encryption_algorithms"]),
+					resource.TestCheckResourceAttr(testResourceName, "sa_life_time", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["sa_life_time"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ipsec_vpn_tunnel_profile.test"
@@ -125,6 +178,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -135,13 +189,10 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnTunnelProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -150,6 +201,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 
 func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_tunnel_profile" {
@@ -157,13 +209,13 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil
@@ -196,6 +248,38 @@ data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_ipsec_vpn_tunnel_profile.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], attrMap["display_name"])
+}
+
+func testAccNsxtPolicyIPSecVpnTunnelProfileMultitenancyTemplate(createFlow bool) string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyIPSecVpnTunnelProfileCreateAttributes
+	} else {
+		attrMap = accTestPolicyIPSecVpnTunnelProfileUpdateAttributes
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
+  display_name                   = "%s"
+  description                    = "%s"
+  df_policy                      = "%s"
+  dh_groups                      = ["%s"]
+  digest_algorithms              = ["%s"]
+  enable_perfect_forward_secrecy = %s
+  encryption_algorithms          = ["%s"]
+  sa_life_time                   = %s
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
+  display_name = "%s"
+  depends_on   = [nsxt_policy_ipsec_vpn_tunnel_profile.test]
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], context, attrMap["display_name"])
 }
 
 func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic() string {
