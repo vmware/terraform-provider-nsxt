@@ -67,8 +67,7 @@ func resourceNsxtPolicyIPSecVpnDpdProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnDpdProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
+func resourceNsxtPolicyIPSecVpnDpdProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
@@ -93,15 +92,7 @@ func resourceNsxtPolicyIPSecVpnDpdProfileCreate(d *schema.ResourceData, m interf
 
 	// Initialize resource Id and verify this ID is not yet used
 	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
-		_, err := client.Get(id)
-		if err == nil {
-			return true, nil
-		}
-		if isNotFoundError(err) {
-			return false, nil
-		}
-		return false, logAPIError("Error retrieving resource", err)
+		return resourceNsxtPolicyIPSecVpnDpdProfileExists(sessionContext, id, connector)
 	}
 	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {

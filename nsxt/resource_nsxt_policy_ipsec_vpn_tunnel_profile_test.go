@@ -178,6 +178,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -188,13 +189,10 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnTunnelProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -203,6 +201,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 
 func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_tunnel_profile" {
@@ -210,13 +209,13 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil
