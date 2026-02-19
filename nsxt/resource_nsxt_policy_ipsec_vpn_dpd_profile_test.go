@@ -97,7 +97,7 @@ func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_multitenancy(t *testing.T) {
 	testDataSourceName := "data.nsxt_policy_ipsec_vpn_dpd_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) }, // testAccOnlyMultitenancy(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnDpdProfileCheckDestroy(state, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"])
@@ -168,6 +168,7 @@ func testAccNsxtPolicyIPSecVpnDpdProfileExists(displayName string, resourceName 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -178,13 +179,10 @@ func testAccNsxtPolicyIPSecVpnDpdProfileExists(displayName string, resourceName 
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnDpdProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnDpdProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnDpdProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnDpdProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -193,6 +191,7 @@ func testAccNsxtPolicyIPSecVpnDpdProfileExists(displayName string, resourceName 
 
 func testAccNsxtPolicyIPSecVpnDpdProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_dpd_profile" {
@@ -200,13 +199,13 @@ func testAccNsxtPolicyIPSecVpnDpdProfileCheckDestroy(state *terraform.State, dis
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnDpdProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnDpdProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnDpdProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil

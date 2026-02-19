@@ -174,6 +174,7 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -184,13 +185,10 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnIkeProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnIkeProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnIkeProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnIkeProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -199,6 +197,7 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 
 func testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_ike_profile" {
@@ -206,13 +205,13 @@ func testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state *terraform.State, dis
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnIkeProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnIkeProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil
