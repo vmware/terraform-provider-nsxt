@@ -136,7 +136,7 @@ func resourceKeyValueHash(v interface{}) int {
 	if v != nil {
 		m := v.(map[string]interface{})
 		for k, v := range m {
-			buf.WriteString(fmt.Sprintf("%s-%s", k, v))
+			fmt.Fprintf(&buf, "%s-%s", k, v)
 		}
 	}
 	result := int(crc32.ChecksumIEEE(buf.Bytes()))

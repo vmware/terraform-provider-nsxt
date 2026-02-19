@@ -122,7 +122,7 @@ type NsxClusterNode struct {
 	ID        string
 	IPAddress string
 	UserName  string
-	Password  string
+	Password  string //nolint:gosec
 	Fqdn      string
 	Status    string
 }

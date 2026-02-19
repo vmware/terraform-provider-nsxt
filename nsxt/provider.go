@@ -42,14 +42,14 @@ var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
 	RemoteAuth             bool
-	BearerToken            string
+	BearerToken            string //nolint:gosec
 	ToleratePartialSuccess bool
 	MaxRetries             int
 	MinRetryInterval       int
 	MaxRetryInterval       int
 	RetryStatusCodes       []int
 	Username               string
-	Password               string
+	Password               string //nolint:gosec
 	LicenseKeys            []string
 }
 
@@ -648,8 +648,8 @@ type jwtToken struct {
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int64  `json:"expires_in"`
 	Scope        string `json:"scope"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`  //nolint:gosec
+	RefreshToken string `json:"refresh_token"` //nolint:gosec
 }
 
 type vmcAuthInfo struct {
@@ -704,7 +704,7 @@ func (v *vmcAuthInfo) getAPIToken() (string, error) {
 	}
 
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
-	res, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req) //nolint:gosec
 	if err != nil {
 		return "", err
 	}
@@ -955,7 +955,7 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
 	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
 
-	log.Printf("Issuing request towards NSX:\n%s", replaced)
+	log.Printf("Issuing request towards NSX:\n%s", replaced) //nolint:gosec
 	return nil
 }
 
