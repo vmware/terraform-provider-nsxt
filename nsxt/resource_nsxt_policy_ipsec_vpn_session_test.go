@@ -854,6 +854,7 @@ resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
 
 	return vpnServiceTemplate + localEndpointTemplate + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+	%s
   display_name          = "%s"
   description           = "Ike profile for ipsec vpn session"
   encryption_algorithms = ["AES_128"]
@@ -863,6 +864,7 @@ resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
 }
 
 resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   display_name          = "%s"
   description           = "Terraform provisioned IPSec VPN Ike Profile"
   df_policy             = "COPY"
@@ -873,6 +875,7 @@ resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
 }
 
 resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+	%s
   display_name       = "%s"
   description        = "Terraform provisioned IPSec VPN DPD Profile"
   dpd_probe_mode     = "ON_DEMAND"
@@ -880,7 +883,7 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
   enabled            = true
   retry_count        = 8
 }
-`, ipsecVpnResourceName, ipsecVpnResourceName, ipsecVpnResourceName)
+`, context, ipsecVpnResourceName, context, ipsecVpnResourceName, context, ipsecVpnResourceName)
 }
 
 func testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyTemplate(createFlow bool) string {
@@ -956,7 +959,6 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
   rule {
     sources      = ["%s"]
     destinations = ["%s"]
-    action       = "%s"
   }
 
   tag {
@@ -966,7 +968,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 }
 `, context, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
 			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"], attrMap["action"])
+			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
 func testAccNsxtPolicyIPSecVpnSessionRouteBasedMinimalistic() string {

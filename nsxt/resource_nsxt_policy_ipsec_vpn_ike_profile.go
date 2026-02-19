@@ -108,8 +108,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnIkeProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
+func resourceNsxtPolicyIPSecVpnIkeProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
@@ -133,15 +132,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfileCreate(d *schema.ResourceData, m interf
 
 	// Initialize resource Id and verify this ID is not yet used
 	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
-		_, err := client.Get(id)
-		if err == nil {
-			return true, nil
-		}
-		if isNotFoundError(err) {
-			return false, nil
-		}
-		return false, logAPIError("Error retrieving resource", err)
+		return resourceNsxtPolicyIPSecVpnIkeProfileExists(sessionContext, id, connector)
 	}
 	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
