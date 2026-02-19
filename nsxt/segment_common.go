@@ -66,8 +66,8 @@ func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 				Optional: true,
 			},
 			"lease_time":          getDhcpLeaseTimeSchema(),
-			"dhcp_option_121":     getDhcpOptions121Schema(),
-			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
+			"dhcp_option_121":     getPolicyDhcpOptions121Schema(),
+			"dhcp_generic_option": getPolicyDhcpGenericOptionsSchema(),
 		},
 	}
 }

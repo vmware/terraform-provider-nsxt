@@ -38,29 +38,12 @@ const tier0RouterDefaultName string = "PLR-1 LogicalRouterTier0"
 const edgeClusterDefaultName string = "EDGECLUSTER1"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
-const macPoolDefaultName string = "DefaultMacPool"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
 const defaultTestResourceName string = "terraform-acctest"
 
 const testAccDataSourceName string = "terraform-acctest-data"
 const testAccResourceName string = "terraform-acctest-resource"
-
-const singleTag string = `
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }`
-
-const doubleTags string = `
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-  tag {
-    scope = "scope2"
-    tag   = "tag2"
-  }`
 
 var (
 	randomized  bool
@@ -159,18 +142,6 @@ func getOverlayTransportZoneName() string {
 		name = overlayTransportZoneNamePrefix
 	}
 	return name
-}
-
-func getMacPoolName() string {
-	name := os.Getenv("NSXT_TEST_MAC_POOL")
-	if name == "" {
-		name = macPoolDefaultName
-	}
-	return name
-}
-
-func getIPPoolName() string {
-	return os.Getenv("NSXT_TEST_IP_POOL")
 }
 
 func getTestVMID() string {

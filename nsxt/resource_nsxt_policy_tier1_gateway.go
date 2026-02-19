@@ -19,6 +19,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var failOverModeDefaultValue = "PREEMPTIVE"
+
 var advertisementTypeValues = []string{
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_STATIC_ROUTES,
 	model.RouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPES_CONNECTED,

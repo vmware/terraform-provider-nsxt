@@ -35,6 +35,8 @@ var lbPoolSnatTypeValues = []string{
 	"AUTOMAP", "IPPOOL", "DISABLED",
 }
 
+var memberAdminStateTypeValues = []string{"ENABLED", "DISABLED", "GRACEFUL_DISABLED"}
+
 func resourceNsxtPolicyLBPool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyLBPoolCreate,
@@ -86,6 +88,60 @@ func resourceNsxtPolicyLBPool() *schema.Resource {
 				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"snat": getPolicyPoolSnatSchema(),
+		},
+	}
+}
+
+func getPoolMembersSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Pool members for the loadbalancing pool",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": {
+					Type:        schema.TypeString,
+					Description: "Pool member display name",
+					Optional:    true,
+				},
+				"admin_state": {
+					Type:         schema.TypeString,
+					Description:  "Member admin state",
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(memberAdminStateTypeValues, false),
+					Default:      "ENABLED",
+				},
+				"backup_member": {
+					Type:        schema.TypeBool,
+					Description: "A boolean flag which reflects whether this is a backup pool member",
+					Optional:    true,
+					Default:     false,
+				},
+				"ip_address": {
+					Type:         schema.TypeString,
+					Description:  "Pool member IP address",
+					Required:     true,
+					ValidateFunc: validateSingleIP(),
+				},
+				"max_concurrent_connections": {
+					Type:        schema.TypeInt,
+					Description: "To ensure members are not overloaded, connections to a member can be capped by the load balancer. When a member reaches this limit, it is skipped during server selection. If it is not specified, it means that connections are unlimited",
+					Optional:    true,
+				},
+				"port": {
+					Type:         schema.TypeString,
+					Description:  "If port is specified, all connections will be sent to this port. Only single port is supported. If unset, the same port the client connected to will be used, it could be overrode by default_pool_member_port setting in virtual server. The port should not specified for port range case",
+					Optional:     true,
+					ValidateFunc: validateSinglePort(),
+				},
+				"weight": {
+					Type:         schema.TypeInt,
+					Description:  "Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms",
+					Optional:     true,
+					Default:      1,
+					ValidateFunc: validation.IntBetween(1, 256),
+				},
+			},
 		},
 	}
 }
