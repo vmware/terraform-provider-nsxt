@@ -36,6 +36,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
@@ -99,6 +100,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_importBasic(t *testing.T
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
