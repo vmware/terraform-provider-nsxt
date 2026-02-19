@@ -47,57 +47,6 @@ var replicationModeValues = []string{
 	model.Segment_REPLICATION_MODE_SOURCE,
 }
 
-func getDhcpOptions121Schema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "DHCP classless static routes",
-		Optional:    true,
-		Computed:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"network": {
-					Type:         schema.TypeString,
-					Description:  "Destination in cidr",
-					Required:     true,
-					ValidateFunc: validateIPCidr(),
-				},
-				"next_hop": {
-					Type:         schema.TypeString,
-					Description:  "Next hop IP",
-					Required:     true,
-					ValidateFunc: validateSingleIP(),
-				},
-			},
-		},
-	}
-}
-
-func getDhcpGenericOptionsSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "Generic DHCP options",
-		Optional:    true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"code": {
-					Type:         schema.TypeInt,
-					Description:  "DHCP option code, [0-255]",
-					Required:     true,
-					ValidateFunc: validation.IntBetween(0, 255),
-				},
-				"values": {
-					Type:        schema.TypeList,
-					Description: "DHCP option values",
-					Required:    true,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-			},
-		},
-	}
-}
-
 func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -117,8 +66,8 @@ func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 				Optional: true,
 			},
 			"lease_time":          getDhcpLeaseTimeSchema(),
-			"dhcp_option_121":     getDhcpOptions121Schema(),
-			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
+			"dhcp_option_121":     getPolicyDhcpOptions121Schema(),
+			"dhcp_generic_option": getPolicyDhcpGenericOptionsSchema(),
 		},
 	}
 }

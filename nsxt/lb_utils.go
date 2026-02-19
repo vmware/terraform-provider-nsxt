@@ -23,6 +23,33 @@ var cliLbPersistenceProfilesClient = infra.NewLbPersistenceProfilesClient
 var cliLbServerSslProfilesClient = infra.NewLbServerSslProfilesClient
 var cliLbClientSslProfilesClient = infra.NewLbClientSslProfilesClient
 
+func getLbRuleInverseSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeBool,
+		Description: "Whether to reverse match result of this condition",
+		Optional:    true,
+		Default:     false,
+	}
+}
+
+func getLbRuleCaseSensitiveSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeBool,
+		Description: "If true, case is significant in condition matching",
+		Optional:    true,
+		Default:     true,
+	}
+}
+
+func getLbRuleMatchTypeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Description:  "Match type (STARTS_WITH, ENDS_WITH, EQUALS, CONTAINS, REGEX)",
+		ValidateFunc: validation.StringInSlice([]string{"STARTS_WITH", "ENDS_WITH", "EQUALS", "CONTAINS", "REGEX"}, false),
+		Required:     true,
+	}
+}
+
 // Helpers for common LB monitor schema settings
 func getLbMonitorFallCountSchema() *schema.Schema {
 	return &schema.Schema{
