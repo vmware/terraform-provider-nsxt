@@ -181,11 +181,11 @@ func TestMockResourceNsxtPolicySegmentCreate(t *testing.T) {
 
 		res := resourceNsxtPolicySegment()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"display_name":         segDisplayName,
-			"transport_zone_path":  "/infra/sites/default/enforcement-points/default/transport-zones/zone-1",
-			"connectivity_path":    "",
-			"vlan_ids":             []interface{}{},
-			"subnet":               []interface{}{},
+			"display_name":        segDisplayName,
+			"transport_zone_path": "/infra/sites/default/enforcement-points/default/transport-zones/zone-1",
+			"connectivity_path":   "",
+			"vlan_ids":            []interface{}{},
+			"subnet":              []interface{}{},
 		})
 
 		m := newGoMockProviderClient()
@@ -261,11 +261,11 @@ func TestMockResourceNsxtPolicySegmentUpdate(t *testing.T) {
 
 		res := resourceNsxtPolicySegment()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"display_name":         segDisplayName,
-			"connectivity_path":    "",
-			"transport_zone_path":  "/infra/sites/default/enforcement-points/default/transport-zones/zone-1",
-			"vlan_ids":             []interface{}{},
-			"subnet":               []interface{}{},
+			"display_name":        segDisplayName,
+			"connectivity_path":   "",
+			"transport_zone_path": "/infra/sites/default/enforcement-points/default/transport-zones/zone-1",
+			"vlan_ids":            []interface{}{},
+			"subnet":              []interface{}{},
 		})
 		d.SetId(segID)
 
