@@ -183,9 +183,9 @@ func TestMockResourceNsxtPolicySegmentPortCreate(t *testing.T) {
 
 		res := resourceNsxtPolicySegmentPort()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"segment_path":  segPortSegmentPath,
-			"display_name":  segPortDisplayName,
-			"description":   segPortDescription,
+			"segment_path": segPortSegmentPath,
+			"display_name": segPortDisplayName,
+			"description":  segPortDescription,
 		})
 
 		m := newGoMockProviderClient()
@@ -259,9 +259,9 @@ func TestMockResourceNsxtPolicySegmentPortUpdate(t *testing.T) {
 
 		res := resourceNsxtPolicySegmentPort()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"segment_path":  segPortSegmentPath,
-			"display_name":  segPortDisplayName,
-			"description":   segPortDescription,
+			"segment_path": segPortSegmentPath,
+			"display_name": segPortDisplayName,
+			"description":  segPortDescription,
 		})
 		d.SetId(segPortPortID)
 
