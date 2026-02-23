@@ -107,33 +107,17 @@ func resourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{}) e
 		return handleReadError(d, "IdsSettings", id, err)
 	}
 
-	if obj.DisplayName != nil {
-		d.Set("display_name", *obj.DisplayName)
-	}
-	if obj.Description != nil {
-		d.Set("description", *obj.Description)
-	}
-	if obj.Path != nil {
-		d.Set("path", *obj.Path)
-	}
-	if obj.Revision != nil {
-		d.Set("revision", *obj.Revision)
-	}
+	d.Set("display_name", obj.DisplayName)
+	d.Set("description", obj.Description)
+	d.Set("path", obj.Path)
+	d.Set("revision", obj.Revision)
 
 	setPolicyTagsInSchema(d, obj.Tags)
 
 	// Set IdsSettings specific fields
-	if obj.AutoUpdate != nil {
-		d.Set("auto_update_signatures", *obj.AutoUpdate)
-	}
-
-	if obj.IdsEventsToSyslog != nil {
-		d.Set("enable_syslog", *obj.IdsEventsToSyslog)
-	}
-
-	if obj.Oversubscription != nil {
-		d.Set("oversubscription", *obj.Oversubscription)
-	}
+	d.Set("auto_update_signatures", obj.AutoUpdate)
+	d.Set("enable_syslog", obj.IdsEventsToSyslog)
+	d.Set("oversubscription", obj.Oversubscription)
 
 	// Read IdsCustomSignatureSettings if custom_signature_version_id is set
 	customSigVersionID := d.Get("custom_signature_version_id").(string)
