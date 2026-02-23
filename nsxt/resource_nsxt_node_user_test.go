@@ -14,7 +14,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 )
 
-var accTestNodeUserCreateAttributes = map[string]string{
+var accTestNodeUserCreateAttributes = map[string]string{ //nolint:gosec
 	"full_name":                 getAccTestRandomString(10),
 	"password":                  "Q5&WfLqv9Zd5",
 	"active":                    "true",
@@ -22,7 +22,7 @@ var accTestNodeUserCreateAttributes = map[string]string{
 	"password_change_warning":   "30",
 }
 
-var accTestNodeUserUpdateAttributes = map[string]string{
+var accTestNodeUserUpdateAttributes = map[string]string{ //nolint:gosec
 	"full_name":                 getAccTestRandomString(10),
 	"password":                  "Q5&WfLqv9Zd5",
 	"active":                    "false",

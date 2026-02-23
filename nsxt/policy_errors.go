@@ -64,7 +64,7 @@ func logRawVapiErrorData(message string, vapiType *errors.ErrorTypeEnum, apiErro
 		return fmt.Errorf("%s (no additional details provided)", message)
 	}
 
-	log.Printf("[ERROR]: %s: %s", message, errorStr)
+	log.Printf("[ERROR]: %s: %s", message, errorStr) //nolint:gosec
 	return fmt.Errorf("%s: %s", message, errorStr)
 }
 
@@ -107,7 +107,7 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 			details += fmt.Sprintf("%s\n", printRelatedAPIError(relatedErr))
 		}
 	}
-	log.Printf("[ERROR]: %s", details)
+	log.Printf("[ERROR]: %s", details) //nolint:gosec
 	return liberrors.New(details)
 }
 
@@ -229,7 +229,7 @@ func handleDataSourceReadError(d *schema.ResourceData, resourceType string, reso
 
 func handleDeleteError(resourceType string, resourceID string, err error) error {
 	if isNotFoundError(err) {
-		log.Printf("[WARNING] %s %s not found on backend", resourceType, resourceID)
+		log.Printf("[WARNING] %s %s not found on backend", resourceType, resourceID) //nolint:gosec
 		// We don't want to fail apply on this
 		return nil
 	}
