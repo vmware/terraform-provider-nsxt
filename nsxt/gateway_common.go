@@ -366,6 +366,13 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 			// we need revision, and keep the HA vip config
 			serviceStruct.Revision = obj.Revision
 			serviceStruct.HaVipConfigs = obj.HaVipConfigs
+			// Preserve existing route redistribution config when not specified in the
+			// locale_service block (e.g. when managed by nsxt_policy_gateway_redistribution_config).
+			// Otherwise updating the T0 with locale_service (e.g. to set preferred_edge_paths)
+			// would overwrite and remove the redistribution config. See GitHub issue #1974.
+			if serviceStruct.RouteRedistributionConfig == nil && obj.RouteRedistributionConfig != nil {
+				serviceStruct.RouteRedistributionConfig = obj.RouteRedistributionConfig
+			}
 		}
 		dataValue, err := initChildLocaleService(&serviceStruct, false)
 		if err != nil {
