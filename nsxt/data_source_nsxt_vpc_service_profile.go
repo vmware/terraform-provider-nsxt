@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -39,16 +40,48 @@ func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) 
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Service Profile data source requires NSX version 9.0.0 or higher")
 	}
+	connector := getPolicyConnector(m)
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.
 	value, defaultOK := d.GetOkExists("is_default")
 	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
-		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", query)
+		_, err := policyDataSourceReadWithCustomField(d, connector, getSessionContext(d, m), "VpcServiceProfile", query)
 		return err
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", nil)
+
+	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "VpcServiceProfile", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcServiceProfileBindingType())
+			if len(convErrs) == 0 {
+				obj, ok := goVal.(model.VpcServiceProfile)
+				if ok {
+					id := lookupKey
+					if obj.Id != nil {
+						id = *obj.Id
+					}
+					d.SetId(id)
+					d.Set("id", id)
+					d.Set("display_name", obj.DisplayName)
+					d.Set("description", obj.Description)
+					d.Set("path", obj.Path)
+					d.Set("is_default", obj.IsDefault)
+					return nil
+				}
+			}
+		}
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "VpcServiceProfile", nil)
 	if err != nil {
 		return err
 	}

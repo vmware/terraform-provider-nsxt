@@ -148,7 +148,12 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.VpcIpAddressAllocation{
 		DisplayName: &displayName,
@@ -182,11 +187,44 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcIpAddressAllocation ID")
 	}
-
-	sessionContext := getSessionContext(d, m)
-	client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
-	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+	var obj *model.VpcIpAddressAllocation
+	var err error
+	if IsCacheEnabled() {
+		obj, _, _, err = CacheAwareResourceRead[model.VpcIpAddressAllocation](
+			d,
+			m,
+			connector,
+			id,
+			"VpcIpAddressAllocation",
+			model.VpcIpAddressAllocationBindingType(),
+			func() (*model.VpcIpAddressAllocation, error) {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.VpcIpAddressAllocation) error {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		sessionContext := getSessionContext(d, m)
+		client := cliVpcIpAddressAllocationsClient(sessionContext, connector)
+		parents := getVpcParentsFromContext(sessionContext)
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "VpcIpAddressAllocation", id, err)
 	}
@@ -198,7 +236,7 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcIpAddressAllocationSchema, "", nil)
 }
 
@@ -214,7 +252,12 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 

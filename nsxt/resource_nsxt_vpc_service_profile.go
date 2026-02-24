@@ -289,9 +289,15 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
-	if tagErr != nil {
-		return tagErr
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		var tagErr error
+		tags, tagErr = getValidatedTagsFromSchema(d)
+		if tagErr != nil {
+			return tagErr
+		}
 	}
 
 	obj := model.VpcServiceProfile{
@@ -331,11 +337,44 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcServiceProfile ID")
 	}
-
-	sessionContext := getSessionContext(d, m)
-	client := cliVpcServiceProfilesClient(sessionContext, connector)
-	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], id)
+	var obj *model.VpcServiceProfile
+	var err error
+	if IsCacheEnabled() {
+		obj, _, _, err = CacheAwareResourceRead[model.VpcServiceProfile](
+			d,
+			m,
+			connector,
+			id,
+			"VpcServiceProfile",
+			model.VpcServiceProfileBindingType(),
+			func() (*model.VpcServiceProfile, error) {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcServiceProfilesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				readObj, readErr := client.Get(parents[0], parents[1], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.VpcServiceProfile) error {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcServiceProfilesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				return client.Patch(parents[0], parents[1], id, *patchObj)
+			},
+		)
+	} else {
+		sessionContext := getSessionContext(d, m)
+		client := cliVpcServiceProfilesClient(sessionContext, connector)
+		parents := getVpcParentsFromContext(sessionContext)
+		readObj, readErr := client.Get(parents[0], parents[1], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "VpcServiceProfile", id, err)
 	}
@@ -347,7 +386,7 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcServiceProfileSchema, "", nil)
 }
 
@@ -363,9 +402,15 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
-	if tagErr != nil {
-		return tagErr
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		var tagErr error
+		tags, tagErr = getValidatedTagsFromSchema(d)
+		if tagErr != nil {
+			return tagErr
+		}
 	}
 
 	revision := int64(d.Get("revision").(int))
