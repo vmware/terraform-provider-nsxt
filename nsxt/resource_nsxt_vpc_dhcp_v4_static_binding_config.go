@@ -251,7 +251,12 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.DhcpV4StaticBindingConfig{
 		DisplayName:  &displayName,
@@ -287,30 +292,74 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 
 func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining DhcpV4StaticBindingConfig ID")
 	}
-
 	parentPath := d.Get("parent_path").(string)
-	sessionContext := getParentContext(d, m, parentPath)
-	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
-	dhcpObj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcSubnetDhcpStaticBindingConfigsClient(sessionContext, connector)
+
+	var obj *model.DhcpV4StaticBindingConfig
+	var err error
+	if IsCacheEnabled() {
+		obj, _, _, err = CacheAwareResourceRead[model.DhcpV4StaticBindingConfig](
+			d,
+			m,
+			connector,
+			id,
+			"DhcpV4StaticBindingConfig",
+			model.DhcpV4StaticBindingConfigBindingType(),
+			func() (*model.DhcpV4StaticBindingConfig, error) {
+				dhcpObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				converter := bindings.NewTypeConverter()
+				convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
+				if errs != nil {
+					return nil, errs[0]
+				}
+				typed := convObj.(model.DhcpV4StaticBindingConfig)
+				return &typed, nil
+			},
+			func(patchObj *model.DhcpV4StaticBindingConfig) error {
+				converter := bindings.NewTypeConverter()
+				convObj, convErrs := converter.ConvertToVapi(*patchObj, model.DhcpV4StaticBindingConfigBindingType())
+				if convErrs != nil {
+					return convErrs[0]
+				}
+				return client.Patch(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
+			},
+		)
+	} else {
+		dhcpObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			converter := bindings.NewTypeConverter()
+			convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+			typed := convObj.(model.DhcpV4StaticBindingConfig)
+			obj = &typed
+		}
+	}
+
 	if err != nil {
 		return handleReadError(d, "DhcpV4StaticBindingConfig", id, err)
 	}
 
-	converter := bindings.NewTypeConverter()
-	convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
-	if errs != nil {
-		return errs[0]
+	if obj == nil {
+		return handleReadError(d, "DhcpV4StaticBindingConfig", id, fmt.Errorf("empty object"))
 	}
-	obj := convObj.(model.DhcpV4StaticBindingConfig)
+
 	if obj.ResourceType != "DhcpV4StaticBindingConfig" {
 		return handleReadError(d, "DhcpV4 Static Binding Config", id, fmt.Errorf("Unexpected ResourceType"))
 	}
@@ -322,7 +371,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, dhcpV4StaticBindingConfigSchema, "", nil)
 }
 
@@ -342,7 +391,12 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
