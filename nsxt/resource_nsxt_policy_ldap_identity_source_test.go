@@ -10,6 +10,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/aaa"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accTestPolicyLdapIdentitySourceCreateAttributes = map[string]string{
@@ -20,6 +25,51 @@ var accTestPolicyLdapIdentitySourceCreateAttributes = map[string]string{
 var accTestPolicyLdapIdentitySourceUpdateAttributes = map[string]string{
 	"nsx_id":      getAccTestResourceName(),
 	"description": "terraform updated",
+}
+
+// testAccDeleteAllLdapIdentitySources deletes every LDAP identity source on the manager.
+// NSX allows only one source per authentication domain; leftovers from parallel packages or failed
+// runs cause "Domain ... is already mapped" (e.g. error 53013) when creating a new source.
+// Call from CheckDestroy so the manager is left clean after each test.
+func testAccDeleteAllLdapIdentitySources() error {
+	connector, err := testAccGetPolicyConnector()
+	if err != nil {
+		return fmt.Errorf("failed to get policy connector: %w", err)
+	}
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	ldapClient := aaa.NewLdapIdentitySourcesClient(sessionContext, connector)
+	if ldapClient == nil {
+		return fmt.Errorf("LDAP identity sources client is nil")
+	}
+	converter := bindings.NewTypeConverter()
+	var cursor *string
+	for {
+		listResult, err := ldapClient.List(cursor, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf("failed to list LDAP identity sources: %w", err)
+		}
+		for _, structVal := range listResult.Results {
+			if structVal == nil {
+				continue
+			}
+			obj, errs := converter.ConvertToGolang(structVal, nsxModel.LdapIdentitySourceBindingType())
+			if errs != nil {
+				return fmt.Errorf("failed to convert LDAP identity source from list: %w", errs[0])
+			}
+			ldapObj := obj.(nsxModel.LdapIdentitySource)
+			if ldapObj.Id == nil || *ldapObj.Id == "" {
+				continue
+			}
+			if err := ldapClient.Delete(*ldapObj.Id); err != nil && !isNotFoundError(err) {
+				return fmt.Errorf("failed to delete LDAP identity source %s: %w", *ldapObj.Id, err)
+			}
+		}
+		if listResult.Cursor == nil || *listResult.Cursor == "" {
+			break
+		}
+		cursor = listResult.Cursor
+	}
+	return nil
 }
 
 func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
@@ -38,7 +88,10 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceUpdateAttributes["nsx_id"])
+			if err := testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceUpdateAttributes["nsx_id"]); err != nil {
+				return err
+			}
+			return testAccDeleteAllLdapIdentitySources()
 		},
 		Steps: []resource.TestStep{
 			{
@@ -99,7 +152,10 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"])
+			if err := testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"]); err != nil {
+				return err
+			}
+			return testAccDeleteAllLdapIdentitySources()
 		},
 		Steps: []resource.TestStep{
 			{

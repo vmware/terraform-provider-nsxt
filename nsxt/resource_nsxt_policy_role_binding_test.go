@@ -42,7 +42,10 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyRoleBindingCheckDestroy(state, accTestPolicyRoleUpdateAttributes["display_name"])
+			if err := testAccNsxtPolicyRoleBindingCheckDestroy(state, accTestPolicyRoleUpdateAttributes["display_name"]); err != nil {
+				return err
+			}
+			return testAccDeleteAllLdapIdentitySources()
 		},
 		Steps: []resource.TestStep{
 			{
@@ -160,7 +163,10 @@ func TestAccResourceNsxtPolicyRoleBinding_import_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyRoleBindingCheckDestroy(state, accTestPolicyRoleUpdateAttributes["display_name"])
+			if err := testAccNsxtPolicyRoleBindingCheckDestroy(state, accTestPolicyRoleUpdateAttributes["display_name"]); err != nil {
+				return err
+			}
+			return testAccDeleteAllLdapIdentitySources()
 		},
 		Steps: []resource.TestStep{
 			{
