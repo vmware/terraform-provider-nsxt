@@ -19,10 +19,7 @@ func NewAttachmentsClient(sessionContext utl.SessionContext, connector vapiProto
 
 	switch sessionContext.ClientType {
 
-	case utl.Multitenancy:
-		client = client0.NewAttachmentsClient(connector)
-
-	case utl.VPC:
+	case utl.Local, utl.Multitenancy, utl.VPC:
 		client = client0.NewAttachmentsClient(connector)
 
 	default:
@@ -36,11 +33,7 @@ func (c TransitGatewayAttachmentClientContext) Delete(orgIdParam string, project
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.AttachmentsClient)
-		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam)
 
@@ -56,14 +49,7 @@ func (c TransitGatewayAttachmentClientContext) Get(orgIdParam string, projectIdP
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.AttachmentsClient)
-		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam)
 		if err != nil {
@@ -82,11 +68,7 @@ func (c TransitGatewayAttachmentClientContext) List(orgIdParam string, projectId
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.AttachmentsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
@@ -101,11 +83,7 @@ func (c TransitGatewayAttachmentClientContext) Patch(orgIdParam string, projectI
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.AttachmentsClient)
-		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam, transitGatewayAttachmentParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam, transitGatewayAttachmentParam)
 
@@ -121,11 +99,7 @@ func (c TransitGatewayAttachmentClientContext) Update(orgIdParam string, project
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.AttachmentsClient)
-		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam, transitGatewayAttachmentParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, attachmentIdParam, transitGatewayAttachmentParam)
 
