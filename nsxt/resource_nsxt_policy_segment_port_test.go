@@ -38,11 +38,11 @@ func testAccResourceNsxtPolicySegmentPort_basic(t *testing.T, withContext bool, 
 		mtPrefix = "/orgs/default/projects/" + projectID
 	}
 	// Attachment field values
-	attachmentID := "vif-uuid-001"
+	attachmentID := getAccTestResourceName()
 	attachmentType := "PARENT"
 	allocateAddresses := "DHCP"
 	hyperbusMode := "DISABLE"
-	childAttachmentID := "vif-uuid-002"
+	childAttachmentID := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -111,11 +111,11 @@ func testAccResourceNsxtPolicySegmentPort_importBasic(t *testing.T, withContext 
 	createResourceTag := "profile1"
 	tzName := getOverlayTransportZoneName()
 	// Attachment field values
-	attachmentID := "vif-uuid-001"
+	attachmentID := getAccTestResourceName()
 	attachmentType := "PARENT"
 	allocateAddresses := "DHCP"
 	hyperbusMode := "DISABLE"
-	childAttachmentID := "vif-uuid-002"
+	childAttachmentID := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
