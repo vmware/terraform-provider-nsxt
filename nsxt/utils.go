@@ -155,7 +155,12 @@ func getNSXVersion(connector client.Connector) (string, error) {
 
 	}
 	log.Printf("[DEBUG] NSX version is %s", *version.NodeVersion)
-	return *version.ProductVersion, nil
+	if version.ProductVersion != nil {
+		return *version.ProductVersion, nil
+	} else if version.NodeVersion != nil {
+		return *version.NodeVersion, nil
+	}
+	return "", logAPIError("Failed to retrieve NSX version, but no error reported by NSX", err)
 }
 
 func initNSXVersion(connector client.Connector) error {
