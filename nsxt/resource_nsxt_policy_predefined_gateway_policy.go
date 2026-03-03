@@ -120,8 +120,12 @@ func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceDa
 
 	// This rule is not present in new config - check if was just deleted
 	// If so, the rule needs to be reverted
-	_, oldRules := d.GetChange("default_rule")
-	for _, oldRule := range oldRules.([]interface{}) {
+	_, oldRulesRaw := d.GetChange("default_rule")
+	var oldRulesList []interface{}
+	if oldRulesSet, ok := oldRulesRaw.(*schema.Set); ok {
+		oldRulesList = oldRulesSet.List()
+	}
+	for _, oldRule := range oldRulesList {
 		oldRuleMap := oldRule.(map[string]interface{})
 		if oldID, ok := oldRuleMap["nsx_id"]; ok {
 			if (rule.Id != nil) && (*rule.Id == oldID.(string)) {
