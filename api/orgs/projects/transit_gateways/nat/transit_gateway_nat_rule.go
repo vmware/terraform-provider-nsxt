@@ -19,10 +19,7 @@ func NewNatRulesClient(sessionContext utl.SessionContext, connector vapiProtocol
 
 	switch sessionContext.ClientType {
 
-	case utl.Multitenancy:
-		client = client0.NewNatRulesClient(connector)
-
-	case utl.VPC:
+	case utl.Local, utl.Multitenancy, utl.VPC:
 		client = client0.NewNatRulesClient(connector)
 
 	default:
@@ -37,14 +34,7 @@ func (c TransitGatewayNatRuleClientContext) Get(orgIdParam string, projectIdPara
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
-		if err != nil {
-			return obj, err
-		}
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
 		if err != nil {
@@ -62,11 +52,7 @@ func (c TransitGatewayNatRuleClientContext) Patch(orgIdParam string, projectIdPa
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatRulesClient)
-		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
 
@@ -82,11 +68,7 @@ func (c TransitGatewayNatRuleClientContext) Update(orgIdParam string, projectIdP
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam, transitGatewayNatRuleParam)
 
@@ -101,11 +83,7 @@ func (c TransitGatewayNatRuleClientContext) Delete(orgIdParam string, projectIdP
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatRulesClient)
-		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, natRuleIdParam)
 
@@ -121,11 +99,7 @@ func (c TransitGatewayNatRuleClientContext) List(orgIdParam string, projectIdPar
 
 	switch c.ClientType {
 
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.VPC:
+	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
