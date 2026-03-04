@@ -48,7 +48,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersionLessThan(t, "9.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersionLessThan(t, "9.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"])
@@ -124,11 +124,11 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig910_basic(t *testing.T) {
+func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"])
@@ -209,7 +209,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_importBasic(t *testin
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersionLessThan(t, "9.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersionLessThan(t, "9.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, name)
@@ -228,12 +228,12 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_importBasic(t *testin
 	})
 }
 
-func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig910_importBasic(t *testing.T) {
+func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, name)
@@ -304,9 +304,9 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state *terraform.
 	return nil
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920 bool) string {
 	var dnsPref string
-	if isNSXGt910 {
+	if isNSXGt920 {
 		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
 	} else {
 		dnsPref = ""
@@ -328,14 +328,14 @@ resource "nsxt_vpc_subnet" "test" {
 `, testAccNsxtPolicyMultitenancyContext(), dnsPref)
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool, isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool, isNSXGt920 bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
 	} else {
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes
 	}
-	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt910) + fmt.Sprintf(`
+	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920) + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   parent_path     = nsxt_vpc_subnet.test.path
   display_name    = "%s"
@@ -371,9 +371,9 @@ resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
 		attrMap["opt121-2-gw"], attrMap["opt121-2-net"], attrMap["opt-other-code"], attrMap["opt-other-value"])
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(isNSXGt920 bool) string {
 	attrMap := accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
-	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt910) + fmt.Sprintf(`
+	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920) + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   display_name = "%s"
   parent_path  = nsxt_vpc_subnet.test.path

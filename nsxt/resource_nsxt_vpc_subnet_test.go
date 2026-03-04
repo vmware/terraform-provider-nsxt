@@ -50,7 +50,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersionLessThan(t, "9.1.0")
+			testAccNSXVersionLessThan(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -106,7 +106,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtVpcSubnet910_basic(t *testing.T) {
+func TestAccResourceNsxtVpcSubnet920_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
 	vlanExtResourcesname := getAccTestResourceName()
 
@@ -114,7 +114,7 @@ func TestAccResourceNsxtVpcSubnet910_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersion(t, "9.1.0")
+			testAccNSXVersion(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -186,7 +186,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersionLessThan(t, "9.1.0")
+			testAccNSXVersionLessThan(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -249,14 +249,14 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtVpcSubnet910_subnetSize(t *testing.T) {
+func TestAccResourceNsxtVpcSubnet920_subnetSize(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersion(t, "9.1.0")
+			testAccNSXVersion(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -475,7 +475,7 @@ func testAccNsxtVpcSubnetCheckDestroy(state *terraform.State, displayName string
 	return nil
 }
 
-func testAccNsxtVpcSubnetTemplate(createFlow bool, isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetTemplate(createFlow bool, isNSXGt920 bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetCreateAttributes
@@ -483,7 +483,7 @@ func testAccNsxtVpcSubnetTemplate(createFlow bool, isNSXGt910 bool) string {
 		attrMap = accTestVpcSubnetUpdateAttributes
 	}
 	var dnsPref string
-	if isNSXGt910 {
+	if isNSXGt920 {
 		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
 	} else {
 		dnsPref = ""
@@ -547,7 +547,7 @@ resource "nsxt_vpc_subnet" "test" {
 	return strings.ReplaceAll(template, "${NAME}", vlanExtResourcesname)
 }
 
-func testAccNsxtVpcSubnetSizeTemplate(createFlow bool, isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetSizeTemplate(createFlow bool, isNSXGt920 bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetCreateAttributes
@@ -555,7 +555,7 @@ func testAccNsxtVpcSubnetSizeTemplate(createFlow bool, isNSXGt910 bool) string {
 		attrMap = accTestVpcSubnetUpdateAttributes
 	}
 	var dnsPref string
-	if isNSXGt910 {
+	if isNSXGt920 {
 		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
 	} else {
 		dnsPref = ""
@@ -610,10 +610,10 @@ resource "nsxt_vpc_subnet" "test" {
 }`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"])
 }
 
-func testAccNsxtVpcSubnetReservedIPRangeTemplate(isNSXGt910 bool) string {
+func testAccNsxtVpcSubnetReservedIPRangeTemplate(isNSXGt920 bool) string {
 	attrMap := accTestVpcSubnetReservedIPRangeAttributes
 	var dnsPref string
-	if isNSXGt910 {
+	if isNSXGt920 {
 		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
 	} else {
 		dnsPref = ""
