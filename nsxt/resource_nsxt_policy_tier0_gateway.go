@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-cty/cty"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
@@ -495,6 +496,26 @@ func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, m inter
 	return d.Set("bgp_config", bgpConfigs)
 }
 
+func isInterSrIbgpSetInConfig(d *schema.ResourceData) bool {
+	raw := d.GetRawConfig()
+	log.Printf("[DEBUG] raw: %v", raw)
+	if raw.IsNull() || !raw.IsKnown() {
+		return false
+	}
+	bgpConfig := raw.GetAttr("bgp_config")
+	log.Printf("[DEBUG] raw bgpConfig: %v", bgpConfig)
+	if bgpConfig.IsNull() || !bgpConfig.IsKnown() || bgpConfig.LengthInt() == 0 {
+		return false
+	}
+	firstBlock := bgpConfig.Index(cty.NumberIntVal(0))
+	if firstBlock.IsNull() || !firstBlock.IsKnown() {
+		return false
+	}
+	interSrIbgp := firstBlock.GetAttr("inter_sr_ibgp")
+	log.Printf("[DEBUG] raw interSrIbgp: %v", interSrIbgp)
+	return !interSrIbgp.IsNull()
+}
+
 func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig {
 
 	if util.NsxVersionLower("3.0.0") {
@@ -887,7 +908,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	if d.HasChange("bgp_config") && len(bgpConfig) > 0 && bgpConfig[0] != nil && !isGlobalManager {
 		// For Global Manager BGP is defined as separate resource
 		bgpCfgMap := bgpConfig[0].(map[string]interface{})
-		if _, isSet := d.GetOkExists("bgp_config.0.inter_sr_ibgp"); !isSet {
+		if !isInterSrIbgpSetInConfig(d) {
 			log.Printf("[DEBUG] inter_sr_ibgp is not set, deleting from bgpCfgMap")
 			delete(bgpCfgMap, "inter_sr_ibgp")
 		}
