@@ -887,7 +887,8 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	if d.HasChange("bgp_config") && len(bgpConfig) > 0 && bgpConfig[0] != nil && !isGlobalManager {
 		// For Global Manager BGP is defined as separate resource
 		bgpCfgMap := bgpConfig[0].(map[string]interface{})
-		if bgpCfgMap["inter_sr_ibgp"] != nil {
+		if _, isSet := d.GetOkExists("bgp_config.0.inter_sr_ibgp"); !isSet {
+			log.Printf("[DEBUG] inter_sr_ibgp is not set, deleting from bgpCfgMap")
 			delete(bgpCfgMap, "inter_sr_ibgp")
 		}
 
