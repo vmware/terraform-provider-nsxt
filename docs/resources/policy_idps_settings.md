@@ -43,16 +43,12 @@ resource "nsxt_policy_idps_settings" "global" {
 }
 ```
 
-## Example Usage - With Custom Signature Version
+## Example Usage - With Custom Signatures
+
+Custom signature versions are system-managed. Use the version ID `"default"` for the custom signatures container (or reference an existing version via `nsxt_policy_idps_signature_version` with required `nsx_id`).
 
 ```hcl
-# Create a custom signature version first
-resource "nsxt_policy_idps_signature_version" "custom" {
-  display_name = "Custom Signatures v1"
-  description  = "Custom IDPS signatures for organization-specific threats"
-}
-
-# Configure global IDPS settings to use custom signatures
+# Enable custom signatures using the default custom signature version
 resource "nsxt_policy_idps_settings" "global" {
   description = "IDPS settings with custom signatures enabled"
 
@@ -60,7 +56,7 @@ resource "nsxt_policy_idps_settings" "global" {
   enable_syslog               = true
   oversubscription            = "BYPASSED"
   enable_custom_signatures    = true
-  custom_signature_version_id = nsxt_policy_idps_signature_version.custom.nsx_id
+  custom_signature_version_id = "default"
 }
 ```
 
@@ -86,7 +82,7 @@ The following arguments are supported:
 
 - `enable_custom_signatures` - (Optional) Enable custom signatures globally. When enabled, user-defined custom signatures in the specified version will be active in IDPS policies. Requires `custom_signature_version_id` to be set. Default is `false`.
 
-- `custom_signature_version_id` - (Optional) The custom signature version ID to use when enabling custom signatures. This should reference an existing custom signature version resource (e.g., `nsxt_policy_idps_signature_version.custom.nsx_id`). Required when `enable_custom_signatures` is `true`.
+- `custom_signature_version_id` - (Optional) The custom signature version ID to use when enabling custom signatures. Use `"default"` for the standard custom signatures container, or reference an existing version (e.g. `nsxt_policy_idps_signature_version.custom.nsx_id`). Required when `enable_custom_signatures` is `true`.
 
 ## Attributes Reference
 
