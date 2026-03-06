@@ -246,7 +246,7 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 	}
 	var obj *model.Vpc
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.Vpc](
 			d,
 			m,
