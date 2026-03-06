@@ -339,7 +339,7 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 	}
 	var obj *model.VpcServiceProfile
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcServiceProfile](
 			d,
 			m,

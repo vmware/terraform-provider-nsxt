@@ -42,6 +42,10 @@ func isRefreshPhase(d *schema.ResourceData) bool {
 	return d.Id() != "" && !d.HasChangesExcept()
 }
 
+func isCacheEnabledForRead(d *schema.ResourceData) bool {
+	return IsCacheEnabled() && isRefreshPhase(d)
+}
+
 func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 	converter := bindings.NewTypeConverter()
 	ret := make(map[string]*data.StructValue)

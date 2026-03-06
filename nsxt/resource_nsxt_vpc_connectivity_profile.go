@@ -279,7 +279,7 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 	}
 	var obj *model.VpcConnectivityProfile
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcConnectivityProfile](
 			d,
 			m,

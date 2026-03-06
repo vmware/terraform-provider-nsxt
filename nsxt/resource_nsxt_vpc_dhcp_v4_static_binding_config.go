@@ -307,7 +307,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 
 	var obj *model.DhcpV4StaticBindingConfig
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.DhcpV4StaticBindingConfig](
 			d,
 			m,
