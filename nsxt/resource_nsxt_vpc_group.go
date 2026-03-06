@@ -39,7 +39,7 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
-	if !IsCacheEnabled() {
+	if !isCacheEnabledForRead(d) {
 		return resourceNsxtPolicyGroupGeneralRead(d, m, false)
 	}
 
