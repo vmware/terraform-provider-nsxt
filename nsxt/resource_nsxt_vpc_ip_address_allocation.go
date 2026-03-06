@@ -189,7 +189,7 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 	}
 	var obj *model.VpcIpAddressAllocation
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcIpAddressAllocation](
 			d,
 			m,

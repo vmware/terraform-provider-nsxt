@@ -270,7 +270,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 
 	var obj *model.PolicyVpcNatRule
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.PolicyVpcNatRule](
 			d,
 			m,

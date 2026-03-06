@@ -144,7 +144,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 
 	var obj *model.VpcAttachment
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcAttachment](
 			d,
 			m,
