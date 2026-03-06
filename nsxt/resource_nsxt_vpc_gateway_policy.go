@@ -67,7 +67,7 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 	}
 	var obj *model.GatewayPolicy
 	var err error
-	if IsCacheEnabled() {
+	if isCacheEnabledForRead(d) {
 		obj, _, _, err = CacheAwareResourceRead[model.GatewayPolicy](
 			d,
 			m,
