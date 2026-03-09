@@ -328,7 +328,7 @@ func TestAccResourceNsxtVpcSubnet_reservedIPRange(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersionLessThan(t, "9.1.0")
+			testAccNSXVersionLessThan(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -360,14 +360,14 @@ func TestAccResourceNsxtVpcSubnet_reservedIPRange(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtVpcSubnet910_reservedIPRange(t *testing.T) {
+func TestAccResourceNsxtVpcSubnet920_reservedIPRange(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyVPC(t)
-			testAccNSXVersion(t, "9.1.0")
+			testAccNSXVersion(t, "9.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
