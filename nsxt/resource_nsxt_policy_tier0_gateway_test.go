@@ -960,7 +960,6 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bo
 	if targets {
 		routeTargets = `
         route_target {
-            auto_mode      = "false"
             import_targets = ["2:12"]
             export_targets = ["8999:123", "2:14"]
         }
