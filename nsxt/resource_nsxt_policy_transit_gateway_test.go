@@ -155,6 +155,59 @@ func TestAccResourceNsxtPolicyTransitGateway_withSpan(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTransitGateway_withCentralizedConfig(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			// This should be 9.1.0 and above - setting for v9.2.0 until this change is rolled into v9.1.0 as well.
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithCentralizedConfigTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayCreateAttributes["transit_subnets"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_STANDBY"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.edge_cluster_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "centralized_config.0.edge_cluster_paths.0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithCentralizedConfigTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayUpdateAttributes["transit_subnets"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.edge_cluster_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "centralized_config.0.edge_cluster_paths.0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway.test"
@@ -316,4 +369,73 @@ resource "nsxt_policy_transit_gateway" "test" {
   display_name    = "%s"
   transit_subnets = ["%s"]
 }`, testAccNsxtProjectContext(), accTestTransitGatewayUpdateAttributes["display_name"], accTestTransitGatewayUpdateAttributes["transit_subnets"])
+}
+
+func testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "tgw-cc-test-t0"
+  ha_mode           = "ACTIVE_STANDBY"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+
+resource "nsxt_policy_gateway_connection" "test" {
+  display_name   = "tgw-cc-test-conn"
+  tier0_path     = nsxt_policy_tier0_gateway.test.path
+  aggregate_routes = ["192.168.241.0/24"]
+}
+
+resource "nsxt_policy_project" "test" {
+  display_name             = "tgw-cc-test-project"
+  tier0_gateway_paths      = [nsxt_policy_tier0_gateway.test.path]
+  tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+}`, getEdgeClusterName())
+}
+
+func testAccNsxtPolicyTransitGatewayWithCentralizedConfigTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestTransitGatewayCreateAttributes
+	} else {
+		attrMap = accTestTransitGatewayUpdateAttributes
+	}
+	haMode := "ACTIVE_STANDBY"
+	if !createFlow {
+		haMode = "ACTIVE_ACTIVE"
+	}
+	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  centralized_config {
+    ha_mode            = "%s"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = "%s"
+  depends_on   = [nsxt_policy_transit_gateway.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], haMode, attrMap["display_name"])
 }
