@@ -497,12 +497,10 @@ func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, m inter
 
 func isInterSrIbgpSetInConfig(d *schema.ResourceData) bool {
 	raw := d.GetRawConfig()
-	log.Printf("[DEBUG] raw: %v", raw)
 	if raw.IsNull() || !raw.IsKnown() {
 		return false
 	}
 	bgpConfig := raw.GetAttr("bgp_config")
-	log.Printf("[DEBUG] raw bgpConfig: %v", bgpConfig)
 	if bgpConfig.IsNull() || !bgpConfig.IsKnown() || bgpConfig.LengthInt() == 0 {
 		return false
 	}
@@ -511,7 +509,6 @@ func isInterSrIbgpSetInConfig(d *schema.ResourceData) bool {
 		return false
 	}
 	interSrIbgp := firstBlock.GetAttr("inter_sr_ibgp")
-	log.Printf("[DEBUG] raw interSrIbgp: %v", interSrIbgp)
 	return !interSrIbgp.IsNull()
 }
 
