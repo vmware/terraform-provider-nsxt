@@ -17,7 +17,7 @@ func TestAccResourceNsxtProxyConfig_basic(t *testing.T) {
 	testAccResourceNsxtPolicyProxyConfigBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
+		testAccNSXVersion(t, "4.2.0")
 	})
 }
 
@@ -82,7 +82,7 @@ func TestAccResourceNsxtProxyConfig_disabled(t *testing.T) {
 	testAccResourceNsxtPolicyProxyConfigDisabled(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
+		testAccNSXVersion(t, "4.2.0")
 	})
 }
 
