@@ -41,9 +41,9 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 1) Tag-mode (default): if resource has no tag attribute, we still send provider-managed tags.
 	t.Run("tag-mode/no-user-tags", func(t *testing.T) {
-		old := os.Getenv("USE_GLOBAL_SEARCH_CACHE")
-		t.Cleanup(func() { _ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", old) })
-		_ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", "false")
+		old := os.Getenv("NSXT_USE_GLOBAL_SEARCH_CACHE")
+		t.Cleanup(func() { _ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", old) })
+		_ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", "false")
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{})
 		q := buildTagQuery(d, runID)
@@ -58,9 +58,9 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 2) Tag-mode: if user tags are present and managed tags are not, provider-managed tags are appended.
 	t.Run("tag-mode/user-tags-appends-provider-tags", func(t *testing.T) {
-		old := os.Getenv("USE_GLOBAL_SEARCH_CACHE")
-		t.Cleanup(func() { _ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", old) })
-		_ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", "false")
+		old := os.Getenv("NSXT_USE_GLOBAL_SEARCH_CACHE")
+		t.Cleanup(func() { _ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", old) })
+		_ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", "false")
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{
 			"tag": []interface{}{
@@ -81,9 +81,9 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 3) Global-search mode: no tag attribute means no additional query.
 	t.Run("global-search/no-user-tags", func(t *testing.T) {
-		old := os.Getenv("USE_GLOBAL_SEARCH_CACHE")
-		t.Cleanup(func() { _ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", old) })
-		_ = os.Setenv("USE_GLOBAL_SEARCH_CACHE", "true")
+		old := os.Getenv("NSXT_USE_GLOBAL_SEARCH_CACHE")
+		t.Cleanup(func() { _ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", old) })
+		_ = os.Setenv("NSXT_USE_GLOBAL_SEARCH_CACHE", "true")
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{})
 		q := buildTagQuery(d, runID)
