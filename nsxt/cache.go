@@ -35,7 +35,7 @@ func IsCacheEnabled() bool {
 }
 
 func isGlobalSearchCacheMode() bool {
-	return os.Getenv("USE_GLOBAL_SEARCH_CACHE") == "true"
+	return os.Getenv("NSXT_USE_GLOBAL_SEARCH_CACHE") == "true"
 }
 
 func isRefreshPhase(d *schema.ResourceData) bool {
