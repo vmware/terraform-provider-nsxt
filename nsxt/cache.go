@@ -265,6 +265,21 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	return strings.Join(tagQueries, " AND ")
 }
 
+// InvalidateCacheForResourceType clears all cached entries for the given resource type.
+// Must be called after write operations (create/update) to prevent stale reads in the
+// subsequent perpetual-diff plan, where isRefreshPhase returns true and cache is used.
+// This is added cause the testcases runs create/update/data-source read in a single run.
+func InvalidateCacheForResourceType(resourceType string) {
+	if !IsCacheEnabled() {
+		return
+	}
+	tc := gcache.getTypeCache(resourceType)
+	tc.mu.Lock()
+	defer tc.mu.Unlock()
+	tc.data = make(map[string]map[string]*data.StructValue)
+	log.Printf("[DEBUG] Cache invalidated for resourceType=%s", resourceType)
+}
+
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
 func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
 	// Use reflection to check if the object has a Tags field
