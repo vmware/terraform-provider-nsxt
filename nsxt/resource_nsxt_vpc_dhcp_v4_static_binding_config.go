@@ -287,6 +287,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
@@ -429,6 +430,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return handleUpdateError("DhcpV4StaticBindingConfig", id, err)
 	}
 
+	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
