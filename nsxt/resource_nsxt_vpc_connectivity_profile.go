@@ -267,6 +267,7 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("VpcConnectivityProfile")
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 
@@ -376,6 +377,7 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcConnectivityProfile", id, err)
 	}
 
+	InvalidateCacheForResourceType("VpcConnectivityProfile")
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 

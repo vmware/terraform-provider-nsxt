@@ -55,6 +55,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("gatewaypolicy")
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -132,6 +133,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
 
+	InvalidateCacheForResourceType("gatewaypolicy")
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
