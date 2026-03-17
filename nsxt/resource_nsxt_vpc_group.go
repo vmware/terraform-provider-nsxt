@@ -35,7 +35,11 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if IsCacheEnabled() {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
-	return resourceNsxtPolicyGroupGeneralCreate(d, m, false)
+	if err := resourceNsxtPolicyGroupGeneralCreate(d, m, false); err != nil {
+		return err
+	}
+	InvalidateCacheForResourceType("group")
+	return nil
 }
 
 func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
@@ -118,7 +122,11 @@ func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if IsCacheEnabled() {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
-	return resourceNsxtPolicyGroupGeneralUpdate(d, m, false)
+	if err := resourceNsxtPolicyGroupGeneralUpdate(d, m, false); err != nil {
+		return err
+	}
+	InvalidateCacheForResourceType("group")
+	return nil
 }
 
 func resourceNsxtVPCGroupDelete(d *schema.ResourceData, m interface{}) error {

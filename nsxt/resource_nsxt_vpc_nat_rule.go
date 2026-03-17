@@ -249,6 +249,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("PolicyVpcNatRule")
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
@@ -358,6 +359,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("PolicyVpcNatRule", id, err)
 	}
 
+	InvalidateCacheForResourceType("PolicyVpcNatRule")
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 

@@ -684,6 +684,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("VpcSubnet")
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -868,6 +869,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
+	InvalidateCacheForResourceType("VpcSubnet")
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
