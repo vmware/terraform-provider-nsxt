@@ -302,7 +302,9 @@ func getDefaultSpan(connector client.Connector) (string, error) {
 			defaultSpanPath = append(defaultSpanPath, *spanObj.Path)
 		}
 	}
-
+	if len(defaultSpanPath) == 0 {
+		return "", fmt.Errorf("no default span path found")
+	}
 	return defaultSpanPath[0], nil
 }
 
