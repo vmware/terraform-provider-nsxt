@@ -14,18 +14,20 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsxt "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+	transitgateways "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
-var transitGatewayHaModeValues = []string{
-	model.TransitGatewayHighAvailabilityConfig_HA_MODE_ACTIVE,
-	model.TransitGatewayHighAvailabilityConfig_HA_MODE_STANDBY,
-}
+var cliTransitGatewaysClient = projects.NewTransitGatewaysClient
+var cliTransitGatewayCentralizedConfigsClient = transitgateways.NewCentralizedConfigsClient
+
+const centralizedConfigID = "default"
 
 var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -55,52 +57,31 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "TransitSubnets",
 		},
 	},
-	"high_availability_config": {
+	"centralized_config": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
 			MaxItems: 1,
-			Elem: &metadata.ExtendedResource{
-				Schema: map[string]*metadata.ExtendedSchema{
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
 					"ha_mode": {
-						Schema: schema.Schema{
-							Type:         schema.TypeString,
-							ValidateFunc: validation.StringInSlice(transitGatewayHaModeValues, false),
-							Optional:     true,
-							Default:      model.TransitGatewayHighAvailabilityConfig_HA_MODE_ACTIVE,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "string",
-							SdkFieldName: "HaMode",
-						},
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice([]string{model.CentralizedConfig_HA_MODE_ACTIVE, model.CentralizedConfig_HA_MODE_STANDBY}, false),
+						Optional:     true,
+						Default:      model.CentralizedConfig_HA_MODE_ACTIVE,
 					},
 					"edge_cluster_paths": {
-						Schema: schema.Schema{
-							Type: schema.TypeList,
-							Elem: &metadata.ExtendedSchema{
-								Schema: schema.Schema{
-									Type:         schema.TypeString,
-									ValidateFunc: validatePolicyPath(),
-								},
-								Metadata: metadata.Metadata{
-									SchemaType: "string",
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "list",
-							SdkFieldName: "EdgeClusterPaths",
+						Type:     schema.TypeList,
+						Optional: true,
+						Elem: &schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validatePolicyPath(),
 						},
 					},
 				},
 			},
-			Optional: true,
 		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "struct",
-			SdkFieldName: "HighAvailabilityConfig",
-			ReflectType:  reflect.TypeOf(model.TransitGatewayHighAvailabilityConfig{}),
-		},
+		Metadata: metadata.Metadata{Skip: true},
 	},
 	"span": {
 		Schema: schema.Schema{
@@ -198,7 +179,7 @@ func resourceNsxtPolicyTransitGateway() *schema.Resource {
 func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
-	client := clientLayer.NewTransitGatewaysClient(connector)
+	client := cliTransitGatewaysClient(connector)
 	_, err = client.Get(parents[0], parents[1], id)
 	if err == nil {
 		return true, nil
@@ -249,6 +230,128 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 	return nil, nil
 }
 
+func getCentralizedConfigFromSchema(v interface{}) *model.CentralizedConfig {
+	if v == nil {
+		return nil
+	}
+	l, ok := v.([]interface{})
+	if !ok || len(l) == 0 {
+		return nil
+	}
+	m, ok := l[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	cfg := &model.CentralizedConfig{
+		ResourceType: strPtr("CentralizedConfig"),
+	}
+	if ha, ok := m["ha_mode"].(string); ok && ha != "" {
+		cfg.HaMode = &ha
+	}
+	if paths, ok := m["edge_cluster_paths"].([]interface{}); ok && len(paths) > 0 {
+		var s []string
+		for _, p := range paths {
+			if str, ok := p.(string); ok {
+				s = append(s, str)
+			}
+		}
+		cfg.EdgeClusterPaths = s
+	}
+	return cfg
+}
+
+func setCentralizedConfigInSchema(cfg *model.CentralizedConfig) []interface{} {
+	if cfg == nil {
+		return nil
+	}
+	m := make(map[string]interface{})
+	if cfg.HaMode != nil {
+		m["ha_mode"] = *cfg.HaMode
+	}
+	m["edge_cluster_paths"] = cfg.EdgeClusterPaths
+
+	return []interface{}{m}
+}
+
+// buildCentralizedConfigChildren builds H-API child structs for TransitGateway.Children.
+// When config is present, returns one ChildCentralizedConfig. When markDelete is true (user removed block), returns child with MarkedForDelete.
+func buildCentralizedConfigChildren(config *model.CentralizedConfig, markDelete bool) ([]*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	id := centralizedConfigID
+	child := model.ChildCentralizedConfig{
+		Id:           &id,
+		ResourceType: "ChildCentralizedConfig",
+	}
+	if markDelete {
+		boolTrue := true
+		child.MarkedForDelete = &boolTrue
+		child.CentralizedConfig = &model.CentralizedConfig{Id: &id}
+	} else if config != nil {
+		child.CentralizedConfig = config
+		if child.CentralizedConfig.Id == nil {
+			child.CentralizedConfig.Id = &id
+		}
+	} else {
+		return nil, nil
+	}
+	dataValue, errs := converter.ConvertToVapi(child, model.ChildCentralizedConfigBindingType())
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+	return []*data.StructValue{dataValue.(*data.StructValue)}, nil
+}
+
+// createChildOrgWithTransitGateway builds the H-API tree Org -> Project -> TransitGateway for OrgRoot.Patch.
+// When markForDelete is true, tgw is ignored and a minimal TransitGateway with MarkedForDelete is used for delete.
+func createChildOrgWithTransitGateway(orgID, projectID, tgwID string, tgw *model.TransitGateway, markForDelete bool) (*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	var childTGW model.ChildTransitGateway
+	if markForDelete {
+		boolTrue := true
+		tgwMinimal := model.TransitGateway{Id: &tgwID, ResourceType: strPtr("TransitGateway")}
+		childTGW = model.ChildTransitGateway{
+			Id:              &tgwID,
+			ResourceType:    model.ChildTransitGateway__TYPE_IDENTIFIER,
+			MarkedForDelete: &boolTrue,
+			TransitGateway:  &tgwMinimal,
+		}
+	} else {
+		tgw.Id = &tgwID
+		childTGW = model.ChildTransitGateway{
+			Id:             &tgwID,
+			ResourceType:   model.ChildTransitGateway__TYPE_IDENTIFIER,
+			TransitGateway: tgw,
+		}
+	}
+	dataValue, errs := converter.ConvertToVapi(childTGW, model.ChildTransitGatewayBindingType())
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+	targetProject := "Project"
+	childProject := model.ChildResourceReference{
+		Id:           &projectID,
+		ResourceType: "ChildResourceReference",
+		TargetType:   &targetProject,
+		Children:     []*data.StructValue{dataValue.(*data.StructValue)},
+	}
+	dataValue, errs = converter.ConvertToVapi(childProject, model.ChildResourceReferenceBindingType())
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+	targetOrg := "Org"
+	childOrg := model.ChildResourceReference{
+		Id:           &orgID,
+		ResourceType: "ChildResourceReference",
+		TargetType:   &targetOrg,
+		Children:     []*data.StructValue{dataValue.(*data.StructValue)},
+	}
+	dataValue, errs = converter.ConvertToVapi(childOrg, model.ChildResourceReferenceBindingType())
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
 func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -266,9 +369,10 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 	}
 
 	obj := model.TransitGateway{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
+		DisplayName:  &displayName,
+		Description:  &description,
+		ResourceType: strPtr("TransitGateway"),
+		Tags:         tags,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -284,11 +388,31 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	}
 
-	log.Printf("[INFO] Creating TransitGateway with ID %s", id)
+	// Attach centralized_config as H-API child in same transaction
+	if cc := getCentralizedConfigFromSchema(d.Get("centralized_config")); cc != nil {
+		children, err := buildCentralizedConfigChildren(cc, false)
+		if err != nil {
+			return handleCreateError("TransitGateway CentralizedConfig", id, err)
+		}
+		if children != nil {
+			obj.Children = children
+		}
+	}
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
-	err = client.Patch(parents[0], parents[1], id, obj)
+	orgRootClient := nsxt.NewOrgRootClient(connector)
+	if orgRootClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	childOrg, err := createChildOrgWithTransitGateway(parents[0], parents[1], id, &obj, false)
 	if err != nil {
+		return handleCreateError("TransitGateway", id, err)
+	}
+	orgRoot := model.OrgRoot{
+		ResourceType: strPtr("OrgRoot"),
+		Children:     []*data.StructValue{childOrg},
+	}
+	log.Printf("[INFO] Creating TransitGateway with ID %s via OrgRoot H-API", id)
+	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleCreateError("TransitGateway", id, err)
 	}
 	d.SetId(id)
@@ -305,8 +429,9 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining TransitGateway ID")
 	}
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	client := cliTransitGatewaysClient(connector)
+	parents := getVpcParentsFromContext(sessionContext)
 	obj, err := client.Get(parents[0], parents[1], id)
 	if err != nil {
 		return handleReadError(d, "TransitGateway", id, err)
@@ -326,6 +451,19 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 			return handleReadError(d, "TransitGateway", id, err)
 		}
 		d.Set("span", span)
+	}
+
+	// Read centralized config via H-API
+	ccClient := cliTransitGatewayCentralizedConfigsClient(connector)
+	if ccClient != nil {
+		cc, err := ccClient.Get(parents[0], parents[1], id, centralizedConfigID)
+		if err == nil {
+			d.Set("centralized_config", setCentralizedConfigInSchema(&cc))
+		} else if !isNotFoundError(err) {
+			return handleReadError(d, "TransitGateway CentralizedConfig", id, err)
+		} else {
+			d.Set("centralized_config", nil)
+		}
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -388,10 +526,11 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.TransitGateway{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		Revision:    &revision,
+		DisplayName:  &displayName,
+		Description:  &description,
+		ResourceType: strPtr("TransitGateway"),
+		Tags:         tags,
+		Revision:     &revision,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -407,12 +546,50 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
-	_, err = client.Update(parents[0], parents[1], id, obj)
+	// When centralized_config changed, attach child for same-transaction update
+	if d.HasChange("centralized_config") {
+		newCC := getCentralizedConfigFromSchema(d.Get("centralized_config"))
+		if newCC != nil {
+			ccClient := cliTransitGatewayCentralizedConfigsClient(connector)
+			if ccClient != nil {
+				if existing, getErr := ccClient.Get(parents[0], parents[1], id, centralizedConfigID); getErr == nil {
+					newCC.Revision = existing.Revision
+				}
+			}
+			children, err := buildCentralizedConfigChildren(newCC, false)
+			if err != nil {
+				return handleUpdateError("TransitGateway CentralizedConfig", id, err)
+			}
+			if children != nil {
+				obj.Children = children
+			}
+		} else {
+			children, err := buildCentralizedConfigChildren(nil, true)
+			if err != nil {
+				return handleUpdateError("TransitGateway CentralizedConfig", id, err)
+			}
+			if children != nil {
+				obj.Children = children
+			}
+		}
+	}
+
+	orgRootClient := nsxt.NewOrgRootClient(connector)
+	if orgRootClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	childOrg, err := createChildOrgWithTransitGateway(parents[0], parents[1], id, &obj, false)
 	if err != nil {
 		return handleUpdateError("TransitGateway", id, err)
 	}
-
+	orgRoot := model.OrgRoot{
+		ResourceType: strPtr("OrgRoot"),
+		Children:     []*data.StructValue{childOrg},
+	}
+	log.Printf("[INFO] Updating TransitGateway with ID %s via OrgRoot H-API", id)
+	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
+		return handleUpdateError("TransitGateway", id, err)
+	}
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
@@ -423,14 +600,24 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	}
 
 	connector := getPolicyConnector(m)
-	parents := getVpcParentsFromContext(getSessionContext(d, m))
+	sessionContext := getSessionContext(d, m)
+	parents := getVpcParentsFromContext(sessionContext)
 
-	client := clientLayer.NewTransitGatewaysClient(connector)
-	err := client.Delete(parents[0], parents[1], id)
-
+	orgRootClient := nsxt.NewOrgRootClient(connector)
+	if orgRootClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	childOrg, err := createChildOrgWithTransitGateway(parents[0], parents[1], id, nil, true)
 	if err != nil {
 		return handleDeleteError("TransitGateway", id, err)
 	}
-
+	orgRoot := model.OrgRoot{
+		ResourceType: strPtr("OrgRoot"),
+		Children:     []*data.StructValue{childOrg},
+	}
+	log.Printf("[INFO] Deleting TransitGateway with ID %s via OrgRoot H-API", id)
+	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
+		return handleDeleteError("TransitGateway", id, err)
+	}
 	return nil
 }
