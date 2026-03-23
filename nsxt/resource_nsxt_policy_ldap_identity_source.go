@@ -125,9 +125,10 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 	}
 }
 
-func getLdapServersFromSchema(d *schema.ResourceData) []nsxModel.IdentitySourceLdapServer {
+func getLdapServersFromSchema(d *schema.ResourceData) ([]nsxModel.IdentitySourceLdapServer, bool) {
 	servers := d.Get("ldap_server").([]interface{})
 	serverList := make([]nsxModel.IdentitySourceLdapServer, 0)
+	isEnabled := false
 	for _, server := range servers {
 		data := server.(map[string]interface{})
 		bindIdentity := data["bind_identity"].(string)
@@ -145,9 +146,10 @@ func getLdapServersFromSchema(d *schema.ResourceData) []nsxModel.IdentitySourceL
 			UseStarttls:  &useStarttls,
 		}
 
+		isEnabled = enabled || isEnabled
 		serverList = append(serverList, elem)
 	}
-	return serverList
+	return serverList, isEnabled
 }
 
 // getLdapServerPasswordMap caches password of ldap servers for setting back to schema after read
@@ -213,7 +215,7 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	domainName := d.Get("domain_name").(string)
 	baseDn := d.Get("base_dn").(string)
 	altDomainNames := getStringListFromSchemaList(d, "alternative_domain_names")
-	ldapServers := getLdapServersFromSchema(d)
+	ldapServers, isEnabled := getLdapServersFromSchema(d)
 
 	var dataValue data.DataValue
 	var errs []error
@@ -248,26 +250,29 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	}
 	structValue := dataValue.(*data.StructValue)
 
-	log.Printf("[INFO] Probing LDAP Identity Source with ID %s", id)
-	probeResult, err := ldapClient.Probeidentitysource(structValue)
-	if err != nil {
-		return logAPIError("Error probing LDAP Identity Source", err)
-	}
-	for _, result := range probeResult.Results {
-		if result.Result != nil && *result.Result != nsxModel.IdentitySourceLdapServerProbeResult_RESULT_SUCCESS {
-			probeErrs := make([]string, 0)
-			for _, probeErr := range result.Errors {
-				if probeErr.ErrorType != nil {
-					probeErrs = append(probeErrs, *probeErr.ErrorType)
+	// Probe identity source only if it has any enabled servers
+	if isEnabled {
+		log.Printf("[INFO] Probing LDAP Identity Source with ID %s", id)
+		probeResult, err := ldapClient.Probeidentitysource(structValue)
+		if err != nil {
+			return logAPIError("Error probing LDAP Identity Source", err)
+		}
+		for _, result := range probeResult.Results {
+			if result.Result != nil && *result.Result != nsxModel.IdentitySourceLdapServerProbeResult_RESULT_SUCCESS {
+				probeErrs := make([]string, 0)
+				for _, probeErr := range result.Errors {
+					if probeErr.ErrorType != nil {
+						probeErrs = append(probeErrs, *probeErr.ErrorType)
+					}
 				}
+				return fmt.Errorf("LDAP Identity Source server %s probe failed with errors: %s",
+					*result.Url, strings.Join(probeErrs, ","))
 			}
-			return fmt.Errorf("LDAP Identity Source server %s probe failed with errors: %s",
-				*result.Url, strings.Join(probeErrs, ","))
 		}
 	}
 
 	log.Printf("[INFO] PUT LDAP Identity Source with ID %s", id)
-	if _, err = ldapClient.Update(id, structValue); err != nil {
+	if _, err := ldapClient.Update(id, structValue); err != nil {
 		return handleUpdateError(serverType, id, err)
 	}
 
