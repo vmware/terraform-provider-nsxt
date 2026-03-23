@@ -33,18 +33,32 @@ var accTestPolicyIPSecVpnIkeProfileUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnIkeProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnIkeProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPSecVpnIkeProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ipsec_vpn_ike_profile.test"
 	testDataSourceName := "data.nsxt_policy_ipsec_vpn_ike_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileTemplate(true),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnIkeProfileExists(accTestPolicyIPSecVpnIkeProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnIkeProfileCreateAttributes["display_name"]),
@@ -54,7 +68,6 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "encryption_algorithms.0", accTestPolicyIPSecVpnIkeProfileCreateAttributes["encryption_algorithms"]),
 					resource.TestCheckResourceAttr(testResourceName, "ike_version", accTestPolicyIPSecVpnIkeProfileCreateAttributes["ike_version"]),
 					resource.TestCheckResourceAttr(testResourceName, "sa_life_time", accTestPolicyIPSecVpnIkeProfileCreateAttributes["sa_life_time"]),
-
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -63,7 +76,7 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileTemplate(false),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnIkeProfileExists(accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"]),
@@ -73,15 +86,15 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "encryption_algorithms.0", accTestPolicyIPSecVpnIkeProfileUpdateAttributes["encryption_algorithms"]),
 					resource.TestCheckResourceAttr(testResourceName, "ike_version", accTestPolicyIPSecVpnIkeProfileUpdateAttributes["ike_version"]),
 					resource.TestCheckResourceAttr(testResourceName, "sa_life_time", accTestPolicyIPSecVpnIkeProfileUpdateAttributes["sa_life_time"]),
-
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnIkeProfileExists(accTestPolicyIPSecVpnIkeProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -108,7 +121,7 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -123,6 +136,7 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -133,13 +147,10 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnIkeProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnIkeProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnIkeProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnIkeProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -148,6 +159,7 @@ func testAccNsxtPolicyIPSecVpnIkeProfileExists(displayName string, resourceName 
 
 func testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_ike_profile" {
@@ -155,27 +167,32 @@ func testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state *terraform.State, dis
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnIkeProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnIkeProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil
 }
 
-func testAccNsxtPolicyIPSecVpnIkeProfileTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPSecVpnIkeProfileTemplate(createFlow bool, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPSecVpnIkeProfileCreateAttributes
 	} else {
 		attrMap = accTestPolicyIPSecVpnIkeProfileUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   display_name          = "%s"
   description           = "%s"
   dh_groups             = ["%s"]
@@ -190,20 +207,27 @@ resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
   }
 }
 data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   display_name = "%s"
   depends_on   = [nsxt_policy_ipsec_vpn_ike_profile.test]
-}  
-`, attrMap["display_name"], attrMap["description"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["encryption_algorithms"], attrMap["ike_version"], attrMap["sa_life_time"], attrMap["display_name"])
+}
+`, context, attrMap["display_name"], attrMap["description"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["encryption_algorithms"], attrMap["ike_version"], attrMap["sa_life_time"], context, attrMap["display_name"])
 }
 
-func testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic() string {
+func testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   display_name          = "%s"
   dh_groups             = ["%s"]
   encryption_algorithms = ["%s"]
 }
 data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   id = nsxt_policy_ipsec_vpn_ike_profile.test.id
-}`, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], accTestPolicyIPSecVpnIkeProfileUpdateAttributes["dh_groups"], "AES_GCM_192")
+}`, context, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], accTestPolicyIPSecVpnIkeProfileUpdateAttributes["dh_groups"], "AES_GCM_192", context)
 }

@@ -35,18 +35,32 @@ var accTestPolicyIPSecVpnTunnelProfileUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnTunnelProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnTunnelProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPSecVpnTunnelProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ipsec_vpn_tunnel_profile.test"
 	testDataSourceName := "data.nsxt_policy_ipsec_vpn_tunnel_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(true),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"]),
@@ -65,7 +79,7 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(false),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"]),
@@ -80,10 +94,11 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -110,7 +125,7 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -125,6 +140,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		sessionContext := testAccGetSessionContext()
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -135,13 +151,10 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile resource ID not set in resources")
 		}
-
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err != nil {
-			return err
-		}
-		if !exists {
-			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s does not exist", resourceID)
+			return fmt.Errorf("Error while retrieving policy IPSecVpnTunnelProfile ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -150,6 +163,7 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileExists(displayName string, resourceNa
 
 func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	sessionContext := testAccGetSessionContext()
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ipsec_vpn_tunnel_profile" {
@@ -157,27 +171,32 @@ func testAccNsxtPolicyIPSecVpnTunnelProfileCheckDestroy(state *terraform.State, 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPSecVpnTunnelProfileExists(resourceID, connector, testAccIsGlobalManager())
+		client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
+		_, err := client.Get(resourceID)
 		if err == nil {
-			return err
-		}
-
-		if exists {
 			return fmt.Errorf("Policy IPSecVpnTunnelProfile %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil
 }
 
-func testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPSecVpnTunnelProfileTemplate(createFlow bool, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPSecVpnTunnelProfileCreateAttributes
 	} else {
 		attrMap = accTestPolicyIPSecVpnTunnelProfileUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   display_name                   = "%s"
   description                    = "%s"
   df_policy                      = "%s"
@@ -193,19 +212,26 @@ resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
   }
 }
 data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   display_name = "%s"
   depends_on   = [nsxt_policy_ipsec_vpn_tunnel_profile.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], attrMap["display_name"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], context, attrMap["display_name"])
 }
 
-func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic() string {
+func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   display_name          = "%s"
   encryption_algorithms = ["%s"]
   dh_groups             = ["%s"]
 }
 data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   id = nsxt_policy_ipsec_vpn_tunnel_profile.test.id
-}`, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], "AES_GCM_192", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"])
+}`, context, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], "AES_GCM_192", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"], context)
 }

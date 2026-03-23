@@ -71,6 +71,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(false, false, false),
 			"df_policy": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(ipSecVpnTunnelProfileDfPolicyValues, false),
@@ -115,8 +116,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnTunnelProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
+func resourceNsxtPolicyIPSecVpnTunnelProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
@@ -135,9 +135,13 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileCreate(d *schema.ResourceData, m int
 		return resourceNotSupportedError()
 	}
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnTunnelProfileExists)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		return resourceNsxtPolicyIPSecVpnTunnelProfileExists(sessionContext, id, connector)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -166,7 +170,6 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnTunnelProfile with ID %s", id)
-	sessionContext := getSessionContext(d, m)
 	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
