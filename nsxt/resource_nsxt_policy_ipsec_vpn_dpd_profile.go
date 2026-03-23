@@ -91,10 +91,7 @@ func resourceNsxtPolicyIPSecVpnDpdProfileCreate(d *schema.ResourceData, m interf
 	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyIPSecVpnDpdProfileExists(sessionContext, id, connector)
-	}
-	id, err := getOrGenerateID(d, m, existsFunc)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPSecVpnDpdProfileExists)
 	if err != nil {
 		return err
 	}
