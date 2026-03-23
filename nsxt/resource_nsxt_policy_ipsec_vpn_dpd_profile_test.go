@@ -90,7 +90,7 @@ func testAccResourceNsxtPolicyIPSecVpnDpdProfileBasic(t *testing.T, withContext 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnDpdProfileExists(accTestPolicyIPSecVpnDpdProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -117,7 +117,7 @@ func TestAccResourceNsxtPolicyIPSecVpnDpdProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -209,12 +209,18 @@ data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
 }`, context, attrMap["display_name"], attrMap["description"], attrMap["dpd_probe_interval"], attrMap["dpd_probe_mode"], attrMap["enabled"], attrMap["retry_count"], context, attrMap["display_name"])
 }
 
-func testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic() string {
+func testAccNsxtPolicyIPSecVpnDpdProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+%s
   display_name = "%s"
 }
 data "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
+%s
   id = nsxt_policy_ipsec_vpn_dpd_profile.test.id
-}`, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"])
+}`, context, accTestPolicyIPSecVpnDpdProfileUpdateAttributes["display_name"], context)
 }

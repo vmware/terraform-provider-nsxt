@@ -94,7 +94,7 @@ func testAccResourceNsxtPolicyIPSecVpnIkeProfileBasic(t *testing.T, withContext 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnIkeProfileExists(accTestPolicyIPSecVpnIkeProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -121,7 +121,7 @@ func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -214,14 +214,20 @@ data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
 `, context, attrMap["display_name"], attrMap["description"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["encryption_algorithms"], attrMap["ike_version"], attrMap["sa_life_time"], context, attrMap["display_name"])
 }
 
-func testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic() string {
+func testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   display_name          = "%s"
   dh_groups             = ["%s"]
   encryption_algorithms = ["%s"]
 }
 data "nsxt_policy_ipsec_vpn_ike_profile" "test" {
+%s
   id = nsxt_policy_ipsec_vpn_ike_profile.test.id
-}`, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], accTestPolicyIPSecVpnIkeProfileUpdateAttributes["dh_groups"], "AES_GCM_192")
+}`, context, accTestPolicyIPSecVpnIkeProfileUpdateAttributes["display_name"], accTestPolicyIPSecVpnIkeProfileUpdateAttributes["dh_groups"], "AES_GCM_192", context)
 }
