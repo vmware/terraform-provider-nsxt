@@ -98,7 +98,7 @@ func testAccResourceNsxtPolicyIPSecVpnTunnelProfileBasic(t *testing.T, withConte
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnTunnelProfileExists(accTestPolicyIPSecVpnTunnelProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -125,7 +125,7 @@ func TestAccResourceNsxtPolicyIPSecVpnTunnelProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -218,14 +218,20 @@ data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
 }`, context, attrMap["display_name"], attrMap["description"], attrMap["df_policy"], attrMap["dh_groups"], attrMap["digest_algorithms"], attrMap["enable_perfect_forward_secrecy"], attrMap["encryption_algorithms"], attrMap["sa_life_time"], context, attrMap["display_name"])
 }
 
-func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic() string {
+func testAccNsxtPolicyIPSecVpnTunnelProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   display_name          = "%s"
   encryption_algorithms = ["%s"]
   dh_groups             = ["%s"]
 }
 data "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
+%s
   id = nsxt_policy_ipsec_vpn_tunnel_profile.test.id
-}`, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], "AES_GCM_192", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"])
+}`, context, accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["display_name"], "AES_GCM_192", accTestPolicyIPSecVpnTunnelProfileUpdateAttributes["dh_groups"], context)
 }
