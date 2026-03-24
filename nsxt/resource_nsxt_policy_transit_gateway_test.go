@@ -163,8 +163,7 @@ func TestAccResourceNsxtPolicyTransitGateway_withCentralizedConfig(t *testing.T)
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			// This should be 9.1.0 and above - setting for v9.2.0 until this change is rolled into v9.1.0 as well.
-			testAccNSXVersion(t, "9.2.0")
+			testAccNSXVersion(t, "9.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
