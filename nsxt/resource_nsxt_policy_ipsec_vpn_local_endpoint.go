@@ -300,12 +300,6 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtPolicyIPSecVpnLocalEndpointExists(servicePath string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id, connector, servicePath)
-	}
-}
-
 func ipSecVpnLocalEndpointInitStruct(d *schema.ResourceData) model.IPSecVpnLocalEndpoint {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
