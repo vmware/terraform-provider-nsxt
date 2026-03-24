@@ -30,7 +30,6 @@ var (
 	macDiscoveryProfileDescription = "mac discovery profile mock"
 	macDiscoveryProfilePath        = "/infra/mac-discovery-profiles/mac-discovery-1"
 	macDiscoveryProfileRevision    = int64(1)
-	macDiscoveryProfileOverride    = false
 )
 
 func TestMockResourceNsxtPolicyMacDiscoveryProfileCreate(t *testing.T) {

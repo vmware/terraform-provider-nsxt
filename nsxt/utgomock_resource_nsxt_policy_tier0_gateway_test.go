@@ -21,7 +21,6 @@ import (
 	cliinfra "github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier0localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	t0mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	localeServicesMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -118,7 +117,7 @@ func TestMockResourceNsxtPolicyTier0GatewayCreate(t *testing.T) {
 
 	mockTier0sSDK := t0mocks.NewMockTier0sClient(ctrl)
 	mockLocaleServicesSDK := localeServicesMocks.NewMockLocaleServicesClient(ctrl)
-	mockInfraSDK := inframocks.NewMockInfraClient(ctrl)
+	mockInfraSDK := t0mocks.NewMockInfraClient(ctrl)
 
 	tier0Wrapper := &cliinfra.Tier0ClientContext{
 		Client:     mockTier0sSDK,
@@ -185,7 +184,7 @@ func TestMockResourceNsxtPolicyTier0GatewayUpdate(t *testing.T) {
 
 	mockTier0sSDK := t0mocks.NewMockTier0sClient(ctrl)
 	mockLocaleServicesSDK := localeServicesMocks.NewMockLocaleServicesClient(ctrl)
-	mockInfraSDK := inframocks.NewMockInfraClient(ctrl)
+	mockInfraSDK := t0mocks.NewMockInfraClient(ctrl)
 
 	tier0Wrapper := &cliinfra.Tier0ClientContext{
 		Client:     mockTier0sSDK,
@@ -262,7 +261,7 @@ func TestMockResourceNsxtPolicyTier0GatewayDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockInfraSDK := inframocks.NewMockInfraClient(ctrl)
+	mockInfraSDK := t0mocks.NewMockInfraClient(ctrl)
 
 	originalInfra := cliInfraClient
 	defer func() { cliInfraClient = originalInfra }()
