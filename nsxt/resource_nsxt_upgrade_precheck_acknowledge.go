@@ -11,12 +11,17 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 )
 
-var cliUpgradeChecksInfoClient = upgrade.NewUpgradeChecksInfoClient
-var cliPreUpgradeChecksClient = upgrade.NewPreUpgradeChecksClient
+var cliUpgradeChecksInfoClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeChecksInfoClient {
+	return upgrade.NewUpgradeChecksInfoClient(connector)
+}
+var cliPreUpgradeChecksClient = func(connector vapiProtocolClient.Connector) upgrade.PreUpgradeChecksClient {
+	return upgrade.NewPreUpgradeChecksClient(connector)
+}
 
 func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 	return &schema.Resource{

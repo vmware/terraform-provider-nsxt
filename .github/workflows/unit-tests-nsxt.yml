@@ -23,4 +23,4 @@ jobs:
       - name: Setup Go
         uses: ./.github/actions/setup-go
       - name: Run unit tests
-        run: make testacc TESTARGS="-run=TestMockResourceNsxtPolicy* -coverpkg=./..."
+        run: make testacc TEST="./nsxt/" TESTARGS="-run=TestMockResourceNsxt.* -coverpkg=./..."

@@ -12,11 +12,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/cluster"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-var cliApiVirtualIpClient = cluster.NewApiVirtualIpClient
+var cliApiVirtualIpClient = func(connector vapiProtocolClient.Connector) cluster.ApiVirtualIpClient {
+	return cluster.NewApiVirtualIpClient(connector)
+}
 
 var DefaultIPv4VirtualAddress = "0.0.0.0"
 
