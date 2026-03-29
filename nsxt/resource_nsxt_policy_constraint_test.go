@@ -51,7 +51,9 @@ func TestAccResourceNsxtPolicyConstraint_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "target.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "target.0.path_prefix"),
 					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "instance_count.0.target_resource_type", accTestPolicyConstraintCreateAttributes["target_resource_type"]),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": accTestPolicyConstraintCreateAttributes["target_resource_type"],
+					}),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -67,7 +69,9 @@ func TestAccResourceNsxtPolicyConstraint_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "target.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "target.0.path_prefix"),
 					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "instance_count.0.target_resource_type", accTestPolicyConstraintUpdateAttributes["target_resource_type"]),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": accTestPolicyConstraintUpdateAttributes["target_resource_type"],
+					}),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -111,7 +115,9 @@ func TestAccResourceNsxtPolicyConstraint_vpc(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "target.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "target.0.path_prefix"),
 					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "instance_count.0.target_resource_type", accTestPolicyConstraintCreateAttributes["target_resource_type"]),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": accTestPolicyConstraintCreateAttributes["target_resource_type"],
+					}),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -127,7 +133,9 @@ func TestAccResourceNsxtPolicyConstraint_vpc(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "target.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "target.0.path_prefix"),
 					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "instance_count.0.target_resource_type", accTestPolicyConstraintUpdateAttributes["target_resource_type"]),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": accTestPolicyConstraintUpdateAttributes["target_resource_type"],
+					}),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -162,6 +170,111 @@ func TestAccResourceNsxtPolicyConstraint_importBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+// TestAccResourceNsxtPolicyConstraint_instanceCountRemoveFirst verifies that removing
+// the first instance_count block from a constraint leaves the remaining blocks unchanged.
+// This is a regression test for a bug where TypeList caused positional index-shifting,
+// making Terraform modify the surviving blocks instead of simply deleting the removed one.
+func TestAccResourceNsxtPolicyConstraint_instanceCountRemoveFirst(t *testing.T) {
+	testResourceName := "nsxt_policy_constraint.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "9.0.0"); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyConstraintCheckDestroy(state, accTestPolicyConstraintCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				// Create with three instance_count blocks
+				Config: testAccNsxtPolicyConstraintThreeInstanceCounts(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyConstraintExists(accTestPolicyConstraintCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "3"),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": "Infra.Tier1",
+						"count":                "8",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": "Infra.Segment",
+						"count":                "20",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": "Infra.Tier1.StaticRoutes",
+						"count":                "15",
+					}),
+				),
+			},
+			{
+				// Remove the first block (Infra.Tier1); the other two must be unchanged
+				Config: testAccNsxtPolicyConstraintTwoInstanceCounts(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyConstraintExists(accTestPolicyConstraintCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "instance_count.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": "Infra.Segment",
+						"count":                "20",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(testResourceName, "instance_count.*", map[string]string{
+						"target_resource_type": "Infra.Tier1.StaticRoutes",
+						"count":                "15",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyConstraintThreeInstanceCounts() string {
+	return testAccNsxtPolicyProjectTemplate900(true, true, false, false) + fmt.Sprintf(`
+resource "nsxt_policy_constraint" "test" {
+  display_name = "%s"
+  description  = "Terraform provisioned Constraint"
+  message      = "quota exceeded"
+
+  target {
+    path_prefix = nsxt_policy_project.test.path
+  }
+
+  instance_count {
+    count                = 8
+    target_resource_type = "Infra.Tier1"
+  }
+
+  instance_count {
+    count                = 20
+    target_resource_type = "Infra.Segment"
+  }
+
+  instance_count {
+    count                = 15
+    target_resource_type = "Infra.Tier1.StaticRoutes"
+  }
+}`, accTestPolicyConstraintCreateAttributes["display_name"])
+}
+
+func testAccNsxtPolicyConstraintTwoInstanceCounts() string {
+	return testAccNsxtPolicyProjectTemplate900(true, true, false, false) + fmt.Sprintf(`
+resource "nsxt_policy_constraint" "test" {
+  display_name = "%s"
+  description  = "Terraform provisioned Constraint"
+  message      = "quota exceeded"
+
+  target {
+    path_prefix = nsxt_policy_project.test.path
+  }
+
+  instance_count {
+    count                = 20
+    target_resource_type = "Infra.Segment"
+  }
+
+  instance_count {
+    count                = 15
+    target_resource_type = "Infra.Tier1.StaticRoutes"
+  }
+}`, accTestPolicyConstraintCreateAttributes["display_name"])
 }
 
 func testAccNsxtPolicyConstraintExists(displayName string, resourceName string) resource.TestCheckFunc {

@@ -42,7 +42,7 @@ var constraintSchema = map[string]*metadata.ExtendedSchema{
 	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 	"instance_count": {
 		Schema: schema.Schema{
-			Type: schema.TypeList,
+			Type: schema.TypeSet,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
 					"count": {
@@ -82,7 +82,7 @@ var constraintSchema = map[string]*metadata.ExtendedSchema{
 			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:      "list",
+			SchemaType:      "set",
 			SdkFieldName:    "ConstraintExpressions",
 			PolymorphicType: metadata.PolymorphicTypeFlatten,
 			ReflectType:     reflect.TypeOf(model.EntityInstanceCountConstraintExpression{}),
