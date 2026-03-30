@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	trust_management_wrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management"
 	principal_identities_wrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management/principal_identities"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	mpModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management"
 	policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -20,7 +21,9 @@ import (
 
 var cliPrincipalIdentityWithCertificateClient = principal_identities_wrapper.NewWithCertificateClient
 var cliPrincipalIdentitiesClient = trust_management_wrapper.NewPrincipalIdentitiesClient
-var cliMpPrincipalIdentitiesClient = trust_management.NewPrincipalIdentitiesClient
+var cliMpPrincipalIdentitiesClient = func(connector vapiProtocolClient.Connector) trust_management.PrincipalIdentitiesClient {
+	return trust_management.NewPrincipalIdentitiesClient(connector)
+}
 var cliCertificatesClient = trust_management_wrapper.NewCertificatesClient
 
 func resourceNsxtPrincipalIdentity() *schema.Resource {
@@ -200,5 +203,5 @@ func resourceNsxtPrincipalIdentityDelete(d *schema.ResourceData, m interface{}) 
 		}
 	}
 
-	return err
+	return nil
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/bundles"
@@ -24,11 +25,21 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/pre_upgrade_checks"
 )
 
-var cliUpgradeBundlesClient = upgrade.NewBundlesClient
-var cliEulaAcceptClient = eula.NewAcceptClient
-var cliPreUpgradeChecksFailuresClient = pre_upgrade_checks.NewFailuresClient
-var cliBundlesUploadStatusClient = bundles.NewUploadStatusClient
-var cliUcUpgradeStatusClient = upgrade.NewUcUpgradeStatusClient
+var cliUpgradeBundlesClient = func(connector vapiProtocolClient.Connector) upgrade.BundlesClient {
+	return upgrade.NewBundlesClient(connector)
+}
+var cliEulaAcceptClient = func(connector vapiProtocolClient.Connector) eula.AcceptClient {
+	return eula.NewAcceptClient(connector)
+}
+var cliPreUpgradeChecksFailuresClient = func(connector vapiProtocolClient.Connector) pre_upgrade_checks.FailuresClient {
+	return pre_upgrade_checks.NewFailuresClient(connector)
+}
+var cliBundlesUploadStatusClient = func(connector vapiProtocolClient.Connector) bundles.UploadStatusClient {
+	return bundles.NewUploadStatusClient(connector)
+}
+var cliUcUpgradeStatusClient = func(connector vapiProtocolClient.Connector) upgrade.UcUpgradeStatusClient {
+	return upgrade.NewUcUpgradeStatusClient(connector)
+}
 
 var precheckComponentTypes = []string{"EDGE", "HOST", "MP"}
 

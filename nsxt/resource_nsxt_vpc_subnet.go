@@ -26,6 +26,9 @@ import (
 var cliVpcSubnetsClient = vpcs.NewSubnetsClient
 var cliVpcSubnetPortsClient = subnets.NewPortsClient
 
+var vpcSubnetDeletePortsPollDelay = 1 * time.Second
+var vpcSubnetDeletePortsPollMinTimeout = 1 * time.Second
+
 var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_PRIVATE,
 	model.VpcSubnet_ACCESS_MODE_PUBLIC,
@@ -691,8 +694,8 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 
 		},
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		MinTimeout: 1 * time.Second,
-		Delay:      1 * time.Second,
+		MinTimeout: vpcSubnetDeletePortsPollMinTimeout,
+		Delay:      vpcSubnetDeletePortsPollDelay,
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {

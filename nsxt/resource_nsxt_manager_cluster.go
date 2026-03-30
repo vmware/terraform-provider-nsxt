@@ -24,7 +24,9 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliClusterClient = nsx.NewClusterClient
+var cliClusterClient = func(connector client.Connector) nsx.ClusterClient {
+	return nsx.NewClusterClient(connector)
+}
 
 const nodeConnectivityInitialDelay int = 20
 const nodeConnectivityInterval int = 16

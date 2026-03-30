@@ -29,8 +29,16 @@ import (
 )
 
 var cliHostSwitchProfilesClient = infra.NewHostSwitchProfilesClient
-var cliTransportNodesClient = nsx.NewTransportNodesClient
-var cliTransportNodeStateClient = transport_nodes.NewStateClient
+var cliTransportNodesClient = func(connector client.Connector) nsx.TransportNodesClient {
+	return nsx.NewTransportNodesClient(connector)
+}
+var cliTransportNodeStateClient = func(connector client.Connector) transport_nodes.StateClient {
+	return transport_nodes.NewStateClient(connector)
+}
+
+var edgeTransportNodeStatePollDelay = 5
+var edgeTransportNodeStatePollInterval = 5
+var edgeTransportNodeStatePollTimeout = 1200
 
 var ipAssignmentTypes = []string{
 	"assigned_by_dhcp",
@@ -2140,9 +2148,9 @@ func getTransportNodeStateConf(connector client.Connector, id string) *resource.
 
 			return "notyet", "notyet", nil
 		},
-		Delay:        time.Duration(5) * time.Second,
-		Timeout:      time.Duration(1200) * time.Second,
-		PollInterval: time.Duration(5) * time.Second,
+		Delay:        time.Duration(edgeTransportNodeStatePollDelay) * time.Second,
+		Timeout:      time.Duration(edgeTransportNodeStatePollTimeout) * time.Second,
+		PollInterval: time.Duration(edgeTransportNodeStatePollInterval) * time.Second,
 	}
 }
 
