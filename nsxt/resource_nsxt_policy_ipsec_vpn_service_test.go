@@ -115,7 +115,7 @@ func TestAccResourceNsxtPolicyIPSecVpnService_tier1_multitenancy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(true),
+				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
@@ -132,10 +132,12 @@ func TestAccResourceNsxtPolicyIPSecVpnService_tier1_multitenancy(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr("data.nsxt_policy_ipsec_vpn_service.test", "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttrSet("data.nsxt_policy_ipsec_vpn_service.test", "path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(false),
+				Config: testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnServiceExists(accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"]),
@@ -280,17 +282,38 @@ func TestAccResourceNsxtPolicyIPSecVpnService_updateFromlocaleServicePathToGatew
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnService_Import(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnServiceImport(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnService_Import_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnServiceImport(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPSecVpnServiceImport(t *testing.T, withContext bool, preCheck func()) {
 	resourceName := "nsxt_policy_ipsec_vpn_service.test"
 
+	var config string
+	if withContext {
+		config = testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(true, false)
+	} else {
+		config = testAccNsxtPolicyIPSecVpnServiceTemplate(true, false)
+	}
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnServiceCheckDestroy(state, accTestPolicyIPSecVpnServiceCreateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnServiceTemplate(true, false),
+				Config: config,
 			},
 			{
 				ResourceName:      resourceName,
@@ -447,7 +470,7 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
 }`, accTestPolicyIPSecVpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
 }
 
-func testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(createFlow bool, withDataSource bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPSecVpnServiceCreateAttributes
@@ -455,6 +478,14 @@ func testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(createFlow bool) 
 		attrMap = accTestPolicyIPSecVpnServiceUpdateAttributes
 	}
 	context := testAccNsxtPolicyMultitenancyContext()
+	dataSource := ""
+	if withDataSource {
+		dataSource = fmt.Sprintf(`
+data "nsxt_policy_ipsec_vpn_service" "test" {
+%s
+  display_name = "%s"
+}`, context, attrMap["display_name"])
+	}
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
 %s
@@ -473,7 +504,7 @@ resource "nsxt_policy_ipsec_vpn_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, context, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"]) + dataSource
 }
 
 func testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() string {

@@ -59,4 +59,18 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test UUID
 ```
 
-The above command imports IPSec VPN IKE Profile named `test` with the NSX ID `UUID`.
+The above command imports IPSec VPN Tunnel Profile named `test` with the NSX ID `UUID`.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test /infra/ipsec-vpn-tunnel-profiles/my-tunnel-profile
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test /orgs/default/projects/project1/infra/ipsec-vpn-tunnel-profiles/my-tunnel-profile
+```
+
+Note: for multitenancy projects only the policy path form is usable.
