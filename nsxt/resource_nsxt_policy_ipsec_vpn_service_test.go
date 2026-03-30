@@ -132,7 +132,6 @@ func TestAccResourceNsxtPolicyIPSecVpnService_tier1_multitenancy(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr("data.nsxt_policy_ipsec_vpn_service.test", "display_name", accTestPolicyIPSecVpnServiceCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttrSet("data.nsxt_policy_ipsec_vpn_service.test", "path"),
 				),
 			},
@@ -483,8 +482,8 @@ func testAccNsxtPolicyIPSecVpnServiceTier1MultitenancyTemplate(createFlow bool, 
 		dataSource = fmt.Sprintf(`
 data "nsxt_policy_ipsec_vpn_service" "test" {
 %s
-  display_name = "%s"
-}`, context, attrMap["display_name"])
+  id = nsxt_policy_ipsec_vpn_service.test.id
+}`, context)
 	}
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {

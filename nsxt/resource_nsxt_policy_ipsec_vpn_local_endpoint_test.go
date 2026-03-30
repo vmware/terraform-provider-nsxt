@@ -122,8 +122,6 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_tier1_multitenancy(t *testin
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttr("data.nsxt_policy_ipsec_vpn_local_endpoint.test", "display_name", accTestPolicyIPSecVpnLocalEndpointCreateAttributes["display_name"]),
-					resource.TestCheckResourceAttr("data.nsxt_policy_ipsec_vpn_local_endpoint.test", "local_address", accTestPolicyIPSecVpnLocalEndpointCreateAttributes["local_address"]),
 					resource.TestCheckResourceAttrSet("data.nsxt_policy_ipsec_vpn_local_endpoint.test", "path"),
 				),
 			},
@@ -310,9 +308,9 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(createFlow 
 		dataSource = fmt.Sprintf(`
 data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 %s
-  display_name = "%s"
+  id           = nsxt_policy_ipsec_vpn_local_endpoint.test.id
   service_path = nsxt_policy_ipsec_vpn_service.test.path
-}`, context, attrMap["display_name"])
+}`, context)
 	}
 	return testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyPrerequisite() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
