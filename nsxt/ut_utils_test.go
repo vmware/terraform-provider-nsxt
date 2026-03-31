@@ -2,9 +2,16 @@ package nsxt
 
 import (
 	api "github.com/vmware/go-vmware-nsxt"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func constructMockProviderClient() nsxtClients {
+	// Prevent auto-initialization of NsxVersion via real API calls when empty.
+	// Tests that need a specific version set it explicitly before calling this.
+	if util.NsxVersion == "" {
+		util.NsxVersion = "3.0.0"
+	}
 	commonConfig := commonProviderConfig{
 		RemoteAuth:             false,
 		ToleratePartialSuccess: false,

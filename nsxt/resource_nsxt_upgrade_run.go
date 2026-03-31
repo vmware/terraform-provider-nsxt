@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
@@ -22,13 +22,27 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
-var cliUpgradeSummaryClient = upgrade.NewSummaryClient
-var cliUpgradeUnitGroupsClient = upgrade.NewUpgradeUnitGroupsClient
-var cliUpgradeSettingsClient = plan.NewSettingsClient
-var cliUpgradePlanClient = upgrade.NewPlanClient
-var cliUpgradeStatusSummaryClient = upgrade.NewStatusSummaryClient
-var cliUpgradeClient = nsx.NewUpgradeClient
-var cliUpgradeUnitGroupsStatusClient = upgrade.NewUpgradeUnitGroupsStatusClient
+var cliUpgradeSummaryClient = func(connector vapiProtocolClient.Connector) upgrade.SummaryClient {
+	return upgrade.NewSummaryClient(connector)
+}
+var cliUpgradeUnitGroupsClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeUnitGroupsClient {
+	return upgrade.NewUpgradeUnitGroupsClient(connector)
+}
+var cliUpgradeSettingsClient = func(connector vapiProtocolClient.Connector) plan.SettingsClient {
+	return plan.NewSettingsClient(connector)
+}
+var cliUpgradePlanClient = func(connector vapiProtocolClient.Connector) upgrade.PlanClient {
+	return upgrade.NewPlanClient(connector)
+}
+var cliUpgradeStatusSummaryClient = func(connector vapiProtocolClient.Connector) upgrade.StatusSummaryClient {
+	return upgrade.NewStatusSummaryClient(connector)
+}
+var cliUpgradeClient = func(connector vapiProtocolClient.Connector) nsx.UpgradeClient {
+	return nsx.NewUpgradeClient(connector)
+}
+var cliUpgradeUnitGroupsStatusClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeUnitGroupsStatusClient {
+	return upgrade.NewUpgradeUnitGroupsStatusClient(connector)
+}
 
 // Order matters
 var upgradeComponentList = []string{
@@ -116,7 +130,7 @@ func getUpgradeComponentList(targetVersion string) []string {
 	return upgradeComponentList
 }
 
-func newUpgradeClientSet(connector client.Connector, d *schema.ResourceData) *upgradeClientSet {
+func newUpgradeClientSet(connector vapiProtocolClient.Connector, d *schema.ResourceData) *upgradeClientSet {
 	return &upgradeClientSet{
 		GroupClient:       cliUpgradeUnitGroupsClient(connector),
 		SettingClient:     cliUpgradeSettingsClient(connector),

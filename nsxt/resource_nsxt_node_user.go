@@ -12,11 +12,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 )
 
-var cliNodeUsersClient = node.NewUsersClient
+var cliNodeUsersClient = func(connector vapiProtocolClient.Connector) node.UsersClient {
+	return node.NewUsersClient(connector)
+}
+
+var nodeUserDeleteSleep = time.Duration(1) * time.Second
 
 func resourceNsxtUsers() *schema.Resource {
 	return &schema.Resource{
@@ -247,7 +252,7 @@ func resourceNsxtNodeUserDelete(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 		err = handleDeleteError("User", id, err)
-		time.Sleep(1 * time.Second)
+		time.Sleep(nodeUserDeleteSleep)
 	}
 
 	return err

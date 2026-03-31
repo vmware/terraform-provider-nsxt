@@ -10,9 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/proxy"
 )
+
+var cliProxyConfigClient = func(connector vapiProtocolClient.Connector) proxy.ConfigClient {
+	return proxy.NewConfigClient(connector)
+}
 
 func resourceNsxtProxyConfig() *schema.Resource {
 	return &schema.Resource{
@@ -120,7 +125,7 @@ func resourceNsxtProxyConfigRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Reading Proxy Config with ID %s", id)
 
 	// Create proxy config client
-	client := proxy.NewConfigClient(connector)
+	client := cliProxyConfigClient(connector)
 
 	// Get proxy configuration
 	proxyConfig, err := client.Get()
@@ -160,7 +165,7 @@ func resourceNsxtProxyConfigUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	// Create proxy config client
-	client := proxy.NewConfigClient(connector)
+	client := cliProxyConfigClient(connector)
 
 	// First, read the current configuration to get the revision
 	currentConfig, err := client.Get()
@@ -248,7 +253,7 @@ func resourceNsxtProxyConfigDelete(d *schema.ResourceData, m interface{}) error 
 
 	// Proxy Config cannot be truly deleted from NSX-T, only disabled
 	// Create proxy config client
-	client := proxy.NewConfigClient(connector)
+	client := cliProxyConfigClient(connector)
 
 	// Read current config to get revision
 	currentConfig, err := client.Get()

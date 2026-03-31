@@ -11,11 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-var cliClusterProfilesClient = nsx.NewClusterProfilesClient
+var cliClusterProfilesClient = func(connector vapiProtocolClient.Connector) nsx.ClusterProfilesClient {
+	return nsx.NewClusterProfilesClient(connector)
+}
 
 func resourceNsxtEdgeHighAvailabilityProfile() *schema.Resource {
 	return &schema.Resource{
