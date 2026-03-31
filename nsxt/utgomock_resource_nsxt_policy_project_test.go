@@ -1,0 +1,202 @@
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
+
+package nsxt
+
+import (
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	orgsapi "github.com/vmware/terraform-provider-nsxt/api/orgs"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	orgsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+)
+
+var (
+	projectID          = "test-project-id"
+	projectDisplayName = "test-project"
+	projectDescription = "Test Project"
+	projectRevision    = int64(1)
+	projectPath        = "/orgs/default/projects/test-project-id"
+)
+
+func projectAPIResponse() nsxModel.Project {
+	return nsxModel.Project{
+		Id:          &projectID,
+		DisplayName: &projectDisplayName,
+		Description: &projectDescription,
+		Revision:    &projectRevision,
+		Path:        &projectPath,
+	}
+}
+
+func minimalProjectData() map[string]interface{} {
+	return map[string]interface{}{
+		"display_name": projectDisplayName,
+		"description":  projectDescription,
+		"nsx_id":       projectID,
+	}
+}
+
+func setupProjectMock(t *testing.T, ctrl *gomock.Controller) (*orgsmocks.MockProjectsClient, func()) {
+	mockSDK := orgsmocks.NewMockProjectsClient(ctrl)
+	mockWrapper := &orgsapi.ProjectClientContext{
+		Client:     mockSDK,
+		ClientType: utl.Local,
+	}
+
+	original := cliProjectsClient
+	cliProjectsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *orgsapi.ProjectClientContext {
+		return mockWrapper
+	}
+
+	return mockSDK, func() { cliProjectsClient = original }
+}
+
+func TestMockResourceNsxtPolicyProjectCreate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupProjectMock(t, ctrl)
+	defer restore()
+
+	t.Run("Create success", func(t *testing.T) {
+		util.NsxVersion = "4.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(nsxModel.Project{}, notFoundErr),
+			mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := resourceNsxtPolicyProjectCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, projectID, d.Id())
+		assert.Equal(t, projectDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Create fails when already exists", func(t *testing.T) {
+		util.NsxVersion = "4.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := resourceNsxtPolicyProjectCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "already exists")
+	})
+}
+
+func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupProjectMock(t, ctrl)
+	defer restore()
+
+	t.Run("Read success", func(t *testing.T) {
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, projectDisplayName, d.Get("display_name"))
+		assert.Equal(t, projectDescription, d.Get("description"))
+	})
+
+	t.Run("Read not found clears ID", func(t *testing.T) {
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(nsxModel.Project{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Read fails when ID is empty", func(t *testing.T) {
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyProjectUpdate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupProjectMock(t, ctrl)
+	defer restore()
+
+	t.Run("Update success", func(t *testing.T) {
+		util.NsxVersion = "4.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update fails when ID is empty", func(t *testing.T) {
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := resourceNsxtPolicyProjectUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyProjectDelete(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupProjectMock(t, ctrl)
+	defer restore()
+
+	t.Run("Delete success", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(utl.DefaultOrgID, projectID, gomock.Any()).Return(nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Delete fails when ID is empty", func(t *testing.T) {
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := resourceNsxtPolicyProjectDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
