@@ -18,7 +18,7 @@ import (
 )
 
 var cliIpsecVpnTunnelProfilesClient = infra.NewIpsecVpnTunnelProfilesClient
-var tunnelProfilePathExample = "/infra/ipsec-vpn-tunnel-profiles/[profile]"
+var tunnelProfilePathExample = getMultitenancyPathExample("/infra/ipsec-vpn-tunnel-profiles/[profile]")
 
 var ipSecVpnTunnelProfileDfPolicyValues = []string{
 	model.IPSecVpnTunnelProfile_DF_POLICY_COPY,

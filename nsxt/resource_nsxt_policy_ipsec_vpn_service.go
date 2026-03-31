@@ -261,6 +261,11 @@ func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface
 	} else {
 		d.Set("gateway_path", parts[0])
 	}
+	if projectID := extractProjectIDFromPolicyPath(importID); projectID != "" {
+		ctxMap := make(map[string]interface{})
+		ctxMap["project_id"] = projectID
+		d.Set("context", []interface{}{ctxMap})
+	}
 	return []*schema.ResourceData{d}, nil
 }
 

@@ -83,7 +83,7 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -111,7 +111,7 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_tier1_multitenancy(t *testin
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(true),
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnLocalEndpointCreateAttributes["display_name"]),
@@ -122,11 +122,11 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_tier1_multitenancy(t *testin
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet("data.nsxt_policy_ipsec_vpn_local_endpoint.test", "path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(false),
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnLocalEndpointExists(accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"]),
@@ -145,18 +145,32 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_tier1_multitenancy(t *testin
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnLocalEndpointImport(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_importBasic_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnLocalEndpointImport(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPSecVpnLocalEndpointImport(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := testAccPolicyVPNLocalEndpointResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic(),
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic(withContext),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -281,13 +295,22 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 }`, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
 }
 
-func testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyTemplate(createFlow bool, withDataSource bool) string {
 	context := testAccNsxtPolicyMultitenancyContext()
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPSecVpnLocalEndpointCreateAttributes
 	} else {
 		attrMap = accTestPolicyIPSecVpnLocalEndpointUpdateAttributes
+	}
+	dataSource := ""
+	if withDataSource {
+		dataSource = fmt.Sprintf(`
+data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+%s
+  id           = nsxt_policy_ipsec_vpn_local_endpoint.test.id
+  service_path = nsxt_policy_ipsec_vpn_service.test.path
+}`, context)
 	}
 	return testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyPrerequisite() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
@@ -301,16 +324,24 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, context, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["local_address"], attrMap["local_id"]) + dataSource
 }
 
-func testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic() string {
-	return testAccNsxtPolicyIPSecVpnLocalEndpointPrerequisite() + fmt.Sprintf(`
+func testAccNsxtPolicyIPSecVpnLocalEndpointMinimalistic(withContext bool) string {
+	var prereqs, context string
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+		prereqs = testAccNsxtPolicyIPSecVpnLocalEndpointTier1MultitenancyPrerequisite()
+	} else {
+		prereqs = testAccNsxtPolicyIPSecVpnLocalEndpointPrerequisite()
+	}
+	return prereqs + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+%s
   service_path  = nsxt_policy_ipsec_vpn_service.test.path
   display_name  = "%s"
   local_address = "%s"
-}`, accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
+}`, context, accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["display_name"], accTestPolicyIPSecVpnLocalEndpointUpdateAttributes["local_address"])
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnLocalEndpointIPV6_basic(t *testing.T) {

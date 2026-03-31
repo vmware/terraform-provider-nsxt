@@ -48,12 +48,25 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-An existing segment can be [imported][docs-import] into this resource, via the following command:
+An existing IPSec VPN Local Endpoint can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 ID
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 POLICY_PATH
 ```
 
-The above command imports the endpoint named `endpoint1` with the NSX ID `ID`.
+The above command imports the endpoint named `endpoint1` with the policy path `POLICY_PATH`.
+Note: a policy path is always required for import; a plain ID is not accepted.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 /infra/tier-1s/gw1/ipsec-vpn-services/svc1/local-endpoints/endpoint1
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 /orgs/default/projects/project1/infra/tier-1s/gw1/ipsec-vpn-services/svc1/local-endpoints/endpoint1
+```

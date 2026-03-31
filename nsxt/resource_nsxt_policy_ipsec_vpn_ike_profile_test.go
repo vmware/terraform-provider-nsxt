@@ -110,23 +110,43 @@ func testAccResourceNsxtPolicyIPSecVpnIkeProfileBasic(t *testing.T, withContext 
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnIkeProfileImport(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnIkeProfile_importBasic_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPSecVpnIkeProfileImport(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPSecVpnIkeProfileImport(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ipsec_vpn_ike_profile.test"
 
+	var importStateIDFunc resource.ImportStateIdFunc
+	if withContext {
+		importStateIDFunc = testAccResourceNsxtPolicyImportIDRetriever(testResourceName)
+	}
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnIkeProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(false),
+				Config: testAccNsxtPolicyIPSecVpnIkeProfileMinimalistic(withContext),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: importStateIDFunc,
 			},
 		},
 	})

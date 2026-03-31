@@ -18,7 +18,7 @@ import (
 )
 
 var cliIpsecVpnIkeProfilesClient = infra.NewIpsecVpnIkeProfilesClient
-var ikeProfilePathExample = "/infra/ipsec-vpn-ike-profiles/[profile]"
+var ikeProfilePathExample = getMultitenancyPathExample("/infra/ipsec-vpn-ike-profiles/[profile]")
 
 var iPSecVpnIkeProfileDhGroupsValues = []string{
 	model.IPSecVpnIkeProfile_DH_GROUPS_GROUP2,

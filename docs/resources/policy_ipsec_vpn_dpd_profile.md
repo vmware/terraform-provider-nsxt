@@ -63,3 +63,11 @@ For example:
 ```shell
 terraform import nsxt_policy_ipsec_vpn_dpd_profile.test /infra/ipsec-vpn-dpd-profiles/my-dpd-profile
 ```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_dpd_profile.test /orgs/default/projects/project1/infra/ipsec-vpn-dpd-profiles/my-dpd-profile
+```
+
+Note: for multitenancy projects only the policy path form is usable.

@@ -18,7 +18,7 @@ import (
 )
 
 var cliIpsecVpnDpdProfilesClient = infra.NewIpsecVpnDpdProfilesClient
-var dpdProfilePathExample = "/infra/ipsec-vpn-dpd-profiles/[profile]"
+var dpdProfilePathExample = getMultitenancyPathExample("/infra/ipsec-vpn-dpd-profiles/[profile]")
 
 var iPSecVpnDpdProfileDpdProbeModeValues = []string{
 	model.IPSecVpnDpdProfile_DPD_PROBE_MODE_ON_DEMAND,
