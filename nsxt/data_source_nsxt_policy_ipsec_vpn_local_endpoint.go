@@ -23,6 +23,7 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchema(false, false, false),
 			"local_address": {
 				Type:        schema.TypeString,
 				Description: "Local IPv4 IP address",
@@ -39,9 +40,10 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m int
 	query := make(map[string]string)
 	if len(servicePath) > 0 {
 		s := strings.Split(servicePath, "/")
-		if len(s) != 8 && len(s) != 6 {
+		if len(s) != 8 && len(s) != 6 && len(s) != 10 {
 			// The policy path of IPSec VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/ipsec-vpn-services/ccc
 			// or /infra/tier-0s/aaa/ipsec-vpn-services/bbb
+			// or /orgs/default/projects/proj/infra/tier-1s/aaa/ipsec-vpn-services/bbb (multitenancy)
 			return fmt.Errorf("Invalid IPSec Vpn Service path: %s", servicePath)
 		}
 		if len(s) == 8 {

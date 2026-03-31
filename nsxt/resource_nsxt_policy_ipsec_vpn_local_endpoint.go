@@ -466,6 +466,7 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	importID := d.Id()
 	err := fmt.Errorf("VPN Local Endpoint Path expected, got %s", importID)
 	// path format example: /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/bbb/local-endpoints/ccc
+	// multitenancy path: /orgs/default/projects/proj-id/infra/tier-1s/aaa/ipsec-vpn-services/bbb/local-endpoints/ccc
 	s := strings.Split(importID, "/")
 	if len(s) < 8 {
 		return []*schema.ResourceData{d}, err
@@ -479,6 +480,12 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	}
 
 	d.Set("service_path", s[0])
+
+	if projectID := extractProjectIDFromPolicyPath(importID); projectID != "" {
+		ctxMap := make(map[string]interface{})
+		ctxMap["project_id"] = projectID
+		d.Set("context", []interface{}{ctxMap})
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

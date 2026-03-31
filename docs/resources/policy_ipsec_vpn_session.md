@@ -110,7 +110,19 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_ipsec_vpn_session.test PATH
+terraform import nsxt_policy_ipsec_vpn_session.test POLICY_PATH
 ```
 
-The above command imports IPSec VPN session named `test` that corresponds to NSX IPSec VPN session with policy path `PATH`.
+The above command imports the IPSec VPN session named `test` with the policy path `POLICY_PATH`.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_session.test /infra/tier-1s/gw1/ipsec-vpn-services/svc1/sessions/session1
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_session.test /orgs/default/projects/project1/infra/tier-1s/gw1/ipsec-vpn-services/svc1/sessions/session1
+```

@@ -43,7 +43,7 @@ func resourceNsxtPolicyL2VPNSession() *schema.Resource {
 		Update: resourceNsxtPolicyL2VPNSessionUpdate,
 		Delete: resourceNsxtPolicyL2VPNSessionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVpnSessionImporter,
+			State: nsxtL2VpnSessionImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -385,6 +385,30 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 
 	return resourceNsxtPolicyL2VPNSessionRead(d, m)
 
+}
+
+func nsxtL2VpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	err := fmt.Errorf("Expected L2 VPN session path, got %s", importID)
+	// Path should be like /infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb/sessions/ccc
+	s := strings.Split(importID, "/")
+	if len(s) < 8 {
+		return []*schema.ResourceData{d}, err
+	}
+
+	d.SetId(s[len(s)-1])
+
+	s = strings.Split(importID, "/sessions/")
+	if len(s) != 2 {
+		return []*schema.ResourceData{d}, err
+	}
+	d.Set("service_path", s[0])
+
+	// L2 VPN sessions are infra-scoped only; project context is not supported.
+	if extractProjectIDFromPolicyPath(importID) != "" {
+		return nil, fmt.Errorf("L2 VPN sessions do not support project context; import path must be infra-scoped (e.g. /infra/tier-1s/...)")
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceNsxtPolicyL2VPNSessionDelete(d *schema.ResourceData, m interface{}) error {

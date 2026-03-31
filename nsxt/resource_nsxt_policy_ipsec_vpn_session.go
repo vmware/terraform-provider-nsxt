@@ -899,6 +899,12 @@ func nsxtVpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.Re
 	}
 	d.Set("service_path", s[0])
 
+	if projectID := extractProjectIDFromPolicyPath(importID); projectID != "" {
+		ctxMap := make(map[string]interface{})
+		ctxMap["project_id"] = projectID
+		d.Set("context", []interface{}{ctxMap})
+	}
+
 	return []*schema.ResourceData{d}, nil
 }
 
