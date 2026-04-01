@@ -16,3 +16,7 @@ dist/
 
 # Ignore macOS desktop services store files.
 **/.DS_Store
+
+# UT files to ignore
+nsxt.test
+metadata.test

@@ -23,4 +23,21 @@ jobs:
       - name: Setup Go
         uses: ./.github/actions/setup-go
       - name: Run unit tests
-        run: make testacc TEST="./nsxt/" TESTARGS="-run=TestMockResourceNsxt.* -coverpkg=./..."
+        run: |
+          set -euo pipefail
+          go test ./nsxt/ -tags=unittest \
+            -run='^(TestMock.*Nsxt.*|TestUnitNsxt_.*)' \
+            -coverpkg=./nsxt/... \
+            -coverprofile=coverage.out
+          total_line=$(go tool cover -func=coverage.out | grep '^total:' || true)
+          pct=$(echo "$total_line" | grep -oE '[0-9]+\.[0-9]+%' | tail -1)
+          {
+            echo "## Unit test coverage"
+            echo ""
+            echo "Merged coverage for \`-coverpkg=./nsxt/...\`: **${pct:-n/a}**"
+            echo ""
+            echo '```'
+            echo "$total_line"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=nsxt unit test coverage::${pct:-n/a}"

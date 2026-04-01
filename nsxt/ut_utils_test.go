@@ -1,3 +1,7 @@
+//go:build unittest
+
+// Shared helpers for unittest-tagged mock tests (see utgomock_*_test.go).
+
 package nsxt
 
 import (
