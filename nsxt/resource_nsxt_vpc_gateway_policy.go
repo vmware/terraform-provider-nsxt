@@ -36,6 +36,9 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Gateway Policy resource requires NSX version 9.0.0 or higher")
 	}
+	if IsCacheEnabled() {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+	}
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
@@ -52,6 +55,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("gatewaypolicy")
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -62,8 +66,36 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 	if id == "" {
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
+	var obj *model.GatewayPolicy
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.GatewayPolicy](
+			d,
+			m,
+			connector,
+			id,
+			"gatewaypolicy",
+			model.GatewayPolicyBindingType(),
+			func() (*model.GatewayPolicy, error) {
+				readObj, readErr := getGatewayPolicy(getSessionContext(d, m), id, "", connector)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.GatewayPolicy) error {
+				return gatewayPolicyInfraPatch(getSessionContext(d, m), *patchObj, "", m)
+			},
+		)
+	} else {
+		readObj, readErr := getGatewayPolicy(getSessionContext(d, m), id, "", connector)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 
-	obj, err := getGatewayPolicy(getSessionContext(d, m), id, "", connector)
 	if err != nil {
 		return handleReadError(d, "VPC Gateway Policy", id, err)
 	}
@@ -92,12 +124,16 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 	if id == "" {
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
+	if IsCacheEnabled() {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+	}
 
 	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true, true)
 	if err != nil {
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
 
+	InvalidateCacheForResourceType("gatewaypolicy")
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 

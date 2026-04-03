@@ -94,7 +94,12 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.VpcAttachment{
 		DisplayName: &displayName,
@@ -118,6 +123,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("VpcAttachment")
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -128,15 +134,45 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 	if id == "" {
 		return fmt.Errorf("error obtaining VpcAttachment ID")
 	}
-
 	parentPath := d.Get("parent_path").(string)
-	sessionContext := getParentContext(d, m, parentPath)
-	client := cliVpcAttachmentsClient(sessionContext, connector)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+
+	sessionContext := getParentContext(d, m, parentPath)
+	client := cliVpcAttachmentsClient(sessionContext, connector)
+
+	var obj *model.VpcAttachment
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.VpcAttachment](
+			d,
+			m,
+			connector,
+			id,
+			"VpcAttachment",
+			model.VpcAttachmentBindingType(),
+			func() (*model.VpcAttachment, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.VpcAttachment) error {
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
+
 	if err != nil {
 		return handleReadError(d, "VpcAttachment", id, err)
 	}
@@ -148,7 +184,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcAttachmentSchema, "", nil)
 }
 
@@ -168,7 +204,12 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -190,6 +231,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("VpcAttachment", id, err)
 	}
 
+	InvalidateCacheForResourceType("VpcAttachment")
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 

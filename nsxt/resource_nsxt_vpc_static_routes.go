@@ -124,7 +124,12 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.StaticRoutes{
 		DisplayName: &displayName,
@@ -148,6 +153,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("StaticRoutes")
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
@@ -158,11 +164,44 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 	if id == "" {
 		return fmt.Errorf("Error obtaining StaticRoutes ID")
 	}
-
-	sessionContext := getSessionContext(d, m)
-	parents := getVpcParentsFromContext(sessionContext)
-	client := cliVpcStaticRoutesClient(sessionContext, connector)
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+	var obj *model.StaticRoutes
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.StaticRoutes](
+			d,
+			m,
+			connector,
+			id,
+			"StaticRoutes",
+			model.StaticRoutesBindingType(),
+			func() (*model.StaticRoutes, error) {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcStaticRoutesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.StaticRoutes) error {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcStaticRoutesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		sessionContext := getSessionContext(d, m)
+		client := cliVpcStaticRoutesClient(sessionContext, connector)
+		parents := getVpcParentsFromContext(sessionContext)
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "StaticRoutes", id, err)
 	}
@@ -174,7 +213,7 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, staticRoutesSchema, "", nil)
 }
 
@@ -190,7 +229,12 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if IsCacheEnabled() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -215,6 +259,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("StaticRoutes", id, err)
 	}
 
+	InvalidateCacheForResourceType("StaticRoutes")
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
