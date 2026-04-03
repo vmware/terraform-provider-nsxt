@@ -313,8 +313,10 @@ func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPol
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralCreate(d, m, true)
+}
 
-	// Initialize resource Id and verify this ID is not yet used
+func resourceNsxtPolicyIntrusionServicePolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(getSessionContext(d, m), d.Get("domain").(string)))
 	if err != nil {
 		return err
@@ -330,10 +332,10 @@ func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m in
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyIntrusionServicePolicyRead(d, m)
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, withRule)
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 	id := d.Id()
 	domainName := d.Get("domain").(string)
@@ -359,11 +361,21 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	d.Set("sequence_number", obj.SequenceNumber)
 	d.Set("stateful", obj.Stateful)
 	d.Set("revision", obj.Revision)
-	return setPolicyIdsRulesInSchema(d, obj.Rules)
+	if withRule {
+		return setPolicyIdsRulesInSchema(d, obj.Rules)
+	}
+	return nil
+}
+
+func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, true)
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralUpdate(d, m, true)
+}
 
+func resourceNsxtPolicyIntrusionServicePolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
@@ -376,7 +388,7 @@ func resourceNsxtPolicyIntrusionServicePolicyUpdate(d *schema.ResourceData, m in
 		return handleUpdateError("Intrusion Service Policy", id, err)
 	}
 
-	return resourceNsxtPolicyIntrusionServicePolicyRead(d, m)
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, withRule)
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m interface{}) error {
