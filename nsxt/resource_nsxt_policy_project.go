@@ -93,6 +93,11 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
+			"ipv6_blocks": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 			"tgw_external_connections": {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
@@ -234,6 +239,10 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		obj.TgwExternalConnections = tgwConnectionsList
 		obj.VcFolder = &vcFolder
 		obj.Limits = quotasList
+	}
+
+	if util.NsxVersionHigherOrEqual("9.2.0") {
+		obj.Ipv6Blocks = getStringListFromSchemaList(d, "ipv6_blocks")
 	}
 
 	if shortID != "" {
@@ -467,6 +476,10 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("tgw_external_connections", obj.TgwExternalConnections)
 		d.Set("vc_folder", obj.VcFolder)
 		d.Set("quotas", obj.Limits)
+	}
+
+	if util.NsxVersionHigherOrEqual("9.2.0") {
+		d.Set("ipv6_blocks", obj.Ipv6Blocks)
 	}
 
 	if util.NsxVersionHigherOrEqual("9.1.0") {

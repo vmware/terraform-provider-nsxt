@@ -97,6 +97,12 @@ func runChecksNsx910(testResourceName string, expectedValues map[string]string) 
 	)
 }
 
+func runChecksNsx920(testResourceName string, expectedValues map[string]string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttr(testResourceName, "ipv6_blocks.#", expectedValues["ipv6_block_count"]),
+	)
+}
+
 func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	siteCount := getExpectedSiteInfoCount(t)
@@ -415,6 +421,67 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
+	testResourceName := "nsxt_policy_project.test"
+	siteCount := getExpectedSiteInfoCount(t)
+	expectedValuesStep1 := map[string]string{
+		"t0_count":                   "1",
+		"ip_block_count":             "1",
+		"ipv6_block_count":           "1",
+		"tgw_ext_conn_count":         "1",
+		"span_reference_count":       "1",
+		"activate_default_dfw_rules": "true",
+		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
+	}
+	expectedValuesStep2 := map[string]string{
+		"t0_count":                   "1",
+		"ip_block_count":             "0",
+		"ipv6_block_count":           "0",
+		"tgw_ext_conn_count":         "1",
+		"span_reference_count":       "1",
+		"activate_default_dfw_rules": "false",
+		"site_count":                 siteCount,
+		"id_suffix":                  "test-suffix",
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyProjectTemplate920(true, true, true, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx410(testResourceName, accTestPolicyProjectCreateAttributes, expectedValuesStep1),
+					runChecksNsx411(testResourceName, expectedValuesStep1),
+					runChecksNsx420(testResourceName, expectedValuesStep1),
+					runChecksNsx900(testResourceName, expectedValuesStep1),
+					runChecksNsx910(testResourceName, expectedValuesStep1),
+					runChecksNsx920(testResourceName, expectedValuesStep1),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyProjectTemplate920(false, true, false, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
+					runChecksNsx411(testResourceName, expectedValuesStep2),
+					runChecksNsx420(testResourceName, expectedValuesStep2),
+					runChecksNsx900(testResourceName, expectedValuesStep2),
+					runChecksNsx910(testResourceName, expectedValuesStep2),
+					runChecksNsx920(testResourceName, expectedValuesStep2),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyProject_DefaultSpanCheck(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_project.test"
@@ -573,6 +640,13 @@ resource "nsxt_policy_ip_block" "test_ip_block" {
   {{if .SetIpBlockVisibility}}visibility   = "EXTERNAL"{{end}}
 }
 
+{{if .ExternalIPv6BlockPath}}resource "nsxt_policy_ip_block" "test_ipv6_block" {
+  display_name      = "test_ipv6_block"
+  cidr              = "2001:db8::/32"
+  visibility        = "EXTERNAL"
+  ip_address_type   = "IPV6"
+}{{end}}
+
 {{if .ExternalTGWConnectionPath}}resource "nsxt_policy_gateway_connection" "test_gw_conn" {
   display_name     = "test_gw_conn"
   tier0_path       = {{.T0GwPath}}
@@ -591,6 +665,7 @@ resource "nsxt_policy_project" "test" {
   {{if .IdSuffix}}id_suffix                  = "{{.IdSuffix}}"{{end}}
   {{if .T0GwPath}}tier0_gateway_paths        = [{{.T0GwPath}}]{{end}}
   {{if .ExternalIPv4BlockPath}}external_ipv4_blocks       = [{{.ExternalIPv4BlockPath}}]{{end}}
+  {{if .ExternalIPv6BlockPath}}ipv6_blocks                = [{{.ExternalIPv6BlockPath}}]{{end}}
   {{if .ExternalTGWConnectionPath}}tgw_external_connections   = [{{.ExternalTGWConnectionPath}}]{{end}}
   {{if .ActivateDefaultDfwRules}}activate_default_dfw_rules = {{.ActivateDefaultDfwRules}}{{end}}
   {{if .PolicyNetworkSpan}}
@@ -711,6 +786,32 @@ func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExterna
 
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate910").Parse(templateData)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(buffer, attrMap)
+	if err != nil {
+		panic(err)
+	}
+	return buffer.String()
+}
+
+func testAccNsxtPolicyProjectTemplate920(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules, includeIPv6Block bool) string {
+	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	if includeExternalIPv4Block {
+		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
+	}
+	if includeIPv6Block {
+		attrMap["ExternalIPv6BlockPath"] = "nsxt_policy_ip_block.test_ipv6_block.path"
+	}
+	attrMap["SetIpBlockVisibility"] = "true"
+	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
+	attrMap["ExternalTGWConnectionPath"] = "nsxt_policy_gateway_connection.test_gw_conn.path"
+	attrMap["PolicyNetworkSpan"] = "nsxt_policy_network_span.netspan.path"
+	attrMap["IdSuffix"] = "test-suffix"
+
+	buffer := new(bytes.Buffer)
+	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate920").Parse(templateData)
 	if err != nil {
 		panic(err)
 	}

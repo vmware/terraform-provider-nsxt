@@ -78,6 +78,25 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "ExternalIpBlocks",
 		},
 	},
+	"ipv6_blocks": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "list",
+			SdkFieldName: "Ipv6Blocks",
+		},
+	},
 	"service_gateway": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
@@ -98,6 +117,17 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 										Metadata: metadata.Metadata{
 											SchemaType:   "bool",
 											SdkFieldName: "EnableDefaultSnat",
+										},
+									},
+									"auto_snat_ip_block": {
+										Schema: schema.Schema{
+											Type:         schema.TypeString,
+											ValidateFunc: validatePolicyPath(),
+											Optional:     true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "string",
+											SdkFieldName: "AutoSnatIpBlock",
 										},
 									},
 								},
