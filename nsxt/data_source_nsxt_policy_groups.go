@@ -37,7 +37,6 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 
 	boolFalse := false
 	var cursor *string
-	total := 0
 	groupsMap := make(map[string]string)
 
 	for {
@@ -45,15 +44,11 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 		if err != nil {
 			return err
 		}
-		if total == 0 && results.ResultCount != nil {
-			// first response
-			total = int(*results.ResultCount)
-		}
 		for _, r := range results.Results {
 			groupsMap[*r.DisplayName] = *r.Path
 		}
 		cursor = results.Cursor
-		if len(groupsMap) >= total {
+		if cursor == nil {
 			break
 		}
 	}
