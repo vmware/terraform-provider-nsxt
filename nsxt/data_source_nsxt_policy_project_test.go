@@ -47,6 +47,42 @@ func TestAccDataSourceNsxtPolicyProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyProject_920ipv6Blocks(t *testing.T) {
+	testDSName := "data.nsxt_policy_project.ds"
+	expected := map[string]string{"ipv6_block_count": "1"}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectCreateAttributes["DisplayName"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceNsxtPolicyProject920Config(),
+				Check: resource.ComposeTestCheckFunc(
+					runChecksNsx920(testDSName, expected),
+					resource.TestCheckResourceAttrPair(testDSName, "ipv6_blocks.0", "nsxt_policy_ip_block.test_ipv6_block", "path"),
+					resource.TestCheckResourceAttr(testDSName, "display_name", accTestPolicyProjectCreateAttributes["DisplayName"]),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceNsxtPolicyProject920Config() string {
+	return testAccNsxtPolicyProjectTemplate920(true, true, true, true, true, false) + fmt.Sprintf(`
+data "nsxt_policy_project" "ds" {
+  display_name = "%s"
+  depends_on = [nsxt_policy_project.test]
+}
+`, accTestPolicyProjectCreateAttributes["DisplayName"])
+}
+
 func testAccDataSourceNsxtPolicyProjectCreate(name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {

@@ -16,8 +16,10 @@ import (
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	sdkprojects "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 
 	orgsapi "github.com/vmware/terraform-provider-nsxt/api/orgs"
+	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	orgsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -29,6 +31,7 @@ var (
 	projectDescription = "Test Project"
 	projectRevision    = int64(1)
 	projectPath        = "/orgs/default/projects/test-project-id"
+	ipv6BlockPath      = "/orgs/default/projects/default/ip-blocks/test-ipv6-block"
 )
 
 func projectAPIResponse() nsxModel.Project {
@@ -39,6 +42,12 @@ func projectAPIResponse() nsxModel.Project {
 		Revision:    &projectRevision,
 		Path:        &projectPath,
 	}
+}
+
+func projectAPIResponseWithIPv6Blocks() nsxModel.Project {
+	p := projectAPIResponse()
+	p.Ipv6Blocks = []string{ipv6BlockPath}
+	return p
 }
 
 func minimalProjectData() map[string]interface{} {
@@ -62,6 +71,42 @@ func setupProjectMock(t *testing.T, ctrl *gomock.Controller) (*orgsmocks.MockPro
 	}
 
 	return mockSDK, func() { cliProjectsClient = original }
+}
+
+// vpcSecurityProfilesClientStub implements sdkprojects.VpcSecurityProfilesClient for unit tests.
+// Get returns NotFound so setVpcSecurityProfileInSchema exits without further API calls.
+type vpcSecurityProfilesClientStub struct{}
+
+func (vpcSecurityProfilesClientStub) Get(string, string, string) (nsxModel.VpcSecurityProfile, error) {
+	return nsxModel.VpcSecurityProfile{}, vapiErrors.NotFound{}
+}
+
+func (vpcSecurityProfilesClientStub) List(string, string, *string, *bool, *string, *int64, *bool, *string) (nsxModel.VpcSecurityProfileListResult, error) {
+	return nsxModel.VpcSecurityProfileListResult{}, nil
+}
+
+func (vpcSecurityProfilesClientStub) Patch(string, string, string, nsxModel.VpcSecurityProfile) error {
+	return nil
+}
+
+func (vpcSecurityProfilesClientStub) Update(string, string, string, nsxModel.VpcSecurityProfile) (nsxModel.VpcSecurityProfile, error) {
+	return nsxModel.VpcSecurityProfile{}, nil
+}
+
+var _ sdkprojects.VpcSecurityProfilesClient = vpcSecurityProfilesClientStub{}
+
+func setupVpcSecurityProfilesStub(t *testing.T) func() {
+	t.Helper()
+	stub := vpcSecurityProfilesClientStub{}
+	mockWrapper := &projects.VpcSecurityProfileClientContext{
+		Client:     stub,
+		ClientType: utl.Multitenancy,
+	}
+	original := cliVpcSecurityProfilesClient
+	cliVpcSecurityProfilesClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *projects.VpcSecurityProfileClientContext {
+		return mockWrapper
+	}
+	return func() { cliVpcSecurityProfilesClient = original }
 }
 
 func TestMockResourceNsxtPolicyProjectCreate(t *testing.T) {
@@ -122,6 +167,45 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, projectDisplayName, d.Get("display_name"))
 		assert.Equal(t, projectDescription, d.Get("description"))
+	})
+
+	t.Run("Read sets ipv6_blocks when NSX 9.2.0+", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponseWithIPv6Blocks(), nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, blocks, 1)
+		assert.Equal(t, ipv6BlockPath, blocks[0])
+	})
+
+	t.Run("Read does not populate ipv6_blocks when NSX below 9.2", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponseWithIPv6Blocks(), nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		_, ok := d.GetOk("ipv6_blocks")
+		assert.False(t, ok)
 	})
 
 	t.Run("Read not found clears ID", func(t *testing.T) {

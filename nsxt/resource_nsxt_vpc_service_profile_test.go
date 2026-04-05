@@ -148,6 +148,113 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 	})
 }
 
+var accTestPolicyVpcServiceProfile920Ipv6Create = map[string]string{
+	"display_name": getAccTestResourceName(),
+	"description":  "terraform ipv6 create",
+	"v6_lease":     "86400",
+	"v6_pref":      "48000",
+	"v6_ntp":       "2001:db8:acc1::1",
+	"v6_sntp":      "2001:db8:acc1::2",
+	"v6_dns":       "2001:db8:acc1::53",
+	"fwd_log":      "INFO",
+	"svc_cidr":     "10.210.240.0/28",
+}
+
+var accTestPolicyVpcServiceProfile920Ipv6Update = map[string]string{
+	"display_name": getAccTestResourceName(),
+	"description":  "terraform ipv6 update",
+	"v6_lease":     "7200",
+	"v6_pref":      "5760",
+	"v6_ntp":       "2001:db8:acc2::1",
+	"v6_sntp":      "2001:db8:acc2::2",
+	"v6_dns":       "2001:db8:acc2::53",
+	"fwd_log":      "WARNING",
+	"svc_cidr":     "10.210.240.16/28",
+}
+
+func TestAccResourceNsxtVpcServiceProfile920_ipv6Extensions(t *testing.T) {
+	testResourceName := "nsxt_vpc_service_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcServiceProfileCheckDestroy(state, accTestPolicyVpcServiceProfile920Ipv6Update["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcServiceProfile920Ipv6Template(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfile920Ipv6Create["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfile920Ipv6Create["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.lease_time", accTestPolicyVpcServiceProfile920Ipv6Create["v6_lease"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.preferred_time", accTestPolicyVpcServiceProfile920Ipv6Create["v6_pref"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.ntp_servers.0", accTestPolicyVpcServiceProfile920Ipv6Create["v6_ntp"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.sntp_servers.0", accTestPolicyVpcServiceProfile920Ipv6Create["v6_sntp"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfile920Ipv6Create["v6_dns"]),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.log_level", accTestPolicyVpcServiceProfile920Ipv6Create["fwd_log"]),
+					resource.TestCheckResourceAttr(testResourceName, "service_subnet_cidrs.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_subnet_cidrs.0", accTestPolicyVpcServiceProfile920Ipv6Create["svc_cidr"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcServiceProfile920Ipv6Template(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfile920Ipv6Update["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfile920Ipv6Update["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.lease_time", accTestPolicyVpcServiceProfile920Ipv6Update["v6_lease"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.preferred_time", accTestPolicyVpcServiceProfile920Ipv6Update["v6_pref"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.ntp_servers.0", accTestPolicyVpcServiceProfile920Ipv6Update["v6_ntp"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.sntp_servers.0", accTestPolicyVpcServiceProfile920Ipv6Update["v6_sntp"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_server_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfile920Ipv6Update["v6_dns"]),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.log_level", accTestPolicyVpcServiceProfile920Ipv6Update["fwd_log"]),
+					resource.TestCheckResourceAttr(testResourceName, "service_subnet_cidrs.0", accTestPolicyVpcServiceProfile920Ipv6Update["svc_cidr"]),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtVpcServiceProfile920_ipv6Extensions_import(t *testing.T) {
+	name := accTestPolicyVpcServiceProfile920Ipv6Create["display_name"]
+	testResourceName := "nsxt_vpc_service_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcServiceProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcServiceProfile920Ipv6Template(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_service_profile.test"
@@ -320,4 +427,58 @@ resource "nsxt_vpc_service_profile" "test" {
   dhcp_config {
   }
 }`, testAccNsxtProjectContext(), displayName)
+}
+
+func testAccNsxtVpcServiceProfile920Ipv6Template(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyVpcServiceProfile920Ipv6Create
+	} else {
+		attrMap = accTestPolicyVpcServiceProfile920Ipv6Update
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_dns_forwarder_zone" "vsp920_dns_fwd" {
+%s
+  display_name     = "%s-dnsfwd"
+  upstream_servers = ["8.8.8.8"]
+}
+
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+  description  = "%s"
+
+  dhcp_config {
+    dhcp_server_config {
+      lease_time  = 86400
+      ntp_servers = ["5.5.5.5"]
+      dns_client_config {
+        dns_server_ips = ["1.1.1.1"]
+      }
+    }
+  }
+
+  dhcpv6_config {
+    dhcpv6_server_config {
+      lease_time       = %s
+      preferred_time   = %s
+      ntp_servers      = ["%s"]
+      sntp_servers     = ["%s"]
+      dns_client_config {
+        dns_server_ips = ["%s"]
+      }
+    }
+  }
+
+  dns_forwarder_config {
+    cache_size                  = 1024
+    default_forwarder_zone_path = nsxt_policy_dns_forwarder_zone.vsp920_dns_fwd.path
+    log_level                   = "%s"
+  }
+
+  service_subnet_cidrs = ["%s"]
+}
+`, testAccNsxtProjectContext(), attrMap["display_name"], testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"],
+		attrMap["v6_lease"], attrMap["v6_pref"], attrMap["v6_ntp"], attrMap["v6_sntp"], attrMap["v6_dns"],
+		attrMap["fwd_log"], attrMap["svc_cidr"])
 }

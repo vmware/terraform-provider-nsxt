@@ -34,3 +34,4 @@ In addition to arguments listed above, the following attributes are exported:
     * `site_path` - This represents the path of the site which is managed by Global Manager. For the local manager the value would be 'default'.
 * `tier0_gateway_paths` - Policy paths of Tier0 gateways associated with the project.
 * `external_ipv4_blocks` - Policy paths of IPv4 blocks associated with the project. Available since NSX 9.0.0.
+* `ipv6_blocks` - Policy paths of IPv6 blocks associated with the project. Available since NSX 9.2.0.
