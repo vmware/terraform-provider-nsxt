@@ -22,10 +22,12 @@ import (
 )
 
 var (
-	cpID          = "conn-profile-id"
-	cpDisplayName = "test-connectivity-profile"
-	cpDescription = "Test Connectivity Profile"
-	cpRevision    = int64(1)
+	cpID            = "conn-profile-id"
+	cpDisplayName   = "test-connectivity-profile"
+	cpDescription   = "Test Connectivity Profile"
+	cpRevision      = int64(1)
+	cpIpv6Block     = "/orgs/default/projects/default/ip-blocks/ipv6-block1"
+	cpAutoSnatBlock = "/orgs/default/projects/default/ip-blocks/snat-block1"
 )
 
 func cpAPIResponse() nsxModel.VpcConnectivityProfile {
@@ -37,11 +39,50 @@ func cpAPIResponse() nsxModel.VpcConnectivityProfile {
 	}
 }
 
+func cpAPIResponseWithNewAttrs() nsxModel.VpcConnectivityProfile {
+	enableSnat := true
+	return nsxModel.VpcConnectivityProfile{
+		Id:          &cpID,
+		DisplayName: &cpDisplayName,
+		Description: &cpDescription,
+		Revision:    &cpRevision,
+		Ipv6Blocks:  []string{cpIpv6Block},
+		ServiceGateway: &nsxModel.VpcServiceGatewayConfig{
+			NatConfig: &nsxModel.VpcNatConfig{
+				EnableDefaultSnat: &enableSnat,
+				AutoSnatIpBlock:   &cpAutoSnatBlock,
+			},
+		},
+	}
+}
+
 func minimalCpData() map[string]interface{} {
 	return map[string]interface{}{
 		"display_name": cpDisplayName,
 		"description":  cpDescription,
 		"nsx_id":       cpID,
+	}
+}
+
+func cpDataWithNewAttrs() map[string]interface{} {
+	return map[string]interface{}{
+		"display_name": cpDisplayName,
+		"description":  cpDescription,
+		"nsx_id":       cpID,
+		"ipv6_blocks":  []interface{}{cpIpv6Block},
+		"service_gateway": []interface{}{
+			map[string]interface{}{
+				"enable": false,
+				"nat_config": []interface{}{
+					map[string]interface{}{
+						"enable_default_snat": true,
+						"auto_snat_ip_block":  cpAutoSnatBlock,
+					},
+				},
+				"qos_config":         []interface{}{},
+				"edge_cluster_paths": []interface{}{},
+			},
+		},
 	}
 }
 
@@ -170,5 +211,71 @@ func TestMockResourceNsxtVpcConnectivityProfileDelete(t *testing.T) {
 
 		err := resourceNsxtVpcConnectivityProfileDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
+	})
+}
+
+func TestMockResourceNsxtVpcConnectivityProfile_v920(t *testing.T) {
+	t.Run("Create with ipv6_blocks and auto_snat_ip_block", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupCpMock(t, ctrl)
+		defer restore()
+
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), cpID).Return(nsxModel.VpcConnectivityProfile{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), cpID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), cpID).Return(cpAPIResponseWithNewAttrs(), nil),
+		)
+
+		res := resourceNsxtVpcConnectivityProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, cpDataWithNewAttrs())
+
+		err := resourceNsxtVpcConnectivityProfileCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, cpID, d.Id())
+
+		ipv6Blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, ipv6Blocks, 1)
+		assert.Equal(t, cpIpv6Block, ipv6Blocks[0])
+
+		sgList := d.Get("service_gateway").([]interface{})
+		require.Len(t, sgList, 1)
+		sg := sgList[0].(map[string]interface{})
+		natList := sg["nat_config"].([]interface{})
+		require.Len(t, natList, 1)
+		nat := natList[0].(map[string]interface{})
+		assert.Equal(t, cpAutoSnatBlock, nat["auto_snat_ip_block"])
+	})
+
+	t.Run("Read populates ipv6_blocks and auto_snat_ip_block", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupCpMock(t, ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), cpID).Return(cpAPIResponseWithNewAttrs(), nil)
+
+		res := resourceNsxtVpcConnectivityProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalCpData())
+		d.SetId(cpID)
+
+		err := resourceNsxtVpcConnectivityProfileRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		ipv6Blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, ipv6Blocks, 1)
+		assert.Equal(t, cpIpv6Block, ipv6Blocks[0])
+
+		sgList := d.Get("service_gateway").([]interface{})
+		require.Len(t, sgList, 1)
+		sg := sgList[0].(map[string]interface{})
+		natList := sg["nat_config"].([]interface{})
+		require.Len(t, natList, 1)
+		nat := natList[0].(map[string]interface{})
+		assert.Equal(t, cpAutoSnatBlock, nat["auto_snat_ip_block"])
 	})
 }
