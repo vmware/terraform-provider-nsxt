@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var accTestVpcSubnetCreateAttributes = map[string]string{
@@ -395,6 +396,58 @@ func TestAccResourceNsxtVpcSubnet920_reservedIPRange(t *testing.T) {
 	})
 }
 
+var accTestVpcSubnet920SubnetDhcpv6Create = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+var accTestVpcSubnet920SubnetDhcpv6Update = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnet920SubnetDhcpv6Update["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnet920SubnetDhcpv6Create["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Create["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnet920SubnetDhcpv6Update["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Update["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcSubnet_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_subnet.test"
@@ -622,4 +675,38 @@ resource "nsxt_vpc_subnet" "test" {
     }
   }
 }`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"])
+}
+
+func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool) string {
+	var attrMap map[string]string
+	var mode, dnsPref string
+	if createFlow {
+		attrMap = accTestVpcSubnet920SubnetDhcpv6Create
+		mode = model.SubnetDhcpv6Config_MODE_DEACTIVATED
+		dnsPref = model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER
+	} else {
+		attrMap = accTestVpcSubnet920SubnetDhcpv6Update
+		mode = model.SubnetDhcpv6Config_MODE_DEACTIVATED
+		dnsPref = model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS
+	}
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name = "%s"
+  ip_addresses = ["192.168.240.0/26"]
+  access_mode  = "Isolated"
+
+  dhcp_config {
+    mode = "DHCP_SERVER"
+    dhcp_server_additional_config {
+      reserved_ip_ranges = ["192.168.240.40-192.168.240.60"]
+    }
+  }
+
+  subnet_dhcpv6_config {
+    mode                  = "%s"
+    dns_server_preference = "%s"
+  }
+}
+`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], mode, dnsPref)
 }

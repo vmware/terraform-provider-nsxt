@@ -74,6 +74,11 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 			},
 			"range":        getAllocationRangesSchema(false, "Represents list of IP address ranges in the form of start and end IPs"),
 			"excluded_ips": getAllocationRangesSchema(false, "Represents list of excluded IP address in the form of start and end IPs"),
+			"ip_address_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "IP address type for the block as reported by NSX (IPV4 or IPV6).",
+			},
 		},
 	}
 }
@@ -134,6 +139,10 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		}
 	} else {
 		d.Set("cidr", block.Cidr)
+	}
+
+	if block.IpAddressType != nil {
+		d.Set("ip_address_type", *block.IpAddressType)
 	}
 
 	return nil

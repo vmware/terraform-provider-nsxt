@@ -22,6 +22,11 @@ func dataSourceNsxtPolicyIPBlock() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"context":      getContextSchema(false, false, false),
+			"ip_address_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "IP address type for the block as reported by NSX (IPV4 or IPV6).",
+			},
 		},
 	}
 }
@@ -81,5 +86,8 @@ func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
+	if obj.IpAddressType != nil {
+		d.Set("ip_address_type", *obj.IpAddressType)
+	}
 	return nil
 }

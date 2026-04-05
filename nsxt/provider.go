@@ -524,6 +524,7 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_attachment":                                      resourceNsxtVpcAttachment(),
 			"nsxt_vpc_connectivity_profile":                            resourceNsxtVpcConnectivityProfile(),
 			"nsxt_vpc_dhcp_v4_static_binding":                          resourceNsxtVpcSubnetDhcpV4StaticBindingConfig(),
+			"nsxt_vpc_dhcp_v6_static_binding":                          resourceNsxtVpcSubnetDhcpV6StaticBindingConfig(),
 			"nsxt_vpc_external_address":                                resourceNsxtVpcExternalAddress(),
 			"nsxt_vpc_gateway_policy":                                  resourceNsxtVPCGatewayPolicy(),
 			"nsxt_vpc_group":                                           resourceNsxtVPCGroup(),

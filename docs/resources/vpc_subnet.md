@@ -67,6 +67,7 @@ The following arguments are supported:
 * `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
   from respective ip block defined in the parent VPC. The default is 64. Conflicts with `ip_addresses`.
 * `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs. Conflicts with `ipv4_subnet_size`. This argument is required when access_mode is set to `Isolated`
+* `ip_address_type` - (Optional) Addressing for the subnet: `IPV4`, `IPV6`, or `IPV4_IPV6` (dual-stack). When omitted, NSX defaults to `IPV4`. Use `IPV4_IPV6` when the subnet uses both IPv4 and IPv6 (for example, both families in `ip_addresses` or DHCPv6 alongside IPv4). Changing this value forces replacement of the subnet.
 * `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated`, `Private_TGW` or `L2_ONLY`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
     * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
@@ -96,6 +97,12 @@ The following arguments are supported:
                         * `values` - (Optional) List of values in string format
         * `reserved_ip_ranges` - (Optional) Specifies IP ranges that are reserved and excluded from being assigned by the DHCP server to clients.
          This is a list of IP ranges or IP addresses.
+* `subnet_dhcpv6_config` - (Optional) DHCPv6 configuration for the subnet. Base settings may be inherited from the VPC service profile; values set here are applied on top. This attribute is supported with NSX v9.2.0 and above.
+    * `mode` - (Optional) Operational mode of DHCPv6 within the subnet. One of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`, or `DHCP_SERVER_STATELESS`. When omitted, the effective mode is inherited from the VPC service profile `dhcpv6_config`.
+    * `dns_server_preference` - (Optional) DNS server IP preference for DHCPv6, same semantics as `dhcp_config.dns_server_preference`. One of `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER` or `DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS`. Supported with NSX v9.2.0 and above.
+    * `dhcpv6_server_additional_config` - (Optional) Additional DHCPv6 server settings. Must not be set when `mode` is `DHCP_RELAY` or `DHCP_DEACTIVATED`.
+        * `domain_names` - (Optional) Domain names assigned to DHCPv6 clients.
+        * `reserved_ip_ranges` - (Optional) IPv6 addresses or ranges excluded from DHCPv6 assignment (for example `2001:db8::10` or `2001:db8::10-2001:db8::20`).
 * `ip_blocks` - (Optional) List of IP block path for subnet IP allocation
 
 ## Attributes Reference

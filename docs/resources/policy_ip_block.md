@@ -105,6 +105,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the IP Block.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the resource.
+* `ip_address_type` - IP address type reported by NSX for the block: `IPV4` or `IPV6`. Present when the API returns it (for example on NSX 9.2.0 and later for IPv6-capable deployments).
 
 ## Importing
 
