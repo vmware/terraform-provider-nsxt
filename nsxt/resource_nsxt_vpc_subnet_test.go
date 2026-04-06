@@ -58,7 +58,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetTemplate(true, false),
+				Config: testAccNsxtVpcSubnetTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetCreateAttributes["display_name"]),
@@ -75,7 +75,7 @@ func TestAccResourceNsxtVpcSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetTemplate(false, false),
+				Config: testAccNsxtVpcSubnetTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetUpdateAttributes["display_name"]),
@@ -122,7 +122,7 @@ func TestAccResourceNsxtVpcSubnet920_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetTemplate(true, true),
+				Config: testAccNsxtVpcSubnetTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetCreateAttributes["display_name"]),
@@ -130,7 +130,6 @@ func TestAccResourceNsxtVpcSubnet920_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestVpcSubnetCreateAttributes["ip_addresses"]),
 					resource.TestCheckResourceAttr(testResourceName, "access_mode", accTestVpcSubnetCreateAttributes["access_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", "DHCP_DEACTIVATED"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -140,7 +139,7 @@ func TestAccResourceNsxtVpcSubnet920_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetTemplate(false, true),
+				Config: testAccNsxtVpcSubnetTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetUpdateAttributes["display_name"]),
@@ -148,7 +147,6 @@ func TestAccResourceNsxtVpcSubnet920_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestVpcSubnetUpdateAttributes["ip_addresses"]),
 					resource.TestCheckResourceAttr(testResourceName, "access_mode", accTestVpcSubnetUpdateAttributes["access_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", "DHCP_DEACTIVATED"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -194,7 +192,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetSizeTemplate(true, false),
+				Config: testAccNsxtVpcSubnetSizeTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetCreateAttributes["display_name"]),
@@ -214,7 +212,7 @@ func TestAccResourceNsxtVpcSubnet_subnetSize(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetSizeTemplate(false, false),
+				Config: testAccNsxtVpcSubnetSizeTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetUpdateAttributes["display_name"]),
@@ -264,7 +262,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetSize(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetSizeTemplate(true, true),
+				Config: testAccNsxtVpcSubnetSizeTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetCreateAttributes["display_name"]),
@@ -272,7 +270,6 @@ func TestAccResourceNsxtVpcSubnet920_subnetSize(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ipv4_subnet_size", accTestVpcSubnetCreateAttributes["ipv4_subnet_size"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -285,7 +282,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetSize(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetSizeTemplate(false, true),
+				Config: testAccNsxtVpcSubnetSizeTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetUpdateAttributes["display_name"]),
@@ -293,7 +290,6 @@ func TestAccResourceNsxtVpcSubnet920_subnetSize(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv4_subnet_size", accTestVpcSubnetCreateAttributes["ipv4_subnet_size"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -336,7 +332,7 @@ func TestAccResourceNsxtVpcSubnet_reservedIPRange(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetReservedIPRangeTemplate(false),
+				Config: testAccNsxtVpcSubnetReservedIPRangeTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetReservedIPRangeAttributes["display_name"]),
@@ -375,7 +371,7 @@ func TestAccResourceNsxtVpcSubnet920_reservedIPRange(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetReservedIPRangeTemplate(true),
+				Config: testAccNsxtVpcSubnetReservedIPRangeTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetReservedIPRangeAttributes["display_name"]),
@@ -384,7 +380,6 @@ func TestAccResourceNsxtVpcSubnet920_reservedIPRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.reserved_ip_ranges.0", accTestVpcSubnetReservedIPRangeAttributes["reserved_ip_ranges"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_additional_config.0.options.0.option121.#", "1"),
@@ -475,18 +470,12 @@ func testAccNsxtVpcSubnetCheckDestroy(state *terraform.State, displayName string
 	return nil
 }
 
-func testAccNsxtVpcSubnetTemplate(createFlow bool, isNSXGt920 bool) string {
+func testAccNsxtVpcSubnetTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetCreateAttributes
 	} else {
 		attrMap = accTestVpcSubnetUpdateAttributes
-	}
-	var dnsPref string
-	if isNSXGt920 {
-		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
-	} else {
-		dnsPref = ""
 	}
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
@@ -497,7 +486,6 @@ resource "nsxt_vpc_subnet" "test" {
   ip_addresses = ["%s"]
   access_mode  = "%s"
   dhcp_config {
-    %s
     mode = "DHCP_DEACTIVATED"
   }
 
@@ -505,7 +493,7 @@ resource "nsxt_vpc_subnet" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["access_mode"], dnsPref)
+}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["access_mode"])
 }
 
 func testAccNsxtVpcSubnetVLANExtensionTemplate(vlanExtResourcesname string) string {
@@ -547,18 +535,12 @@ resource "nsxt_vpc_subnet" "test" {
 	return strings.ReplaceAll(template, "${NAME}", vlanExtResourcesname)
 }
 
-func testAccNsxtVpcSubnetSizeTemplate(createFlow bool, isNSXGt920 bool) string {
+func testAccNsxtVpcSubnetSizeTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetCreateAttributes
 	} else {
 		attrMap = accTestVpcSubnetUpdateAttributes
-	}
-	var dnsPref string
-	if isNSXGt920 {
-		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
-	} else {
-		dnsPref = ""
 	}
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
@@ -570,7 +552,6 @@ resource "nsxt_vpc_subnet" "test" {
   access_mode      = "Public"
 
   dhcp_config {
-    %s
     mode = "DHCP_SERVER"
 
     dhcp_server_additional_config {
@@ -588,7 +569,7 @@ resource "nsxt_vpc_subnet" "test" {
       }
     }
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ipv4_subnet_size"], dnsPref)
+}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ipv4_subnet_size"])
 }
 
 func testAccNsxtVpcSubnetMinimalisticIsolated() string {
@@ -610,14 +591,8 @@ resource "nsxt_vpc_subnet" "test" {
 }`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"])
 }
 
-func testAccNsxtVpcSubnetReservedIPRangeTemplate(isNSXGt920 bool) string {
+func testAccNsxtVpcSubnetReservedIPRangeTemplate() string {
 	attrMap := accTestVpcSubnetReservedIPRangeAttributes
-	var dnsPref string
-	if isNSXGt920 {
-		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
-	} else {
-		dnsPref = ""
-	}
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
 %s
@@ -628,7 +603,6 @@ resource "nsxt_vpc_subnet" "test" {
   access_mode = "Public"
 
   dhcp_config {
-    %s
     mode = "DHCP_SERVER"
 
     dhcp_server_additional_config {
@@ -647,5 +621,5 @@ resource "nsxt_vpc_subnet" "test" {
       reserved_ip_ranges = ["%s"]
     }
   }
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], dnsPref, attrMap["reserved_ip_ranges"])
+}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"])
 }
