@@ -55,7 +55,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(true, false),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"]),
@@ -82,7 +82,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(false, false),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"]),
@@ -109,7 +109,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(false),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
@@ -135,7 +135,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(true, true),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"]),
@@ -162,7 +162,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(false, true),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"]),
@@ -189,7 +189,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(true),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
@@ -216,7 +216,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_importBasic(t *testin
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(false),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -240,7 +240,7 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_importBasic(t *tes
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(true),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -304,13 +304,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state *terraform.
 	return nil
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920 bool) string {
-	var dnsPref string
-	if isNSXGt920 {
-		dnsPref = "dns_server_preference = \"PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER\""
-	} else {
-		dnsPref = ""
-	}
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() string {
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
 %s
@@ -318,24 +312,23 @@ resource "nsxt_vpc_subnet" "test" {
   ip_addresses = ["192.168.240.0/26"]
   access_mode  = "Isolated"
   dhcp_config {
-    %s
     mode = "DHCP_SERVER"
     dhcp_server_additional_config {
       reserved_ip_ranges = ["192.168.240.40-192.168.240.60"]
     }
   }
 }
-`, testAccNsxtPolicyMultitenancyContext(), dnsPref)
+`, testAccNsxtPolicyMultitenancyContext())
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool, isNSXGt920 bool) string {
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
 	} else {
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes
 	}
-	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920) + fmt.Sprintf(`
+	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   parent_path     = nsxt_vpc_subnet.test.path
   display_name    = "%s"
@@ -371,9 +364,9 @@ resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
 		attrMap["opt121-2-gw"], attrMap["opt121-2-net"], attrMap["opt-other-code"], attrMap["opt-other-value"])
 }
 
-func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic(isNSXGt920 bool) string {
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigMinimalistic() string {
 	attrMap := accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
-	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites(isNSXGt920) + fmt.Sprintf(`
+	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
   display_name = "%s"
   parent_path  = nsxt_vpc_subnet.test.path
