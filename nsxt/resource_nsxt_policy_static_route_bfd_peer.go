@@ -123,7 +123,7 @@ func policyStaticRouteBfdPeerPatch(d *schema.ResourceData, m interface{}, gwID s
 func resourceNsxtPolicyStaticRouteBfdPeerExistsOnGateway(gwID string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 
 	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyStaticRouteBfdPeerExists(id, gwID, connector, isGlobalManager)
+		return resourceNsxtPolicyStaticRouteBfdPeerExists(gwID, id, connector, isGlobalManager)
 	}
 }
 
