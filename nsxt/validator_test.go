@@ -1,3 +1,5 @@
+//go:build unittest
+
 // © Broadcom. All Rights Reserved.
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: MPL-2.0
@@ -8,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestValidateCidrOrIPOrRange(t *testing.T) {
+func TestUnitNsxt_ValidateCidrOrIPOrRange(t *testing.T) {
 
 	cases := map[string]struct {
 		value  interface{}
@@ -66,7 +68,7 @@ func TestValidateCidrOrIPOrRange(t *testing.T) {
 	}
 }
 
-func TestValidateCidrOrIPOrRangeList(t *testing.T) {
+func TestUnitNsxt_ValidateCidrOrIPOrRangeList(t *testing.T) {
 
 	cases := map[string]struct {
 		value  interface{}
@@ -116,7 +118,7 @@ func TestValidateCidrOrIPOrRangeList(t *testing.T) {
 	}
 }
 
-func TestValidateSingleIP(t *testing.T) {
+func TestUnitNsxt_ValidateSingleIP(t *testing.T) {
 
 	cases := map[string]struct {
 		value  interface{}
@@ -144,7 +146,7 @@ func TestValidateSingleIP(t *testing.T) {
 		},
 		"badIP": {
 			value:  "192.278.3.1",
-			result: true,
+			result: false,
 		},
 	}
 
