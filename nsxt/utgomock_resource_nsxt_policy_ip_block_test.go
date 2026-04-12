@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -143,6 +144,19 @@ func TestMockResourceNsxtPolicyIPBlockRead(t *testing.T) {
 		err := resourceNsxtPolicyIPBlockRead(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining IP Block ID")
+	})
+
+	t.Run("Read not found clears ID", func(t *testing.T) {
+		mockBlockSDK.EXPECT().Get(ipBlockID, nil).Return(model.IpAddressBlock{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyIPBlock()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(ipBlockID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyIPBlockRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Id())
 	})
 }
 
