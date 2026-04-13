@@ -372,3 +372,26 @@ func TestUnitNsxt_isT0Gw(t *testing.T) {
 	_, err = isT0Gw("/short")
 	require.Error(t, err)
 }
+
+func TestUnitNsxt_ValidateStringListNoDuplicateValues(t *testing.T) {
+	cases := []struct {
+		name    string
+		list    []interface{}
+		wantErr bool
+	}{
+		{"empty", []interface{}{}, false},
+		{"unique", []interface{}{"/a", "/b"}, false},
+		{"duplicate", []interface{}{"/a", "/a"}, true},
+		{"wrong type", []interface{}{42}, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidateStringListNoDuplicateValues(tc.list, "attr")
+			if tc.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}

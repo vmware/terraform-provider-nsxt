@@ -569,3 +569,22 @@ func validateLdapOrLdapsURL() schema.SchemaValidateFunc {
 		return
 	}
 }
+
+// ValidateStringListNoDuplicateValues returns an error if the same string value appears more than once in list.
+//
+// Terraform Plugin SDK v2 does not invoke ValidateFunc/ValidateDiagFunc for TypeList (only for primitives and TypeMap);
+// use this helper from CustomizeDiff or other plan-time validation for list attributes.
+func ValidateStringListNoDuplicateValues(list []interface{}, attrName string) error {
+	seen := make(map[string]struct{}, len(list))
+	for i, item := range list {
+		s, ok := item.(string)
+		if !ok {
+			return fmt.Errorf("%s[%d]: expected string element", attrName, i)
+		}
+		if _, exists := seen[s]; exists {
+			return fmt.Errorf("%s must not contain duplicate values: %q appears more than once", attrName, s)
+		}
+		seen[s] = struct{}{}
+	}
+	return nil
+}
