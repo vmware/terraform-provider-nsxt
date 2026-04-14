@@ -203,16 +203,15 @@ func shouldIgnoreScope(scope string, scopesToIgnore []string) bool {
 	return false
 }
 
-const (
-	managedDefaultTagScopeManagedBy = "nsx-tf/managed-by"
-	managedDefaultTagScopeRunID     = "tf-run-id"
-)
+// managedDefaultTagScope is the NSX Policy tag scope for provider-injected tracking
+// (tag value = provider context_id / tf-run-id) used for Search API scoping and cache.
+const managedDefaultTagScope = "nsx-tf/tf-run-id"
 
 func isManagedDefaultTagScope(scope *string) bool {
 	if scope == nil {
 		return false
 	}
-	return *scope == managedDefaultTagScopeManagedBy || *scope == managedDefaultTagScopeRunID
+	return *scope == managedDefaultTagScope
 }
 
 func isManagedDefaultTag(tag model.Tag) bool {
@@ -223,14 +222,10 @@ func getProviderManagedDefaultTags(runID string) []model.Tag {
 	if runID == "" {
 		return nil
 	}
-	managedByScope := managedDefaultTagScopeManagedBy
-	managedByTag := "terraform"
-	runIDScope := managedDefaultTagScopeRunID
-	runIDTag := runID
-
+	scope := managedDefaultTagScope
+	tagVal := runID
 	return []model.Tag{
-		{Scope: &managedByScope, Tag: &managedByTag},
-		{Scope: &runIDScope, Tag: &runIDTag},
+		{Scope: &scope, Tag: &tagVal},
 	}
 }
 

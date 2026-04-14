@@ -16,9 +16,7 @@ func TestProviderManagedTagsSearchQuery(t *testing.T) {
 	runID := "run-xyz"
 	got := providerManagedTagsSearchQuery(runID)
 	for _, part := range []string{
-		"tags.scope:" + escapeSpecialCharacters("nsx-tf/managed-by"),
-		"tags.tag:" + escapeSpecialCharacters("terraform"),
-		"tags.scope:" + escapeSpecialCharacters("tf-run-id"),
+		"tags.scope:" + escapeSpecialCharacters("nsx-tf/tf-run-id"),
 		"tags.tag:" + escapeSpecialCharacters(runID),
 	} {
 		if !strings.Contains(got, part) {
@@ -67,9 +65,7 @@ func TestBuildTagQuery(t *testing.T) {
 		q := buildTagQuery(d, runID)
 
 		assertContainsAll(t, q,
-			expectScope("nsx-tf/managed-by"),
-			expectTag("terraform"),
-			expectScope("tf-run-id"),
+			expectScope("nsx-tf/tf-run-id"),
 			expectTag(runID),
 		)
 	})
@@ -90,9 +86,7 @@ func TestBuildTagQuery(t *testing.T) {
 		assertContainsAll(t, q,
 			expectScope("env"),
 			expectTag("dev"),
-			expectScope("nsx-tf/managed-by"),
-			expectTag("terraform"),
-			expectScope("tf-run-id"),
+			expectScope("nsx-tf/tf-run-id"),
 			expectTag(runID),
 		)
 	})
@@ -135,8 +129,7 @@ func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 
 	t.Run("no-change-when-tags-match", func(t *testing.T) {
 		obj := &testTagObj{Tags: []model.Tag{
-			{Scope: newString("nsx-tf/managed-by"), Tag: newString("terraform")},
-			{Scope: newString("tf-run-id"), Tag: newString(runID)},
+			{Scope: newString("nsx-tf/tf-run-id"), Tag: newString(runID)},
 			{Scope: newString("env"), Tag: newString("dev")},
 		}}
 		called := false
@@ -158,8 +151,7 @@ func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 
 	t.Run("patches-when-runid-mismatch", func(t *testing.T) {
 		obj := &testTagObj{Tags: []model.Tag{
-			{Scope: newString("nsx-tf/managed-by"), Tag: newString("terraform")},
-			{Scope: newString("tf-run-id"), Tag: newString("old-run")},
+			{Scope: newString("nsx-tf/tf-run-id"), Tag: newString("old-run")},
 			{Scope: newString("env"), Tag: newString("dev")},
 		}}
 		called := false
@@ -178,12 +170,12 @@ func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 			t.Fatalf("expected patchFunc to be called")
 		}
 
-		val, ok := findTag(obj.Tags, "tf-run-id")
+		val, ok := findTag(obj.Tags, "nsx-tf/tf-run-id")
 		if !ok {
-			t.Fatalf("expected tf-run-id tag to exist")
+			t.Fatalf("expected nsx-tf/tf-run-id tag to exist")
 		}
 		if val != runID {
-			t.Fatalf("expected tf-run-id tag to be %q, got %q", runID, val)
+			t.Fatalf("expected nsx-tf/tf-run-id tag to be %q, got %q", runID, val)
 		}
 	})
 }
