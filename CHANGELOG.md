@@ -1,3 +1,12 @@
+## 3.11.1 (Unreleased)
+
+BUG FIXES:
+* `data/nsxt_policy_groups`: Fix infinite loop when duplicate display names exist ([#1935](https://github.com/vmware/terraform-provider-nsxt/pull/1935))
+* `resource/nsxt_policy_tier0_gateway`: Fix `inter_sr_ibgp` mismatch on resource update when the attribute is omitted from configuration ([#2000](https://github.com/vmware/terraform-provider-nsxt/pull/2000))
+
+SECURITY:
+* Upgrade `google.golang.org/grpc` to v1.79.3 to resolve authorization bypass vulnerability (gRPC-Go missing leading slash in :path) ([#2022](https://github.com/vmware/terraform-provider-nsxt/pull/2022))
+
 ## 3.11.0 (December 16, 2025)
 
 BUG FIXES:

@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var accTestTransitGatewayNatRuleHelperName = getAccTestResourceName()
 var accTestTransitGatewayNatRuleCreateAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
 	"description":         "terraform created",
@@ -238,17 +237,17 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 }
 
 func testAccNsxtTransitGatewayNatRulePrerequisites() string {
+	// Transit gateway resource creation is not supported on NSX 9.0; use default TGW.
 	return fmt.Sprintf(`
-resource "nsxt_policy_transit_gateway" "test" {
-  %s
-  display_name    = "%s"
-  transit_subnets = ["192.168.5.0/24"]
+data "nsxt_policy_transit_gateway" "test" {
+%s
+  id = "default"
 }
 
 data "nsxt_policy_transit_gateway_nat" "test" {
   transit_gateway_path = data.nsxt_policy_transit_gateway.test.path
 }
-`, testAccNsxtProjectContext(), accTestTransitGatewayNatRuleHelperName)
+`, testAccNsxtProjectContext())
 }
 
 func testAccNsxtTransitGatewayNatRuleTemplate(createFlow bool) string {
