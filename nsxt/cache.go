@@ -388,15 +388,13 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 }
 
 // providerManagedTagsSearchFragments returns NSX search tag clauses for provider-managed
-// tags (managed-by=terraform, tf-run-id). Empty when runID is unset.
+// tag nsx-tf/tf-run-id (value = context_id). Empty when runID is unset.
 func providerManagedTagsSearchFragments(runID string) []string {
 	if runID == "" {
 		return nil
 	}
 	return []string{
-		fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("nsx-tf/managed-by")),
-		fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters("terraform")),
-		fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("tf-run-id")),
+		fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters(managedDefaultTagScope)),
 		fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(runID)),
 	}
 }
@@ -452,11 +450,11 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 		tag, hasTag := tagMap["tag"]
 		// Build query parts for scope and tag
 		if hasScope && scope != nil && scope.(string) != "" {
-			scopeStr := escapeSpecialCharacters(scope.(string))
-			if isManagedDefaultTagScope(&scopeStr) {
+			rawScope := scope.(string)
+			if isManagedDefaultTagScope(&rawScope) {
 				managedTagPresent = true
 			}
-			tagQueries = append(tagQueries, fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters(scope.(string))))
+			tagQueries = append(tagQueries, fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters(rawScope)))
 		}
 		if hasTag && tag != nil && tag.(string) != "" {
 			tagQueries = append(tagQueries, fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(tag.(string))))
