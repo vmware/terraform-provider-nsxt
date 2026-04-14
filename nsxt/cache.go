@@ -1,6 +1,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -30,6 +31,11 @@ type typeScopedCache struct {
 }
 
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
+
+// errCacheUseBackendDirect is returned when the cache query bucket exists but the requested id
+// is not present (including partial bulk results without this id), and from readCache after a
+// successful refill that still does not contain the id; callers must use direct API read.
+var errCacheUseBackendDirect = errors.New("nsxt cache: use direct API read")
 
 // compositeCacheEntry describes a parent search type that needs a second child search and merge
 // before results are stored (e.g. GatewayPolicy + Rule where search omits embedded rules).
@@ -128,14 +134,20 @@ func getQueryString(resourceType string, context utl.SessionContext) string {
 }
 
 func (c *resourceTypeCache) getQueryResult(query string, resourceID string) (*data.StructValue, error) {
-	if val, ok := c.data[query]; ok {
-		return val[resourceID], nil
+	if inner, ok := c.data[query]; ok {
+		if v := inner[resourceID]; v != nil {
+			return v, nil
+		}
+		return nil, errCacheUseBackendDirect
 	}
 	return nil, fmt.Errorf("element is not found")
 }
 
 func (c *resourceTypeCache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
-	c.cacheMis += 1
+	if _, ok := c.data[query]; ok {
+		log.Printf("[DEBUG] Cache skip bulk refill for resourceType=%s query=%q (bucket already present)", resourceType, query) //nolint:gosec
+		return nil
+	}
 	runID := m.(nsxtClients).CommonConfig.contextID
 	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query) //nolint:gosec
 	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType, runID)
@@ -174,30 +186,47 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	defer tc.mu.Unlock()
 
 	query := getCacheQueryKey(resourceType, d, m)
-	if val, _ := tc.getQueryResult(query, resourceID); val != nil {
+	val, qerr := tc.getQueryResult(query, resourceID)
+	if val != nil {
 		tc.cacheHit += 1
 		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
 		return val, nil
 	}
+	if errors.Is(qerr, errCacheUseBackendDirect) {
+		tc.cacheMis++
+		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		return nil, errCacheUseBackendDirect
+	}
+	tc.cacheMis++
 	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
 	err := tc.writeCache(query, resourceType, d, m, connector)
 	if err != nil {
 		return nil, err
 	}
-	return tc.getQueryResult(query, resourceID)
+	val, _ = tc.getQueryResult(query, resourceID)
+	if val != nil {
+		return val, nil
+	}
+	return nil, errCacheUseBackendDirect
 }
 
 func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
 	// Now we have access to the proper runID passed from writeCache
 	additionalQuery := buildTagQuery(d, runID)
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
-	if err != nil {
+	if err != nil && len(resultList) == 0 {
 		return fmt.Errorf("error listing resource %s %w", resourceType, err)
+	}
+	if err != nil {
+		log.Printf("[WARNING] Partial search results for resourceType=%s query=%q: %d parent results before error: %v", resourceType, query, len(resultList), err) //nolint:gosec
 	}
 
 	entry, composite := compositeCacheRegistry[resourceType]
 	if !composite {
 		tmp := converListToMap(resultList)
+		if tmp == nil {
+			return fmt.Errorf("error converting resources to cache map for resource type %s", resourceType)
+		}
 		c.data[query] = tmp
 		return nil
 	}
@@ -212,14 +241,20 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 			childAdditional = &q
 		}
 	}
-	childList, err := listPolicyResources(connector, context, entry.childSearchType, childAdditional)
-	if err != nil {
-		return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, err)
+	childList, childErr := listPolicyResources(connector, context, entry.childSearchType, childAdditional)
+	if childErr != nil && len(childList) == 0 {
+		return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
+	}
+	if childErr != nil {
+		log.Printf("[WARNING] Partial child search for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr) //nolint:gosec
 	}
 	if childAdditional != nil && len(resultList) > 0 && len(childList) == 0 {
-		childList, err = listPolicyResources(connector, context, entry.childSearchType, nil)
-		if err != nil {
-			return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, err)
+		childList, childErr = listPolicyResources(connector, context, entry.childSearchType, nil)
+		if childErr != nil && len(childList) == 0 {
+			return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
+		}
+		if childErr != nil {
+			log.Printf("[WARNING] Partial child search (fallback) for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr) //nolint:gosec
 		}
 	}
 
