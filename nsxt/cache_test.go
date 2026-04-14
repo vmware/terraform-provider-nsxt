@@ -1,6 +1,8 @@
 package nsxt
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -345,4 +347,14 @@ func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
 			t.Fatalf("expected no policies, got %d", len(got))
 		}
 	})
+}
+
+func TestErrCacheUseBackendDirect(t *testing.T) {
+	if !errors.Is(errCacheUseBackendDirect, errCacheUseBackendDirect) {
+		t.Fatal("errors.Is should match sentinel to itself")
+	}
+	wrapped := fmt.Errorf("wrap: %w", errCacheUseBackendDirect)
+	if !errors.Is(wrapped, errCacheUseBackendDirect) {
+		t.Fatal("errors.Is should unwrap to sentinel")
+	}
 }
