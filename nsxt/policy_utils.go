@@ -248,6 +248,9 @@ func mergeManagedDefaultAndUserTags(managedDefaults []model.Tag, userTags []mode
 func getPolicyTagsWithProviderManagedDefaults(d *schema.ResourceData, m interface{}) []model.Tag {
 	userTags := getPolicyTagsFromSchema(d)
 	runID := m.(nsxtClients).CommonConfig.contextID
+	if runID == "" {
+		log.Printf("[DEBUG] context_id is empty; skipping provider-managed tag scope %q", managedDefaultTagScope)
+	}
 	managedDefaults := getProviderManagedDefaultTags(runID)
 	return mergeManagedDefaultAndUserTags(managedDefaults, userTags)
 }
