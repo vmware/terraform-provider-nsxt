@@ -25,7 +25,7 @@ jobs:
       - name: Run unit tests
         run: |
           set -euo pipefail
-          go test ./nsxt/ -tags=unittest \
+          go test ./nsxt/... -tags=unittest \
             -run='^(TestMock.*Nsxt.*|TestUnitNsxt_.*)' \
             -coverpkg=./nsxt/... \
             -coverprofile=coverage.out

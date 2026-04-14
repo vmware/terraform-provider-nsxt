@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -192,6 +193,35 @@ func TestMockResourceNsxtPolicyQosProfileRead(t *testing.T) {
 		err := resourceNsxtPolicyQosProfileRead(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining QosProfile ID")
+	})
+
+	t.Run("Read not found clears ID", func(t *testing.T) {
+		mockQosProfilesSDK.EXPECT().
+			Get(qosID).
+			Return(model.QosProfile{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyQosProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(qosID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyQosProfileRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Id())
+	})
+
+	t.Run("Read API error", func(t *testing.T) {
+		mockQosProfilesSDK.EXPECT().
+			Get(qosID).
+			Return(model.QosProfile{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyQosProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(qosID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyQosProfileRead(d, m)
+		require.Error(t, err)
 	})
 }
 

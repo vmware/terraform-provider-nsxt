@@ -339,3 +339,36 @@ func TestUnitNsxt_validateCidrIPCidr(t *testing.T) {
 	_, es = vipc("10.0.0.1/32", "k")
 	assert.Empty(t, es)
 }
+
+func TestUnitNsxt_validateLocaleServiceAndGatewayPolicyPath(t *testing.T) {
+	vl := validateLocaleServicePolicyPath()
+	_, es := vl("/infra/tier-0s/mygw/locale-services/default", "k")
+	assert.Empty(t, es)
+	_, es = vl("/not/locale/services", "k")
+	assert.NotEmpty(t, es)
+	_, es = vl(42, "k")
+	assert.NotEmpty(t, es)
+
+	vg := validateGatewayPolicyPath()
+	_, es = vg("/infra/tier-0s/gw1", "k")
+	assert.Empty(t, es)
+	_, es = vg("/infra/tier-1s/t1", "k")
+	assert.Empty(t, es)
+	_, es = vg("/bad", "k")
+	assert.NotEmpty(t, es)
+	_, es = vg(1, "k")
+	assert.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_isT0Gw(t *testing.T) {
+	ok, err := isT0Gw("/infra/tier-0s/t0")
+	require.NoError(t, err)
+	assert.True(t, ok)
+
+	ok, err = isT0Gw("/infra/tier-1s/t1")
+	require.NoError(t, err)
+	assert.False(t, ok)
+
+	_, err = isT0Gw("/short")
+	require.Error(t, err)
+}
