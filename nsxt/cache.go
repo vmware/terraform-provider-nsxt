@@ -30,12 +30,58 @@ type typeScopedCache struct {
 
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 
+// compositeCacheEntry describes a parent search type that needs a second child search and merge
+// before results are stored (e.g. GatewayPolicy + Rule where search omits embedded rules).
+type compositeCacheEntry struct {
+	childSearchType string
+	merge           func(parents, children []*data.StructValue) ([]*data.StructValue, error)
+}
+
+var compositeCacheRegistry = map[string]compositeCacheEntry{
+	"gatewaypolicy": {
+		childSearchType: "rule",
+		merge:           mergeGatewayPolicyCacheSearchResults,
+	},
+}
+
+const envNSXTCacheMode = "NSXT_CACHE_MODE"
+
+type cacheMode int
+
+const (
+	cacheDisabled cacheMode = iota
+	cacheConfigScoped
+	cacheGlobal
+)
+
+var invalidNSXTCacheModeWarn sync.Map // raw env value -> struct{}; log once per distinct invalid value
+
+func currentCacheMode() cacheMode {
+	raw := strings.TrimSpace(os.Getenv(envNSXTCacheMode))
+	lower := strings.ToLower(raw)
+	switch lower {
+	case "", "disabled", "off":
+		return cacheDisabled
+	case "config-scope":
+		return cacheConfigScoped
+	case "global":
+		return cacheGlobal
+	default:
+		if raw != "" {
+			if _, loaded := invalidNSXTCacheModeWarn.LoadOrStore(raw, struct{}{}); !loaded {
+				log.Printf("[WARNING] Invalid %s=%q; expected disabled, off, config-scope, or global. Caching disabled.", envNSXTCacheMode, raw)
+			}
+		}
+		return cacheDisabled
+	}
+}
+
 func IsCacheEnabled() bool {
-	return os.Getenv("NSXT_ENABLE_CACHE") == "true"
+	return currentCacheMode() != cacheDisabled
 }
 
 func isGlobalSearchCacheMode() bool {
-	return os.Getenv("NSXT_USE_GLOBAL_SEARCH_CACHE") == "true"
+	return currentCacheMode() == cacheGlobal
 }
 
 func isRefreshPhase(d *schema.ResourceData) bool {
@@ -146,10 +192,161 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 	if err != nil {
 		return fmt.Errorf("error listing resource %s %w", resourceType, err)
 	}
-	tmp := converListToMap(resultList)
-	//convert list to map
+
+	entry, composite := compositeCacheRegistry[resourceType]
+	if !composite {
+		tmp := converListToMap(resultList)
+		c.data[query] = tmp
+		return nil
+	}
+
+	// Child objects (e.g. rules) must not use the full parent tag query (policy user tags
+	// like color:orange vs rule tags color:blue). In tag cache mode (!global search cache),
+	// still scope children by provider-managed tags when runID is set; if that returns
+	// nothing (rules may not carry those tags in NSX), fall back to path-scoped list.
+	var childAdditional *string
+	if !isGlobalSearchCacheMode() {
+		if q := providerManagedTagsSearchQuery(runID); q != "" {
+			childAdditional = &q
+		}
+	}
+	childList, err := listPolicyResources(connector, context, entry.childSearchType, childAdditional)
+	if err != nil {
+		return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, err)
+	}
+	if childAdditional != nil && len(resultList) > 0 && len(childList) == 0 {
+		childList, err = listPolicyResources(connector, context, entry.childSearchType, nil)
+		if err != nil {
+			return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, err)
+		}
+	}
+
+	mergedSVs, err := entry.merge(resultList, childList)
+	if err != nil {
+		return err
+	}
+	tmp := converListToMap(mergedSVs)
+	if tmp == nil {
+		return fmt.Errorf("error converting merged resources to cache map for resource type %s", resourceType)
+	}
 	c.data[query] = tmp
 	return nil
+}
+
+func structValuesToModels[T any](list []*data.StructValue, bt bindings.BindingType) ([]T, error) {
+	converter := bindings.NewTypeConverter()
+	out := make([]T, 0, len(list))
+	for _, obj := range list {
+		dataValue, errors := converter.ConvertToGolang(obj, bt)
+		if len(errors) > 0 {
+			var zero T
+			return nil, fmt.Errorf("converting %T for cache: %w", zero, errors[0])
+		}
+		v, ok := dataValue.(T)
+		if !ok {
+			return nil, fmt.Errorf("converting for cache: unexpected type %T", dataValue)
+		}
+		out = append(out, v)
+	}
+	return out, nil
+}
+
+func modelsToStructValues[T any](models []T, bt bindings.BindingType) ([]*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	out := make([]*data.StructValue, 0, len(models))
+	for i := range models {
+		dataValue, errors := converter.ConvertToVapi(models[i], bt)
+		if len(errors) > 0 {
+			var zero T
+			return nil, fmt.Errorf("converting %T to struct value: %w", zero, errors[0])
+		}
+		sv, ok := dataValue.(*data.StructValue)
+		if !ok {
+			return nil, fmt.Errorf("converting to struct value: expected *data.StructValue, got %T", dataValue)
+		}
+		out = append(out, sv)
+	}
+	return out, nil
+}
+
+func structValuesToRules(list []*data.StructValue) []model.Rule {
+	converter := bindings.NewTypeConverter()
+	out := make([]model.Rule, 0, len(list))
+	for _, obj := range list {
+		dataValue, errors := converter.ConvertToGolang(obj, model.RuleBindingType())
+		if len(errors) > 0 {
+			continue
+		}
+		rule, ok := dataValue.(model.Rule)
+		if !ok {
+			continue
+		}
+		out = append(out, rule)
+	}
+	return out
+}
+
+// groupRulesByValidParentPath buckets rules by trimmed ParentPath when that path is in validParentPaths.
+// Rules with nil/empty ParentPath or unknown parent paths are skipped. Order within each bucket matches
+// the order rules appear in the input slice (typically child search result order).
+func groupRulesByValidParentPath(validParentPaths map[string]struct{}, rules []model.Rule) map[string][]model.Rule {
+	byParent := make(map[string][]model.Rule)
+	for _, r := range rules {
+		if r.ParentPath == nil {
+			continue
+		}
+		pp := strings.TrimSpace(*r.ParentPath)
+		if pp == "" {
+			continue
+		}
+		if _, ok := validParentPaths[pp]; !ok {
+			continue
+		}
+		byParent[pp] = append(byParent[pp], r)
+	}
+	return byParent
+}
+
+// attachRulesByParentPath groups rules onto parents where rule.ParentPath matches getPath(parent) (trimmed).
+// Rules without ParentPath or with unknown parents are skipped. Parents are returned in input order.
+func attachRulesByParentPath[P any](parents []P, rules []model.Rule, getPath func(P) *string, setRules func(*P, []model.Rule)) []P {
+	validPaths := make(map[string]struct{})
+	for _, p := range parents {
+		path := getPath(p)
+		if path != nil {
+			k := strings.TrimSpace(*path)
+			if k != "" {
+				validPaths[k] = struct{}{}
+			}
+		}
+	}
+	byParent := groupRulesByValidParentPath(validPaths, rules)
+
+	out := make([]P, len(parents))
+	for i := range parents {
+		p := parents[i]
+		key := ""
+		if path := getPath(p); path != nil {
+			key = strings.TrimSpace(*path)
+		}
+		bucket := byParent[key]
+		setRules(&p, bucket)
+		out[i] = p
+	}
+	return out
+}
+
+func mergeGatewayPolicyCacheSearchResults(parents, children []*data.StructValue) ([]*data.StructValue, error) {
+	gp, err := structValuesToModels[model.GatewayPolicy](parents, model.GatewayPolicyBindingType())
+	if err != nil {
+		return nil, err
+	}
+	rules := structValuesToRules(children)
+	merged := attachRulesByParentPath(gp, rules,
+		func(p model.GatewayPolicy) *string { return p.Path },
+		func(p *model.GatewayPolicy, r []model.Rule) { p.Rules = r },
+	)
+	return modelsToStructValues(merged, model.GatewayPolicyBindingType())
 }
 
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {
@@ -188,6 +385,29 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 	return obj, cacheUsed, cacheAttempted, nil
 }
 
+// providerManagedTagsSearchFragments returns NSX search tag clauses for provider-managed
+// tags (managed-by=terraform, tf-run-id). Empty when runID is unset.
+func providerManagedTagsSearchFragments(runID string) []string {
+	if runID == "" {
+		return nil
+	}
+	return []string{
+		fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("nsx-tf/managed-by")),
+		fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters("terraform")),
+		fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("tf-run-id")),
+		fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(runID)),
+	}
+}
+
+// providerManagedTagsSearchQuery is the AND-joined search fragment for provider-managed tags.
+func providerManagedTagsSearchQuery(runID string) string {
+	fr := providerManagedTagsSearchFragments(runID)
+	if len(fr) == 0 {
+		return ""
+	}
+	return strings.Join(fr, " AND ")
+}
+
 // buildTagQuery extracts tags from resource data and builds NSX-T search query string
 // In tag search mode, automatically appends provider-managed tags if not present
 func buildTagQuery(d *schema.ResourceData, runID string) string {
@@ -197,22 +417,11 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	}
 
 	shouldAddProviderTags := !isGlobalSearchCacheMode() && runID != ""
-	providerManagedTagQueries := func() []string {
-		return []string{
-			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("nsx-tf/managed-by")),
-			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters("terraform")),
-			fmt.Sprintf("tags.scope:%s", escapeSpecialCharacters("tf-run-id")),
-			fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(runID)),
-		}
-	}
-	providerManagedTagQuery := func() string {
-		return strings.Join(providerManagedTagQueries(), " AND ")
-	}
 
 	tags, exists := d.GetOk("tag")
 	if !exists {
 		if shouldAddProviderTags {
-			return providerManagedTagQuery()
+			return providerManagedTagsSearchQuery(runID)
 		}
 		return ""
 	}
@@ -221,13 +430,13 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	tagSet, ok := tags.(*schema.Set)
 	if !ok {
 		if shouldAddProviderTags {
-			return providerManagedTagQuery()
+			return providerManagedTagsSearchQuery(runID)
 		}
 		return ""
 	}
 	if tagSet.Len() == 0 {
 		if shouldAddProviderTags {
-			return providerManagedTagQuery()
+			return providerManagedTagsSearchQuery(runID)
 		}
 		return ""
 	}
@@ -253,8 +462,7 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	}
 	// In tag search mode (not global search cache mode), automatically append provider-managed tags if not present
 	if !isGlobalSearchCacheMode() && !managedTagPresent && runID != "" {
-		// Append provider-managed tags: managed-by=terraform and tf-run-id=<runID>
-		tagQueries = append(tagQueries, providerManagedTagQueries()...)
+		tagQueries = append(tagQueries, providerManagedTagsSearchFragments(runID)...)
 	}
 
 	if len(tagQueries) == 0 {
