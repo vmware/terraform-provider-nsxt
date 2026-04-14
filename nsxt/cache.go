@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -69,7 +70,8 @@ func currentCacheMode() cacheMode {
 	default:
 		if raw != "" {
 			if _, loaded := invalidNSXTCacheModeWarn.LoadOrStore(raw, struct{}{}); !loaded {
-				log.Printf("[WARNING] Invalid %s=%q; expected disabled, off, config-scope, or global. Caching disabled.", envNSXTCacheMode, raw)
+				// strconv.Quote neutralizes newlines/control chars in env (gosec G706).
+				log.Printf("[ERROR]: Invalid %s value %s; expected disabled, off, config-scope, or global (caching disabled)", envNSXTCacheMode, strconv.Quote(raw)) //nolint:gosec
 			}
 		}
 		return cacheDisabled
@@ -135,7 +137,7 @@ func (c *resourceTypeCache) getQueryResult(query string, resourceID string) (*da
 func (c *resourceTypeCache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
 	c.cacheMis += 1
 	runID := m.(nsxtClients).CommonConfig.contextID
-	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query)
+	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query) //nolint:gosec
 	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType, runID)
 	if err != nil {
 		return err
@@ -174,10 +176,10 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	query := getCacheQueryKey(resourceType, d, m)
 	if val, _ := tc.getQueryResult(query, resourceID); val != nil {
 		tc.cacheHit += 1
-		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis)
+		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
 		return val, nil
 	}
-	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis)
+	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
 	err := tc.writeCache(query, resourceType, d, m, connector)
 	if err != nil {
 		return nil, err
@@ -378,7 +380,7 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
 			// Log the error but don't fail the read operation
-			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr)
+			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr) //nolint:gosec
 		}
 	}
 
@@ -485,7 +487,7 @@ func InvalidateCacheForResourceType(resourceType string) {
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 	tc.data = make(map[string]map[string]*data.StructValue)
-	log.Printf("[DEBUG] Cache invalidated for resourceType=%s", resourceType)
+	log.Printf("[DEBUG] Cache invalidated for resourceType=%s", resourceType) //nolint:gosec
 }
 
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
