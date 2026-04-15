@@ -34,6 +34,13 @@ func resourceNsxtPolicyProject() *schema.Resource {
 		},
 
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+			if v, ok := d.GetOk("tier0_gateway_paths"); ok {
+				if list, ok := v.([]interface{}); ok && len(list) > 0 {
+					if err := ValidateStringListNoDuplicateValues(list, "tier0_gateway_paths"); err != nil {
+						return err
+					}
+				}
+			}
 			if util.NsxVersionHigherOrEqual("9.1.0") {
 				c := m.(nsxtClients)
 				raw := d.GetRawConfig()
@@ -73,6 +80,8 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			// List-level ValidateFunc is not supported for TypeList in SDK v2 (only primitives and TypeMap);
+			// duplicate-path checks run in CustomizeDiff via ValidateStringListNoDuplicateValues.
 			"tier0_gateway_paths": {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
