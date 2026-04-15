@@ -882,18 +882,16 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
 	}
 
+	nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
+	if err != nil {
+		return nil, err
+	}
+
 	var nodeDeploymentInfo *data.StructValue
+	converter := bindings.NewTypeConverter()
 	if nodeID == "" {
-		/*
-			node_id attribute conflicts with node_deployment_info. As node_deployment_info is a complex object which has
-			attributes with default values, this schema property will always have values - therefore there is no simple way
-			to enforce this conflict within the provider (e.g check if node_id and node_deployment_info have values, then
-			fail.
-			So the provider will ignore node_deployment_info properties when node_id has a value - which would mean that
-			this edge appliance was created externally.
-		*/
+		// Full EdgeNode: VM deployment plus node_settings. node_id conflicts with deployment_config / fqdn / etc. in schema.
 		log.Printf("node_id not specified, will deploy edge using values in deploymentConfig")
-		converter := bindings.NewTypeConverter()
 		var dataValue data.DataValue
 		var errs []error
 
@@ -902,10 +900,6 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 		ipAddresses := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
 
 		deploymentConfig, err := getEdgeNodeDeploymentConfigFromSchema(d.Get("deployment_config"))
-		if err != nil {
-			return nil, err
-		}
-		nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
 		if err != nil {
 			return nil, err
 		}
@@ -919,6 +913,18 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 		}
 		dataValue, errs = converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
 
+		if errs != nil {
+			log.Printf("Failed to convert node object, errors are %v", errs)
+			return nil, errs[0]
+		}
+		nodeDeploymentInfo = dataValue.(*data.StructValue)
+	} else if nodeSettings != nil {
+		// Existing fabric node (node_id set): send node_settings only; NSX validates merge/replace semantics for EdgeNode.
+		node := mpmodel.EdgeNode{
+			NodeSettings: nodeSettings,
+			ResourceType: mpmodel.EdgeNode__TYPE_IDENTIFIER,
+		}
+		dataValue, errs := converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
 		if errs != nil {
 			log.Printf("Failed to convert node object, errors are %v", errs)
 			return nil, errs[0]

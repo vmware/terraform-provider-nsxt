@@ -345,7 +345,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				Description:   "Unique Id of the fabric node",
-				ConflictsWith: []string{"advanced_configuration", "appliance_config", "credentials", "form_factor", "management_interface", "vm_deployment_config"},
+				ConflictsWith: []string{"advanced_configuration", "credentials", "form_factor", "management_interface", "vm_deployment_config"},
 			},
 			"advanced_configuration": getKeyValuePairListSchema(),
 			"appliance_config": {
@@ -689,40 +689,60 @@ func getApplianceConfigFromSchema(appCfg interface{}) *model.PolicyVmApplianceCo
 	if appCfg == nil {
 		return nil
 	}
-	var obj model.PolicyVmApplianceConfig
+	cfgList, ok := appCfg.([]interface{})
+	if !ok || len(cfgList) == 0 {
+		return nil
+	}
 
-	for _, aCfg := range appCfg.([]interface{}) {
-		appCfg := aCfg.(map[string]interface{})
-		allowSshRootLogin := appCfg["allow_ssh_root_login"].(bool)
-		dnsServers := interfaceListToStringList(appCfg["dns_servers"].([]interface{}))
-		enableSSH := appCfg["enable_ssh"].(bool)
-		enableUptMode := appCfg["enable_upt_mode"].(bool)
-		var syslogServers []model.SyslogConfiguration
-		if appCfg["syslog_servers"] != nil {
-			for _, syslogSrvr := range appCfg["syslog_servers"].([]interface{}) {
-				syslogServer := syslogSrvr.(map[string]interface{})
-				logLevel := syslogServer["log_level"].(string)
-				port := syslogServer["port"].(string)
-				protocol := syslogServer["protocol"].(string)
-				server := syslogServer["server"].(string)
-				syslogServers = append(syslogServers, model.SyslogConfiguration{
-					LogLevel: &logLevel,
-					Port:     &port,
-					Protocol: &protocol,
-					Server:   &server,
-				})
+	for _, aCfg := range cfgList {
+		cfgMap, ok := aCfg.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		allowSshRootLogin, _ := cfgMap["allow_ssh_root_login"].(bool)
+		enableSSH, _ := cfgMap["enable_ssh"].(bool)
+		enableUptMode, _ := cfgMap["enable_upt_mode"].(bool)
+
+		var dnsServers []string
+		if v, ok := cfgMap["dns_servers"]; ok && v != nil {
+			if list, ok := v.([]interface{}); ok {
+				dnsServers = interfaceListToStringList(list)
 			}
 		}
 
-		obj = model.PolicyVmApplianceConfig{
+		var syslogServers []model.SyslogConfiguration
+		// Schema attribute is syslog_server (not syslog_servers).
+		if v, ok := cfgMap["syslog_server"]; ok && v != nil {
+			if slist, ok := v.([]interface{}); ok {
+				for _, syslogSrvr := range slist {
+					syslogServer, ok := syslogSrvr.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					logLevel, _ := syslogServer["log_level"].(string)
+					port, _ := syslogServer["port"].(string)
+					protocol, _ := syslogServer["protocol"].(string)
+					server, _ := syslogServer["server"].(string)
+					syslogServers = append(syslogServers, model.SyslogConfiguration{
+						LogLevel: &logLevel,
+						Port:     &port,
+						Protocol: &protocol,
+						Server:   &server,
+					})
+				}
+			}
+		}
+
+		obj := model.PolicyVmApplianceConfig{
 			AllowSshRootLogin: &allowSshRootLogin,
 			DnsServers:        dnsServers,
 			EnableSsh:         &enableSSH,
 			EnableUptMode:     &enableUptMode,
 			SyslogServers:     syslogServers,
 		}
+		return &obj
 	}
-	return &obj
+	return nil
 }
 
 func getCredentialsFromSchema(creds interface{}) *model.PolicyEdgeTransportNodeCredential {
@@ -1225,6 +1245,13 @@ func policyEdgeTransportNodePredeployedPatch(siteID, epID, etnID string, d *sche
 		return err
 	}
 	obj.SwitchSpec = switchSpec
+
+	// appliance_config does not conflict with node_id; include it so DNS/SSH/syslog
+	// settings apply when registering a pre-existing edge (same gap as full Patch).
+	applianceCfg := getApplianceConfigFromSchema(d.Get("appliance_config"))
+	if applianceCfg != nil {
+		obj.ApplianceConfig = applianceCfg
+	}
 
 	return etnClient.Patch(siteID, epID, etnID, obj)
 }
