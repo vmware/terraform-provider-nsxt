@@ -31,7 +31,8 @@ func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"context": getContextSchemaWithSpec(utl.SessionContextSpec{FromGlobal: true}),
+			"context":    getContextSchemaWithSpec(utl.SessionContextSpec{FromGlobal: true}),
+			"vrf_config": getPolicyVRFConfigSchema(),
 		},
 	}
 }
@@ -56,6 +57,10 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 		err := resourceNsxtPolicyTier0GatewayReadEdgeCluster(getSessionContext(d, m), d, connector)
 		if err != nil {
 			return fmt.Errorf("failed to get Tier0 %s locale-services: %v", *gw.Id, err)
+		}
+		err = setPolicyVRFConfigInSchema(d, gw.VrfConfig)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

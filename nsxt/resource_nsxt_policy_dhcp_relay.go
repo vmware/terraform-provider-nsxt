@@ -37,7 +37,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 			"tag":          getTagsSchema(),
 			"context":      getContextSchema(false, false, false),
 			"server_addresses": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
@@ -82,7 +82,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-	serverAddresses := getStringListFromSchemaList(d, "server_addresses")
+	serverAddresses := getStringListFromSchemaSet(d, "server_addresses")
 
 	obj := model.DhcpRelayConfig{
 		DisplayName:     &displayName,
@@ -151,7 +151,7 @@ func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface
 	tags := getPolicyTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
 
-	serverAddresses := getStringListFromSchemaList(d, "server_addresses")
+	serverAddresses := getStringListFromSchemaSet(d, "server_addresses")
 
 	obj := model.DhcpRelayConfig{
 		DisplayName:     &displayName,
