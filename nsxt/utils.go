@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"hash/crc32"
 	"log"
+	"os"
+	"strings"
 
 	api_util "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -23,6 +25,13 @@ import (
 
 var cliVersionClient = node_api.NewVersionClient
 var cliQueryClient = search_api.NewQueryClient
+
+const defaultDebugNsxVersion = "9.2.0.0.9999999"
+
+func nsxtEnvTruthy(v string) bool {
+	s := strings.ToLower(strings.TrimSpace(v))
+	return s == "1" || s == "true" || s == "yes"
+}
 
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
@@ -147,6 +156,17 @@ func resourceKeyValueHash(v interface{}) int {
 }
 
 func getNSXVersion(connector client.Connector) (string, error) {
+	if !nsxtEnvTruthy(os.Getenv("NSXT_USE_REAL_NSX_VERSION")) {
+		raw := strings.TrimSpace(os.Getenv("NSXT_DEBUG_NSX_VERSION"))
+		var version string
+		if raw == "" || nsxtEnvTruthy(raw) {
+			version = defaultDebugNsxVersion
+		} else {
+			version = raw
+		}
+		log.Printf("[DEBUG] NSX version (override; set NSXT_USE_REAL_NSX_VERSION=1 to query the manager): %s", version)
+		return version, nil
+	}
 	sessionContext := api_util.SessionContext{ClientType: api_util.Local}
 	client := cliVersionClient(sessionContext, connector)
 	version, err := client.Get()
