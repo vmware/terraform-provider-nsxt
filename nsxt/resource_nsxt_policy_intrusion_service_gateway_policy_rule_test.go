@@ -212,7 +212,6 @@ resource "nsxt_policy_parent_intrusion_service_gateway_policy" "parent" {
   category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
-  stateful        = true
 }`
 }
 

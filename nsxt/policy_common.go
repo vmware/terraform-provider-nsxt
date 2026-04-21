@@ -24,6 +24,9 @@ var securityPolicyIPProtocolValues = []string{"NONE", model.Rule_IP_PROTOCOL_IPV
 // TODO: change last string to sdk constant when available
 var securityPolicyActionValues = []string{model.Rule_ACTION_ALLOW, model.Rule_ACTION_DROP, model.Rule_ACTION_REJECT, "JUMP_TO_APPLICATION"}
 var gatewayPolicyCategoryWritableValues = []string{"Emergency", "SharedPreRules", "LocalGatewayRules", "Default"}
+var idpsGatewayPolicyCategoryValues = []string{"SharedPreRules", "LocalGatewayRules", "Default"}
+var idpsDfwPolicyCategoryValues = []string{"ThreatRules", "EmergencyThreatRules"}
+var idpsDfwRuleOversubscriptionValues = []string{"BYPASSED", "DROPPED", "INHERIT_GLOBAL"}
 var policyFailOverModeValues = []string{model.Tier1_FAILOVER_MODE_PREEMPTIVE, model.Tier1_FAILOVER_MODE_NON_PREEMPTIVE}
 var failOverModeDefaultPolicyT0Value = model.Tier0_FAILOVER_MODE_NON_PREEMPTIVE
 var defaultPolicyLocaleServiceID = "default"
@@ -309,6 +312,14 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 	}
 	if isIds {
 		ruleSchema["ids_profiles"] = getIdsProfilesSchema()
+		// Add oversubscription field for IDPS DFW rules
+		ruleSchema["oversubscription"] = &schema.Schema{
+			Type:         schema.TypeString,
+			Description:  "Action to take when IDPS engine is oversubscribed. BYPASSED: Traffic bypasses IDPS when oversubscribed. DROPPED: Traffic is dropped when oversubscribed. INHERIT_GLOBAL: Uses global IDPS settings.",
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(idpsDfwRuleOversubscriptionValues, false),
+			Default:      "INHERIT_GLOBAL",
+		}
 	}
 	if separated {
 		ruleSchema["policy_path"] = getPolicyPathSchema(true, true, "Security or Gateway Policy path")
@@ -369,11 +380,17 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map
 		"context":      getContextSchemaExtended(isVPC, false, isVPC, isVPC),
 		"domain":       getDomainNameSchema(),
 		"category": {
-			Type:         schema.TypeString,
-			Description:  "Category",
-			ValidateFunc: validation.StringInSlice(securityPolicyCategoryValues, false),
-			Required:     true,
-			ForceNew:     true,
+			Type:        schema.TypeString,
+			Description: "Category",
+			ValidateFunc: func() schema.SchemaValidateFunc {
+				if isIds {
+					return validation.StringInSlice(idpsDfwPolicyCategoryValues, false)
+				}
+				return validation.StringInSlice(securityPolicyCategoryValues, false)
+			}(),
+			Optional: isIds,  // Optional for IDPS
+			Required: !isIds, // Required for regular security policies
+			ForceNew: true,
 		},
 		"comments": {
 			Type:        schema.TypeString,
@@ -405,8 +422,14 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map
 		"stateful": {
 			Type:        schema.TypeBool,
 			Description: "When it is stateful, the state of the network connects are tracked and a stateful packet inspection is performed",
-			Optional:    true,
-			Default:     true,
+			Optional:    !isIds, // Not optional for IDPS (computed only)
+			Computed:    isIds,  // Computed for IDPS
+			Default: func() interface{} {
+				if isIds {
+					return nil // No default for computed fields
+				}
+				return true
+			}(),
 		},
 		"tcp_strict": {
 			Type:        schema.TypeBool,
@@ -418,7 +441,6 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map
 	}
 
 	if isIds {
-		delete(result, "category")
 		delete(result, "scope")
 		delete(result, "tcp_strict")
 	}

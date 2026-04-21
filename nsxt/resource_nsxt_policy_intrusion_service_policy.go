@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -16,14 +17,17 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var cliIntrusionServicePoliciesClient = domains.NewIntrusionServicePoliciesClient
 
 // TODO: revisit with new SDK if constant is available
-var policyIntrusionServiceRuleActionValues = []string{model.IdsRule_ACTION_DETECT, "DETECT_PREVENT"}
+var policyIntrusionServiceRuleActionValues = []string{model.IdsRule_ACTION_DETECT, "DETECT_PREVENT", "EXEMPT"}
 
 func resourceNsxtPolicyIntrusionServicePolicy() *schema.Resource {
+	policySchema := getPolicySecurityPolicySchema(true, true, true, false)
+
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIntrusionServicePolicyCreate,
 		Read:   resourceNsxtPolicyIntrusionServicePolicyRead,
@@ -32,7 +36,7 @@ func resourceNsxtPolicyIntrusionServicePolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(true, true, true, false),
+		Schema: policySchema,
 	}
 }
 
@@ -66,7 +70,9 @@ func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(sessionContext utl.S
 	return false, logAPIError("Error retrieving Intrusion Service Policy", err)
 }
 
-func setPolicyIdsRulesInSchema(d *schema.ResourceData, rules []model.IdsRule) error {
+// setPolicyIdsRulesInSchema sets IDPS rules in schema
+// includeOversubscription: true for DFW IDPS rules, false for Gateway IDPS rules
+func setPolicyIdsRulesInSchema(d *schema.ResourceData, rules []model.IdsRule, includeOversubscription bool) error {
 	var rulesList []map[string]interface{}
 	for _, rule := range rules {
 		elem := make(map[string]interface{})
@@ -88,7 +94,13 @@ func setPolicyIdsRulesInSchema(d *schema.ResourceData, rules []model.IdsRule) er
 		setPathListInMap(elem, "scope", rule.Scope)
 		elem["sequence_number"] = rule.SequenceNumber
 		elem["nsx_id"] = rule.Id
+		if rule.RuleId != nil {
+			elem["rule_id"] = *rule.RuleId
+		}
 		setPathListInMap(elem, "ids_profiles", rule.IdsProfiles)
+		if includeOversubscription && rule.Oversubscription != nil {
+			elem["oversubscription"] = *rule.Oversubscription
+		}
 
 		var tagList []map[string]string
 		for _, tag := range rule.Tags {
@@ -105,10 +117,12 @@ func setPolicyIdsRulesInSchema(d *schema.ResourceData, rules []model.IdsRule) er
 	return d.Set("rule", rulesList)
 }
 
-func getPolicyIdsRulesFromSchema(d *schema.ResourceData) []model.IdsRule {
+// getPolicyIdsRulesFromSchema converts IDPS rule schema data to model.IdsRule objects
+// includeOversubscription: true for DFW IDPS rules, false for Gateway IDPS rules
+func getPolicyIdsRulesFromSchema(d *schema.ResourceData, includeOversubscription bool) []model.IdsRule {
 	rules := d.Get("rule").([]interface{})
 	var ruleList []model.IdsRule
-	seq := 0
+	lastSequence := int64(0)
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
 		displayName := data["display_name"].(string)
@@ -122,12 +136,36 @@ func getPolicyIdsRulesFromSchema(d *schema.ResourceData) []model.IdsRule {
 		ipProtocol := data["ip_version"].(string)
 		direction := data["direction"].(string)
 		notes := data["notes"].(string)
+
+		// Handle sequence_number using the same logic as policy_common.go
+		seq := data["sequence_number"].(int)
 		sequenceNumber := int64(seq)
+		if sequenceNumber == 0 || sequenceNumber <= lastSequence {
+			// We overwrite sequence number in case it's not specified,
+			// or out of order, which might be due to provider upgrade
+			// or bad user configuration
+			if sequenceNumber <= lastSequence {
+				log.Printf("[WARNING] Sequence_number %v for IDPS rule %s is out of order - overriding with sequence number %v", sequenceNumber, displayName, lastSequence+1)
+			}
+			sequenceNumber = lastSequence + 1
+		}
+		lastSequence = sequenceNumber
 		tagStructs := getPolicyTagsFromSet(data["tag"].(*schema.Set))
+
+		var oversubscription string
+		if includeOversubscription {
+			if val, exists := data["oversubscription"]; exists {
+				oversubscription = val.(string)
+			}
+		}
 
 		// Use a different random Id each time, otherwise Update requires revision
 		// to be set for existing rules, and NOT be set for new rules
 		id := newUUID()
+		nsxID := data["nsx_id"].(string)
+		if nsxID != "" {
+			id = nsxID
+		}
 
 		resourceType := "IdsRule"
 		elem := model.IdsRule{
@@ -153,12 +191,19 @@ func getPolicyIdsRulesFromSchema(d *schema.ResourceData) []model.IdsRule {
 			IdsProfiles:          getPathListFromMap(data, "ids_profiles"),
 		}
 
+		if includeOversubscription {
+			elem.Oversubscription = &oversubscription
+		}
+
 		ruleList = append(ruleList, elem)
-		seq = seq + 1
 	}
 
 	return ruleList
 }
+
+// validateIdpsDfwRuleAction validates IDPS DFW rule actions using validation.StringInSlice
+// Uses the existing policyIntrusionServiceRuleActionValues slice for consistency
+var validateIdpsDfwRuleAction = validation.StringInSlice(policyIntrusionServiceRuleActionValues, false)
 
 func resourceNsxtPolicyIntrusionServicePolicyExistsPartial(sessionContext utl.SessionContext, domainName string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
@@ -225,7 +270,7 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 	comments := d.Get("comments").(string)
 	locked := d.Get("locked").(bool)
 	sequenceNumber := int64(d.Get("sequence_number").(int))
-	stateful := d.Get("stateful").(bool)
+	stateful := true // IDPS policies must always be stateful
 	resourceType := "IdsSecurityPolicy"
 
 	obj := model.IdsSecurityPolicy{
@@ -240,20 +285,39 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 		ResourceType:   &resourceType,
 	}
 
+	// Only set category if explicitly provided by user
+	if categoryValue := d.Get("category"); categoryValue != nil && categoryValue != "" {
+		if categoryStr, ok := categoryValue.(string); ok && categoryStr != "" {
+			obj.Category = &categoryStr
+		}
+	}
+
 	var childRules []*data.StructValue
 	if d.HasChange("rule") {
 		oldRules, _ := d.GetChange("rule")
-		rules := getPolicyIdsRulesFromSchema(d)
+
+		// Validate EXEMPT action version requirement at runtime
+		// This must be done here (not in ValidateFunc) because version info is only available after provider connection
+		rulesInterface := d.Get("rule").([]interface{})
+		for i, rule := range rulesInterface {
+			if ruleMap, ok := rule.(map[string]interface{}); ok {
+				if action, exists := ruleMap["action"]; exists {
+					if actionValue, ok := action.(string); ok && actionValue == "EXEMPT" {
+						if !util.NsxVersionHigherOrEqual("9.1.0") {
+							return fmt.Errorf("rule.%d: EXEMPT action requires NSX version 9.1.0 or higher", i)
+						}
+					}
+				}
+			}
+		}
+
+		rules := getPolicyIdsRulesFromSchema(d, true)
 
 		existingRules := make(map[string]bool)
 		for _, rule := range rules {
-			ruleID := newUUID()
-			if rule.Id != nil {
-				ruleID = *rule.Id
-				existingRules[ruleID] = true
-			} else {
-				rule.Id = &ruleID
-			}
+			// getPolicyIdsRulesFromSchema always sets rule.Id, so it's never nil
+			ruleID := *rule.Id
+			existingRules[ruleID] = true
 
 			childRule, err := createPolicyChildIdsRule(ruleID, rule, false)
 			if err != nil {
@@ -313,8 +377,10 @@ func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPol
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralCreate(d, m, true)
+}
 
-	// Initialize resource Id and verify this ID is not yet used
+func resourceNsxtPolicyIntrusionServicePolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(getSessionContext(d, m), d.Get("domain").(string)))
 	if err != nil {
 		return err
@@ -330,10 +396,10 @@ func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m in
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyIntrusionServicePolicyRead(d, m)
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, withRule)
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 	id := d.Id()
 	domainName := d.Get("domain").(string)
@@ -358,12 +424,28 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	d.Set("locked", obj.Locked)
 	d.Set("sequence_number", obj.SequenceNumber)
 	d.Set("stateful", obj.Stateful)
+	// Only set category if it was explicitly configured by user
+	if configuredCategory := d.Get("category"); configuredCategory != nil && configuredCategory != "" {
+		if obj.Category != nil {
+			d.Set("category", *obj.Category)
+		}
+	}
 	d.Set("revision", obj.Revision)
-	return setPolicyIdsRulesInSchema(d, obj.Rules)
+	if withRule {
+		return setPolicyIdsRulesInSchema(d, obj.Rules, true)
+	}
+	return nil
+}
+
+func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, true)
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralUpdate(d, m, true)
+}
 
+func resourceNsxtPolicyIntrusionServicePolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
@@ -376,7 +458,7 @@ func resourceNsxtPolicyIntrusionServicePolicyUpdate(d *schema.ResourceData, m in
 		return handleUpdateError("Intrusion Service Policy", id, err)
 	}
 
-	return resourceNsxtPolicyIntrusionServicePolicyRead(d, m)
+	return resourceNsxtPolicyIntrusionServicePolicyGeneralRead(d, m, withRule)
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m interface{}) error {

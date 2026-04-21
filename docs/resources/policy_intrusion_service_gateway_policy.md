@@ -2,7 +2,7 @@
 subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_intrusion_service_gateway_policy"
-description: A resource to configure an Intrusion Service Gateway Policy and its rules.
+description: A resource to configure an Intrusion Service Gateway Policy and its rules for North-South traffic inspection.
 ---
 
 # nsxt_policy_intrusion_service_gateway_policy
@@ -28,17 +28,17 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "idps_gateway_policy" {
   category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   rule {
     display_name       = "detect-inbound-threats"
     description        = "Detect threats in North-South inbound traffic"
-    direction          = "IN"
     action             = "DETECT"
-    scope              = [data.nsxt_policy_tier1_gateway.tier1_gw.path]
+    direction          = "IN"
+    ip_version         = "IPV4_IPV6"
     source_groups      = [nsxt_policy_group.web_servers.path]
     destination_groups = [nsxt_policy_group.db_servers.path]
     services           = [nsxt_policy_service.http.path]
+    scope              = [data.nsxt_policy_tier1_gateway.tier1_gw.path]
     ids_profiles       = [data.nsxt_policy_intrusion_service_profile.default.path]
     logged             = true
   }
@@ -46,8 +46,9 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "idps_gateway_policy" {
   rule {
     display_name = "detect-prevent-outbound"
     description  = "Detect and prevent threats in outbound traffic"
-    direction    = "OUT"
     action       = "DETECT_PREVENT"
+    direction    = "OUT"
+    ip_version   = "IPV4"
     scope        = [data.nsxt_policy_tier1_gateway.tier1_gw.path]
     ids_profiles = [data.nsxt_policy_intrusion_service_profile.default.path]
     logged       = true
@@ -67,34 +68,33 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the resource. Defaults to `default`.
+* `domain` - (Optional) The domain to use for the resource. This domain must already exist. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `category` - (Required) Category of this policy. Must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules`, or `Default`. ForceNew.
-* `comments` - (Optional) Comments for security policy lock/unlock.
-* `locked` - (Optional) Indicates whether a security policy should be locked. Default is `false`.
-* `sequence_number` - (Optional) This field is used to resolve conflicts between security policies across domains. Default is `0`.
-* `stateful` - (Optional) When it is stateful, the state of the network connects are tracked and a stateful packet inspection is performed. Default is `true`.
-* `tcp_strict` - (Optional) Ensures that a 3-way TCP handshake is done before the data packets are sent. Computed if not set.
+* `category` - (Required) The category to use for priority of this Intrusion Service Gateway Policy. Must be one of: `SharedPreRules`, `LocalGatewayRules`, or `Default`.
+* `comments` - (Optional) Comments for this Intrusion Service Gateway Policy including lock/unlock comments.
+* `locked` - (Optional) A boolean value indicating if the policy is locked. If locked, no other users can update the resource. Default is `false`.
+* `sequence_number` - (Optional) An int value used to resolve conflicts between intrusion service gateway policies across domains. Default is `0`.
+* `stateful` - (Computed) A boolean value indicating if this Policy is stateful. Intrusion Service Gateway Policies are always stateful as they require connection state tracking for proper intrusion detection and prevention. This field is read-only and always returns `true`.
 * `rule` - (Optional) A list of rules for this policy. Each rule supports the following:
     * `display_name` - (Required) Display name of the rule.
     * `description` - (Optional) Description of the rule.
-    * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule.
-    * `destinations_excluded` - (Optional) Negation of destination groups. Default is `false`.
-    * `direction` - (Optional) Traffic direction. One of `IN`, `OUT`, or `IN_OUT`. Default is `IN_OUT`.
-    * `disabled` - (Optional) Flag to disable the rule. Default is `false`.
-    * `ip_version` - (Optional) IP version. One of `IPV4`, `IPV6`, or `IPV4_IPV6`. Default is `IPV4_IPV6`.
-    * `logged` - (Optional) Flag to enable packet logging. Default is `false`.
-    * `notes` - (Optional) Text for additional notes on changes.
-    * `scope` - (Required) Set of policy paths where the rule is applied (e.g., Tier-0/Tier-1 gateway paths).
-    * `services` - (Optional) Set of service paths to match.
-    * `source_groups` - (Optional) Set of group paths that serve as the source for this rule.
-    * `sources_excluded` - (Optional) Negation of source groups. Default is `false`.
+    * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. An empty set can be used to specify `ANY`. Default is `ANY`.
+    * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups. Default is `false`.
+    * `direction` - (Optional) The traffic direction for the rule. Must be one of: `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
+    * `disabled` - (Optional) A boolean value to indicate the rule is disabled. Default is `false`.
+    * `ip_version` - (Optional) The IP Protocol for the rule. Must be one of: `IPV4`, `IPV6` or `IPV4_IPV6`. Default is `IPV4_IPV6`.
+    * `logged` - (Optional) A boolean flag to enable packet logging. Default is `false`.
+    * `notes` - (Optional) Text for additional notes on changes for the rule.
+    * `scope` - (Required) Set of policy paths where the rule is applied. These should be Tier-0 or Tier-1 gateway paths for North-South traffic inspection.
+    * `services` - (Optional) Set of service paths to match for this rule. An empty set can be used to specify `ANY`. Default is `ANY`.
+    * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. An empty set can be used to specify `ANY`. Default is `ANY`.
+    * `sources_excluded` - (Optional) A boolean value indicating negation of source groups. Default is `false`.
     * `log_label` - (Optional) Additional information which will be propagated to the rule syslog.
     * `tag` - (Optional) A list of scope + tag pairs to associate with this rule.
-    * `action` - (Optional) Rule action. One of `DETECT` or `DETECT_PREVENT`. Default is `DETECT`.
-    * `ids_profiles` - (Required) Set of IDS profile paths for this rule.
-    * `sequence_number` - (Optional) Sequence number of this rule.
+    * `action` - (Optional) Rule action for intrusion detection/prevention. One of `DETECT` or `DETECT_PREVENT`. Default is `DETECT`.
+    * `ids_profiles` - (Required) Set of IDS profile paths for this rule. These profiles define the intrusion detection signatures to be applied.
+    * `sequence_number` - (Optional) Sequence number to determine the order of rule processing within this policy.
 
 ## Attributes Reference
 
@@ -107,13 +107,13 @@ In addition to arguments listed above, the following attributes are exported:
     * `revision` - Indicates current revision number of the rule.
     * `path` - The NSX path of the rule.
     * `sequence_number` - Sequence number of the rule.
-    * `nsx_id` - NSX ID of the rule.
+    * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ## Importing
 
 An existing Intrusion Service Gateway Policy can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/cli/import
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
 terraform import nsxt_policy_intrusion_service_gateway_policy.north_south_detect POLICY_PATH

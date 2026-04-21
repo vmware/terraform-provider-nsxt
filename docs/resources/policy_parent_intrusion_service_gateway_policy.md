@@ -2,7 +2,7 @@
 subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_parent_intrusion_service_gateway_policy"
-description: A resource to configure an Intrusion Service Gateway Policy without embedded rules.
+description: A resource to configure an Intrusion Service Gateway Policy without embedded rules for North-South traffic inspection.
 ---
 
 # nsxt_policy_parent_intrusion_service_gateway_policy
@@ -24,11 +24,10 @@ data "nsxt_policy_intrusion_service_profile" "default_ids" {
 
 resource "nsxt_policy_parent_intrusion_service_gateway_policy" "parent_policy" {
   display_name    = "intrusion-svc-gw-parent-policy"
-  description     = "Parent policy for standalone IDPS rules"
+  description     = "Parent policy for standalone IDPS gateway rules"
   category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "env"
@@ -44,8 +43,9 @@ resource "nsxt_policy_intrusion_service_gateway_policy_rule" "detect_inbound" {
   display_name    = "detect-inbound-threats"
   description     = "Detect threats in inbound traffic"
   policy_path     = nsxt_policy_parent_intrusion_service_gateway_policy.parent_policy.path
-  action          = "DETECT"
+  action          = "DETECT_PREVENT"
   direction       = "IN"
+  ip_version      = "IPV4"
   sequence_number = 1
   scope           = [data.nsxt_policy_tier1_gateway.tier1_gw.path]
   ids_profiles    = [data.nsxt_policy_intrusion_service_profile.default_ids.path]
@@ -61,15 +61,14 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the resource. Defaults to `default`.
+* `domain` - (Optional) The domain to use for the resource. This domain must already exist. If not specified, this field defaults to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `category` - (Required) Category of this policy. Must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules`, or `Default`. ForceNew.
-* `comments` - (Optional) Comments for security policy lock/unlock.
-* `locked` - (Optional) Indicates whether a security policy should be locked. Default is `false`.
-* `sequence_number` - (Optional) This field is used to resolve conflicts between security policies across domains. Default is `0`.
-* `stateful` - (Optional) When it is stateful, the state of the network connects are tracked and a stateful packet inspection is performed. Default is `true`.
-* `tcp_strict` - (Optional) Ensures that a 3-way TCP handshake is done before the data packets are sent. Computed if not set.
+* `category` - (Required) The category to use for priority of this Intrusion Service Gateway Policy. Must be one of: `SharedPreRules`, `LocalGatewayRules`, or `Default`.
+* `comments` - (Optional) Comments for this Intrusion Service Gateway Policy including lock/unlock comments.
+* `locked` - (Optional) A boolean value indicating if the policy is locked. If locked, no other users can update the resource. Default is `false`.
+* `sequence_number` - (Optional) An int value used to resolve conflicts between intrusion service gateway policies across domains. Default is `0`.
+* `stateful` - (Computed) A boolean value indicating if this Policy is stateful. Intrusion Service Gateway Policies are always stateful as they require connection state tracking for proper intrusion detection and prevention. This field is read-only and always returns `true`.
 
 ## Attributes Reference
 
@@ -83,7 +82,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Intrusion Service Gateway Policy can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/cli/import
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
 terraform import nsxt_policy_parent_intrusion_service_gateway_policy.parent_policy POLICY_PATH

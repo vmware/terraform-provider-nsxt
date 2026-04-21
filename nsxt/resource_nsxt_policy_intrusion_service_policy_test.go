@@ -122,6 +122,16 @@ func testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t *testing.T, withCont
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ids_profiles.#", "1"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicyIntrusionServicePolicyWithOversubscription(updatedName, defaultDomain, withContext),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "DETECT_PREVENT"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.oversubscription", "DROPPED"),
+				),
+			},
 		},
 	})
 }
@@ -305,7 +315,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   comments        = "%s"
   locked          = true
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "color"
@@ -322,7 +331,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   comments        = "%s"
   locked          = true
   sequence_number = 3
-  stateful        = true
   domain          = data.nsxt_policy_site.test.id
 
   tag {
@@ -351,7 +359,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   description     = "Acceptance Test"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "color"
@@ -379,7 +386,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   description     = "Acceptance Test"
   locked          = false
   sequence_number = 3
-  stateful        = true
   domain          = data.nsxt_policy_site.test.id
 
   tag {
@@ -388,12 +394,11 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   }
 
   rule {
-    display_name  = "%s"
-    direction     = "%s"
-    ip_version    = "%s"
-    log_label     = "%s"
-    source_groups = [nsxt_policy_group.test.path]
-    ids_profiles  = ["%s"]
+    display_name = "%s"
+    direction    = "%s"
+    ip_version   = "%s"
+    log_label    = "%s"
+    ids_profiles = [%s]
 
     tag {
       scope = "color"
@@ -436,7 +441,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   description     = "Acceptance Test"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "color"
@@ -470,7 +474,6 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   description     = "Acceptance Test"
   locked          = true
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "color"
@@ -489,4 +492,272 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
   }
 
 }`, name, policyDefaultIdsProfilePath)
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_extendedFields(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyExtendedFields(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "4.2.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_extendedFields_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyExtendedFields(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServicePolicyExtendedFields(t *testing.T, withContext bool, preCheck func()) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_intrusion_service_policy.test"
+	nsxID := "test-" + name
+	comments := "Test extended fields"
+	notes := "Rule notes for testing"
+	logLabel := "extended-field-test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIntrusionServicePolicyExtendedFieldsTemplate(name, nsxID, comments, notes, logLabel, withContext),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "nsx_id", nsxID),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "5"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.notes", notes),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", logLabel),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.sequence_number", "10"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.0.nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyIntrusionServicePolicyExtendedFieldsTemplate(name, nsxID, comments, notes, logLabel string, withContext bool) string {
+	context := ""
+	profile := ""
+	profilePath := fmt.Sprintf("\"%s\"", policyDefaultIdsProfilePath)
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+		profile = testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext)
+		profilePath = "nsxt_policy_intrusion_service_profile.test.path"
+	}
+
+	return profile + fmt.Sprintf(`
+resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
+  display_name    = "%s"
+  nsx_id          = "%s"
+  description     = "Extended fields test policy"
+  comments        = "%s"
+  sequence_number = 5
+  locked          = false
+  category        = "ThreatRules"
+
+  tag {
+    scope = "environment"
+    tag   = "test"
+  }
+
+  tag {
+    scope = "application"
+    tag   = "idps"
+  }
+
+  rule {
+    display_name     = "extended-field-rule"
+    description      = "Rule with all extended fields"
+    action           = "DETECT"
+    direction        = "IN_OUT"
+    ip_version       = "IPV4_IPV6"
+    logged           = true
+    log_label        = "%s"
+    notes            = "%s"
+    disabled         = false
+    sequence_number  = 10
+    ids_profiles     = [%s]
+    
+    tag {
+      scope = "rule-env"
+      tag   = "production"
+    }
+  }
+}`, context, name, nsxID, comments, logLabel, notes, profilePath)
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_exemptAction(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyExemptAction(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "9.1.0") // EXEMPT requires 9.1.0+
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_exemptAction_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyExemptAction(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+		testAccNSXVersion(t, "9.1.0") // EXEMPT requires 9.1.0+
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServicePolicyExemptAction(t *testing.T, withContext bool, preCheck func()) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_intrusion_service_policy.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIntrusionServicePolicyExemptTemplate(name, withContext),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "DETECT"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.action", "DETECT_PREVENT"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.action", "EXEMPT"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyIntrusionServicePolicyExemptTemplate(name string, withContext bool) string {
+	context := ""
+	profile := ""
+	profilePath := fmt.Sprintf("\"%s\"", policyDefaultIdsProfilePath)
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+		profile = testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext)
+		profilePath = "nsxt_policy_intrusion_service_profile.test.path"
+	}
+
+	return profile + fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+%s
+  display_name = "%s-group"
+
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["192.168.1.0/24"]
+    }
+  }
+}
+
+resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
+  display_name = "%s"
+  description  = "EXEMPT action test policy"
+  category     = "ThreatRules"
+
+  rule {
+    display_name = "detect-rule"
+    action       = "DETECT"
+    ids_profiles = [%s]
+    scope        = [nsxt_policy_group.test.path]
+  }
+
+  rule {
+    display_name = "detect-prevent-rule"
+    action       = "DETECT_PREVENT"
+    ids_profiles = [%s]
+    scope        = [nsxt_policy_group.test.path]
+  }
+
+  rule {
+    display_name = "exempt-rule"
+    action       = "EXEMPT"
+    ids_profiles = [%s]
+    scope        = [nsxt_policy_group.test.path]
+  }
+}`, context, name, context, name, profilePath, profilePath, profilePath)
+}
+
+func testAccNsxtPolicyIntrusionServicePolicyWithOversubscription(name, domainName string, withContext bool) string {
+	context := ""
+	profile := ""
+	profilePath := fmt.Sprintf("\"%s\"", policyDefaultIdsProfilePath)
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+		profile = testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext)
+		profilePath = "nsxt_policy_intrusion_service_profile.test.path"
+	}
+	if domainName == defaultDomain {
+		return fmt.Sprintf(`
+%s
+resource "nsxt_policy_group" "test" {
+%s
+  display_name = "tf-test-group"
+  description  = "Acceptance Test"
+
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
+  display_name    = "%s"
+  description     = "Acceptance Test with Oversubscription"
+  locked          = false
+  sequence_number = 3
+
+  rule {
+    display_name       = "%s-rule"
+    action             = "DETECT_PREVENT"
+    direction          = "IN_OUT"
+    ip_version         = "IPV4_IPV6"
+    oversubscription   = "DROPPED"
+    ids_profiles       = [%s]
+    source_groups      = [nsxt_policy_group.test.path]
+    destination_groups = [nsxt_policy_group.test.path]
+  }
+}`, profile, context, context, name, name, profilePath)
+	}
+	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
+resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
+  display_name    = "%s"
+  description     = "Acceptance Test with Oversubscription"
+  locked          = false
+  sequence_number = 3
+  domain          = "%s"
+
+  rule {
+    display_name       = "%s-rule"
+    action             = "DETECT_PREVENT"
+    direction          = "IN_OUT"
+    ip_version         = "IPV4_IPV6"
+    oversubscription   = "DROPPED"
+    ids_profiles       = ["%s"]
+    source_groups      = [nsxt_policy_group.test.path]
+    destination_groups = [nsxt_policy_group.test.path]
+  }
+}`, context, name, domainName, name, policyDefaultIdsProfilePath)
 }
