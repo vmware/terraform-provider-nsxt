@@ -1,4 +1,4 @@
-## 3.11.1 (Unreleased)
+## 3.11.1 (April 21, 2025)
 
 BUG FIXES:
 * `data/nsxt_policy_groups`: Fix infinite loop when duplicate display names exist ([#1935](https://github.com/vmware/terraform-provider-nsxt/pull/1935))
@@ -69,7 +69,7 @@ Simplified VPC configuration
 * `data/nsxt_vpc_nat`
 * `data/nsxt_vpc_service_profile`
 * `data/nsxt_vpc_subnet_port`
-* `data/nsxt_vpc_subnet`
+ `data/nsxt_vpc_subnet`
 * `data/nsxt_vpc`
 * `resource/nsxt_vpc_attachment`
 * `resource/nsxt_vpc_connectivity_profile`
