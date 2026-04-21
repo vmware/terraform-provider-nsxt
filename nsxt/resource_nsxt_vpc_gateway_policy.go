@@ -36,7 +36,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Gateway Policy resource requires NSX version 9.0.0 or higher")
 	}
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	connector := getPolicyConnector(m)
@@ -124,7 +124,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 	if id == "" {
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 

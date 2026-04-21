@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -31,6 +32,11 @@ type typeScopedCache struct {
 }
 
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
+
+// postWritePhase is set after the first Create/Update operation.
+// Once true, cache reads are bypassed so post-write Read calls use direct
+// individual API GETs instead of triggering another bulk search.
+var postWritePhase atomic.Bool
 
 // errCacheUseBackendDirect is returned when the cache query bucket exists but the requested id
 // is not present (including partial bulk results without this id), and from readCache after a
@@ -92,8 +98,15 @@ func isGlobalSearchCacheMode() bool {
 	return currentCacheMode() == cacheGlobal
 }
 
+// isConfigScopedCacheMode returns true only when tag-filtered (config-scope) caching is active.
+// Provider-managed tags (nsx-tf/tf-run-id) should only be stamped on resources in this mode;
+// global mode and disabled mode must send only user-defined tags.
+func isConfigScopedCacheMode() bool {
+	return currentCacheMode() == cacheConfigScoped
+}
+
 func isRefreshPhase(d *schema.ResourceData) bool {
-	return d.Id() != "" && !d.HasChangesExcept()
+	return d.Id() != "" && !postWritePhase.Load()
 }
 
 func isCacheEnabledForRead(d *schema.ResourceData) bool {
@@ -213,6 +226,7 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
 	// Now we have access to the proper runID passed from writeCache
 	additionalQuery := buildTagQuery(d, runID)
+	log.Printf("[DEBUG] Cache search query: resourceType=%s query=%q additionalQuery=%q", resourceType, query, additionalQuery) //nolint:gosec
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
 	if err != nil && len(resultList) == 0 {
 		return fmt.Errorf("error listing resource %s %w", resourceType, err)
@@ -405,6 +419,7 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 		}
 	}
 
+	log.Printf("[DEBUG] Cache fallback: direct GET for resourceType=%s id=%s", resourceType, resourceID) //nolint:gosec
 	obj, err := backendRead()
 	if err != nil {
 		return nil, cacheUsed, cacheAttempted, err
@@ -520,7 +535,8 @@ func InvalidateCacheForResourceType(resourceType string) {
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 	tc.data = make(map[string]map[string]*data.StructValue)
-	log.Printf("[DEBUG] Cache invalidated for resourceType=%s", resourceType) //nolint:gosec
+	postWritePhase.Store(true)
+	log.Printf("[DEBUG] Cache invalidated for resourceType=%s; post-write phase set, cache bypassed for remaining reads", resourceType) //nolint:gosec
 }
 
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
@@ -579,6 +595,7 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 	if !needsPatch {
 		return nil, nil
 	}
+	log.Printf("[DEBUG] Provider-managed tag missing; patching object to add scope=%s", managedDefaultTagScope) //nolint:gosec
 
 	// Merge current user tags with expected provider-managed tags
 	userTags := make([]model.Tag, 0)
