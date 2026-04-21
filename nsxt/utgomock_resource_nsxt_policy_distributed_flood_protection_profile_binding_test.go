@@ -154,6 +154,21 @@ func TestMockResourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(t *t
 		assert.Equal(t, ffppbProfilePath, d.Get("profile_path"))
 	})
 
+	t.Run("Read_success_when_API_omits_optional_pointer_fields", func(t *testing.T) {
+		mockBindingSDK.EXPECT().Get(ffppbDomainID, ffppbGroupID, ffppbID).Return(model.PolicyFirewallFloodProtectionProfileBindingMap{}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"group_path": ffppbGroupPath,
+		})
+		d.SetId(ffppbID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Get("display_name"))
+		assert.Equal(t, "", d.Get("profile_path"))
+		assert.Equal(t, 0, d.Get("revision"))
+	})
+
 	t.Run("Read_fails_when_ID_is_empty", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"group_path": ffppbGroupPath,

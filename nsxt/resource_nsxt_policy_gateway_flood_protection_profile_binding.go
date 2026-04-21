@@ -230,11 +230,12 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingRead(d *schema.Resour
 		return handleReadError(d, "GatewayFloodProtectionProfileBinding", id, err)
 	}
 
-	floodProtectionProfileBindingModelToSchema(d, *binding.DisplayName, *binding.Description, id, *binding.Path, *binding.ProfilePath, -1, binding.Tags, *binding.Revision)
+	floodProtectionProfileBindingModelToSchema(d, binding.DisplayName, binding.Description, id, binding.Path, binding.ProfilePath, nil, binding.Tags, binding.Revision)
 	return nil
 }
 
-func floodProtectionProfileBindingModelToSchema(d *schema.ResourceData, displayName, description, nsxID, path, profilePath string, seqNum int64, tags []model.Tag, revision int64) {
+// seqNum is set only for the distributed binding; pass nil for gateway (no sequence_number attribute).
+func floodProtectionProfileBindingModelToSchema(d *schema.ResourceData, displayName, description *string, nsxID string, path, profilePath *string, seqNum *int64, tags []model.Tag, revision *int64) {
 	d.Set("display_name", displayName)
 	d.Set("description", description)
 	setPolicyTagsInSchema(d, tags)
@@ -243,7 +244,7 @@ func floodProtectionProfileBindingModelToSchema(d *schema.ResourceData, displayN
 	d.Set("revision", revision)
 
 	d.Set("profile_path", profilePath)
-	if seqNum != -1 {
+	if seqNum != nil {
 		d.Set("sequence_number", seqNum)
 	}
 }

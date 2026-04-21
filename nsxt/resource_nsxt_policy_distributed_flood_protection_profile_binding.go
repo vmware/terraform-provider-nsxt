@@ -154,9 +154,17 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 		return handleReadError(d, "FloodProtectionProfileBinding", id, err)
 	}
 
-	floodProtectionProfileBindingModelToSchema(d, *binding.DisplayName, *binding.Description, id, *binding.Path, *binding.ProfilePath, *binding.SequenceNumber, binding.Tags, *binding.Revision)
+	floodProtectionProfileBindingModelToSchema(d, binding.DisplayName, binding.Description, id, binding.Path, binding.ProfilePath, int64PtrOrZero(binding.SequenceNumber), binding.Tags, binding.Revision)
 
 	return nil
+}
+
+func int64PtrOrZero(p *int64) *int64 {
+	if p != nil {
+		return p
+	}
+	z := int64(0)
+	return &z
 }
 
 func resourceNsxtPolicyDistributedFloodProtectionProfileBindingUpdate(d *schema.ResourceData, m interface{}) error {
