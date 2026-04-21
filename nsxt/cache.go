@@ -75,7 +75,7 @@ func currentCacheMode() cacheMode {
 	switch lower {
 	case "", "disabled", "off":
 		return cacheDisabled
-	case "config-scope":
+	case "config_scope":
 		return cacheConfigScoped
 	case "global":
 		return cacheGlobal
@@ -83,7 +83,7 @@ func currentCacheMode() cacheMode {
 		if raw != "" {
 			if _, loaded := invalidNSXTCacheModeWarn.LoadOrStore(raw, struct{}{}); !loaded {
 				// strconv.Quote neutralizes newlines/control chars in env (gosec G706).
-				log.Printf("[ERROR]: Invalid %s value %s; expected disabled, off, config-scope, or global (caching disabled)", envNSXTCacheMode, strconv.Quote(raw)) //nolint:gosec
+				log.Printf("[ERROR]: Invalid %s value %s; expected disabled, off, config_scope, or global (caching disabled)", envNSXTCacheMode, strconv.Quote(raw)) //nolint:gosec
 			}
 		}
 		return cacheDisabled
