@@ -252,7 +252,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)
@@ -393,7 +393,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)
