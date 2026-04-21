@@ -125,7 +125,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)
@@ -230,7 +230,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)

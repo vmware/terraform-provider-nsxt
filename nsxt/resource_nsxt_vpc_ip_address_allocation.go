@@ -149,7 +149,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)
@@ -254,7 +254,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	var tags []model.Tag
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		tags = getPolicyTagsFromSchema(d)

@@ -540,7 +540,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if IsCacheEnabled() {
+	if isConfigScopedCacheMode() {
 		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		obj.Tags = getPolicyTagsFromSchema(d)
@@ -676,8 +676,8 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if IsCacheEnabled() {
-		// Always regenerate Provider-managed default tags  to ensure they're present
+	if isConfigScopedCacheMode() {
+		// Always regenerate provider-managed default tags to ensure they're present
 		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	} else {
 		obj.Tags = getPolicyTagsFromSchema(d)
