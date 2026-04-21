@@ -97,6 +97,19 @@ func minimalTransportNodeData() map[string]interface{} {
 	}
 }
 
+func transportNodeDataWithNodeSettings() map[string]interface{} {
+	m := minimalTransportNodeData()
+	m["revision"] = int(tnRevision)
+	m["node_settings"] = []interface{}{
+		map[string]interface{}{
+			"hostname":       tnFQDN,
+			"dns_servers":    []interface{}{"10.0.0.1"},
+			"search_domains": []interface{}{"example.com"},
+		},
+	}
+	return m
+}
+
 func TestMockResourceNsxtEdgeTransportNodeCreate(t *testing.T) {
 	t.Run("Create with existing node_id success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -105,7 +118,7 @@ func TestMockResourceNsxtEdgeTransportNodeCreate(t *testing.T) {
 		defer restore()
 
 		resp := transportNodeAPIResponse()
-		// 1st Get (in Create to read existing node), Update, then Get (from Read)
+		// Get in Create, Get from Read after Update (Update does not pre-Get)
 		mockSDK.EXPECT().Get(tnID).Return(resp, nil).Times(2)
 		mockSDK.EXPECT().Update(tnID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(resp, nil)
 
@@ -201,6 +214,24 @@ func TestMockResourceNsxtEdgeTransportNodeUpdate(t *testing.T) {
 		err := resourceNsxtEdgeTransportNodeUpdate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, tnDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Update with node_settings when node_id is set", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTransportNodeMock(t, ctrl)
+		defer restore()
+
+		resp := transportNodeAPIResponse()
+		mockSDK.EXPECT().Update(tnID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(resp, nil)
+		mockSDK.EXPECT().Get(tnID).Return(resp, nil)
+
+		res := resourceNsxtEdgeTransportNode()
+		d := schema.TestResourceDataRaw(t, res.Schema, transportNodeDataWithNodeSettings())
+		d.SetId(tnID)
+
+		err := resourceNsxtEdgeTransportNodeUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
 	})
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
