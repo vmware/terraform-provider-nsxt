@@ -40,9 +40,6 @@ func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		lookupKey = displayName
 	}
 
-	// Try serving from cache when the caller specified an ID or display name.
-	// Data sources don't participate in refresh phase detection the same way resources do,
-	// so we call cache directly here while reusing the same cache storage and conversion.
 	if lookupKey != "" && IsCacheEnabled() {
 		val, err := gcache.readCache(lookupKey, "VpcSubnet", d, m, connector)
 		if err == nil {
