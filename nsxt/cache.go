@@ -413,6 +413,11 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 				typedVal, ok := goVal.(T)
 				if ok {
 					cacheUsed = true
+					// Strip provider-managed tags so TF state does not track them.
+					// They live on NSX but must not drive TF diffs (config has no tag blocks for them).
+					if !isGlobalSearchCacheMode() {
+						stripProviderManagedTagsFromAny(&typedVal)
+					}
 					return &typedVal, cacheUsed, cacheAttempted, nil
 				}
 			}
@@ -425,13 +430,15 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 		return nil, cacheUsed, cacheAttempted, err
 	}
 
-	// Handle tag-based cache mode: validate and patch provider-managed tags if missing
+	// Handle tag-based cache mode: validate and patch provider-managed tags if missing.
+	// Always strip provider-managed tags from the returned object so TF state does not
+	// track them — they are managed on NSX out-of-band and must not appear in diffs.
 	if !isGlobalSearchCacheMode() {
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
-			// Log the error but don't fail the read operation
 			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr) //nolint:gosec
 		}
+		stripProviderManagedTagsFromAny(obj)
 	}
 
 	return obj, cacheUsed, cacheAttempted, nil
@@ -539,6 +546,41 @@ func InvalidateCacheForResourceType(resourceType string) {
 	log.Printf("[DEBUG] Cache invalidated for resourceType=%s; post-write phase set, cache bypassed for remaining reads", resourceType) //nolint:gosec
 }
 
+// stripProviderManagedTagsFromAny removes provider-managed tags (scope=nsx-tf/tf-run-id) from any
+// NSX model object using reflection. The object must be a pointer to a struct with a Tags []model.Tag
+// field. Provider-managed tags live on NSX out-of-band and must not appear in TF state so that
+// TF never plans to remove them (the config has no tag blocks for them).
+func stripProviderManagedTagsFromAny(obj interface{}) {
+	if obj == nil {
+		return
+	}
+	objValue := reflect.ValueOf(obj)
+	for objValue.IsValid() && objValue.Kind() == reflect.Ptr {
+		if objValue.IsNil() {
+			return
+		}
+		objValue = objValue.Elem()
+	}
+	if !objValue.IsValid() || objValue.Kind() != reflect.Struct {
+		return
+	}
+	tagsField := objValue.FieldByName("Tags")
+	if !tagsField.IsValid() || !tagsField.CanSet() || tagsField.Kind() != reflect.Slice {
+		return
+	}
+	current, ok := tagsField.Interface().([]model.Tag)
+	if !ok {
+		return
+	}
+	userTags := make([]model.Tag, 0, len(current))
+	for _, tag := range current {
+		if !isManagedDefaultTag(tag) {
+			userTags = append(userTags, tag)
+		}
+	}
+	tagsField.Set(reflect.ValueOf(userTags))
+}
+
 // ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
 func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
 	// Use reflection to check if the object has a Tags field
@@ -619,6 +661,13 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 				return nil, fmt.Errorf("failed to patch tags to NSX API: %w", err)
 			}
 			log.Printf("[DEBUG] Patched provider-managed tags successfully")
+			// Increment the Revision field to match the server-side increment from the PATCH.
+			// Without this, a subsequent apply would send the stale (pre-PATCH) revision and
+			// NSX would reject the request with error 500071.
+			revField := objValue.FieldByName("Revision")
+			if revField.IsValid() && revField.Kind() == reflect.Ptr && !revField.IsNil() {
+				revField.Elem().SetInt(revField.Elem().Int() + 1)
+			}
 		}
 
 		return obj, nil
