@@ -126,8 +126,19 @@ func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 			ret[*resource.Id] = obj
 		}
 		if resource.DisplayName != nil {
-			// Keep DisplayName as an alias key for data source lookups.
-			ret[*resource.DisplayName] = obj
+			name := *resource.DisplayName
+			if existing, seen := ret[name]; seen {
+				// A second resource shares this display_name: mark the key ambiguous.
+				// nil sentinel causes getQueryResult to return errCacheAmbiguousDisplayName
+				// so the caller falls back to the direct API, which returns a proper
+				// "Found multiple X with name Y" error to the user.
+				if existing != nil {
+					ret[name] = nil
+				}
+				// If already nil (3rd+ duplicate), leave as nil — still ambiguous.
+			} else {
+				ret[name] = obj
+			}
 		}
 	}
 	return ret
