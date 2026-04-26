@@ -882,9 +882,12 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
 	}
 
-	nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
-	if err != nil {
-		return nil, err
+	var nodeSettings *mpmodel.EdgeNodeSettings
+	if util.NsxVersionHigherOrEqual("9.0.0") || nodeID == "" {
+		nodeSettings, err = getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var nodeDeploymentInfo *data.StructValue
