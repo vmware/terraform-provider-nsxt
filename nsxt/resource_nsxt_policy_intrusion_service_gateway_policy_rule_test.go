@@ -15,6 +15,7 @@ import (
 func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_basic(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
+	tierInfraName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_gateway_policy_rule.rule1"
 	action1 := "DETECT"
 	action2 := "DETECT_PREVENT"
@@ -26,7 +27,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_basic(t *testing
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -34,7 +34,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_basic(t *testing
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name, action1, direction1),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name, action1, direction1, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -47,7 +47,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_basic(t *testing
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(updatedName, action2, direction2),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(updatedName, action2, direction2, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -65,6 +65,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_basic(t *testing
 
 func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_withAllFields(t *testing.T) {
 	name := getAccTestResourceName()
+	tierInfraName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_gateway_policy_rule.rule1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -72,7 +73,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_withAllFields(t 
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_withAllFields(t 
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsCreate(name),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsCreate(name, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -104,7 +104,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_withAllFields(t 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsUpdate(name),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsUpdate(name, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -133,6 +133,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_withAllFields(t 
 
 func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	tierInfraName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_gateway_policy_rule.rule1"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -140,7 +141,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_importBasic(t *t
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -148,7 +148,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicyRule_importBasic(t *t
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name, "DETECT", "IN"),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name, "DETECT", "IN", tierInfraName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -205,8 +205,8 @@ func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleCheckDestroy(state *terra
 	return nil
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps() string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1GatewayTemplate() + `
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps(tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1Prerequisites(tierInfraPrefix) + `
 resource "nsxt_policy_parent_intrusion_service_gateway_policy" "parent" {
   display_name    = "tf-intrusion-svc-gw-parent-for-rule-test"
   category        = "LocalGatewayRules"
@@ -216,8 +216,8 @@ resource "nsxt_policy_parent_intrusion_service_gateway_policy" "parent" {
 }`
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps() string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps() + `
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps(tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps(tierInfraPrefix) + `
 resource "nsxt_policy_group" "src_group" {
   display_name = "tf-intrusion-svc-gw-rule-src-group"
 }
@@ -246,21 +246,21 @@ resource "nsxt_policy_service" "tcp_svc" {
 }`
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name string, action string, direction string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleBasicTemplate(name string, action string, direction string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleParentDeps(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
   display_name    = "%s"
   policy_path     = nsxt_policy_parent_intrusion_service_gateway_policy.parent.path
   action          = "%s"
   direction       = "%s"
   sequence_number = 1
-  scope           = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+  scope           = [nsxt_policy_tier1_gateway.t1_gw.path]
   ids_profiles    = ["%s"]
 }`, name, action, direction, policyDefaultIdsProfilePath)
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsCreate(name string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsCreate(name string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
   display_name          = "%s"
   description           = "Standalone rule with all fields"
@@ -277,7 +277,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
   source_groups         = [nsxt_policy_group.src_group.path]
   destination_groups    = [nsxt_policy_group.dst_group1.path]
   services              = [nsxt_policy_service.icmp_svc.path, nsxt_policy_service.tcp_svc.path]
-  scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+  scope                 = [nsxt_policy_tier1_gateway.t1_gw.path]
   ids_profiles          = ["%s"]
 
   tag {
@@ -287,8 +287,8 @@ resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
 }`, name, policyDefaultIdsProfilePath)
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsUpdate(name string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleWithAllFieldsUpdate(name string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyRuleAllFieldsDeps(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
   display_name          = "%s"
   description           = "Updated standalone rule"
@@ -303,7 +303,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy_rule" "rule1" {
   destinations_excluded = false
   sequence_number       = 2
   destination_groups    = [nsxt_policy_group.dst_group1.path, nsxt_policy_group.dst_group2.path]
-  scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+  scope                 = [nsxt_policy_tier1_gateway.t1_gw.path]
   ids_profiles          = ["%s"]
 
   tag {
