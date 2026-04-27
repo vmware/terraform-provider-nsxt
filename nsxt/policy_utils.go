@@ -561,6 +561,18 @@ func getPolicyIDFromPath(path string) string {
 	return tokens[len(tokens)-1]
 }
 
+// suppressPolicyPathOrID avoids perpetual drift when the API returns a bare
+// resource ID but configuration uses a policy path (or vice versa).
+func suppressPolicyPathOrID(_, oldVal, newVal string, _ *schema.ResourceData) bool {
+	if oldVal == newVal {
+		return true
+	}
+	if oldVal == "" || newVal == "" {
+		return false
+	}
+	return getPolicyIDFromPath(oldVal) == getPolicyIDFromPath(newVal)
+}
+
 func interfaceListToStringList(interfaces []interface{}) []string {
 	var strList []string
 	for _, elem := range interfaces {
