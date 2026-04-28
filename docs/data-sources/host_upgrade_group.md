@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: host_upgrade_group"
 description: A Host Upgrade Group data source.
 ---

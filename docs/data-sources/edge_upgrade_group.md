@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: edge_upgrade_group"
 description: An Edge Upgrade Group data source.
 ---

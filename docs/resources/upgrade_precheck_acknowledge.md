@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: nsxt_upgrade_precheck_acknowledge"
 description: A resource to acknowledge failed NSXT upgrade prechecks.
 ---
