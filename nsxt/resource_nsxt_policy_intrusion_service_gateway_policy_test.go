@@ -6,30 +6,16 @@ package nsxt
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func getTestTier1GatewayName() string {
-	name := os.Getenv("NSXT_TEST_TIER1_ROUTER")
-	if name == "" {
-		return ""
-	}
-	return name
-}
-
-func testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t *testing.T) {
-	if getTestTier1GatewayName() == "" {
-		t.Skip("NSXT_TEST_TIER1_ROUTER must be set for Intrusion Service Gateway Policy tests")
-	}
-}
-
 func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
+	tierInfraName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_gateway_policy.ids_gw_policy"
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
@@ -46,7 +32,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) 
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -85,7 +70,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(updatedName, direction1, proto1, tag1),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(updatedName, direction1, proto1, tag1, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -108,7 +93,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(updatedName, direction2, proto2, tag2),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(updatedName, direction2, proto2, tag2, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -136,6 +121,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) 
 
 func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *testing.T) {
 	name := getAccTestResourceName()
+	tierInfraName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_gateway_policy.ids_gw_policy"
 	defaultAction := "DETECT"
 	defaultDirection := "IN_OUT"
@@ -146,7 +132,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			testAccNsxtPolicyIntrusionServiceGatewayPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -154,7 +139,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsCreate(name),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsCreate(name, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -192,7 +177,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsUpdate(name),
+				Config: testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsUpdate(name, tierInfraName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -294,11 +279,25 @@ func testAccNsxtPolicyIntrusionServiceGatewayPolicyCheckDestroy(state *terraform
 	return nil
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyT1GatewayTemplate() string {
-	return fmt.Sprintf(`
-data "nsxt_policy_tier1_gateway" "t1_gw" {
-  display_name = "%s"
-}`, getTestTier1GatewayName())
+// testAccNsxtPolicyIntrusionServiceGatewayPolicyT1Prerequisites creates Tier-0/Tier-1
+// used as IDS gateway policy rule scope (same pattern as other policy acceptance tests).
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyT1Prerequisites(uniquePrefix string) string {
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "t0_for_ids" {
+  display_name = "%[1]s-t0"
+  description    = "Terraform acceptance IDS gateway policy T0"
+  ha_mode        = "ACTIVE_STANDBY"
+}
+
+resource "nsxt_policy_tier1_gateway" "t1_gw" {
+  display_name = "%[1]s-t1"
+  description    = "Terraform acceptance IDS gateway policy T1"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  }
+  tier0_path = nsxt_policy_tier0_gateway.t0_for_ids.path
+}
+`, uniquePrefix)
 }
 
 func testAccNsxtPolicyIntrusionServiceGatewayPolicyBasic(name string, comments string) string {
@@ -319,8 +318,8 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
 }`, name, comments)
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1GatewayTemplate() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1Prerequisites(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -338,7 +337,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
     display_name = "ids-gw-detect-rule"
     direction    = "%s"
     ip_version   = "%s"
-    scope        = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+    scope        = [nsxt_policy_tier1_gateway.t1_gw.path]
     log_label    = "%s"
     ids_profiles = ["%s"]
 
@@ -350,8 +349,8 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
 }`, name, direction, protocol, ruleTag, policyDefaultIdsProfilePath)
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps() string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1GatewayTemplate() + `
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps(tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyT1Prerequisites(tierInfraPrefix) + `
 resource "nsxt_policy_group" "src_group" {
   display_name = "tf-intrusion-svc-gw-policy-src-group"
 }
@@ -376,8 +375,8 @@ resource "nsxt_policy_service" "tcp_svc" {
 }`
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsCreate(name string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsCreate(name string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -397,7 +396,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
     destination_groups    = [nsxt_policy_group.dst_group.path]
     sources_excluded      = true
     destinations_excluded = true
-    scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+    scope                 = [nsxt_policy_tier1_gateway.t1_gw.path]
     services              = [nsxt_policy_service.icmp_svc.path, nsxt_policy_service.tcp_svc.path]
     ids_profiles          = ["%s"]
   }
@@ -407,14 +406,14 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
     source_groups         = [nsxt_policy_group.src_group.path, nsxt_policy_group.dst_group.path]
     sources_excluded      = false
     destinations_excluded = false
-    scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+    scope                 = [nsxt_policy_tier1_gateway.t1_gw.path]
     ids_profiles          = ["%s"]
   }
 }`, name, policyDefaultIdsProfilePath, policyDefaultIdsProfilePath)
 }
 
-func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsUpdate(name string) string {
-	return testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyIntrusionServiceGatewayPolicyWithDepsUpdate(name string, tierInfraPrefix string) string {
+	return testAccNsxtPolicyIntrusionServiceGatewayPolicyDeps(tierInfraPrefix) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -436,7 +435,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
     disabled              = true
     action                = "DETECT_PREVENT"
     logged                = true
-    scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
+    scope                 = [nsxt_policy_tier1_gateway.t1_gw.path]
     ids_profiles          = ["%s"]
   }
 }`, name, policyDefaultIdsProfilePath)
