@@ -9,20 +9,31 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
-	name := getTestCertificateName(false)
+	name := getAccTestResourceName()
 	testResourceName := "data.nsxt_policy_certificate.test"
+	var accTestTlsCertID string
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},
 		Providers: testAccProviders,
+		CheckDestroy: func(*terraform.State) error {
+			return testAccTlsCertificateDeleteGlobal(accTestTlsCertID)
+		},
 		Steps: []resource.TestStep{
 			{
+				PreConfig: func() {
+					id, err := testAccTlsCertificateSelfSignedCreateGlobal(name)
+					if err != nil {
+						t.Fatal(err)
+					}
+					accTestTlsCertID = id
+				},
 				Config: testAccNsxtPolicyCertificateReadTemplate(false, name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -46,18 +57,30 @@ data "nsxt_policy_certificate" "test" {
 }
 
 func TestAccDataSourceContextBasedNsxtPolicyCertificate_basic(t *testing.T) {
-	name := getTestCertificateName(false)
+	name := getAccTestResourceName()
 	testResourceName := "data.nsxt_policy_certificate.test"
+	var accTestTlsCertID string
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_LOCAL_DEV")
-			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
+			if testAccMultitenancyProjectID() == "" {
+				t.Skipf("This test requires NSXT_PROJECT_ID or NSXT_VPC_PROJECT_ID for project-scoped TLS certificate API")
+			}
 		},
 		Providers: testAccProviders,
+		CheckDestroy: func(*terraform.State) error {
+			return testAccTlsCertificateDeleteProject(accTestTlsCertID)
+		},
 		Steps: []resource.TestStep{
 			{
+				PreConfig: func() {
+					id, err := testAccTlsCertificateSelfSignedCreateProject(name)
+					if err != nil {
+						t.Fatal(err)
+					}
+					accTestTlsCertID = id
+				},
 				Config: testAccNsxtPolicyCertificateReadTemplate(true, name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),

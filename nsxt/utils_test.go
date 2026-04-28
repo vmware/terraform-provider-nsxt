@@ -167,13 +167,6 @@ func getTestAnotherSiteName() string {
 	return os.Getenv("NSXT_TEST_ANOTHER_SITE_NAME")
 }
 
-func getTestCertificateName(isClient bool) string {
-	if isClient {
-		return os.Getenv("NSXT_TEST_CLIENT_CERTIFICATE_NAME")
-	}
-	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
-}
-
 func getTestLdapUser() string {
 	return os.Getenv("NSXT_TEST_LDAP_USER")
 }

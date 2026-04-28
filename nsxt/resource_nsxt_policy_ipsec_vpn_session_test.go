@@ -344,19 +344,30 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBased_tier1_multitenancy(t *t
 func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBasedWithComplianceSuite(t *testing.T) {
 
 	testResourceName := testAccIPSecVpnSessionResourceName
+	certDisplayName := getAccTestResourceName()
+	var accTestIPSecTlsCertID string
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedComlianceSuiteAttributes["display_name"])
+			if err := testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedComlianceSuiteAttributes["display_name"]); err != nil {
+				return err
+			}
+			return testAccTlsCertificateDeleteGlobal(accTestIPSecTlsCertID)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplateWithComplianceSuite(true),
+				PreConfig: func() {
+					id, err := testAccTlsCertificateSelfSignedCreateGlobal(certDisplayName)
+					if err != nil {
+						t.Fatal(err)
+					}
+					accTestIPSecTlsCertID = id
+				},
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplateWithComplianceSuite(true, certDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedComlianceSuiteAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedComlianceSuiteAttributes["display_name"]),
@@ -508,19 +519,30 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBased_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBasedWithComplianceSuite(t *testing.T) {
 
 	testResourceName := testAccIPSecVpnSessionResourceName
+	certDisplayName := getAccTestResourceName()
+	var accTestIPSecTlsCertID string
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionPolicyBasedComlianceSuiteAttributes["display_name"])
+			if err := testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionPolicyBasedComlianceSuiteAttributes["display_name"]); err != nil {
+				return err
+			}
+			return testAccTlsCertificateDeleteGlobal(accTestIPSecTlsCertID)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplateWithComplianceSuite(true),
+				PreConfig: func() {
+					id, err := testAccTlsCertificateSelfSignedCreateGlobal(certDisplayName)
+					if err != nil {
+						t.Fatal(err)
+					}
+					accTestIPSecTlsCertID = id
+				},
+				Config: testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplateWithComplianceSuite(true, certDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionPolicyBasedComlianceSuiteAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionPolicyBasedComlianceSuiteAttributes["display_name"]),
@@ -763,8 +785,8 @@ func testAccNSXPolicyIPSecVpnSessionImporterGetID(s *terraform.State) (string, e
 	return fmt.Sprintf("%s/sessions/%s", servicePath, resourceID), nil
 }
 
-func testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0 bool, useCert bool) string {
-	certName := getTestCertificateName(false)
+func testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0 bool, useCert bool, certDisplayName string) string {
+	certName := certDisplayName
 	var localEndpointTemplate string
 	if useCert {
 		localEndpointTemplate = fmt.Sprintf(`
@@ -835,9 +857,9 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
 }`, ipsecVpnResourceName, ipsecVpnResourceName, ipsecVpnResourceName)
 }
 
-func testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(useCert bool) string {
+func testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(useCert bool, certDisplayName string) string {
 	context := testAccNsxtPolicyMultitenancyContext()
-	certName := getTestCertificateName(false)
+	certName := certDisplayName
 	var localEndpointTemplate string
 	if useCert {
 		localEndpointTemplate = fmt.Sprintf(`
@@ -916,7 +938,7 @@ func testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyTemplate(createFlow bool) 
 		attrMap = accTestPolicyIPSecVpnSessionRouteBasedUpdateAttributes
 	}
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() +
-		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false) +
+		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 %s
@@ -957,7 +979,7 @@ func testAccNsxtPolicyIPSecVpnSessionPolicyBasedTier1MultitenancyTemplate(create
 		attrMap = accTestPolicyIPSecVpnSessionPolicyBasedUpdateAttributes
 	}
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() +
-		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false) +
+		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 %s
@@ -996,7 +1018,7 @@ func testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyMinimalistic() string {
 	context := testAccNsxtPolicyMultitenancyContext()
 	attrMap := accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPNMultitenancy() +
-		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false) +
+		testAccNsxtPolicyIPSecVpnSessionTier1MultitenancyPreConditionTemplate(false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 %s
@@ -1016,7 +1038,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 func testAccNsxtPolicyIPSecVpnSessionRouteBasedMinimalistic() string {
 	attrMap := accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
-		testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(true, false) +
+		testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(true, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
   display_name        = "%s"
@@ -1039,7 +1061,7 @@ func testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplate(createFlow bool, isT0 bo
 	} else {
 		attrMap = accTestPolicyIPSecVpnSessionRouteBasedUpdateAttributes
 	}
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, false) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
   display_name               = "%s"
@@ -1076,7 +1098,7 @@ func testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplate(createFlow bool, isT0 b
 	} else {
 		attrMap = accTestPolicyIPSecVpnSessionPolicyBasedUpdateAttributes
 	}
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, false) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
   display_name               = "%s"
@@ -1109,9 +1131,9 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
-func testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplateWithComplianceSuite(isT0 bool) string {
+func testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplateWithComplianceSuite(isT0 bool, certDisplayName string) string {
 	attrMap := accTestPolicyIPSecVpnSessionRouteBasedComlianceSuiteAttributes
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, true) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, true, certDisplayName) +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
   display_name               = "%s"
@@ -1138,9 +1160,9 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 			attrMap["connection_initiation_mode"], attrMap["ip_addresses"], attrMap["prefix_length"])
 }
 
-func testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplateWithComplianceSuite(isT0 bool) string {
+func testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplateWithComplianceSuite(isT0 bool, certDisplayName string) string {
 	attrMap := accTestPolicyIPSecVpnSessionPolicyBasedComlianceSuiteAttributes
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, true) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate(isT0, true, certDisplayName) +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
   display_name               = "%s"
@@ -1178,7 +1200,7 @@ func testAccNsxtPolicyIPSecVpnSessionPolicyBasedIPv6Template(createFlow bool, is
 	} else {
 		attrMap = accTestPolicyIPSecVpnSessionPolicyBasedIPv6UpdateAttributes
 	}
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0, false) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 	display_name               = "%s"
@@ -1211,8 +1233,8 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 			attrMap["psk"], attrMap["connection_initiation_mode"], attrMap["sources"], attrMap["destinations"])
 }
 
-func testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0 bool, useCert bool) string {
-	certName := getTestCertificateName(false)
+func testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0 bool, useCert bool, certDisplayName string) string {
+	certName := certDisplayName
 	var localEndpointTemplate string
 	if useCert {
 		localEndpointTemplate = fmt.Sprintf(`
@@ -1441,7 +1463,7 @@ func testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Template(createFlow bool, isT
 	} else {
 		attrMap = accTestPolicyIPSecVpnSessionRouteBasedIPv6UpdateAttributes
 	}
-	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0, false) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) + testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(isT0, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 	display_name               = "%s"
@@ -1473,7 +1495,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 func testAccNsxtPolicyIPSecVpnSessionRouteBasedIPv6Minimalistic() string {
 	attrMap := accTestPolicyIPSecVpnSessionRouteBasedIPv6CreateAttributes
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
-		testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(true, false) +
+		testAccNsxtPolicyIPSecVpnSessionIPv6PreConditionTemplate(true, false, "") +
 		fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_session" "test" {
 	display_name        = "%s"
