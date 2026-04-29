@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: policy_tags"
 description: Tags data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 page_title: "NSXT: nsxt_policy_edge_transport_node"
 description: A resource to configure a Policy Edge Transport Node.
 ---
