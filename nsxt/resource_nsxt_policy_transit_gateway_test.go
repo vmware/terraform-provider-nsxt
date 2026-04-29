@@ -207,6 +207,49 @@ func TestAccResourceNsxtPolicyTransitGateway_withCentralizedConfig(t *testing.T)
 	})
 }
 
+func TestAccResourceNsxtPolicyTransitGateway_withCentralizedConfig920_failoverMode(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithCentralizedConfig920FailoverTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_STANDBY"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.failover_mode", "PREEMPTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.edge_cluster_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "centralized_config.0.edge_cluster_paths.0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTransitGatewayWithCentralizedConfig920FailoverTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_STANDBY"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.failover_mode", "NON_PREEMPTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.edge_cluster_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "centralized_config.0.edge_cluster_paths.0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway.test"
@@ -437,4 +480,46 @@ data "nsxt_policy_transit_gateway" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_transit_gateway.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], haMode, attrMap["display_name"])
+}
+
+func testAccNsxtPolicyTransitGatewayWithCentralizedConfig920FailoverTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestTransitGatewayCreateAttributes
+	} else {
+		attrMap = accTestTransitGatewayUpdateAttributes
+	}
+	failoverMode := "PREEMPTIVE"
+	if !createFlow {
+		failoverMode = "NON_PREEMPTIVE"
+	}
+	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  centralized_config {
+    ha_mode            = "ACTIVE_STANDBY"
+    failover_mode      = "%s"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = "%s"
+  depends_on   = [nsxt_policy_transit_gateway.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], failoverMode, attrMap["display_name"])
 }
