@@ -144,6 +144,42 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 	}
 }
 
+// setRouteMapEntriesInSchema populates the "entry" attribute from a slice of RouteMapEntry.
+// Shared between nsxt_policy_gateway_route_map (T0) and nsxt_policy_transit_gateway_route_map.
+func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMapEntry) {
+	var entryList []interface{}
+	for _, entry := range entries {
+		schemaEntry := make(map[string]interface{})
+		schemaEntry["action"] = entry.Action
+
+		var commList []map[string]interface{}
+		for _, comm := range entry.CommunityListMatches {
+			data := make(map[string]interface{})
+			data["criteria"] = comm.Criteria
+			data["match_operator"] = comm.MatchOperator
+			commList = append(commList, data)
+		}
+		schemaEntry["community_list_match"] = commList
+		schemaEntry["prefix_list_matches"] = entry.PrefixListMatches
+
+		var setList []map[string]interface{}
+		if entry.Set != nil {
+			setData := make(map[string]interface{})
+			setData["as_path_prepend"] = entry.Set.AsPathPrepend
+			setData["community"] = entry.Set.Community
+			setData["med"] = entry.Set.Med
+			setData["local_preference"] = entry.Set.LocalPreference
+			setData["prefer_global_v6_next_hop"] = entry.Set.PreferGlobalV6NextHop
+			setData["weight"] = entry.Set.Weight
+			setList = append(setList, setData)
+		}
+		schemaEntry["set"] = setList
+
+		entryList = append(entryList, schemaEntry)
+	}
+	d.Set("entry", entryList)
+}
+
 func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	var sessionContext utl.SessionContext
@@ -331,44 +367,7 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	var entryList []interface{}
-	for _, entry := range obj.Entries {
-		schemaEntry := make(map[string]interface{})
-		schemaEntry["action"] = entry.Action
-
-		var commList []map[string]interface{}
-		if len(entry.CommunityListMatches) > 0 {
-			for _, comm := range entry.CommunityListMatches {
-				data := make(map[string]interface{})
-				data["criteria"] = comm.Criteria
-				data["match_operator"] = comm.MatchOperator
-
-				commList = append(commList, data)
-			}
-		}
-
-		schemaEntry["community_list_match"] = commList
-		schemaEntry["prefix_list_matches"] = entry.PrefixListMatches
-
-		var setList []map[string]interface{}
-		if entry.Set != nil {
-			setData := make(map[string]interface{})
-			setData["as_path_prepend"] = entry.Set.AsPathPrepend
-			setData["community"] = entry.Set.Community
-			setData["med"] = entry.Set.Med
-			setData["local_preference"] = entry.Set.LocalPreference
-			setData["prefer_global_v6_next_hop"] = entry.Set.PreferGlobalV6NextHop
-			setData["weight"] = entry.Set.Weight
-
-			setList = append(setList, setData)
-		}
-
-		schemaEntry["set"] = setList
-
-		entryList = append(entryList, schemaEntry)
-	}
-
-	d.Set("entry", entryList)
+	setRouteMapEntriesInSchema(d, obj.Entries)
 
 	return nil
 }

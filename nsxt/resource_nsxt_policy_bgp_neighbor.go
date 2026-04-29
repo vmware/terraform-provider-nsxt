@@ -140,12 +140,24 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 			"source_addresses": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Source IP Addresses for BGP peering",
+				Description: "Source IP addresses for BGP peering (Tier-0); not supported for transit gateway neighbors — use source_attachment instead (NSX 9.2.0+)",
 				MaxItems:    8,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateSingleIP(),
 				},
+				ConflictsWith: []string{"source_attachment"},
+			},
+			"source_attachment": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Policy path of transit gateway attachment or IPSec route-based VPN session used as the BGP source (transit gateway). Supported with NSX version 9.2.0 or greater; mutually exclusive with source_addresses on Tier-0",
+				MaxItems:    1,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				ConflictsWith: []string{"source_addresses"},
 			},
 			"route_filtering": {
 				Type:        schema.TypeList,
@@ -253,6 +265,10 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 	password := d.Get("password").(string)
 	remoteAsNum := d.Get("remote_as_num").(string)
 	sourceAddresses := interface2StringList(d.Get("source_addresses").([]interface{}))
+	sourceAttachment := interface2StringList(d.Get("source_attachment").([]interface{}))
+	if len(sourceAttachment) > 0 && !util.NsxVersionHigherOrEqual("9.2.0") {
+		return neighborStruct, fmt.Errorf("source_attachment is only supported with NSX version 9.2.0 or higher")
+	}
 
 	var bfdConfig *model.BgpBfdConfig
 	for _, bfd := range d.Get("bfd_config").([]interface{}) {
@@ -338,6 +354,9 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 		NeighborLocalAsConfig: neighborLocalAsConfig,
 		Id:                    &id,
 	}
+	if util.NsxVersionHigherOrEqual("9.2.0") {
+		neighborStruct.SourceAttachment = sourceAttachment
+	}
 
 	if d.HasChange("password") {
 		neighborStruct.Password = &password
@@ -406,37 +425,11 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 	return resourceNsxtPolicyBgpNeighborRead(d, m)
 }
 
-func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) error {
-	connector := getPolicyConnector(m)
-
-	id := d.Id()
-	if id == "" {
-		return fmt.Errorf("Error obtaining BgpNeighbor ID")
-	}
-
-	bgpPath := d.Get("bgp_path").(string)
-	t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
-	if t0ID == "" || serviceID == "" {
-		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
-	}
-
-	sessionContext := getSessionContext(d, m)
-	client := cliBgpNeighborsClient(sessionContext, connector)
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
-	obj, err := client.Get(t0ID, serviceID, id)
-	if err != nil {
-		return handleReadError(d, "BgpNeighbor", id, err)
-	}
-
-	d.Set("display_name", obj.DisplayName)
-	d.Set("description", obj.Description)
-	setPolicyTagsInSchema(d, obj.Tags)
-	d.Set("nsx_id", id)
-	d.Set("path", obj.Path)
-	d.Set("revision", obj.Revision)
-
+// setBgpNeighborConfigInSchema populates d with fields from a BgpNeighborConfig API response.
+// Shared between nsxt_policy_bgp_neighbor (T0) and nsxt_policy_transit_gateway_bgp_neighbor.
+// The caller is responsible for setting nsx_id, path, revision, and display_name/description/tags.
+// setSourceAttachment controls whether source_attachment is written (T0: version-gated; TGW: always).
+func setBgpNeighborConfigInSchema(d *schema.ResourceData, obj model.BgpNeighborConfig, setSourceAttachment bool) {
 	// NOTE: password is not returned on API responses
 	d.Set("allow_as_in", obj.AllowAsIn)
 	d.Set("graceful_restart_mode", obj.GracefulRestartMode)
@@ -446,6 +439,9 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 	d.Set("neighbor_address", obj.NeighborAddress)
 	d.Set("remote_as_num", obj.RemoteAsNum)
 	d.Set("source_addresses", obj.SourceAddresses)
+	if setSourceAttachment {
+		d.Set("source_attachment", obj.SourceAttachment)
+	}
 
 	var bfdConfigs []interface{}
 	if obj.Bfd != nil {
@@ -492,6 +488,40 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 		neighborLocalAsConfigs = append(neighborLocalAsConfigs, localAsConfig)
 	}
 	d.Set("neighbor_local_as_config", neighborLocalAsConfigs)
+}
+
+func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining BgpNeighbor ID")
+	}
+
+	bgpPath := d.Get("bgp_path").(string)
+	t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
+	if t0ID == "" || serviceID == "" {
+		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
+	}
+
+	sessionContext := getSessionContext(d, m)
+	client := cliBgpNeighborsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+	obj, err := client.Get(t0ID, serviceID, id)
+	if err != nil {
+		return handleReadError(d, "BgpNeighbor", id, err)
+	}
+
+	d.Set("display_name", obj.DisplayName)
+	d.Set("description", obj.Description)
+	setPolicyTagsInSchema(d, obj.Tags)
+	d.Set("nsx_id", id)
+	d.Set("path", obj.Path)
+	d.Set("revision", obj.Revision)
+
+	setBgpNeighborConfigInSchema(d, obj, util.NsxVersionHigherOrEqual("9.2.0"))
 
 	return nil
 }

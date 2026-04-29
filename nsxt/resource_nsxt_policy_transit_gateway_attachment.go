@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -32,13 +33,78 @@ var transitGatewayAttachmentSchema = map[string]*metadata.ExtendedSchema{
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
 			ValidateFunc: validatePolicyPath(),
-			Required:     true,
+			Optional:     true,
+			ExactlyOneOf: []string{"connection_path", "cna_path"},
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "ConnectionPath",
 			OmitIfEmpty:  true,
 		},
+	},
+	"cna_path": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			Description:  "Policy path to centralized network attachment. Mutually exclusive with connection_path.",
+			ValidateFunc: validatePolicyPath(),
+			Optional:     true,
+			ExactlyOneOf: []string{"connection_path", "cna_path"},
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "CnaPath",
+			OmitIfEmpty:  true,
+		},
+	},
+	"admin_state": {
+		Schema: schema.Schema{
+			Type:        schema.TypeString,
+			Description: "Administrative state of the attachment interface. UP or DOWN.",
+			Optional:    true,
+			Computed:    true,
+			ValidateFunc: validation.StringInSlice([]string{
+				model.TransitGatewayAttachment_ADMIN_STATE_UP,
+				model.TransitGatewayAttachment_ADMIN_STATE_DOWN,
+			}, false),
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "AdminState",
+			OmitIfEmpty:  true,
+		},
+	},
+	"urpf_mode": {
+		Schema: schema.Schema{
+			Type:        schema.TypeString,
+			Description: "Unicast Reverse Path Forwarding mode. NONE or STRICT.",
+			Optional:    true,
+			Computed:    true,
+			ValidateFunc: validation.StringInSlice([]string{
+				model.TransitGatewayAttachment_URPF_MODE_NONE,
+				model.TransitGatewayAttachment_URPF_MODE_STRICT,
+			}, false),
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "UrpfMode",
+			OmitIfEmpty:  true,
+		},
+	},
+	"route_advertisement_types": {
+		Schema: schema.Schema{
+			Type:        schema.TypeList,
+			Description: "List of route advertisement types. Defaults to [PUBLIC] when not specified.",
+			Optional:    true,
+			Computed:    true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{
+					model.TransitGatewayRouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPE_PUBLIC,
+					model.TransitGatewayRouteAdvertisementRule_ROUTE_ADVERTISEMENT_TYPE_TGW_PRIVATE,
+				}, false),
+			},
+		},
+		Metadata: metadata.Metadata{Skip: true},
 	},
 }
 
@@ -77,6 +143,26 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 	return false, logAPIError("Error retrieving resource", err)
 }
 
+func getRouteAdvertisementRulesFromSchema(d *schema.ResourceData) []model.TransitGatewayRouteAdvertisementRule {
+	types := interfaceListToStringList(d.Get("route_advertisement_types").([]interface{}))
+	var rules []model.TransitGatewayRouteAdvertisementRule
+	for _, t := range types {
+		tCopy := t
+		rules = append(rules, model.TransitGatewayRouteAdvertisementRule{RouteAdvertisementType: &tCopy})
+	}
+	return rules
+}
+
+func setRouteAdvertisementTypesInSchema(d *schema.ResourceData, rules []model.TransitGatewayRouteAdvertisementRule) {
+	var types []string
+	for _, r := range rules {
+		if r.RouteAdvertisementType != nil {
+			types = append(types, *r.RouteAdvertisementType)
+		}
+	}
+	d.Set("route_advertisement_types", types)
+}
+
 func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -103,6 +189,8 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayAttachmentSchema, "", nil); err != nil {
 		return err
 	}
+
+	obj.RouteAdvertisementRules = getRouteAdvertisementRulesFromSchema(d)
 
 	log.Printf("[INFO] Creating TransitGatewayAttachment with ID %s", id)
 
@@ -151,6 +239,8 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
+	setRouteAdvertisementTypesInSchema(d, obj.RouteAdvertisementRules)
+
 	elem := reflect.ValueOf(&obj).Elem()
 	return metadata.StructToSchema(elem, d, transitGatewayAttachmentSchema, "", nil)
 }
@@ -186,6 +276,9 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayAttachmentSchema, "", nil); err != nil {
 		return err
 	}
+
+	obj.RouteAdvertisementRules = getRouteAdvertisementRulesFromSchema(d)
+
 	sessionContext := getParentContext(d, m, parentPath)
 	client := cliTransitGatewayAttachmentsClient(sessionContext, connector)
 	if client == nil {

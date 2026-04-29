@@ -106,6 +106,37 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyBgpNeighbor920_basic(t *testing.T) {
+	testResourceName := "nsxt_policy_bgp_neighbor.test"
+	subnet := "1.1.12.2/24"
+	sourceAddress := "1.1.12.2"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyBgpNeighborTemplate(true, subnet, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyBgpNeighborExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyBgpNeighborConfigCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "source_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "source_addresses.0", sourceAddress),
+					resource.TestCheckResourceAttr(testResourceName, "source_attachment.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyBgpNeighborWithLocalAsNeighbour_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 	subnet := "1.1.12.2/24"

@@ -434,7 +434,7 @@ func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context utl.SessionContex
 func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]interface{} {
 
 	cfgMap := make(map[string]interface{})
-	cfgMap["revision"] = int(*bgpConfig.Revision)
+	cfgMap["revision"] = bgpConfig.Revision
 	cfgMap["path"] = bgpConfig.Path
 	cfgMap["ecmp"] = bgpConfig.Ecmp
 	cfgMap["enabled"] = bgpConfig.Enabled
