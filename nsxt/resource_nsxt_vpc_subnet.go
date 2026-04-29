@@ -529,12 +529,11 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
-		Tags:        tags,
+		Tags:        nil,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -542,6 +541,11 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	if isConfigScopedCacheMode() {
+		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		obj.Tags = getPolicyTagsFromSchema(d)
+	}
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
@@ -553,6 +557,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("VpcSubnet")
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -583,20 +588,51 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
-
-	sessionContext := getSessionContext(d, m)
-	client := cliVpcSubnetsClient(sessionContext, connector)
-	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+	var obj *model.VpcSubnet
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.VpcSubnet](
+			d,
+			m,
+			connector,
+			id,
+			"VpcSubnet",
+			model.VpcSubnetBindingType(),
+			func() (*model.VpcSubnet, error) {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcSubnetsClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.VpcSubnet) error {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcSubnetsClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		sessionContext := getSessionContext(d, m)
+		client := cliVpcSubnetsClient(sessionContext, connector)
+		parents := getVpcParentsFromContext(sessionContext)
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "VpcSubnet", id, err)
 	}
-
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("display_name", obj.DisplayName)
@@ -606,8 +642,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	// Depending on subnet type, this attribute might not be sent back by NSX
 	// If not provided by NSX, the next line will explicitly assign empty list to ip_blocks
 	d.Set("ip_blocks", obj.IpBlocks)
-
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcSubnetSchema, "", nil)
 }
 
@@ -627,20 +662,26 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
 
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.VpcSubnet{
 		DisplayName: &displayName,
 		Description: &description,
-		Tags:        tags,
+		Tags:        nil,
 		Revision:    &revision,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
+	}
+
+	if isConfigScopedCacheMode() {
+		// Always regenerate provider-managed default tags to ensure they're present
+		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		obj.Tags = getPolicyTagsFromSchema(d)
 	}
 
 	// Since dhcp block is Computed (sent back by NSX even if not specified), we need to
@@ -660,6 +701,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
+	InvalidateCacheForResourceType("VpcSubnet")
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 

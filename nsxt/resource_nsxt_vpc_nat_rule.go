@@ -220,7 +220,12 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.PolicyVpcNatRule{
 		DisplayName: &displayName,
@@ -244,6 +249,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	InvalidateCacheForResourceType("PolicyVpcNatRule")
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
@@ -254,15 +260,44 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 	if id == "" {
 		return fmt.Errorf("Error obtaining PolicyVpcNatRule ID")
 	}
-
 	parentPath := d.Get("parent_path").(string)
-	sessionContext := getParentContext(d, m, parentPath)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
-		return handleReadError(d, "VpcNatRule", id, pathErr)
+		return pathErr
 	}
+
+	sessionContext := getParentContext(d, m, parentPath)
 	client := cliVpcNatRulesClient(sessionContext, connector)
-	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+
+	var obj *model.PolicyVpcNatRule
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.PolicyVpcNatRule](
+			d,
+			m,
+			connector,
+			id,
+			"PolicyVpcNatRule",
+			model.PolicyVpcNatRuleBindingType(),
+			func() (*model.PolicyVpcNatRule, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.PolicyVpcNatRule) error {
+				return client.Patch(parents[0], parents[1], parents[2], parents[3], id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "PolicyVpcNatRule", id, err)
 	}
@@ -274,7 +309,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, getPolicyVpcNatRuleSchema(false), "", nil)
 }
 
@@ -294,7 +329,12 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -319,6 +359,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("PolicyVpcNatRule", id, err)
 	}
 
+	InvalidateCacheForResourceType("PolicyVpcNatRule")
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
