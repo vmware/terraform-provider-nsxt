@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Gateways and Routing"
 page_title: "NSXT: policy_distributed_flood_protection_profile"
 description: Policy Distributed Flood Protection Profile data source.
 ---

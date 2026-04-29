@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 page_title: "NSXT: nsxt_policy_edge_high_availability_profile"
 description: A resource to configure a PolicyEdgeHighAvailabilityProfile.
 ---

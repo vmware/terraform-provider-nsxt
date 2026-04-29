@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: nsxt_upgrade_prepare"
 description: A resource to prepare for the upgrade of NSXT cluster.
 ---

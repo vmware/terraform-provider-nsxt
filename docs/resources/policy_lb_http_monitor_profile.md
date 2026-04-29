@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Load Balancer"
 page_title: "NSXT: nsxt_policy_lb_http_monitor_profile"
 description: A resource to configure a LBHttpMonitorProfile.
 ---

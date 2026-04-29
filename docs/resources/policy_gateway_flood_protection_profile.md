@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Gateways and Routing"
 page_title: "NSXT: policy_gateway_flood_protection_profile"
 description: A resource to configure Policy Gateway Flood Protection Profile on NSX Policy manager.
 ---
