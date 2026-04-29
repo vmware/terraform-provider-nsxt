@@ -19,10 +19,22 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	mp_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	nsx_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+// queryListClient is the subset of the policy search query client used by
+// policy_search and initNSXVersionVMC. Tests may replace cliQueryClient to
+// return a mock implementation.
+type queryListClient interface {
+	List(queryParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_model.SearchResponse, error)
+}
+
 var cliVersionClient = node_api.NewVersionClient
-var cliQueryClient = search_api.NewQueryClient
+var cliQueryClient = defaultCliQueryClient
+
+func defaultCliQueryClient(sessionContext api_util.SessionContext, connector client.Connector) queryListClient {
+	return search_api.NewQueryClient(sessionContext, connector)
+}
 
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))

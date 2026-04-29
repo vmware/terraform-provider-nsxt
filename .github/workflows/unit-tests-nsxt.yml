@@ -25,16 +25,17 @@ jobs:
       - name: Run unit tests
         run: |
           set -euo pipefail
-          go test ./nsxt/... -tags=unittest \
+          # Only the root nsxt package (not nsxt/metadata — see metadata-test.yml).
+          go test ./nsxt -tags=unittest \
             -run='^(TestMock.*Nsxt.*|TestUnitNsxt_.*)' \
-            -coverpkg=./nsxt/... \
+            -coverpkg=./nsxt \
             -coverprofile=coverage.out
           total_line=$(go tool cover -func=coverage.out | grep '^total:' || true)
           pct=$(echo "$total_line" | grep -oE '[0-9]+\.[0-9]+%' | tail -1)
           {
             echo "## Unit test coverage"
             echo ""
-            echo "Merged coverage for \`-coverpkg=./nsxt/...\`: **${pct:-n/a}**"
+            echo "Merged coverage for \`-coverpkg=./nsxt\`: **${pct:-n/a}**"
             echo ""
             echo '```'
             echo "$total_line"

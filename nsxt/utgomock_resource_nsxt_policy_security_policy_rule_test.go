@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -191,5 +192,78 @@ func TestMockResourceNsxtPolicySecurityPolicyRuleDelete(t *testing.T) {
 
 		err := resourceNsxtPolicySecurityPolicyRuleDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicySecurityPolicyRuleExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupSPRuleMock(t, ctrl)
+	defer restore()
+
+	m := newGoMockProviderClient()
+	connector := getPolicyConnector(m)
+	sctx := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("exists when rule is present", func(t *testing.T) {
+		mockSDK.EXPECT().Get(spRuleDomain, spRulePolicyID, spRuleID).Return(spRuleAPIResponse(), nil)
+		ok, err := resourceNsxtPolicySecurityPolicyRuleExists(sctx, spRuleID, spRulePolicyPath, connector)
+		require.NoError(t, err)
+		assert.True(t, ok)
+	})
+
+	t.Run("not exists on NotFound", func(t *testing.T) {
+		mockSDK.EXPECT().Get(spRuleDomain, spRulePolicyID, spRuleID).Return(nsxModel.Rule{}, vapiErrors.NotFound{})
+		ok, err := resourceNsxtPolicySecurityPolicyRuleExists(sctx, spRuleID, spRulePolicyPath, connector)
+		require.NoError(t, err)
+		assert.False(t, ok)
+	})
+
+	t.Run("error on unexpected API failure", func(t *testing.T) {
+		mockSDK.EXPECT().Get(spRuleDomain, spRulePolicyID, spRuleID).Return(nsxModel.Rule{}, vapiErrors.ServiceUnavailable{})
+		ok, err := resourceNsxtPolicySecurityPolicyRuleExists(sctx, spRuleID, spRulePolicyPath, connector)
+		require.Error(t, err)
+		assert.False(t, ok)
+	})
+
+	t.Run("error when rules client is not supported (nil)", func(t *testing.T) {
+		orig := cliSecurityPoliciesRulesClient
+		cliSecurityPoliciesRulesClient = func(utl.SessionContext, vapiProtocolClient.Connector) *secpolapi.RuleClientContext {
+			return nil
+		}
+		defer func() { cliSecurityPoliciesRulesClient = orig }()
+		ok, err := resourceNsxtPolicySecurityPolicyRuleExists(sctx, spRuleID, spRulePolicyPath, connector)
+		require.Error(t, err)
+		assert.False(t, ok)
+	})
+}
+
+func TestMockResourceNsxtPolicySecurityPolicyRuleImport(t *testing.T) {
+	m := newGoMockProviderClient()
+	res := resourceNsxtPolicySecurityPolicyRule()
+
+	importPath := "/infra/domains/default/security-policies/sp-001/rules/sp-rule-1"
+	ruleIdx := strings.Index(importPath, "rule")
+	require.Greater(t, ruleIdx, 0)
+	wantPolicyPath := importPath[:ruleIdx-1]
+
+	t.Run("import success sets policy_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(importPath)
+
+		rd, err := nsxtSecurityPolicyRuleImporter(d, m)
+		require.NoError(t, err)
+		require.Len(t, rd, 1)
+		assert.Equal(t, wantPolicyPath, rd[0].Get("policy_path"))
+	})
+
+	t.Run("import fails when path has no rule segment", func(t *testing.T) {
+		badPath := "/infra/domains/default/security-policies/sp-001"
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(badPath)
+
+		_, err := nsxtSecurityPolicyRuleImporter(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid path")
 	})
 }
