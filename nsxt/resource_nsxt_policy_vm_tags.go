@@ -279,6 +279,9 @@ func updateNsxtPolicyVMTags(connector client.Connector, externalID string, tags 
 	}
 	if util.NsxVersionHigherOrEqual("4.1.1") {
 		client := cliVirtualMachineTagsClient(sessionContext, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Create(externalID, tagUpdate, nil, nil, nil, nil, nil, nil, nil)
 	}
 	client := cliVirtualMachinesClient(sessionContext, connector)

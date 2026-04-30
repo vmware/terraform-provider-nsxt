@@ -90,5 +90,5 @@ func testAccNsxtPolicyVMReadByIDTemplate(withContext bool) string {
 data "nsxt_policy_vm" "test" {
 %s
   external_id = "%s"
-}`, context, getTestVMID())
+}`, context, getTestVMID(withContext))
 }

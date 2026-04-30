@@ -8,6 +8,8 @@ import (
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/virtual_machines"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/realized_state/virtual_machines"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/virtual_machines"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -21,6 +23,12 @@ func NewTagsClient(sessionContext utl.SessionContext, connector vapiProtocolClie
 
 	case utl.Local:
 		client = client0.NewTagsClient(connector)
+
+	case utl.Multitenancy:
+		client = client1.NewTagsClient(connector)
+
+	case utl.VPC:
+		client = client2.NewTagsClient(connector)
 
 	default:
 		return nil
@@ -36,6 +44,14 @@ func (c TagsClientContext) Create(virtualMachineIdParam string, virtualMachineTa
 	case utl.Local:
 		client := c.Client.(client0.TagsClient)
 		err = client.Create(virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client1.TagsClient)
+		err = client.Create(utl.DefaultOrgID, c.ProjectID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
+		client := c.Client.(client2.TagsClient)
+		err = client.Create(utl.DefaultOrgID, c.ProjectID, c.VPCID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

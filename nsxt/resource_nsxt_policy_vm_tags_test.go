@@ -24,12 +24,12 @@ func TestAccResourceNsxtPolicyVMTags_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicyVMTagsBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
-		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+		testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_ID")
 	})
 }
 
 func testAccResourceNsxtPolicyVMTagsBasic(t *testing.T, withContext bool, preCheck func()) {
-	vmID := getTestVMID()
+	vmID := getTestVMID(withContext)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
@@ -60,7 +60,7 @@ func testAccResourceNsxtPolicyVMTagsBasic(t *testing.T, withContext bool, preChe
 }
 
 func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
-	vmID := getTestVMID()
+	vmID := getTestVMID(false)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
@@ -102,7 +102,7 @@ func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
-	vmID := getTestVMID()
+	vmID := getTestVMID(false)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
@@ -126,11 +126,15 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
-	vmID := getTestVMID()
+	vmID := getTestVMID(false)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID"); testAccOnlyMultitenancy(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_ID")
+			testAccOnlyMultitenancy(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)
