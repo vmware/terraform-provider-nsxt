@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: nsxt_upgrade_run"
 description: A resource to configure and execute upgrade of NSXT cluster.
 ---

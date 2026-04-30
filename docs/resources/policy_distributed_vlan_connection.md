@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPC"
 page_title: "NSXT: nsxt_policy_distributed_vlan_connection"
 description: A resource to configure a Distributed Vlan Connection.
 ---

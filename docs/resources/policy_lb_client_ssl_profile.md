@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Load Balancer"
 page_title: "NSXT: nsxt_policy_lb_client_ssl_profile"
 description: A resource to configure a LB Client SSL Profile.
 ---

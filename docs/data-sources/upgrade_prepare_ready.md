@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Upgrade"
 page_title: "NSXT: upgrade_prepare_ready"
 description: A data source to check if NSX Manager is ready for upgrade.
 ---

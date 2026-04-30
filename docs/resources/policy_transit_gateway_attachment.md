@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPC"
 page_title: "NSXT: nsxt_policy_transit_gateway_attachment"
 description: A resource to configure a Transit Gateway Attachment.
 ---
