@@ -164,28 +164,55 @@ func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Conn
 
 func listAllPolicyVifs(m interface{}, sessionContext utl.SessionContext) ([]model.VirtualNetworkInterface, error) {
 	connector := getPolicyConnector(m)
-	client := cliVifsClient(sessionContext, connector)
-	var results []model.VirtualNetworkInterface
-	var cursor *string
-	total := 0
 
-	enforcementPointPath := getPolicyEnforcementPoint(m)
-	for {
-		// NOTE: Search API doesn't filter by realized state resources
-		vifs, err := client.List(enforcementPointPath, cursor, nil, nil, nil, nil, nil)
-		if err != nil {
-			return results, err
+	// Multitenancy/VPC: SDK has no org/project realized-state enforcement-point Vifs API;
+	// use inventory search (same approach as VM lookup on NSX 4.1.2+).
+	if sessionContext.ClientType == utl.Multitenancy || sessionContext.ClientType == utl.VPC {
+		if util.NsxVersionHigherOrEqual("4.1.2") {
+			const resourceType = "VirtualNetworkInterface"
+			resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
+			if err != nil {
+				return nil, err
+			}
+			return convertSearchResultToVifList(resultValues)
 		}
-		results = append(results, vifs.Results...)
-		if total == 0 && vifs.ResultCount != nil {
-			// first response
-			total = int(*vifs.ResultCount)
-		}
-		cursor = vifs.Cursor
-		if len(results) >= total {
-			return results, nil
+		return nil, policyResourceNotSupportedError()
+	}
+
+	client := cliVifsClient(sessionContext, connector)
+	if client != nil {
+		var results []model.VirtualNetworkInterface
+		var cursor *string
+		total := 0
+
+		enforcementPointPath := getPolicyEnforcementPoint(m)
+		for {
+			// NOTE: Search API doesn't filter by realized state resources
+			vifs, err := client.List(enforcementPointPath, cursor, nil, nil, nil, nil, nil)
+			if err != nil {
+				return results, err
+			}
+			results = append(results, vifs.Results...)
+			if total == 0 && vifs.ResultCount != nil {
+				// first response
+				total = int(*vifs.ResultCount)
+			}
+			cursor = vifs.Cursor
+			if len(results) >= total {
+				return results, nil
+			}
 		}
 	}
+
+	if util.NsxVersionHigherOrEqual("4.1.2") {
+		const resourceType = "VirtualNetworkInterface"
+		resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
+		if err != nil {
+			return nil, err
+		}
+		return convertSearchResultToVifList(resultValues)
+	}
+	return nil, policyResourceNotSupportedError()
 }
 
 func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
@@ -233,6 +260,21 @@ func convertSearchResultToVMList(searchResults []*data.StructValue) ([]model.Vir
 		vms = append(vms, vm)
 	}
 	return vms, nil
+}
+
+func convertSearchResultToVifList(searchResults []*data.StructValue) ([]model.VirtualNetworkInterface, error) {
+	var vifs []model.VirtualNetworkInterface
+	converter := bindings.NewTypeConverter()
+
+	for _, item := range searchResults {
+		dataValue, errors := converter.ConvertToGolang(item, model.VirtualNetworkInterfaceBindingType())
+		if len(errors) > 0 {
+			return vifs, errors[0]
+		}
+		vif := dataValue.(model.VirtualNetworkInterface)
+		vifs = append(vifs, vif)
+	}
+	return vifs, nil
 }
 
 func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector, vmID string, m interface{}) (model.VirtualMachine, error) {
