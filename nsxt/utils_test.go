@@ -144,7 +144,10 @@ func getOverlayTransportZoneName() string {
 	return name
 }
 
-func getTestVMID() string {
+func getTestVMID(isMultitenancy bool) string {
+	if isMultitenancy {
+		return os.Getenv("NSXT_TEST_MULTITENANCY_VM_ID")
+	}
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 

@@ -19,7 +19,11 @@ func NewVifsClient(sessionContext utl.SessionContext, connector vapiProtocolClie
 
 	switch sessionContext.ClientType {
 
-	case utl.Local:
+	case utl.Local, utl.Multitenancy, utl.VPC:
+		// NSX Go SDK only exposes realized-state enforcement-point VIFs under
+		// infra/realized_state/enforcement_points (LM path). There is no separate
+		// orgs/projects/.../realized_state/enforcement_points/vifs client; multitenancy
+		// enumeration is done via inventory search in the provider (NSX 4.1.2+).
 		client = client0.NewVifsClient(connector)
 
 	default:
@@ -37,6 +41,10 @@ func (c VirtualNetworkInterfaceClientContext) List(enforcementPointNameParam str
 	case utl.Local:
 		client := c.Client.(client0.VifsClient)
 		obj, err = client.List(enforcementPointNameParam, cursorParam, includedFieldsParam, lportAttachmentIdParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.Multitenancy, utl.VPC:
+		// Do not invoke LM enforcement-point List for tenant/VPC sessions; use inventory search instead.
+		err = errors.New("enforcement-point VIF list is not supported for multitenancy or VPC; use inventory search (NSX 4.1.2+)")
 
 	default:
 		err = errors.New("invalid infrastructure for model")

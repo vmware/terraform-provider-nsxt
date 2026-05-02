@@ -199,6 +199,11 @@ func listInventoryResourcesByAnyFieldAndType(connector client.Connector, context
 	return searchLM(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
+func listInventoryResourcesByType(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s", resourceType)
+	return searchLM(context, connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+}
+
 func escapeSpecialCharacters(str string) string {
 	// we replace special characters that can be encountered in object IDs
 	specials := "()[]+-=&|><!{}^~*?:/"
