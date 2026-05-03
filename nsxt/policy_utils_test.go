@@ -101,3 +101,11 @@ func TestParseStandardPolicyPathVerifySize(t *testing.T) {
 	_, err = parseStandardPolicyPathVerifySize("/global-infra/things/1/sub-things/2/fine-tuned-thing/3", 1, "sample")
 	assert.NotNil(t, err)
 }
+
+func TestUnitNsxt_StringListsEqualIgnoreOrder(t *testing.T) {
+	assert.True(t, stringListsEqualIgnoreOrder(nil, nil))
+	assert.True(t, stringListsEqualIgnoreOrder([]string{}, []string{}))
+	assert.True(t, stringListsEqualIgnoreOrder([]string{"b", "a"}, []string{"a", "b"}))
+	assert.False(t, stringListsEqualIgnoreOrder([]string{"a"}, []string{"a", "b"}))
+	assert.False(t, stringListsEqualIgnoreOrder([]string{"a", "a"}, []string{"a", "b"}))
+}
