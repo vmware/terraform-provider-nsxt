@@ -96,6 +96,9 @@ func intrusionServiceGatewayPolicyRuleModelToSchema(d *schema.ResourceData, rule
 	setPathListInSchema(d, "ids_profiles", rule.IdsProfiles)
 	d.Set("sequence_number", rule.SequenceNumber)
 	d.Set("nsx_id", rule.Id)
+	if rule.RuleId != nil {
+		d.Set("rule_id", *rule.RuleId)
+	}
 
 	setPolicyTagsInSchema(d, rule.Tags)
 }
@@ -132,8 +135,9 @@ func resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleCreate(d *schema.Resourc
 }
 
 func resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleExistsPartial(d *schema.ResourceData, m interface{}, policyPath string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	parentContext := getParentContext(d, m, policyPath)
 	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-		return resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(sessionContext, id, policyPath, connector)
+		return resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleExists(parentContext, id, policyPath, connector)
 	}
 }
 

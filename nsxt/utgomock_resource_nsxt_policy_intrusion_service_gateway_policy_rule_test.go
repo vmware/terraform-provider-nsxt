@@ -19,47 +19,84 @@ import (
 
 	intrusionservicegatewaypolicies "github.com/vmware/terraform-provider-nsxt/api/infra/domains/intrusion_service_gateway_policies"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	isgwrulemocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/domains/intrusion_service_gateway_policies"
+	idsgwrulemocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/domains/intrusion_service_gateway_policies"
 )
 
 var (
-	idsGwRuleID          = "ids-gw-rule-1"
+	idsGwRuleID          = "ids-gw-rule-id"
 	idsGwRuleDisplayName = "Test IDS Gateway Policy Rule"
-	idsGwRuleDescription = "Test IDS gateway policy rule"
-	idsGwRuleRevision    = int64(1)
+	idsGwRuleDescription = "Test Intrusion Service Gateway Policy Rule"
 	idsGwRuleDomain      = "default"
-	idsGwRulePolicyID    = "ids-gw-policy-001"
-	idsGwRulePolicyPath  = "/infra/domains/default/ids-gateway-policies/ids-gw-policy-001"
 	idsGwRuleAction      = "DETECT"
 	idsGwRuleDirection   = "IN_OUT"
 	idsGwRuleIPVersion   = "IPV4_IPV6"
-	idsGwRuleScopePath   = "/infra/domains/default/gateway-policies/gw-policy-001"
-	idsGwRuleProfilePath = "/infra/domains/default/ids-profiles/default"
+	idsGwRuleLogged      = false
+	idsGwRuleDisabled    = false
+	idsGwRuleSeqNum      = int64(0)
+	idsGwRuleRuleID      = int64(2001)
+	idsGwRuleScope       = []string{"/infra/tier-1s/test-t1-gw"}
+	idsGwRuleProfilePath = []string{"/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"}
+	idsGwRulePolicyID    = "ids-gw-policy-id"
+	idsGwRulePolicyPath  = "/infra/domains/default/intrusion-service-gateway-policies/ids-gw-policy-id"
+
+	// Updated values for testing modifications
+	idsGwRuleUpdatedDirection   = "IN"
+	idsGwRuleUpdatedIPVersion   = "IPV4"
+	idsGwRuleUpdatedLogged      = true
+	idsGwRuleUpdatedDisabled    = true
+	idsGwRuleUpdatedSeqNum      = int64(1)
+	idsGwRuleUpdatedAction      = "DETECT_PREVENT"
+	idsGwRuleUpdatedDisplayName = "Test IDS Gateway Policy Rule Update"
+	idsGwRuleUpdatedDescription = "Test Intrusion Service Gateway Policy Rule Update"
 )
 
+// idsGwRuleAPIResponse creates a mock API response for IDS Gateway Rule with default values.
+// This represents what the NSX-T API would return for a successfully created/retrieved rule.
 func idsGwRuleAPIResponse() nsxModel.IdsRule {
 	resourceType := "IdsRule"
-	seq := int64(1)
-	logged := false
-	disabled := false
 	srcEx := false
 	dstEx := false
 	return nsxModel.IdsRule{
 		Id:                   &idsGwRuleID,
 		DisplayName:          &idsGwRuleDisplayName,
 		Description:          &idsGwRuleDescription,
-		Revision:             &idsGwRuleRevision,
 		ResourceType:         &resourceType,
 		Action:               &idsGwRuleAction,
 		Direction:            &idsGwRuleDirection,
 		IpProtocol:           &idsGwRuleIPVersion,
-		SequenceNumber:       &seq,
-		Logged:               &logged,
-		Disabled:             &disabled,
+		RuleId:               &idsGwRuleRuleID,
+		Scope:                idsGwRuleScope,
+		IdsProfiles:          idsGwRuleProfilePath,
+		SequenceNumber:       &idsGwRuleSeqNum,
+		Logged:               &idsGwRuleLogged,
+		Disabled:             &idsGwRuleDisabled,
 		SourcesExcluded:      &srcEx,
 		DestinationsExcluded: &dstEx,
-		Scope:                []string{idsGwRuleScopePath},
-		IdsProfiles:          []string{idsGwRuleProfilePath},
+	}
+}
+
+// idsGwRuleAPIResponseUpdated creates a mock API response for IDS Gateway Rule with updated values.
+// This represents what the NSX-T API would return after a successful update operation.
+func idsGwRuleAPIResponseUpdated() nsxModel.IdsRule {
+	resourceType := "IdsRule"
+	srcEx := false
+	dstEx := false
+	return nsxModel.IdsRule{
+		Id:                   &idsGwRuleID,
+		DisplayName:          &idsGwRuleUpdatedDisplayName,
+		Description:          &idsGwRuleUpdatedDescription,
+		ResourceType:         &resourceType,
+		Action:               &idsGwRuleUpdatedAction,
+		Direction:            &idsGwRuleUpdatedDirection,
+		IpProtocol:           &idsGwRuleUpdatedIPVersion,
+		RuleId:               &idsGwRuleRuleID,
+		Scope:                idsGwRuleScope,
+		IdsProfiles:          idsGwRuleProfilePath,
+		SequenceNumber:       &idsGwRuleUpdatedSeqNum,
+		Logged:               &idsGwRuleUpdatedLogged,
+		Disabled:             &idsGwRuleUpdatedDisabled,
+		SourcesExcluded:      &srcEx,
+		DestinationsExcluded: &dstEx,
 	}
 }
 
@@ -71,17 +108,39 @@ func minimalIdsGwRuleData() map[string]interface{} {
 		"action":          idsGwRuleAction,
 		"direction":       idsGwRuleDirection,
 		"ip_version":      idsGwRuleIPVersion,
+		"sequence_number": 1,
 		"logged":          false,
 		"disabled":        false,
-		"sequence_number": 1,
-		"scope":           []interface{}{idsGwRuleScopePath},
-		"ids_profiles":    []interface{}{idsGwRuleProfilePath},
 	}
 }
 
-func setupIdsGwRuleMock(t *testing.T, ctrl *gomock.Controller) (*isgwrulemocks.MockRulesClient, func()) {
+// setIdsGwRuleProfiles sets the ids_profiles TypeSet on d (must be called after TestResourceDataRaw).
+// This helper function properly handles the TypeSet creation for IDS profiles, which cannot be done
+// directly in the minimalIdsGwRuleData() map due to TypeSet requirements.
+func setIdsGwRuleProfiles(d *schema.ResourceData, t *testing.T) {
+	profilesSet := schema.NewSet(schema.HashString, []interface{}{
+		"/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile",
+	})
+	if err := d.Set("ids_profiles", profilesSet); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// setIdsGwRuleScope sets the scope TypeSet on d (must be called after TestResourceDataRaw).
+// This helper function properly handles the TypeSet creation for Gateway scope paths, which is
+// required for Gateway rules but optional for DFW rules.
+func setIdsGwRuleScope(d *schema.ResourceData, t *testing.T) {
+	scopeSet := schema.NewSet(schema.HashString, []interface{}{
+		"/infra/tier-1s/test-t1-gw",
+	})
+	if err := d.Set("scope", scopeSet); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func setupIdsGwRuleMock(t *testing.T, ctrl *gomock.Controller) (*idsgwrulemocks.MockRulesClient, func()) {
 	t.Helper()
-	mockSDK := isgwrulemocks.NewMockRulesClient(ctrl)
+	mockSDK := idsgwrulemocks.NewMockRulesClient(ctrl)
 	mockWrapper := &intrusionservicegatewaypolicies.IntrusionServiceGatewayRuleClientContext{
 		Client:     mockSDK,
 		ClientType: utl.Local,
@@ -108,10 +167,37 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleCreate(t *testin
 
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleCreate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.NotEmpty(t, d.Id())
+	})
+
+	t.Run("Create fails when patch fails", func(t *testing.T) {
+		mockSDK.EXPECT().Patch(idsGwRuleDomain, idsGwRulePolicyID, gomock.Any(), gomock.Any()).Return(vapiErrors.NewInvalidRequest())
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Create fails when get after patch fails", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(idsGwRuleDomain, idsGwRulePolicyID, gomock.Any(), gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, gomock.Any()).Return(nsxModel.IdsRule{}, vapiErrors.NewInternalServerError()),
+		)
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }
 
@@ -126,19 +212,37 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(t *testing.
 
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
 		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
+		assert.Equal(t, idsGwRuleLogged, d.Get("logged"))
+		assert.Equal(t, idsGwRuleDisabled, d.Get("disabled"))
+		assert.Equal(t, int(idsGwRuleSeqNum), d.Get("sequence_number"))
 		assert.Equal(t, idsGwRuleDisplayName, d.Get("display_name"))
+		assert.Equal(t, idsGwRuleDescription, d.Get("description"))
 		assert.Equal(t, idsGwRuleAction, d.Get("action"))
+		assert.Equal(t, idsGwRuleDirection, d.Get("direction"))
+		assert.Equal(t, idsGwRuleIPVersion, d.Get("ip_version"))
+
+		// Verify scope is properly handled
+		scopeSet := d.Get("scope").(*schema.Set)
+		assert.Equal(t, 1, scopeSet.Len())
+		assert.True(t, scopeSet.Contains("/infra/tier-1s/test-t1-gw"))
+
+		// Verify ids profile is properly handled
+		idsProfileSet := d.Get("ids_profiles").(*schema.Set)
+		assert.Equal(t, 1, idsProfileSet.Len())
+		assert.True(t, idsProfileSet.Contains("/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"))
 	})
 
-	t.Run("Read not found clears ID", func(t *testing.T) {
+	t.Run("Read not found", func(t *testing.T) {
 		mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(nsxModel.IdsRule{}, vapiErrors.NotFound{})
 
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
 		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(d, newGoMockProviderClient())
@@ -149,6 +253,22 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(t *testing.
 	t.Run("Read fails when ID is empty", func(t *testing.T) {
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		// Don't set ID
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "ID")
+		assert.Contains(t, err.Error(), "Intrusion Service Gateway Policy Rule")
+	})
+
+	t.Run("Read fails on API error", func(t *testing.T) {
+		mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(nsxModel.IdsRule{}, vapiErrors.NewInternalServerError())
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleRead(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -164,20 +284,69 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleUpdate(t *testin
 	t.Run("Update success", func(t *testing.T) {
 		gomock.InOrder(
 			mockSDK.EXPECT().Patch(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID, gomock.Any()).Return(nil),
-			mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(idsGwRuleAPIResponse(), nil),
+			mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(idsGwRuleAPIResponseUpdated(), nil),
 		)
 
+		updatedData := minimalIdsGwRuleData()
+		updatedData["sequence_number"] = int(idsGwRuleUpdatedSeqNum)
+		updatedData["logged"] = idsGwRuleUpdatedLogged
+		updatedData["disabled"] = idsGwRuleUpdatedDisabled
+		updatedData["action"] = idsGwRuleUpdatedAction
+		updatedData["display_name"] = idsGwRuleUpdatedDisplayName
+		updatedData["description"] = idsGwRuleUpdatedDescription
+		updatedData["direction"] = idsGwRuleUpdatedDirection
+		updatedData["ip_version"] = idsGwRuleUpdatedIPVersion
+
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		d := schema.TestResourceDataRaw(t, res.Schema, updatedData)
+		setIdsGwRuleProfiles(d, t)
 		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleUpdate(d, newGoMockProviderClient())
 		require.NoError(t, err)
+		assert.Equal(t, int(idsGwRuleUpdatedSeqNum), d.Get("sequence_number"))
+		assert.Equal(t, idsGwRuleUpdatedLogged, d.Get("logged"))
+		assert.Equal(t, idsGwRuleUpdatedDisabled, d.Get("disabled"))
+		assert.Equal(t, idsGwRuleUpdatedAction, d.Get("action"))
+		assert.Equal(t, idsGwRuleUpdatedDisplayName, d.Get("display_name"))
+		assert.Equal(t, idsGwRuleUpdatedDescription, d.Get("description"))
+		assert.Equal(t, idsGwRuleUpdatedDirection, d.Get("direction"))
+		assert.Equal(t, idsGwRuleUpdatedIPVersion, d.Get("ip_version"))
 	})
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		// Don't set ID
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "ID")
+	})
+
+	t.Run("Update fails on patch error", func(t *testing.T) {
+		mockSDK.EXPECT().Patch(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID, gomock.Any()).Return(vapiErrors.NewInvalidRequest())
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		d.SetId(idsGwRuleID)
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Update fails when get after patch fails", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(nsxModel.IdsRule{}, vapiErrors.NewInternalServerError()),
+		)
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -190,11 +359,12 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleDelete(t *testin
 	mockSDK, restore := setupIdsGwRuleMock(t, ctrl)
 	defer restore()
 
-	t.Run("Delete success with nsx_id set", func(t *testing.T) {
+	t.Run("Delete success", func(t *testing.T) {
 		mockSDK.EXPECT().Delete(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(nil)
 
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
 		d.SetId(idsGwRuleID)
 		d.Set("nsx_id", idsGwRuleID)
 
@@ -205,6 +375,21 @@ func TestMockResourceNsxtPolicyIntrusionServiceGatewayPolicyRuleDelete(t *testin
 	t.Run("Delete fails when ID is empty", func(t *testing.T) {
 		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		// Don't set ID
+
+		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "ID")
+	})
+
+	t.Run("Delete fails on API error", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(idsGwRuleDomain, idsGwRulePolicyID, idsGwRuleID).Return(vapiErrors.NewInternalServerError())
+
+		res := resourceNsxtPolicyIntrusionServiceGatewayPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdsGwRuleData())
+		setIdsGwRuleProfiles(d, t)
+		d.SetId(idsGwRuleID)
 
 		err := resourceNsxtPolicyIntrusionServiceGatewayPolicyRuleDelete(d, newGoMockProviderClient())
 		require.Error(t, err)

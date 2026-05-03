@@ -40,7 +40,6 @@ func ispAPIResponse() nsxModel.IdsSecurityPolicy {
 		Id:             &ispID,
 		DisplayName:    &ispDisplayName,
 		Description:    &ispDescription,
-		Revision:       &ispRevision,
 		Path:           &ispPath,
 		Stateful:       &stateful,
 		SequenceNumber: &seqNum,
@@ -54,6 +53,15 @@ func minimalIspData() map[string]interface{} {
 		"nsx_id":       ispID,
 		"domain":       ispDomain,
 		"stateful":     true,
+	}
+}
+
+func minimalIspDataUpdate() map[string]interface{} {
+	return map[string]interface{}{
+		"display_name": ispDisplayName,
+		"description":  ispDescription,
+		"nsx_id":       ispID,
+		"domain":       ispDomain,
 	}
 }
 
@@ -166,7 +174,7 @@ func TestMockResourceNsxtPolicyIntrusionServicePolicyUpdate(t *testing.T) {
 		)
 
 		res := resourceNsxtPolicyIntrusionServicePolicy()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalIspData())
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIspDataUpdate())
 		d.SetId(ispID)
 
 		err := resourceNsxtPolicyIntrusionServicePolicyUpdate(d, newGoMockProviderClient())
@@ -175,7 +183,7 @@ func TestMockResourceNsxtPolicyIntrusionServicePolicyUpdate(t *testing.T) {
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
 		res := resourceNsxtPolicyIntrusionServicePolicy()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalIspData())
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIspDataUpdate())
 
 		err := resourceNsxtPolicyIntrusionServicePolicyUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
