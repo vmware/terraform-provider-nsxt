@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 
@@ -579,6 +580,53 @@ func interfaceListToStringList(interfaces []interface{}) []string {
 		strList = append(strList, elem.(string))
 	}
 	return strList
+}
+
+// stringListsEqualIgnoreOrder reports whether two slices contain the same strings
+// with the same multiplicity. NSX may return tier-0 (and similar) path lists in
+// a canonical order that does not match the configuration order.
+func stringListsEqualIgnoreOrder(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	if len(a) == 0 {
+		return true
+	}
+	ac := append([]string(nil), a...)
+	bc := append([]string(nil), b...)
+	sort.Strings(ac)
+	sort.Strings(bc)
+	for i := range ac {
+		if ac[i] != bc[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// diffSuppressStringListOfPathsOrder returns a DiffSuppressFunc for a TypeList of
+// policy path strings when the remote API may reorder elements. The SDK invokes
+// the suppressor for each diff key (attr.0, attr.1, …); we compare the full lists.
+func diffSuppressStringListOfPathsOrder(attr string) schema.SchemaDiffSuppressFunc {
+	prefix := attr + "."
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if !strings.HasPrefix(k, prefix) {
+			return false
+		}
+		if strings.HasSuffix(k, ".#") {
+			return false
+		}
+		o, n := d.GetChange(attr)
+		oldList, _ := o.([]interface{})
+		newList, _ := n.([]interface{})
+		if oldList == nil {
+			oldList = []interface{}{}
+		}
+		if newList == nil {
+			newList = []interface{}{}
+		}
+		return stringListsEqualIgnoreOrder(interfaceListToStringList(oldList), interfaceListToStringList(newList))
+	}
 }
 
 func policyResourceNotSupportedError() error {

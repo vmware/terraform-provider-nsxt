@@ -166,6 +166,14 @@ func TestUnitNsxt_InterfaceListToStringList(t *testing.T) {
 	assert.Equal(t, []string{"a", "b"}, interfaceListToStringList([]interface{}{"a", "b"}))
 }
 
+func TestUnitNsxt_StringListsEqualIgnoreOrder(t *testing.T) {
+	assert.True(t, stringListsEqualIgnoreOrder(nil, nil))
+	assert.True(t, stringListsEqualIgnoreOrder([]string{}, []string{}))
+	assert.True(t, stringListsEqualIgnoreOrder([]string{"b", "a"}, []string{"a", "b"}))
+	assert.False(t, stringListsEqualIgnoreOrder([]string{"a"}, []string{"a", "b"}))
+	assert.False(t, stringListsEqualIgnoreOrder([]string{"a", "a"}, []string{"a", "b"}))
+}
+
 func TestUnitNsxt_IsValidResourceID(t *testing.T) {
 	assert.True(t, isValidResourceID("abc-123"))
 	assert.False(t, isValidResourceID(""))

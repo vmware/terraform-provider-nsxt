@@ -83,9 +83,10 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			// List-level ValidateFunc is not supported for TypeList in SDK v2 (only primitives and TypeMap);
 			// duplicate-path checks run in CustomizeDiff via ValidateStringListNoDuplicateValues.
 			"tier0_gateway_paths": {
-				Type:     schema.TypeList,
-				Elem:     getElemPolicyPathSchema(),
-				Optional: true,
+				Type:             schema.TypeList,
+				Elem:             getElemPolicyPathSchema(),
+				Optional:         true,
+				DiffSuppressFunc: diffSuppressStringListOfPathsOrder("tier0_gateway_paths"),
 			},
 			"activate_default_dfw_rules": {
 				Type:     schema.TypeBool,
