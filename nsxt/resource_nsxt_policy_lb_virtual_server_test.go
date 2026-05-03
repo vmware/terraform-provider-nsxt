@@ -129,20 +129,31 @@ func TestAccResourceNsxtPolicyLBVirtualServer_basic(t *testing.T) {
 // TODO: add CRLs and other certificates
 func TestAccResourceNsxtPolicyLBVirtualServer_withSSL(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_virtual_server.test"
+	certDisplayName := getAccTestResourceName()
+	var accTestLbTlsCertID string
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLBVirtualServerCheckDestroy(state, accTestPolicyLBVirtualServerCreateAttributes["display_name"])
+			if err := testAccNsxtPolicyLBVirtualServerCheckDestroy(state, accTestPolicyLBVirtualServerCreateAttributes["display_name"]); err != nil {
+				return err
+			}
+			return testAccTlsCertificateDeleteGlobal(accTestLbTlsCertID)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyLBVirtualServerSSLTemplate(true),
+				PreConfig: func() {
+					id, err := testAccTlsCertificateSelfSignedCreateGlobal(certDisplayName)
+					if err != nil {
+						t.Fatal(err)
+					}
+					accTestLbTlsCertID = id
+				},
+				Config: testAccNsxtPolicyLBVirtualServerSSLTemplate(true, certDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBVirtualServerCreateAttributes["display_name"]),
@@ -161,7 +172,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withSSL(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyLBVirtualServerSSLTemplate(false),
+				Config: testAccNsxtPolicyLBVirtualServerSSLTemplate(false, certDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBVirtualServerUpdateAttributes["display_name"]),
@@ -841,7 +852,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, accTestPolicyLBVirtualServerUpdateAttributes["display_name"], attrMap["ip_address"], accTestPolicyLBVirtualServerUpdateAttributes["ports"])
 }
 
-func testAccNsxtPolicyLBVirtualServerSSLTemplate(createFlow bool) string {
+func testAccNsxtPolicyLBVirtualServerSSLTemplate(createFlow bool, certDisplayName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyLBVirtualServerCreateAttributes
@@ -882,7 +893,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
     certificate_chain_depth = %s
     ssl_profile_path        = data.nsxt_policy_lb_server_ssl_profile.default.path
   }
-}`, getTestCertificateName(false), attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["certificate_chain_depth"], attrMap["certificate_chain_depth"])
+}`, certDisplayName, attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["certificate_chain_depth"], attrMap["certificate_chain_depth"])
 }
 
 func testAccNsxtPolicyLBVirtualServerWithAccessList(createFlow bool) string {
