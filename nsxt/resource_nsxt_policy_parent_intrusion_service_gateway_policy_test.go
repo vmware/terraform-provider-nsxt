@@ -146,7 +146,6 @@ resource "nsxt_policy_parent_intrusion_service_gateway_policy" "test" {
   category        = "LocalGatewayRules"
   locked          = %s
   sequence_number = %s
-  stateful        = true
 
   tag {
     scope = "env"

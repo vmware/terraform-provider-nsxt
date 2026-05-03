@@ -21,6 +21,8 @@ import (
 
 var cliIntrusionServiceGatewayPoliciesClient = domains.NewIntrusionServiceGatewayPoliciesClient
 
+var policyIntrusionServiceGatewayRuleActionValues = []string{model.IdsRule_ACTION_DETECT, "DETECT_PREVENT"}
+
 func resourceNsxtPolicyIntrusionServiceGatewayPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIntrusionServiceGatewayPolicyCreate,
@@ -46,7 +48,7 @@ func getIntrusionServiceGatewayPolicySchema(withRule bool) map[string]*schema.Sc
 		"category": {
 			Type:         schema.TypeString,
 			Description:  "Category",
-			ValidateFunc: validation.StringInSlice(gatewayPolicyCategoryValues, false),
+			ValidateFunc: validation.StringInSlice(idpsGatewayPolicyCategoryValues, false),
 			Required:     true,
 			ForceNew:     true,
 		},
@@ -69,14 +71,7 @@ func getIntrusionServiceGatewayPolicySchema(withRule bool) map[string]*schema.Sc
 		},
 		"stateful": {
 			Type:        schema.TypeBool,
-			Description: "When it is stateful, the state of the network connects are tracked and a stateful packet inspection is performed",
-			Optional:    true,
-			Default:     true,
-		},
-		"tcp_strict": {
-			Type:        schema.TypeBool,
-			Description: "Ensures that a 3 way TCP handshake is done before the data packets are sent",
-			Optional:    true,
+			Description: "When it is stateful, the state of the network connects are tracked and a stateful packet inspection is performed. Note: Intrusion Service Gateway Policies are always stateful.",
 			Computed:    true,
 		},
 	}
@@ -202,10 +197,15 @@ func getIntrusionServiceGatewayPolicyRuleSchema(embedded bool) map[string]*schem
 			Type:         schema.TypeString,
 			Description:  "Action",
 			Optional:     true,
-			ValidateFunc: validation.StringInSlice(policyIntrusionServiceRuleActionValues, false),
+			ValidateFunc: validation.StringInSlice(policyIntrusionServiceGatewayRuleActionValues, false),
 			Default:      model.IdsRule_ACTION_DETECT,
 		},
 		"ids_profiles": getIdsProfilesSchema(),
+		"rule_id": {
+			Type:        schema.TypeInt,
+			Description: "Unique positive number that is assigned by the system and is useful for debugging",
+			Computed:    true,
+		},
 	}
 
 	if embedded {
@@ -310,7 +310,7 @@ func updateIntrusionServiceGatewayPolicy(id string, d *schema.ResourceData, m in
 	comments := d.Get("comments").(string)
 	locked := d.Get("locked").(bool)
 	sequenceNumber := int64(d.Get("sequence_number").(int))
-	stateful := d.Get("stateful").(bool)
+	stateful := true
 	category := d.Get("category").(string)
 	resourceType := "IdsGatewayPolicy"
 
@@ -327,12 +327,6 @@ func updateIntrusionServiceGatewayPolicy(id string, d *schema.ResourceData, m in
 		ResourceType:   &resourceType,
 	}
 
-	_, isSet := d.GetOkExists("tcp_strict")
-	if isSet {
-		tcpStrict := d.Get("tcp_strict").(bool)
-		obj.TcpStrict = &tcpStrict
-	}
-
 	if len(d.Id()) > 0 {
 		revision := int64(d.Get("revision").(int))
 		obj.Revision = &revision
@@ -341,17 +335,12 @@ func updateIntrusionServiceGatewayPolicy(id string, d *schema.ResourceData, m in
 	var childRules []*data.StructValue
 	if d.HasChange("rule") {
 		oldRules, _ := d.GetChange("rule")
-		rules := getPolicyIdsRulesFromSchema(d)
+		rules := getPolicyIdsRulesFromSchema(d, false)
 
 		existingRules := make(map[string]bool)
 		for _, rule := range rules {
-			ruleID := newUUID()
-			if rule.Id != nil {
-				ruleID = *rule.Id
-				existingRules[ruleID] = true
-			} else {
-				rule.Id = &ruleID
-			}
+			ruleID := *rule.Id
+			existingRules[ruleID] = true
 
 			childRule, err := createPolicyChildIdsRule(ruleID, rule, false)
 			if err != nil {
@@ -443,12 +432,9 @@ func resourceNsxtPolicyIntrusionServiceGatewayPolicyGeneralRead(d *schema.Resour
 	d.Set("locked", obj.Locked)
 	d.Set("sequence_number", obj.SequenceNumber)
 	d.Set("stateful", obj.Stateful)
-	if obj.TcpStrict != nil {
-		d.Set("tcp_strict", *obj.TcpStrict)
-	}
 	d.Set("revision", obj.Revision)
 	if withRule {
-		return setPolicyIdsRulesInSchema(d, obj.Rules)
+		return setPolicyIdsRulesInSchema(d, obj.Rules, false)
 	}
 	return nil
 }

@@ -182,7 +182,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.ip_version", defaultProtocol),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.source_groups.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.sources_excluded", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.destinations_excluded", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.disabled", "false"),
@@ -310,7 +310,6 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   comments        = "%s"
   locked          = true
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "env"
@@ -327,7 +326,6 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "env"
@@ -356,8 +354,16 @@ resource "nsxt_policy_group" "src_group" {
   display_name = "tf-intrusion-svc-gw-policy-src-group"
 }
 
+resource "nsxt_policy_group" "src_group_2" {
+  display_name = "tf-intrusion-svc-gw-policy-src-group_2"
+}
+
 resource "nsxt_policy_group" "dst_group" {
   display_name = "tf-intrusion-svc-gw-policy-dst-group"
+}
+
+resource "nsxt_policy_group" "dst_group_2" {
+  display_name = "tf-intrusion-svc-gw-policy-dst-group_2"
 }
 
 resource "nsxt_policy_service" "icmp_svc" {
@@ -384,7 +390,6 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "env"
@@ -404,7 +409,8 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
 
   rule {
     display_name          = "ids-gw-rule-multi-source"
-    source_groups         = [nsxt_policy_group.src_group.path, nsxt_policy_group.dst_group.path]
+    source_groups         = [nsxt_policy_group.src_group.path, nsxt_policy_group.src_group_2.path]
+    destination_groups    = [nsxt_policy_group.dst_group.path]
     sources_excluded      = false
     destinations_excluded = false
     scope                 = [data.nsxt_policy_tier1_gateway.t1_gw.path]
@@ -421,7 +427,6 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
   category        = "LocalGatewayRules"
   locked          = true
   sequence_number = 3
-  stateful        = true
 
   tag {
     scope = "env"
@@ -430,7 +435,7 @@ resource "nsxt_policy_intrusion_service_gateway_policy" "ids_gw_policy" {
 
   rule {
     display_name          = "ids-gw-rule-with-exclusions"
-    destination_groups    = [nsxt_policy_group.src_group.path, nsxt_policy_group.dst_group.path]
+    destination_groups    = [nsxt_policy_group.dst_group.path, nsxt_policy_group.dst_group_2.path]
     sources_excluded      = false
     destinations_excluded = false
     disabled              = true
