@@ -156,6 +156,80 @@ func TestMockResourceNsxtVpcServiceProfileUpdate(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtVpcServiceProfileCreateWithDnsConfig(t *testing.T) {
+	t.Run("Create with dns_config succeeds on NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVspMock(t, ctrl)
+		defer restore()
+
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(nsxModel.VpcServiceProfile{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), vspID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(vspAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcServiceProfile()
+		data := minimalVspData()
+		data["dns_config"] = []interface{}{
+			map[string]interface{}{
+				"ipv4_resolver_ip": "192.168.1.1",
+				"ipv6_resolver_ip": "",
+				"enable_proxy":     false,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtVpcServiceProfileCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, vspID, d.Id())
+	})
+
+	t.Run("Create with dns_config fails on NSX 9.1.0", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		res := resourceNsxtVpcServiceProfile()
+		data := minimalVspData()
+		data["dns_config"] = []interface{}{
+			map[string]interface{}{
+				"ipv4_resolver_ip": "192.168.1.1",
+				"ipv6_resolver_ip": "",
+				"enable_proxy":     false,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtVpcServiceProfileCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "9.2.0")
+	})
+
+	t.Run("Create with dns_config fails when neither resolver IP is set", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		res := resourceNsxtVpcServiceProfile()
+		data := minimalVspData()
+		data["dns_config"] = []interface{}{
+			map[string]interface{}{
+				"ipv4_resolver_ip": "",
+				"ipv6_resolver_ip": "",
+				"enable_proxy":     true,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtVpcServiceProfileCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "ipv4_resolver_ip")
+	})
+}
+
 func TestMockResourceNsxtVpcServiceProfileDelete(t *testing.T) {
 	t.Run("Delete success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)

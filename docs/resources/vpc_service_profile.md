@@ -10,6 +10,8 @@ This resource provides a method for the management of a VPC Service Profile.
 
 This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
 
+The `dns_config` argument requires NSX 9.2.0 or higher.
+
 ## Example Usage
 
 ```hcl
@@ -74,6 +76,10 @@ The following arguments are supported:
         If value is `true`, edge cluster will not be required. This is a DHCP server that dynamically assigns IP per VM port.
     * `dhcp_relay_config` - (Optional) DHCP Relay configuration
         * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
+* `dns_config` - (Optional) DNS configuration for this profile. Requires NSX 9.2.0 or higher.
+    * `ipv4_resolver_ip` - (Optional) IPv4 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
+    * `ipv6_resolver_ip` - (Optional) IPv6 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
+    * `enable_proxy` - (Optional) When `true`, DNS requests are proxied through the aDNS service. Defaults to `false`.
 
 ## Attributes Reference
 
