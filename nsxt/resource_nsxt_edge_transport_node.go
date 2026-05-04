@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"maps"
 	"reflect"
 	"strings"
 	"time"
@@ -21,7 +22,6 @@ import (
 	mpmodel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/transport_nodes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"golang.org/x/exp/maps"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"

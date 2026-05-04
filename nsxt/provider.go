@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -32,7 +33,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"golang.org/x/exp/slices"
 )
 
 var cliLicensesClient = nsx.NewLicensesClient
