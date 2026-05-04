@@ -280,6 +280,20 @@ func testAccRetryOnTransientError(f func() error) error {
 	return err
 }
 
+// testAccNsxtDnsTransitGatewayTemplate returns HCL that creates an inline
+// transit gateway required by DnsService.
+// Exposed reference:
+//   - nsxt_policy_transit_gateway.dns_tgw.path
+func testAccNsxtDnsTransitGatewayTemplate(displayName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "dns_tgw" {
+  %s
+  display_name    = "%s-tgw"
+  transit_subnets = ["192.168.200.0/24"]
+}
+`, testAccNsxtProjectContext(), displayName)
+}
+
 // testAccNsxtExtraCoverage skips a test unless NSXT_TEST_EXTRA_COVERAGE is set.
 //
 // Apply this guard to tests that are expensive to run and cover scenarios that
@@ -303,7 +317,6 @@ func testAccNsxtExtraCoverage(t *testing.T) {
 		t.Skipf("set NSXT_TEST_EXTRA_COVERAGE to run extra-coverage tests")
 	}
 }
-
 func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
