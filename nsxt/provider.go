@@ -23,6 +23,8 @@ import (
 	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
+	"slices"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -32,7 +34,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"golang.org/x/exp/slices"
 )
 
 var cliLicensesClient = nsx.NewLicensesClient
