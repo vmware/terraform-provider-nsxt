@@ -99,6 +99,41 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0GatewayInterface920_basic(t *testing.T) {
+	name := getAccTestResourceName()
+	mtu := "1500"
+	subnet := "1.1.12.2/24"
+	ipAddress := "1.1.12.2"
+	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0InterfaceServiceTemplate(name, subnet, mtu),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", mtu),
+					resource.TestCheckResourceAttr(testResourceName, "type", "SERVICE"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_path", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()

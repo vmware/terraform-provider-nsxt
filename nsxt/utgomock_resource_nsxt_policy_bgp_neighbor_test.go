@@ -113,6 +113,22 @@ func TestMockResourceNsxtPolicyBgpNeighborCreate(t *testing.T) {
 		assert.Contains(t, err.Error(), "Invalid bgp_path")
 	})
 
+	t.Run("Create_fails_with_source_attachment_before_NSX_9_2", func(t *testing.T) {
+		mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, gomock.Any()).Return(model.BgpNeighborConfig{}, vapiErrors.NotFound{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name":      bgpNbName,
+			"bgp_path":          bgpNbBgpPath,
+			"neighbor_address":  bgpNbAddr,
+			"remote_as_num":     bgpNbRemoteAsNum,
+			"source_attachment": []interface{}{"/orgs/default/projects/p1/vpcs/v1/attachments/att-1"},
+		})
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyBgpNeighborCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "9.2.0")
+	})
+
 	t.Run("Create_fails_when_Patch_returns_error", func(t *testing.T) {
 		mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, gomock.Any()).Return(model.BgpNeighborConfig{}, vapiErrors.NotFound{})
 		mockNeighborsSDK.EXPECT().Patch(bgpNbT0ID, bgpNbServiceID, gomock.Any(), gomock.Any(), gomock.Any()).Return(vapiErrors.InternalServerError{})
@@ -318,4 +334,125 @@ func TestMockResourceNsxtPolicyBgpNeighborDelete(t *testing.T) {
 		err := resourceNsxtPolicyBgpNeighborDelete(d, m)
 		require.Error(t, err)
 	})
+}
+
+func TestMockResourceNsxtPolicyBgpNeighborRead_sourceAttachmentVersion(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockNeighborsSDK := bgpMocks.NewMockNeighborsClient(ctrl)
+	nbWrapper := &bgpapi.BgpNeighborConfigClientContext{
+		Client:     mockNeighborsSDK,
+		ClientType: utl.Local,
+	}
+
+	originalCli := cliBgpNeighborsClient
+	defer func() { cliBgpNeighborsClient = originalCli }()
+	cliBgpNeighborsClient = func(sessionContext utl.SessionContext, connector client.Connector) *bgpapi.BgpNeighborConfigClientContext {
+		return nbWrapper
+	}
+
+	res := resourceNsxtPolicyBgpNeighbor()
+	attPath := "/orgs/default/projects/p/vpcs/v/attachments/a1"
+
+	t.Run("source_attachment omitted in state before NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "3.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, bgpNbID).Return(model.BgpNeighborConfig{
+			DisplayName:      &bgpNbName,
+			Path:             &bgpNbPath,
+			Revision:         &bgpNbRevision,
+			NeighborAddress:  &bgpNbAddr,
+			RemoteAsNum:      &bgpNbRemoteAsNum,
+			HoldDownTime:     &bgpNbHoldDown,
+			KeepAliveTime:    &bgpNbKeepAlive,
+			MaximumHopLimit:  &bgpNbMaxHopLimit,
+			SourceAttachment: []string{attPath},
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bgp_path": bgpNbBgpPath,
+		})
+		d.SetId(bgpNbID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyBgpNeighborRead(d, m)
+		require.NoError(t, err)
+		sa := d.Get("source_attachment")
+		assert.Equal(t, 0, len(sa.([]interface{})))
+	})
+
+	t.Run("source_attachment set in state on NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, bgpNbID).Return(model.BgpNeighborConfig{
+			DisplayName:      &bgpNbName,
+			Path:             &bgpNbPath,
+			Revision:         &bgpNbRevision,
+			NeighborAddress:  &bgpNbAddr,
+			RemoteAsNum:      &bgpNbRemoteAsNum,
+			HoldDownTime:     &bgpNbHoldDown,
+			KeepAliveTime:    &bgpNbKeepAlive,
+			MaximumHopLimit:  &bgpNbMaxHopLimit,
+			SourceAttachment: []string{attPath},
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bgp_path": bgpNbBgpPath,
+		})
+		d.SetId(bgpNbID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyBgpNeighborRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, attPath, d.Get("source_attachment").([]interface{})[0].(string))
+	})
+}
+
+func TestMockResourceNsxtPolicyBgpNeighborCreate_sourceAttachment920(t *testing.T) {
+	util.NsxVersion = "9.2.0"
+	defer func() { util.NsxVersion = "" }()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockNeighborsSDK := bgpMocks.NewMockNeighborsClient(ctrl)
+	nbWrapper := &bgpapi.BgpNeighborConfigClientContext{
+		Client:     mockNeighborsSDK,
+		ClientType: utl.Local,
+	}
+
+	originalCli := cliBgpNeighborsClient
+	defer func() { cliBgpNeighborsClient = originalCli }()
+	cliBgpNeighborsClient = func(sessionContext utl.SessionContext, connector client.Connector) *bgpapi.BgpNeighborConfigClientContext {
+		return nbWrapper
+	}
+
+	res := resourceNsxtPolicyBgpNeighbor()
+	att := "/orgs/default/projects/p1/vpcs/v1/attachments/att-1"
+
+	mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, gomock.Any()).Return(model.BgpNeighborConfig{}, vapiErrors.NotFound{})
+	mockNeighborsSDK.EXPECT().Patch(bgpNbT0ID, bgpNbServiceID, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+	mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, gomock.Any()).Return(model.BgpNeighborConfig{
+		DisplayName:      &bgpNbName,
+		Path:             &bgpNbPath,
+		Revision:         &bgpNbRevision,
+		NeighborAddress:  &bgpNbAddr,
+		RemoteAsNum:      &bgpNbRemoteAsNum,
+		HoldDownTime:     &bgpNbHoldDown,
+		KeepAliveTime:    &bgpNbKeepAlive,
+		MaximumHopLimit:  &bgpNbMaxHopLimit,
+		SourceAttachment: []string{att},
+	}, nil)
+
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"display_name":      bgpNbName,
+		"bgp_path":          bgpNbBgpPath,
+		"neighbor_address":  bgpNbAddr,
+		"remote_as_num":     bgpNbRemoteAsNum,
+		"source_attachment": []interface{}{att},
+	})
+	m := newGoMockProviderClient()
+	err := resourceNsxtPolicyBgpNeighborCreate(d, m)
+	require.NoError(t, err)
 }
