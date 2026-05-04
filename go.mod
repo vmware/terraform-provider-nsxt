@@ -12,7 +12,7 @@ require (
 	github.com/vmware/go-vmware-nsxt v0.0.0-20230223012718-d31b8a1ca05e
 	github.com/vmware/vsphere-automation-sdk-go/lib v0.8.0
 	github.com/vmware/vsphere-automation-sdk-go/runtime v0.8.0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20260630133807-525a3b3f5961
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20260706162538-d534d622447e
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.6.1-0.20241118070726-666c7cd6e466
 	go.uber.org/mock v0.6.0
