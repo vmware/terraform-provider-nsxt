@@ -202,12 +202,14 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T) 
 
 	t.Run("Read_success_with_advanced_config", func(t *testing.T) {
 		coreProfile := model.VirtualNetworkApplianceClusterAdvancedConfiguration_CORE_ALLOCATION_PROFILE_L4LBSERVICE
+		tzPath := "/infra/sites/default/enforcement-points/default/transport-zones/tz-1"
 		mockVNAClusters.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID).Return(model.VirtualNetworkApplianceCluster{
 			DisplayName: &vnaClusterName,
 			Path:        &vnaClusterPath,
 			Revision:    &vnaClusterRevision,
 			AdvancedConfiguration: &model.VirtualNetworkApplianceClusterAdvancedConfiguration{
-				CoreAllocationProfile: &coreProfile,
+				CoreAllocationProfile:    &coreProfile,
+				OverlayTransportZonePath: &tzPath,
 			},
 		}, nil)
 
@@ -222,6 +224,7 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T) 
 		advCfg := d.Get("advanced_configuration").([]interface{})
 		require.Len(t, advCfg, 1)
 		assert.Equal(t, coreProfile, advCfg[0].(map[string]interface{})["core_allocation_profile"])
+		assert.Equal(t, tzPath, advCfg[0].(map[string]interface{})["overlay_transport_zone_path"])
 	})
 
 	t.Run("Read_fails_when_Get_returns_NotFound", func(t *testing.T) {
