@@ -242,6 +242,53 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "QosProfile",
 		},
 	},
+	"dns_config": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Optional: true,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"ipv4_resolver_ip": {
+						Schema: schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "Ipv4ResolverIp",
+						},
+					},
+					"ipv6_resolver_ip": {
+						Schema: schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "Ipv6ResolverIp",
+						},
+					},
+					"enable_proxy": {
+						Schema: schema.Schema{
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "bool",
+							SdkFieldName: "EnableProxy",
+						},
+					},
+				},
+			},
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "struct",
+			SdkFieldName: "DnsConfig",
+			ReflectType:  reflect.TypeOf(model.VpcProfileDnsConfig{}),
+		},
+	},
 }
 
 var vpcServiceProfilePathExample = "/orgs/[org]/projects/[project]/vpc-service-profiles/[profile]"
@@ -257,6 +304,23 @@ func resourceNsxtVpcServiceProfile() *schema.Resource {
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcServiceProfileSchema),
 	}
+}
+
+func validateVpcServiceProfileDnsConfig(d *schema.ResourceData) error {
+	dnsConfigs := d.Get("dns_config").([]interface{})
+	if len(dnsConfigs) == 0 {
+		return nil
+	}
+	if !util.NsxVersionHigherOrEqual("9.2.0") {
+		return fmt.Errorf("dns_config requires NSX version 9.2.0 or higher")
+	}
+	cfg := dnsConfigs[0].(map[string]interface{})
+	ipv4 := cfg["ipv4_resolver_ip"].(string)
+	ipv6 := cfg["ipv6_resolver_ip"].(string)
+	if ipv4 == "" && ipv6 == "" {
+		return fmt.Errorf("dns_config requires at least one of ipv4_resolver_ip or ipv6_resolver_ip to be set")
+	}
+	return nil
 }
 
 func resourceNsxtVpcServiceProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
@@ -278,6 +342,9 @@ func resourceNsxtVpcServiceProfileExists(sessionContext utl.SessionContext, id s
 func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Service Profile resource requires NSX version 9.0.0 or higher")
+	}
+	if err := validateVpcServiceProfileDnsConfig(d); err != nil {
+		return err
 	}
 	connector := getPolicyConnector(m)
 
@@ -352,6 +419,9 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) error {
+	if err := validateVpcServiceProfileDnsConfig(d); err != nil {
+		return err
+	}
 
 	connector := getPolicyConnector(m)
 

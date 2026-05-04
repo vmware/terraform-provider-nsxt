@@ -148,6 +148,47 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtVpcServiceProfile_dnsConfig(t *testing.T) {
+	testResourceName := "nsxt_vpc_service_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcServiceProfileCheckDestroy(state, accTestPolicyVpcServiceProfileCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcServiceProfileDnsConfig("192.168.1.10", "", true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.ipv4_resolver_ip", "192.168.1.10"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.ipv6_resolver_ip", ""),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.enable_proxy", "true"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcServiceProfileDnsConfig("192.168.1.20", "fd00::1", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.ipv4_resolver_ip", "192.168.1.20"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.ipv6_resolver_ip", "fd00::1"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.0.enable_proxy", "false"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcServiceProfileMinimalistic(accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dns_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_service_profile.test"
@@ -310,6 +351,30 @@ resource "nsxt_vpc_service_profile" "test" {
   }
 
 }`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["server_addresses"])
+}
+
+func testAccNsxtVpcServiceProfileDnsConfig(ipv4ResolverIP, ipv6ResolverIP string, enableProxy bool) string {
+	ipv4Line := ""
+	if ipv4ResolverIP != "" {
+		ipv4Line = fmt.Sprintf(`ipv4_resolver_ip = "%s"`, ipv4ResolverIP)
+	}
+	ipv6Line := ""
+	if ipv6ResolverIP != "" {
+		ipv6Line = fmt.Sprintf(`ipv6_resolver_ip = "%s"`, ipv6ResolverIP)
+	}
+	return fmt.Sprintf(`
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+  dhcp_config {
+  }
+
+  dns_config {
+    %s
+    %s
+    enable_proxy = %t
+  }
+}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileCreateAttributes["display_name"], ipv4Line, ipv6Line, enableProxy)
 }
 
 func testAccNsxtVpcServiceProfileMinimalistic(displayName string) string {
