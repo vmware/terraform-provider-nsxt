@@ -37,6 +37,12 @@ var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_L2_ONLY,
 }
 
+var vpcSubnetIPAddressTypeValues = []string{
+	model.VpcSubnet_IP_ADDRESS_TYPE_IPV4,
+	model.VpcSubnet_IP_ADDRESS_TYPE_IPV6,
+	model.VpcSubnet_IP_ADDRESS_TYPE_IPV4_IPV6,
+}
+
 var vpcSubnetConnectivityStateValues = []string{
 	model.SubnetAdvancedConfig_CONNECTIVITY_STATE_CONNECTED,
 	model.SubnetAdvancedConfig_CONNECTIVITY_STATE_DISCONNECTED,
@@ -46,6 +52,13 @@ var vpcSubnetModeValues = []string{
 	model.SubnetDhcpConfig_MODE_SERVER,
 	model.SubnetDhcpConfig_MODE_RELAY,
 	model.SubnetDhcpConfig_MODE_DEACTIVATED,
+}
+
+var vpcSubnetDhcpv6ModeValues = []string{
+	model.SubnetDhcpv6Config_MODE_SERVER,
+	model.SubnetDhcpv6Config_MODE_RELAY,
+	model.SubnetDhcpv6Config_MODE_DEACTIVATED,
+	model.SubnetDhcpv6Config_MODE_SERVER_STATELESS,
 }
 
 var dnsServerPreferenceValues = []string{
@@ -80,6 +93,21 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
 			SdkFieldName: "IpBlocks",
+		},
+	},
+	"ip_address_type": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringInSlice(vpcSubnetIPAddressTypeValues, false),
+			Optional:     true,
+			Computed:     true,
+			ForceNew:     true,
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "string",
+			SdkFieldName:        "IpAddressType",
+			OmitIfEmpty:         true,
 		},
 	},
 	"advanced_config": {
@@ -164,7 +192,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 							Elem: &metadata.ExtendedSchema{
 								Schema: schema.Schema{
 									Type:         schema.TypeString,
-									ValidateFunc: validateSingleIP(),
+									ValidateFunc: validateCidrOrIPOrRangeAllowHostPrefix(),
 								},
 								Metadata: metadata.Metadata{
 									SchemaType: "string",
@@ -480,6 +508,102 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			ReflectType:  reflect.TypeOf(model.SubnetDhcpConfig{}),
 		},
 	},
+	"subnet_dhcpv6_config": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Optional: true,
+			Computed: true,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"dns_server_preference": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice(dnsServerPreferenceValues, false),
+							Optional:     true,
+						},
+						Metadata: metadata.Metadata{
+							IntroducedInVersion: "9.2.0",
+							SchemaType:          "string",
+							SdkFieldName:        "DnsServerPreference",
+							OmitIfEmpty:         true,
+						},
+					},
+					"mode": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice(vpcSubnetDhcpv6ModeValues, false),
+							Optional:     true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "Mode",
+						},
+					},
+					"dhcpv6_server_additional_config": {
+						Schema: schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"domain_names": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type: schema.TypeString,
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "DomainNames",
+										},
+									},
+									"reserved_ip_ranges": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type:         schema.TypeString,
+													ValidateFunc: validateCidrOrIPOrRange(),
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "ReservedIpRanges",
+										},
+									},
+								},
+							},
+							Optional: true,
+							Computed: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "struct",
+							SdkFieldName: "Dhcpv6ServerAdditionalConfig",
+							ReflectType:  reflect.TypeOf(model.DhcpV6ServerAdditionalConfig{}),
+						},
+					},
+				},
+			},
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "struct",
+			SdkFieldName:        "SubnetDhcpv6Config",
+			ReflectType:         reflect.TypeOf(model.SubnetDhcpv6Config{}),
+		},
+	},
 }
 
 func resourceNsxtVpcSubnet() *schema.Resource {
@@ -523,6 +647,9 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if err = validateDhcpConfig(d); err != nil {
+		return err
+	}
+	if err = validateSubnetDhcpv6Config(d); err != nil {
 		return err
 	}
 
@@ -581,6 +708,37 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 	return nil
 }
 
+func validateSubnetDhcpv6Config(d *schema.ResourceData) error {
+	v6, ok := d.GetOk("subnet_dhcpv6_config")
+	if !ok {
+		return nil
+	}
+	list := v6.([]interface{})
+	if len(list) == 0 {
+		return nil
+	}
+	cfg := list[0].(map[string]interface{})
+	mode, _ := cfg["mode"].(string)
+	if mode != model.SubnetDhcpv6Config_MODE_RELAY && mode != model.SubnetDhcpv6Config_MODE_DEACTIVATED {
+		return nil
+	}
+	ac, ok := cfg["dhcpv6_server_additional_config"]
+	if !ok {
+		return nil
+	}
+	addList := ac.([]interface{})
+	if len(addList) == 0 {
+		return nil
+	}
+	add := addList[0].(map[string]interface{})
+	domains := add["domain_names"].([]interface{})
+	ranges := add["reserved_ip_ranges"].([]interface{})
+	if len(domains) > 0 || len(ranges) > 0 {
+		return fmt.Errorf("dhcpv6_server_additional_config can not be specified when subnet_dhcpv6_config mode is DHCP_RELAY or DHCP_DEACTIVATED")
+	}
+	return nil
+}
+
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -623,6 +781,9 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	if err := validateDhcpConfig(d); err != nil {
 		return err
 	}
+	if err := validateSubnetDhcpv6Config(d); err != nil {
+		return err
+	}
 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
@@ -648,6 +809,13 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	// NSX throws an error
 	if (obj.SubnetDhcpConfig != nil) && (obj.SubnetDhcpConfig.Mode != nil && *obj.SubnetDhcpConfig.Mode == model.SubnetDhcpConfig_MODE_RELAY) {
 		obj.SubnetDhcpConfig.DhcpServerAdditionalConfig = nil
+	}
+
+	if obj.SubnetDhcpv6Config != nil && obj.SubnetDhcpv6Config.Mode != nil {
+		dhcpv6Mode := *obj.SubnetDhcpv6Config.Mode
+		if dhcpv6Mode == model.SubnetDhcpv6Config_MODE_RELAY || dhcpv6Mode == model.SubnetDhcpv6Config_MODE_DEACTIVATED {
+			obj.SubnetDhcpv6Config.Dhcpv6ServerAdditionalConfig = nil
+		}
 	}
 
 	sessionContext := getSessionContext(d, m)

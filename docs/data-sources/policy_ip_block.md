@@ -46,3 +46,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `ip_address_type` - IP address type reported by NSX for the block: `IPV4` or `IPV6`. Present when the API returns it (for example on NSX 9.2.0 and later for IPv6-capable deployments).

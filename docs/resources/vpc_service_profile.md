@@ -8,7 +8,7 @@ description: A resource to configure a VPC Service Profile.
 
 This resource provides a method for the management of a VPC Service Profile.
 
-This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards. IPv6-related arguments (`dhcpv6_config`, `dns_forwarder_config`, `ipv6_profile_paths`, `service_subnet_cidrs`) require NSX 9.2.0 or later.
 
 ## Example Usage
 
@@ -44,6 +44,30 @@ resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
       }
     }
   }
+
+  dhcpv6_config {
+    dhcpv6_server_config {
+      lease_time     = 86400
+      preferred_time = 69120
+      ntp_servers    = ["2001:db8::1"]
+      sntp_servers   = ["2001:db8::2"]
+      dns_client_config {
+        dns_server_ips = ["2001:db8::53"]
+      }
+      advanced_config {
+        is_distributed_dhcp = false
+      }
+    }
+  }
+
+  # Up to two paths: one IPv6 DAD profile and one NDRA profile (see data sources nsxt_policy_ipv6_dad_profile / nsxt_policy_ipv6_ndra_profile).
+  ipv6_profile_paths = ["/orgs/default/projects/myproj/infra/ipv6-dad-profiles/dad1", "/orgs/default/projects/myproj/infra/ipv6-ndra-profiles/ndra1"]
+
+  service_subnet_cidrs = ["fd12:3456::/64"]
+
+  dns_forwarder_config {
+    log_level = "INFO"
+  }
 }
 ```
 
@@ -63,7 +87,7 @@ The following arguments are supported:
 * `security_profile` - (Optional) Policy path for Security Profile
 * `qos_profile` - (Optional) Policy path for QoS profile
 * `dhcp_config` - (Required) DHCP configuration for this profile
-    * `dhcp_server_config` - (Optional) DHCP server configuration for this profile
+    * `dhcp_server_config` - (Optional / Computed) DHCP server configuration for this profile. NSX may supply defaults when this block is omitted or only partially specified.
         * `ntp_servers` - (Optional) List of NTP servers
         * `dns_client_config` - (Optional) DNS Client configuration
             * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
@@ -74,6 +98,24 @@ The following arguments are supported:
         If value is `true`, edge cluster will not be required. This is a DHCP server that dynamically assigns IP per VM port.
     * `dhcp_relay_config` - (Optional) DHCP Relay configuration
         * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
+* `dhcpv6_config` - (Optional) DHCPv6 profile template for VPC subnets (relay and/or server settings). Supported with NSX v9.2.0 and above.
+    * `dhcpv6_relay_config` - (Optional) DHCPv6 relay configuration
+        * `server_addresses` - (Optional) List of DHCPv6 server addresses for relay
+    * `dhcpv6_server_config` - (Optional) DHCPv6 server defaults for subnets using this profile
+        * `dns_client_config` - (Optional) Same structure as `dhcp_config.dhcp_server_config.dns_client_config` (DNS server IPs for clients)
+        * `lease_time` - (Optional) IPv6 lease time in seconds. Default is 86400.
+        * `preferred_time` - (Optional) Preferred lifetime in seconds for delegated prefixes. Minimum 48. If omitted, the server may derive a value from `lease_time`.
+        * `ntp_servers` - (Optional) NTP servers as FQDN or IPv6 address
+        * `sntp_servers` - (Optional) SNTP server IPv6 addresses
+        * `advanced_config` - (Optional) Same semantics as IPv4 `dhcp_config.dhcp_server_config.advanced_config`
+            * `is_distributed_dhcp` - (Optional / Computed) Distributed DHCP mode for DHCPv6
+* `dns_forwarder_config` - (Optional) VPC DNS forwarder settings. Supported with NSX v9.2.0 and above.
+    * `cache_size` - (Optional) DNS answer cache size
+    * `conditional_forwarder_zone_paths` - (Optional) Policy paths of conditional DNS forwarder zones
+    * `default_forwarder_zone_path` - (Optional) Policy path of the default forwarder zone
+    * `log_level` - (Optional) One of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `FATAL`
+* `ipv6_profile_paths` - (Optional / Computed) List of policy paths for IPv6 DAD and/or NDRA profiles used on VPC subnets (up to two paths: one DAD profile and one NDRA profile). Supported with NSX v9.2.0 and above. NSX may populate this when omitted from the configuration.
+* `service_subnet_cidrs` - (Optional / Computed) Service subnet CIDRs in `ip/prefix` form (IPv4 and/or IPv6). Minimum IPv4 size /28; must not overlap private, private TGW, or external IP blocks. Supported with NSX v9.2.0 and above. The manager may return CIDRs on read when this argument is omitted; Terraform keeps them in state without forcing a change.
 
 ## Attributes Reference
 

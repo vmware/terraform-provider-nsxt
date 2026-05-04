@@ -230,3 +230,43 @@ func TestMockResourceNsxtVpcSubnetDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestValidateSubnetDhcpv6Config(t *testing.T) {
+	res := resourceNsxtVpcSubnet()
+	t.Run("DHCP_RELAY with dhcpv6_server_additional_config is rejected", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_RELAY,
+			"dhcpv6_server_additional_config": []interface{}{map[string]interface{}{
+				"domain_names": []interface{}{"example.com"},
+			}},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		err := validateSubnetDhcpv6Config(d)
+		require.Error(t, err)
+	})
+	t.Run("DHCP_DEACTIVATED with reserved_ip_ranges is rejected", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_DEACTIVATED,
+			"dhcpv6_server_additional_config": []interface{}{map[string]interface{}{
+				"reserved_ip_ranges": []interface{}{"2001:db8::10"},
+			}},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		err := validateSubnetDhcpv6Config(d)
+		require.Error(t, err)
+	})
+	t.Run("DHCP_SERVER with additional config is allowed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_SERVER,
+			"dhcpv6_server_additional_config": []interface{}{map[string]interface{}{
+				"domain_names": []interface{}{"example.com"},
+			}},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		err := validateSubnetDhcpv6Config(d)
+		require.NoError(t, err)
+	})
+}

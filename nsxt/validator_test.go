@@ -68,6 +68,30 @@ func TestUnitNsxt_ValidateCidrOrIPOrRange(t *testing.T) {
 	}
 }
 
+func TestUnitNsxt_ValidateCidrOrIPOrRangeAllowHostPrefix(t *testing.T) {
+	validator := validateCidrOrIPOrRangeAllowHostPrefix()
+	cases := map[string]struct {
+		value  interface{}
+		result bool
+	}{
+		"hostIpv4WithPrefix": {value: "10.203.240.2/26", result: true},
+		"hostIpv6WithPrefix": {value: "fd00:240:2400:0:0:0:0:2/64", result: true},
+		"networkCidr":        {value: "10.203.240.0/26", result: true},
+		"plainIp":            {value: "10.203.240.2", result: true},
+		"invalid":            {value: "not-an-ip", result: false},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			_, errors := validator(tc.value, tn)
+			if len(errors) > 0 && tc.result {
+				t.Errorf("unexpected error for %v: %v", tc.value, errors)
+			} else if len(errors) == 0 && !tc.result {
+				t.Errorf("expected error for %v", tc.value)
+			}
+		})
+	}
+}
+
 func TestUnitNsxt_ValidateCidrOrIPOrRangeList(t *testing.T) {
 
 	cases := map[string]struct {

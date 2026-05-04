@@ -36,6 +36,7 @@ The following arguments are supported:
     * `site_path` - (Optional) This represents the path of the site which is managed by Global Manager. For the local manager, if set, this needs to point to 'default'.
 * `tier0_gateway_paths` - (Optional) The tier 0 has to be pre-created before Project is created. The tier 0 typically provides connectivity to external world. List of sites for Project has to be subset of sites where the tier 0 spans.
 * `external_ipv4_blocks` - (Optional) IP blocks used for allocating CIDR blocks for public subnets. These can be consumed by all the VPCs under this project. Available since NSX 4.1.1.
+* `ipv6_blocks` - (Optional) Policy paths of external IPv6 blocks. These blocks can be consumed by all the VPCs under this project. Only IP address blocks with EXTERNAL visibility and ip_address_type IPV6 are supported. Available since NSX 9.2.0.
 * `tgw_external_connections` - (Optional) Transit gateway connection objects available to the project. Gateway connection and distributed VLAN connection object path will be allowed. Available since NSX 9.0.0.
 * `default_security_profile`- (Optional) Default security profile properties for project.
     * `north_south_firewall` - (Required) North South firewall configuration.

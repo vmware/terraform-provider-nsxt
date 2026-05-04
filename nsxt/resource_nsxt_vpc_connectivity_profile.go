@@ -78,6 +78,27 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "ExternalIpBlocks",
 		},
 	},
+	"ipv6_blocks": {
+		Schema: schema.Schema{
+			Type:        schema.TypeList,
+			Description: "External IPv6 policy paths; subset of the project's ipv6_blocks. Requires NSX 9.2.0 or later.",
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:          "list",
+			SdkFieldName:        "Ipv6Blocks",
+			IntroducedInVersion: "9.2.0",
+		},
+	},
 	"service_gateway": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
@@ -98,6 +119,19 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 										Metadata: metadata.Metadata{
 											SchemaType:   "bool",
 											SdkFieldName: "EnableDefaultSnat",
+										},
+									},
+									"auto_snat_ip_block": {
+										Schema: schema.Schema{
+											Type:         schema.TypeString,
+											ValidateFunc: validatePolicyPath(),
+											Optional:     true,
+											Description:  "Policy path of the IP block for default SNAT. Requires NSX 9.2.0 or later.",
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:          "string",
+											SdkFieldName:        "AutoSnatIpBlock",
+											IntroducedInVersion: "9.2.0",
 										},
 									},
 								},

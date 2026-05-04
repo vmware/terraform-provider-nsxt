@@ -155,6 +155,37 @@ func getContextString(prefix, parent string, elemType reflect.Type) string {
 	return fmt.Sprintf("[%s %s]", prefix, ctx)
 }
 
+// structToSchemaGatedReadPlaceholder returns a Terraform state value for an attribute
+// that is not read from the API on managers below IntroducedInVersion. Using the
+// schema default when present keeps Optional+Default fields aligned with config on
+// those managers (otherwise state stays unset while config still applies Default).
+func structToSchemaGatedReadPlaceholder(item *ExtendedSchema) interface{} {
+	if len(item.Metadata.PolymorphicType) > 0 {
+		return nil
+	}
+	switch item.Metadata.SchemaType {
+	case "list", "set", "struct":
+		return []interface{}{}
+	case "string":
+		if item.Schema.Default != nil {
+			return item.Schema.Default
+		}
+		return ""
+	case "int":
+		if item.Schema.Default != nil {
+			return item.Schema.Default
+		}
+		return 0
+	case "bool":
+		if item.Schema.Default != nil {
+			return item.Schema.Default
+		}
+		return false
+	default:
+		return nil
+	}
+}
+
 // StructToSchema converts NSX model struct to terraform schema
 // currently supports nested subtype and trivial types
 func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) (err error) {
@@ -170,6 +201,17 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if item.Metadata.Skip {
 			continue
 		}
+		if item.Metadata.IntroducedInVersion != "" && util.NsxVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
+			metadataTraceLogger("%s skip key %s as NSX version is lower than %v (StructToSchema read)", ctx, key, item.Metadata.IntroducedInVersion)
+			if placeholder := structToSchemaGatedReadPlaceholder(item); placeholder != nil {
+				if len(parent) > 0 {
+					parentMap[key] = placeholder
+				} else {
+					d.Set(key, placeholder)
+				}
+			}
+			continue
+		}
 
 		metadataTraceLogger("%s inspecting key %s", ctx, key)
 		if len(parent) > 0 {
@@ -183,7 +225,20 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				ctx, key, elem.Type())
 			return
 		}
-		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
+		fieldVal := elem.FieldByName(item.Metadata.SdkFieldName)
+		if fieldVal.IsNil() {
+			// Nil slices/maps never reach the list/set switch below; write an empty
+			// collection so optional list attributes (e.g. NtpServers) match config
+			// that omits them (avoids perpetual + ntp_servers = [] drift).
+			if (item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set") && fieldVal.Kind() == reflect.Slice {
+				if len(parent) > 0 {
+					parentMap[key] = []interface{}{}
+				} else {
+					d.Set(key, []interface{}{})
+				}
+				metadataTraceLogger("%s assign empty %s for nil API slice %s", ctx, item.Metadata.SchemaType, key)
+				continue
+			}
 			metadataTraceLogger("%s skip key %s with nil value", ctx, key)
 			continue
 		}
@@ -291,7 +346,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			metadataTraceLogger("%s skip key %s", ctx, key)
 			continue
 		}
-		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
+		if item.Metadata.IntroducedInVersion != "" && util.NsxVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
 			metadataTraceLogger("%s skip key %s as NSX version is lower than %v", ctx, key, item.Metadata.IntroducedInVersion)
 			continue
 		}

@@ -129,6 +129,25 @@ func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 	}
 }
 
+// validateCidrOrIPOrRangeAllowHostPrefix is like validateCidrOrIPOrRange but accepts CIDR strings
+// where the address may include host bits (e.g. 10.0.0.2/26 as returned by NSX for DHCP server
+// addresses), not only network-prefix CIDRs.
+func validateCidrOrIPOrRangeAllowHostPrefix() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isCidr(v, true, true) && !isSingleIP(v) && !isIPRange(v) {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid CIDR or IP or Range, got: %s", k, v))
+		}
+		return
+	}
+}
+
 func validateCidrOrIPOrRangeList() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
