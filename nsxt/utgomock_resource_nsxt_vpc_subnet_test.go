@@ -180,6 +180,77 @@ func TestMockResourceNsxtVpcSubnetUpdate(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtVpcSubnetDnsServerPreference(t *testing.T) {
+	dnsPreference := nsxModel.SubnetDhcpConfig_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS
+	dhcpMode := nsxModel.SubnetDhcpConfig_MODE_SERVER
+
+	t.Run("Read populates dns_server_preference from API response", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSubnetSDK, _, restore := setupSubnetMock(t, ctrl)
+		defer restore()
+
+		response := subnetAPIResponse()
+		response.SubnetDhcpConfig = &nsxModel.SubnetDhcpConfig{
+			Mode:                &dhcpMode,
+			DnsServerPreference: &dnsPreference,
+		}
+		mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(response, nil)
+
+		res := resourceNsxtVpcSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		d.SetId(subnetID)
+
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		err := resourceNsxtVpcSubnetRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		dhcpConfigs := d.Get("dhcp_config").([]interface{})
+		require.Len(t, dhcpConfigs, 1)
+		dhcpConfig := dhcpConfigs[0].(map[string]interface{})
+		assert.Equal(t, dnsPreference, dhcpConfig["dns_server_preference"])
+	})
+
+	t.Run("Create sends dns_server_preference to API", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSubnetSDK, _, restore := setupSubnetMock(t, ctrl)
+		defer restore()
+
+		var capturedSubnet nsxModel.VpcSubnet
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(nsxModel.VpcSubnet{}, notFoundErr),
+			mockSubnetSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), subnetID, gomock.Any()).Do(
+				func(_, _, _, _ string, s nsxModel.VpcSubnet) {
+					capturedSubnet = s
+				}).Return(nil),
+			mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(subnetAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcSubnet()
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{
+			map[string]interface{}{
+				"mode":                          dhcpMode,
+				"dns_server_preference":         dnsPreference,
+				"dhcp_server_additional_config": []interface{}{},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtVpcSubnetCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.NotNil(t, capturedSubnet.SubnetDhcpConfig)
+		assert.Equal(t, dnsPreference, *capturedSubnet.SubnetDhcpConfig.DnsServerPreference)
+	})
+}
+
 func TestMockResourceNsxtVpcSubnetDelete(t *testing.T) {
 	t.Run("Delete success with no ports", func(t *testing.T) {
 		// Override poll delay for fast test
