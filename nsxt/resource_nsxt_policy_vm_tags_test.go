@@ -68,7 +68,7 @@ func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
-			testAccEnvDefined(t, "NSXT_TEST_VM_SEGMENT_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_SEGMENT_NAME")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -126,7 +126,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
-	vmID := getTestVMID(false)
+	vmID := getTestVMID(true)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
@@ -239,6 +239,10 @@ resource "nsxt_policy_vm_tags" "test" {
 
 func testAccNSXPolicyVMPortTagsCreateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_segment" "segment" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_vm_tags" "test" {
   instance_id = "%s"
 
@@ -248,22 +252,26 @@ resource "nsxt_policy_vm_tags" "test" {
   }
 
   port {
-    segment_path = "/infra/segments/%s"
+    segment_path = data.nsxt_policy_segment.segment.path
     tag {
       scope = "color"
       tag   = "green"
     }
   }
-}`, instanceID, getTestVMSegmentID())
+}`, getTestVMSegmentName(), instanceID)
 }
 
 func testAccNSXPolicyVMPortTagsUpdateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_segment" "segment" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_vm_tags" "test" {
   instance_id = "%s"
 
   port {
-    segment_path = "/infra/segments/%s"
+    segment_path = data.nsxt_policy_segment.segment.path
     tag {
       scope = "color"
       tag   = "green"
@@ -273,5 +281,5 @@ resource "nsxt_policy_vm_tags" "test" {
       tag   = "round"
     }
   }
-}`, instanceID, getTestVMSegmentID())
+}`, getTestVMSegmentName(), instanceID)
 }

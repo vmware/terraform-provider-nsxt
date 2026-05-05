@@ -151,11 +151,14 @@ func getTestVMID(isMultitenancy bool) string {
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
-func getTestVMSegmentID() string {
-	return os.Getenv("NSXT_TEST_VM_SEGMENT_ID")
+func getTestVMSegmentName() string {
+	return os.Getenv("NSXT_TEST_VM_SEGMENT_NAME")
 }
 
-func getTestVMName() string {
+func getTestVMName(withContext bool) string {
+	if withContext {
+		return os.Getenv("NSXT_TEST_MULTITENANCY_VM_NAME")
+	}
 	return os.Getenv("NSXT_TEST_VM_NAME")
 }
 
