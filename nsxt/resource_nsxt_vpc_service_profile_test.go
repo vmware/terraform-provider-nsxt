@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var accTestPolicyVpcServiceProfileCreateAttributes = map[string]string{
@@ -29,6 +30,8 @@ var accTestPolicyVpcServiceProfileUpdateAttributes = map[string]string{
 	"dns_server_ips":   "7.7.7.2",
 	"server_addresses": "11.11.11.111",
 }
+
+var accTestPolicyVpcServiceProfileDnsForwarderHelper = getAccTestResourceName()
 
 func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_service_profile.test"
@@ -313,6 +316,54 @@ func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtVpcServiceProfile_dnsForwarder(t *testing.T) {
+	testResourceName := "nsxt_vpc_service_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcServiceProfileCheckDestroy(state, accTestPolicyVpcServiceProfileDnsForwarderHelper)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcServiceProfileWithDnsForwarder(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileDnsForwarderHelper),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dns_forwarder_config.0.default_forwarder_zone_path"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.conditional_forwarder_zone_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.log_level", model.PolicyVpcDnsForwarder_LOG_LEVEL_INFO),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.cache_size", "1024"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcServiceProfileWithDnsForwarder(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dns_forwarder_config.0.default_forwarder_zone_path"),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.0.conditional_forwarder_zone_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dns_forwarder_config.0.conditional_forwarder_zone_paths.0"),
+				),
+			},
+			{
+				// Step 3: remove dns_forwarder_config but keep zone resources in config so they
+				// are not destroyed while the service profile still holds references to them.
+				Config: testAccNsxtVpcServiceProfileWithDnsForwarderNoConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtVpcServiceProfileExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -532,4 +583,68 @@ resource "nsxt_vpc_service_profile" "test" {
 `, testAccNsxtProjectContext(), attrMap["display_name"], testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"],
 		attrMap["v6_lease"], attrMap["v6_pref"], attrMap["v6_ntp"], attrMap["v6_sntp"], attrMap["v6_dns"],
 		attrMap["fwd_log"], attrMap["svc_cidr"])
+}
+
+// testAccNsxtVpcServiceProfileDnsForwarderZones returns the HCL for the two
+// nsxt_policy_dns_forwarder_zone resources shared by the DNS forwarder test configs below.
+func testAccNsxtVpcServiceProfileDnsForwarderZones() string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_dns_forwarder_zone" "test" {
+  %s
+  display_name     = "%s"
+  upstream_servers = ["8.8.8.8"]
+}
+
+resource "nsxt_policy_dns_forwarder_zone" "conditional" {
+  %s
+  display_name     = "%s-cond"
+  dns_domain_names = ["corp.example.com"]
+  upstream_servers = ["1.1.1.1"]
+}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileDnsForwarderHelper,
+		testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileDnsForwarderHelper)
+}
+
+func testAccNsxtVpcServiceProfileWithDnsForwarder(withConditional bool) string {
+	conditionalPaths := ""
+	if withConditional {
+		conditionalPaths = `
+    conditional_forwarder_zone_paths = [nsxt_policy_dns_forwarder_zone.conditional.path]`
+	}
+	return fmt.Sprintf(`
+%s
+
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+
+  dhcp_config {
+  }
+
+  dns_forwarder_config {
+    default_forwarder_zone_path = nsxt_policy_dns_forwarder_zone.test.path%s
+    log_level                   = "%s"
+    cache_size                  = 1024
+  }
+}`, testAccNsxtVpcServiceProfileDnsForwarderZones(),
+		testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileDnsForwarderHelper,
+		conditionalPaths, model.PolicyVpcDnsForwarder_LOG_LEVEL_INFO)
+}
+
+// testAccNsxtVpcServiceProfileWithDnsForwarderNoConfig keeps both zone resources in the HCL
+// but omits dns_forwarder_config from the service profile. This prevents the zones from being
+// destroyed (and triggering NSX "still referenced" errors) while the service profile still
+// holds path references; the zones are cleaned up in the final test-framework destroy pass
+// after the service profile (and its references) is deleted first.
+func testAccNsxtVpcServiceProfileWithDnsForwarderNoConfig() string {
+	return fmt.Sprintf(`
+%s
+
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+
+  dhcp_config {
+  }
+}`, testAccNsxtVpcServiceProfileDnsForwarderZones(),
+		testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileDnsForwarderHelper)
 }
