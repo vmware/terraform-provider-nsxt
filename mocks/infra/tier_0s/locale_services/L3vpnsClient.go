@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockL3vpnsClient is a mock of L3vpnsClient interface.

@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockPathExpressionsClient is a mock of PathExpressionsClient interface.

@@ -46,6 +46,9 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+test-unit:
+	go test -v ./nsxt -tags=unittest  -run='^(TestMock.*Nsxt.*|TestUnitNsxt_.*)'
+
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \

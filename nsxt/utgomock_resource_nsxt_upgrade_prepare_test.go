@@ -16,7 +16,6 @@ package nsxt
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,6 +26,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/bundles"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/eula"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/pre_upgrade_checks"
+	"go.uber.org/mock/gomock"
 
 	upgrademocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx/upgrade"
 	bundlesmocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx/upgrade/bundles"
