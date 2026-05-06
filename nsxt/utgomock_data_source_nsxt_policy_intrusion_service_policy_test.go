@@ -33,6 +33,14 @@ var (
 
 func idsDfwPolicyModel() nsxModel.IdsSecurityPolicy {
 	stateful := true
+	resourceType := "IdsRule"
+	ruleID := "test-rule-id"
+	ruleName := "test-rule"
+	ruleNotes := "Test rule notes"
+	ruleAction := "DETECT"
+	ruleDirection := "IN_OUT"
+	ruleId := int64(12345)
+
 	return nsxModel.IdsSecurityPolicy{
 		Id:          &idsDfwPolID,
 		DisplayName: &idsDfwPolName,
@@ -40,6 +48,17 @@ func idsDfwPolicyModel() nsxModel.IdsSecurityPolicy {
 		Path:        &idsDfwPolPath,
 		Category:    &idsDfwPolCategory,
 		Stateful:    &stateful,
+		Rules: []nsxModel.IdsRule{
+			{
+				Id:           &ruleID,
+				DisplayName:  &ruleName,
+				Notes:        &ruleNotes,
+				ResourceType: &resourceType,
+				Action:       &ruleAction,
+				Direction:    &ruleDirection,
+				RuleId:       &ruleId,
+			},
+		},
 	}
 }
 
@@ -80,6 +99,18 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 		assert.Equal(t, idsDfwPolName, d.Get("display_name"))
 		assert.Equal(t, idsDfwPolCategory, d.Get("category"))
 		assert.Equal(t, true, d.Get("stateful"))
+		// Check that rules are present
+		rules := d.Get("rule").([]interface{})
+		assert.Len(t, rules, 1)
+		rule := rules[0].(map[string]interface{})
+		assert.Equal(t, 12345, rule["rule_id"])
+		assert.Equal(t, "test-rule", rule["display_name"])
+		assert.Equal(t, "DETECT", rule["action"])
+		_, hasNsxId := rule["nsx_id"]
+		assert.True(t, hasNsxId, "nsx_id should be included in IDPS data source embedded rules for consistency with resources")
+		// Verify scope is included in data source embedded rules (as per original implementation)
+		_, hasScope := rule["scope"]
+		assert.True(t, hasScope, "scope should be included in IDPS data source embedded rules")
 	})
 
 	t.Run("by id not found", func(t *testing.T) {
@@ -127,6 +158,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 			Results:     []nsxModel.IdsSecurityPolicy{idsDfwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
+		mockSDK.EXPECT().Get(idsDfwPolDomain, idsDfwPolID).Return(idsDfwPolicyModel(), nil)
 
 		ds := dataSourceNsxtPolicyIntrusionServicePolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -147,6 +179,8 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 			Results:     []nsxModel.IdsSecurityPolicy{idsDfwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
+		// Expect additional Get call to fetch complete policy with rules
+		mockSDK.EXPECT().Get(idsDfwPolDomain, idsDfwPolID).Return(idsDfwPolicyModel(), nil)
 
 		ds := dataSourceNsxtPolicyIntrusionServicePolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{

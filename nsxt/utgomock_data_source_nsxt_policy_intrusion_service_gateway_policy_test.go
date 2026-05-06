@@ -32,12 +32,31 @@ var (
 )
 
 func idsGatewayPolicyModel() nsxModel.IdsGatewayPolicy {
+	resourceType := "IdsRule"
+	ruleID := "test-gw-rule-id"
+	ruleName := "test-gw-rule"
+	ruleNotes := "Test Gateway rule notes"
+	ruleAction := "DETECT"
+	ruleDirection := "IN_OUT"
+	ruleId := int64(12345)
+
 	return nsxModel.IdsGatewayPolicy{
 		Id:          &idsGwPolID,
 		DisplayName: &idsGwPolName,
 		Description: &idsGwPolDesc,
 		Path:        &idsGwPolPath,
 		Category:    &idsGwPolCategory,
+		Rules: []nsxModel.IdsRule{
+			{
+				Id:           &ruleID,
+				DisplayName:  &ruleName,
+				Notes:        &ruleNotes,
+				ResourceType: &resourceType,
+				Action:       &ruleAction,
+				Direction:    &ruleDirection,
+				RuleId:       &ruleId,
+			},
+		},
 	}
 }
 
@@ -77,6 +96,20 @@ func TestMockDataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(t *testing.T)
 		assert.Equal(t, idsGwPolID, d.Id())
 		assert.Equal(t, idsGwPolName, d.Get("display_name"))
 		assert.Equal(t, idsGwPolCategory, d.Get("category"))
+		// Check that rules are present
+		rules := d.Get("rule").([]interface{})
+		assert.Len(t, rules, 1)
+		rule := rules[0].(map[string]interface{})
+		assert.Equal(t, 12345, rule["rule_id"])
+		assert.Equal(t, "test-gw-rule", rule["display_name"])
+		assert.Equal(t, "DETECT", rule["action"])
+		_, hasNsxId := rule["nsx_id"]
+		assert.True(t, hasNsxId, "nsx_id should be included in IDPS data source embedded rules for consistency with resources")
+		_, hasScope := rule["scope"]
+		assert.True(t, hasScope, "scope should be included in IDPS data source embedded rules")
+		// Verify oversubscription is excluded for Gateway rules
+		_, hasOversubscription := rule["oversubscription"]
+		assert.False(t, hasOversubscription, "oversubscription should be excluded from Gateway IDPS rules")
 	})
 
 	t.Run("by id not found", func(t *testing.T) {
@@ -124,6 +157,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(t *testing.T)
 			Results:     []nsxModel.IdsGatewayPolicy{idsGatewayPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
+		mockSDK.EXPECT().Get(idsGwPolDomain, idsGwPolID).Return(idsGatewayPolicyModel(), nil)
 
 		ds := dataSourceNsxtPolicyIntrusionServiceGatewayPolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
