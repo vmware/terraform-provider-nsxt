@@ -14,10 +14,10 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_lb_fast_udp_application_profile" "test" {
-  display_name              = "test"
-  description               = "Terraform provisioned profile"
-  idle_timeout              = 120
-  ha_flow_mirroring_enabled = true
+  display_name           = "test"
+  description            = "Terraform provisioned profile"
+  idle_timeout           = 120
+  flow_mirroring_enabled = true
 }
 ```
 
@@ -30,7 +30,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `idle_timeout` - (Optional) Timeout in seconds to specify how long UDP connection can remain open. Default is 300.
-* `ha_flow_mirroring_enabled` - (Optional) If enabled, all the flows to the bounded virtual server are mirrored to the standby node. Default is False.
+* `flow_mirroring_enabled` - (Optional) If enabled, all the flows to the bounded virtual server are mirrored to the standby node. Default is `false`.
 
 ## Attributes Reference
 
