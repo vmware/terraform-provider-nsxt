@@ -103,7 +103,7 @@ func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeHost)
+	err = setHostSwitchSpecInSchema(d, m, obj.HostSwitchSpec, nodeTypeHost)
 	if err != nil {
 		return err
 	}

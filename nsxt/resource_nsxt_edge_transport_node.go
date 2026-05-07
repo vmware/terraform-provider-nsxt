@@ -1187,25 +1187,35 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfig
 	return cpuConfig
 }
 
-func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
+func listHostSwitchProfiles(m interface{}) ([]model.PolicyBaseHostSwitchProfile, error) {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	client := cliHostSwitchProfilesClient(sessionContext, connector)
 	t := true
-	// we retrieve a list of profiles instead of using Get(), as the id could be either MP id or Policy id
+	// retrieve a list of profiles - the id could be either MP id or Policy id
 	list, err := client.List(nil, nil, nil, nil, &t, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	converter := bindings.NewTypeConverter()
 
+	var profiles []model.PolicyBaseHostSwitchProfile
 	for _, structValue := range list.Results {
 		baseInterface, errs := converter.ConvertToGolang(structValue, model.PolicyBaseHostSwitchProfileBindingType())
 		if errs != nil {
-			return "", errs[0]
+			return nil, errs[0]
 		}
-		base := baseInterface.(model.PolicyBaseHostSwitchProfile)
+		profiles = append(profiles, baseInterface.(model.PolicyBaseHostSwitchProfile))
+	}
+	return profiles, nil
+}
 
+func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
+	profiles, err := listHostSwitchProfiles(m)
+	if err != nil {
+		return "", err
+	}
+	for _, base := range profiles {
 		if *base.Id == id || *base.RealizationId == id {
 			resourceType, ok := mpHostSwitchProfileTypeFromPolicyType[base.ResourceType]
 			if !ok {
@@ -1214,8 +1224,55 @@ func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) 
 			return resourceType, nil
 		}
 	}
-
 	return "", fmt.Errorf("Host Switch Profile type not found for %s", id)
+}
+
+// getHostSwitchProfilePathFromRealizationID converts an MP realization UUID
+// returned by the MP API into the matching policy path. If the value is already
+// a policy path, or if the lookup fails, the original value is returned as-is.
+func getHostSwitchProfilePathFromRealizationID(m interface{}, id string) string {
+	if isPolicyPath(id) {
+		return id
+	}
+	profiles, err := listHostSwitchProfiles(m)
+	if err != nil {
+		log.Printf("[WARN] Failed to list host switch profiles for path normalization: %v", err)
+		return id
+	}
+	for _, base := range profiles {
+		if base.RealizationId != nil && *base.RealizationId == id {
+			if base.Path != nil {
+				return *base.Path
+			}
+		}
+	}
+	return id
+}
+
+// getTransportZonePathFromRealizationID converts an MP realization UUID returned
+// by the MP API into the matching policy path. If the value is already a policy
+// path, or if the lookup fails, the original value is returned as-is.
+func getTransportZonePathFromRealizationID(m interface{}, id string) string {
+	if isPolicyPath(id) {
+		return id
+	}
+	connector := getPolicyConnector(m)
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliTransportZonesClient(sessionContext, connector)
+	f := false
+	list, err := client.List(defaultSite, getPolicyEnforcementPoint(m), nil, &f, nil, nil, &f, nil)
+	if err != nil {
+		log.Printf("[WARN] Failed to list transport zones for path normalization: %v", err)
+		return id
+	}
+	for _, tz := range list.Results {
+		if tz.RealizationId != nil && *tz.RealizationId == id {
+			if tz.Path != nil {
+				return *tz.Path
+			}
+		}
+	}
+	return id
 }
 
 func getHostSwitchProfileIDsFromSchema(m interface{}, parentMap map[string]interface{}) ([]mpmodel.HostSwitchProfileTypeIdEntry, error) {
@@ -1704,7 +1761,7 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	d.Set("failure_domain", obj.FailureDomainId)
 
 	if obj.HostSwitchSpec != nil {
-		err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeEdge)
+		err = setHostSwitchSpecInSchema(d, m, obj.HostSwitchSpec, nodeTypeEdge)
 		if err != nil {
 			return handleReadError(d, "TransportNode", id, err)
 		}
@@ -1847,7 +1904,7 @@ func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error
 	return []interface{}{elem}, nil
 }
 
-func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, nodeType string) error {
+func setHostSwitchSpecInSchema(d *schema.ResourceData, m interface{}, spec *data.StructValue, nodeType string) error {
 	converter := bindings.NewTypeConverter()
 
 	base, errs := converter.ConvertToGolang(spec, mpmodel.HostSwitchSpecBindingType())
@@ -1869,7 +1926,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
 			elem["host_switch_name"] = sw.HostSwitchName
-			setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds, elem)
+			setHostSwitchProfileIDsInSchema(m, sw.HostSwitchProfileIds, elem)
 			var err error
 			if sw.IpAssignmentSpec != nil {
 				elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
@@ -1908,7 +1965,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 					e := make(map[string]interface{})
 					hsCfgOpt := make(map[string]interface{})
 					hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
-					setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds, hsCfgOpt)
+					setHostSwitchProfileIDsInSchema(m, tnpsc.HostSwitchConfigOption.HostSwitchProfileIds, hsCfgOpt)
 					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
 						hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
 						if err != nil {
@@ -1937,7 +1994,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 				}
 				elem["vmk_install_migration"] = vmkIMList
 			}
-			elem["transport_zone_endpoint"] = setTransportZoneEndpointInSchema(sw.TransportZoneEndpoints)
+			elem["transport_zone_endpoint"] = setTransportZoneEndpointInSchema(m, sw.TransportZoneEndpoints)
 
 			swList = append(swList, elem)
 		}
@@ -1949,11 +2006,15 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 	return nil
 }
 
-func setTransportZoneEndpointInSchema(endpoints []mpmodel.TransportZoneEndPoint) interface{} {
+func setTransportZoneEndpointInSchema(m interface{}, endpoints []mpmodel.TransportZoneEndPoint) interface{} {
 	var endpointList []map[string]interface{}
 	for _, endpoint := range endpoints {
 		e := make(map[string]interface{})
-		e["transport_zone"] = endpoint.TransportZoneId
+		tzID := ""
+		if endpoint.TransportZoneId != nil {
+			tzID = getTransportZonePathFromRealizationID(m, *endpoint.TransportZoneId)
+		}
+		e["transport_zone"] = tzID
 		var tzpIDs []string
 		for _, tzpID := range endpoint.TransportZoneProfileIds {
 			tzpIDs = append(tzpIDs, *tzpID.ProfileId)
@@ -2101,19 +2162,20 @@ func setIPv6AssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 	return []interface{}{elem}, nil
 }
 
-func setHostSwitchProfileIDsInSchema(hspIDs []mpmodel.HostSwitchProfileTypeIdEntry, parentMap map[string]interface{}) {
+func setHostSwitchProfileIDsInSchema(m interface{}, hspIDs []mpmodel.HostSwitchProfileTypeIdEntry, parentMap map[string]interface{}) {
 	var hostSwitchProfileIDs []interface{}
 	for _, hspID := range hspIDs {
-		if hspID.Key == nil {
+		if hspID.Key == nil || hspID.Value == nil {
 			continue
 		}
+		normalized := getHostSwitchProfilePathFromRealizationID(m, *hspID.Value)
 		if *hspID.Key == mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE {
-			parentMap["uplink_profile"] = hspID.Value
+			parentMap["uplink_profile"] = normalized
 		}
 		if *hspID.Key == mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_VTEPHAHOSTSWITCHPROFILE {
-			parentMap["vtep_ha_profile"] = hspID.Value
+			parentMap["vtep_ha_profile"] = normalized
 		}
-		hostSwitchProfileIDs = append(hostSwitchProfileIDs, hspID.Value)
+		hostSwitchProfileIDs = append(hostSwitchProfileIDs, normalized)
 	}
 
 	// deprecated way of specifying profiles in single list
