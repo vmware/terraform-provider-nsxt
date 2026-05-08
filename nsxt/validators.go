@@ -21,6 +21,9 @@ func isSinglePort(vi interface{}) bool {
 	var i uint64
 	switch vi := vi.(type) {
 	case int:
+		if vi < 0 {
+			return false
+		}
 		i = uint64(vi)
 	case string:
 		var err error
