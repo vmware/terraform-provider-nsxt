@@ -145,6 +145,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 	poolID := getPolicyIDFromPath(poolPath)
 
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	if id == "" {
 		id = newUUID()
 	} else {

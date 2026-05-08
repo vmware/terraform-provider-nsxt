@@ -239,6 +239,9 @@ func resourceNsxtPolicyGatewayPrefixListCreate(d *schema.ResourceData, m interfa
 
 	// Initialize resource Id and verify this ID is not yet used
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	if id == "" {
 		id = newUUID()
 	} else {

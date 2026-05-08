@@ -38,7 +38,7 @@ func dataSourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interfac
 
 	ips := d.Get("allocation_ips").(string)
 	query := make(map[string]string)
-	query["allocation_ips"] = ips
+	query["allocation_ips"] = escapeSpecialCharacters(ips)
 
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "VpcIpAddressAllocation", query, false)
 	if err != nil {

@@ -247,9 +247,9 @@ func resourceNsxtPolicyTier0GatewayGRETunnelExists(id, localeServicePath string,
 func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	localeServicePath := d.Get("locale_service_path").(string)
 	isT0, tier0id, localeSvcID, err := parseLocaleServicePolicyPath(localeServicePath)

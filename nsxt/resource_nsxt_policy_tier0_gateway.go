@@ -472,7 +472,9 @@ func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]i
 	for _, agg := range bgpConfig.RouteAggregations {
 		elem := make(map[string]interface{})
 		elem["prefix"] = agg.Prefix
-		elem["summary_only"] = *agg.SummaryOnly
+		if agg.SummaryOnly != nil {
+			elem["summary_only"] = *agg.SummaryOnly
+		}
 		aggregationList = append(aggregationList, elem)
 	}
 	cfgMap["route_aggregation"] = aggregationList

@@ -50,7 +50,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 
 	if isPolicyGlobalManager(m) || util.NsxVersionHigherOrEqual("3.2.0") {
 		query := make(map[string]string)
-		query["parent_path"] = edgeClusterPath
+		query["parent_path"] = escapeSpecialCharacters(edgeClusterPath)
 		if memberIndexSet {
 			query["member_index"] = strconv.Itoa(memberIndex.(int))
 		}

@@ -248,6 +248,9 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	tier0Path := d.Get("gateway_path").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
 

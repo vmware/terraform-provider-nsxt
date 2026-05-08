@@ -67,9 +67,9 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	}
 	query := make(map[string]string)
 	if servicePath != "" {
-		query["parent_path"] = servicePath
+		query["parent_path"] = escapeSpecialCharacters(servicePath)
 	} else {
-		query["parent_path"] = t0Gw + "/locale-services/*"
+		query["parent_path"] = escapeSpecialCharacters(t0Gw) + escapeSpecialCharacters("/locale-services/") + "*"
 	}
 	var isT0 bool
 	var err error

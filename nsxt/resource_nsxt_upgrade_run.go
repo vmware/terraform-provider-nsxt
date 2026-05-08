@@ -982,6 +982,10 @@ func setUpgradeRunOutput(upgradeClientSet *upgradeClientSet, d *schema.ResourceD
 	}
 	var states []map[string]interface{}
 	for _, result := range status.ComponentStatus {
+		if result.ComponentType == nil || result.Status == nil {
+			log.Printf("[WARNING] upgrade component status entry has nil ComponentType or Status, skipping")
+			continue
+		}
 		elem := make(map[string]interface{})
 		elem["type"] = *result.ComponentType
 		elem["status"] = *result.Status

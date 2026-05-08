@@ -157,15 +157,15 @@ func policyOspfAreaPatch(d *schema.ResourceData, m interface{}, id string) error
 
 func resourceNsxtPolicyOspfAreaCreate(d *schema.ResourceData, m interface{}) error {
 
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 
 	// Only a single OSPF area is supported so far per OSPF config, thus we don't check
 	// here for nsx id existence
 
-	err := policyOspfAreaPatch(d, m, id)
+	err = policyOspfAreaPatch(d, m, id)
 	if err != nil {
 		return handleCreateError("Ospf Area", id, err)
 	}

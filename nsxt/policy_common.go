@@ -824,13 +824,16 @@ func attributeRequiredGlobalManagerError(attribute string, resource string) erro
 	return fmt.Errorf("%s requires %s configuration for NSX Global Manager", resource, attribute)
 }
 
+// buildQueryStringFromMap joins key:value pairs into a Lucene AND clause.
+// Callers are responsible for escaping user-provided values with
+// escapeSpecialCharacters() before inserting them into the map; wildcards must
+// be appended AFTER the escaped value so they are not inadvertently escaped.
 func buildQueryStringFromMap(query map[string]string) string {
 	if query == nil {
 		return ""
 	}
 	keyValues := make([]string, 0, len(query))
 	for key, value := range query {
-		value = strings.ReplaceAll(value, "/", "\\/")
 		keyValue := strings.Join([]string{key, value}, ":")
 		keyValues = append(keyValues, keyValue)
 	}

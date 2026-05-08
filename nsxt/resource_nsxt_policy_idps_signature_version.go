@@ -120,6 +120,9 @@ func resourceNsxtPolicyIdpsSignatureVersionCreate(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("nsx_id is required for IDS Signature Version resource. Signature versions are system-managed and cannot be created. Use nsx_id to reference an existing version.")
 	}
+	if !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 
 	// Verify the version exists
 	client := intrusion_services.NewSignatureVersionsClient(connector)

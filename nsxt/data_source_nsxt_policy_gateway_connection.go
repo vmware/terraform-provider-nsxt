@@ -28,7 +28,7 @@ func dataSourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interfa
 	gwPath := d.Get("tier0_path").(string)
 	query := make(map[string]string)
 	if len(gwPath) > 0 {
-		query["tier0_path"] = gwPath
+		query["tier0_path"] = escapeSpecialCharacters(gwPath)
 	}
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "GatewayConnection", query, false)
 	if err != nil {
