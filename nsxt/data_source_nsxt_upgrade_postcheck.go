@@ -33,7 +33,8 @@ func dataSourceNsxtUpgradePostCheck() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "ID of corresponding nsxt_upgrade_run resource",
 				Required:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"type": {
 				Type:         schema.TypeString,
 				Description:  "Component Type",

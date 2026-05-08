@@ -25,7 +25,8 @@ func dataSourceNsxtUpgradePrepareReady() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "ID of corresponding nsxt_upgrade_prepare resource",
 				Required:    true,
-			},
+				ValidateFunc: validateID(),
+},
 		},
 	}
 }

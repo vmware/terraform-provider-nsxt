@@ -401,7 +401,8 @@ func getPolicyLbRuleHTTPRequestURIConditionSchema() *schema.Schema {
 				"uri": {
 					Type:     schema.TypeString,
 					Required: true,
-				},
+					ValidateFunc: validateHTTPURIPath(),
+},
 				"case_sensitive": getLbRuleCaseSensitiveSchema(),
 				"match_type":     getLbRuleMatchTypeSchema(),
 			},
@@ -568,7 +569,8 @@ func getPolicyLbRuleIPConditionSchema() *schema.Schema {
 				"group_path": {
 					Type:     schema.TypeString,
 					Optional: true,
-				},
+					ValidateFunc: validatePolicyPath(),
+},
 			},
 		},
 	}
@@ -660,7 +662,8 @@ func getPolicyLbRuleHTTPRequestURIRewriteActionSchema() *schema.Schema {
 				"uri": {
 					Type:     schema.TypeString,
 					Required: true,
-				},
+					ValidateFunc: validateHTTPURIPath(),
+},
 				"uri_arguments": {
 					Type:     schema.TypeString,
 					Optional: true,
@@ -723,7 +726,8 @@ func getPolicyLbRuleJwtAuthActionSchema() *schema.Schema {
 							"certificate_path": {
 								Type:     schema.TypeString,
 								Optional: true,
-							},
+								ValidateFunc: validatePolicyPath(),
+},
 							"public_key_content": {
 								Type:     schema.TypeString,
 								Optional: true,
@@ -767,7 +771,8 @@ func getPolicyLbRuleSelectPoolActionSchema() *schema.Schema {
 				"pool_id": {
 					Type:     schema.TypeString,
 					Required: true,
-				},
+					ValidateFunc: validateID(),
+},
 			},
 		},
 	}
@@ -820,7 +825,8 @@ func getPolicyLbRuleVariablePersistenceLearnActionSchema() *schema.Schema {
 				"persistence_profile_path": {
 					Type:     schema.TypeString,
 					Optional: true,
-				},
+					ValidateFunc: validatePolicyPath(),
+},
 				"variable_hash_enabled": {
 					Type:     schema.TypeBool,
 					Optional: true,

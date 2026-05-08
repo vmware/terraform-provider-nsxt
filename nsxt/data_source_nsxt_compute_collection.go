@@ -30,12 +30,14 @@ func dataSourceNsxtComputeCollection() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Id of the compute manager from where this Compute Collection was discovered",
-			},
+				ValidateFunc: validateID(),
+},
 			"cm_local_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Local Id of the compute collection in the Compute Manager",
-			},
+				ValidateFunc: validateID(),
+},
 		},
 	}
 }

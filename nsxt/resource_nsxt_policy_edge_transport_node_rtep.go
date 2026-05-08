@@ -34,7 +34,8 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 				Description: "Policy path of Edge transport node to associate with remote tunnel endpoint.",
 				Required:    true,
 				ForceNew:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"host_switch_name": {
 				Type:        schema.TypeString,
 				Description: "The host switch name to be used for the remote tunnel endpoint",

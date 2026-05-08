@@ -28,7 +28,8 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Description: "The path of the edge cluster connected to this Tier1 gateway",
 				Optional:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsRequired: false, IsComputed: false, IsVpc: false, AllowDefaultProject: false, FromGlobal: true}),
 		},
 	}

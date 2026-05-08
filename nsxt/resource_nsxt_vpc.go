@@ -108,9 +108,10 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"short_id": {
 		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
+			Type:         schema.TypeString,
+			Optional:     true,
+			Computed:     true,
+			ValidateFunc: validateID(),
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",

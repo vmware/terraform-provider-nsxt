@@ -39,7 +39,8 @@ func resourceNsxtPolicySecurityPolicyContainerCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Path to the container cluster entity in NSX",
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 		},
 	}
 }

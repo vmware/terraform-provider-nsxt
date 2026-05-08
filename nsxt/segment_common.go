@@ -301,7 +301,8 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Type:        schema.TypeString,
 			Description: "DNS domain names",
 			Optional:    true,
-		},
+			ValidateFunc: validateFQDN(),
+},
 		"l2_extension": {
 			Type:        schema.TypeList,
 			Description: "Configuration for extending Segment through L2 VPN",

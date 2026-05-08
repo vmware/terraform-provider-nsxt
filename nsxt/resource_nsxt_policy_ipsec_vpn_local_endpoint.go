@@ -48,9 +48,10 @@ func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*met
 		"certificate_path": metadata.GetExtendedSchema(getPolicyPathSchema(false, false, "Policy path referencing site certificate")),
 		"local_id": {
 			Schema: schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 		},
 		"trust_ca_paths": {

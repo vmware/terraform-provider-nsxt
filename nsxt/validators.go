@@ -382,6 +382,76 @@ func validateID() schema.SchemaValidateFunc {
 	}
 }
 
+func validateSHA256Thumbprint() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(`^[0-9a-fA-F]{64}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be a 64-character hex SHA-256 thumbprint, got: %q", k, v))
+		}
+		return
+	}
+}
+
+func validateFQDN() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(
+			`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be a valid fully-qualified domain name, got: %q", k, v))
+		}
+		return
+	}
+}
+
+func validateHTTPURIPath() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		if !strings.HasPrefix(v, "/") {
+			errors = append(errors, fmt.Errorf(
+				"%q must start with '/', got: %q", k, v))
+			return
+		}
+		matched, _ := regexp.MatchString(`^[^\s<>"{}|\\^` + "`" + `]*$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q contains invalid URI path characters, got: %q", k, v))
+		}
+		return
+	}
+}
+
+func validateLogLabel() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(`^[a-zA-Z0-9_\-]{0,64}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be alphanumeric, underscore or hyphen, max 64 characters, got: %q", k, v))
+		}
+		return
+	}
+}
+
 func validateProjectID(allowDefault bool) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)

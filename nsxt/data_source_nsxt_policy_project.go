@@ -26,7 +26,8 @@ func dataSourceNsxtPolicyProject() *schema.Resource {
 			"short_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
+				ValidateFunc: validateID(),
+},
 			"site_info": getSiteInfoSchema(),
 			"tier0_gateway_paths": {
 				Type: schema.TypeList,
@@ -54,14 +55,16 @@ func getSiteInfoSchema() *schema.Schema {
 				"edge_cluster_paths": {
 					Type: schema.TypeList,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:         schema.TypeString,
+						ValidateFunc: validatePolicyPath(),
 					},
 					Optional: true,
 				},
 				"site_path": {
 					Type:     schema.TypeString,
 					Optional: true,
-				},
+					ValidateFunc: validatePolicyPath(),
+},
 			},
 		},
 		Optional: true,

@@ -51,7 +51,8 @@ func resourceNsxtPolicyIdpsClusterConfig() *schema.Resource {
 							Description: "Cluster target ID (e.g., domain-c123)",
 							Required:    true,
 							ForceNew:    true,
-						},
+							ValidateFunc: validateID(),
+},
 						"target_type": {
 							Type:        schema.TypeString,
 							Description: "Target type (e.g., VC_Cluster)",

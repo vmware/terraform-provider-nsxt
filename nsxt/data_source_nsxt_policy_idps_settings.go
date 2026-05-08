@@ -46,7 +46,8 @@ func dataSourceNsxtPolicyIdpsSettings() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The custom signature version ID used for custom signatures",
 				Optional:    true,
-			},
+				ValidateFunc: validateID(),
+},
 		},
 	}
 }

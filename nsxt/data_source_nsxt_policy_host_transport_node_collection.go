@@ -32,7 +32,8 @@ func dataSourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Description: "Transport Node Profile Path",
 				Optional:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"unique_id": {
 				Type:        schema.TypeString,
 				Description: "A unique identifier assigned by the system",

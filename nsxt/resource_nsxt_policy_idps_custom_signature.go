@@ -41,7 +41,8 @@ func resourceNsxtPolicyIdpsCustomSignature() *schema.Resource {
 				Required:    true,
 				Description: "ID of the custom signature version (e.g. \"default\") to which this signature belongs.",
 				ForceNew:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"signature": {
 				Type:        schema.TypeString,
 				Required:    true,

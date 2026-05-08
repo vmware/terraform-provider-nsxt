@@ -22,7 +22,8 @@ func dataSourceNsxtPolicyClusterSecurityConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Cluster external ID (e.g., uuid:domain-c20)",
 				Required:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"dfw_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Whether Distributed Firewall (DFW) is enabled on the cluster",

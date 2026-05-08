@@ -39,13 +39,15 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 				Description: "The path of the edge cluster connected to the gateway linked to this interface. This is exported only for Tier0 gateways",
 				Optional:    true,
 				Computed:    false,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"segment_path": {
 				Type:        schema.TypeString,
 				Description: "Policy path for segment to be connected with the Gateway.",
 				Optional:    true,
 				Computed:    false,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 		},
 	}
 }

@@ -75,7 +75,8 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"realized_id": {
 				Type:        schema.TypeString,
 				Description: "Computed ID of the realized object",

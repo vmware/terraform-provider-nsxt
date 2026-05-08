@@ -29,7 +29,8 @@ func resourceNsxtPolicySegmentPort() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Path of the segment",
 				Required:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"attachment": {
 				Type:        schema.TypeList,
 				Description: "VIF attachment",
@@ -77,12 +78,14 @@ func getPolicySegmentPortAttachmentSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "ID used to identify/look up a child attachment behind a parent attachment",
 				Optional:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"context_id": {
 				Type:        schema.TypeString,
 				Description: "If type is CHILD and the parent port is on the same segment as the child port, then this field should be VIF ID of the parent port. If type is CHILD and the parent port is on a different segment, then this field should be policy path of the parent port. If type is INDEPENDENT/STATIC, then this field should be transport node ID.",
 				Optional:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"context_type": {
 				Type:        schema.TypeString,
 				Description: "Set to PARENT when type field is CHILD. Read only field.",

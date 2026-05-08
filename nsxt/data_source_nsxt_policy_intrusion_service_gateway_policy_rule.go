@@ -26,7 +26,8 @@ func dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRule() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Policy path for this rule",
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"sequence_number": {
 				Type:        schema.TypeInt,
 				Computed:    true,

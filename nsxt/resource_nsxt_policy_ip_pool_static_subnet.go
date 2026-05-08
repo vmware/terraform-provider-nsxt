@@ -57,8 +57,9 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "DNS suffix for the nameserver",
 				Optional:    true,
-				// TODO: validate hostname
-			},
+				// TODO: validate hostname,
+				ValidateFunc: validateFQDN(),
+},
 			"gateway": {
 				Type:         schema.TypeString,
 				Description:  "The default gateway address",

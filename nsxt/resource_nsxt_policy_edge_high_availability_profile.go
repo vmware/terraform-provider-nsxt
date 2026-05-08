@@ -45,11 +45,12 @@ var policyEdgeHighAvailabilityProfileSchema = map[string]*metadata.ExtendedSchem
 	},
 	"enforcement_point": {
 		Schema: schema.Schema{
-			Type:        schema.TypeString,
-			Description: "ID of the enforcement point this Host Transport Node belongs to",
-			Optional:    true,
-			ForceNew:    true,
-			Default:     "default",
+			Type:         schema.TypeString,
+			Description:  "ID of the enforcement point this Host Transport Node belongs to",
+			Optional:     true,
+			ForceNew:     true,
+			Default:      "default",
+			ValidateFunc: validateID(),
 		},
 		Metadata: metadata.Metadata{
 			SchemaType: "string",

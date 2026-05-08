@@ -28,7 +28,8 @@ func dataSourceNsxtPolicyIdpsCustomSignature() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Custom signature version ID (e.g. \"default\"). Required if id is only the signature_id.",
-			},
+				ValidateFunc: validateID(),
+},
 			"path": {
 				Type:        schema.TypeString,
 				Description: "Absolute path of the custom signature.",

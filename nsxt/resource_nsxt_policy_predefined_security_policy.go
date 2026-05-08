@@ -64,7 +64,8 @@ func getSecurityPolicyDefaultRulesSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Additional information (string) which will be propagated to the rule syslog",
 					Optional:    true,
-				},
+					ValidateFunc: validateLogLabel(),
+},
 				"action": {
 					Type:         schema.TypeString,
 					Description:  "Action",
