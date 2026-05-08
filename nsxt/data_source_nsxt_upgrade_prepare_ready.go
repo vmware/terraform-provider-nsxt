@@ -41,7 +41,7 @@ func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
 	}
 	for _, checkInfo := range checkInfoResults.Results {
 		for _, ci := range checkInfo.PreUpgradeChecksInfo {
-			if slices.Contains(precheckIDs, *ci.Id) {
+			if slices.Contains(precheckIDs, *ci.Id) { //nolint:govet -- govet inline analyzer does not support type-parameter inference in generics
 				precheckText += fmt.Sprintf("  Component: %s, code: %s, description: %s\n", *checkInfo.ComponentType, *ci.Id, *ci.Description)
 			}
 		}
