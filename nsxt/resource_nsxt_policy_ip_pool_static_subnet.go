@@ -59,7 +59,7 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 				Optional:    true,
 				// TODO: validate hostname,
 				ValidateFunc: validateFQDN(),
-},
+			},
 			"gateway": {
 				Type:         schema.TypeString,
 				Description:  "The default gateway address",

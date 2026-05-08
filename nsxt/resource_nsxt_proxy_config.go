@@ -59,11 +59,11 @@ func resourceNsxtProxyConfig() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 			"host": {
-				Type:        schema.TypeString,
-				Description: "Proxy server host (IP address or FQDN)",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Proxy server host (IP address or FQDN)",
+				Optional:     true,
 				ValidateFunc: validateSingleIPOrHostName(),
-},
+			},
 			"port": {
 				Type:         schema.TypeInt,
 				Description:  "Proxy server port",
@@ -83,11 +83,11 @@ func resourceNsxtProxyConfig() *schema.Resource {
 				Sensitive:   true,
 			},
 			"certificate_id": {
-				Type:        schema.TypeString,
-				Description: "Certificate ID for HTTPS proxy (from trust-management API). Required when scheme is HTTPS.",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Certificate ID for HTTPS proxy (from trust-management API). Required when scheme is HTTPS.",
+				Optional:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"test_connection_url": {
 				Type:        schema.TypeString,
 				Description: "URL to test proxy connectivity (e.g., https://www.vmware.com)",

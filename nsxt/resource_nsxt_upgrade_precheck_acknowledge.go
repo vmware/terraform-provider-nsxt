@@ -31,14 +31,14 @@ func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 		Delete: resourceNsxtUpgradePrecheckAcknowledgeDelete,
 
 		Schema: map[string]*schema.Schema{
-		"precheck_ids": {
-			Type:        schema.TypeList,
-			Description: "IDs of precheck warnings that need to be acknowledged",
-			Elem: &schema.Schema{
-				Type:         schema.TypeString,
-				ValidateFunc: validateID(),
-			},
-			Required: true,
+			"precheck_ids": {
+				Type:        schema.TypeList,
+				Description: "IDs of precheck warnings that need to be acknowledged",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
+				},
+				Required: true,
 			},
 			"precheck_warnings": {
 				Type:        schema.TypeList,

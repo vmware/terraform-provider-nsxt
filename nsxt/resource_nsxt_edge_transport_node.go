@@ -129,8 +129,8 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 				Computed:      true,
 				Description:   "Unique Id of the fabric node",
 				ConflictsWith: []string{"ip_addresses", "fqdn", "deployment_config", "external_id"},
-				ValidateFunc: validateID(),
-},
+				ValidateFunc:  validateID(),
+			},
 			"failure_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -144,12 +144,12 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 			"deployment_config": getEdgeNodeDeploymentConfigSchema(),
 			"node_settings":     getEdgeNodeSettingsSchema(),
 			"external_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "ID of the Node",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				Description:  "ID of the Node",
 				ValidateFunc: validateID(),
-},
+			},
 			"fqdn": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -230,17 +230,17 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"compute_folder_id": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Description: "Compute folder identifier in the specified vcenter server",
+								Type:         schema.TypeString,
+								Optional:     true,
+								Description:  "Compute folder identifier in the specified vcenter server",
 								ValidateFunc: validateID(),
-},
+							},
 							"compute_id": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "Cluster identifier or resourcepool identifier for specified vcenter server",
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Cluster identifier or resourcepool identifier for specified vcenter server",
 								ValidateFunc: validateID(),
-},
+							},
 							"data_network_ids": {
 								Type:        schema.TypeList,
 								MinItems:    1,
@@ -249,7 +249,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								Description: "List of portgroups, logical switch identifiers or segment paths for datapath connectivity",
 								Elem: &schema.Schema{
 									ValidateFunc: validateID(),
-									Type: schema.TypeString,
+									Type:         schema.TypeString,
 								},
 							},
 							"default_gateway_address": {
@@ -264,17 +264,17 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								},
 							},
 							"host_id": {
-								Type:        schema.TypeString,
-								Optional:    true,
-								Description: "Host identifier in the specified vcenter server",
+								Type:         schema.TypeString,
+								Optional:     true,
+								Description:  "Host identifier in the specified vcenter server",
 								ValidateFunc: validateID(),
-},
+							},
 							"management_network_id": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "Portgroup, logical switch identifier or segment path for management network connectivity",
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Portgroup, logical switch identifier or segment path for management network connectivity",
 								ValidateFunc: validateID(),
-},
+							},
 							"management_port_subnet": {
 								Type:        schema.TypeList,
 								Optional:    true,
@@ -332,17 +332,17 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								},
 							},
 							"storage_id": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "Storage/datastore identifier in the specified vcenter server",
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Storage/datastore identifier in the specified vcenter server",
 								ValidateFunc: validateID(),
-},
+							},
 							"vc_id": {
-								Type:        schema.TypeString,
-								Description: "Vsphere compute identifier for identifying the vcenter server",
-								Required:    true,
+								Type:         schema.TypeString,
+								Description:  "Vsphere compute identifier for identifying the vcenter server",
+								Required:     true,
 								ValidateFunc: validateID(),
-},
+							},
 						},
 					},
 				},
@@ -388,11 +388,11 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 					Optional:    true,
 				},
 				"hostname": {
-					Type:        schema.TypeString,
-					Description: "Host name or FQDN for edge node",
-					Required:    true,
+					Type:         schema.TypeString,
+					Description:  "Host name or FQDN for edge node",
+					Required:     true,
 					ValidateFunc: validateSingleIPOrHostName(),
-},
+				},
 				"ntp_servers": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -440,11 +440,11 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 								ValidateFunc: validation.StringInSlice(syslogProtocolValues, false),
 							},
 							"server": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "Server IP or fqdn",
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Server IP or fqdn",
 								ValidateFunc: validateSingleIPOrHostName(),
-},
+							},
 						},
 					},
 				},
@@ -461,12 +461,12 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"host_switch_id": {
-					Type:        schema.TypeString,
-					Description: "The host switch id. This ID will be used to reference a host switch",
-					Optional:    true,
-					Computed:    true,
+					Type:         schema.TypeString,
+					Description:  "The host switch id. This ID will be used to reference a host switch",
+					Optional:     true,
+					Computed:     true,
 					ValidateFunc: validateID(),
-},
+				},
 				"host_switch_name": {
 					Type:        schema.TypeString,
 					Description: "Host switch name. This name will be used to reference a host switch",
@@ -563,11 +563,11 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"host_switch_id": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The host switch id. This ID will be used to reference a host switch",
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  "The host switch id. This ID will be used to reference a host switch",
 										ValidateFunc: validateID(),
-},
+									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
 									"uplink_profile": {
 										Type:             schema.TypeString,

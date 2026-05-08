@@ -39,12 +39,12 @@ func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"locale_service_path": {
-				Type:        schema.TypeString,
-				Description: "Policy path of associated Gateway Locale Service on NSX",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "Policy path of associated Gateway Locale Service on NSX",
+				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validatePolicyPath(),
-},
+			},
 			"destination_address": {
 				Type:         schema.TypeString,
 				Description:  "Destination IPv4 address",

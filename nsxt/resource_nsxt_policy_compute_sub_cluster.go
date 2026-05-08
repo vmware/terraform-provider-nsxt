@@ -45,28 +45,28 @@ func resourceNsxtPolicyComputeSubCluster() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this subcluster belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "default",
-				ValidateFunc: validateID(),
-},
-			"compute_collection_id": {
-				Type:        schema.TypeString,
-				Description: "Compute collection ID under which subcluster is created",
-				Required:    true,
-				ValidateFunc: validateID(),
-},
-		"discovered_node_ids": {
-			Type:        schema.TypeList,
-			Description: "Discovered node IDs under this subcluster",
-			Optional:    true,
-			Computed:    true,
-			Elem: &schema.Schema{
 				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this subcluster belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "default",
 				ValidateFunc: validateID(),
 			},
+			"compute_collection_id": {
+				Type:         schema.TypeString,
+				Description:  "Compute collection ID under which subcluster is created",
+				Required:     true,
+				ValidateFunc: validateID(),
+			},
+			"discovered_node_ids": {
+				Type:        schema.TypeList,
+				Description: "Discovered node IDs under this subcluster",
+				Optional:    true,
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
+				},
 			},
 		},
 	}

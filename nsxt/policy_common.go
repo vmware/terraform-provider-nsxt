@@ -304,11 +304,11 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 		},
 		"tag": getTagsSchema(),
 		"log_label": {
-			Type:        schema.TypeString,
-			Description: "Additional information (string) which will be propagated to the rule syslog",
-			Optional:    true,
+			Type:         schema.TypeString,
+			Description:  "Additional information (string) which will be propagated to the rule syslog",
+			Optional:     true,
 			ValidateFunc: validateLogLabel(),
-},
+		},
 		"action": getPolicyRuleActionSchema(isIds),
 	}
 	if isIds {

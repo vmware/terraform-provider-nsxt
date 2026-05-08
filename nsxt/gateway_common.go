@@ -490,11 +490,11 @@ func getRedistributionConfigRuleSchema() *schema.Schema {
 					Optional:    true,
 				},
 				"route_map_path": {
-					Type:        schema.TypeString,
-					Description: "Route map to be associated with the redistribution rule",
-					Optional:    true,
+					Type:         schema.TypeString,
+					Description:  "Route map to be associated with the redistribution rule",
+					Optional:     true,
 					ValidateFunc: validatePolicyPath(),
-},
+				},
 				"types": {
 					Type:        schema.TypeSet,
 					Description: "List of redistribution types",

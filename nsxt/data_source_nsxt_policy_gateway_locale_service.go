@@ -24,12 +24,12 @@ func dataSourceNsxtPolicyGatewayLocaleService() *schema.Resource {
 			"path":         getPathSchema(),
 			"bgp_path":     getComputedPolicyPathSchema("Path for BGP config"),
 			"edge_cluster_path": {
-				Type:        schema.TypeString,
-				Description: "The path of the edge cluster connected to this Tier0 gateway",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "The path of the edge cluster connected to this Tier0 gateway",
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validatePolicyPath(),
-},
+			},
 			"context": getContextSchema(false, false, false),
 		},
 	}

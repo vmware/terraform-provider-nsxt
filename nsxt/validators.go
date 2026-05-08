@@ -427,7 +427,7 @@ func validateHTTPURIPath() schema.SchemaValidateFunc {
 				"%q must start with '/', got: %q", k, v))
 			return
 		}
-		matched, _ := regexp.MatchString(`^[^\s<>"{}|\\^` + "`" + `]*$`, v)
+		matched, _ := regexp.MatchString(`^[^\s<>"{}|\\^`+"`"+`]*$`, v)
 		if !matched {
 			errors = append(errors, fmt.Errorf(
 				"%q contains invalid URI path characters, got: %q", k, v))

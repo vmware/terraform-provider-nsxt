@@ -61,11 +61,11 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"short_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"site_info": {
 				Type: schema.TypeList,
 				Elem: &schema.Resource{

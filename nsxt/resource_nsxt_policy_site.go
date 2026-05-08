@@ -79,11 +79,11 @@ func getConnectionInfoSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"fqdn": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "Fully Qualified Domain Name of the Management Node",
+					Type:         schema.TypeString,
+					Optional:     true,
+					Description:  "Fully Qualified Domain Name of the Management Node",
 					ValidateFunc: validateFQDN(),
-},
+				},
 				"password": {
 					Type:        schema.TypeString,
 					Optional:    true,
@@ -96,11 +96,11 @@ func getConnectionInfoSchema() *schema.Schema {
 					Description: "id of Site",
 				},
 				"thumbprint": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "Thumbprint of Enforcement Point",
+					Type:         schema.TypeString,
+					Optional:     true,
+					Description:  "Thumbprint of Enforcement Point",
 					ValidateFunc: validateSHA256Thumbprint(),
-},
+				},
 				"username": {
 					Type:        schema.TypeString,
 					Optional:    true,

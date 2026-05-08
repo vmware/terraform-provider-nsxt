@@ -23,10 +23,10 @@ func dataSourceNsxtVPC() *schema.Resource {
 			"path":         getPathSchema(),
 			"context":      getContextSchemaExtended(true, false, false, true),
 			"short_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validateID(),
-},
+			},
 		},
 	}
 }

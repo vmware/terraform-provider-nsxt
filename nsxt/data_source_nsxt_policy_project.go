@@ -24,10 +24,10 @@ func dataSourceNsxtPolicyProject() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"short_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"site_info": getSiteInfoSchema(),
 			"tier0_gateway_paths": {
 				Type: schema.TypeList,
@@ -61,10 +61,10 @@ func getSiteInfoSchema() *schema.Schema {
 					Optional: true,
 				},
 				"site_path": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:         schema.TypeString,
+					Optional:     true,
 					ValidateFunc: validatePolicyPath(),
-},
+				},
 			},
 		},
 		Optional: true,

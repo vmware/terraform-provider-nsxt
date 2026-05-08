@@ -24,12 +24,12 @@ func resourceNsxtEdgeTransportNodeRTEP() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"edge_id": {
-				Type:        schema.TypeString,
-				Description: "Edge ID to associate with remote tunnel endpoint.",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "Edge ID to associate with remote tunnel endpoint.",
+				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"host_switch_name": {
 				Type:        schema.TypeString,
 				Description: "The host switch name to be used for the remote tunnel endpoint",
