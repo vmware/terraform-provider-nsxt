@@ -43,11 +43,19 @@ func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]
 		return nil, ErrEmptyImportID
 	}
 
-	if idx := strings.Index(importID, vmTagsImportIDSeparator); idx >= 0 {
-		instanceID := importID[:idx]
-		projectID := importID[idx+len(vmTagsImportIDSeparator):]
+	parts := strings.SplitN(importID, vmTagsImportIDSeparator, 3)
+	switch len(parts) {
+	case 1:
+		// Plain instance ID — local manager (no project, no VPC).
+		if !isValidResourceID(parts[0]) {
+			return nil, fmt.Errorf("invalid import ID %q: use instance_id, instance_id%sproject_id, or instance_id%sproject_id%svpc_id",
+				importID, vmTagsImportIDSeparator, vmTagsImportIDSeparator, vmTagsImportIDSeparator)
+		}
+	case 2:
+		// instance_id::project_id — multitenancy / project scope.
+		instanceID, projectID := parts[0], parts[1]
 		if instanceID == "" || projectID == "" {
-			return nil, fmt.Errorf("invalid import ID %q: both instance_id and project_id must be non-empty when using %q separator", importID, vmTagsImportIDSeparator)
+			return nil, fmt.Errorf("invalid import ID %q: instance_id and project_id must both be non-empty", importID)
 		}
 		ctxMap := map[string]interface{}{
 			"project_id": projectID,
@@ -56,11 +64,20 @@ func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]
 			return nil, err
 		}
 		d.SetId(instanceID)
-		return []*schema.ResourceData{d}, nil
-	}
-
-	if !isValidResourceID(importID) {
-		return nil, fmt.Errorf("invalid import ID %q: use instance_id for non-multitenancy or instance_id%sproject_id for multitenancy", importID, vmTagsImportIDSeparator)
+	case 3:
+		// instance_id::project_id::vpc_id — VPC scope.
+		instanceID, projectID, vpcID := parts[0], parts[1], parts[2]
+		if instanceID == "" || projectID == "" || vpcID == "" {
+			return nil, fmt.Errorf("invalid import ID %q: instance_id, project_id and vpc_id must all be non-empty", importID)
+		}
+		ctxMap := map[string]interface{}{
+			"project_id": projectID,
+			"vpc_id":     vpcID,
+		}
+		if err := d.Set("context", []interface{}{ctxMap}); err != nil {
+			return nil, err
+		}
+		d.SetId(instanceID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -93,7 +110,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 					},
 				},
 			},
-			"context": getContextSchema(false, false, false),
+			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsVpc: true, IsVpcOptional: true}),
 		},
 	}
 }

@@ -31,6 +31,7 @@ type SessionContextSpec struct {
 	IsRequired          bool
 	IsComputed          bool
 	IsVpc               bool
+	IsVpcOptional       bool
 	AllowDefaultProject bool
 	FromGlobal          bool
 }

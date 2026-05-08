@@ -63,7 +63,18 @@ func TestUnitNsxt_getPolicyPathOrIDResourceImporter(t *testing.T) {
 
 func TestUnitNsxt_resourceNsxtPolicyVMTagsImporter(t *testing.T) {
 	m := newGoMockProviderClient()
-	contextSchema := getContextSchema(false, false, false)
+	contextSchema := &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		ForceNew: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"project_id": {Type: schema.TypeString, Required: true, ForceNew: true},
+				"vpc_id":     {Type: schema.TypeString, Optional: true, ForceNew: true},
+			},
+		},
+	}
 
 	t.Run("plain instance id", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
@@ -131,6 +142,43 @@ func TestUnitNsxt_resourceNsxtPolicyVMTagsImporter(t *testing.T) {
 
 		_, err := resourceNsxtPolicyVMTagsImporter(d, m)
 		require.Error(t, err)
+	})
+
+	t.Run("composite instance_id::project_id::vpc_id sets context", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+			"context": contextSchema,
+		}, map[string]interface{}{})
+		d.SetId("503b13f0-22c7-4d72-a16e-aa7e6c8f2da6::demoproj::demovpc")
+
+		rd, err := resourceNsxtPolicyVMTagsImporter(d, m)
+		require.NoError(t, err)
+		require.Len(t, rd, 1)
+		assert.Equal(t, "503b13f0-22c7-4d72-a16e-aa7e6c8f2da6", rd[0].Id())
+		projectID, vpcID, _ := getContextDataFromSchema(rd[0])
+		assert.Equal(t, "demoproj", projectID)
+		assert.Equal(t, "demovpc", vpcID)
+	})
+
+	t.Run("empty vpc_id in three-part composite", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+			"context": contextSchema,
+		}, map[string]interface{}{})
+		d.SetId("503b13f0-22c7-4d72-a16e-aa7e6c8f2da6::demoproj::")
+
+		_, err := resourceNsxtPolicyVMTagsImporter(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "non-empty")
+	})
+
+	t.Run("empty project_id in three-part composite", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+			"context": contextSchema,
+		}, map[string]interface{}{})
+		d.SetId("503b13f0-22c7-4d72-a16e-aa7e6c8f2da6::::demovpc")
+
+		_, err := resourceNsxtPolicyVMTagsImporter(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "non-empty")
 	})
 }
 
