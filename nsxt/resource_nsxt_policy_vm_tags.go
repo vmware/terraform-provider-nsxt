@@ -24,6 +24,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+const vmTagsImportIDSeparator = "::"
+
 var (
 	nsxtPolicyBiosUUIDKey     = "biosUuid"
 	nsxtPolicyInstanceUUIDKey = "instanceUuid"
@@ -35,7 +37,33 @@ var cliVirtualMachinesClient = realized_enforcement_points.NewVirtualMachinesCli
 var cliRealizedVirtualMachinesClient = realizedstate.NewVirtualMachinesClient
 var cliVirtualMachineTagsClient = realized_virtual_machines.NewTagsClient
 
-var vmTagsPathExample = getMultitenancyPathExample("/infra/realized-state/virtual-machines/[vm]")
+func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if isSpaceString(importID) {
+		return nil, ErrEmptyImportID
+	}
+
+	if idx := strings.Index(importID, vmTagsImportIDSeparator); idx >= 0 {
+		instanceID := importID[:idx]
+		projectID := importID[idx+len(vmTagsImportIDSeparator):]
+		if instanceID == "" || projectID == "" {
+			return nil, fmt.Errorf("invalid import ID %q: both instance_id and project_id must be non-empty when using %q separator", importID, vmTagsImportIDSeparator)
+		}
+		ctxMap := map[string]interface{}{
+			"project_id": projectID,
+		}
+		if err := d.Set("context", []interface{}{ctxMap}); err != nil {
+			return nil, err
+		}
+		d.SetId(instanceID)
+		return []*schema.ResourceData{d}, nil
+	}
+
+	if !isValidResourceID(importID) {
+		return nil, fmt.Errorf("invalid import ID %q: use instance_id for non-multitenancy or instance_id%sproject_id for multitenancy", importID, vmTagsImportIDSeparator)
+	}
+	return []*schema.ResourceData{d}, nil
+}
 
 func resourceNsxtPolicyVMTags() *schema.Resource {
 	return &schema.Resource{
@@ -44,7 +72,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 		Update: resourceNsxtPolicyVMTagsUpdate,
 		Delete: resourceNsxtPolicyVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathOrIDResourceImporter(vmTagsPathExample),
+			State: resourceNsxtPolicyVMTagsImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

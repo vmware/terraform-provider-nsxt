@@ -148,10 +148,30 @@ func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id"},
-				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+				ImportStateIdFunc:       testAccNsxtPolicyVMTagsImportIDFunc(testResourceName),
 			},
 		},
 	})
+}
+
+// testAccNsxtPolicyVMTagsImportIDFunc builds the composite "<instance_id>::<project_id>" import
+// identifier for multitenancy, since nsxt_policy_vm_tags has no path attribute.
+func testAccNsxtPolicyVMTagsImportIDFunc(resourceName string) func(*terraform.State) (string, error) {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("NSX Policy VM Tags resource %s not found in resources", resourceName)
+		}
+		instanceID := rs.Primary.ID
+		if instanceID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource ID not set in resources")
+		}
+		projectID := rs.Primary.Attributes["context.0.project_id"]
+		if projectID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource context.0.project_id not set in resources")
+		}
+		return instanceID + vmTagsImportIDSeparator + projectID, nil
+	}
 }
 
 func testAccNSXPolicyVMTagsCheckExists(resourceName string) resource.TestCheckFunc {
