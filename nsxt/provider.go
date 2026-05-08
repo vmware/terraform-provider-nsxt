@@ -1049,7 +1049,7 @@ func getLicenses(connector client.Connector) ([]string, error) {
 	defaultLicenseMarkers := []string{"NSX for vShield Endpoint"}
 	for _, item := range list.Results {
 		// Ignore default licenses
-		if item.Description != nil && slices.Contains(defaultLicenseMarkers, *item.Description) { //nolint:govet -- govet inline analyzer does not support type-parameter inference in generics
+		if item.Description != nil && slices.Contains[[]string, string](defaultLicenseMarkers, *item.Description) {
 			continue
 		}
 		licenseList = append(licenseList, *item.LicenseKey)
@@ -1081,7 +1081,7 @@ func configureLicenses(connector client.Connector, intentLicenses []string) erro
 	}
 	// Apply new licenses
 	for _, license := range intentLicenses {
-		if slices.Contains(existingLicenses, license) { //nolint:govet -- govet inline analyzer does not support type-parameter inference in generics
+		if slices.Contains[[]string, string](existingLicenses, license) {
 			continue
 		}
 		err := applyLicense(connector, license)
