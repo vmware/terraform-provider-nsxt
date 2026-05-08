@@ -1,6 +1,6 @@
 module github.com/vmware/terraform-provider-nsxt
 
-go 1.25.8
+go 1.25.10
 
 require (
 	github.com/golang/mock v1.6.0
@@ -68,7 +68,7 @@ require (
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/tools v0.44.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
