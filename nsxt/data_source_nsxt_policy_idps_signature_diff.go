@@ -15,11 +15,11 @@ func dataSourceNsxtPolicyIdpsSignatureDiff() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"signature_version_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ID of the custom signature version (e.g. \"default\").",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "ID of the custom signature version (e.g. \"default\").",
 				ValidateFunc: validateID(),
-},
+			},
 			"newly_added_signatures": {
 				Type:        schema.TypeList,
 				Description: "List of custom signature IDs that are newly added (unpublished).",

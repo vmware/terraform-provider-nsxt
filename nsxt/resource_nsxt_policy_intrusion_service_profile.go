@@ -133,10 +133,10 @@ func getIdsProfileSignatureSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"signature_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,

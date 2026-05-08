@@ -75,11 +75,11 @@ func resourceNsxtComputeManager() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"thumbprint": {
-										Type:        schema.TypeString,
-										Description: "Thumbprint of the server",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "Thumbprint of the server",
+										Required:     true,
 										ValidateFunc: validateSHA256Thumbprint(),
-},
+									},
 									"token": {
 										Type:        schema.TypeString,
 										Description: "The saml token to login to server",
@@ -97,18 +97,18 @@ func resourceNsxtComputeManager() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"session_id": {
-										Type:        schema.TypeString,
-										Description: "The session_id to login to server",
-										Required:    true,
-										Sensitive:   true,
+										Type:         schema.TypeString,
+										Description:  "The session_id to login to server",
+										Required:     true,
+										Sensitive:    true,
 										ValidateFunc: validateID(),
-},
+									},
 									"thumbprint": {
-										Type:        schema.TypeString,
-										Description: "Thumbprint of the login server",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "Thumbprint of the login server",
+										Required:     true,
 										ValidateFunc: validateSHA256Thumbprint(),
-},
+									},
 								},
 							},
 						},
@@ -126,11 +126,11 @@ func resourceNsxtComputeManager() *schema.Resource {
 										Sensitive:   true,
 									},
 									"thumbprint": {
-										Type:        schema.TypeString,
-										Description: "Thumbprint of the login server",
-										Required:    true,
+										Type:         schema.TypeString,
+										Description:  "Thumbprint of the login server",
+										Required:     true,
 										ValidateFunc: validateSHA256Thumbprint(),
-},
+									},
 									"username": {
 										Type:        schema.TypeString,
 										Description: "The username for login",
@@ -211,11 +211,11 @@ func resourceNsxtComputeManager() *schema.Resource {
 				Default:      443,
 			},
 			"server": {
-				Type:        schema.TypeString,
-				Description: "IP address or hostname of compute manager",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "IP address or hostname of compute manager",
+				Required:     true,
 				ValidateFunc: validateSingleIPOrHostName(),
-},
+			},
 			"set_as_oidc_provider": {
 				Type:        schema.TypeBool,
 				Description: "Specifies whether compute manager has been set as OIDC provider",

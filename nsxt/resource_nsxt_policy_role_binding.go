@@ -67,12 +67,12 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 				Computed:    true,
 			},
 			"identity_source_id": {
-				Type:        schema.TypeString,
-				Description: "ID of the external identity source",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of the external identity source",
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validateID(),
-},
+			},
 			"identity_source_type": {
 				Type:         schema.TypeString,
 				Description:  "ID of the external identity source",

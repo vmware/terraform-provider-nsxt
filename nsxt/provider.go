@@ -196,8 +196,8 @@ func Provider() *schema.Provider {
 				DefaultFunc:   schema.EnvDefaultFunc("NSXT_VMC_CLIENT_ID", nil),
 				ConflictsWith: []string{"vmc_token"},
 				RequiredWith:  []string{"vmc_client_secret"},
-				ValidateFunc: validateID(),
-},
+				ValidateFunc:  validateID(),
+			},
 			"vmc_client_secret": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -214,12 +214,12 @@ func Provider() *schema.Provider {
 				Description:  "Mode for VMC authorization",
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enforcement Point for NSXT Policy",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Enforcement Point for NSXT Policy",
+				DefaultFunc:  schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
 				ValidateFunc: validateID(),
-},
+			},
 			"global_manager": {
 				Type:        schema.TypeBool,
 				Optional:    true,
