@@ -51,16 +51,18 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this resource belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this resource belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"compute_collection_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Compute collection id",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Compute collection id",
+				ValidateFunc: validateID(),
 			},
 			"enable_nsx_on_dvpg": {
 				Type:        schema.TypeBool,
@@ -80,9 +82,10 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"host_switch_id": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "HostSwitch Id",
+										Type:         schema.TypeString,
+										Required:     true,
+										Description:  "HostSwitch Id",
+										ValidateFunc: validateID(),
 									},
 									"transport_node_profile_sub_config_name": {
 										Type:        schema.TypeString,
@@ -93,11 +96,12 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 							},
 						},
 						"sub_cluster_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: "sub-cluster Id",
-							Deprecated:  "Use with sub_cluster_path instead of sub_cluster_id",
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  "sub-cluster Id",
+							Deprecated:   "Use with sub_cluster_path instead of sub_cluster_id",
+							ValidateFunc: validateID(),
 						},
 						"sub_cluster_path": {
 							Type:         schema.TypeString,
@@ -109,9 +113,10 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				},
 			},
 			"transport_node_profile_path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Transport Node Profile Path",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Transport Node Profile Path",
+				ValidateFunc: validatePolicyPath(),
 			},
 			"remove_nsx_on_destroy": {
 				Type:        schema.TypeBool,
@@ -228,9 +233,9 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 
 func resourceNsxtPolicyHostTransportNodeCollectionCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

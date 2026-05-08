@@ -61,9 +61,10 @@ func resourceNsxtPolicyProject() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"short_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"site_info": {
 				Type: schema.TypeList,
@@ -162,7 +163,8 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Optional:    true,
 				MinItems:    1,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
 				},
 			},
 			"id_suffix": {

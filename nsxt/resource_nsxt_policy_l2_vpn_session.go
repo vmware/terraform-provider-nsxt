@@ -112,9 +112,9 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 	transportTunnel := getStringListFromSchemaList(d, "transport_tunnels")
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sessionContext := getSessionContext(d, m)
 	_, err = resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector, sessionContext)

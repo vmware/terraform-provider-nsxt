@@ -26,9 +26,10 @@ func dataSourceNsxtPolicyIntrusionServicePolicyRule() *schema.Resource {
 			"context":      getContextSchema(false, false, false),
 			"domain":       getDataSourceDomainNameSchema(),
 			"policy_path": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Policy path for this rule",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Policy path for this rule",
+				ValidateFunc: validatePolicyPath(),
 			},
 			"sequence_number": {
 				Type:        schema.TypeInt,

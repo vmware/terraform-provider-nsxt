@@ -304,9 +304,10 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 		},
 		"tag": getTagsSchema(),
 		"log_label": {
-			Type:        schema.TypeString,
-			Description: "Additional information (string) which will be propagated to the rule syslog",
-			Optional:    true,
+			Type:         schema.TypeString,
+			Description:  "Additional information (string) which will be propagated to the rule syslog",
+			Optional:     true,
+			ValidateFunc: validateLogLabel(),
 		},
 		"action": getPolicyRuleActionSchema(isIds),
 	}
@@ -529,8 +530,12 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		var tagList []map[string]string
 		for _, tag := range rule.Tags {
 			tags := make(map[string]string)
-			tags["scope"] = *tag.Scope
-			tags["tag"] = *tag.Tag
+			if tag.Scope != nil {
+				tags["scope"] = *tag.Scope
+			}
+			if tag.Tag != nil {
+				tags["tag"] = *tag.Tag
+			}
 			tagList = append(tagList, tags)
 		}
 		elem["tag"] = tagList
@@ -651,7 +656,9 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 }
 
 func getDataSourceDisplayNameSchema() *schema.Schema {
-	return getDataSourceStringSchema("Display name of this resource")
+	s := getDataSourceStringSchema("Display name of this resource")
+	s.ValidateFunc = validation.StringLenBetween(0, 255)
+	return s
 }
 
 func getDataSourceExtendedDisplayNameSchema() *schema.Schema {
@@ -661,11 +668,14 @@ func getDataSourceExtendedDisplayNameSchema() *schema.Schema {
 		ConflictsWith: []string{"id"},
 		Optional:      true,
 		Computed:      true,
+		ValidateFunc:  validation.StringLenBetween(0, 255),
 	}
 }
 
 func getDataSourceDescriptionSchema() *schema.Schema {
-	return getDataSourceStringSchema("Description for this resource")
+	s := getDataSourceStringSchema("Description for this resource")
+	s.ValidateFunc = validation.StringLenBetween(0, 1024)
+	return s
 }
 
 func getDataSourceIDSchema() *schema.Schema {
@@ -820,13 +830,16 @@ func attributeRequiredGlobalManagerError(attribute string, resource string) erro
 	return fmt.Errorf("%s requires %s configuration for NSX Global Manager", resource, attribute)
 }
 
+// buildQueryStringFromMap joins key:value pairs into a Lucene AND clause.
+// Callers are responsible for escaping user-provided values with
+// escapeSpecialCharacters() before inserting them into the map; wildcards must
+// be appended AFTER the escaped value so they are not inadvertently escaped.
 func buildQueryStringFromMap(query map[string]string) string {
 	if query == nil {
 		return ""
 	}
 	keyValues := make([]string, 0, len(query))
 	for key, value := range query {
-		value = strings.ReplaceAll(value, "/", "\\/")
 		keyValue := strings.Join([]string{key, value}, ":")
 		keyValues = append(keyValues, keyValue)
 	}

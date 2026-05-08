@@ -378,9 +378,9 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 	connector := getPolicyConnector(m)
 	isGlobalManager := isPolicyGlobalManager(m)
 
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	bgpPath := d.Get("bgp_path").(string)
 	t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)

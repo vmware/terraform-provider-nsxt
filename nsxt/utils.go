@@ -353,8 +353,12 @@ func setCustomizedMPTagsInSchema(d *schema.ResourceData, tags []mp_model.Tag, sc
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
-		elem["scope"] = *tag.Scope
-		elem["tag"] = *tag.Tag
+		if tag.Scope != nil {
+			elem["scope"] = *tag.Scope
+		}
+		if tag.Tag != nil {
+			elem["tag"] = *tag.Tag
+		}
 		tagList = append(tagList, elem)
 	}
 	err := d.Set(schemaName, tagList)
@@ -391,8 +395,12 @@ func setCustomizedGMTagsInSchema(d *schema.ResourceData, tags []gm_model.Tag, sc
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
-		elem["scope"] = *tag.Scope
-		elem["tag"] = *tag.Tag
+		if tag.Scope != nil {
+			elem["scope"] = *tag.Scope
+		}
+		if tag.Tag != nil {
+			elem["tag"] = *tag.Tag
+		}
 		tagList = append(tagList, elem)
 	}
 	err := d.Set(schemaName, tagList)

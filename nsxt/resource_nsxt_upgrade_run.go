@@ -155,10 +155,11 @@ func resourceNsxtUpgradeRun() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"upgrade_prepare_ready_id": {
-				Type:        schema.TypeString,
-				Description: "ID of corresponding nsxt_upgrade_prepare_ready resource",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of corresponding nsxt_upgrade_prepare_ready resource",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateID(),
 			},
 			"edge_group":           getUpgradeGroupSchema(false),
 			"host_group":           getUpgradeGroupSchema(true),
@@ -773,12 +774,18 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 		if isCreate {
 			var grp model.UpgradeUnitGroup
 			grp, err = upgradeClientSet.GroupClient.Create(*groupGet)
+			if err != nil {
+				return err
+			}
+			if grp.Id == nil {
+				return fmt.Errorf("upgrade group Create returned a nil Id")
+			}
 			groupID = *grp.Id
 		} else {
 			_, err = upgradeClientSet.GroupClient.Update(groupID, *groupGet)
-		}
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 		if preUpgradeGroupID != "" {
 			err = upgradeClientSet.GroupClient.Reorder(groupID, getReorderAfterReq(preUpgradeGroupID))
@@ -976,6 +983,10 @@ func setUpgradeRunOutput(upgradeClientSet *upgradeClientSet, d *schema.ResourceD
 	}
 	var states []map[string]interface{}
 	for _, result := range status.ComponentStatus {
+		if result.ComponentType == nil || result.Status == nil {
+			log.Printf("[WARNING] upgrade component status entry has nil ComponentType or Status, skipping")
+			continue
+		}
 		elem := make(map[string]interface{})
 		elem["type"] = *result.ComponentType
 		elem["status"] = *result.Status

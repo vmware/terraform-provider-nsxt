@@ -35,7 +35,8 @@ func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "IDs of precheck warnings that need to be acknowledged",
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
 				},
 				Required: true,
 			},

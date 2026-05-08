@@ -30,10 +30,11 @@ func resourceNsxtPolicyEdgeTransportNodeRTEP() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"edge_transport_node_path": {
-				Type:        schema.TypeString,
-				Description: "Policy path of Edge transport node to associate with remote tunnel endpoint.",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "Policy path of Edge transport node to associate with remote tunnel endpoint.",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"host_switch_name": {
 				Type:        schema.TypeString,

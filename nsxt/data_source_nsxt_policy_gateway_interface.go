@@ -35,16 +35,18 @@ func dataSourceNsxtPolicyGatewayInterface() *schema.Resource {
 			},
 			"path": getPathSchema(),
 			"edge_cluster_path": {
-				Type:        schema.TypeString,
-				Description: "The path of the edge cluster connected to the gateway linked to this interface. This is exported only for Tier0 gateways",
-				Optional:    true,
-				Computed:    false,
+				Type:         schema.TypeString,
+				Description:  "The path of the edge cluster connected to the gateway linked to this interface. This is exported only for Tier0 gateways",
+				Optional:     true,
+				Computed:     false,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"segment_path": {
-				Type:        schema.TypeString,
-				Description: "Policy path for segment to be connected with the Gateway.",
-				Optional:    true,
-				Computed:    false,
+				Type:         schema.TypeString,
+				Description:  "Policy path for segment to be connected with the Gateway.",
+				Optional:     true,
+				Computed:     false,
+				ValidateFunc: validatePolicyPath(),
 			},
 		},
 	}
@@ -67,9 +69,9 @@ func dataSourceNsxtPolicyGatewayInterfaceRead(d *schema.ResourceData, m interfac
 	}
 	query := make(map[string]string)
 	if servicePath != "" {
-		query["parent_path"] = servicePath
+		query["parent_path"] = escapeSpecialCharacters(servicePath)
 	} else {
-		query["parent_path"] = t0Gw + "/locale-services/*"
+		query["parent_path"] = escapeSpecialCharacters(t0Gw) + escapeSpecialCharacters("/locale-services/") + "*"
 	}
 	var isT0 bool
 	var err error

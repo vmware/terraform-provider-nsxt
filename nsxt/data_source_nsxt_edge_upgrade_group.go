@@ -25,9 +25,10 @@ func dataSourceNsxtEdgeUpgradeGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"upgrade_prepare_id": {
-				Type:        schema.TypeString,
-				Description: "ID of corresponding nsxt_upgrade_prepare resource",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of corresponding nsxt_upgrade_prepare resource",
+				Required:     true,
+				ValidateFunc: validateID(),
 			},
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),

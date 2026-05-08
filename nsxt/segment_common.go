@@ -298,9 +298,10 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			ValidateFunc: validatePolicyPath(),
 		},
 		"domain_name": {
-			Type:        schema.TypeString,
-			Description: "DNS domain names",
-			Optional:    true,
+			Type:         schema.TypeString,
+			Description:  "DNS domain names",
+			Optional:     true,
+			ValidateFunc: validateFQDN(),
 		},
 		"l2_extension": {
 			Type:        schema.TypeList,

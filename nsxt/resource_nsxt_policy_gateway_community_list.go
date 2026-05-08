@@ -75,6 +75,9 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 
 	// Initialize resource Id and verify this ID is not yet used
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	gwPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
 	if !isT0 {

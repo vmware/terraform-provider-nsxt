@@ -334,11 +334,12 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this Edge Transport Node belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this Edge Transport Node belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "default",
+				ValidateFunc: validateID(),
 			},
 			"node_id": {
 				Type:          schema.TypeString,
@@ -346,6 +347,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				Computed:      true,
 				Description:   "Unique Id of the fabric node",
 				ConflictsWith: []string{"advanced_configuration", "credentials", "form_factor", "management_interface", "vm_deployment_config"},
+				ValidateFunc:  validateID(),
 			},
 			"advanced_configuration": getKeyValuePairListSchema(),
 			"appliance_config": {
@@ -411,9 +413,10 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 										ValidateFunc: validation.StringInSlice(policySyslogProtocolValues, false),
 									},
 									"server": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Server IP or fqdn",
+										Type:         schema.TypeString,
+										Required:     true,
+										Description:  "Server IP or fqdn",
+										ValidateFunc: validateSingleIPOrHostName(),
 									},
 								},
 							},
@@ -462,10 +465,11 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				},
 			},
 			"failure_domain_path": {
-				Type:        schema.TypeString,
-				Description: "Path of the failure domain",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "Path of the failure domain",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"form_factor": {
 				Type:         schema.TypeString,
@@ -474,9 +478,10 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(policyEdgeNodeFormFactorValues, false),
 			},
 			"hostname": {
-				Type:        schema.TypeString,
-				Description: "Host name or FQDN for edge node",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Host name or FQDN for edge node",
+				Required:     true,
+				ValidateFunc: validateSingleIPOrHostName(),
 			},
 			"management_interface": {
 				Type:        schema.TypeList,
@@ -487,9 +492,10 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"ip_assignment": getPolicyIPAssignmentSchema(true, 1, 2, managementAssignments),
 						"network_id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Portgroup, logical switch identifier or segment path for management network connectivity",
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  "Portgroup, logical switch identifier or segment path for management network connectivity",
+							ValidateFunc: validateID(),
 						},
 					},
 				},
@@ -509,9 +515,10 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"datapath_network_id": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "A portgroup, logical switch identifier or segment path for datapath connectivity",
+										Type:         schema.TypeString,
+										Optional:     true,
+										Description:  "A portgroup, logical switch identifier or segment path for datapath connectivity",
+										ValidateFunc: validateID(),
 									},
 									"device_name": {
 										Type:        schema.TypeString,
@@ -583,14 +590,16 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"compute_folder_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Compute folder identifier in the specified vcenter server",
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "Compute folder identifier in the specified vcenter server",
+							ValidateFunc: validateID(),
 						},
 						"compute_id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Cluster identifier for specified vcenter server",
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  "Cluster identifier for specified vcenter server",
+							ValidateFunc: validateID(),
 						},
 						"edge_host_affinity_config": {
 							Type:        schema.TypeList,
@@ -608,9 +617,10 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 							},
 						},
 						"host_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Host identifier in the specified vcenter server",
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "Host identifier in the specified vcenter server",
+							ValidateFunc: validateID(),
 						},
 						"reservation_info": {
 							Type:        schema.TypeList,
@@ -643,14 +653,16 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 							},
 						},
 						"storage_id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Storage/datastore identifier in the specified vcenter server",
+							Type:         schema.TypeString,
+							Required:     true,
+							Description:  "Storage/datastore identifier in the specified vcenter server",
+							ValidateFunc: validateID(),
 						},
 						"compute_manager_id": {
-							Type:        schema.TypeString,
-							Description: "Vsphere compute identifier for identifying the vcenter server",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Vsphere compute identifier for identifying the vcenter server",
+							Required:     true,
+							ValidateFunc: validateID(),
 						},
 					},
 				},
@@ -1309,6 +1321,9 @@ func resourceNsxtPolicyEdgeTransportNodeCreate(d *schema.ResourceData, m interfa
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	nodeID := d.Get("node_id").(string)
 	if id == "" {
 		if nodeID != "" {

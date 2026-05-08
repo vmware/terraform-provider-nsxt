@@ -23,10 +23,11 @@ func dataSourceNsxtPolicyIdpsSystemSignatures() *schema.Resource {
 			"id":   getDataSourceIDSchema(),
 			"path": getPathSchema(),
 			"version_id": {
-				Type:        schema.TypeString,
-				Description: "Signature version ID to query. If not specified, uses the active version",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "Signature version ID to query. If not specified, uses the active version",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"severity": {
 				Type:         schema.TypeString,

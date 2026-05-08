@@ -67,10 +67,11 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 				Computed:    true,
 			},
 			"identity_source_id": {
-				Type:        schema.TypeString,
-				Description: "ID of the external identity source",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of the external identity source",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"identity_source_type": {
 				Type:         schema.TypeString,
@@ -150,10 +151,18 @@ func getRolesForPathFromSchema(d *schema.ResourceData) rolesForPath {
 func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxModel.RolesForPath) {
 	var rolesForPathList []map[string]interface{}
 	for _, nsxRolesForPath := range nsxRolesForPathList {
+		if nsxRolesForPath.Path == nil {
+			log.Printf("[WARNING] roles_for_path entry has nil Path, skipping")
+			continue
+		}
 		elem := make(map[string]interface{})
 		elem["path"] = *nsxRolesForPath.Path
 		roles := make([]string, 0, len(nsxRolesForPath.Roles))
 		for _, nsxRole := range nsxRolesForPath.Roles {
+			if nsxRole.Role == nil {
+				log.Printf("[WARNING] role entry has nil Role, skipping")
+				continue
+			}
 			roles = append(roles, *nsxRole.Role)
 		}
 		elem["roles"] = roles

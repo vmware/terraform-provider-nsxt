@@ -27,14 +27,16 @@ func dataSourceNsxtComputeCollection() *schema.Resource {
 				Description: "ComputeCollection type like VC_Cluster. Here the Compute Manager type prefix would help in differentiating similar named Compute Collection types from different Compute Managers",
 			},
 			"origin_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Id of the compute manager from where this Compute Collection was discovered",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Id of the compute manager from where this Compute Collection was discovered",
+				ValidateFunc: validateID(),
 			},
 			"cm_local_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Local Id of the compute collection in the Compute Manager",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Local Id of the compute collection in the Compute Manager",
+				ValidateFunc: validateID(),
 			},
 		},
 	}

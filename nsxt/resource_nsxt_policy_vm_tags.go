@@ -49,9 +49,10 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:        schema.TypeString,
-				Description: "Instance id",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Instance id",
+				Required:     true,
+				ValidateFunc: validateID(),
 			},
 			"tag": getTagsSchema(),
 			"port": {

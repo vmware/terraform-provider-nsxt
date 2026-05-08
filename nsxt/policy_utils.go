@@ -43,6 +43,9 @@ func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker fun
 	if id == "" {
 		return newUUID(), nil
 	}
+	if !isValidID(id) {
+		return "", fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 
 	exists, err := presenceChecker(getSessionContext(d, m), id, connector)
 	if err != nil {
@@ -64,6 +67,9 @@ func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func
 	if id == "" {
 		return newUUID(), nil
 	}
+	if !isValidID(id) {
+		return "", fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 
 	exists, err := presenceChecker(id, connector, isGlobalManager)
 	if err != nil {
@@ -83,6 +89,9 @@ func getOrGenerateIDWithParent(d *schema.ResourceData, m interface{}, presenceCh
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		return newUUID(), nil
+	}
+	if !isValidID(id) {
+		return "", fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
 	}
 
 	parentPath := d.Get("parent_path").(string)
@@ -557,6 +566,20 @@ func isValidID(id string) bool {
 	return !strings.ContainsAny(id, "/&")
 }
 
+// getNsxIDFromSchema reads nsx_id from the resource schema, validates it, and
+// returns a generated UUID when no id was supplied. Returns an error if the
+// supplied id contains characters that are illegal in NSX-T resource identifiers.
+func getNsxIDFromSchema(d *schema.ResourceData) (string, error) {
+	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return "", fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
+	if id == "" {
+		return newUUID(), nil
+	}
+	return id, nil
+}
+
 func getPolicyIDFromPath(path string) string {
 	tokens := strings.Split(path, "/")
 	return tokens[len(tokens)-1]
@@ -777,6 +800,10 @@ func getElemOrEmptyMapFromMap(d map[string]interface{}, key string) map[string]i
 func setPolicyLbHTTPHeaderInSchema(d *schema.ResourceData, attrName string, headers []model.LbHttpRequestHeader) {
 	var headerList []map[string]string
 	for _, header := range headers {
+		if header.HeaderName == nil || header.HeaderValue == nil {
+			log.Printf("[WARNING] LB HTTP header entry has nil HeaderName or HeaderValue, skipping")
+			continue
+		}
 		elem := make(map[string]string)
 		elem["name"] = *header.HeaderName
 		elem["value"] = *header.HeaderValue

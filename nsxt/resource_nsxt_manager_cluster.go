@@ -269,15 +269,30 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 
 			log.Printf("[DEBUG]: Host resolved to IP addresses %v", hostIPs)
 		}
+		if clusterConfig.ClusterId == nil {
+			return "", "", hostIPs, fmt.Errorf("NSX-T API returned ClusterConfig with nil ClusterId")
+		}
 		clusterID := *clusterConfig.ClusterId
 		nodes := clusterConfig.Nodes
-		node := nodes[0]
-		apiListenAddr := node.ApiListenAddr
-		if apiListenAddr != nil {
-			certSha256Thumbprint := *apiListenAddr.CertificateSha256Thumbprint
-			return clusterID, certSha256Thumbprint, hostIPs, nil
+		if len(nodes) == 0 {
+			// Transient state: cluster has no nodes yet. Continue polling.
+			log.Printf("[DEBUG]: Cluster has no nodes yet, retrying (attempt %d)", i+1)
+		} else {
+			node := nodes[0]
+			apiListenAddr := node.ApiListenAddr
+			if apiListenAddr != nil {
+				if apiListenAddr.CertificateSha256Thumbprint == nil {
+					return "", "", hostIPs, fmt.Errorf("ApiListenAddr has nil CertificateSha256Thumbprint")
+				}
+				certSha256Thumbprint := *apiListenAddr.CertificateSha256Thumbprint
+				return clusterID, certSha256Thumbprint, hostIPs, nil
+			}
 		}
-		interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
+		jitter := maxRetryInterval - minRetryInterval
+		if jitter <= 0 {
+			jitter = 1
+		}
+		interval := (rand.Intn(jitter) + minRetryInterval) // #nosec G404 -- non-cryptographic retry jitter
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 		log.Printf("[DEBUG]: Waited %d ms before retrying getting API Listen Address, attempt %d", interval, i+1)
 	}
