@@ -42,7 +42,9 @@ func dataSourceNsxtTagsRead(d *schema.ResourceData, m interface{}) error {
 
 	var tags []string
 	for _, tag := range tagsList {
-		tags = append(tags, *tag.Tag)
+		if tag.Tag != nil {
+			tags = append(tags, *tag.Tag)
+		}
 	}
 	d.Set("items", tags)
 

@@ -50,7 +50,7 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m int
 			// search API does not recognized the locale-services part in the VPN service path
 			servicePath = strings.Join(append(s[:4], s[6:]...), "/")
 		}
-		query["parent_path"] = fmt.Sprintf("%s*", servicePath)
+		query["parent_path"] = escapeSpecialCharacters(servicePath) + "*"
 	}
 	objInt, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "IPSecVpnLocalEndpoint", query, false)
 	if err != nil {

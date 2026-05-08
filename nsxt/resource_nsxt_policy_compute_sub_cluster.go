@@ -165,9 +165,9 @@ func policyComputeSubClusterPatch(siteID, epID, id string, d *schema.ResourceDat
 
 func resourceNsxtPolicyComputeSubClusterCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

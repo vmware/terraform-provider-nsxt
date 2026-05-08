@@ -39,7 +39,7 @@ func dataSourceNsxtPolicyGatewayLocaleServiceRead(d *schema.ResourceData, m inte
 
 	gwPath := d.Get("gateway_path").(string)
 	query := make(map[string]string)
-	query["parent_path"] = gwPath
+	query["parent_path"] = escapeSpecialCharacters(gwPath)
 	obj, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "LocaleServices", query, false)
 
 	if err != nil {

@@ -74,7 +74,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		}
 		query := make(map[string]string)
 		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
-		query["parent_path"] = globalPolicyEnforcementPointPath
+		query["parent_path"] = escapeSpecialCharacters(globalPolicyEnforcementPointPath)
 		if transportType != "" {
 			query["tz_type"] = transportType
 		}

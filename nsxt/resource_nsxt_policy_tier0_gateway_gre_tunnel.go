@@ -252,6 +252,9 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	localeServicePath := d.Get("locale_service_path").(string)
 	isT0, tier0id, localeSvcID, err := parseLocaleServicePolicyPath(localeServicePath)
 	if err != nil {
