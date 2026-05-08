@@ -190,6 +190,9 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		if err1 != nil {
 			return fmt.Errorf("Tier0 Gateway path with configured edge cluster expected, got %s", gwPath)
 		}
+		if localeService == nil {
+			return fmt.Errorf("No locale service with edge cluster found for gateway %s", gwPath)
+		}
 		localeServiceID = *localeService.Id
 	}
 

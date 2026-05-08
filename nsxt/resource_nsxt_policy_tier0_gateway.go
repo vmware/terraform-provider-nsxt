@@ -458,8 +458,12 @@ func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]i
 	var tagList []map[string]string
 	for _, tag := range bgpConfig.Tags {
 		elem := make(map[string]string)
-		elem["scope"] = *tag.Scope
-		elem["tag"] = *tag.Tag
+		if tag.Scope != nil {
+			elem["scope"] = *tag.Scope
+		}
+		if tag.Tag != nil {
+			elem["tag"] = *tag.Tag
+		}
 		tagList = append(tagList, elem)
 	}
 	cfgMap["tag"] = tagList

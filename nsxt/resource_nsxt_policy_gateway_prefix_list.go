@@ -88,10 +88,16 @@ func setPrefixesInSchema(d *schema.ResourceData, prefixes []model.PrefixEntry) {
 	var entriesList []map[string]interface{}
 	for _, prefix := range prefixes {
 		elem := make(map[string]interface{})
+		if prefix.Action == nil {
+			log.Printf("[WARNING] prefix entry has nil Action, skipping")
+			continue
+		}
 		elem["action"] = *prefix.Action
 		elem["ge"] = prefix.Ge
 		elem["le"] = prefix.Le
-		if *prefix.Network == "ANY" || *prefix.Network == "any" {
+		if prefix.Network == nil {
+			elem["network"] = ""
+		} else if *prefix.Network == "ANY" || *prefix.Network == "any" {
 			elem["network"] = ""
 		} else {
 			elem["network"] = prefix.Network

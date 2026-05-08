@@ -773,12 +773,18 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 		if isCreate {
 			var grp model.UpgradeUnitGroup
 			grp, err = upgradeClientSet.GroupClient.Create(*groupGet)
+			if err != nil {
+				return err
+			}
+			if grp.Id == nil {
+				return fmt.Errorf("upgrade group Create returned a nil Id")
+			}
 			groupID = *grp.Id
 		} else {
 			_, err = upgradeClientSet.GroupClient.Update(groupID, *groupGet)
-		}
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 		if preUpgradeGroupID != "" {
 			err = upgradeClientSet.GroupClient.Reorder(groupID, getReorderAfterReq(preUpgradeGroupID))

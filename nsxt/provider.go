@@ -1190,10 +1190,13 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 
 		minRetryInterval := c.CommonConfig.MinRetryInterval
 		maxRetryInterval := c.CommonConfig.MaxRetryInterval
-		if maxRetryInterval > 0 {
+		if maxRetryInterval > minRetryInterval {
 			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
 			time.Sleep(time.Duration(interval) * time.Millisecond)
 			log.Printf("[DEBUG]: Waited %d ms before retrying", interval)
+		} else if maxRetryInterval > 0 {
+			time.Sleep(time.Duration(maxRetryInterval) * time.Millisecond)
+			log.Printf("[DEBUG]: Waited %d ms before retrying (fixed interval)", maxRetryInterval)
 		}
 
 		return true

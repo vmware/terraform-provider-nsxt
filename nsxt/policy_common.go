@@ -529,8 +529,12 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		var tagList []map[string]string
 		for _, tag := range rule.Tags {
 			tags := make(map[string]string)
-			tags["scope"] = *tag.Scope
-			tags["tag"] = *tag.Tag
+			if tag.Scope != nil {
+				tags["scope"] = *tag.Scope
+			}
+			if tag.Tag != nil {
+				tags["tag"] = *tag.Tag
+			}
 			tagList = append(tagList, tags)
 		}
 		elem["tag"] = tagList
