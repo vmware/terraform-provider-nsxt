@@ -27,7 +27,9 @@ func dataSourceNsxtPolicyRoleBinding() *schema.Resource {
 			"name":                 {Type: schema.TypeString, Description: "User/Group's name", Optional: true, Computed: true},
 			"type":                 {Type: schema.TypeString, Description: "Indicates the type of the user", Optional: true, Computed: true, ValidateFunc: validation.StringInSlice(roleBindingUserTypes, false)},
 			"user_id":              {Type: schema.TypeString, Description: "Local user's numeric id", Computed: true},
-			"identity_source_id":   {Type: schema.TypeString, Description: "ID of the external identity source", Optional: true, Computed: true},
+			"identity_source_id":   {Type: schema.TypeString, Description: "ID of the external identity source", Optional: true, Computed: true,
+ValidateFunc: validateID(),
+},
 			"identity_source_type": {Type: schema.TypeString, Description: "Type of the external identity source", Optional: true, Computed: true, ValidateFunc: validation.StringInSlice(roleBindingIdentitySourceTypes, false)},
 			"roles_for_path": {
 				Type:        schema.TypeSet,

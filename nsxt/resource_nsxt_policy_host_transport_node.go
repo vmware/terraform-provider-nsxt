@@ -54,12 +54,14 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Default:     "default",
-			},
+				ValidateFunc: validateID(),
+},
 			"discovered_node_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Discovered node id to create Host Transport Node",
-			},
+				ValidateFunc: validateID(),
+},
 			// host_switch_spec
 			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
 			"remove_nsx_on_destroy": {

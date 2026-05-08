@@ -26,12 +26,14 @@ func dataSourceNsxtPolicySegmentPorts() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Segment Port attachment id to filter segment ports",
 				Optional:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"segment_path": {
 				Type:        schema.TypeString,
 				Description: "Segment path to filter segment ports",
 				Optional:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"items": {
 				Type:        schema.TypeList,
 				Description: "List of segment ports matching the criteria",

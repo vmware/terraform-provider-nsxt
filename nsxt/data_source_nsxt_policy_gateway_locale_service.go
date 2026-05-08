@@ -28,7 +28,8 @@ func dataSourceNsxtPolicyGatewayLocaleService() *schema.Resource {
 				Description: "The path of the edge cluster connected to this Tier0 gateway",
 				Optional:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"context": getContextSchema(false, false, false),
 		},
 	}

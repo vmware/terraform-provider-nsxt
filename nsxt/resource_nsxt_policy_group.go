@@ -194,7 +194,8 @@ func getExternalIDExpressionSchema() *schema.Resource {
 				Required:    true,
 				Description: "List of external IDs",
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
 				},
 			},
 			"member_type": {

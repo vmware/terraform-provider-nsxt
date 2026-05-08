@@ -135,7 +135,8 @@ func getIdsProfileSignatureSchema() *schema.Resource {
 			"signature_id": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
+				ValidateFunc: validateID(),
+},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,

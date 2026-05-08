@@ -25,7 +25,8 @@ func dataSourceNsxtVPC() *schema.Resource {
 			"short_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
+				ValidateFunc: validateID(),
+},
 		},
 	}
 }

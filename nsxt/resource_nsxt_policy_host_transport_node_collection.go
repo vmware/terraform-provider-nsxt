@@ -56,12 +56,14 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"compute_collection_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Compute collection id",
-			},
+				ValidateFunc: validateID(),
+},
 			"enable_nsx_on_dvpg": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -83,7 +85,8 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: "HostSwitch Id",
-									},
+										ValidateFunc: validateID(),
+},
 									"transport_node_profile_sub_config_name": {
 										Type:        schema.TypeString,
 										Required:    true,
@@ -98,7 +101,8 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 							Computed:    true,
 							Description: "sub-cluster Id",
 							Deprecated:  "Use with sub_cluster_path instead of sub_cluster_id",
-						},
+							ValidateFunc: validateID(),
+},
 						"sub_cluster_path": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -112,7 +116,8 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Transport Node Profile Path",
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"remove_nsx_on_destroy": {
 				Type:        schema.TypeBool,
 				Optional:    true,

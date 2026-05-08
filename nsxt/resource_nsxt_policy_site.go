@@ -88,7 +88,8 @@ func getConnectionInfoSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: "Fully Qualified Domain Name of the Management Node",
-				},
+					ValidateFunc: validateFQDN(),
+},
 				"password": {
 					Type:             schema.TypeString,
 					Optional:         true,
@@ -105,7 +106,8 @@ func getConnectionInfoSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: "Thumbprint of Enforcement Point",
-				},
+					ValidateFunc: validateSHA256Thumbprint(),
+},
 				"username": {
 					Type:        schema.TypeString,
 					Optional:    true,

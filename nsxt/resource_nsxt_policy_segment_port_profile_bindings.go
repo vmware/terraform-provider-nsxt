@@ -26,7 +26,8 @@ func resourceNsxtPolicySegmentPortProfileBindings() *schema.Resource {
 				Description: "Policy path of the segment port",
 				Required:    true,
 				ForceNew:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"discovery_profile": {
 				Type:        schema.TypeList,
 				Description: "IP and MAC discovery profiles for this segment port",

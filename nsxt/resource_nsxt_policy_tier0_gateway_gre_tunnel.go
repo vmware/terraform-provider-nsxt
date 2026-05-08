@@ -43,7 +43,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 				Description: "Policy path of associated Gateway Locale Service on NSX",
 				Required:    true,
 				ForceNew:    true,
-			},
+				ValidateFunc: validatePolicyPath(),
+},
 			"destination_address": {
 				Type:         schema.TypeString,
 				Description:  "Destination IPv4 address",

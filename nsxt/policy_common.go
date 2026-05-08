@@ -307,7 +307,8 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 			Type:        schema.TypeString,
 			Description: "Additional information (string) which will be propagated to the rule syslog",
 			Optional:    true,
-		},
+			ValidateFunc: validateLogLabel(),
+},
 		"action": getPolicyRuleActionSchema(isIds),
 	}
 	if isIds {
@@ -673,7 +674,9 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 }
 
 func getDataSourceDisplayNameSchema() *schema.Schema {
-	return getDataSourceStringSchema("Display name of this resource")
+	s := getDataSourceStringSchema("Display name of this resource")
+	s.ValidateFunc = validation.StringLenBetween(0, 255)
+	return s
 }
 
 func getDataSourceExtendedDisplayNameSchema() *schema.Schema {
@@ -683,11 +686,14 @@ func getDataSourceExtendedDisplayNameSchema() *schema.Schema {
 		ConflictsWith: []string{"id"},
 		Optional:      true,
 		Computed:      true,
+		ValidateFunc:  validation.StringLenBetween(0, 255),
 	}
 }
 
 func getDataSourceDescriptionSchema() *schema.Schema {
-	return getDataSourceStringSchema("Description for this resource")
+	s := getDataSourceStringSchema("Description for this resource")
+	s.ValidateFunc = validation.StringLenBetween(0, 1024)
+	return s
 }
 
 func getDataSourceIDSchema() *schema.Schema {

@@ -27,7 +27,8 @@ func dataSourceNsxtPolicyIdpsSystemSignatures() *schema.Resource {
 				Description: "Signature version ID to query. If not specified, uses the active version",
 				Optional:    true,
 				Computed:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"severity": {
 				Type:         schema.TypeString,
 				Description:  "Filter signatures by severity level",

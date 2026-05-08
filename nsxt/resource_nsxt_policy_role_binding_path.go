@@ -34,7 +34,8 @@ func resourceNsxtPolicyUserManagementRoleBindingPath() *schema.Resource {
 				Description: "ID of the role binding to add this path to. Use the id from nsxt_policy_user_management_role_binding or the data source.",
 				Required:    true,
 				ForceNew:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"path": {
 				Type:        schema.TypeString,
 				Description: "Path in the parent hierarchy for which these roles apply (e.g. \"/\" or \"/orgs/default\").",

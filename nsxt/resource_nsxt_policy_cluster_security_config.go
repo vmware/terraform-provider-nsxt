@@ -31,7 +31,8 @@ func resourceNsxtPolicyClusterSecurityConfig() *schema.Resource {
 				Description: "Cluster external ID (e.g., uuid:domain-c20). This is the cluster identifier from compute collection.",
 				Required:    true,
 				ForceNew:    true,
-			},
+				ValidateFunc: validateID(),
+},
 			"dfw_enabled": {
 				Type:         schema.TypeBool,
 				Description:  "Enable or disable Distributed Firewall (DFW) on the cluster. DFW must be enabled before IDPS can be configured.",

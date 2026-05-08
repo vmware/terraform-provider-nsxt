@@ -257,7 +257,8 @@ func getLbServerSslSchema() *schema.Schema {
 				"server_auth_ca_paths": {
 					Type: schema.TypeList,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:         schema.TypeString,
+						ValidateFunc: validatePolicyPath(),
 					},
 					Optional:    true,
 					Description: "If server auth type is REQUIRED, server certificate must be signed by one of the trusted Certificate Authorities (CAs), also referred to as root CAs, whose self signed certificates are specified.",
@@ -265,7 +266,8 @@ func getLbServerSslSchema() *schema.Schema {
 				"server_auth_crl_paths": {
 					Type: schema.TypeList,
 					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						Type:         schema.TypeString,
+						ValidateFunc: validatePolicyPath(),
 					},
 					Optional:    true,
 					Description: "A Certificate Revocation List (CRL) can be specified in the server-side SSL profile binding to disallow compromised server certificates.",
