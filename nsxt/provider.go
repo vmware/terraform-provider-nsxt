@@ -1099,7 +1099,7 @@ func getLicenses(connector client.Connector) ([]string, error) {
 	defaultLicenseMarkers := []string{"NSX for vShield Endpoint"}
 	for _, item := range list.Results {
 		// Ignore default licenses
-		if item.Description != nil && slices.Contains[[]string, string](defaultLicenseMarkers, *item.Description) {
+		if item.Description != nil && stringInList(*item.Description, defaultLicenseMarkers) {
 			continue
 		}
 		licenseList = append(licenseList, *item.LicenseKey)
@@ -1131,7 +1131,7 @@ func configureLicenses(connector client.Connector, intentLicenses []string) erro
 	}
 	// Apply new licenses
 	for _, license := range intentLicenses {
-		if slices.Contains[[]string, string](existingLicenses, license) {
+		if stringInList(license, existingLicenses) {
 			continue
 		}
 		err := applyLicense(connector, license)

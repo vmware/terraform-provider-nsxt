@@ -41,7 +41,7 @@ func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
 	}
 	for _, checkInfo := range checkInfoResults.Results {
 		for _, ci := range checkInfo.PreUpgradeChecksInfo {
-			if slices.Contains[[]string, string](precheckIDs, *ci.Id) {
+			if stringInList(*ci.Id, precheckIDs) {
 				precheckText += fmt.Sprintf("  Component: %s, code: %s, description: %s\n", *checkInfo.ComponentType, *ci.Id, *ci.Description)
 			}
 		}
