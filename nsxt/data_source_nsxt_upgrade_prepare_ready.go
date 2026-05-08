@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"golang.org/x/exp/slices"
 )
 
 func dataSourceNsxtUpgradePrepareReady() *schema.Resource {
@@ -41,7 +40,7 @@ func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
 	}
 	for _, checkInfo := range checkInfoResults.Results {
 		for _, ci := range checkInfo.PreUpgradeChecksInfo {
-			if slices.Contains[[]string, string](precheckIDs, *ci.Id) {
+			if stringInList(*ci.Id, precheckIDs) {
 				precheckText += fmt.Sprintf("  Component: %s, code: %s, description: %s\n", *checkInfo.ComponentType, *ci.Id, *ci.Description)
 			}
 		}
