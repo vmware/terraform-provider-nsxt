@@ -757,10 +757,7 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	caCert := d.Get("ca").(string)
-	tlsConfig := tls.Config{}
-	if insecure {
-		tlsConfig.InsecureSkipVerify = true // #nosec G402 -- user-controlled via allow_unverified_ssl provider option
-	}
+	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
 
 	if len(clientAuthCertFile) > 0 {
 
@@ -1052,7 +1049,7 @@ func getLicenses(connector client.Connector) ([]string, error) {
 	defaultLicenseMarkers := []string{"NSX for vShield Endpoint"}
 	for _, item := range list.Results {
 		// Ignore default licenses
-		if item.Description != nil && slices.Contains(defaultLicenseMarkers, *item.Description) {
+		if item.Description != nil && slices.Contains(defaultLicenseMarkers, *item.Description) { //nolint:govet -- govet inline analyzer does not support type-parameter inference in generics
 			continue
 		}
 		licenseList = append(licenseList, *item.LicenseKey)
@@ -1084,7 +1081,7 @@ func configureLicenses(connector client.Connector, intentLicenses []string) erro
 	}
 	// Apply new licenses
 	for _, license := range intentLicenses {
-		if slices.Contains(existingLicenses, license) {
+		if slices.Contains(existingLicenses, license) { //nolint:govet -- govet inline analyzer does not support type-parameter inference in generics
 			continue
 		}
 		err := applyLicense(connector, license)
