@@ -246,6 +246,9 @@ func listPolicyGatewayLocaleServices(context utl.SessionContext, connector clien
 			return results, err
 		}
 		cursor = listResponse.Cursor
+		if listResponse.ResultCount == nil {
+			return results, fmt.Errorf("NSX-T API returned a list response with nil ResultCount")
+		}
 		count = *listResponse.ResultCount
 		results = append(results, listResponse.Results...)
 		if total == 0 {
