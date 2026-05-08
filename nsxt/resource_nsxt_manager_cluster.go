@@ -292,7 +292,7 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 		if jitter <= 0 {
 			jitter = 1
 		}
-		interval := (rand.Intn(jitter) + minRetryInterval)
+		interval := (rand.Intn(jitter) + minRetryInterval) // #nosec G404 -- non-cryptographic retry jitter
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 		log.Printf("[DEBUG]: Waited %d ms before retrying getting API Listen Address, attempt %d", interval, i+1)
 	}

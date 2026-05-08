@@ -16,6 +16,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -754,7 +755,10 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	caCert := d.Get("ca").(string)
-	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
+	tlsConfig := tls.Config{}
+	if insecure {
+		tlsConfig.InsecureSkipVerify = true // #nosec G402 -- user-controlled via allow_unverified_ssl provider option
+	}
 
 	if len(clientAuthCertFile) > 0 {
 
@@ -792,7 +796,7 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	}
 
 	if len(caFile) > 0 {
-		caCert, err := os.ReadFile(caFile)
+		caCert, err := os.ReadFile(filepath.Clean(caFile)) // #nosec G304 -- path cleaned; user-supplied CA file path
 		if err != nil {
 			return nil, err
 		}
@@ -976,7 +980,7 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
 	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
 
-	log.Printf("Issuing request towards NSX:\n%s", replaced) //nolint:gosec
+	log.Printf("Issuing request towards NSX:\n%s", replaced) // #nosec G706 -- intentional debug dump; auth headers already scrubbed above
 	return nil
 }
 
@@ -1191,7 +1195,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		minRetryInterval := c.CommonConfig.MinRetryInterval
 		maxRetryInterval := c.CommonConfig.MaxRetryInterval
 		if maxRetryInterval > minRetryInterval {
-			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
+			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval) // #nosec G404 -- non-cryptographic retry jitter
 			time.Sleep(time.Duration(interval) * time.Millisecond)
 			log.Printf("[DEBUG]: Waited %d ms before retrying", interval)
 		} else if maxRetryInterval > 0 {
