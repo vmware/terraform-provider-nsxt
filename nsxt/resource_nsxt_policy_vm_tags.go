@@ -54,7 +54,7 @@ func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]
 	case 2:
 		// instance_id::project_id — multitenancy / project scope.
 		instanceID, projectID := parts[0], parts[1]
-		if instanceID == "" || projectID == "" {
+		if !isValidResourceID(instanceID) || projectID == "" {
 			return nil, fmt.Errorf("invalid import ID %q: instance_id and project_id must both be non-empty", importID)
 		}
 		ctxMap := map[string]interface{}{
@@ -67,7 +67,7 @@ func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]
 	case 3:
 		// instance_id::project_id::vpc_id — VPC scope.
 		instanceID, projectID, vpcID := parts[0], parts[1], parts[2]
-		if instanceID == "" || projectID == "" || vpcID == "" {
+		if !isValidResourceID(instanceID) || projectID == "" || vpcID == "" {
 			return nil, fmt.Errorf("invalid import ID %q: instance_id, project_id and vpc_id must all be non-empty", importID)
 		}
 		ctxMap := map[string]interface{}{

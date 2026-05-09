@@ -20,6 +20,7 @@ func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(*terraform.State) error {
