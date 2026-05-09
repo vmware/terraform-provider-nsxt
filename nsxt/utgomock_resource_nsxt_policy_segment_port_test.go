@@ -196,6 +196,37 @@ func TestMockResourceNsxtPolicySegmentPortCreate(t *testing.T) {
 		assert.NotEmpty(t, d.Id())
 		assert.Equal(t, segPortDisplayName, d.Get("display_name"))
 	})
+
+	t.Run("Create succeeds with short segment path", func(t *testing.T) {
+		shortSegmentPath := "a/b/c"
+		shortSegmentID := "c"
+		mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
+		mockPortsSDK.EXPECT().Get(shortSegmentID, gomock.Any()).Return(model.SegmentPort{
+			DisplayName: &segPortDisplayName,
+			Description: &segPortDescription,
+			Path:        &segPortPath,
+			Revision:    &segPortRevision,
+		}, nil)
+		mockDiscoverySDK.EXPECT().List(shortSegmentID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PortDiscoveryProfileBindingMapListResult{Results: []model.PortDiscoveryProfileBindingMap{}}, nil)
+		mockQosSDK.EXPECT().List(shortSegmentID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PortQosProfileBindingMapListResult{Results: []model.PortQosProfileBindingMap{}}, nil)
+		mockSecuritySDK.EXPECT().List(shortSegmentID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PortSecurityProfileBindingMapListResult{Results: []model.PortSecurityProfileBindingMap{}}, nil)
+
+		res := resourceNsxtPolicySegmentPort()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"segment_path": shortSegmentPath,
+			"display_name": segPortDisplayName,
+		})
+
+		m := newGoMockProviderClient()
+		assert.NotPanics(t, func() {
+			err := resourceNsxtPolicySegmentPortCreate(d, m)
+			require.NoError(t, err)
+		})
+		assert.NotEmpty(t, d.Id())
+	})
 }
 
 func TestMockResourceNsxtPolicySegmentPortUpdate(t *testing.T) {
@@ -328,4 +359,77 @@ func TestMockResourceNsxtPolicySegmentPortDelete(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining Segment Port ID")
 	})
+}
+
+func TestMockIsT1Segment(t *testing.T) {
+	tests := []struct {
+		name        string
+		segmentPath string
+		expected    bool
+	}{
+		{
+			name:        "T1 segment path",
+			segmentPath: "/infra/tier-1s/t1-1/segments/seg-1",
+			expected:    true,
+		},
+		{
+			name:        "non-T1 infra segment path",
+			segmentPath: "/infra/segments/seg-1",
+			expected:    false,
+		},
+		{
+			name:        "short path with three tokens",
+			segmentPath: "a/b/c",
+			expected:    false,
+		},
+		{
+			name:        "short path with two tokens",
+			segmentPath: "a/b",
+			expected:    false,
+		},
+		{
+			name:        "empty string",
+			segmentPath: "",
+			expected:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, isT1Segment(tt.segmentPath))
+		})
+	}
+}
+
+func TestMockGetT1IdFromSegPath(t *testing.T) {
+	tests := []struct {
+		name        string
+		segmentPath string
+		expectedID  string
+	}{
+		{
+			name:        "T1 segment path",
+			segmentPath: "/infra/tier-1s/t1-1/segments/seg-1",
+			expectedID:  "t1-1",
+		},
+		{
+			name:        "non-T1 segment path",
+			segmentPath: "/infra/segments/seg-1",
+			expectedID:  "",
+		},
+		{
+			name:        "short path with three tokens",
+			segmentPath: "a/b/c",
+			expectedID:  "",
+		},
+		{
+			name:        "empty string",
+			segmentPath: "",
+			expectedID:  "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expectedID, getT1IdFromSegPath(tt.segmentPath))
+		})
+	}
 }
