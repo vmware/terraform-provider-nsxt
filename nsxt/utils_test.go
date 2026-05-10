@@ -156,6 +156,10 @@ func getVNARootPassword() string {
 	return os.Getenv("NSXT_TEST_VNA_ROOT_PASSWORD")
 }
 
+func getRCVNAClusterName() string {
+	return os.Getenv("NSXT_TEST_RC_VNA_CLUSTER_NAME")
+}
+
 func getHostTransportNodeName() string {
 	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
 }
