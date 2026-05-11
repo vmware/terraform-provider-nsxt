@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -32,7 +33,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"golang.org/x/exp/slices"
 )
 
 var cliLicensesClient = nsx.NewLicensesClient
@@ -299,7 +299,9 @@ func Provider() *schema.Provider {
 			"nsxt_policy_idps_signature_version":                     dataSourceNsxtPolicyIdpsSignatureVersion(),
 			"nsxt_policy_idps_system_signatures":                     dataSourceNsxtPolicyIdpsSystemSignatures(),
 			"nsxt_policy_intrusion_service_gateway_policy":           dataSourceNsxtPolicyIntrusionServiceGatewayPolicy(),
+			"nsxt_policy_intrusion_service_gateway_policy_rule":      dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRule(),
 			"nsxt_policy_intrusion_service_policy":                   dataSourceNsxtPolicyIntrusionServicePolicy(),
+			"nsxt_policy_intrusion_service_policy_rule":              dataSourceNsxtPolicyIntrusionServicePolicyRule(),
 			"nsxt_policy_intrusion_service_profile":                  dataSourceNsxtPolicyIntrusionServiceProfile(),
 			"nsxt_policy_ip_block":                                   dataSourceNsxtPolicyIPBlock(),
 			"nsxt_policy_ip_discovery_profile":                       dataSourceNsxtPolicyIPDiscoveryProfile(),
@@ -320,6 +322,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_service":                                 dataSourceNsxtPolicyLbService(),
 			"nsxt_policy_mac_discovery_profile":                      dataSourceNsxtPolicyMacDiscoveryProfile(),
 			"nsxt_policy_network_span":                               dataSourceNsxtPolicyNetworkSpan(),
+			"nsxt_policy_parent_intrusion_service_gateway_policy":    dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicy(),
+			"nsxt_policy_parent_intrusion_service_policy":            dataSourceNsxtPolicyParentIntrusionServicePolicy(),
 			"nsxt_policy_project":                                    dataSourceNsxtPolicyProject(),
 			"nsxt_policy_project_ip_address_allocation":              dataSourceNsxtProjectIpAddressAllocation(),
 			"nsxt_policy_qos_profile":                                dataSourceNsxtPolicyQosProfile(),

@@ -206,3 +206,58 @@ func TestMockResourceNsxtPolicyTier0GatewayGRETunnelDelete(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func structValueToGreTunnel(t *testing.T, d data.DataValue) nsxModel.GreTunnel {
+	t.Helper()
+	converter := bindings.NewTypeConverter()
+	out, errs := converter.ConvertToGolang(d, nsxModel.GreTunnelBindingType())
+	require.Nil(t, errs)
+	return out.(nsxModel.GreTunnel)
+}
+
+// TestMockResourceNsxtPolicyTier0GatewayGRETunnelFromSchema verifies the
+// _revision field handling in tier0GatewayGRETunnelFromSchema.
+// Regression guard for issue #1027: Update was omitting _revision, causing
+// NSX to reject the PATCH with error code 500127 ("cannot create object as
+// it already exists").
+func TestMockResourceNsxtPolicyTier0GatewayGRETunnelFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyTier0GatewayGRETunnel()
+
+	t.Run("Create omits revision", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGreTunnelData())
+
+		sv, err := tier0GatewayGRETunnelFromSchema(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, sv)
+
+		gt := structValueToGreTunnel(t, sv)
+		assert.Nil(t, gt.Revision, "Revision must be omitted on create to avoid NSX error 500127")
+		require.NotNil(t, gt.DisplayName)
+		assert.Equal(t, greTunnelDisplayName, *gt.DisplayName)
+	})
+
+	t.Run("Update includes revision", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGreTunnelData())
+
+		rev := greTunnelRevision
+		sv, err := tier0GatewayGRETunnelFromSchema(d, &rev)
+		require.NoError(t, err)
+		require.NotNil(t, sv)
+
+		gt := structValueToGreTunnel(t, sv)
+		require.NotNil(t, gt.Revision, "Revision must be present on update path")
+		assert.Equal(t, greTunnelRevision, *gt.Revision)
+	})
+
+	t.Run("Update with zero revision", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGreTunnelData())
+
+		rev := int64(0)
+		sv, err := tier0GatewayGRETunnelFromSchema(d, &rev)
+		require.NoError(t, err)
+
+		gt := structValueToGreTunnel(t, sv)
+		require.NotNil(t, gt.Revision)
+		assert.Equal(t, int64(0), *gt.Revision)
+	})
+}

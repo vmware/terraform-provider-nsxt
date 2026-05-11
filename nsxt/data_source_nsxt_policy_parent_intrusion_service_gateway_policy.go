@@ -10,13 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func dataSourceNsxtPolicyIntrusionServiceGatewayPolicy() *schema.Resource {
+func dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicy() *schema.Resource {
+	// NOTE: This parent data source intentionally excludes the "rule" field to provide lightweight policy metadata retrieval without embedded rules
+	// Use nsxt_policy_intrusion_service_gateway_policy for complete policy with rules
 	return &schema.Resource{
-		Read: dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead,
+		Read: dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead,
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
@@ -50,42 +51,13 @@ func dataSourceNsxtPolicyIntrusionServiceGatewayPolicy() *schema.Resource {
 				Computed:    true,
 				Description: "Comments for security policy lock/unlock.",
 			},
-			"rule":     getIntrusionServiceGatewayPolicyRulesSchema(),
 			"tag":      getTagsSchema(),
 			"revision": getRevisionSchema(),
 		},
 	}
 }
 
-func listIntrusionServiceGatewayPolicies(d *schema.ResourceData, domain string, m interface{}, connector client.Connector) ([]model.IdsGatewayPolicy, error) {
-	client := cliIntrusionServiceGatewayPoliciesClient(getSessionContext(d, m), connector)
-	if client == nil {
-		return nil, policyResourceNotSupportedError()
-	}
-
-	var results []model.IdsGatewayPolicy
-	var cursor *string
-	total := 0
-
-	for {
-		includeMarkForDeleteObjectsParam := false
-		policies, err := client.List(domain, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil, nil)
-		if err != nil {
-			return results, err
-		}
-		results = append(results, policies.Results...)
-		if total == 0 && policies.ResultCount != nil {
-			total = int(*policies.ResultCount)
-		}
-
-		cursor = policies.Cursor
-		if len(results) >= total {
-			return results, nil
-		}
-	}
-}
-
-func dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead(d *schema.ResourceData, m interface{}) error {
 	domain := d.Get("domain").(string)
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
@@ -100,40 +72,23 @@ func dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(d *schema.ResourceDat
 		obj, err := client.Get(domain, objID)
 		if err != nil {
 			if isNotFoundError(err) {
-				return fmt.Errorf("Intrusion Service Gateway Policy with ID %s was not found", objID)
+				return fmt.Errorf("Parent Intrusion Service Gateway Policy with ID %s was not found", objID)
 			}
-			return fmt.Errorf("Error while reading Intrusion Service Gateway Policy %s: %v", objID, err)
+			return fmt.Errorf("Error while reading Parent Intrusion Service Gateway Policy %s: %v", objID, err)
 		}
 		d.SetId(*obj.Id)
-		d.Set("display_name", obj.DisplayName)
-		d.Set("description", obj.Description)
-		d.Set("path", obj.Path)
-		d.Set("domain", getDomainFromResourcePath(*obj.Path))
-		d.Set("category", obj.Category)
-		d.Set("stateful", obj.Stateful != nil && *obj.Stateful)
-		d.Set("sequence_number", obj.SequenceNumber)
-		d.Set("locked", obj.Locked)
-		d.Set("comments", obj.Comments)
-		setPolicyTagsInSchema(d, obj.Tags)
-		d.Set("revision", obj.Revision)
-
-		// Set embedded rules (this policy data source includes rules)
-		// false = Gateway rules with no oversubscription field
-		var rules []model.IdsRule
-		if obj.Rules != nil {
-			rules = obj.Rules
-		}
-		return setPolicyIdsRulesInSchema(d, rules, false)
+		setParentIntrusionServiceGatewayPolicyDataSourceSchema(d, obj)
+		return nil
 	}
 
 	if objName == "" && category == "" {
-		return fmt.Errorf("Intrusion Service Gateway Policy id, display name or category must be specified")
+		return fmt.Errorf("Parent Intrusion Service Gateway Policy id, display name or category must be specified")
 	}
 
 	connector := getPolicyConnector(m)
 	policies, err := listIntrusionServiceGatewayPolicies(d, domain, m, connector)
 	if err != nil {
-		return fmt.Errorf("Error while reading Intrusion Service Gateway Policies: %v", err)
+		return fmt.Errorf("Error while reading Parent Intrusion Service Gateway Policies: %v", err)
 	}
 
 	var perfectMatch []model.IdsGatewayPolicy
@@ -157,46 +112,35 @@ func dataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(d *schema.ResourceDat
 	var obj model.IdsGatewayPolicy
 	if len(perfectMatch) > 0 {
 		if len(perfectMatch) > 1 {
-			return fmt.Errorf("Found multiple Intrusion Service Gateway Policies with name '%s'", objName)
+			return fmt.Errorf("Found multiple Parent Intrusion Service Gateway Policies with name '%s'", objName)
 		}
 		obj = perfectMatch[0]
 	} else if len(prefixMatch) > 0 {
 		if len(prefixMatch) > 1 {
-			return fmt.Errorf("Found multiple Intrusion Service Gateway Policies with name starting with '%s' and category '%s'", objName, category)
+			return fmt.Errorf("Found multiple Parent Intrusion Service Gateway Policies with name starting with '%s' and category '%s'", objName, category)
 		}
 		obj = prefixMatch[0]
 	} else {
-		return fmt.Errorf("Intrusion Service Gateway Policy with name '%s' and category '%s' was not found", objName, category)
+		return fmt.Errorf("Parent Intrusion Service Gateway Policy with name '%s' and category '%s' was not found", objName, category)
 	}
-
-	// Get the complete policy with embedded rules using the ID
-	client := cliIntrusionServiceGatewayPoliciesClient(getSessionContext(d, m), connector)
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
-	completeObj, err := client.Get(domain, *obj.Id)
-	if err != nil {
-		return fmt.Errorf("Error while reading Intrusion Service Gateway Policy %s: %v", *obj.Id, err)
-	}
-	obj = completeObj
 
 	d.SetId(*obj.Id)
+	setParentIntrusionServiceGatewayPolicyDataSourceSchema(d, obj)
+	return nil
+}
+
+func setParentIntrusionServiceGatewayPolicyDataSourceSchema(d *schema.ResourceData, obj model.IdsGatewayPolicy) {
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("category", obj.Category)
 	d.Set("stateful", obj.Stateful != nil && *obj.Stateful)
-	d.Set("sequence_number", obj.SequenceNumber)
-	d.Set("locked", obj.Locked)
+	d.Set("locked", obj.Locked != nil && *obj.Locked)
 	d.Set("comments", obj.Comments)
+	if obj.SequenceNumber != nil {
+		d.Set("sequence_number", int(*obj.SequenceNumber))
+	}
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("revision", obj.Revision)
-
-	// Set embedded rules (this policy data source includes rules)
-	var rules []model.IdsRule
-	if obj.Rules != nil {
-		rules = obj.Rules
-	}
-	return setPolicyIdsRulesInSchema(d, rules, false)
 }

@@ -7,12 +7,12 @@ package nsxt
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"golang.org/x/exp/slices"
 )
 
 func dataSourceNsxtUpgradePrepareReady() *schema.Resource {

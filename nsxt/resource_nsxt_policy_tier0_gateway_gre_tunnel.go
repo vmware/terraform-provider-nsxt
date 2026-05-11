@@ -152,7 +152,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 	}
 }
 
-func tier0GatewayGRETunnelFromSchema(d *schema.ResourceData) (*data.StructValue, error) {
+func tier0GatewayGRETunnelFromSchema(d *schema.ResourceData, revision *int64) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
 
 	displayName := d.Get("display_name").(string)
@@ -214,6 +214,7 @@ func tier0GatewayGRETunnelFromSchema(d *schema.ResourceData) (*data.StructValue,
 		TunnelAddress:      tunnelAddresses,
 		TunnelKeepalive:    &tunnelKeepalive,
 		ResourceType:       model.GreTunnel__TYPE_IDENTIFIER,
+		Revision:           revision,
 	}
 	dataValue, errs := converter.ConvertToVapi(greTunnel, model.GreTunnelBindingType())
 	if errs != nil {
@@ -262,7 +263,7 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	client := cliTunnelsClient(sessionContext, connector)
 
-	obj, err := tier0GatewayGRETunnelFromSchema(d)
+	obj, err := tier0GatewayGRETunnelFromSchema(d, nil)
 	if err != nil {
 		return fmt.Errorf("unable to create the GRE Tunnel: %v", err)
 	}
@@ -359,7 +360,8 @@ func resourceNsxtPolicyTier0GatewayGRETunnelUpdate(d *schema.ResourceData, m int
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	client := cliTunnelsClient(sessionContext, connector)
 
-	obj, err := tier0GatewayGRETunnelFromSchema(d)
+	rev := int64(d.Get("revision").(int))
+	obj, err := tier0GatewayGRETunnelFromSchema(d, &rev)
 	if err != nil {
 		return fmt.Errorf("failed to update GRE Tunnel: %v", err)
 	}

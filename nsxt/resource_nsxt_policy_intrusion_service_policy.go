@@ -94,6 +94,7 @@ func setPolicyIdsRulesInSchema(d *schema.ResourceData, rules []model.IdsRule, in
 		setPathListInMap(elem, "scope", rule.Scope)
 		elem["sequence_number"] = rule.SequenceNumber
 		elem["nsx_id"] = rule.Id
+		elem["path"] = rule.Path
 		if rule.RuleId != nil {
 			elem["rule_id"] = *rule.RuleId
 		}
