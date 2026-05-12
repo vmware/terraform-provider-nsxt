@@ -72,17 +72,9 @@ func dataSourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{})
 	d.Set("path", obj.Path)
 
 	// Set IdsSettings specific fields
-	if obj.AutoUpdate != nil {
-		d.Set("auto_update_signatures", *obj.AutoUpdate)
-	}
-
-	if obj.IdsEventsToSyslog != nil {
-		d.Set("enable_syslog", *obj.IdsEventsToSyslog)
-	}
-
-	if obj.Oversubscription != nil {
-		d.Set("oversubscription", *obj.Oversubscription)
-	}
+	d.Set("auto_update_signatures", obj.AutoUpdate)
+	d.Set("enable_syslog", obj.IdsEventsToSyslog)
+	d.Set("oversubscription", obj.Oversubscription)
 
 	// Read IdsCustomSignatureSettings if custom_signature_version_id is provided
 	customSigVersionID := d.Get("custom_signature_version_id").(string)
