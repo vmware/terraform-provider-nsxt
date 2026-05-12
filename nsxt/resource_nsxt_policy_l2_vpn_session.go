@@ -61,9 +61,10 @@ func resourceNsxtPolicyL2VPNSession() *schema.Resource {
 				Default:     true,
 			},
 			"transport_tunnels": {
-				Type:        schema.TypeList,
-				Description: "List of transport tunnels(vpn sessions path) for redundancy",
-				Required:    true,
+				Type:             schema.TypeList,
+				Description:      "List of transport tunnels(vpn sessions path) for redundancy",
+				Required:         true,
+				DiffSuppressFunc: suppressL2VpnTransportTunnelsDiff,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -188,6 +189,42 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 	return resourceNsxtPolicyL2VPNSessionRead(d, m)
 }
 
+// normalizeL2VpnTransportTunnelPath strips the optional `locale-services/<id>/`
+// segment from an IPsec VPN session policy path. NSX may expand a flat path
+//
+//	/infra/tier-0s/<gw>/ipsec-vpn-services/<svc>/sessions/<id>
+//
+// to the locale-service-scoped form:
+//
+//	/infra/tier-0s/<gw>/locale-services/default/ipsec-vpn-services/<svc>/sessions/<id>
+//
+// Both forms refer to the same session.
+func normalizeL2VpnTransportTunnelPath(path string) string {
+	const token = "/locale-services/"
+	idx := strings.Index(path, token)
+	if idx < 0 {
+		return path
+	}
+	rest := path[idx+len(token):]
+	slashIdx := strings.Index(rest, "/")
+	if slashIdx < 0 {
+		return path
+	}
+	return path[:idx] + rest[slashIdx:]
+}
+
+// suppressL2VpnTransportTunnelsDiff is a DiffSuppressFunc for the transport_tunnels
+// TypeList. It normalizes both the old and new element strings before comparing so
+// that perpetual drift is avoided when NSX returns the locale-service-scoped form of
+// an IPsec VPN session path while the user-supplied configuration contains the flat
+// form (or vice versa).
+func suppressL2VpnTransportTunnelsDiff(k, old, new string, _ *schema.ResourceData) bool {
+	if strings.HasSuffix(k, ".#") {
+		return old == new
+	}
+	return normalizeL2VpnTransportTunnelPath(old) == normalizeL2VpnTransportTunnelPath(new)
+}
+
 func parseL2VPNServicePolicyPath(path string) (bool, string, string, string, error) {
 	segs := strings.Split(path, "/")
 	// Path should be like /infra/tier-1s/aaa/locale-services/bbb/l2vpn-services/ccc
@@ -253,9 +290,7 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	d.Set("revision", obj.Revision)
 	d.Set("enabled", obj.Enabled)
 
-	if len(obj.TransportTunnels) > 0 {
-		d.Set("transport_tunnels", obj.TransportTunnels)
-	}
+	d.Set("transport_tunnels", obj.TransportTunnels)
 	if util.NsxVersionHigherOrEqual("3.2.0") {
 		if obj.TcpMssClamping != nil {
 			direction := obj.TcpMssClamping.Direction
