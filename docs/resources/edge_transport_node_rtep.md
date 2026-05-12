@@ -12,12 +12,12 @@ This resource is supported with NSX 4.1.0 onwards.
 ## Example Usage
 
 ```hcl
-data "nsxt_edge_transport_node" "test_node" {
+data "nsxt_transport_node" "test_node" {
   display_name = "edgenode1"
 }
 
 resource "nsxt_edge_transport_node_rtep" "test_rtep" {
-  edge_id = data.nsxt_edge_transport_node.test_node.id
+  edge_id = data.nsxt_transport_node.test_node.id
 
   host_switch_name = "someSwitch"
   ip_assignment {
