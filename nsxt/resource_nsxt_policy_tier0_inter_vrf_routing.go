@@ -157,6 +157,9 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 	bpgRouteLeakingList := d.Get("bgp_route_leaking")
 	if bpgRouteLeakingList != nil {
 		for _, brl := range bpgRouteLeakingList.([]interface{}) {
+			if brl == nil {
+				continue
+			}
 			brlMap := brl.(map[string]interface{})
 			addressFamily := brlMap["address_family"].(string)
 			var inFilter []string
@@ -179,6 +182,9 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 	staticRouteAdvert := d.Get("static_route_advertisement")
 	if staticRouteAdvert != nil {
 		for _, sAdvert := range staticRouteAdvert.([]interface{}) {
+			if sAdvert == nil {
+				continue
+			}
 			// Should be one as list has MaxItems = 1
 			sAdvertMap := sAdvert.(map[string]interface{})
 
@@ -186,6 +192,9 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 			advertRulesList := sAdvertMap["advertisement_rule"]
 			if advertRulesList != nil {
 				for _, advRule := range advertRulesList.([]interface{}) {
+					if advRule == nil {
+						continue
+					}
 					advRuleMap := advRule.(map[string]interface{})
 					action := advRuleMap["action"].(string)
 					name := advRuleMap["name"].(string)
