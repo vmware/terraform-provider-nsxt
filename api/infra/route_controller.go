@@ -8,6 +8,7 @@ import (
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	rcClient "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/route_controllers"
+	rcBgpClient "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/route_controllers/bgp"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -141,6 +142,103 @@ func (c RouteControllerBgpClientContext) Get(routerControllerIdParam string) (mo
 
 	default:
 		return obj, errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+type RouteControllerBgpNeighborClientContext utl.ClientContext
+
+func NewRouteControllerBgpNeighborClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *RouteControllerBgpNeighborClientContext {
+	var client interface{}
+
+	switch sessionContext.ClientType {
+
+	case utl.Local:
+		client = rcBgpClient.NewNeighborsClient(connector)
+
+	default:
+		return nil
+	}
+	return &RouteControllerBgpNeighborClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
+}
+
+func (c RouteControllerBgpNeighborClientContext) Delete(routerControllerIdParam string, neighborIdParam string) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcBgpClient.NeighborsClient)
+		err = client.Delete(routerControllerIdParam, neighborIdParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
+
+func (c RouteControllerBgpNeighborClientContext) Get(routerControllerIdParam string, neighborIdParam string) (model0.RouteControllerBgpNeighborConfig, error) {
+	var obj model0.RouteControllerBgpNeighborConfig
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcBgpClient.NeighborsClient)
+		obj, err = client.Get(routerControllerIdParam, neighborIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	default:
+		return obj, errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+func (c RouteControllerBgpNeighborClientContext) List(routerControllerIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.RouteControllerBgpNeighborConfigListResult, error) {
+	var err error
+	var obj model0.RouteControllerBgpNeighborConfigListResult
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcBgpClient.NeighborsClient)
+		obj, err = client.List(routerControllerIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+func (c RouteControllerBgpNeighborClientContext) Patch(routerControllerIdParam string, neighborIdParam string, routeControllerBgpNeighborConfigParam model0.RouteControllerBgpNeighborConfig) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcBgpClient.NeighborsClient)
+		err = client.Patch(routerControllerIdParam, neighborIdParam, routeControllerBgpNeighborConfigParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
+
+func (c RouteControllerBgpNeighborClientContext) Update(routerControllerIdParam string, neighborIdParam string, routeControllerBgpNeighborConfigParam model0.RouteControllerBgpNeighborConfig) (model0.RouteControllerBgpNeighborConfig, error) {
+	var err error
+	var obj model0.RouteControllerBgpNeighborConfig
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcBgpClient.NeighborsClient)
+		obj, err = client.Update(routerControllerIdParam, neighborIdParam, routeControllerBgpNeighborConfigParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
 	}
 	return obj, err
 }
