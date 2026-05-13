@@ -144,3 +144,100 @@ func (c RouteControllerBgpClientContext) Get(routerControllerIdParam string) (mo
 	}
 	return obj, err
 }
+
+type RouteControllerInterfaceClientContext utl.ClientContext
+
+func NewRouteControllerInterfaceClient(sessionContext utl.SessionContext, connector vapiProtocolClient_.Connector) *RouteControllerInterfaceClientContext {
+	var client interface{}
+
+	switch sessionContext.ClientType {
+
+	case utl.Local:
+		client = rcClient.NewInterfacesClient(connector)
+
+	default:
+		return nil
+	}
+	return &RouteControllerInterfaceClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
+}
+
+func (c RouteControllerInterfaceClientContext) Delete(routerControllerIdParam string, interfaceIdParam string) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcClient.InterfacesClient)
+		err = client.Delete(routerControllerIdParam, interfaceIdParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
+
+func (c RouteControllerInterfaceClientContext) Get(routerControllerIdParam string, interfaceIdParam string) (model0.RouteControllerInterface, error) {
+	var obj model0.RouteControllerInterface
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcClient.InterfacesClient)
+		obj, err = client.Get(routerControllerIdParam, interfaceIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	default:
+		return obj, errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+func (c RouteControllerInterfaceClientContext) List(routerControllerIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.RouteControllerInterfaceListResult, error) {
+	var err error
+	var obj model0.RouteControllerInterfaceListResult
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcClient.InterfacesClient)
+		obj, err = client.List(routerControllerIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
+func (c RouteControllerInterfaceClientContext) Patch(routerControllerIdParam string, interfaceIdParam string, routeControllerInterfaceParam model0.RouteControllerInterface) error {
+	var err error
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcClient.InterfacesClient)
+		err = client.Patch(routerControllerIdParam, interfaceIdParam, routeControllerInterfaceParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return err
+}
+
+func (c RouteControllerInterfaceClientContext) Update(routerControllerIdParam string, interfaceIdParam string, routeControllerInterfaceParam model0.RouteControllerInterface) (model0.RouteControllerInterface, error) {
+	var err error
+	var obj model0.RouteControllerInterface
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(rcClient.InterfacesClient)
+		obj, err = client.Update(routerControllerIdParam, interfaceIdParam, routeControllerInterfaceParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
