@@ -27,16 +27,18 @@ var (
 	rtepHostSwitch    = "nvds-1"
 	rtepVlanID        = int64(100)
 	rtepTeamingPolicy = "named-teaming-1"
+	rtepIPPoolID      = "ip-pool-uuid-1"
 )
 
-// dhcpIpAssignmentStructValue builds the *data.StructValue for AssignedByDhcp
+// staticIPPoolAssignmentStructValue builds the *data.StructValue for StaticIpPoolSpec
 // so that RTEP Read tests can round-trip through setIPAssignmentInSchema.
-func dhcpIpAssignmentStructValue() *data.StructValue {
+func staticIPPoolAssignmentStructValue() *data.StructValue {
 	converter := bindings.NewTypeConverter()
-	dhcp := mpmodel.AssignedByDhcp{
-		ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP,
+	pool := mpmodel.StaticIpPoolSpec{
+		IpPoolId:     &rtepIPPoolID,
+		ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC,
 	}
-	dataValue, errs := converter.ConvertToVapi(dhcp, mpmodel.AssignedByDhcpBindingType())
+	dataValue, errs := converter.ConvertToVapi(pool, mpmodel.StaticIpPoolSpecBindingType())
 	if errs != nil {
 		panic(errs[0])
 	}
@@ -51,7 +53,7 @@ func transportNodeWithRTEP() mpmodel.TransportNode {
 			HostSwitchName:     &rtepHostSwitch,
 			RtepVlan:           &rtepVlanID,
 			NamedTeamingPolicy: &rtepTeamingPolicy,
-			IpAssignmentSpec:   dhcpIpAssignmentStructValue(),
+			IpAssignmentSpec:   staticIPPoolAssignmentStructValue(),
 		},
 	}
 }
@@ -71,11 +73,8 @@ func minimalRTEPData() map[string]interface{} {
 		"rtep_vlan":        int(rtepVlanID),
 		"ip_assignment": []interface{}{
 			map[string]interface{}{
-				"assigned_by_dhcp": true,
-				"no_ipv4":          false,
-				"static_ip":        []interface{}{},
-				"static_ip_pool":   "",
-				"static_ip_mac":    []interface{}{},
+				"static_ip":      []interface{}{},
+				"static_ip_pool": rtepIPPoolID,
 			},
 		},
 	}
@@ -147,9 +146,11 @@ func TestMockResourceNsxtEdgeTransportNodeRTEPRead(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"edge_id": rtepEdgeID,
 		})
+		d.SetId(rtepEdgeID)
 
 		err := resourceNsxtEdgeTransportNodeRTEPRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
+		assert.Equal(t, rtepEdgeID, d.Get("edge_id"))
 		assert.Equal(t, rtepHostSwitch, d.Get("host_switch_name"))
 		assert.Equal(t, int(rtepVlanID), d.Get("rtep_vlan"))
 	})
@@ -166,6 +167,7 @@ func TestMockResourceNsxtEdgeTransportNodeRTEPRead(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"edge_id": rtepEdgeID,
 		})
+		d.SetId(rtepEdgeID)
 
 		err := resourceNsxtEdgeTransportNodeRTEPRead(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -202,6 +204,7 @@ func TestMockResourceNsxtEdgeTransportNodeRTEPUpdate(t *testing.T) {
 
 		res := resourceNsxtEdgeTransportNodeRTEP()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalRTEPData())
+		d.SetId(rtepEdgeID)
 
 		err := resourceNsxtEdgeTransportNodeRTEPUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -240,6 +243,7 @@ func TestMockResourceNsxtEdgeTransportNodeRTEPDelete(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"edge_id": rtepEdgeID,
 		})
+		d.SetId(rtepEdgeID)
 
 		err := resourceNsxtEdgeTransportNodeRTEPDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
@@ -257,6 +261,7 @@ func TestMockResourceNsxtEdgeTransportNodeRTEPDelete(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"edge_id": rtepEdgeID,
 		})
+		d.SetId(rtepEdgeID)
 
 		err := resourceNsxtEdgeTransportNodeRTEPDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
