@@ -205,6 +205,7 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Connectivity configuration to manually connect (ON) or disconnect (OFF)",
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(connectivityValues, false),
 			},
 			"hybrid": {
@@ -1381,7 +1382,9 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		if len(poolPaths) > 0 {
 			advConfig["address_pool_path"] = poolPaths[0]
 		}
-		advConfig["connectivity"] = obj.AdvancedConfig.Connectivity
+		if obj.AdvancedConfig.Connectivity != nil {
+			advConfig["connectivity"] = *obj.AdvancedConfig.Connectivity
+		}
 		advConfig["hybrid"] = obj.AdvancedConfig.Hybrid
 		advConfig["local_egress"] = obj.AdvancedConfig.LocalEgress
 		advConfig["multicast"] = obj.AdvancedConfig.Multicast
