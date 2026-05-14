@@ -143,6 +143,19 @@ func TestMockResourceNsxtPolicyTier0InterVRFRoutingRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	t.Run("Read fails for non-Tier0 gateway path", func(t *testing.T) {
+		t1Data := minimalInterVrfData()
+		t1Data["gateway_path"] = "/infra/tier-1s/t1-gw-1"
+
+		res := resourceNsxtPolicyTier0InterVRFRouting()
+		d := schema.TestResourceDataRaw(t, res.Schema, t1Data)
+		d.SetId(interVrfID)
+
+		err := resourceNsxtPolicyTier0InterVRFRoutingRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Tier0")
+	})
 }
 
 func TestMockResourceNsxtPolicyTier0InterVRFRoutingUpdate(t *testing.T) {
@@ -164,6 +177,30 @@ func TestMockResourceNsxtPolicyTier0InterVRFRoutingUpdate(t *testing.T) {
 		err := resourceNsxtPolicyTier0InterVRFRoutingUpdate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Update fails for non-Tier0 gateway path", func(t *testing.T) {
+		t1Data := minimalInterVrfData()
+		t1Data["gateway_path"] = "/infra/tier-1s/t1-gw-1"
+
+		res := resourceNsxtPolicyTier0InterVRFRouting()
+		d := schema.TestResourceDataRaw(t, res.Schema, t1Data)
+		d.SetId(interVrfID)
+
+		err := resourceNsxtPolicyTier0InterVRFRoutingUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Tier0")
+	})
+
+	t.Run("Update fails with API error", func(t *testing.T) {
+		mockSDK.EXPECT().Patch(interVrfGwID, interVrfID, gomock.Any()).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyTier0InterVRFRouting()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalInterVrfData())
+		d.SetId(interVrfID)
+
+		err := resourceNsxtPolicyTier0InterVRFRoutingUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
 }
 
 func TestMockResourceNsxtPolicyTier0InterVRFRoutingDelete(t *testing.T) {
@@ -181,5 +218,116 @@ func TestMockResourceNsxtPolicyTier0InterVRFRoutingDelete(t *testing.T) {
 
 		err := resourceNsxtPolicyTier0InterVRFRoutingDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
+	})
+
+	t.Run("Delete fails with API error", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(interVrfGwID, interVrfID).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyTier0InterVRFRouting()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalInterVrfData())
+		d.SetId(interVrfID)
+
+		err := resourceNsxtPolicyTier0InterVRFRoutingDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTier0InterVRFRoutingGetFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyTier0InterVRFRouting()
+
+	t.Run("minimal fields produce empty optional collections", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalInterVrfData())
+		obj := getPolicyInterVRFRoutingFromSchema(d)
+		assert.Equal(t, interVrfDisplayName, *obj.DisplayName)
+		assert.Equal(t, interVrfDescription, *obj.Description)
+		assert.Equal(t, interVrfTargetPath, *obj.TargetPath)
+		assert.Empty(t, obj.BgpRouteLeaking)
+		assert.Nil(t, obj.StaticRouteAdvertisement)
+	})
+
+	t.Run("bgp_route_leaking IPV4 with in and out filters is parsed", func(t *testing.T) {
+		data := minimalInterVrfData()
+		inPath := "/infra/tier-0s/t0-gw-1/route-maps/rm-in"
+		outPath := "/infra/tier-0s/t0-gw-1/route-maps/rm-out"
+		data["bgp_route_leaking"] = []interface{}{
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"in_filter":      []interface{}{inPath},
+				"out_filter":     []interface{}{outPath},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		obj := getPolicyInterVRFRoutingFromSchema(d)
+		require.Len(t, obj.BgpRouteLeaking, 1)
+		assert.Equal(t, "IPV4", *obj.BgpRouteLeaking[0].AddressFamily)
+		assert.Equal(t, []string{inPath}, obj.BgpRouteLeaking[0].InFilter)
+		assert.Equal(t, []string{outPath}, obj.BgpRouteLeaking[0].OutFilter)
+	})
+
+	t.Run("two bgp_route_leaking entries for IPV4 and IPV6 are both parsed", func(t *testing.T) {
+		data := minimalInterVrfData()
+		data["bgp_route_leaking"] = []interface{}{
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"in_filter":      []interface{}{},
+				"out_filter":     []interface{}{},
+			},
+			map[string]interface{}{
+				"address_family": "IPV6",
+				"in_filter":      []interface{}{},
+				"out_filter":     []interface{}{},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		obj := getPolicyInterVRFRoutingFromSchema(d)
+		require.Len(t, obj.BgpRouteLeaking, 2)
+		assert.Equal(t, "IPV4", *obj.BgpRouteLeaking[0].AddressFamily)
+		assert.Equal(t, "IPV6", *obj.BgpRouteLeaking[1].AddressFamily)
+	})
+
+	t.Run("static_route_advertisement with advertisement_rule and in_filter_prefix_list is parsed", func(t *testing.T) {
+		data := minimalInterVrfData()
+		plPath := "/infra/tier-0s/t0-gw-1/prefix-lists/pl-1"
+		data["static_route_advertisement"] = []interface{}{
+			map[string]interface{}{
+				"advertisement_rule": []interface{}{
+					map[string]interface{}{
+						"action":                    "PERMIT",
+						"name":                      "rule-1",
+						"prefix_operator":           "GE",
+						"route_advertisement_types": []interface{}{"TIER0_CONNECTED", "TIER0_NAT"},
+						"subnets":                   []interface{}{"192.168.1.0/24", "192.168.2.0/24"},
+					},
+				},
+				"in_filter_prefix_list": []interface{}{plPath},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		obj := getPolicyInterVRFRoutingFromSchema(d)
+		require.NotNil(t, obj.StaticRouteAdvertisement)
+		require.Len(t, obj.StaticRouteAdvertisement.AdvertisementRules, 1)
+		rule := obj.StaticRouteAdvertisement.AdvertisementRules[0]
+		assert.Equal(t, "PERMIT", *rule.Action)
+		assert.Equal(t, "rule-1", *rule.Name)
+		assert.Equal(t, "GE", *rule.PrefixOperator)
+		assert.Equal(t, []string{"TIER0_CONNECTED", "TIER0_NAT"}, rule.RouteAdvertisementTypes)
+		assert.Equal(t, []string{"192.168.1.0/24", "192.168.2.0/24"}, rule.Subnets)
+		assert.Equal(t, []string{plPath}, obj.StaticRouteAdvertisement.InFilterPrefixList)
+	})
+
+	t.Run("static_route_advertisement without advertisement_rule is parsed", func(t *testing.T) {
+		data := minimalInterVrfData()
+		plPath := "/infra/tier-0s/t0-gw-1/prefix-lists/pl-1"
+		data["static_route_advertisement"] = []interface{}{
+			map[string]interface{}{
+				"advertisement_rule":    []interface{}{},
+				"in_filter_prefix_list": []interface{}{plPath},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		obj := getPolicyInterVRFRoutingFromSchema(d)
+		require.NotNil(t, obj.StaticRouteAdvertisement)
+		assert.Empty(t, obj.StaticRouteAdvertisement.AdvertisementRules)
+		assert.Equal(t, []string{plPath}, obj.StaticRouteAdvertisement.InFilterPrefixList)
 	})
 }
