@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -25,6 +26,70 @@ func TestAccResourceNsxtPolicyVMTags_multitenancy(t *testing.T) {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
 		testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_ID")
+	})
+}
+
+func TestAccResourceNsxtPolicyVMTags_vpc(t *testing.T) {
+	vmID := os.Getenv("NSXT_TEST_VPC_VM_ID")
+	testResourceName := "nsxt_policy_vm_tags.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccEnvDefined(t, "NSXT_TEST_VPC_VM_ID")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyVMTagsCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
+				),
+			},
+			{
+				Config: testAccNSXPolicyVMTagsUpdateTemplate(vmID, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyVMTagsCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyVMTags_import_basic_vpc(t *testing.T) {
+	vmID := os.Getenv("NSXT_TEST_VPC_VM_ID")
+	testResourceName := "nsxt_policy_vm_tags.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccEnvDefined(t, "NSXT_TEST_VPC_VM_ID")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, true),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id"},
+				ImportStateIdFunc:       testAccNsxtPolicyVMTagsVPCImportIDFunc(testResourceName),
+			},
+		},
 	})
 }
 
@@ -68,7 +133,7 @@ func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
-			testAccEnvDefined(t, "NSXT_TEST_VM_SEGMENT_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_SEGMENT_NAME")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -126,7 +191,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
-	vmID := getTestVMID(false)
+	vmID := getTestVMID(true)
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
@@ -148,10 +213,54 @@ func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id"},
-				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+				ImportStateIdFunc:       testAccNsxtPolicyVMTagsImportIDFunc(testResourceName),
 			},
 		},
 	})
+}
+
+// testAccNsxtPolicyVMTagsImportIDFunc builds the composite "<instance_id>::<project_id>" import
+// identifier for multitenancy, since nsxt_policy_vm_tags has no path attribute.
+func testAccNsxtPolicyVMTagsImportIDFunc(resourceName string) func(*terraform.State) (string, error) {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("NSX Policy VM Tags resource %s not found in resources", resourceName)
+		}
+		instanceID := rs.Primary.ID
+		if instanceID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource ID not set in resources")
+		}
+		projectID := rs.Primary.Attributes["context.0.project_id"]
+		if projectID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource context.0.project_id not set in resources")
+		}
+		return instanceID + vmTagsImportIDSeparator + projectID, nil
+	}
+}
+
+// testAccNsxtPolicyVMTagsVPCImportIDFunc builds the composite
+// "<instance_id>::<project_id>::<vpc_id>" import identifier for VPC context.
+func testAccNsxtPolicyVMTagsVPCImportIDFunc(resourceName string) func(*terraform.State) (string, error) {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("NSX Policy VM Tags resource %s not found in resources", resourceName)
+		}
+		instanceID := rs.Primary.ID
+		if instanceID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource ID not set in resources")
+		}
+		projectID := rs.Primary.Attributes["context.0.project_id"]
+		if projectID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource context.0.project_id not set in resources")
+		}
+		vpcID := rs.Primary.Attributes["context.0.vpc_id"]
+		if vpcID == "" {
+			return "", fmt.Errorf("NSX Policy VM Tags resource context.0.vpc_id not set in resources")
+		}
+		return instanceID + vmTagsImportIDSeparator + projectID + vmTagsImportIDSeparator + vpcID, nil
+	}
 }
 
 func testAccNSXPolicyVMTagsCheckExists(resourceName string) resource.TestCheckFunc {
@@ -239,6 +348,10 @@ resource "nsxt_policy_vm_tags" "test" {
 
 func testAccNSXPolicyVMPortTagsCreateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_segment" "segment" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_vm_tags" "test" {
   instance_id = "%s"
 
@@ -248,22 +361,26 @@ resource "nsxt_policy_vm_tags" "test" {
   }
 
   port {
-    segment_path = "/infra/segments/%s"
+    segment_path = data.nsxt_policy_segment.segment.path
     tag {
       scope = "color"
       tag   = "green"
     }
   }
-}`, instanceID, getTestVMSegmentID())
+}`, getTestVMSegmentName(), instanceID)
 }
 
 func testAccNSXPolicyVMPortTagsUpdateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_segment" "segment" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_vm_tags" "test" {
   instance_id = "%s"
 
   port {
-    segment_path = "/infra/segments/%s"
+    segment_path = data.nsxt_policy_segment.segment.path
     tag {
       scope = "color"
       tag   = "green"
@@ -273,5 +390,5 @@ resource "nsxt_policy_vm_tags" "test" {
       tag   = "round"
     }
   }
-}`, instanceID, getTestVMSegmentID())
+}`, getTestVMSegmentName(), instanceID)
 }

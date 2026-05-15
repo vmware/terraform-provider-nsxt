@@ -281,8 +281,8 @@ func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
 
 func getContextSchemaWithSpec(spec api_util.SessionContextSpec) *schema.Schema {
 	ctxSchema := getContextSchemaExtended(spec.IsRequired, spec.IsComputed, spec.IsVpc, spec.AllowDefaultProject)
+	elem := ctxSchema.Elem.(*schema.Resource)
 	if spec.FromGlobal {
-		elem := ctxSchema.Elem.(*schema.Resource)
 		elem.Schema["from_global"] = &schema.Schema{
 			Type:        schema.TypeBool,
 			Description: "Search among global resource",
@@ -296,6 +296,12 @@ func getContextSchemaWithSpec(spec api_util.SessionContextSpec) *schema.Schema {
 			projectIdElem.Optional = true
 		}
 
+	}
+	if spec.IsVpcOptional {
+		if vpcElem, ok := elem.Schema["vpc_id"]; ok {
+			vpcElem.Required = false
+			vpcElem.Optional = true
+		}
 	}
 	return ctxSchema
 }

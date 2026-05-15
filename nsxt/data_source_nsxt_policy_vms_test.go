@@ -21,10 +21,10 @@ func TestAccDataSourceNsxtPolicyVMs_basic(t *testing.T) {
 }
 
 func TestAccDataSourceNsxtPolicyVMs_multitenancy(t *testing.T) {
-	testAccDataSourceNsxtPolicyVMsBasic(t, false, func() {
+	testAccDataSourceNsxtPolicyVMsBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
-		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+		testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_ID")
 	})
 }
 
@@ -120,7 +120,7 @@ resource "nsxt_policy_group" "check" {
 output "vm_vif_id" {
   value = data.nsxt_policy_vm.check.vif_ids[0]
 }
-`, context, valueType, context, getTestVMName(), context, getTestVMName())
+`, context, valueType, context, getTestVMName(withContext), context, getTestVMName(withContext))
 }
 
 func testAccNsxtPolicyVMsTemplateFilter() string {
@@ -146,5 +146,5 @@ output "vmout" {
   value = data.nsxt_policy_vms.test.items["%s"]
 }
 
-`, getTestVMName())
+`, getTestVMName(false))
 }

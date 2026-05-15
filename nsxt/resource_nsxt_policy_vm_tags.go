@@ -24,6 +24,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+const vmTagsImportIDSeparator = "::"
+
 var (
 	nsxtPolicyBiosUUIDKey     = "biosUuid"
 	nsxtPolicyInstanceUUIDKey = "instanceUuid"
@@ -35,7 +37,50 @@ var cliVirtualMachinesClient = realized_enforcement_points.NewVirtualMachinesCli
 var cliRealizedVirtualMachinesClient = realizedstate.NewVirtualMachinesClient
 var cliVirtualMachineTagsClient = realized_virtual_machines.NewTagsClient
 
-var vmTagsPathExample = getMultitenancyPathExample("/infra/realized-state/virtual-machines/[vm]")
+func resourceNsxtPolicyVMTagsImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if isSpaceString(importID) {
+		return nil, ErrEmptyImportID
+	}
+
+	parts := strings.SplitN(importID, vmTagsImportIDSeparator, 3)
+	switch len(parts) {
+	case 1:
+		// Plain instance ID — local manager (no project, no VPC).
+		if !isValidResourceID(parts[0]) {
+			return nil, fmt.Errorf("invalid import ID %q: use instance_id, instance_id%sproject_id, or instance_id%sproject_id%svpc_id",
+				importID, vmTagsImportIDSeparator, vmTagsImportIDSeparator, vmTagsImportIDSeparator)
+		}
+	case 2:
+		// instance_id::project_id — multitenancy / project scope.
+		instanceID, projectID := parts[0], parts[1]
+		if !isValidResourceID(instanceID) || projectID == "" {
+			return nil, fmt.Errorf("invalid import ID %q: instance_id and project_id must both be non-empty", importID)
+		}
+		ctxMap := map[string]interface{}{
+			"project_id": projectID,
+		}
+		if err := d.Set("context", []interface{}{ctxMap}); err != nil {
+			return nil, err
+		}
+		d.SetId(instanceID)
+	case 3:
+		// instance_id::project_id::vpc_id — VPC scope.
+		instanceID, projectID, vpcID := parts[0], parts[1], parts[2]
+		if !isValidResourceID(instanceID) || projectID == "" || vpcID == "" {
+			return nil, fmt.Errorf("invalid import ID %q: instance_id, project_id and vpc_id must all be non-empty", importID)
+		}
+		ctxMap := map[string]interface{}{
+			"project_id": projectID,
+			"vpc_id":     vpcID,
+		}
+		if err := d.Set("context", []interface{}{ctxMap}); err != nil {
+			return nil, err
+		}
+		d.SetId(instanceID)
+	}
+	return []*schema.ResourceData{d}, nil
+}
 
 func resourceNsxtPolicyVMTags() *schema.Resource {
 	return &schema.Resource{
@@ -44,7 +89,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 		Update: resourceNsxtPolicyVMTagsUpdate,
 		Delete: resourceNsxtPolicyVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: getPolicyPathOrIDResourceImporter(vmTagsPathExample),
+			State: resourceNsxtPolicyVMTagsImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -65,7 +110,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 					},
 				},
 			},
-			"context": getContextSchema(false, false, false),
+			"context": getContextSchemaWithSpec(utl.SessionContextSpec{IsVpc: true, IsVpcOptional: true}),
 		},
 	}
 }

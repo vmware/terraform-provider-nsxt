@@ -26,7 +26,6 @@ func TestAccDataSourceNsxtPolicyVM_multitenancy(t *testing.T) {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
 		testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_ID")
-		testAccEnvDefined(t, "NSXT_TEST_MULTITENANCY_VM_NAME")
 	})
 }
 func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck func()) {
@@ -78,7 +77,7 @@ data "nsxt_policy_vm" "test" {
 output "vm_vif_id" {
   value = data.nsxt_policy_vm.test.vif_ids[0]
 }
-`, context, getTestVMName())
+`, context, getTestVMName(withContext))
 }
 
 func testAccNsxtPolicyVMReadByIDTemplate(withContext bool) string {
