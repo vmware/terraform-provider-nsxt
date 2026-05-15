@@ -1,7 +1,5 @@
 ## 3.12.0 (May 15, 2026)
 
-Expanded Intrusion Detection and Prevention System (IDPS) support: gateway policies and rules, DFW parent policies and standalone rules, custom signatures, proxy configuration, and data sources for all policy types.
-
 BUG FIXES:
 
 * `resource/nsxt_policy_gateway_policy_rule`: Ensure rule IDs are unique to prevent conflicts ([#1899](https://github.com/vmware/terraform-provider-nsxt/pull/1899))
@@ -10,10 +8,12 @@ BUG FIXES:
 * `resource/nsxt_policy_tier0_gateway`: Adapt to API changes for Transit Gateway HA configuration ([#2006](https://github.com/vmware/terraform-provider-nsxt/pull/2006))
 * `resource/nsxt_vpc_subnet`: Remove unsupported `dns_server_preference` attribute from `dhcp_config` block ([#1994](https://github.com/vmware/terraform-provider-nsxt/pull/1994))
 * `resource/nsxt_policy_parent_gateway_policy`: Validate rule list before iterating to prevent nil pointer errors ([#2007](https://github.com/vmware/terraform-provider-nsxt/pull/2007))
-* Default span handling: Fetch default spans only for local manager ([#1976](https://github.com/vmware/terraform-provider-nsxt/pull/1976)), handle authorization errors gracefully ([#1900](https://github.com/vmware/terraform-provider-nsxt/pull/1900)), and improve error reporting ([#2011](https://github.com/vmware/terraform-provider-nsxt/pull/2011))
+* `resource/nsxt_policy_project`: Fix default span path resolution — fetch only for local manager ([#1976](https://github.com/vmware/terraform-provider-nsxt/pull/1976)), handle authorization errors gracefully ([#1900](https://github.com/vmware/terraform-provider-nsxt/pull/1900)), and improve error reporting ([#2011](https://github.com/vmware/terraform-provider-nsxt/pull/2011))
 
 IMPROVEMENTS:
 
+* `resource/nsxt_policy_transit_gateway_nat_rule`: Add `scope` attribute
+* `resource/nsxt_policy_project`, `resource/nsxt_vpc`: Support quota specification via new `ip_block_quota` configuration block ([#1590](https://github.com/vmware/terraform-provider-nsxt/pull/1590))
 * `resource/nsxt_policy_bgp_neighbor`: Add `neighbor_local_as_config` attribute ([#1924](https://github.com/vmware/terraform-provider-nsxt/pull/1924))
 * `resource/nsxt_policy_segment_port`: Add support for CHILD segment port type and attachment configuration ([#1931](https://github.com/vmware/terraform-provider-nsxt/pull/1931), [#1940](https://github.com/vmware/terraform-provider-nsxt/pull/1940))
 * `resource/nsxt_policy_segment_port`: Add prefix match support for `display_name` filtering ([#1952](https://github.com/vmware/terraform-provider-nsxt/pull/1952))
@@ -21,7 +21,7 @@ IMPROVEMENTS:
 * `resource/nsxt_policy_gateway_policy_rule`: Allow duplicate display names as permitted by the NSX API ([#1905](https://github.com/vmware/terraform-provider-nsxt/pull/1905))
 * `resource/nsxt_policy_project`: Add `id_suffix` attribute ([#1863](https://github.com/vmware/terraform-provider-nsxt/pull/1863))
 * `resource/nsxt_policy_project`: Automatically populate default span when not specified in configuration ([#1839](https://github.com/vmware/terraform-provider-nsxt/pull/1839))
-* `data/nsxt_vpc_connectivity_profile`, `data/nsxt_vpc_service_profile`, `data/nsxt_policy_network_span`: Add `is_default` attribute ([#1838](https://github.com/vmware/terraform-provider-nsxt/pull/1838))
+* `data/nsxt_vpc_connectivity_profile`, `data/nsxt_vpc_service_profile`: Add `is_default` attribute ([#1838](https://github.com/vmware/terraform-provider-nsxt/pull/1838))
 * `data/nsxt_policy_certificate`: Add `context` attribute ([#1858](https://github.com/vmware/terraform-provider-nsxt/pull/1858))
 * Various data sources: Make `display_name` optional, allowing lookups by other criteria ([#1956](https://github.com/vmware/terraform-provider-nsxt/pull/1956))
 * `resource/nsxt_policy_ip_block`, `resource/nsxt_policy_distributed_vlan_connection`, `resource/nsxt_vpc_subnet`: Add TEP-less support for NSX 9.1.0 ([#1897](https://github.com/vmware/terraform-provider-nsxt/pull/1897))
@@ -35,6 +35,13 @@ Transit Gateway IPSec VPN:
 * `resource/nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint` ([#1740](https://github.com/vmware/terraform-provider-nsxt/pull/1740))
 * `resource/nsxt_policy_transit_gateway_ipsec_vpn_service` ([#1740](https://github.com/vmware/terraform-provider-nsxt/pull/1740))
 * `resource/nsxt_policy_transit_gateway_ipsec_vpn_session` ([#1740](https://github.com/vmware/terraform-provider-nsxt/pull/1740))
+* `resource/nsxt_policy_transit_gateway_static_route` ([#1712](https://github.com/vmware/terraform-provider-nsxt/pull/1712))
+* `resource/nsxt_policy_connectivity_policy` ([#1657](https://github.com/vmware/terraform-provider-nsxt/pull/1657))
+
+Network Span:
+
+* `resource/nsxt_policy_network_span` ([#1652](https://github.com/vmware/terraform-provider-nsxt/pull/1652))
+* `data/nsxt_policy_network_span` ([#1731](https://github.com/vmware/terraform-provider-nsxt/pull/1731))
 
 Segment Port:
 
@@ -68,6 +75,11 @@ IDPS:
 * `data/nsxt_policy_gateway_security_config` ([#2071](https://github.com/vmware/terraform-provider-nsxt/pull/2071))
 * `resource/nsxt_proxy_config` ([#1969](https://github.com/vmware/terraform-provider-nsxt/pull/1969))
 * `data/nsxt_proxy_config` ([#1969](https://github.com/vmware/terraform-provider-nsxt/pull/1969))
+
+Quotas and Constraints:
+
+* `resource/nsxt_policy_constraint` ([#1583](https://github.com/vmware/terraform-provider-nsxt/pull/1583))
+* `resource/nsxt_policy_ip_block_quota` ([#1590](https://github.com/vmware/terraform-provider-nsxt/pull/1590))
 
 ## 3.11.1 (April 21, 2026)
 
