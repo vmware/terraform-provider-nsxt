@@ -68,7 +68,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `type` - (Optional) Type of this interface, one of `SERVICE`, `EXTERNAL`, `LOOPBACK`. Default is `EXTERNAL`
 * `gateway_path` - (Required) Policy path for the Tier-0 Gateway.
-* `segment_path` - (Optional) Policy path for segment to be connected with this Tier1 Gateway. This argument is required for interfaces of type `SERVICE` and `EXTERNAL`.
+* `segment_path` - (Optional) Policy path for the segment connected to this Tier-0 interface. Required for interfaces of type `SERVICE` and `EXTERNAL` unless `subnet_path` is set instead. Mutually exclusive with `subnet_path`.
+* `subnet_path` - (Optional) Policy path of an overlay VPC subnet for centralized network attachment (alternative to `segment_path`). Mutually exclusive with `segment_path`. **Supported with NSX 9.2.0 or greater.**
 * `subnets` - (Required) list of Ip Addresses/Prefixes in CIDR format, to be associated with this interface.
 * `edge_node_path` - (Optional) Path of edge node for this interface, relevant for interfaces of type `EXTERNAL`.
 * `mtu` - (Optional) Maximum Transmission Unit for this interface.

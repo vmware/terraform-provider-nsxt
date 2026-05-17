@@ -50,7 +50,8 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for Tier0 gateway"),
-			"segment_path":           getPolicyPathSchema(false, true, "Policy path for connected segment"),
+			"segment_path":           getPolicyPathSchemaExtended(false, true, "Policy path for connected segment", "", []string{"subnet_path"}),
+			"subnet_path":            getPolicyPathSchemaExtended(false, true, "Policy path of overlay VPC subnet for centralized network attachment; mutually exclusive with segment_path. Supported with NSX version 9.2.0 or greater", "", []string{"segment_path"}),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
 			"mtu":                    getMtuSchema(),
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
@@ -252,12 +253,15 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	tier0ID := getPolicyIDFromPath(tier0Path)
 
 	segmentPath := d.Get("segment_path").(string)
+	subnetPath := d.Get("subnet_path").(string)
 	objSitePath := d.Get("site_path").(string)
 	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
 	ifType := d.Get("type").(string)
-	if len(segmentPath) == 0 && ifType != model.Tier0Interface_TYPE_LOOPBACK {
-		// segment_path in required for all interfaces other than loopback
-		return fmt.Errorf("segment_path is mandatory for interface of type %s", ifType)
+	if len(segmentPath) == 0 && len(subnetPath) == 0 && ifType != model.Tier0Interface_TYPE_LOOPBACK {
+		return fmt.Errorf("segment_path or subnet_path is mandatory for interface of type %s", ifType)
+	}
+	if len(subnetPath) > 0 && !util.NsxVersionHigherOrEqual("9.2.0") {
+		return fmt.Errorf("subnet_path is only supported with NSX version 9.2.0 or higher")
 	}
 
 	localeServiceID := ""
@@ -337,6 +341,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	if len(segmentPath) > 0 {
 		obj.SegmentPath = &segmentPath
+	}
+
+	if util.NsxVersionHigherOrEqual("9.2.0") && len(subnetPath) > 0 {
+		obj.SubnetPath = &subnetPath
 	}
 
 	if len(dhcpRelayPath) > 0 {
@@ -436,6 +444,9 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("segment_path", obj.SegmentPath)
+	if util.NsxVersionHigherOrEqual("9.2.0") {
+		d.Set("subnet_path", obj.SubnetPath)
+	}
 	d.Set("edge_node_path", obj.EdgePath)
 	d.Set("type", obj.Type_)
 	d.Set("dhcp_relay_path", obj.DhcpRelayPath)
@@ -494,6 +505,11 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
+	subnetPath := d.Get("subnet_path").(string)
+	if len(subnetPath) > 0 && !util.NsxVersionHigherOrEqual("9.2.0") {
+		return fmt.Errorf("subnet_path is only supported with NSX version 9.2.0 or higher")
+	}
+
 	if isPolicyGlobalManager(m) {
 		enablePIM := d.Get("enable_pim").(bool)
 		if enablePIM {
@@ -539,6 +555,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	if len(segmentPath) > 0 {
 		obj.SegmentPath = &segmentPath
+	}
+
+	if util.NsxVersionHigherOrEqual("9.2.0") && len(subnetPath) > 0 {
+		obj.SubnetPath = &subnetPath
 	}
 
 	err := gatewayInterfaceVersionDepenantSet(d, m, &obj)

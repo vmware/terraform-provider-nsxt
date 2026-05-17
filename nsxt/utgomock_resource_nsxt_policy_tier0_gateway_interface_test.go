@@ -225,3 +225,69 @@ func TestMockResourceNsxtPolicyTier0GatewayInterfaceDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockResourceNsxtPolicyTier0GatewayInterface_subnetPathVersion(t *testing.T) {
+	t.Run("Create fails with subnet_path before NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "3.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		res := resourceNsxtPolicyTier0GatewayInterface()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name": t0IntDisplayName,
+			"description":  t0IntDescription,
+			"gateway_path": t0IntGwPath,
+			"type":         nsxModel.Tier0Interface_TYPE_EXTERNAL,
+			"subnet_path":  "/orgs/default/projects/p1/vpcs/v1/subnets/s1",
+			"subnets":      []interface{}{t0IntSubnet},
+			"urpf_mode":    nsxModel.Tier0Interface_URPF_MODE_STRICT,
+			"enable_pim":   false,
+		})
+
+		err := resourceNsxtPolicyTier0GatewayInterfaceCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "9.2.0")
+	})
+}
+
+func TestMockResourceNsxtPolicyTier0GatewayInterfaceRead_subnetPathVersion(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockIntfSDK, _, restore := setupT0InterfaceMocks(t, ctrl)
+	defer restore()
+
+	sp := "/orgs/default/projects/p1/vpcs/v1/subnets/s1"
+
+	t.Run("subnet_path omitted in state before 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "3.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		iface := t0InterfaceAPIResponse()
+		iface.SubnetPath = &sp
+		mockIntfSDK.EXPECT().Get(t0IntGwID, t0IntLocaleServiceID, t0IntID).Return(iface, nil)
+
+		res := resourceNsxtPolicyTier0GatewayInterface()
+		d := schema.TestResourceDataRaw(t, res.Schema, t0InterfaceDataWithLocaleService())
+		d.SetId(t0IntID)
+
+		err := resourceNsxtPolicyTier0GatewayInterfaceRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Empty(t, d.Get("subnet_path"))
+	})
+
+	t.Run("subnet_path set in state on NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		iface := t0InterfaceAPIResponse()
+		iface.SubnetPath = &sp
+		mockIntfSDK.EXPECT().Get(t0IntGwID, t0IntLocaleServiceID, t0IntID).Return(iface, nil)
+
+		res := resourceNsxtPolicyTier0GatewayInterface()
+		d := schema.TestResourceDataRaw(t, res.Schema, t0InterfaceDataWithLocaleService())
+		d.SetId(t0IntID)
+
+		err := resourceNsxtPolicyTier0GatewayInterfaceRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, sp, d.Get("subnet_path"))
+	})
+}
