@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -207,6 +208,309 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 			SchemaType:   "struct",
 			SdkFieldName: "DhcpConfig",
 			ReflectType:  reflect.TypeOf(model.VpcProfileDhcpConfig{}),
+		},
+	},
+	"dhcpv6_config": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Optional: true,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"dhcpv6_relay_config": {
+						Schema: schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"server_addresses": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type: schema.TypeString,
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "ServerAddresses",
+										},
+									},
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "struct",
+							SdkFieldName: "Dhcpv6RelayConfig",
+							ReflectType:  reflect.TypeOf(model.VpcDhcpRelayConfig{}),
+						},
+					},
+					"dhcpv6_server_config": {
+						Schema: schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"dns_client_config": {
+										Schema: schema.Schema{
+											Type:     schema.TypeList,
+											MaxItems: 1,
+											Elem: &metadata.ExtendedResource{
+												Schema: map[string]*metadata.ExtendedSchema{
+													"dns_server_ips": {
+														Schema: schema.Schema{
+															Type: schema.TypeList,
+															Elem: &metadata.ExtendedSchema{
+																Schema: schema.Schema{
+																	Type: schema.TypeString,
+																},
+																Metadata: metadata.Metadata{
+																	SchemaType: "string",
+																},
+															},
+															Optional: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "list",
+															SdkFieldName: "DnsServerIps",
+														},
+													},
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "struct",
+											SdkFieldName: "DnsClientConfig",
+											ReflectType:  reflect.TypeOf(model.DnsClientConfig{}),
+										},
+									},
+									"lease_time": {
+										Schema: schema.Schema{
+											Type:     schema.TypeInt,
+											Optional: true,
+											Default:  86400,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "int",
+											SdkFieldName: "LeaseTime",
+										},
+									},
+									"preferred_time": {
+										Schema: *getDhcpPreferredTimeSchema(),
+										Metadata: metadata.Metadata{
+											SchemaType:   "int",
+											SdkFieldName: "PreferredTime",
+											OmitIfEmpty:  true,
+										},
+									},
+									"ntp_servers": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type:         schema.TypeString,
+													ValidateFunc: validateSingleIPOrHostName(),
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "NtpServers",
+										},
+									},
+									"sntp_servers": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type:         schema.TypeString,
+													ValidateFunc: validation.IsIPv6Address,
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "SntpServers",
+										},
+									},
+									"advanced_config": {
+										Schema: schema.Schema{
+											Type:     schema.TypeList,
+											MaxItems: 1,
+											Elem: &metadata.ExtendedResource{
+												Schema: map[string]*metadata.ExtendedSchema{
+													"is_distributed_dhcp": {
+														Schema: schema.Schema{
+															Type:     schema.TypeBool,
+															Optional: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "bool",
+															SdkFieldName: "IsDistributedDhcp",
+														},
+													},
+												},
+											},
+											Optional: true,
+											Computed: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "struct",
+											SdkFieldName: "AdvancedConfig",
+											ReflectType:  reflect.TypeOf(model.VpcDhcpAdvancedConfig{}),
+										},
+									},
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "struct",
+							SdkFieldName: "Dhcpv6ServerConfig",
+							ReflectType:  reflect.TypeOf(model.VpcDhcpv6ServerConfig{}),
+						},
+					},
+				},
+			},
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "struct",
+			SdkFieldName:        "Dhcpv6Config",
+			ReflectType:         reflect.TypeOf(model.VpcProfileDhcpV6Config{}),
+		},
+	},
+	"dns_forwarder_config": {
+		Schema: schema.Schema{
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Optional: true,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"cache_size": {
+						Schema: schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "int",
+							SdkFieldName: "CacheSize",
+							OmitIfEmpty:  true,
+						},
+					},
+					"conditional_forwarder_zone_paths": {
+						Schema: schema.Schema{
+							Type: schema.TypeList,
+							Elem: &metadata.ExtendedSchema{
+								Schema: schema.Schema{
+									Type:         schema.TypeString,
+									ValidateFunc: validatePolicyPath(),
+								},
+								Metadata: metadata.Metadata{
+									SchemaType: "string",
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "list",
+							SdkFieldName: "ConditionalForwarderZonePaths",
+						},
+					},
+					"default_forwarder_zone_path": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validatePolicyPath(),
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "DefaultForwarderZonePath",
+							OmitIfEmpty:  true,
+						},
+					},
+					"log_level": {
+						Schema: schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								model.PolicyVpcDnsForwarder_LOG_LEVEL_DEBUG,
+								model.PolicyVpcDnsForwarder_LOG_LEVEL_INFO,
+								model.PolicyVpcDnsForwarder_LOG_LEVEL_WARNING,
+								model.PolicyVpcDnsForwarder_LOG_LEVEL_ERROR,
+								model.PolicyVpcDnsForwarder_LOG_LEVEL_FATAL,
+							}, false),
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "LogLevel",
+							OmitIfEmpty:  true,
+						},
+					},
+				},
+			},
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "struct",
+			SdkFieldName:        "DnsForwarderConfig",
+			ReflectType:         reflect.TypeOf(model.PolicyVpcDnsForwarder{}),
+		},
+	},
+	"ipv6_profile_paths": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "list",
+			SdkFieldName:        "Ipv6ProfilePaths",
+		},
+	},
+	"service_subnet_cidrs": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateIPCidr(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Computed: true,
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "list",
+			SdkFieldName:        "ServiceSubnetCidrs",
 		},
 	},
 	"ip_discovery_profile": {

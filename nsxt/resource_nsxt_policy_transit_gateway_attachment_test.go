@@ -174,9 +174,6 @@ resource "nsxt_policy_gateway_connection" "test" {
   display_name     = "%s"
   tier0_path       = nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["192.168.240.0/24"]
-  advertise_outbound_networks {
-    allow_external_blocks = [nsxt_policy_ip_block.extblk.path]
-  }
 }
 
 resource "nsxt_policy_project" "test" {

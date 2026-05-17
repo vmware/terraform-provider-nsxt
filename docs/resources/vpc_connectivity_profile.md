@@ -42,9 +42,11 @@ The following arguments are supported:
 * `transit_gateway_path` - (Required) Transit Gateway path.
 * `private_tgw_ip_blocks` - (Optional) Policy path of Private IP block
 * `external_ip_blocks` - (Optional) Policy path of External IP block
+* `ipv6_blocks` - (Optional) List of policy paths of external IPv6 blocks. These blocks must be a subset of the Project's ipv6_blocks. Only IP address blocks with EXTERNAL visibility and ip_address_type IPV6 are supported. Maximum 5 entries.
 * `service_gateway` - (Optional) Service Gateway configuration
     * `nat_config` - (Optional) NAT configuration
         * `enable_default_snat` - (Optional) Auto configured SNAT for private subnet.
+        * `auto_snat_ip_block` - (Optional) Policy path of the IP block used to share with VPC user for configuring default SNAT.
     * `qos_config` - (Optional) None
         * `ingress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in ingress direction.
         * `egress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in egress direction.

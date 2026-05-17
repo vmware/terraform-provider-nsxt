@@ -17,6 +17,7 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
@@ -125,5 +126,68 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 
 		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestMockDataSourceNsxtPolicyProjectRead_ipv6Blocks(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupProjectMock(t, ctrl)
+	defer restore()
+
+	t.Run("by ID sets ipv6_blocks when NSX 9.2.0+", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponseWithIPv6Blocks(), nil)
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"id": projectID,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, blocks, 1)
+		assert.Equal(t, ipv6BlockPath, blocks[0])
+	})
+
+	t.Run("by ID does not populate ipv6_blocks when NSX below 9.2", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponseWithIPv6Blocks(), nil)
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"id": projectID,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		_, ok := d.GetOk("ipv6_blocks")
+		assert.False(t, ok)
+	})
+
+	t.Run("by display_name sets ipv6_blocks when NSX 9.2.0+", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		mockSDK.EXPECT().List(utl.DefaultOrgID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nsxModel.ProjectListResult{
+				Results: []nsxModel.Project{projectAPIResponseWithIPv6Blocks()},
+			}, nil)
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"display_name": projectDisplayName,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, blocks, 1)
+		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 }
