@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/upgrade_unit_groups"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var cliUpgradeUnitGroupsAggregateInfoClient = upgrade_unit_groups.NewAggregateInfoClient
@@ -95,6 +97,11 @@ func dataSourceNsxtUpgradePostCheck() *schema.Resource {
 }
 
 func dataSourceNsxtUpgradePostCheckRead(d *schema.ResourceData, m interface{}) error {
+	upgradeRunID := d.Get("upgrade_run_id").(string)
+	if !util.VerifyVerifiableID(upgradeRunID, "nsxt_upgrade_run") {
+		return fmt.Errorf("value for upgrade_run_id is invalid: %s", upgradeRunID)
+	}
+
 	connector := getPolicyConnector(m)
 	aggregateInfoClient := cliUpgradeUnitGroupsAggregateInfoClient(connector)
 	component := d.Get("type").(string)
@@ -158,5 +165,6 @@ func dataSourceNsxtUpgradePostCheckRead(d *schema.ResourceData, m interface{}) e
 		d.Set("failed_group", failedGroup)
 	}
 
+	d.SetId(fmt.Sprintf("%s/%s", upgradeRunID, component))
 	return nil
 }

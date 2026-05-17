@@ -432,7 +432,7 @@ func resourceNsxtUpgradeRunCreate(d *schema.ResourceData, m interface{}) error {
 func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		id = newUUID()
+		id = util.GetVerifiableID(newUUID(), "nsxt_upgrade_run")
 	}
 
 	// Validate that upgrade_prepare_id is actually from the nsxt_upgrade_prepare_ready data source
