@@ -124,10 +124,26 @@ func getMgtNetworkID() string {
 	return os.Getenv("NSXT_TEST_MGT_NETWORK")
 }
 
+func getEdgeDataNetworkID() string {
+	id := os.Getenv("NSXT_TEST_PORTGROUP_ID")
+	if id == "" {
+		id = getMgtNetworkID()
+	}
+	return id
+}
+
 func getVNAHostname() string {
 	name := os.Getenv("NSXT_TEST_VNA_HOSTNAME")
 	if name == "" {
 		name = "vna-test.example.com"
+	}
+	return name
+}
+
+func getEdgeHostname() string {
+	name := os.Getenv("NSXT_TEST_EDGE_HOSTNAME")
+	if name == "" {
+		name = "test-edge.example.com"
 	}
 	return name
 }
@@ -295,6 +311,20 @@ func testAccTestFabric(t *testing.T) {
 	if !testAccIsFabric() {
 		t.Skipf("Fabric testing is not enabled")
 	}
+}
+
+func testAccEdgeTransportNodePreCheck(t *testing.T) {
+	testAccPreCheck(t)
+	testAccOnlyLocalManager(t)
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_MANAGER")
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
+	testAccEnvDefined(t, "NSXT_TEST_DATASTORE_ID")
+	testAccEnvDefined(t, "NSXT_TEST_MGT_NETWORK")
+}
+
+func testAccPolicyEdgeTransportNodePreCheck(t *testing.T) {
+	testAccEdgeTransportNodePreCheck(t)
+	testAccNSXVersion(t, "9.0.0")
 }
 
 func getTestVCUsername() string {
