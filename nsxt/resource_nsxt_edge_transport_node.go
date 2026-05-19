@@ -196,8 +196,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 							"audit_username": {
 								Type:        schema.TypeString,
 								Optional:    true,
-								Computed:    true,
-								Description: "CLI \"audit\" username; if omitted, set from NSX after read",
+								Description: "CLI \"audit\" username",
 							},
 							"cli_password": {
 								Type:        schema.TypeString,
@@ -463,18 +462,16 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
 				"uplink_profile": {
-					Type:             schema.TypeString,
-					Description:      "Host switch uplink profile",
-					Optional:         true,
-					Computed:         true,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:        schema.TypeString,
+					Description: "Host switch uplink profile",
+					Optional:    true,
+					Computed:    true,
 				},
 				"vtep_ha_profile": {
-					Type:             schema.TypeString,
-					Description:      "Host switch high availability profile",
-					Optional:         true,
-					Computed:         true,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:        schema.TypeString,
+					Description: "Host switch high availability profile",
+					Optional:    true,
+					Computed:    true,
 				},
 				"ip_assignment":   getIPAssignmentSchema(false),
 				"ipv6_assignment": getIPv6AssignmentSchema(),
@@ -557,18 +554,16 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
 									"uplink_profile": {
-										Type:             schema.TypeString,
-										Description:      "Host switch uplink profile",
-										Optional:         true,
-										Computed:         true,
-										DiffSuppressFunc: suppressPolicyPathOrID,
+										Type:        schema.TypeString,
+										Description: "Host switch uplink profile",
+										Optional:    true,
+										Computed:    true,
 									},
 									"vtep_ha_profile": {
-										Type:             schema.TypeString,
-										Description:      "Host switch high availability profile",
-										Optional:         true,
-										Computed:         true,
-										DiffSuppressFunc: suppressPolicyPathOrID,
+										Type:        schema.TypeString,
+										Description: "Host switch high availability profile",
+										Optional:    true,
+										Computed:    true,
 									},
 									"ip_assignment":   getIPAssignmentSchema(false),
 									"ipv6_assignment": getIPv6AssignmentSchema(),
@@ -617,11 +612,10 @@ func getTransportZoneEndpointSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"transport_zone": {
-					Type:             schema.TypeString,
-					Required:         true,
-					Description:      "Unique ID identifying the transport zone for this endpoint",
-					ValidateFunc:     validation.StringIsNotWhiteSpace,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  "Unique ID identifying the transport zone for this endpoint",
+					ValidateFunc: validation.StringIsNotWhiteSpace,
 				},
 				"transport_zone_profiles": {
 					Type:        schema.TypeList,
@@ -671,8 +665,7 @@ func getHostSwitchProfileIDsSchema() *schema.Schema {
 		Description: "Identifiers of host switch profiles to be associated with this host switch",
 		Optional:    true,
 		Elem: &schema.Schema{
-			Type:             schema.TypeString,
-			DiffSuppressFunc: suppressPolicyPathOrID,
+			Type: schema.TypeString,
 		},
 		Computed:   true,
 		Deprecated: "use specific profiles instead",
@@ -1019,7 +1012,7 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*mpmodel.EdgeNodeDe
 			for _, nusi := range c["node_user_settings"].([]interface{}) {
 				nus := nusi.(map[string]interface{})
 				auditPassword := nus["audit_password"].(string)
-				auditUsername, _ := nus["audit_username"].(string)
+				auditUsername := nus["audit_username"].(string)
 				cliPassword := nus["cli_password"].(string)
 				cliUsername := nus["cli_username"].(string)
 				rootPassword := nus["root_password"].(string)
