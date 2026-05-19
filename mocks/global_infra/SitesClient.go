@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockGlobalSitesClient is a mock of SitesClient interface.

@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	data "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockStatisticsClient is a mock of StatisticsClient interface.

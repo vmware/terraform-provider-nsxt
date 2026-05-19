@@ -9,7 +9,6 @@ package nsxt
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,6 +17,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"go.uber.org/mock/gomock"
 
 	tier0mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
 	tier1mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"

@@ -9,12 +9,12 @@ package nsxt
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"go.uber.org/mock/gomock"
 
 	ippoolsapi "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"

@@ -10,8 +10,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockStateClient is a mock of StateClient interface.

@@ -15,7 +15,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,6 +23,7 @@ import (
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	mpModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management"
+	"go.uber.org/mock/gomock"
 
 	tmWrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management"
 	certPIWrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management/principal_identities"

@@ -3,7 +3,6 @@ module github.com/vmware/terraform-provider-nsxt
 go 1.25.8
 
 require (
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-version v1.9.0
@@ -16,6 +15,7 @@ require (
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.1-0.20260517061842-508c01aec2fc
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.1-0.20241118070726-666c7cd6e466
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.6.1-0.20241118070726-666c7cd6e466
+	go.uber.org/mock v0.6.0
 )
 
 require (

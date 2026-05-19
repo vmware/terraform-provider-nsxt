@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockIdsStandaloneHostConfigClient is a mock of IdsStandaloneHostConfigClient interface.

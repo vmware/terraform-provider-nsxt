@@ -10,9 +10,9 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	data "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockClusterProfilesClient is a mock of ClusterProfilesClient interface.

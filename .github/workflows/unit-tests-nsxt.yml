@@ -5,10 +5,12 @@ on:
   push:
     paths:
       - 'nsxt/**'
+      - 'mocks/**'
       - '.github/workflows/unit-tests-nsxt.yml'
   pull_request:
     paths:
       - 'nsxt/**'
+      - 'mocks/**'
       - '.github/workflows/unit-tests-nsxt.yml'
 
 permissions:

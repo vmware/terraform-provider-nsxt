@@ -9,7 +9,6 @@ package nsxt
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,6 +16,7 @@ import (
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	sdkprojects "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+	"go.uber.org/mock/gomock"
 
 	orgsapi "github.com/vmware/terraform-provider-nsxt/api/orgs"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
