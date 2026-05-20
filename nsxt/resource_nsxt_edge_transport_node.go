@@ -788,6 +788,15 @@ func getIPAssignmentSchema(required bool) *schema.Schema {
 	}
 }
 
+func getIPAssignmentSchemaForRTEP() *schema.Schema {
+	s := getIPAssignmentSchema(false)
+	r := s.Elem.(*schema.Resource)
+	delete(r.Schema, "assigned_by_dhcp")
+	delete(r.Schema, "no_ipv4")
+	delete(r.Schema, "static_ip_mac")
+	return s
+}
+
 func getIPv6AssignmentSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
