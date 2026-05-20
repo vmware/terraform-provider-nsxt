@@ -197,7 +197,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								Type:        schema.TypeString,
 								Optional:    true,
 								Computed:    true,
-								Description: "CLI \"audit\" username; if omitted, set from NSX after read",
+								Description: "CLI \"audit\" username; if omitted, set from NSX after creation",
 							},
 							"cli_password": {
 								Type:        schema.TypeString,
@@ -463,18 +463,18 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
 				"uplink_profile": {
-					Type:             schema.TypeString,
-					Description:      "Host switch uplink profile",
-					Optional:         true,
-					Computed:         true,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:         schema.TypeString,
+					Description:  "Host switch uplink profile",
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validatePolicyPath(),
 				},
 				"vtep_ha_profile": {
-					Type:             schema.TypeString,
-					Description:      "Host switch high availability profile",
-					Optional:         true,
-					Computed:         true,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:         schema.TypeString,
+					Description:  "Host switch high availability profile",
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validatePolicyPath(),
 				},
 				"ip_assignment":   getIPAssignmentSchema(false),
 				"ipv6_assignment": getIPv6AssignmentSchema(),
@@ -557,18 +557,18 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
 									"uplink_profile": {
-										Type:             schema.TypeString,
-										Description:      "Host switch uplink profile",
-										Optional:         true,
-										Computed:         true,
-										DiffSuppressFunc: suppressPolicyPathOrID,
+										Type:         schema.TypeString,
+										Description:  "Host switch uplink profile",
+										Optional:     true,
+										Computed:     true,
+										ValidateFunc: validatePolicyPath(),
 									},
 									"vtep_ha_profile": {
-										Type:             schema.TypeString,
-										Description:      "Host switch high availability profile",
-										Optional:         true,
-										Computed:         true,
-										DiffSuppressFunc: suppressPolicyPathOrID,
+										Type:         schema.TypeString,
+										Description:  "Host switch high availability profile",
+										Optional:     true,
+										Computed:     true,
+										ValidateFunc: validatePolicyPath(),
 									},
 									"ip_assignment":   getIPAssignmentSchema(false),
 									"ipv6_assignment": getIPv6AssignmentSchema(),
@@ -617,11 +617,10 @@ func getTransportZoneEndpointSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"transport_zone": {
-					Type:             schema.TypeString,
-					Required:         true,
-					Description:      "Unique ID identifying the transport zone for this endpoint",
-					ValidateFunc:     validation.StringIsNotWhiteSpace,
-					DiffSuppressFunc: suppressPolicyPathOrID,
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  "Policy path of the transport zone for this endpoint",
+					ValidateFunc: validatePolicyPath(),
 				},
 				"transport_zone_profiles": {
 					Type:        schema.TypeList,
@@ -668,11 +667,11 @@ func getUplinksSchema() *schema.Schema {
 func getHostSwitchProfileIDsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
-		Description: "Identifiers of host switch profiles to be associated with this host switch",
+		Description: "Policy paths of host switch profiles to be associated with this host switch",
 		Optional:    true,
 		Elem: &schema.Schema{
-			Type:             schema.TypeString,
-			DiffSuppressFunc: suppressPolicyPathOrID,
+			Type:         schema.TypeString,
+			ValidateFunc: validatePolicyPath(),
 		},
 		Computed:   true,
 		Deprecated: "use specific profiles instead",
@@ -952,6 +951,126 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 	}
 
 	return &obj, nil
+}
+
+// etNodeShallowCopyMap returns a shallow copy of m.
+func etNodeShallowCopyMap(m map[string]interface{}) map[string]interface{} {
+	cp := make(map[string]interface{}, len(m))
+	for k, v := range m {
+		cp[k] = v
+	}
+	return cp
+}
+
+// etNodeStringVal returns the string value for key in m, or "" if absent/not string.
+func etNodeStringVal(m map[string]interface{}, key string) string {
+	v, _ := m[key].(string)
+	return v
+}
+
+// etNodeNestedList returns the []interface{} stored at key in m, or nil.
+func etNodeNestedList(m map[string]interface{}, key string) []interface{} {
+	v, _ := m[key].([]interface{})
+	return v
+}
+
+// etNodeNormalizeHostSwitchesInState restores policy-path representations for
+// standard_host_switch fields that the MP API returns as bare realization UUIDs.
+// It must be called after setHostSwitchSpecInSchema has stored the API values,
+// with priorSwitches being the state captured before that call.
+//
+// Because inputs are validated to be policy paths, any prior-state value that
+// is already a policy path is trusted and kept without an extra API lookup.
+func etNodeNormalizeHostSwitchesInState(d *schema.ResourceData, priorSwitches []interface{}) {
+	if len(priorSwitches) == 0 {
+		return
+	}
+	apiSwitches := d.Get("standard_host_switch").([]interface{})
+	if len(apiSwitches) != len(priorSwitches) {
+		return
+	}
+
+	modified := false
+	result := make([]interface{}, len(apiSwitches))
+	for i := range apiSwitches {
+		apiSw := apiSwitches[i].(map[string]interface{})
+		priorSw := priorSwitches[i].(map[string]interface{})
+		normalizedSw := etNodeShallowCopyMap(apiSw)
+
+		// For each string field: if the prior state already holds a policy path,
+		// keep it — the API always returns bare MP realization UUIDs for these.
+		for _, field := range []string{"uplink_profile", "vtep_ha_profile"} {
+			if prior := etNodeStringVal(priorSw, field); isPolicyPath(prior) {
+				normalizedSw[field] = prior
+				modified = true
+			}
+		}
+
+		// host_switch_profile (deprecated list of profile paths)
+		if etNodeNormalizeStringList(priorSw, normalizedSw, "host_switch_profile") {
+			modified = true
+		}
+
+		// transport_zone inside each transport_zone_endpoint
+		if etNodeNormalizeTZEndpoints(priorSw, normalizedSw) {
+			modified = true
+		}
+
+		result[i] = normalizedSw
+	}
+
+	if modified {
+		d.Set("standard_host_switch", result)
+	}
+}
+
+// etNodeNormalizeStringList replaces entries in newSw[field] with the
+// corresponding prior-state values when those are policy paths.
+func etNodeNormalizeStringList(priorSw, newSw map[string]interface{}, field string) bool {
+	priorList := etNodeNestedList(priorSw, field)
+	newList := etNodeNestedList(newSw, field)
+	if len(priorList) != len(newList) {
+		return false
+	}
+	modified := false
+	result := make([]interface{}, len(newList))
+	for j := range newList {
+		if prior, _ := priorList[j].(string); isPolicyPath(prior) {
+			result[j] = prior
+			modified = true
+		} else {
+			result[j] = newList[j]
+		}
+	}
+	if modified {
+		newSw[field] = result
+	}
+	return modified
+}
+
+// etNodeNormalizeTZEndpoints replaces transport_zone values in newSw's
+// transport_zone_endpoint list with prior-state policy paths where present.
+func etNodeNormalizeTZEndpoints(priorSw, newSw map[string]interface{}) bool {
+	priorEPs := etNodeNestedList(priorSw, "transport_zone_endpoint")
+	newEPs := etNodeNestedList(newSw, "transport_zone_endpoint")
+	if len(priorEPs) != len(newEPs) {
+		return false
+	}
+	modified := false
+	result := make([]interface{}, len(newEPs))
+	for j := range newEPs {
+		priorEP := priorEPs[j].(map[string]interface{})
+		newEP := etNodeShallowCopyMap(newEPs[j].(map[string]interface{}))
+		if prior := etNodeStringVal(priorEP, "transport_zone"); isPolicyPath(prior) {
+			newEP["transport_zone"] = prior
+			modified = true
+		}
+		result[j] = newEP
+	}
+	if modified {
+		newSw["transport_zone_endpoint"] = result
+	}
+	return modified
 }
 
 func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) error {
@@ -1703,11 +1822,16 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	d.Set("node_id", obj.NodeId)
 	d.Set("failure_domain", obj.FailureDomainId)
 
+	// Capture prior state before setHostSwitchSpecInSchema overwrites it with
+	// bare MP realization UUIDs.  The normalization call below restores any
+	// policy-path values that were in use before the read.
+	priorSwitches := d.Get("standard_host_switch").([]interface{})
 	if obj.HostSwitchSpec != nil {
 		err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeEdge)
 		if err != nil {
 			return handleReadError(d, "TransportNode", id, err)
 		}
+		etNodeNormalizeHostSwitchesInState(d, priorSwitches)
 	}
 
 	converter := bindings.NewTypeConverter()
