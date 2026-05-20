@@ -19,7 +19,7 @@ resource "nsxt_edge_transport_node" "test" {
       static_ip_pool = data.nsxt_ip_pool.ipp1.id
     }
     transport_zone_endpoint {
-      transport_zone          = data.nsxt_transport_zone.tz1.id
+      transport_zone          = data.nsxt_policy_transport_zone.tz1.path
       transport_zone_profiles = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
     host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
