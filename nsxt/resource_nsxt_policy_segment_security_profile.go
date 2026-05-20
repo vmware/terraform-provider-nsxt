@@ -349,6 +349,10 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
+	// bpdu_filter_allow is marked `skip: true` in metadata, so StructToSchema
+	// does not sync it. Set it manually from the API response so refresh keeps
+	// the state aligned with NSX (e.g., after a rejected update).
+	d.Set("bpdu_filter_allow", obj.BpduFilterAllow)
 
 	return nil
 }
