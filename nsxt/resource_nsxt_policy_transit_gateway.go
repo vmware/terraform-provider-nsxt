@@ -370,31 +370,6 @@ func setCentralizedConfigInSchema(cfg *model.CentralizedConfig, _ interface{}) [
 }
 
 // buildTransitGatewayRoutingConfigChildren builds H-API child structs for TransitGatewayRoutingConfig.
-func buildTransitGatewayRoutingConfigChildren(config *model.TransitGatewayRoutingConfig, markDelete bool) ([]*data.StructValue, error) {
-	converter := bindings.NewTypeConverter()
-	id := routingConfigID
-	child := model.ChildTransitGatewayRoutingConfig{
-		Id:           &id,
-		ResourceType: model.ChildTransitGatewayRoutingConfig__TYPE_IDENTIFIER,
-	}
-	if markDelete {
-		boolTrue := true
-		child.MarkedForDelete = &boolTrue
-		child.TransitGatewayRoutingConfig = &model.TransitGatewayRoutingConfig{Id: &id}
-	} else if config != nil {
-		child.TransitGatewayRoutingConfig = config
-		if child.TransitGatewayRoutingConfig.Id == nil {
-			child.TransitGatewayRoutingConfig.Id = &id
-		}
-	} else {
-		return nil, nil
-	}
-	dataValue, errs := converter.ConvertToVapi(child, model.ChildTransitGatewayRoutingConfigBindingType())
-	if len(errs) > 0 {
-		return nil, errs[0]
-	}
-	return []*data.StructValue{dataValue.(*data.StructValue)}, nil
-}
 
 func getRedistributionConfigFromSchema(d *schema.ResourceData) *model.TransitGatewayRedistributionConfig {
 	list := d.Get("redistribution_config").([]interface{})
@@ -671,7 +646,10 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	}
 
-	// Attach centralized_config and routing_config as H-API children in same transaction
+	// Attach centralized_config and bgp_config as H-API children in the same creation transaction.
+	// Note: TransitGatewayRoutingConfig cannot be included as an H-API child during TGW creation
+	// (API error 500165 "Invalid Dto type hierarchy"). It is patched separately below via direct API.
+	// BgpRoutingConfig IS supported as an H-API child and is included here for atomic creation.
 	var childStructs []*data.StructValue
 	cc, err := getCentralizedConfigFromSchema(d, m)
 	if err != nil {
@@ -681,17 +659,6 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 		ch, err := buildCentralizedConfigChildren(cc, false)
 		if err != nil {
 			return handleCreateError("TransitGateway CentralizedConfig", id, err)
-		}
-		childStructs = append(childStructs, ch...)
-	}
-	rc, err := getTransitGatewayRoutingConfigFromSchema(d)
-	if err != nil {
-		return handleCreateError("TransitGateway RoutingConfig", id, err)
-	}
-	if rc != nil {
-		ch, err := buildTransitGatewayRoutingConfigChildren(rc, false)
-		if err != nil {
-			return handleCreateError("TransitGateway RoutingConfig", id, err)
 		}
 		childStructs = append(childStructs, ch...)
 	}
@@ -723,6 +690,23 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleCreateError("TransitGateway", id, err)
 	}
+
+	// TransitGatewayRoutingConfig is not supported as an H-API child (error 500165), so
+	// apply it via direct API after the TGW is created.
+	rc, err := getTransitGatewayRoutingConfigFromSchema(d)
+	if err != nil {
+		return handleCreateError("TransitGateway RoutingConfig", id, err)
+	}
+	if rc != nil {
+		rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
+		if rcClient != nil {
+			log.Printf("[INFO] Patching TransitGateway %s routing config via direct API", id)
+			if err := rcClient.Patch(parents[0], parents[1], id, *rc); err != nil {
+				return handleCreateError("TransitGateway RoutingConfig", id, err)
+			}
+		}
+	}
+
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -922,43 +906,6 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	if d.HasChange("advanced_config") || d.HasChange("redistribution_config") {
-		rc, rcErr := transitGatewayRoutingConfigForUpdate(d, sessionContext, connector, parents, id)
-		if rcErr != nil {
-			return handleUpdateError("TransitGateway RoutingConfig", id, rcErr)
-		}
-		if rc != nil {
-			ch, err := buildTransitGatewayRoutingConfigChildren(rc, false)
-			if err != nil {
-				return handleUpdateError("TransitGateway RoutingConfig", id, err)
-			}
-			childStructs = append(childStructs, ch...)
-		}
-	}
-
-	if d.HasChange("bgp_config") {
-		newBgp := getTGWBgpConfigFromSchema(d)
-		if newBgp != nil {
-			bgpAPIClient := cliTransitGatewayBgpClient(sessionContext, connector)
-			if bgpAPIClient != nil {
-				if existing, getErr := bgpAPIClient.Get(parents[0], parents[1], id); getErr == nil {
-					newBgp.Revision = existing.Revision
-				}
-			}
-			ch, err := buildTGWBgpConfigChildren(newBgp, false)
-			if err != nil {
-				return handleUpdateError("TransitGateway BgpConfig", id, err)
-			}
-			childStructs = append(childStructs, ch...)
-		} else {
-			ch, err := buildTGWBgpConfigChildren(nil, true)
-			if err != nil {
-				return handleUpdateError("TransitGateway BgpConfig", id, err)
-			}
-			childStructs = append(childStructs, ch...)
-		}
-	}
-
 	if len(childStructs) > 0 {
 		obj.Children = childStructs
 	}
@@ -979,6 +926,41 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleUpdateError("TransitGateway", id, err)
 	}
+
+	// Routing config and BGP config are not supported as H-API children of TransitGateway.
+	// Apply them via direct API calls after the main H-API update completes.
+	if d.HasChange("advanced_config") || d.HasChange("redistribution_config") {
+		rc, rcErr := transitGatewayRoutingConfigForUpdate(d, sessionContext, connector, parents, id)
+		if rcErr != nil {
+			return handleUpdateError("TransitGateway RoutingConfig", id, rcErr)
+		}
+		if rc != nil {
+			rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
+			if rcClient != nil {
+				log.Printf("[INFO] Updating TransitGateway %s routing config via direct API", id)
+				if err := rcClient.Patch(parents[0], parents[1], id, *rc); err != nil {
+					return handleUpdateError("TransitGateway RoutingConfig", id, err)
+				}
+			}
+		}
+	}
+
+	if d.HasChange("bgp_config") {
+		newBgp := getTGWBgpConfigFromSchema(d)
+		bgpAPIClient := cliTransitGatewayBgpClient(sessionContext, connector)
+		if bgpAPIClient != nil {
+			if newBgp != nil {
+				if existing, getErr := bgpAPIClient.Get(parents[0], parents[1], id); getErr == nil {
+					newBgp.Revision = existing.Revision
+				}
+				log.Printf("[INFO] Updating TransitGateway %s BGP config via direct API", id)
+				if err := bgpAPIClient.Patch(parents[0], parents[1], id, *newBgp); err != nil {
+					return handleUpdateError("TransitGateway BgpConfig", id, err)
+				}
+			}
+		}
+	}
+
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 

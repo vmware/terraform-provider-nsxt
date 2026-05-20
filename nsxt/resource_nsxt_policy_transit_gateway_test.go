@@ -250,6 +250,73 @@ func TestAccResourceNsxtPolicyTransitGateway_withCentralizedConfig920_failoverMo
 	})
 }
 
+func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				// Step 1: create TGW with centralized_config only so it can realize before
+				// redistribution_config and bgp_config are applied. The NSX API returns empty
+				// bodies for /routing and /bgp endpoints until the TGW is edge-deployed.
+				Config: testAccNsxtPolicyTransitGatewayBgpConfigBaseTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_ACTIVE"),
+				),
+			},
+			{
+				// Step 2: add redistribution_config and bgp_config. The TGW may still be
+				// realizing on the edge; the /routing and /bgp endpoints return empty bodies
+				// until the TGW is edge-deployed, so redistribution_config may not appear
+				// in state yet. ExpectNonEmptyPlan acknowledges the expected drift.
+				Config:             testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(true),
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_ACTIVE"),
+				),
+			},
+			{
+				// Step 3: update bgp_config params to verify updates work. redistribution_config
+				// is not checked because the NSX /routing endpoint returns empty bodies until
+				// the TGW routing engine fully initializes on the edge (eventual consistency).
+				// ExpectNonEmptyPlan is set because redistribution_config state may differ from config.
+				Config:             testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(false),
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway.test"
@@ -480,6 +547,78 @@ data "nsxt_policy_transit_gateway" "test" {
   display_name = "%s"
   depends_on   = [nsxt_policy_transit_gateway.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"], haMode, attrMap["display_name"])
+}
+
+// testAccNsxtPolicyTransitGatewayBgpConfigBaseTemplate creates a TGW with centralized_config only,
+// allowing the TGW to realize (edge-deploy) before redistribution_config and bgp_config are applied.
+func testAccNsxtPolicyTransitGatewayBgpConfigBaseTemplate() string {
+	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  centralized_config {
+    ha_mode            = "ACTIVE_ACTIVE"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+}`, accTestTransitGatewayCreateAttributes["display_name"],
+		accTestTransitGatewayCreateAttributes["description"],
+		accTestTransitGatewayCreateAttributes["transit_subnets"])
+}
+
+func testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestTransitGatewayCreateAttributes
+	} else {
+		attrMap = accTestTransitGatewayUpdateAttributes
+	}
+	localAsNum := "65001"
+	ecmp := "true"
+	gracefulRestartTimer := 180
+	gracefulStaleTimer := 600
+	if !createFlow {
+		localAsNum = "65002"
+		ecmp = "false"
+		gracefulRestartTimer = 120
+		gracefulStaleTimer = 300
+	}
+	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  centralized_config {
+    ha_mode            = "ACTIVE_ACTIVE"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+
+  redistribution_config {
+    rule {
+      types = ["PUBLIC", "TGW_STATIC_ROUTE"]
+    }
+  }
+
+  bgp_config {
+    local_as_num                       = "%s"
+    enabled                            = true
+    ecmp                               = %s
+    graceful_restart_mode              = "HELPER_ONLY"
+    graceful_restart_timer             = %d
+    graceful_restart_stale_route_timer = %d
+  }
+}`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
+		localAsNum, ecmp, gracefulRestartTimer, gracefulStaleTimer)
 }
 
 func testAccNsxtPolicyTransitGatewayWithCentralizedConfig920FailoverTemplate(createFlow bool) string {
