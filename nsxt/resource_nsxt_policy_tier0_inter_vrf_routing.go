@@ -316,7 +316,9 @@ func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interf
 
 		brlList = append(brlList, brlMap)
 	}
-	d.Set("bgp_route_leaking", brlList)
+	if brlList != nil {
+		d.Set("bgp_route_leaking", brlList)
+	}
 
 	var sraList []interface{}
 	if obj.StaticRouteAdvertisement != nil {
@@ -337,7 +339,9 @@ func resourceNsxtPolicyTier0InterVRFRoutingRead(d *schema.ResourceData, m interf
 
 		sraList = []interface{}{sra}
 	}
-	d.Set("static_route_advertisement", sraList)
+	if sraList != nil {
+		d.Set("static_route_advertisement", sraList)
+	}
 	d.Set("target_path", obj.TargetPath)
 
 	return nil
