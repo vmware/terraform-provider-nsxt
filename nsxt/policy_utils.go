@@ -515,7 +515,7 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 		// assigned into the context as well
 		ctxMap := make(map[string]interface{})
 		ctxMap["project_id"] = pathSegs[4]
-		if len(pathSegs) > 5 && pathSegs[5] == "vpcs" {
+		if len(pathSegs) > 6 && pathSegs[5] == "vpcs" {
 			ctxMap["vpc_id"] = pathSegs[6]
 		}
 		d.Set("context", []interface{}{ctxMap})
