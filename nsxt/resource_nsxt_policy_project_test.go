@@ -365,6 +365,17 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	siteCount := getExpectedSiteInfoCount(t)
+	localShortID := getAccTestRandomString(6)
+	createAttrs := map[string]string{
+		"DisplayName": getAccTestResourceName(),
+		"Description": "terraform created",
+		"ShortId":     localShortID,
+	}
+	updateAttrs := map[string]string{
+		"DisplayName": getAccTestResourceName(),
+		"Description": "terraform updated",
+		"ShortId":     localShortID,
+	}
 	expectedValuesStep1 := map[string]string{
 		"t0_count":                   "1",
 		"ip_block_count":             "1",
@@ -392,14 +403,14 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, updateAttrs["DisplayName"])
 		},
 		Steps: []resource.TestStep{
 			{
 				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
-				Config: testAccNsxtPolicyProjectTemplate910(true, true, true, true),
+				Config: testAccNsxtPolicyProjectTemplate910(createAttrs, updateAttrs, true, true, true, true),
 				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectCreateAttributes, expectedValuesStep1),
+					runChecksNsx410(testResourceName, createAttrs, expectedValuesStep1),
 					runChecksNsx411(testResourceName, expectedValuesStep1),
 					runChecksNsx420(testResourceName, expectedValuesStep1),
 					runChecksNsx900(testResourceName, expectedValuesStep1),
@@ -408,9 +419,9 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 			},
 			{
 				// Update: Set T0, Ext GW connection, No Ext IPv4 Block, disable default DFW
-				Config: testAccNsxtPolicyProjectTemplate910(false, true, false, false),
+				Config: testAccNsxtPolicyProjectTemplate910(createAttrs, updateAttrs, false, true, false, false),
 				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
+					runChecksNsx410(testResourceName, updateAttrs, expectedValuesStep2),
 					runChecksNsx411(testResourceName, expectedValuesStep2),
 					runChecksNsx420(testResourceName, expectedValuesStep2),
 					runChecksNsx900(testResourceName, expectedValuesStep2),
@@ -424,6 +435,17 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	siteCount := getExpectedSiteInfoCount(t)
+	localShortID := getAccTestRandomString(6)
+	createAttrs := map[string]string{
+		"DisplayName": getAccTestResourceName(),
+		"Description": "terraform created",
+		"ShortId":     localShortID,
+	}
+	updateAttrs := map[string]string{
+		"DisplayName": getAccTestResourceName(),
+		"Description": "terraform updated",
+		"ShortId":     localShortID,
+	}
 	expectedValuesStep1 := map[string]string{
 		"t0_count":                   "1",
 		"ip_block_count":             "1",
@@ -453,13 +475,13 @@ func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, updateAttrs["DisplayName"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyProjectTemplate920(true, true, true, true, true, false),
+				Config: testAccNsxtPolicyProjectTemplate920(createAttrs, updateAttrs, true, true, true, true, true, false),
 				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectCreateAttributes, expectedValuesStep1),
+					runChecksNsx410(testResourceName, createAttrs, expectedValuesStep1),
 					runChecksNsx411(testResourceName, expectedValuesStep1),
 					runChecksNsx420(testResourceName, expectedValuesStep1),
 					runChecksNsx900(testResourceName, expectedValuesStep1),
@@ -468,9 +490,9 @@ func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyProjectTemplate920(false, true, false, false, false, true),
+				Config: testAccNsxtPolicyProjectTemplate920(createAttrs, updateAttrs, false, true, false, false, false, true),
 				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
+					runChecksNsx410(testResourceName, updateAttrs, expectedValuesStep2),
 					runChecksNsx411(testResourceName, expectedValuesStep2),
 					runChecksNsx420(testResourceName, expectedValuesStep2),
 					runChecksNsx900(testResourceName, expectedValuesStep2),
@@ -479,9 +501,9 @@ func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyProjectTemplate920(false, true, false, false, false, false),
+				Config: testAccNsxtPolicyProjectTemplate920(createAttrs, updateAttrs, false, true, false, false, false, false),
 				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
+					runChecksNsx410(testResourceName, updateAttrs, expectedValuesStep2),
 					runChecksNsx411(testResourceName, expectedValuesStep2),
 					runChecksNsx420(testResourceName, expectedValuesStep2),
 					runChecksNsx900(testResourceName, expectedValuesStep2),
@@ -707,11 +729,11 @@ resource "nsxt_policy_project" "test" {
 }
 `
 
-func getBasicAttrMap(createFlow, includeT0GW bool) map[string]string {
+func getBasicAttrMap(createAttrs, updateAttrs map[string]string, createFlow, includeT0GW bool) map[string]string {
 	attrMap := make(map[string]string)
-	baseMap := accTestPolicyProjectUpdateAttributes
+	baseMap := updateAttrs
 	if createFlow {
-		baseMap = accTestPolicyProjectCreateAttributes
+		baseMap = createAttrs
 		//do not pass short_id on update
 		attrMap["ShortId"] = baseMap["ShortId"]
 	}
@@ -727,7 +749,7 @@ func getBasicAttrMap(createFlow, includeT0GW bool) map[string]string {
 }
 
 func testAccNsxtPolicyProjectTemplate410(createFlow, includeT0GW bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	attrMap := getBasicAttrMap(accTestPolicyProjectCreateAttributes, accTestPolicyProjectUpdateAttributes, createFlow, includeT0GW)
 	buffer := new(bytes.Buffer)
 	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate410").Parse(templateData)
 	if err != nil {
@@ -741,7 +763,7 @@ func testAccNsxtPolicyProjectTemplate410(createFlow, includeT0GW bool) string {
 }
 
 func testAccNsxtPolicyProjectTemplate411(createFlow, includeT0GW, includeExternalIPv4Block bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	attrMap := getBasicAttrMap(accTestPolicyProjectCreateAttributes, accTestPolicyProjectUpdateAttributes, createFlow, includeT0GW)
 	if includeExternalIPv4Block {
 		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
 	}
@@ -759,7 +781,7 @@ func testAccNsxtPolicyProjectTemplate411(createFlow, includeT0GW, includeExterna
 }
 
 func testAccNsxtPolicyProjectTemplate420(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	attrMap := getBasicAttrMap(accTestPolicyProjectCreateAttributes, accTestPolicyProjectUpdateAttributes, createFlow, includeT0GW)
 	if includeExternalIPv4Block {
 		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
 	}
@@ -778,7 +800,7 @@ func testAccNsxtPolicyProjectTemplate420(createFlow, includeT0GW, includeExterna
 }
 
 func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+	attrMap := getBasicAttrMap(accTestPolicyProjectCreateAttributes, accTestPolicyProjectUpdateAttributes, createFlow, includeT0GW)
 	if includeExternalIPv4Block {
 		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
 	}
@@ -798,8 +820,8 @@ func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExterna
 	return buffer.String()
 }
 
-func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+func testAccNsxtPolicyProjectTemplate910(createAttrs, updateAttrs map[string]string, createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
+	attrMap := getBasicAttrMap(createAttrs, updateAttrs, createFlow, includeT0GW)
 	if includeExternalIPv4Block {
 		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
 	}
@@ -824,8 +846,8 @@ func testAccNsxtPolicyProjectTemplate910(createFlow, includeT0GW, includeExterna
 	return buffer.String()
 }
 
-func testAccNsxtPolicyProjectTemplate920(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules, includeIPv6Block, orphanIPv6Block bool) string {
-	attrMap := getBasicAttrMap(createFlow, includeT0GW)
+func testAccNsxtPolicyProjectTemplate920(createAttrs, updateAttrs map[string]string, createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules, includeIPv6Block, orphanIPv6Block bool) string {
+	attrMap := getBasicAttrMap(createAttrs, updateAttrs, createFlow, includeT0GW)
 	if includeExternalIPv4Block {
 		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
 	}
