@@ -44,6 +44,24 @@ var accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes = map[string]strin
 	"opt-other-value": "45",
 }
 
+// NSX 9.2.0 enforces that gateway_address must match the subnet's actual gateway
+// (first host of the subnet CIDR). For subnet 192.168.240.0/26 that is .1, not .2.
+var accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes = map[string]string{
+	"display_name":    getAccTestResourceName(),
+	"description":     "terraform updated",
+	"gateway_address": "192.168.240.1",
+	"host_name":       "test-update",
+	"mac_address":     "10:ff:22:11:cc:02",
+	"lease_time":      "500",
+	"ip_address":      "192.168.240.42",
+	"opt121-1-gw":     "192.168.240.8",
+	"opt121-1-net":    "192.168.244.0/24",
+	"opt121-2-gw":     "192.168.240.9",
+	"opt121-2-net":    "192.168.245.0/24",
+	"opt-other-code":  "35",
+	"opt-other-value": "45",
+}
+
 func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_dhcp_v4_static_binding.test"
 
@@ -131,11 +149,11 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"])
+			return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state, accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(true),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfig920Template(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes["display_name"]),
@@ -162,25 +180,25 @@ func TestAccResourceNsxtVpcSubnetDhcpV4StaticBindingConfig920_basic(t *testing.T
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(false),
+				Config: testAccNsxtVpcSubnetDhcpV4StaticBindingConfig920Template(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["display_name"]),
+					testAccNsxtVpcSubnetDhcpV4StaticBindingConfigExists(accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "gateway_address", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["gateway_address"]),
-					resource.TestCheckResourceAttr(testResourceName, "host_name", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["host_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_address", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["mac_address"]),
-					resource.TestCheckResourceAttr(testResourceName, "lease_time", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["lease_time"]),
-					resource.TestCheckResourceAttr(testResourceName, "ip_address", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["ip_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "gateway_address", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["gateway_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "host_name", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["host_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "mac_address", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["mac_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "lease_time", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["lease_time"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["ip_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "options.0.other.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.0.next_hop", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt121-1-gw"]),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.0.network", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt121-1-net"]),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.1.next_hop", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt121-2-gw"]),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.1.network", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt121-2-net"]),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.other.0.code", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt-other-code"]),
-					resource.TestCheckResourceAttr(testResourceName, "options.0.other.0.values.0", accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes["opt-other-value"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.0.next_hop", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt121-1-gw"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.0.network", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt121-1-net"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.1.next_hop", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt121-2-gw"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.option121.0.static_route.1.network", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt121-2-net"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.other.0.code", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt-other-code"]),
+					resource.TestCheckResourceAttr(testResourceName, "options.0.other.0.values.0", accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes["opt-other-value"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -327,6 +345,49 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigTemplate(createFlow bool) stri
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
 	} else {
 		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigUpdateAttributes
+	}
+	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
+  parent_path     = nsxt_vpc_subnet.test.path
+  display_name    = "%s"
+  description     = "%s"
+  gateway_address = "%s"
+  host_name       = "%s"
+  mac_address     = "%s"
+  lease_time      = %s
+  ip_address      = "%s"
+
+  options {
+    option121 {
+      static_route {
+        next_hop = "%s"
+        network  = "%s"
+      }
+      static_route {
+        next_hop = "%s"
+        network  = "%s"
+      }
+    }
+    other {
+      code   = %s
+      values = ["%s"]
+    }
+  }
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["host_name"],
+		attrMap["mac_address"], attrMap["lease_time"], attrMap["ip_address"], attrMap["opt121-1-gw"], attrMap["opt121-1-net"],
+		attrMap["opt121-2-gw"], attrMap["opt121-2-net"], attrMap["opt-other-code"], attrMap["opt-other-value"])
+}
+
+func testAccNsxtVpcSubnetDhcpV4StaticBindingConfig920Template(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfigCreateAttributes
+	} else {
+		attrMap = accTestVpcSubnetDhcpV4StaticBindingConfig920UpdateAttributes
 	}
 	return testAccNsxtVpcSubnetDhcpV4StaticBindingConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
