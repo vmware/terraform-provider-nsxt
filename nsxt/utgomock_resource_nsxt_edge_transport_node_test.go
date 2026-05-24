@@ -41,14 +41,34 @@ var (
 
 // edgeNodeStructValue builds the *data.StructValue the resource's Read path
 // expects in TransportNode.NodeDeploymentInfo.
+// NodeSettings is intentionally omitted: Read no longer uses it because the
+// NSX edge MPA initial-boot sync can temporarily overwrite the desired state
+// in the API with the edge VM's current running state, causing perpetual drift
+// if those stale values are written back to Terraform state (bug 3689817).
 func edgeNodeStructValue() *data.StructValue {
-	hostname := "edge-node.example.com"
+	node := mpmodel.EdgeNode{
+		ResourceType: mpmodel.EdgeNode__TYPE_IDENTIFIER,
+		ExternalId:   &tnExternalID,
+		Fqdn:         &tnFQDN,
+	}
+	converter := bindings.NewTypeConverter()
+	dataValue, errs := converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
+	if errs != nil {
+		panic(errs[0])
+	}
+	return dataValue.(*data.StructValue)
+}
+
+// edgeNodeStructValueWithNodeSettings returns a StructValue whose NodeSettings
+// carries a hostname that differs from what the Terraform config would hold.
+// Used to verify that Read does NOT copy MPA-sync-overwritten values into state.
+func edgeNodeStructValueWithNodeSettings(apiHostname string) *data.StructValue {
 	node := mpmodel.EdgeNode{
 		ResourceType: mpmodel.EdgeNode__TYPE_IDENTIFIER,
 		ExternalId:   &tnExternalID,
 		Fqdn:         &tnFQDN,
 		NodeSettings: &mpmodel.EdgeNodeSettings{
-			Hostname: &hostname,
+			Hostname: &apiHostname,
 		},
 	}
 	converter := bindings.NewTypeConverter()
@@ -193,6 +213,46 @@ func TestMockResourceNsxtEdgeTransportNodeRead(t *testing.T) {
 		err := resourceNsxtEdgeTransportNodeRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "read API error")
+	})
+
+	t.Run("Read does not overwrite node_settings from API", func(t *testing.T) {
+		// When a freshly deployed edge VM boots, its MPA performs an initial
+		// sync that temporarily overwrites the desired node_settings in the NSX
+		// API with the VM's current running state (bug 3689817).  Read must NOT
+		// copy those MPA-overwritten values into Terraform state or it would
+		// cause perpetual drift.  This test verifies that the config-driven
+		// node_settings value in state survives a Read unchanged, even when the
+		// API response carries a different (stale) hostname.
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTransportNodeMock(t, ctrl)
+		defer restore()
+
+		apiHostname := "stale-mpa-reported-hostname.example.com"
+		apiResp := mpmodel.TransportNode{
+			Id:                 &tnID,
+			DisplayName:        &tnDisplayName,
+			Description:        &tnDescription,
+			Revision:           &tnRevision,
+			NodeDeploymentInfo: edgeNodeStructValueWithNodeSettings(apiHostname),
+		}
+		mockSDK.EXPECT().Get(tnID).Return(apiResp, nil)
+
+		res := resourceNsxtEdgeTransportNode()
+		d := schema.TestResourceDataRaw(t, res.Schema, transportNodeDataWithNodeSettings())
+		d.SetId(tnID)
+
+		err := resourceNsxtEdgeTransportNodeRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		// The config-driven hostname (tnFQDN) must survive Read unchanged.
+		// The stale MPA-reported hostname must NOT replace it.
+		nodeSettings := d.Get("node_settings").([]interface{})
+		require.Len(t, nodeSettings, 1)
+		ns := nodeSettings[0].(map[string]interface{})
+		assert.Equal(t, tnFQDN, ns["hostname"],
+			"Read must not overwrite node_settings.hostname with MPA-reported stale value")
+		assert.NotEqual(t, apiHostname, ns["hostname"])
 	})
 }
 

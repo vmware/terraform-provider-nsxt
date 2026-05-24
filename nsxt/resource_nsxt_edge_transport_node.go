@@ -1857,12 +1857,27 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if node.NodeSettings != nil {
-		err = setEdgeNodeSettingsInSchema(d, node.NodeSettings)
-		if err != nil {
-			return handleReadError(d, "TransportNode", id, err)
-		}
-	}
+	// node_settings are intentionally not refreshed from the API here.
+	//
+	// Root cause (bug 3689817): when a freshly deployed edge VM boots, its
+	// management plane agent (MPA) performs an initial sync that reports the
+	// VM's current running state to NSX.  NSX writes those MPA-reported values
+	// back into node_deployment_info.node_settings, temporarily overwriting
+	// whatever was last PUT by Terraform.  A Read executed immediately after an
+	// Update would pick up those stale MPA-reported values and write them into
+	// Terraform state, causing the same changes to re-appear on every
+	// subsequent plan (perpetual drift).
+	//
+	// Empirical verification: for already-initialized edges a PUT is reflected
+	// immediately in GET (no stale values).  The overwrite only occurs during
+	// the new-edge MPA initialization window.  Once the window closes, NSX
+	// re-delivers the desired state to the edge MPA which then applies it, so
+	// the changes are not lost — they are just applied with a brief delay.
+	//
+	// Trade-off: by treating the Terraform config as the authoritative source
+	// for node_settings, state remains stable and accurate for the vast
+	// majority of lifecycle operations.  On import, users must supply
+	// node_settings in their config (listed in ImportStateVerifyIgnore).
 
 	// Set base object attributes
 	d.Set("external_id", node.ExternalId)
@@ -1873,30 +1888,6 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 		return handleReadError(d, "TransportNode", id, err)
 	}
 
-	return nil
-}
-
-func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *mpmodel.EdgeNodeSettings) error {
-	elem := getElemOrEmptyMapFromSchema(d, "node_settings")
-	elem["advanced_configuration"] = setKeyValueListForSchema(nodeSettings.AdvancedConfiguration)
-	elem["allow_ssh_root_login"] = nodeSettings.AllowSshRootLogin
-	elem["dns_servers"] = nodeSettings.DnsServers
-	elem["enable_ssh"] = nodeSettings.EnableSsh
-	elem["enable_upt_mode"] = nodeSettings.EnableUptMode
-	elem["hostname"] = nodeSettings.Hostname
-	elem["ntp_servers"] = nodeSettings.NtpServers
-	elem["search_domains"] = nodeSettings.SearchDomains
-	var syslogServers []map[string]interface{}
-	for _, syslogServer := range nodeSettings.SyslogServers {
-		e := make(map[string]interface{})
-		e["log_level"] = syslogServer.LogLevel
-		e["port"] = syslogServer.Port
-		e["protocol"] = syslogServer.Protocol
-		e["server"] = syslogServer.Server
-		syslogServers = append(syslogServers, e)
-	}
-	elem["syslog_server"] = syslogServers
-	d.Set("node_settings", []map[string]interface{}{elem})
 	return nil
 }
 

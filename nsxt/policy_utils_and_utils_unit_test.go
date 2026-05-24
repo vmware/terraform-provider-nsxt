@@ -247,11 +247,3 @@ func TestUnitNsxt_getKeyValuePairListFromSchema(t *testing.T) {
 	require.Len(t, out, 1)
 	assert.Equal(t, "k", *out[0].Key)
 }
-
-func TestUnitNsxt_setKeyValueListForSchema(t *testing.T) {
-	ka2, vb2 := "a", "b"
-	out := setKeyValueListForSchema([]mp_model.KeyValuePair{
-		{Key: &ka2, Value: &vb2},
-	}).([]interface{})
-	require.Len(t, out, 1)
-}

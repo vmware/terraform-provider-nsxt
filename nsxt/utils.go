@@ -447,14 +447,3 @@ func getKeyValuePairListFromSchema(kvIList interface{}) []mp_model.KeyValuePair 
 	}
 	return kvList
 }
-
-func setKeyValueListForSchema(kvList []mp_model.KeyValuePair) interface{} {
-	var kvIList []interface{}
-	for _, ec := range kvList {
-		kvMap := make(map[string]interface{})
-		kvMap["key"] = ec.Key
-		kvMap["value"] = ec.Value
-		kvIList = append(kvIList, kvMap)
-	}
-	return kvIList
-}
