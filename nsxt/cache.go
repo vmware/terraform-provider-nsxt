@@ -566,7 +566,7 @@ func stripProviderManagedTagsFromAny(obj interface{}) {
 		return
 	}
 	objValue := reflect.ValueOf(obj)
-	for objValue.IsValid() && objValue.Kind() == reflect.Ptr {
+	for objValue.IsValid() && objValue.Kind() == reflect.Pointer {
 		if objValue.IsNil() {
 			return
 		}
@@ -596,7 +596,7 @@ func stripProviderManagedTagsFromAny(obj interface{}) {
 func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
 	// Use reflection to check if the object has a Tags field
 	objValue := reflect.ValueOf(obj)
-	for objValue.IsValid() && objValue.Kind() == reflect.Ptr {
+	for objValue.IsValid() && objValue.Kind() == reflect.Pointer {
 		if objValue.IsNil() {
 			// No object to patch
 			return nil, nil
@@ -676,7 +676,7 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 			// Without this, a subsequent apply would send the stale (pre-PATCH) revision and
 			// NSX would reject the request with error 500071.
 			revField := objValue.FieldByName("Revision")
-			if revField.IsValid() && revField.Kind() == reflect.Ptr && !revField.IsNil() {
+			if revField.IsValid() && revField.Kind() == reflect.Pointer && !revField.IsNil() {
 				revField.Elem().SetInt(revField.Elem().Int() + 1)
 			}
 		}
