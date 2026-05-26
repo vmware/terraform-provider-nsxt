@@ -1656,6 +1656,335 @@ resource "nsxt_policy_group" "test" {
 }`, name)
 }
 
+func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupBMSStaticCreateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.external_id_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.external_id_expression.0.member_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.external_id_expression.0.external_ids.#", "2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupBMSStaticUpdateTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.external_id_expression.0.member_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.external_id_expression.0.external_ids.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.external_id_expression.0.member_type", "BareMetalServerInterface"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.external_id_expression.0.external_ids.#", "1"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupBMSDynamicCreateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.key", "Tag"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.member_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.1.key", "OSName"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.1.member_type", "BareMetalServer"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupBMSDynamicUpdateTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.key", "Name"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.member_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.0.key", "OSVersion"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.0.member_type", "BareMetalServer"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupBMSInterfaceDynamicTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.key", "Tag"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.member_type", "BareMetalServerInterface"),
+				),
+			},
+			{
+				// Update: change the interface Tag value, add OR conjunction, and a second
+				// criteria on BareMetalServer — exercises mixed interface/server criteria.
+				Config: testAccNsxtPolicyGroupBMSInterfaceUpdateTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "group_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.key", "Tag"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.member_type", "BareMetalServerInterface"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.operator", "EQUALS"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.0.value", "intf|updated"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.0.key", "Tag"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.0.member_type", "BareMetalServer"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.condition.0.value", "role|compute"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyGroupBMSStaticCreateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    external_id_expression {
+      member_type  = "BareMetalServer"
+      external_ids = ["bms-ext-id-1", "bms-ext-id-2"]
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupBMSStaticUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    external_id_expression {
+      member_type  = "BareMetalServer"
+      external_ids = ["bms-ext-id-1"]
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    external_id_expression {
+      member_type  = "BareMetalServerInterface"
+      external_ids = ["bms-intf-ext-id-1"]
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupBMSDynamicCreateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "env|production"
+    }
+    condition {
+      key         = "OSName"
+      member_type = "BareMetalServer"
+      operator    = "CONTAINS"
+      value       = "Linux"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupBMSDynamicUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "BareMetalServer"
+      operator    = "STARTSWITH"
+      value       = "prod-bms"
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    condition {
+      key         = "OSVersion"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "22.04.3 LTS"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupBMSInterfaceDynamicTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServerInterface"
+      operator    = "EQUALS"
+      value       = "intf|mgmt"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupBMSInterfaceUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServerInterface"
+      operator    = "EQUALS"
+      value       = "intf|updated"
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "role|compute"
+    }
+  }
+}
+`, name)
+}
+
 func testAccNsxtPolicyGroupTemplateWithVpc(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_vpc" "test" {
