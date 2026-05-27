@@ -10,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 const defaultOrgID = "default"
@@ -144,9 +142,7 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
 	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
-	if util.NsxVersionHigherOrEqual("9.2.0") && obj.Ipv6Blocks != nil {
-		d.Set("ipv6_blocks", obj.Ipv6Blocks)
-	}
+	d.Set("ipv6_blocks", obj.Ipv6Blocks)
 
 	return nil
 }

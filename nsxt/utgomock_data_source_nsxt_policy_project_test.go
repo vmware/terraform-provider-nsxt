@@ -153,7 +153,7 @@ func TestMockDataSourceNsxtPolicyProjectRead_ipv6Blocks(t *testing.T) {
 		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 
-	t.Run("by ID does not populate ipv6_blocks when NSX below 9.2", func(t *testing.T) {
+	t.Run("by ID sets ipv6_blocks regardless of NSX version", func(t *testing.T) {
 		util.NsxVersion = "9.1.0"
 		defer func() { util.NsxVersion = "" }()
 
@@ -166,8 +166,9 @@ func TestMockDataSourceNsxtPolicyProjectRead_ipv6Blocks(t *testing.T) {
 
 		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
-		_, ok := d.GetOk("ipv6_blocks")
-		assert.False(t, ok)
+		blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, blocks, 1)
+		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 
 	t.Run("by display_name sets ipv6_blocks when NSX 9.2.0+", func(t *testing.T) {
