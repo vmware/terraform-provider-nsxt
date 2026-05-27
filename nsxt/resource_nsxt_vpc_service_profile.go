@@ -225,7 +225,7 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 								Schema: map[string]*metadata.ExtendedSchema{
 									"server_addresses": {
 										Schema: schema.Schema{
-											Type: schema.TypeList,
+											Type: schema.TypeSet,
 											Elem: &metadata.ExtendedSchema{
 												Schema: schema.Schema{
 													Type: schema.TypeString,
@@ -237,7 +237,7 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 											Optional: true,
 										},
 										Metadata: metadata.Metadata{
-											SchemaType:   "list",
+											SchemaType:   "set",
 											SdkFieldName: "ServerAddresses",
 										},
 									},
