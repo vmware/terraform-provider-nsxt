@@ -255,6 +255,40 @@ func TestAccResourceNsxtVpcServiceProfile920_ipv6Extensions_import(t *testing.T)
 	})
 }
 
+func TestAccResourceNsxtVpcServiceProfile920_dhcpv6Relay(t *testing.T) {
+	testResourceName := "nsxt_vpc_service_profile.test"
+	name := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcServiceProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcServiceProfile920Dhcpv6RelayTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_relay_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcpv6_config.0.dhcpv6_relay_config.0.server_addresses.#", "2"),
+					resource.TestCheckTypeSetElemAttr(testResourceName, "dhcpv6_config.0.dhcpv6_relay_config.0.server_addresses.*", "2001:db8::3"),
+					resource.TestCheckTypeSetElemAttr(testResourceName, "dhcpv6_config.0.dhcpv6_relay_config.0.server_addresses.*", "2001:db8::4"),
+				),
+			},
+			{
+				// Verify idempotency: a second plan must produce no changes
+				Config:   testAccNsxtVpcServiceProfile920Dhcpv6RelayTemplate(name),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcServiceProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_service_profile.test"
@@ -427,6 +461,23 @@ resource "nsxt_vpc_service_profile" "test" {
   dhcp_config {
   }
 }`, testAccNsxtProjectContext(), displayName)
+}
+
+func testAccNsxtVpcServiceProfile920Dhcpv6RelayTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+
+  dhcp_config {
+  }
+
+  dhcpv6_config {
+    dhcpv6_relay_config {
+      server_addresses = ["2001:db8::3", "2001:db8::4"]
+    }
+  }
+}`, testAccNsxtProjectContext(), name)
 }
 
 func testAccNsxtVpcServiceProfile920Ipv6Template(createFlow bool) string {
