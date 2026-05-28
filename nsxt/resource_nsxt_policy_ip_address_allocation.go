@@ -108,7 +108,12 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	allocationIP := d.Get("allocation_ip").(string)
 
 	obj := model.IpAddressAllocation{
@@ -151,6 +156,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 				d.SetId(id)
 				d.Set("nsx_id", id)
 				d.Set("allocation_ip", attr.Values[0])
+				InvalidateCacheForResourceType("IpAddressAllocation")
 				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 			}
 		}
@@ -161,7 +167,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-
+	InvalidateCacheForResourceType("IpAddressAllocation")
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 
@@ -178,8 +184,35 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 	}
 
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
-
-	obj, err := client.Get(poolID, id)
+	var obj *model.IpAddressAllocation
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.IpAddressAllocation](
+			d,
+			m,
+			connector,
+			id,
+			"IpAddressAllocation",
+			model.IpAddressAllocationBindingType(),
+			func() (*model.IpAddressAllocation, error) {
+				readObj, readErr := client.Get(poolID, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.IpAddressAllocation) error {
+				return client.Patch(poolID, id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(poolID, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "IPAddressAllocation", id, err)
 	}
@@ -213,7 +246,12 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	obj := model.IpAddressAllocation{
@@ -228,7 +266,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("IPAddressAllocation", id, err)
 	}
-
+	InvalidateCacheForResourceType("IpAddressAllocation")
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 

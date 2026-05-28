@@ -431,6 +431,9 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 					}
 					return &typedVal, cacheUsed, cacheAttempted, nil
 				}
+				log.Printf("[WARNING] Cache: type assertion failed for resourceType=%s id=%s; discarding cached value, falling back to direct GET", resourceType, resourceID) //nolint:gosec
+			} else {
+				log.Printf("[WARNING] Cache: conversion failed for resourceType=%s id=%s (%v); discarding cached value, falling back to direct GET", resourceType, resourceID, convErrs[0]) //nolint:gosec
 			}
 		}
 	}
@@ -441,14 +444,21 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 		return nil, cacheUsed, cacheAttempted, err
 	}
 
-	// Handle tag-based cache mode: validate and patch provider-managed tags if missing.
-	// Always strip provider-managed tags from the returned object so TF state does not
-	// track them — they are managed on NSX out-of-band and must not appear in diffs.
-	if !isGlobalSearchCacheMode() {
+	// Tag injection is only meaningful in config_scope mode, where the provider
+	// tracks resources via nsx-tf/tf-run-id tags. In disabled or global mode there
+	// is no tag-based ownership contract, so patching would silently modify NSX
+	// objects that are not under tag-based lifecycle management.
+	if isConfigScopedCacheMode() {
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
 			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr) //nolint:gosec
 		}
+	}
+	// Provider-managed tags must not be surfaced in Terraform state: they are an
+	// out-of-band NSX annotation and must not appear in plan diffs. Strip them in
+	// both disabled and config_scope modes; global mode intentionally returns all
+	// tags as-is so the caller sees the full NSX object.
+	if !isGlobalSearchCacheMode() {
 		stripProviderManagedTagsFromAny(obj)
 	}
 

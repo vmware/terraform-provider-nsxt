@@ -871,6 +871,11 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	if tagErr != nil {
 		return tagErr
 	}
+	if isConfigScopedCacheMode() {
+		runID := m.(nsxtClients).CommonConfig.contextID
+		managedDefaults := getProviderManagedDefaultTags(runID)
+		tags = mergeManagedDefaultAndUserTags(managedDefaults, tags)
+	}
 
 	var groupTypes []string
 	groupType := d.Get("group_type").(string)
@@ -906,7 +911,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-
+	InvalidateCacheForResourceType("Group")
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
@@ -928,7 +933,35 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	obj, err := client.Get(domainName, id)
+	var obj *model.Group
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.Group](
+			d,
+			m,
+			connector,
+			id,
+			"Group",
+			model.GroupBindingType(),
+			func() (*model.Group, error) {
+				readObj, readErr := client.Get(domainName, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.Group) error {
+				return client.Patch(domainName, id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(domainName, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Group", id, err)
 	}
@@ -1007,7 +1040,15 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return tagErr
+	}
+	if isConfigScopedCacheMode() {
+		runID := m.(nsxtClients).CommonConfig.contextID
+		managedDefaults := getProviderManagedDefaultTags(runID)
+		tags = mergeManagedDefaultAndUserTags(managedDefaults, tags)
+	}
 
 	var groupTypes []string
 	groupType := d.Get("group_type").(string)
@@ -1043,7 +1084,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
-
+	InvalidateCacheForResourceType("Group")
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 

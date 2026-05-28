@@ -505,7 +505,12 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
 	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
 		activeMonitorPath := d.Get("active_monitor_path").(string)
@@ -546,7 +551,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-
+	InvalidateCacheForResourceType("LBPool")
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }
 
@@ -564,7 +569,35 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining LBPool ID")
 	}
 
-	obj, err := client.Get(id)
+	var obj *model.LBPool
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.LBPool](
+			d,
+			m,
+			connector,
+			id,
+			"LBPool",
+			model.LBPoolBindingType(),
+			func() (*model.LBPool, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.LBPool) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBPool", id, err)
 	}
@@ -632,7 +665,12 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
 	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
@@ -672,6 +710,7 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleUpdateError("LBPool", id, err)
 	}
+	InvalidateCacheForResourceType("LBPool")
 
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }

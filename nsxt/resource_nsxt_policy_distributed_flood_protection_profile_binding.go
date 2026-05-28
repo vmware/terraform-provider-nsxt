@@ -65,7 +65,12 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.R
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	profilePath := d.Get("profile_path").(string)
 	seqNum := int64(d.Get("sequence_number").(int))
 	obj := model.PolicyFirewallFloodProtectionProfileBindingMap{
@@ -129,6 +134,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate(d *schema.
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap")
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }
@@ -148,8 +154,35 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 	groupPath := d.Get("group_path").(string)
 	domain := getDomainFromResourcePath(groupPath)
 	groupID := getPolicyIDFromPath(groupPath)
-
-	binding, err := bindingClient.Get(domain, groupID, id)
+	var binding *model.PolicyFirewallFloodProtectionProfileBindingMap
+	var err error
+	if isCacheEnabledForRead(d) {
+		binding, _, _, err = CacheAwareResourceRead[model.PolicyFirewallFloodProtectionProfileBindingMap](
+			d,
+			m,
+			connector,
+			id,
+			"PolicyFirewallFloodProtectionProfileBindingMap",
+			model.PolicyFirewallFloodProtectionProfileBindingMapBindingType(),
+			func() (*model.PolicyFirewallFloodProtectionProfileBindingMap, error) {
+				readObj, readErr := bindingClient.Get(domain, groupID, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.PolicyFirewallFloodProtectionProfileBindingMap) error {
+				return bindingClient.Patch(domain, groupID, id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := bindingClient.Get(domain, groupID, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			binding = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "FloodProtectionProfileBinding", id, err)
 	}
@@ -177,6 +210,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingUpdate(d *schema.
 	if err != nil {
 		return handleUpdateError("DistributedFloodProtectionProfileBinding", id, err)
 	}
+	InvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap")
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }

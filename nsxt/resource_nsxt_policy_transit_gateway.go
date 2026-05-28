@@ -624,9 +624,15 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
-	if tagErr != nil {
-		return tagErr
+	var tags []model.Tag
+	var tagErr error
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags, tagErr = getValidatedTagsFromSchema(d)
+		if tagErr != nil {
+			return tagErr
+		}
 	}
 
 	obj := model.TransitGateway{
@@ -712,6 +718,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("TransitGateway")
 
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
@@ -727,7 +734,47 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 	sessionContext := getSessionContext(d, m)
 	client := cliTransitGatewaysClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], id)
+	var obj *model.TransitGateway
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.TransitGateway](
+			d,
+			m,
+			connector,
+			id,
+			"TransitGateway",
+			model.TransitGatewayBindingType(),
+			func() (*model.TransitGateway, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.TransitGateway) error {
+				orgRootClient := cliOrgRootClient(sessionContext, connector)
+				if orgRootClient == nil {
+					return policyResourceNotSupportedError()
+				}
+				childOrg, childErr := createChildOrgWithTransitGateway(parents[0], parents[1], id, patchObj, false)
+				if childErr != nil {
+					return childErr
+				}
+				orgRoot := model.OrgRoot{
+					ResourceType: strPtr("OrgRoot"),
+					Children:     []*data.StructValue{childOrg},
+				}
+				return orgRootClient.Patch(orgRoot, nil)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "TransitGateway", id, err)
 	}
@@ -799,7 +846,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 		}
 	}
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, transitGatewaySchema, "", nil)
 }
 
@@ -851,9 +898,15 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
-	if tagErr != nil {
-		return tagErr
+	var tags []model.Tag
+	var tagErr error
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags, tagErr = getValidatedTagsFromSchema(d)
+		if tagErr != nil {
+			return tagErr
+		}
 	}
 
 	revision := int64(d.Get("revision").(int))
@@ -964,6 +1017,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
+	InvalidateCacheForResourceType("TransitGateway")
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
