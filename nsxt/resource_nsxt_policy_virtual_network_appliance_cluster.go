@@ -189,8 +189,12 @@ func resourceNsxtPolicyVirtualNetworkApplianceClusterRead(d *schema.ResourceData
 	// after the cluster state reaches SUCCESS. Preserve existing member state
 	// so that the user-defined EdgeTransportNodePath intent is not wiped out
 	// on every Read, which would cause a perpetual diff.
+	//
+	// Additionally, in VNA-capable environments NSX replaces edge_transport_node_path
+	// with the deployed VNA node path. We preserve the user-configured paths to avoid
+	// a perpetual diff.
 	if len(obj.Members) > 0 {
-		if err := setVNAClusterMembersInSchema(d, obj.Members); err != nil {
+		if err := setVNAClusterMembersInSchema(d, obj.Members, d.Get("member")); err != nil {
 			return err
 		}
 	}
@@ -201,9 +205,15 @@ func resourceNsxtPolicyVirtualNetworkApplianceClusterRead(d *schema.ResourceData
 	return nil
 }
 
-func setVNAClusterMembersInSchema(d *schema.ResourceData, members []model.VirtualNetworkApplianceClusterMember) error {
+// setVNAClusterMembersInSchema sets the member list from the API response.
+// currentMembersRaw carries the existing state so that the user-configured
+// edge_transport_node_path is preserved even when NSX replaces it with the
+// deployed VNA slot path in VNA-capable environments.
+func setVNAClusterMembersInSchema(d *schema.ResourceData, members []model.VirtualNetworkApplianceClusterMember, currentMembersRaw interface{}) error {
+	currentMembers, _ := currentMembersRaw.([]interface{})
+
 	var memberList []map[string]interface{}
-	for _, member := range members {
+	for i, member := range members {
 		m := make(map[string]interface{})
 		if member.AppliancePath != nil {
 			m["appliance_path"] = *member.AppliancePath
@@ -211,8 +221,20 @@ func setVNAClusterMembersInSchema(d *schema.ResourceData, members []model.Virtua
 		if member.ApplianceUniqueId != nil {
 			m["appliance_unique_id"] = *member.ApplianceUniqueId
 		}
-		if member.EdgeTransportNodePath != nil {
-			m["edge_transport_node_path"] = *member.EdgeTransportNodePath
+		// Preserve the user-configured edge_transport_node_path: NSX may overwrite
+		// it with the VNA node's path in fully realized clusters. Since the user
+		// cannot meaningfully reconfigure this after creation, we keep the original.
+		if i < len(currentMembers) {
+			if cur, ok := currentMembers[i].(map[string]interface{}); ok {
+				if existing, ok := cur["edge_transport_node_path"].(string); ok && existing != "" {
+					m["edge_transport_node_path"] = existing
+				}
+			}
+		}
+		if _, hasETN := m["edge_transport_node_path"]; !hasETN {
+			if member.EdgeTransportNodePath != nil {
+				m["edge_transport_node_path"] = *member.EdgeTransportNodePath
+			}
 		}
 		memberList = append(memberList, m)
 	}

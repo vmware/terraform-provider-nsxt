@@ -133,6 +133,22 @@ func getComputeManagerName() string {
 	return os.Getenv("NSXT_TEST_COMPUTE_MANAGER")
 }
 
+func getDatastoreID() string {
+	return os.Getenv("NSXT_TEST_DATASTORE_ID")
+}
+
+func getMgtNetworkID() string {
+	return os.Getenv("NSXT_TEST_MGT_NETWORK")
+}
+
+func getVNAHostname() string {
+	name := os.Getenv("NSXT_TEST_VNA_HOSTNAME")
+	if name == "" {
+		name = "vna-test.example.com"
+	}
+	return name
+}
+
 func getHostTransportNodeName() string {
 	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
 }
