@@ -22,10 +22,6 @@ func TestAccDataSourceNsxtPolicyIdpsCustomSignature_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
-			// NSX backend regression (error 523940): ADD_CUSTOM_SIGNATURES fails with
-			// "Ids custom signature json file not found even after retry" on NSX builds
-			// >= 25433529. Remove this skip once the fix is available on the NSX side.
-			t.Skip("Skipped pending NSX fix for error 523940 in ADD_CUSTOM_SIGNATURES")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
