@@ -99,7 +99,12 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d *schema.ResourceData
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.LBSourceIpPersistenceProfile{
 		DisplayName:  &displayName,
@@ -128,6 +133,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d *schema.ResourceData
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("LBSourceIpPersistenceProfile")
 
 	return resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, m)
 }
@@ -143,17 +149,53 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d *schema.ResourceData, 
 
 	sessionContext := getSessionContext(d, m)
 	client := cliLbPersistenceProfilesClient(sessionContext, connector)
-
-	genObj, err := client.Get(id)
+	var obj *model.LBSourceIpPersistenceProfile
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.LBSourceIpPersistenceProfile](
+			d,
+			m,
+			connector,
+			id,
+			"LBSourceIpPersistenceProfile",
+			model.LBSourceIpPersistenceProfileBindingType(),
+			func() (*model.LBSourceIpPersistenceProfile, error) {
+				genObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				baseObj, errs := converter.ConvertToGolang(genObj, model.LBSourceIpPersistenceProfileBindingType())
+				if len(errs) > 0 {
+					return nil, fmt.Errorf("Error converting LBSourceIpPersistenceProfile %s", errs[0])
+				}
+				typed := baseObj.(model.LBSourceIpPersistenceProfile)
+				return &typed, nil
+			},
+			func(patchObj *model.LBSourceIpPersistenceProfile) error {
+				dataValue, errs := converter.ConvertToVapi(*patchObj, model.LBSourceIpPersistenceProfileBindingType())
+				if errs != nil {
+					return fmt.Errorf("Profile %s is not of type LBSourceIpPersistenceProfile %s", id, errs[0])
+				}
+				return client.Patch(id, dataValue.(*data.StructValue))
+			},
+		)
+	} else {
+		genObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			baseObj, errs := converter.ConvertToGolang(genObj, model.LBSourceIpPersistenceProfileBindingType())
+			if len(errs) > 0 {
+				err = fmt.Errorf("Error converting LBSourceIpPersistenceProfile %s", errs[0])
+			} else {
+				typed := baseObj.(model.LBSourceIpPersistenceProfile)
+				obj = &typed
+			}
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBSourceIpPersistenceProfile", id, err)
 	}
-
-	baseObj, errs := converter.ConvertToGolang(genObj, model.LBSourceIpPersistenceProfileBindingType())
-	if len(errs) > 0 {
-		return fmt.Errorf("Error converting LBSourceIpPersistenceProfile %s", errs[0])
-	}
-	obj := baseObj.(model.LBSourceIpPersistenceProfile)
 
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
@@ -162,7 +204,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d *schema.ResourceData, 
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, lbSourceIpPersistenceProfileSchema, "", nil)
 }
 
@@ -178,7 +220,12 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d *schema.ResourceData
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -205,6 +252,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d *schema.ResourceData
 	if err != nil {
 		return handleUpdateError("LBSourceIpPersistenceProfile", id, err)
 	}
+	InvalidateCacheForResourceType("LBSourceIpPersistenceProfile")
 
 	return resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, m)
 }

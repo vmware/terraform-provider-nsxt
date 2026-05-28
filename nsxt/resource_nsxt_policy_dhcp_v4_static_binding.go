@@ -163,7 +163,12 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	gatewayAddress := d.Get("gateway_address").(string)
 	hostName := d.Get("hostname").(string)
 	ipAddress := d.Get("ip_address").(string)
@@ -264,6 +269,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -277,11 +283,6 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 	}
 
 	segmentPath := d.Get("segment_path").(string)
-
-	var obj model.DhcpV4StaticBindingConfig
-	converter := bindings.NewTypeConverter()
-	var err error
-	var dhcpObj *data.StructValue
 	isT0, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
 	if isT0 {
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
@@ -292,32 +293,48 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
 	}
 
-	if gwID == "" {
-		// infra segment
-		client := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		dhcpObj, err = client.Get(segmentID, id)
-	} else {
-		// fixed segment
-		client := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		dhcpObj, err = client.Get(gwID, segmentID, id)
-	}
-
+	obj, _, _, err := CacheAwareResourceRead[model.DhcpV4StaticBindingConfig](
+		d,
+		m,
+		connector,
+		id,
+		"DhcpV4StaticBindingConfig",
+		model.DhcpV4StaticBindingConfigBindingType(),
+		func() (*model.DhcpV4StaticBindingConfig, error) {
+			converter := bindings.NewTypeConverter()
+			var dhcpObj *data.StructValue
+			var getErr error
+			if gwID == "" {
+				c := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
+				if c == nil {
+					return nil, policyResourceNotSupportedError()
+				}
+				dhcpObj, getErr = c.Get(segmentID, id)
+			} else {
+				c := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
+				if c == nil {
+					return nil, policyResourceNotSupportedError()
+				}
+				dhcpObj, getErr = c.Get(gwID, segmentID, id)
+			}
+			if getErr != nil {
+				return nil, getErr
+			}
+			convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
+			if errs != nil {
+				return nil, errs[0]
+			}
+			typed := convObj.(model.DhcpV4StaticBindingConfig)
+			return &typed, nil
+		},
+		func(patchObj *model.DhcpV4StaticBindingConfig) error {
+			// ensureProviderManagedTagsWithPatchFunc requires a patch function; reuse existing conversion+patch
+			return policyDhcpV4StaticBindingConvertAndPatch(d, segmentPath, id, m)
+		},
+	)
 	if err != nil {
 		return handleReadError(d, "DhcpV4 Static Binding Config", id, err)
 	}
-
-	convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
-	if errs != nil {
-		return errs[0]
-	}
-	obj = convObj.(model.DhcpV4StaticBindingConfig)
-
 	if obj.ResourceType != "DhcpV4StaticBindingConfig" {
 		return handleReadError(d, "DhcpV4 Static Binding Config", id, fmt.Errorf("Unexpected ResourceType"))
 	}
@@ -360,6 +377,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV4 Static Binding Config", id, err)
 	}
+	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }

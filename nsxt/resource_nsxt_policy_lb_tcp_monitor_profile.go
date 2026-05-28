@@ -56,7 +56,12 @@ func resourceNsxtPolicyLBTcpMonitorProfilePatch(d *schema.ResourceData, m interf
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	receive := d.Get("receive").(string)
 	send := d.Get("send").(string)
 	fallCount := int64(d.Get("fall_count").(int))
@@ -107,13 +112,13 @@ func resourceNsxtPolicyLBTcpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("LBTcpMonitorProfile")
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }
 
 func resourceNsxtPolicyLBTcpMonitorProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	converter := bindings.NewTypeConverter()
 
 	id := d.Id()
 	if id == "" {
@@ -122,16 +127,51 @@ func resourceNsxtPolicyLBTcpMonitorProfileRead(d *schema.ResourceData, m interfa
 
 	sessionContext := getSessionContext(d, m)
 	client := cliLbMonitorProfilesClient(sessionContext, connector)
-	obj, err := client.Get(id)
+	var lbTCPMonitor *model.LBTcpMonitorProfile
+	var err error
+	if isCacheEnabledForRead(d) {
+		lbTCPMonitor, _, _, err = CacheAwareResourceRead[model.LBTcpMonitorProfile](
+			d,
+			m,
+			connector,
+			id,
+			"LBTcpMonitorProfile",
+			model.LBTcpMonitorProfileBindingType(),
+			func() (*model.LBTcpMonitorProfile, error) {
+				converter := bindings.NewTypeConverter()
+				obj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				baseObj, errs := converter.ConvertToGolang(obj, model.LBTcpMonitorProfileBindingType())
+				if len(errs) > 0 {
+					return nil, fmt.Errorf("Error converting LBTcpMonitorProfile %s", errs[0])
+				}
+				typed := baseObj.(model.LBTcpMonitorProfile)
+				return &typed, nil
+			},
+			func(patchObj *model.LBTcpMonitorProfile) error {
+				return resourceNsxtPolicyLBTcpMonitorProfilePatch(d, m, id)
+			},
+		)
+	} else {
+		converter := bindings.NewTypeConverter()
+		obj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			baseObj, errs := converter.ConvertToGolang(obj, model.LBTcpMonitorProfileBindingType())
+			if len(errs) > 0 {
+				err = fmt.Errorf("Error converting LBTcpMonitorProfile %s", errs[0])
+			} else {
+				typed := baseObj.(model.LBTcpMonitorProfile)
+				lbTCPMonitor = &typed
+			}
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBHTcpMonitorProfile", id, err)
 	}
-
-	baseObj, errs := converter.ConvertToGolang(obj, model.LBTcpMonitorProfileBindingType())
-	if len(errs) > 0 {
-		return fmt.Errorf("Error converting LBTcpMonitorProfile %s", errs[0])
-	}
-	lbTCPMonitor := baseObj.(model.LBTcpMonitorProfile)
 
 	d.Set("display_name", lbTCPMonitor.DisplayName)
 	d.Set("description", lbTCPMonitor.Description)
@@ -162,6 +202,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBTcpMonitorProfile", id, err)
 	}
+	InvalidateCacheForResourceType("LBTcpMonitorProfile")
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }
