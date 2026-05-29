@@ -55,6 +55,10 @@ var compositeCacheRegistry = map[string]compositeCacheEntry{
 		childSearchType: "rule",
 		merge:           mergeGatewayPolicyCacheSearchResults,
 	},
+	"securitypolicy": {
+		childSearchType: "rule",
+		merge:           mergeSecurityPolicyCacheSearchResults,
+	},
 }
 
 const envNSXTCacheMode = "NSXT_CACHE_MODE"
@@ -174,7 +178,7 @@ func (c *resourceTypeCache) writeCache(query string, resourceType string, d *sch
 	}
 	runID := m.(nsxtClients).CommonConfig.contextID
 	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query) //nolint:gosec
-	err := c.getListOfPolicyResources(query, d, connector, getSessionContext(d, m), resourceType, runID)
+	err := c.getListOfPolicyResources(query, d, connector, getEffectiveCacheContext(d, m), resourceType, runID)
 	if err != nil {
 		return err
 	}
@@ -192,8 +196,24 @@ func (c *typeScopedCache) getTypeCache(resourceType string) *resourceTypeCache {
 	return tc
 }
 
+// getEffectiveCacheContext derives the correct SessionContext for cache operations.
+// Resources that carry scope via parent_path (e.g. TransitGatewayAttachment,
+// ConnectivityPolicy) have no context{} block in their schema. getSessionContext
+// would return clientType=Local for them, causing the bulk search to hit the
+// infrastructure scope and never return project-scoped objects.
+// By checking parent_path first we extract the project/VPC context the same
+// way the resource's own CRUD code does via getParentContext.
+func getEffectiveCacheContext(d *schema.ResourceData, m interface{}) utl.SessionContext {
+	if pp, ok := d.GetOk("parent_path"); ok {
+		if parentPath := pp.(string); parentPath != "" {
+			return getParentContext(d, m, parentPath)
+		}
+	}
+	return getSessionContext(d, m)
+}
+
 func getCacheQueryKey(resourceType string, d *schema.ResourceData, m interface{}) string {
-	context := getSessionContext(d, m)
+	context := getEffectiveCacheContext(d, m)
 	query := getQueryString(resourceType, context)
 	runID := m.(nsxtClients).CommonConfig.contextID
 	additionalQuery := buildTagQuery(d, runID)
@@ -409,6 +429,19 @@ func mergeGatewayPolicyCacheSearchResults(parents, children []*data.StructValue)
 		func(p *model.GatewayPolicy, r []model.Rule) { p.Rules = r },
 	)
 	return modelsToStructValues(merged, model.GatewayPolicyBindingType())
+}
+
+func mergeSecurityPolicyCacheSearchResults(parents, children []*data.StructValue) ([]*data.StructValue, error) {
+	sp, err := structValuesToModels[model.SecurityPolicy](parents, model.SecurityPolicyBindingType())
+	if err != nil {
+		return nil, err
+	}
+	rules := structValuesToRules(children)
+	merged := attachRulesByParentPath(sp, rules,
+		func(p model.SecurityPolicy) *string { return p.Path },
+		func(p *model.SecurityPolicy, r []model.Rule) { p.Rules = r },
+	)
+	return modelsToStructValues(merged, model.SecurityPolicyBindingType())
 }
 
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {

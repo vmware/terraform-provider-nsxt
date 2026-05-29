@@ -107,6 +107,44 @@ func TestBuildTagQuery(t *testing.T) {
 	})
 }
 
+func TestAttachRulesByParentPathSecurityPolicy(t *testing.T) {
+	policyPathA := "/infra/domains/default/security-policies/pol-a"
+	policyPathB := "/infra/domains/default/security-policies/pol-b"
+
+	t.Run("happy-path-partitions-by-parent-path", func(t *testing.T) {
+		parents := []model.SecurityPolicy{
+			{Path: strPtr(policyPathA), Id: strPtr("pol-a")},
+			{Path: strPtr(policyPathB), Id: strPtr("pol-b")},
+		}
+		rules := []model.Rule{
+			{Id: strPtr("r1"), ParentPath: strPtr(policyPathA), SequenceNumber: int64Ptr(1)},
+			{Id: strPtr("r2"), ParentPath: strPtr(policyPathB), SequenceNumber: int64Ptr(1)},
+		}
+		got := attachRulesToSecurityPoliciesForTest(parents, rules)
+		if len(got) != 2 {
+			t.Fatalf("expected 2 policies, got %d", len(got))
+		}
+		if len(got[0].Rules) != 1 || got[0].Rules[0].Id == nil || *got[0].Rules[0].Id != "r1" {
+			t.Fatalf("policy A rules: %+v", got[0].Rules)
+		}
+		if len(got[1].Rules) != 1 || got[1].Rules[0].Id == nil || *got[1].Rules[0].Id != "r2" {
+			t.Fatalf("policy B rules: %+v", got[1].Rules)
+		}
+	})
+
+	t.Run("orphan-rule-discarded", func(t *testing.T) {
+		parents := []model.SecurityPolicy{{Path: strPtr(policyPathA), Id: strPtr("pol-a")}}
+		rules := []model.Rule{
+			{Id: strPtr("ok"), ParentPath: strPtr(policyPathA), SequenceNumber: int64Ptr(1)},
+			{Id: strPtr("orphan"), ParentPath: strPtr("/infra/domains/default/security-policies/other"), SequenceNumber: int64Ptr(1)},
+		}
+		got := attachRulesToSecurityPoliciesForTest(parents, rules)
+		if len(got[0].Rules) != 1 || got[0].Rules[0].Id == nil || *got[0].Rules[0].Id != "ok" {
+			t.Fatalf("rules: %+v", got[0].Rules)
+		}
+	})
+}
+
 func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
 	type testTagObj struct {
 		Tags []model.Tag
@@ -242,6 +280,13 @@ func attachRulesToGatewayPoliciesForTest(parents []model.GatewayPolicy, rules []
 	return attachRulesByParentPath(parents, rules,
 		func(p model.GatewayPolicy) *string { return p.Path },
 		func(p *model.GatewayPolicy, r []model.Rule) { p.Rules = r },
+	)
+}
+
+func attachRulesToSecurityPoliciesForTest(parents []model.SecurityPolicy, rules []model.Rule) []model.SecurityPolicy {
+	return attachRulesByParentPath(parents, rules,
+		func(p model.SecurityPolicy) *string { return p.Path },
+		func(p *model.SecurityPolicy, r []model.Rule) { p.Rules = r },
 	)
 }
 
