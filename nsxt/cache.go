@@ -33,18 +33,16 @@ type typeScopedCache struct {
 
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 
-// postWritePhase is set after the first Create/Update operation.
-// Once true, cache reads are bypassed so post-write Read calls use direct
-// individual API GETs instead of triggering another bulk search.
+// postWritePhase disables cache reads after a write (Create/Update/Delete).
+// Post-write Reads always use a direct GET to pick up the just-written state.
 var postWritePhase atomic.Bool
 
-// errCacheUseBackendDirect is returned when the cache query bucket exists but the requested id
-// is not present (including partial bulk results without this id), and from readCache after a
-// successful refill that still does not contain the id; callers must use direct API read.
+// errCacheUseBackendDirect signals that the bucket exists but the requested ID is absent;
+// the caller must fall back to a direct API GET.
 var errCacheUseBackendDirect = errors.New("nsxt cache: use direct API read")
 
-// compositeCacheEntry describes a parent search type that needs a second child search and merge
-// before results are stored (e.g. GatewayPolicy + Rule where search omits embedded rules).
+// compositeCacheEntry pairs a parent type with a child search + merge step.
+// Used when NSX search omits embedded children (e.g. GatewayPolicy rules).
 type compositeCacheEntry struct {
 	childSearchType string
 	merge           func(parents, children []*data.StructValue) ([]*data.StructValue, error)
@@ -102,9 +100,8 @@ func isGlobalSearchCacheMode() bool {
 	return currentCacheMode() == cacheGlobal
 }
 
-// isConfigScopedCacheMode returns true only when tag-filtered (config-scope) caching is active.
-// Provider-managed tags (nsx-tf/tf-run-id) should only be stamped on resources in this mode;
-// global mode and disabled mode must send only user-defined tags.
+// isConfigScopedCacheMode reports whether tag-filtered caching is active.
+// Provider-managed tags (nsx-tf/tf-run-id) are only injected in this mode.
 func isConfigScopedCacheMode() bool {
 	return currentCacheMode() == cacheConfigScoped
 }
@@ -132,14 +129,12 @@ func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
 		if resource.DisplayName != nil {
 			name := *resource.DisplayName
 			if existing, seen := ret[name]; seen {
-				// A second resource shares this display_name: mark the key ambiguous.
-				// nil sentinel causes getQueryResult to return errCacheAmbiguousDisplayName
-				// so the caller falls back to the direct API, which returns a proper
-				// "Found multiple X with name Y" error to the user.
+				// Duplicate display_name: mark ambiguous with nil so the caller
+				// falls back to a direct GET (which returns a proper multi-match error).
 				if existing != nil {
 					ret[name] = nil
 				}
-				// If already nil (3rd+ duplicate), leave as nil — still ambiguous.
+				// Already nil (3rd+ duplicate) — leave as nil.
 			} else {
 				ret[name] = obj
 			}
@@ -196,13 +191,10 @@ func (c *typeScopedCache) getTypeCache(resourceType string) *resourceTypeCache {
 	return tc
 }
 
-// getEffectiveCacheContext derives the correct SessionContext for cache operations.
-// Resources that carry scope via parent_path (e.g. TransitGatewayAttachment,
-// ConnectivityPolicy) have no context{} block in their schema. getSessionContext
-// would return clientType=Local for them, causing the bulk search to hit the
-// infrastructure scope and never return project-scoped objects.
-// By checking parent_path first we extract the project/VPC context the same
-// way the resource's own CRUD code does via getParentContext.
+// getEffectiveCacheContext returns the correct SessionContext for cache key derivation.
+// Resources without a context{} block (e.g. TransitGatewayAttachment) encode their
+// scope in parent_path; getSessionContext alone would return Local for those.
+// Checking parent_path first mirrors what the resource's own CRUD code does.
 func getEffectiveCacheContext(d *schema.ResourceData, m interface{}) utl.SessionContext {
 	if pp, ok := d.GetOk("parent_path"); ok {
 		if parentPath := pp.(string); parentPath != "" {
@@ -255,7 +247,6 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 }
 
 func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
-	// Now we have access to the proper runID passed from writeCache
 	additionalQuery := buildTagQuery(d, runID)
 	log.Printf("[DEBUG] Cache search query: resourceType=%s query=%q additionalQuery=%q", resourceType, query, additionalQuery) //nolint:gosec
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
@@ -276,10 +267,8 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 		return nil
 	}
 
-	// Child objects (e.g. rules) must not use the full parent tag query (policy user tags
-	// like color:orange vs rule tags color:blue). In tag cache mode (!global search cache),
-	// still scope children by provider-managed tags when runID is set; if that returns
-	// nothing (rules may not carry those tags in NSX), fall back to path-scoped list.
+	// Rules may not carry user tags, so scope child search by provider-managed tags only.
+	// If that yields nothing (rules untagged in NSX), retry without any tag filter.
 	var childAdditional *string
 	if !isGlobalSearchCacheMode() {
 		if q := providerManagedTagsSearchQuery(runID); q != "" {
@@ -368,9 +357,8 @@ func structValuesToRules(list []*data.StructValue) []model.Rule {
 	return out
 }
 
-// groupRulesByValidParentPath buckets rules by trimmed ParentPath when that path is in validParentPaths.
-// Rules with nil/empty ParentPath or unknown parent paths are skipped. Order within each bucket matches
-// the order rules appear in the input slice (typically child search result order).
+// groupRulesByValidParentPath indexes rules by ParentPath, restricted to known parent paths.
+// Rules with a missing, empty, or unrecognized ParentPath are dropped.
 func groupRulesByValidParentPath(validParentPaths map[string]struct{}, rules []model.Rule) map[string][]model.Rule {
 	byParent := make(map[string][]model.Rule)
 	for _, r := range rules {
@@ -389,8 +377,8 @@ func groupRulesByValidParentPath(validParentPaths map[string]struct{}, rules []m
 	return byParent
 }
 
-// attachRulesByParentPath groups rules onto parents where rule.ParentPath matches getPath(parent) (trimmed).
-// Rules without ParentPath or with unknown parents are skipped. Parents are returned in input order.
+// attachRulesByParentPath assigns rules to the parent whose Path matches rule.ParentPath.
+// Unmatched rules are dropped; parent order is preserved.
 func attachRulesByParentPath[P any](parents []P, rules []model.Rule, getPath func(P) *string, setRules func(*P, []model.Rule)) []P {
 	validPaths := make(map[string]struct{})
 	for _, p := range parents {
@@ -457,8 +445,7 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 				typedVal, ok := goVal.(T)
 				if ok {
 					cacheUsed = true
-					// Strip provider-managed tags so TF state does not track them.
-					// They live on NSX but must not drive TF diffs (config has no tag blocks for them).
+					// Remove provider-managed tags before returning; they must not appear in TF state.
 					if !isGlobalSearchCacheMode() {
 						stripProviderManagedTagsFromAny(&typedVal)
 					}
@@ -477,20 +464,14 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 		return nil, cacheUsed, cacheAttempted, err
 	}
 
-	// Tag injection is only meaningful in config_scope mode, where the provider
-	// tracks resources via nsx-tf/tf-run-id tags. In disabled or global mode there
-	// is no tag-based ownership contract, so patching would silently modify NSX
-	// objects that are not under tag-based lifecycle management.
+	// Only stamp provider-managed tags in config_scope mode; other modes have no tag ownership.
 	if isConfigScopedCacheMode() {
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
 			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr) //nolint:gosec
 		}
 	}
-	// Provider-managed tags must not be surfaced in Terraform state: they are an
-	// out-of-band NSX annotation and must not appear in plan diffs. Strip them in
-	// both disabled and config_scope modes; global mode intentionally returns all
-	// tags as-is so the caller sees the full NSX object.
+	// Strip provider-managed tags from state; global mode returns tags as-is.
 	if !isGlobalSearchCacheMode() {
 		stripProviderManagedTagsFromAny(obj)
 	}
@@ -519,8 +500,8 @@ func providerManagedTagsSearchQuery(runID string) string {
 	return strings.Join(fr, " AND ")
 }
 
-// buildTagQuery extracts tags from resource data and builds NSX-T search query string
-// In tag search mode, automatically appends provider-managed tags if not present
+// buildTagQuery builds the NSX search tag filter from the resource's tag block.
+// In config_scope mode, provider-managed tags are appended automatically if absent.
 func buildTagQuery(d *schema.ResourceData, runID string) string {
 	managedTagPresent := false
 	if d == nil {
@@ -537,7 +518,6 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 		return ""
 	}
 
-	// Tags are stored as *schema.Set
 	tagSet, ok := tags.(*schema.Set)
 	if !ok {
 		if shouldAddProviderTags {
@@ -556,10 +536,8 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 	for _, tagInterface := range tagSet.List() {
 		tagMap := tagInterface.(map[string]interface{})
 
-		// Extract scope and tag values
 		scope, hasScope := tagMap["scope"]
 		tag, hasTag := tagMap["tag"]
-		// Build query parts for scope and tag
 		if hasScope && scope != nil && scope.(string) != "" {
 			rawScope := scope.(string)
 			if isManagedDefaultTagScope(&rawScope) {
@@ -571,7 +549,6 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 			tagQueries = append(tagQueries, fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(tag.(string))))
 		}
 	}
-	// In tag search mode (not global search cache mode), automatically append provider-managed tags if not present
 	if !isGlobalSearchCacheMode() && !managedTagPresent && runID != "" {
 		tagQueries = append(tagQueries, providerManagedTagsSearchFragments(runID)...)
 	}
@@ -580,14 +557,12 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 		return ""
 	}
 
-	// Join all tag queries with AND
 	return strings.Join(tagQueries, " AND ")
 }
 
-// InvalidateCacheForResourceType clears all cached entries for the given resource type.
-// Must be called after write operations (create/update) to prevent stale reads in the
-// subsequent perpetual-diff plan, where isRefreshPhase returns true and cache is used.
-// This is added cause the testcases runs create/update/data-source read in a single run.
+// InvalidateCacheForResourceType clears the cache bucket for a resource type and
+// sets postWritePhase so that the immediately following Read uses a direct GET.
+// Call after every Create, Update, and Delete.
 func InvalidateCacheForResourceType(resourceType string) {
 	if !IsCacheEnabled() {
 		return
@@ -600,10 +575,8 @@ func InvalidateCacheForResourceType(resourceType string) {
 	log.Printf("[DEBUG] Cache invalidated for resourceType=%s; post-write phase set, cache bypassed for remaining reads", resourceType) //nolint:gosec
 }
 
-// stripProviderManagedTagsFromAny removes provider-managed tags (scope=nsx-tf/tf-run-id) from any
-// NSX model object using reflection. The object must be a pointer to a struct with a Tags []model.Tag
-// field. Provider-managed tags live on NSX out-of-band and must not appear in TF state so that
-// TF never plans to remove them (the config has no tag blocks for them).
+// stripProviderManagedTagsFromAny removes nsx-tf/tf-run-id tags from any NSX model object
+// via reflection. Provider-managed tags must not appear in TF state to prevent spurious diffs.
 func stripProviderManagedTagsFromAny(obj interface{}) {
 	if obj == nil {
 		return
@@ -635,13 +608,11 @@ func stripProviderManagedTagsFromAny(obj interface{}) {
 	tagsField.Set(reflect.ValueOf(userTags))
 }
 
-// ensureProviderManagedTagsWithPatchFunc checks and patches tags using the provided patch function
+// ensureProviderManagedTagsWithPatchFunc stamps provider-managed tags onto obj via patchFunc if missing.
 func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFunc func(obj T) error) (interface{}, error) {
-	// Use reflection to check if the object has a Tags field
 	objValue := reflect.ValueOf(obj)
 	for objValue.IsValid() && objValue.Kind() == reflect.Pointer {
 		if objValue.IsNil() {
-			// No object to patch
 			return nil, nil
 		}
 		objValue = objValue.Elem()
@@ -652,11 +623,9 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 
 	tagsField := objValue.FieldByName("Tags")
 	if !tagsField.IsValid() {
-		// Resource doesn't have tags, skip validation
 		return nil, nil
 	}
 
-	// Extract current tags from the resource
 	var currentTags []model.Tag
 	if tagsField.Kind() == reflect.Slice && !tagsField.IsNil() {
 		for i := 0; i < tagsField.Len(); i++ {
@@ -665,11 +634,9 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 		}
 	}
 
-	// Get expected provider-managed tags
 	runID := m.(nsxtClients).CommonConfig.contextID
 	expectedManagedTags := getProviderManagedDefaultTags(runID)
 
-	// Check if provider-managed tags are missing
 	needsPatch := false
 	for _, expectedTag := range expectedManagedTags {
 		found := false
@@ -693,7 +660,6 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 	}
 	log.Printf("[DEBUG] Provider-managed tag missing; patching object to add scope=%s", managedDefaultTagScope) //nolint:gosec
 
-	// Merge current user tags with expected provider-managed tags
 	userTags := make([]model.Tag, 0)
 	for _, tag := range currentTags {
 		if !isManagedDefaultTag(tag) {
@@ -701,23 +667,19 @@ func ensureProviderManagedTagsWithPatchFunc[T any](obj T, m interface{}, patchFu
 		}
 	}
 
-	// Create merged tags
 	mergedTags := mergeManagedDefaultAndUserTags(expectedManagedTags, userTags)
 
-	// Update the resource object's Tags field using reflection
 	if tagsField.CanSet() {
 		tagsField.Set(reflect.ValueOf(mergedTags))
 
-		// Patch the updated object to NSX API using the provided patch function
 		if patchFunc != nil {
 			err := patchFunc(obj)
 			if err != nil {
 				return nil, fmt.Errorf("failed to patch tags to NSX API: %w", err)
 			}
 			log.Printf("[DEBUG] Patched provider-managed tags successfully")
-			// Increment the Revision field to match the server-side increment from the PATCH.
-			// Without this, a subsequent apply would send the stale (pre-PATCH) revision and
-			// NSX would reject the request with error 500071.
+			// Bump Revision to match the server-side increment from the PATCH;
+			// without this the next apply sends a stale revision and NSX rejects it (error 500071).
 			revField := objValue.FieldByName("Revision")
 			if revField.IsValid() && revField.Kind() == reflect.Pointer && !revField.IsNil() {
 				revField.Elem().SetInt(revField.Elem().Int() + 1)
