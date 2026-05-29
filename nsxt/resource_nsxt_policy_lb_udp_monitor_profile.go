@@ -56,7 +56,12 @@ func resourceNsxtPolicyLBUdpMonitorProfilePatch(d *schema.ResourceData, m interf
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	receive := d.Get("receive").(string)
 	send := d.Get("send").(string)
 	fallCount := int64(d.Get("fall_count").(int))
@@ -107,13 +112,13 @@ func resourceNsxtPolicyLBUdpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("LBUdpMonitorProfile")
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }
 
 func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	converter := bindings.NewTypeConverter()
 
 	id := d.Id()
 	if id == "" {
@@ -122,16 +127,51 @@ func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interfa
 
 	sessionContext := getSessionContext(d, m)
 	client := cliLbMonitorProfilesClient(sessionContext, connector)
-	obj, err := client.Get(id)
+	var lbUDPMonitor *model.LBUdpMonitorProfile
+	var err error
+	if isCacheEnabledForRead(d) {
+		lbUDPMonitor, _, _, err = CacheAwareResourceRead[model.LBUdpMonitorProfile](
+			d,
+			m,
+			connector,
+			id,
+			"LBUdpMonitorProfile",
+			model.LBUdpMonitorProfileBindingType(),
+			func() (*model.LBUdpMonitorProfile, error) {
+				converter := bindings.NewTypeConverter()
+				obj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				baseObj, errs := converter.ConvertToGolang(obj, model.LBUdpMonitorProfileBindingType())
+				if errs != nil {
+					return nil, fmt.Errorf("LBMonitorProfile %s is not of type LBUdpMonitorProfile %s", id, errs[0])
+				}
+				typed := baseObj.(model.LBUdpMonitorProfile)
+				return &typed, nil
+			},
+			func(patchObj *model.LBUdpMonitorProfile) error {
+				return resourceNsxtPolicyLBUdpMonitorProfilePatch(d, m, id)
+			},
+		)
+	} else {
+		converter := bindings.NewTypeConverter()
+		obj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			baseObj, errs := converter.ConvertToGolang(obj, model.LBUdpMonitorProfileBindingType())
+			if errs != nil {
+				err = fmt.Errorf("LBMonitorProfile %s is not of type LBUdpMonitorProfile %s", id, errs[0])
+			} else {
+				typed := baseObj.(model.LBUdpMonitorProfile)
+				lbUDPMonitor = &typed
+			}
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBUdpMonitorProfile", id, err)
 	}
-
-	baseObj, errs := converter.ConvertToGolang(obj, model.LBUdpMonitorProfileBindingType())
-	if errs != nil {
-		return fmt.Errorf("LBMonitorProfile %s is not of type LBUdpMonitorProfile %s", id, errs[0])
-	}
-	lbUDPMonitor := baseObj.(model.LBUdpMonitorProfile)
 
 	d.Set("display_name", lbUDPMonitor.DisplayName)
 	d.Set("description", lbUDPMonitor.Description)
@@ -162,6 +202,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBUdpMonitorProfile", id, err)
 	}
+	InvalidateCacheForResourceType("LBUdpMonitorProfile")
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }

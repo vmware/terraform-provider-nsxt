@@ -177,7 +177,12 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.TransitGatewayAttachment{
 		DisplayName: &displayName,
@@ -205,6 +210,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	InvalidateCacheForResourceType("TransitGatewayAttachment")
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -227,7 +233,35 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 	if pathErr != nil {
 		return pathErr
 	}
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+	var obj *model.TransitGatewayAttachment
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.TransitGatewayAttachment](
+			d,
+			m,
+			connector,
+			id,
+			"TransitGatewayAttachment",
+			model.TransitGatewayAttachmentBindingType(),
+			func() (*model.TransitGatewayAttachment, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.TransitGatewayAttachment) error {
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "TransitGatewayAttachment", id, err)
 	}
@@ -241,7 +275,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 
 	setRouteAdvertisementTypesInSchema(d, obj.RouteAdvertisementRules)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, transitGatewayAttachmentSchema, "", nil)
 }
 
@@ -261,7 +295,12 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -288,6 +327,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
+	InvalidateCacheForResourceType("TransitGatewayAttachment")
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
