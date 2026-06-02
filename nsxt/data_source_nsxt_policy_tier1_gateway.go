@@ -22,7 +22,14 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
-			"path":         getPathSchema(),
+			"path": {
+				Type:          schema.TypeString,
+				Description:   "Policy path for this resource. Can be used as input to look up the gateway.",
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"id", "display_name"},
+				ValidateFunc:  validatePolicyPath(),
+			},
 			"edge_cluster_path": {
 				Type:         schema.TypeString,
 				Description:  "The path of the edge cluster connected to this Tier1 gateway",
@@ -37,6 +44,17 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+
+	// If path is provided as input, extract the ID from the last path segment
+	inputPath := d.Get("path").(string)
+	if inputPath != "" && d.Id() == "" {
+		extractedID := getPolicyIDFromPath(inputPath)
+		if extractedID == "" {
+			return fmt.Errorf("could not extract ID from path: %s", inputPath)
+		}
+		d.Set("id", extractedID)
+	}
+
 	objID := d.Get("id").(string)
 
 	if obj, ok := cacheAwareDataSourceReadByID[model.Tier1](d, m, connector, objID, resourceTypeTier1, model.Tier1BindingType()); ok {

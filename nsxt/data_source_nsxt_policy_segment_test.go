@@ -108,6 +108,31 @@ func testAccDataSourceNsxtPolicySegmentDeleteByName(name string) error {
 	return nil
 }
 
+func TestAccDataSourceNsxtPolicySegment_withAttributes(t *testing.T) {
+	name := getAccTestDataSourceName()
+	tzName := getOverlayTransportZoneName()
+	testResourceName := "data.nsxt_policy_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentWithAttributesTemplate(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "transport_zone_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "subnet.0.cidr"),
+					resource.TestCheckResourceAttrSet(testResourceName, "subnet.0.network"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicySegmentReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
@@ -118,4 +143,26 @@ data "nsxt_policy_segment" "test" {
 %s
   display_name = "%s"
 }`, context, name)
+}
+
+func testAccNsxtPolicySegmentWithAttributesTemplate(tzName string, name string) string {
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, false) + fmt.Sprintf(`
+resource "nsxt_policy_tier1_gateway" "test" {
+  display_name = "%s-t1"
+}
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.test.path
+
+  subnet {
+    cidr = "192.168.100.1/24"
+  }
+}
+
+data "nsxt_policy_segment" "test" {
+  display_name = nsxt_policy_segment.test.display_name
+}
+`, name, name)
 }
