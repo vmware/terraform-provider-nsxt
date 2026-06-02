@@ -365,11 +365,12 @@ func TestMockResourceNsxtPolicyTransitGatewayRedistributionConfig(t *testing.T) 
 		},
 	}
 
-	t.Run("Create with redistribution_config patches routing config via H-API", func(t *testing.T) {
+	t.Run("Create with redistribution_config patches routing config via direct API", func(t *testing.T) {
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
 			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, notFoundErr),
 			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			m.rc.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).Return(nil),
 			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
 			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
 			m.rc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayRoutingConfig{}, vapiErrors.NotFound{}),
@@ -428,7 +429,7 @@ func TestMockResourceNsxtPolicyTransitGatewayBgpConfig(t *testing.T) {
 	defer ctrl.Finish()
 	m := setupTransitGatewayMockFull(t, ctrl)
 
-	t.Run("Create with bgp_config includes ChildBgpRoutingConfig in H-API call", func(t *testing.T) {
+	t.Run("Create with bgp_config includes BGP in initial H-API OrgRoot call", func(t *testing.T) {
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
 			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, notFoundErr),
