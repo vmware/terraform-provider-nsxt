@@ -369,6 +369,20 @@ func TestUnitNsxt_nsxtParentPathResourceImporter(t *testing.T) {
 	assert.Equal(t, "/infra/domains/default", rd[0].Get("parent_path"))
 }
 
+func TestUnitNsxt_nsxtTGWRoutingChildResourceImporter(t *testing.T) {
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+		"parent_path": {Type: schema.TypeString, Optional: true, Computed: true},
+	}, map[string]interface{}{})
+	d.SetId("/orgs/default/projects/proj1/transit-gateways/tgw-1/routing/prefix-lists/pl-1")
+	rd, err := nsxtTGWRoutingChildResourceImporter(d, nil)
+	require.NoError(t, err)
+	require.Len(t, rd, 1)
+	assert.Equal(t, "pl-1", rd[0].Id())
+	// The intermediate "routing" singleton has no schema attribute, so it must be
+	// stripped for parent_path to match the Transit Gateway path users configure.
+	assert.Equal(t, "/orgs/default/projects/proj1/transit-gateways/tgw-1", rd[0].Get("parent_path"))
+}
+
 func TestUnitNsxt_getVpcParentsFromContext(t *testing.T) {
 	out := getVpcParentsFromContext(utl.SessionContext{ProjectID: "proj1", VPCID: "vpc1"})
 	assert.Equal(t, []string{utl.DefaultOrgID, "proj1", "vpc1"}, out)
