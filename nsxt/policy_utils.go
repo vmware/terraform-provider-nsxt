@@ -87,7 +87,7 @@ func getOrGenerateIDWithParent(d *schema.ResourceData, m interface{}, presenceCh
 
 	parentPath := d.Get("parent_path").(string)
 
-	exists, err := presenceChecker(getSessionContext(d, m), parentPath, id, connector)
+	exists, err := presenceChecker(getParentContext(d, m, parentPath), parentPath, id, connector)
 	if err != nil {
 		return "", err
 	}
