@@ -214,6 +214,56 @@ data "nsxt_policy_virtual_network_appliance_cluster_realization" "test" {
 `, edgeTransportNodeName, getOverlayTransportZoneName(), displayName)
 }
 
+// TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_noAdvancedConfig covers
+// the idempotency regression reported in bug 3713480: when advanced_configuration
+// is omitted from the manifest, NSX auto-populates server-side defaults for
+// high_availability_profile, overlay_transport_zone_path and
+// core_allocation_profile. A second plan must detect zero drift.
+func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_noAdvancedConfig(t *testing.T) {
+	testResourceName := "nsxt_policy_virtual_network_appliance_cluster.test"
+	displayName := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.1.1")
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterNoAdvancedConfigTemplate(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyVirtualNetworkApplianceClusterExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
+					resource.TestCheckResourceAttr(testResourceName, "appliance_form_factor", "MEDIUM"),
+					resource.TestCheckResourceAttr(testResourceName, "service_type", "VPC_SERVICES"),
+				),
+			},
+			{
+				// Idempotency check: re-planning with the same config (no
+				// advanced_configuration) must produce no changes even after
+				// NSX has auto-populated the block with server-side defaults.
+				Config:             testAccNsxtPolicyVirtualNetworkApplianceClusterNoAdvancedConfigTemplate(displayName),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyVirtualNetworkApplianceClusterNoAdvancedConfigTemplate(displayName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
+  display_name          = "%s"
+  description           = "Acceptance test cluster - no advanced configuration"
+  appliance_form_factor = "MEDIUM"
+  service_type          = "VPC_SERVICES"
+}
+`, displayName)
+}
+
 func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_coreAllocationProfile(t *testing.T) {
 	testResourceName := "nsxt_policy_virtual_network_appliance_cluster.test"
 	displayName := getAccTestResourceName()
