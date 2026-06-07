@@ -76,6 +76,43 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T
 		assert.Equal(t, vnaClusterName, d.Get("display_name"))
 		assert.Equal(t, formFactor, d.Get("appliance_form_factor"))
 		assert.Equal(t, svcType, d.Get("service_type"))
+		members := d.Get("member").([]interface{})
+		assert.Empty(t, members)
+	})
+
+	t.Run("by_id_with_members", func(t *testing.T) {
+		edgePath := "/infra/sites/default/enforcement-points/default/edge-transport-nodes/edge-1"
+		appPath := "/infra/sites/default/enforcement-points/default/virtual-network-appliance-clusters/vna-cluster-1/virtual-network-appliances/vna-1"
+		uniqueID := "unique-id-123"
+		modelWithMembers := model.VirtualNetworkApplianceCluster{
+			Id:          &vnaClusterID,
+			DisplayName: &vnaClusterName,
+			Path:        &vnaClusterPath,
+			Members: []model.VirtualNetworkApplianceClusterMember{
+				{
+					AppliancePath:         &appPath,
+					ApplianceUniqueId:     &uniqueID,
+					EdgeTransportNodePath: &edgePath,
+				},
+			},
+		}
+		mockSDK.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID).Return(modelWithMembers, nil)
+
+		ds := dataSourceNsxtPolicyVirtualNetworkApplianceCluster()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"id":                vnaClusterID,
+			"site_path":         vnaClusterSitePath,
+			"enforcement_point": vnaClusterEPID,
+		})
+
+		err := dataSourceNsxtPolicyVirtualNetworkApplianceClusterRead(d, m)
+		require.NoError(t, err)
+		members := d.Get("member").([]interface{})
+		require.Len(t, members, 1)
+		mem := members[0].(map[string]interface{})
+		assert.Equal(t, appPath, mem["appliance_path"])
+		assert.Equal(t, uniqueID, mem["appliance_unique_id"])
+		assert.Equal(t, edgePath, mem["edge_transport_node_path"])
 	})
 
 	t.Run("by_id_not_found", func(t *testing.T) {
