@@ -178,6 +178,116 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	// Verify credentials are preserved after Read when the API returns nil
+	// credentials (passwords are write-only and never included in GET).
+	t.Run("Read_preserves_credentials_when_api_returns_nil", func(t *testing.T) {
+		returnSV := vnaStructValue(model.VirtualNetworkAppliance{
+			Id:          &vnaID,
+			DisplayName: &vnaName,
+			Path:        &vnaPath,
+			Revision:    &vnaRevision,
+			// Credentials intentionally absent: API never returns passwords.
+		})
+		mockVNA.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID, vnaID).Return(returnSV, nil)
+
+		cliPass := "TestCli@Secret99"
+		rootPass := "TestRoot@Secret99"
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"cluster_path": vnaClusterPath,
+			"credentials": []interface{}{
+				map[string]interface{}{
+					"cli_password":   cliPass,
+					"root_password":  rootPass,
+					"audit_password": "",
+					"cli_username":   "",
+					"audit_username": "",
+				},
+			},
+		})
+		d.SetId(vnaID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyVirtualNetworkApplianceRead(d, m)
+		require.NoError(t, err)
+
+		creds := d.Get("credentials").([]interface{})
+		require.Len(t, creds, 1, "credentials block must be preserved in state")
+		credsMap := creds[0].(map[string]interface{})
+		assert.Equal(t, cliPass, credsMap["cli_password"], "cli_password must be preserved")
+		assert.Equal(t, rootPass, credsMap["root_password"], "root_password must be preserved")
+	})
+
+	// Verify credentials (including passwords) are preserved and computed
+	// usernames are updated when the API returns a Credentials object.
+	t.Run("Read_preserves_passwords_and_updates_usernames", func(t *testing.T) {
+		cliUsername := "admin"
+		auditUsername := "audit"
+		returnSV := vnaStructValue(model.VirtualNetworkAppliance{
+			Id:          &vnaID,
+			DisplayName: &vnaName,
+			Path:        &vnaPath,
+			Revision:    &vnaRevision,
+			Credentials: &model.VirtualNetworkApplianceCredential{
+				CliUsername:   &cliUsername,
+				AuditUsername: &auditUsername,
+			},
+		})
+		mockVNA.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID, vnaID).Return(returnSV, nil)
+
+		cliPass := "TestCli@Secret99"
+		rootPass := "TestRoot@Secret99"
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"cluster_path": vnaClusterPath,
+			"credentials": []interface{}{
+				map[string]interface{}{
+					"cli_password":   cliPass,
+					"root_password":  rootPass,
+					"audit_password": "",
+					"cli_username":   "",
+					"audit_username": "",
+				},
+			},
+		})
+		d.SetId(vnaID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyVirtualNetworkApplianceRead(d, m)
+		require.NoError(t, err)
+
+		creds := d.Get("credentials").([]interface{})
+		require.Len(t, creds, 1, "credentials block must be preserved in state")
+		credsMap := creds[0].(map[string]interface{})
+		assert.Equal(t, cliPass, credsMap["cli_password"], "cli_password must be preserved")
+		assert.Equal(t, rootPass, credsMap["root_password"], "root_password must be preserved")
+		assert.Equal(t, cliUsername, credsMap["cli_username"], "cli_username must be set from API response")
+		assert.Equal(t, auditUsername, credsMap["audit_username"], "audit_username must be set from API response")
+	})
+
+	// Verify that no credentials block is written to state when the API
+	// returns a Credentials object but no credentials are configured locally.
+	t.Run("Read_no_credentials_block_when_not_configured", func(t *testing.T) {
+		cliUsername := "admin"
+		returnSV := vnaStructValue(model.VirtualNetworkAppliance{
+			Id:          &vnaID,
+			DisplayName: &vnaName,
+			Path:        &vnaPath,
+			Revision:    &vnaRevision,
+			Credentials: &model.VirtualNetworkApplianceCredential{
+				CliUsername: &cliUsername,
+			},
+		})
+		mockVNA.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID, vnaID).Return(returnSV, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"cluster_path": vnaClusterPath,
+		})
+		d.SetId(vnaID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyVirtualNetworkApplianceRead(d, m)
+		require.NoError(t, err)
+
+		creds := d.Get("credentials").([]interface{})
+		assert.Empty(t, creds, "credentials block must not appear when not configured")
+	})
 }
 
 func TestMockResourceNsxtPolicyVirtualNetworkApplianceUpdate(t *testing.T) {
