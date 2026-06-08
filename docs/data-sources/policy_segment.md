@@ -61,5 +61,5 @@ In addition to arguments listed above, the following attributes are exported:
 * `connectivity_path` - The policy path of the connected Tier-0 or Tier-1 gateway.
 * `vlan_ids` - List of VLAN IDs configured on a VLAN-backed segment.
 * `subnet` - List of subnet configurations.
-  * `cidr` - Gateway IP address in CIDR format (e.g. `10.0.0.1/24`).
-  * `network` - Network CIDR derived from the gateway address and prefix length.
+    * `cidr` - Gateway IP address in CIDR format (e.g. `10.0.0.1/24`).
+    * `network` - Network CIDR derived from the gateway address and prefix length.
