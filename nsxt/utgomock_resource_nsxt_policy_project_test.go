@@ -189,7 +189,7 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 
-	t.Run("Read does not populate ipv6_blocks when NSX below 9.2", func(t *testing.T) {
+	t.Run("Read sets ipv6_blocks regardless of NSX version", func(t *testing.T) {
 		util.NsxVersion = "9.1.0"
 		defer func() { util.NsxVersion = "" }()
 
@@ -204,8 +204,9 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 
 		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
-		_, ok := d.GetOk("ipv6_blocks")
-		assert.False(t, ok)
+		blocks := d.Get("ipv6_blocks").([]interface{})
+		require.Len(t, blocks, 1)
+		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 
 	t.Run("Read not found clears ID", func(t *testing.T) {
