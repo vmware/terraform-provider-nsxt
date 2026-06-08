@@ -41,7 +41,7 @@ func resourceNsxtPolicyTransitGatewayCommunityList() *schema.Resource {
 				Required:    true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: validatePolicyBGPCommunity,
+					ValidateFunc: validateTransitGatewayBGPCommunity,
 				},
 			},
 		},

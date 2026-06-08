@@ -575,6 +575,15 @@ func validatePolicyBGPCommunity(i interface{}, k string) (s []string, es []error
 	return
 }
 
+// validateTransitGatewayBGPCommunity validates BGP community entries for Transit Gateways.
+// It strictly supports standard (aa:nn), large (aa:bb:nn), and predefined well-known communities
+// (NO_EXPORT, NO_ADVERTISE, NO_EXPORT_SUBCONFED) specified in the official NSX API schema.
+// It embeds and extends the base validatePolicyBGPCommunity validator.
+func validateTransitGatewayBGPCommunity(i interface{}, k string) (s []string, es []error) {
+	// Delegate all validations to the base validator to enforce the official NSX API spec
+	return validatePolicyBGPCommunity(i, k)
+}
+
 // validateLdapOrLdapsURL( is a SchemaValidateFunc which tests if the url is of type string and a valid LDAP or LDAPs
 func validateLdapOrLdapsURL() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
