@@ -404,6 +404,155 @@ var accTestVpcSubnet920SubnetDhcpv6Update = map[string]string{
 	"display_name": getAccTestResourceName(),
 }
 
+var accTestVpcSubnetDhcpv4ConfigCreate = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+var accTestVpcSubnetDhcpv4ConfigUpdate = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+func TestAccResourceNsxtVpcSubnet_subnetDhcpv4Config(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnetDhcpv4ConfigUpdate["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpv4Template(true, "DHCP_DEACTIVATED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv4ConfigCreate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv4ConfigCreate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpv4Template(false, "DHCP_DEACTIVATED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv4ConfigUpdate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv4ConfigUpdate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetSubnetDhcpv4Template(false, "DHCP_DEACTIVATED"),
+				PlanOnly: true,
+			},
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpv4Template(false, "DHCP_SERVER"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv4ConfigUpdate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv4ConfigUpdate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_SERVER),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.0", "192.168.240.11/26"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetSubnetDhcpv4Template(false, "DHCP_SERVER"),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+var accTestVpcSubnetDhcpDualStackConfigCreate = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+var accTestVpcSubnetDhcpDualStackConfigUpdate = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(true, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigCreate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigCreate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				PlanOnly: true,
+			},
+			{
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_SERVER),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.0", "192.168.240.11/26"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED"),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
 
@@ -426,6 +575,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -439,10 +589,15 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetSubnetDhcpv6Template(false),
+				PlanOnly: true,
 			},
 		},
 	})
@@ -693,20 +848,79 @@ func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool) string {
 resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "%s"
-  ip_addresses = ["192.168.240.0/26"]
+  ip_addresses = ["2001:db8:f100::/64"]
+  ip_address_type = "IPV6"
   access_mode  = "Isolated"
-
-  dhcp_config {
-    mode = "DHCP_SERVER"
-    dhcp_server_additional_config {
-      reserved_ip_ranges = ["192.168.240.40-192.168.240.60"]
-    }
-  }
 
   subnet_dhcpv6_config {
     mode                  = "%s"
     dns_server_preference = "%s"
   }
+
+  advanced_config {
+    connectivity_state    = "DISCONNECTED"
+    gateway_addresses     = ["2001:db8:f100::10/64"]
+    dhcp_server_addresses = ["2001:db8:f100::11/64"]
+  }
 }
 `, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], mode, dnsPref)
+}
+
+func testAccNsxtVpcSubnetSubnetDhcpv4Template(createFlow bool, dhcpMode string) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestVpcSubnetDhcpv4ConfigCreate
+	} else {
+		attrMap = accTestVpcSubnetDhcpv4ConfigUpdate
+	}
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name = "%s"
+  ip_addresses = ["192.168.240.0/26"]
+  access_mode  = "Isolated"
+
+  dhcp_config {
+    mode = "%s"
+  }
+
+  advanced_config {
+    connectivity_state    = "DISCONNECTED"
+    gateway_addresses     = ["192.168.240.10/26"]
+    dhcp_server_addresses = ["192.168.240.11/26"]
+  }
+}
+`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], dhcpMode)
+}
+
+func testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(createFlow bool, v4Mode string, v6Mode string) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestVpcSubnetDhcpDualStackConfigCreate
+	} else {
+		attrMap = accTestVpcSubnetDhcpDualStackConfigUpdate
+	}
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name = "%s"
+  ip_addresses = ["192.168.240.0/26", "2001:db8:f100::/64"]
+  ip_address_type = "IPV4_IPV6"
+  access_mode  = "Isolated"
+
+  dhcp_config {
+    mode = "%s"
+  }
+
+  subnet_dhcpv6_config {
+    mode = "%s"
+  }
+
+  advanced_config {
+    connectivity_state    = "DISCONNECTED"
+    gateway_addresses     = ["192.168.240.10/26", "2001:db8:f100::10/64"]
+    dhcp_server_addresses = ["192.168.240.11/26", "2001:db8:f100::11/64"]
+  }
+}
+`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], v4Mode, v6Mode)
 }
