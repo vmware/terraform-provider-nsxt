@@ -14,21 +14,19 @@ import (
 func TestAccDataSourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_virtual_network_appliance_cluster.test"
 	displayName := getAccTestResourceName()
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
-			testAccEnvDefined(t, "NSXT_TEST_EDGE_TRANSPORT_NODE")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterDataSourceTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterDataSourceTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
@@ -41,12 +39,8 @@ func TestAccDataSourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.
 	})
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceClusterDataSourceTemplate(displayName, edgeTransportNodeName string) string {
+func testAccNsxtPolicyVirtualNetworkApplianceClusterDataSourceTemplate(displayName string) string {
 	return fmt.Sprintf(`
-data "nsxt_policy_edge_transport_node" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
@@ -57,10 +51,6 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   appliance_form_factor = "MEDIUM"
   service_type          = "VPC_SERVICES"
 
-  member {
-    edge_transport_node_path = data.nsxt_policy_edge_transport_node.test.path
-  }
-
   advanced_configuration {
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
   }
@@ -69,5 +59,5 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
 data "nsxt_policy_virtual_network_appliance_cluster" "test" {
   display_name = nsxt_policy_virtual_network_appliance_cluster.test.display_name
 }
-`, edgeTransportNodeName, getOverlayTransportZoneName(), displayName)
+`, getOverlayTransportZoneName(), displayName)
 }

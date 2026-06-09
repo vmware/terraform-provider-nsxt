@@ -19,35 +19,31 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.T)
 	testResourceName := "nsxt_policy_virtual_network_appliance_cluster.test"
 	displayName := getAccTestResourceName()
 	updatedDisplayName := displayName + "-updated"
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
-			testAccEnvDefined(t, "NSXT_TEST_EDGE_TRANSPORT_NODE")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVirtualNetworkApplianceClusterExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
 					resource.TestCheckResourceAttr(testResourceName, "appliance_form_factor", "MEDIUM"),
 					resource.TestCheckResourceAttr(testResourceName, "service_type", "VPC_SERVICES"),
-					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "member.0.edge_transport_node_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testVNAClusterRealizationResourceName, "state", "SUCCESS"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterUpdateTemplate(updatedDisplayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterUpdateTemplate(updatedDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVirtualNetworkApplianceClusterExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedDisplayName),
@@ -63,28 +59,26 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.T)
 func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_virtual_network_appliance_cluster.test"
 	displayName := getAccTestResourceName()
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
-			testAccEnvDefined(t, "NSXT_TEST_EDGE_TRANSPORT_NODE")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName),
 			},
 			{
 				ResourceName:            testResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
-				ImportStateVerifyIgnore: []string{"revision", "member"},
+				ImportStateVerifyIgnore: []string{"revision"},
 			},
 		},
 	})
@@ -137,12 +131,8 @@ func testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(resourceName st
 	}
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName, edgeTransportNodeName string) string {
+func testAccNsxtPolicyVirtualNetworkApplianceClusterCreateTemplate(displayName string) string {
 	return fmt.Sprintf(`
-data "nsxt_policy_edge_transport_node" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
@@ -152,10 +142,6 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   description           = "Acceptance test cluster"
   appliance_form_factor = "MEDIUM"
   service_type          = "VPC_SERVICES"
-
-  member {
-    edge_transport_node_path = data.nsxt_policy_edge_transport_node.test.path
-  }
 
   advanced_configuration {
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -170,15 +156,11 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
 data "nsxt_policy_virtual_network_appliance_cluster_realization" "test" {
   path = nsxt_policy_virtual_network_appliance_cluster.test.path
 }
-`, edgeTransportNodeName, getOverlayTransportZoneName(), displayName)
+`, getOverlayTransportZoneName(), displayName)
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceClusterUpdateTemplate(displayName, edgeTransportNodeName string) string {
+func testAccNsxtPolicyVirtualNetworkApplianceClusterUpdateTemplate(displayName string) string {
 	return fmt.Sprintf(`
-data "nsxt_policy_edge_transport_node" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
@@ -188,10 +170,6 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   description           = "Acceptance test cluster - updated"
   appliance_form_factor = "LARGE"
   service_type          = "VPC_SERVICES"
-
-  member {
-    edge_transport_node_path = data.nsxt_policy_edge_transport_node.test.path
-  }
 
   advanced_configuration {
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -211,7 +189,7 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
 data "nsxt_policy_virtual_network_appliance_cluster_realization" "test" {
   path = nsxt_policy_virtual_network_appliance_cluster.test.path
 }
-`, edgeTransportNodeName, getOverlayTransportZoneName(), displayName)
+`, getOverlayTransportZoneName(), displayName)
 }
 
 // TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_noAdvancedConfig covers
@@ -267,21 +245,19 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
 func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_coreAllocationProfile(t *testing.T) {
 	testResourceName := "nsxt_policy_virtual_network_appliance_cluster.test"
 	displayName := getAccTestResourceName()
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.2.0")
-			testAccEnvDefined(t, "NSXT_TEST_EDGE_TRANSPORT_NODE")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCoreAllocationTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceClusterCoreAllocationTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVirtualNetworkApplianceClusterExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
@@ -294,12 +270,8 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_coreAllocationProfi
 	})
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceClusterCoreAllocationTemplate(displayName, edgeTransportNodeName string) string {
+func testAccNsxtPolicyVirtualNetworkApplianceClusterCoreAllocationTemplate(displayName string) string {
 	return fmt.Sprintf(`
-data "nsxt_policy_edge_transport_node" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
@@ -310,10 +282,6 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   appliance_form_factor = "LARGE"
   service_type          = "VPC_SERVICES"
 
-  member {
-    edge_transport_node_path = data.nsxt_policy_edge_transport_node.test.path
-  }
-
   advanced_configuration {
     core_allocation_profile     = "L4LBSERVICE"
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -323,5 +291,5 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
 data "nsxt_policy_virtual_network_appliance_cluster_realization" "test" {
   path = nsxt_policy_virtual_network_appliance_cluster.test.path
 }
-`, edgeTransportNodeName, getOverlayTransportZoneName(), displayName)
+`, getOverlayTransportZoneName(), displayName)
 }

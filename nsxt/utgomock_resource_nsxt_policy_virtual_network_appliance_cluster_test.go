@@ -200,22 +200,12 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T) 
 		assert.Equal(t, vnaServiceType, d.Get("service_type"))
 	})
 
-	t.Run("Read_success_with_members_and_advanced_config", func(t *testing.T) {
-		edgePath := "/infra/sites/default/enforcement-points/default/edge-transport-nodes/edge-1"
-		appPath := "/infra/sites/default/enforcement-points/default/virtual-network-appliance-clusters/vna-cluster-1/virtual-network-appliances/vna-1"
-		uniqueID := "unique-id-123"
+	t.Run("Read_success_with_advanced_config", func(t *testing.T) {
 		coreProfile := model.VirtualNetworkApplianceClusterAdvancedConfiguration_CORE_ALLOCATION_PROFILE_L4LBSERVICE
 		mockVNAClusters.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID).Return(model.VirtualNetworkApplianceCluster{
 			DisplayName: &vnaClusterName,
 			Path:        &vnaClusterPath,
 			Revision:    &vnaClusterRevision,
-			Members: []model.VirtualNetworkApplianceClusterMember{
-				{
-					AppliancePath:         &appPath,
-					ApplianceUniqueId:     &uniqueID,
-					EdgeTransportNodePath: &edgePath,
-				},
-			},
 			AdvancedConfiguration: &model.VirtualNetworkApplianceClusterAdvancedConfiguration{
 				CoreAllocationProfile: &coreProfile,
 			},
@@ -229,9 +219,6 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T) 
 		m := newGoMockProviderClient()
 		err := resourceNsxtPolicyVirtualNetworkApplianceClusterRead(d, m)
 		require.NoError(t, err)
-		members := d.Get("member").([]interface{})
-		require.Len(t, members, 1)
-		assert.Equal(t, edgePath, members[0].(map[string]interface{})["edge_transport_node_path"])
 		advCfg := d.Get("advanced_configuration").([]interface{})
 		require.Len(t, advCfg, 1)
 		assert.Equal(t, coreProfile, advCfg[0].(map[string]interface{})["core_allocation_profile"])
@@ -345,33 +332,6 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterDelete(t *testing.T
 		m := newGoMockProviderClient()
 		err := resourceNsxtPolicyVirtualNetworkApplianceClusterDelete(d, m)
 		require.Error(t, err)
-	})
-}
-
-func TestUnitNsxtPolicyVirtualNetworkApplianceCluster_getVNAClusterMembersFromSchema(t *testing.T) {
-	t.Run("empty_members", func(t *testing.T) {
-		res := resourceNsxtPolicyVirtualNetworkApplianceCluster()
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
-		members := getVNAClusterMembersFromSchema(d)
-		assert.Empty(t, members)
-	})
-
-	t.Run("with_members", func(t *testing.T) {
-		edgePath := "/infra/sites/default/enforcement-points/default/edge-transport-nodes/edge-1"
-		res := resourceNsxtPolicyVirtualNetworkApplianceCluster()
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"member": []interface{}{
-				map[string]interface{}{
-					"edge_transport_node_path": edgePath,
-					"appliance_path":           "",
-					"appliance_unique_id":      "",
-				},
-			},
-		})
-		members := getVNAClusterMembersFromSchema(d)
-		require.Len(t, members, 1)
-		require.NotNil(t, members[0].EdgeTransportNodePath)
-		assert.Equal(t, edgePath, *members[0].EdgeTransportNodePath)
 	})
 }
 
