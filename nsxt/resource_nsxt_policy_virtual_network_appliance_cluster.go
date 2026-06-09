@@ -124,8 +124,14 @@ func resourceNsxtPolicyVirtualNetworkApplianceCluster() *schema.Resource {
 				},
 			},
 			"advanced_configuration": {
-				Type:        schema.TypeList,
-				Optional:    true,
+				Type:     schema.TypeList,
+				Optional: true,
+				// Computed is required because NSX auto-populates this block with
+				// server-side defaults (e.g. high_availability_profile,
+				// overlay_transport_zone_path, core_allocation_profile) even when
+				// the user omits it. Without Computed, Terraform plans perpetual
+				// in-place updates to remove the server-populated values.
+				Computed:    true,
 				MaxItems:    1,
 				Description: "Advanced configuration for virtual network appliances in the cluster",
 				Elem: &schema.Resource{
@@ -145,8 +151,10 @@ func resourceNsxtPolicyVirtualNetworkApplianceCluster() *schema.Resource {
 							ValidateFunc: validatePolicyPath(),
 						},
 						"overlay_transport_zone_path": {
-							Type:         schema.TypeString,
-							Optional:     true,
+							Type:     schema.TypeString,
+							Optional: true,
+							// Computed because NSX auto-populates this field server-side.
+							Computed:     true,
 							Description:  "Overlay transport zone path associated with the VNA host switch and TEP",
 							ValidateFunc: validatePolicyPath(),
 						},
