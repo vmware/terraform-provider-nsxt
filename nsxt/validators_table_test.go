@@ -91,6 +91,46 @@ func TestUnitNsxt_validatePolicyBGPCommunity(t *testing.T) {
 	}
 }
 
+func TestUnitNsxt_validateTransitGatewayBGPCommunity(t *testing.T) {
+	cases := []struct {
+		name    string
+		value   interface{}
+		wantErr bool
+	}{
+		{"NO_EXPORT", "NO_EXPORT", false},
+		{"NO_ADVERTISE", "NO_ADVERTISE", false},
+		{"NO_EXPORT_SUBCONFED", "NO_EXPORT_SUBCONFED", false},
+		{"internet", "internet", true},
+		{"INTERNET", "INTERNET", true},
+		{"no-export", "no-export", true},
+		{"no_export", "no_export", true},
+		{"no-advertise", "no-advertise", true},
+		{"no_advertise", "no_advertise", true},
+		{"local-AS", "local-AS", true},
+		{"local-as", "local-as", true},
+		{"LOCAL_AS", "LOCAL_AS", true},
+		{"local_as", "local_as", true},
+		{"no-export-subconfed", "no-export-subconfed", true},
+		{"no_export_subconfed", "no_export_subconfed", true},
+		{"aa nn", "1:2", false},
+		{"aa bb nn", "1:2:3", false},
+		{"too few parts", "1", true},
+		{"too many parts", "1:2:3:4", true},
+		{"non numeric", "a:b", true},
+		{"wrong type", 99, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := validateTransitGatewayBGPCommunity(tc.value, "key")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+}
+
 func TestUnitNsxt_validateLdapOrLdapsURL(t *testing.T) {
 	v := validateLdapOrLdapsURL()
 	cases := []struct {
