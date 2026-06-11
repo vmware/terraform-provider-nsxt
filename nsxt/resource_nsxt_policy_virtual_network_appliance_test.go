@@ -17,12 +17,17 @@ func testAccVNAPreCheck(t *testing.T) {
 	testAccPreCheck(t)
 	testAccOnlyLocalManager(t)
 	testAccNSXVersion(t, "9.1.1")
-	testAccEnvDefined(t, "NSXT_TEST_EDGE_TRANSPORT_NODE")
 	testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 	testAccEnvDefined(t, "NSXT_TEST_MGT_NETWORK")
 	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_MANAGER")
 	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
 	testAccEnvDefined(t, "NSXT_TEST_DATASTORE_ID")
+}
+
+func testAccVNACredentialsPreCheck(t *testing.T) {
+	testAccVNAPreCheck(t)
+	testAccEnvDefined(t, "NSXT_TEST_VNA_CLI_PASSWORD")
+	testAccEnvDefined(t, "NSXT_TEST_VNA_ROOT_PASSWORD")
 }
 
 func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
@@ -31,7 +36,6 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 	testRealizationName := "data.nsxt_policy_virtual_network_appliance_realization.test"
 	displayName := getAccTestResourceName()
 	updatedDisplayName := displayName + "-updated"
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccVNAPreCheck(t) },
@@ -39,7 +43,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVirtualNetworkApplianceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
@@ -54,7 +58,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceUpdateTemplate(updatedDisplayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceUpdateTemplate(updatedDisplayName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVirtualNetworkApplianceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedDisplayName),
@@ -69,7 +73,6 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_virtual_network_appliance.test"
 	displayName := getAccTestResourceName()
-	edgeTransportNodeName := getEdgeTransportNodeName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccVNAPreCheck(t) },
@@ -77,7 +80,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importBasic(t *testing.T) 
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName, edgeTransportNodeName),
+				Config: testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -150,12 +153,8 @@ func testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(resourceName string) r
 	}
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName, edgeTransportNodeName string) string {
+func testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName string) string {
 	return fmt.Sprintf(`
-data "nsxt_policy_edge_transport_node" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
@@ -174,19 +173,15 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   appliance_form_factor = "MEDIUM"
   service_type          = "VPC_SERVICES"
 
-  member {
-    edge_transport_node_path = data.nsxt_policy_edge_transport_node.test.path
-  }
-
   advanced_configuration {
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
   }
 }
-`, edgeTransportNodeName, getOverlayTransportZoneName(), getComputeManagerName(), getComputeCollectionName(), displayName)
+`, getOverlayTransportZoneName(), getComputeManagerName(), getComputeCollectionName(), displayName)
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName, edgeTransportNodeName string) string {
-	return testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName, edgeTransportNodeName) + fmt.Sprintf(`
+func testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName string) string {
+	return testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName) + fmt.Sprintf(`
 resource "nsxt_policy_virtual_network_appliance" "test" {
   display_name = "%s"
   description  = "Acceptance test VNA"
@@ -229,8 +224,8 @@ data "nsxt_policy_virtual_network_appliance_realization" "test" {
 `, displayName, getVNAHostname(), getMgtNetworkID(), getDatastoreID())
 }
 
-func testAccNsxtPolicyVirtualNetworkApplianceUpdateTemplate(displayName, edgeTransportNodeName string) string {
-	return testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName, edgeTransportNodeName) + fmt.Sprintf(`
+func testAccNsxtPolicyVirtualNetworkApplianceUpdateTemplate(displayName string) string {
+	return testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName) + fmt.Sprintf(`
 resource "nsxt_policy_virtual_network_appliance" "test" {
   display_name = "%s"
   description  = "Acceptance test VNA - updated"
@@ -262,4 +257,82 @@ resource "nsxt_policy_virtual_network_appliance" "test" {
   }
 }
 `, displayName, getVNAHostname(), getMgtNetworkID(), getDatastoreID())
+}
+
+// TestAccResourceNsxtPolicyVirtualNetworkAppliance_credentialsDrift verifies
+// that adding a credentials block to an already-deployed VNA (update #1 in
+// bug 3715433) does not cause perpetual configuration drift. After the update
+// the plan must be a no-op.
+func TestAccResourceNsxtPolicyVirtualNetworkAppliance_credentialsDrift(t *testing.T) {
+	testResourceName := "nsxt_policy_virtual_network_appliance.test"
+	displayName := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccVNACredentialsPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: deploy VNA without credentials.
+				Config: testAccNsxtPolicyVirtualNetworkApplianceCreateTemplate(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyVirtualNetworkApplianceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "credentials.#", "0"),
+				),
+			},
+			{
+				// Step 2: add credentials to the existing VNA.
+				// The test framework automatically verifies idempotency after
+				// this step by confirming that a subsequent plan shows no
+				// changes (i.e. credentials are properly preserved in state).
+				Config: testAccNsxtPolicyVirtualNetworkApplianceWithCredentialsTemplate(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyVirtualNetworkApplianceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "credentials.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyVirtualNetworkApplianceWithCredentialsTemplate(displayName string) string {
+	return testAccNsxtPolicyVirtualNetworkApplianceClusterTemplate(displayName) + fmt.Sprintf(`
+resource "nsxt_policy_virtual_network_appliance" "test" {
+  display_name = "%s"
+  description  = "Acceptance test VNA"
+  cluster_path = nsxt_policy_virtual_network_appliance_cluster.test.path
+  hostname     = "%s"
+
+  credentials {
+    cli_password  = "%s"
+    root_password = "%s"
+  }
+
+  management_interface {
+    network_id = "%s"
+
+    ip_assignment {
+      dhcp_v4 = true
+    }
+  }
+
+  vm_deployment_config {
+    compute_manager_id          = data.nsxt_compute_manager.test.id
+    cluster_or_resource_pool_id = data.nsxt_compute_collection.test.cm_local_id
+    datastore_id                = "%s"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_virtual_network_appliance_realization" "test" {
+  path    = nsxt_policy_virtual_network_appliance.test.path
+  timeout = 5400
+
+  depends_on = [nsxt_policy_virtual_network_appliance.test]
+}
+`, displayName, getVNAHostname(), getVNACLIPassword(), getVNARootPassword(), getMgtNetworkID(), getDatastoreID())
 }

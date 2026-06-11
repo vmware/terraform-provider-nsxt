@@ -208,22 +208,28 @@ func getVNACredentialsFromSchema(creds interface{}) *model.VirtualNetworkApplian
 }
 
 func setVNACredentialsInSchema(d *schema.ResourceData, obj *model.VirtualNetworkApplianceCredential) error {
-	if obj == nil {
-		return nil
-	}
-	// Only update computed usernames if the credentials block was configured.
-	// Passwords are write-only and not returned by GET, so we preserve whatever
-	// the user set and only refresh the computed username fields.
+	// Passwords are write-only and never returned by GET. We must always call
+	// d.Set("credentials", …) when the block is present so that the passwords
+	// are written to the ResourceData writer and are therefore persisted to
+	// state. Simply returning nil (no-op) when obj is nil is insufficient:
+	// during an Update that *adds* the credentials block for the first time,
+	// Terraform places the planned passwords in the diff area of ResourceData
+	// (accessible via d.Get) but they are not yet in the writer. Without an
+	// explicit d.Set call, they are never transferred to the writer and are
+	// consequently lost from state, causing perpetual drift on every subsequent
+	// plan (bug 3715433).
 	c := d.Get("credentials").([]interface{})
 	if len(c) == 0 {
 		return nil
 	}
 	creds := c[0].(map[string]interface{})
-	if obj.AuditUsername != nil {
-		creds["audit_username"] = *obj.AuditUsername
-	}
-	if obj.CliUsername != nil {
-		creds["cli_username"] = *obj.CliUsername
+	if obj != nil {
+		if obj.AuditUsername != nil {
+			creds["audit_username"] = *obj.AuditUsername
+		}
+		if obj.CliUsername != nil {
+			creds["cli_username"] = *obj.CliUsername
+		}
 	}
 	return d.Set("credentials", []interface{}{creds})
 }
