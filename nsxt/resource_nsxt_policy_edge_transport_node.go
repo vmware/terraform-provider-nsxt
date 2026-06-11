@@ -353,6 +353,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				Description: "Appliance configuration",
 				MaxItems:    1,
 				Optional:    true,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allow_ssh_root_login": {
