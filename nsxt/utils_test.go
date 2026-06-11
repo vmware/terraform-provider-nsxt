@@ -148,6 +148,14 @@ func getEdgeHostname() string {
 	return name
 }
 
+func getVNACLIPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_CLI_PASSWORD")
+}
+
+func getVNARootPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_ROOT_PASSWORD")
+}
+
 func getHostTransportNodeName() string {
 	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
 }
