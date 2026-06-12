@@ -159,6 +159,69 @@ func TestMockResourceNsxtVpcSubnetRead(t *testing.T) {
 	})
 }
 
+func TestSuppressDhcpServerAddresses(t *testing.T) {
+	res := resourceNsxtVpcSubnet()
+
+	t.Run("IPv4 address with DHCP deactivated is suppressed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED,
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		suppressed := suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.0", "", "10.203.240.2/26", d)
+		assert.True(t, suppressed)
+	})
+
+	t.Run("IPv4 address with DHCP active is not suppressed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpConfig_MODE_SERVER,
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		suppressed := suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.0", "", "10.203.240.2/26", d)
+		assert.False(t, suppressed)
+	})
+
+	t.Run("IPv6 address with DHCPv6 deactivated is suppressed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_DEACTIVATED,
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		suppressed := suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.0", "", "fd00:240:2400::2/64", d)
+		assert.True(t, suppressed)
+	})
+
+	t.Run("IPv6 address with DHCPv6 active is not suppressed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_SERVER,
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		suppressed := suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.0", "", "fd00:240:2400::2/64", d)
+		assert.False(t, suppressed)
+	})
+
+	t.Run("List count change with deactivated DHCP is suppressed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED,
+		}}
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpv6Config_MODE_DEACTIVATED,
+		}}
+		data["advanced_config"] = []interface{}{map[string]interface{}{
+			"dhcp_server_addresses": []interface{}{"10.203.240.2/26", "fd00:240:2400::2/64"},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		// Set changed list in resource data
+		d.Set("advanced_config.0.dhcp_server_addresses", []interface{}{"10.203.240.2/26", "fd00:240:2400::2/64"})
+
+		suppressed := suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.#", "0", "2", d)
+		assert.True(t, suppressed)
+	})
+}
+
 func TestMockResourceNsxtVpcSubnetUpdate(t *testing.T) {
 	t.Run("Update success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
