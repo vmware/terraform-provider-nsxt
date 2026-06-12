@@ -824,3 +824,18 @@ func setPolicyKeyValueListForSchema(kvList []model.KeyValuePair) interface{} {
 	}
 	return kvIList
 }
+
+// Helper functions for safe string/int64 value extraction
+func getStringValue(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
+}
+
+func getInt64Value(ptr *int64) int64 {
+	if ptr == nil {
+		return 0
+	}
+	return *ptr
+}

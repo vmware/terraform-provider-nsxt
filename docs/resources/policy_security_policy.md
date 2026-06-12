@@ -90,6 +90,146 @@ resource "nsxt_policy_security_policy" "policy1" {
 }
 ```
 
+## Example Usage - Bare Metal Server Security Policy
+
+```hcl
+# Create BMS groups for policy application
+resource "nsxt_policy_group" "production_bms" {
+  display_name = "Production-BMS-Servers"
+  description  = "Production bare metal servers"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "environment|production"
+    }
+  }
+}
+
+resource "nsxt_policy_group" "bms_data_interfaces" {
+  display_name = "BMS-Data-Interfaces"
+  description  = "Bare metal server data plane interfaces"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServerInterface"
+      operator    = "EQUALS"
+      value       = "network-type|data-plane"
+    }
+  }
+}
+
+resource "nsxt_policy_group" "web_servers_bms" {
+  display_name = "Web-Servers-BMS"
+  description  = "Static group of web server BMS"
+
+  criteria {
+    external_id_expression {
+      member_type = "BareMetalServer"
+      external_ids = [
+        "71be0142-2ed1-1d53-9c60-5564cf4b7e2e",
+        "81be0142-2ed1-1d53-9c60-5564cf4b7e2f"
+      ]
+    }
+  }
+}
+
+# Security policy for BMS servers
+resource "nsxt_policy_security_policy" "bms_security_policy" {
+  display_name = "BMS-Security-Policy"
+  description  = "Security policy for bare metal servers"
+  category     = "Application"
+  stateful     = true
+  scope        = [nsxt_policy_group.production_bms.path]
+
+  rule {
+    display_name       = "allow_bms_internal"
+    description        = "Allow communication between BMS servers"
+    source_groups      = [nsxt_policy_group.production_bms.path]
+    destination_groups = [nsxt_policy_group.production_bms.path]
+    action             = "ALLOW"
+    services           = ["SSH", "HTTP", "HTTPS"]
+    logged             = true
+  }
+
+  rule {
+    display_name       = "allow_web_traffic"
+    description        = "Allow web traffic to BMS web servers"
+    destination_groups = [nsxt_policy_group.web_servers_bms.path]
+    action             = "ALLOW"
+    services           = ["HTTP", "HTTPS"]
+    logged             = true
+  }
+
+  rule {
+    display_name = "block_management_access"
+    description  = "Block management interface access"
+    scope        = [nsxt_policy_group.bms_data_interfaces.path]
+    action       = "DROP"
+    services     = ["SSH", "SNMP"]
+    logged       = true
+  }
+
+  rule {
+    display_name    = "default_deny"
+    description     = "Default deny rule for BMS"
+    action          = "DROP"
+    logged          = true
+    sequence_number = 1000
+  }
+}
+```
+
+## Example Usage - Mixed BMS and VM Policy
+
+```hcl
+# Mixed environment with both BMS and VMs
+resource "nsxt_policy_group" "all_web_servers" {
+  display_name = "All-Web-Servers"
+  description  = "Web servers across BMS and VMs"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "application|web-server"
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "VirtualMachine"
+      operator    = "EQUALS"
+      value       = "application|web-server"
+    }
+  }
+}
+
+resource "nsxt_policy_security_policy" "web_tier_policy" {
+  display_name = "Web-Tier-Policy"
+  description  = "Policy for web tier (BMS + VMs)"
+  category     = "Application"
+
+  rule {
+    display_name       = "allow_load_balancer"
+    description        = "Allow traffic from load balancer to all web servers"
+    source_groups      = [nsxt_policy_group.load_balancers.path]
+    destination_groups = [nsxt_policy_group.all_web_servers.path]
+    action             = "ALLOW"
+    services           = ["HTTP", "HTTPS"]
+  }
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl

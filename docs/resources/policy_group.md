@@ -119,7 +119,7 @@ resource "nsxt_policy_group" "bms_static" {
   }
 }
 
-# Dynamic BMS group using conditions
+# Dynamic BMS group using conditions  
 resource "nsxt_policy_group" "bms_dynamic" {
   display_name = "tf-bms-dynamic"
   description  = "Bare Metal Server group with dynamic membership"
@@ -296,7 +296,7 @@ The following arguments are supported:
         * `distinguished_name` (Required) LDAP distinguished name (DN). A valid fully qualified distinguished name should be provided here. This value is valid only if it matches to exactly 1 LDAP object on the LDAP server.
         * `domain_base_distinguished_name` (Required) Identity (Directory) domain base distinguished name. This is the base distinguished name for the domain where this identity group resides. (e.g. dc=example,dc=com)
         * `sid` (Optional) Identity (Directory) Group SID (security identifier). A security identifier (SID) is a unique value of variable length used to identify a trustee. This field is only populated for Microsoft Active Directory identity store.
-* `group_type` - (Optional) One of `IPAddress`, `ANTREA`, `BareMetalServer`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group. `BareMetalServer` group type requires NSX version 9.0.0 or higher.
+* `group_type` - (Optional) One of `IPAddress`, `ANTREA`, `BareMetalServer`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group. `BareMetalServer` group type requires NSX version 9.0.0 or higher. **IMPORTANT**: `group_type = "BareMetalServer"` is **REQUIRED** when using `BareMetalServer` or `BareMetalServerInterface` member types in criteria.
 
 ## Attributes Reference
 
