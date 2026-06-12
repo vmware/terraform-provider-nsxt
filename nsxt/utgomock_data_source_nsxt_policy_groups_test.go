@@ -13,8 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	projects "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 	"go.uber.org/mock/gomock"
+
+	projectsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects"
 )
 
 func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
@@ -97,5 +101,53 @@ func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
 
 		err := dataSourceNsxtPolicyGroupsRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("include shared groups", func(t *testing.T) {
+		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
+			Results: []nsxModel.Group{groupAPIResponse()},
+			Cursor:  nil,
+		}, nil)
+
+		mockShared := projectsmocks.NewMockSharedWithMeClient(ctrl)
+		originalShared := cliSharedWithMeClient
+		cliSharedWithMeClient = func(_ vapiProtocolClient.Connector) projects.SharedWithMeClient {
+			return mockShared
+		}
+		defer func() { cliSharedWithMeClient = originalShared }()
+
+		sharedGroupPath := "/infra/domains/default/groups/shared-group"
+		sharedGroupName := "shared-group"
+		resourceType := "Group"
+		mockShared.EXPECT().List("default", "project1", &resourceType).Return(nsxModel.SharedResourceListResult{
+			Results: []nsxModel.SharedResource{
+				{
+					DisplayName: &sharedGroupName,
+					ResourceObjects: []nsxModel.ResourceObject{
+						{
+							ResourcePath: &sharedGroupPath,
+						},
+					},
+				},
+			},
+		}, nil)
+
+		ds := dataSourceNsxtPolicyGroups()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"domain":                groupDomain,
+			"include_shared_groups": true,
+			"context": []interface{}{
+				map[string]interface{}{
+					"project_id":  "project1",
+					"from_global": false,
+				},
+			},
+		})
+
+		err := dataSourceNsxtPolicyGroupsRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		items := d.Get("items").(map[string]interface{})
+		assert.Equal(t, groupPath, items[groupDisplayName])
+		assert.Equal(t, sharedGroupPath, items[sharedGroupName])
 	})
 }

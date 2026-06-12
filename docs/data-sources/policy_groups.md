@@ -56,6 +56,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 * `domain` - (Optional) The domain this Group belongs to. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
+* `include_shared_groups` - (Optional) A boolean flag indicating whether to include groups shared with the project. Defaults to `false`. Only applicable when `context` is specified with a project or VPC context.
 
 ## Attributes Reference
 
