@@ -884,3 +884,20 @@ resource "nsxt_policy_shared_resource" "test" {
   }
 }`, context, name, projectPath, name, sharedResourcePath)
 }
+
+// withIdempotencyChecks inserts a PlanOnly step after every non-import,
+// non-plan-only step to verify the apply leaves no residual diff.
+func withIdempotencyChecks(steps []resource.TestStep) []resource.TestStep {
+	expanded := make([]resource.TestStep, 0, len(steps)*2)
+	for _, step := range steps {
+		expanded = append(expanded, step)
+		if step.ImportState || step.PlanOnly || step.Config == "" {
+			continue
+		}
+		expanded = append(expanded, resource.TestStep{
+			Config:   step.Config,
+			PlanOnly: true,
+		})
+	}
+	return expanded
+}

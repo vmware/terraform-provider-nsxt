@@ -24,7 +24,7 @@ func TestAccResourceNsxtEdgeTransportNode_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtEdgeTransportNodeCheckDestroy(state, displayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtEdgeTransportNodeCreateTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
@@ -68,7 +68,7 @@ func TestAccResourceNsxtEdgeTransportNode_basic(t *testing.T) {
 					"standard_host_switch.0.transport_zone_endpoint.0.transport_zone",
 				},
 			},
-		},
+		}),
 	})
 }
 
@@ -82,7 +82,7 @@ func TestAccResourceNsxtEdgeTransportNode_importBasic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtEdgeTransportNodeCheckDestroy(state, displayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtEdgeTransportNodeCreateTemplate(displayName),
 			},
@@ -99,7 +99,7 @@ func TestAccResourceNsxtEdgeTransportNode_importBasic(t *testing.T) {
 					"standard_host_switch.0.transport_zone_endpoint.0.transport_zone",
 				},
 			},
-		},
+		}),
 	})
 }
 
