@@ -72,6 +72,7 @@ func resourceNsxtPolicyVirtualNetworkApplianceCluster() *schema.Resource {
 			"appliance_form_factor": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				Description:  "Form factor for virtual network appliances in this cluster",
 				ValidateFunc: validation.StringInSlice(vnaClusterFormFactorValues, false),
 			},
