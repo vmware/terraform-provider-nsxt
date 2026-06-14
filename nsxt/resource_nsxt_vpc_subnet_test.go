@@ -448,6 +448,60 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 	})
 }
 
+var accTestVpcSubnet920DnsPrefCreateAttrs = map[string]string{
+	"display_name":     getAccTestResourceName(),
+	"description":      "terraform created",
+	"ipv4_subnet_size": "32",
+}
+
+var accTestVpcSubnet920DnsPrefUpdateAttrs = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+func TestAccResourceNsxtVpcSubnet920_dnsServerPreference(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnet920DnsPrefUpdateAttrs["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetDnsServerPreferenceTemplate("DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnet920DnsPrefCreateAttrs["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", "DHCP_SERVER"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetDnsServerPreferenceTemplate("PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnet920DnsPrefCreateAttrs["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_server_preference", "PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcSubnetDnsServerPreferenceMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnet920DnsPrefUpdateAttrs["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtVpcSubnet_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_vpc_subnet.test"
@@ -642,6 +696,33 @@ resource "nsxt_vpc_subnet" "test" {
   display_name = "%s"
   access_mode  = "Public"
 }`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"])
+}
+
+func testAccNsxtVpcSubnetDnsServerPreferenceTemplate(preference string) string {
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name = "%s"
+  description  = "%s"
+
+  ipv4_subnet_size = %s
+  access_mode      = "Public"
+
+  dhcp_config {
+    mode                  = "DHCP_SERVER"
+    dns_server_preference = "%s"
+  }
+}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnet920DnsPrefCreateAttrs["display_name"],
+		accTestVpcSubnet920DnsPrefCreateAttrs["description"], accTestVpcSubnet920DnsPrefCreateAttrs["ipv4_subnet_size"], preference)
+}
+
+func testAccNsxtVpcSubnetDnsServerPreferenceMinimalistic() string {
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name = "%s"
+  access_mode  = "Public"
+}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnet920DnsPrefUpdateAttrs["display_name"])
 }
 
 func testAccNsxtVpcSubnetReservedIPRangeTemplate() string {
