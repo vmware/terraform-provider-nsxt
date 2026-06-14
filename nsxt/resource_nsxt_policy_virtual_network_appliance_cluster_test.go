@@ -262,7 +262,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_coreAllocationProfi
 					testAccNsxtPolicyVirtualNetworkApplianceClusterExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_configuration.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "advanced_configuration.0.core_allocation_profile", "L4LBSERVICE"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_configuration.0.core_allocation_profile", "L4FORWARDING"),
 					resource.TestCheckResourceAttr(testVNAClusterRealizationResourceName, "state", "SUCCESS"),
 				),
 			},
@@ -283,7 +283,7 @@ resource "nsxt_policy_virtual_network_appliance_cluster" "test" {
   service_type          = "VPC_SERVICES"
 
   advanced_configuration {
-    core_allocation_profile     = "L4LBSERVICE"
+    core_allocation_profile     = "L4FORWARDING"
     overlay_transport_zone_path = data.nsxt_policy_transport_zone.test.path
   }
 }
