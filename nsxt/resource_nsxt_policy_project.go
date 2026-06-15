@@ -490,7 +490,9 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 		d.Set("quotas", obj.Limits)
 	}
 
-	d.Set("ipv6_blocks", obj.Ipv6Blocks)
+	if obj.Ipv6Blocks != nil {
+		d.Set("ipv6_blocks", obj.Ipv6Blocks)
+	}
 
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		// Set id_suffix if available
