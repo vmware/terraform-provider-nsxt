@@ -38,6 +38,8 @@ resource "nsxt_policy_nat_rule" "dnat1" {
 
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
+* `include_shared_services` - (Optional) Include services shared with the project (default `false`). Note: This is only applicable in project context (not supported in default space).
+* `built_in_only` - (Optional) Only include default built-in services (default `false`). Note: This is only applicable in project context (not supported in default space).
 
 ## Attributes Reference
 
