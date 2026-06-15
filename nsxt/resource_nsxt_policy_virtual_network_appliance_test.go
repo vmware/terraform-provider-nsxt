@@ -70,6 +70,43 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 	})
 }
 
+// TestAccResourceNsxtPolicyVirtualNetworkAppliance_importWithCredentials
+// reproduces the FVT scenario from bug 3715433: after importing a VNA that
+// was created with credentials, a subsequent plan must show no changes.
+// withImportIdempotencyChecks automatically appends the PlanOnly verification
+// step after the ImportState step.
+func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importWithCredentials(t *testing.T) {
+	testResourceName := "nsxt_policy_virtual_network_appliance.test"
+	displayName := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccVNACredentialsPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
+			// Step 1: Create VNA with credentials.
+			{
+				Config: testAccNsxtPolicyVirtualNetworkApplianceWithCredentialsTemplate(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyVirtualNetworkApplianceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "credentials.#", "1"),
+				),
+			},
+			// Step 2: Import the VNA. Credentials are write-only and not
+			// returned by GET, so exclude them from the import state check.
+			// withImportIdempotencyChecks inserts a PlanOnly step after this
+			// to assert the plan is empty — no +credentials drift (bug 3715433).
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+				ImportStateVerifyIgnore: []string{"credentials"},
+			},
+		}),
+	})
+}
+
 func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_virtual_network_appliance.test"
 	displayName := getAccTestResourceName()

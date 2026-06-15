@@ -288,6 +288,76 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceRead(t *testing.T) {
 		creds := d.Get("credentials").([]interface{})
 		assert.Empty(t, creds, "credentials block must not appear when not configured")
 	})
+
+	// Simulate the import path: the Importer seeds an empty credentials block
+	// before Read is called. Read must populate the block with NSX-returned
+	// usernames so that suppressIfEmptyPriorState can suppress the subsequent
+	// password diff and the plan shows zero drift (bug 3715433).
+	t.Run("Read_with_importer_seeded_block_writes_usernames_to_state", func(t *testing.T) {
+		cliUser := "admin"
+		auditUser := "audit"
+		returnSV := vnaStructValue(model.VirtualNetworkAppliance{
+			Id:          &vnaID,
+			DisplayName: &vnaName,
+			Path:        &vnaPath,
+			Revision:    &vnaRevision,
+			Credentials: &model.VirtualNetworkApplianceCredential{
+				CliUsername:   &cliUser,
+				AuditUsername: &auditUser,
+			},
+		})
+		mockVNA.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID, vnaID).Return(returnSV, nil)
+
+		// Seed an empty credentials block — exactly what the Importer does.
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"cluster_path": vnaClusterPath,
+			"credentials":  []interface{}{map[string]interface{}{}},
+		})
+		d.SetId(vnaID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyVirtualNetworkApplianceRead(d, m)
+		require.NoError(t, err)
+
+		credList := d.Get("credentials").([]interface{})
+		require.Len(t, credList, 1, "credentials block must be written when importer-seeded block is present")
+		creds := credList[0].(map[string]interface{})
+		assert.Equal(t, cliUser, creds["cli_username"], "cli_username must reflect NSX response")
+		assert.Equal(t, auditUser, creds["audit_username"], "audit_username must reflect NSX response")
+		assert.Equal(t, "", creds["cli_password"], "cli_password must remain empty (write-only)")
+		assert.Equal(t, "", creds["root_password"], "root_password must remain empty (write-only)")
+	})
+}
+
+func TestSuppressIfEmptyPriorState(t *testing.T) {
+	res := resourceNsxtPolicyVirtualNetworkAppliance()
+
+	// Build a ResourceData that simulates an existing (imported) resource:
+	// no credentials in state yet, resource ID is set.
+	existing := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"cluster_path": vnaClusterPath,
+	})
+	existing.SetId(vnaID)
+
+	// Build a ResourceData that simulates a new resource (no ID yet).
+	fresh := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"cluster_path": vnaClusterPath,
+	})
+	// fresh has no ID set.
+
+	// Existing resource, old state is empty: suppress (import scenario).
+	assert.True(t, suppressIfEmptyPriorState("cli_password", "", "VMware123!", existing),
+		"must suppress diff when old (state) is empty and resource exists (import)")
+	assert.True(t, suppressIfEmptyPriorState("root_password", "", "VMware123!", existing),
+		"must suppress diff when old (state) is empty and resource exists (import)")
+
+	// New resource (no ID), old state is empty: do not suppress so passwords
+	// are included in the Create diff.
+	assert.False(t, suppressIfEmptyPriorState("cli_password", "", "VMware123!", fresh),
+		"must not suppress diff for a new resource (no ID)")
+
+	// Non-empty old value: never suppress so password changes are applied.
+	assert.False(t, suppressIfEmptyPriorState("cli_password", "OldPass!", "NewPass!", existing),
+		"must not suppress diff when old (state) is non-empty")
 }
 
 func TestMockResourceNsxtPolicyVirtualNetworkApplianceUpdate(t *testing.T) {
