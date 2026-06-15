@@ -884,8 +884,10 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
-		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER && !util.NsxVersionHigherOrEqual("9.0.0") {
-			return fmt.Errorf("group_type %s requires NSX version 9.0.0 or higher", groupType)
+		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
+			if err := validateBMSVersionRequirement(); err != nil {
+				return err
+			}
 		}
 		obj.GroupType = groupTypes
 	}
@@ -1019,8 +1021,10 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
-		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER && !util.NsxVersionHigherOrEqual("9.0.0") {
-			return fmt.Errorf("group_type %s requires NSX version 9.0.0 or higher", groupType)
+		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
+			if err := validateBMSVersionRequirement(); err != nil {
+				return err
+			}
 		}
 		obj.GroupType = groupTypes
 	}

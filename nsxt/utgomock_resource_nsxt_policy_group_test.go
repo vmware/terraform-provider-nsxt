@@ -245,7 +245,7 @@ func TestMockResourceNsxtPolicyGroupBMSCreate(t *testing.T) {
 
 		err := resourceNsxtPolicyGroupCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "requires NSX version 9.0.0")
+		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
 	})
 
 	t.Run("BMS group_type create succeeds on NSX 9.0", func(t *testing.T) {
@@ -367,7 +367,7 @@ func TestMockResourceNsxtPolicyGroupBMSUpdate(t *testing.T) {
 
 		err := resourceNsxtPolicyGroupUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "requires NSX version 9.0.0")
+		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
 	})
 
 	t.Run("BMS group_type update succeeds on NSX 9.0", func(t *testing.T) {

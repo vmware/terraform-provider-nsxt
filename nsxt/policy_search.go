@@ -302,3 +302,19 @@ func searchMultitenancyResources(connector client.Connector, context utl.Session
 	}
 	return searchLM(context, connector, query)
 }
+
+// buildBareMetalTagsFilter builds a Lucene additionalQuery from tag_scope and tag schema fields
+func buildBareMetalTagsFilter(d *schema.ResourceData) *string {
+	var parts []string
+	if v, ok := d.GetOk("tag_scope"); ok {
+		parts = append(parts, "tags.scope:"+escapeSpecialCharacters(v.(string)))
+	}
+	if v, ok := d.GetOk("tag"); ok {
+		parts = append(parts, "tags.tag:"+escapeSpecialCharacters(v.(string)))
+	}
+	if len(parts) == 0 {
+		return nil
+	}
+	query := strings.Join(parts, " AND ")
+	return &query
+}

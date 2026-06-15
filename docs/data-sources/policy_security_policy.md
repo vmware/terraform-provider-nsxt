@@ -20,6 +20,33 @@ data "nsxt_policy_security_policy" "predefined" {
 }
 ```
 
+## Example Usage - Bare Metal Server Security Policies
+
+```hcl
+# Find BMS security policy by display name
+data "nsxt_policy_security_policy" "bms_policy" {
+  display_name = "BMS-Security-Policy"
+  category     = "Application"
+}
+
+# Use the policy path in other resources
+resource "nsxt_policy_predefined_security_policy" "bms_predefined" {
+  path         = data.nsxt_policy_security_policy.bms_policy.path
+  display_name = "BMS-Predefined-Policy"
+}
+
+# Find specific BMS policy by name pattern
+data "nsxt_policy_security_policy" "bms_production" {
+  display_name = "BMS-Production-Policy"
+  category     = "Application"
+}
+
+# Use the policy in other configurations
+output "bms_production_policy_path" {
+  value = data.nsxt_policy_security_policy.bms_production.path
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl
