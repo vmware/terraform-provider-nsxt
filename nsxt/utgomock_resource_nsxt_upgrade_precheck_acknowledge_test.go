@@ -133,6 +133,83 @@ func TestMockResourceNsxtUpgradePrecheckAcknowledgeCreate(t *testing.T) {
 		assert.NotEmpty(t, d.Id())
 	})
 
+	t.Run("Create success when precheck warning does not need acknowledgment", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockChecksInfo, _, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restore()
+
+		warningType := nsxModel.UpgradeCheckFailure_TYPE_WARNING
+		needsAck := false
+		acked := false
+		warnItem := precheckWarningItem(precheckID, acked)
+		warnItem.NeedsAck = &needsAck
+
+		gomock.InOrder(
+			// validatePrecheckIDs
+			mockChecksInfo.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(checksInfoResult(precheckID), nil),
+			// acknowledgePrecheckWarnings -> getPrecheckErrors (WARNING type)
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), &warningType, gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{warnItem},
+				}, nil,
+			),
+			// Acknowledge should NOT be called because NeedsAck is false
+			// Read -> getPrecheckErrors (WARNING type, same as acknowledgePrecheckWarnings)
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{},
+				}, nil,
+			),
+		)
+
+		res := resourceNsxtUpgradePrecheckAcknowledge()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPrecheckAcknowledgeData())
+
+		err := resourceNsxtUpgradePrecheckAcknowledgeCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+	})
+
+	t.Run("Create success when Acknowledge returns code 30976", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockChecksInfo, mockPreChecks, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restore()
+
+		warningType := nsxModel.UpgradeCheckFailure_TYPE_WARNING
+		needsAck := true
+		acked := false
+		warnItem := precheckWarningItem(precheckID, acked)
+		warnItem.NeedsAck = &needsAck
+
+		gomock.InOrder(
+			// validatePrecheckIDs
+			mockChecksInfo.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(checksInfoResult(precheckID), nil),
+			// acknowledgePrecheckWarnings -> getPrecheckErrors (WARNING type)
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), &warningType, gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{warnItem},
+				}, nil,
+			),
+			// acknowledge the warning but it returns error code 30976
+			mockPreChecks.EXPECT().Acknowledge(precheckID).Return(errors.New("Invalid pre-check id provided (code 30976)")),
+			// Read -> getPrecheckErrors (WARNING type, same as acknowledgePrecheckWarnings)
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{},
+				}, nil,
+			),
+		)
+
+		res := resourceNsxtUpgradePrecheckAcknowledge()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPrecheckAcknowledgeData())
+
+		err := resourceNsxtUpgradePrecheckAcknowledgeCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+	})
+
 	t.Run("Create fails when precheck ID invalid", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
