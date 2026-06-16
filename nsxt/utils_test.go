@@ -244,6 +244,30 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 	}
 }
 
+// testAccNsxtExtraCoverage skips a test unless NSXT_TEST_EXTRA_COVERAGE is set.
+//
+// Apply this guard to tests that are expensive to run and cover scenarios that
+// are already exercised by a sibling test in the same file, or that target a
+// resource/data-source whose implementation has been stable for a long time.
+// Typical candidates:
+//
+//   - Import-only variants (_importBasic) when a _basic test already deploys
+//     the same resource and the import code path is not under active change.
+//   - IPv6 / protocol-variant tests (_withV6, _withIPv6) when a non-IPv6
+//     sibling test covers the same create/update/read lifecycle.
+//   - Data-source tests that use an identical Terraform config to another
+//     test in the same file and differ only in their Check assertions.
+//   - Any test whose execution time is unusually long (>5 min) and whose
+//     resource has had no functional changes in the past 3–6 months.
+//
+// Tests guarded by this helper still run in periodic CI jobs where
+// NSXT_TEST_EXTRA_COVERAGE=true is set, so coverage is not lost permanently.
+func testAccNsxtExtraCoverage(t *testing.T) {
+	if os.Getenv("NSXT_TEST_EXTRA_COVERAGE") == "" {
+		t.Skipf("set NSXT_TEST_EXTRA_COVERAGE to run extra-coverage tests")
+	}
+}
+
 func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
