@@ -225,6 +225,11 @@ func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionC
 	return searchByContext(connector, context, query, additionalQuery)
 }
 
+func listInventoryResourcesByType(connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s", resourceType)
+	return searchLM(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+}
+
 func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 	if additionalQuery != nil && *additionalQuery != "" {
 		*query = *query + " AND " + *additionalQuery
@@ -298,4 +303,20 @@ func searchMultitenancyResources(connector client.Connector, context utl.Session
 		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", utl.DefaultOrgID, context.ProjectID)
 	}
 	return searchLM(connector, query)
+}
+
+// buildBareMetalTagsFilter builds a Lucene additionalQuery from tag_scope and tag schema fields
+func buildBareMetalTagsFilter(d *schema.ResourceData) *string {
+	var parts []string
+	if v, ok := d.GetOk("tag_scope"); ok {
+		parts = append(parts, "tags.scope:"+escapeSpecialCharacters(v.(string)))
+	}
+	if v, ok := d.GetOk("tag"); ok {
+		parts = append(parts, "tags.tag:"+escapeSpecialCharacters(v.(string)))
+	}
+	if len(parts) == 0 {
+		return nil
+	}
+	query := strings.Join(parts, " AND ")
+	return &query
 }
