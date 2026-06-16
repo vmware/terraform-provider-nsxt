@@ -1656,7 +1656,7 @@ resource "nsxt_policy_group" "test" {
 }`, name)
 }
 
-func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
+func TestAccResourceNsxtPolicyBMSStaticGroup(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
@@ -1664,6 +1664,7 @@ func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -1672,7 +1673,7 @@ func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupBMSStaticCreateTemplate(name),
+				Config: testAccNsxtPolicyBMSStaticGroupCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -1689,7 +1690,7 @@ func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGroupBMSStaticUpdateTemplate(updatedName),
+				Config: testAccNsxtPolicyBMSStaticGroupUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -1715,7 +1716,7 @@ func TestAccResourceNsxtPolicyGroup_bmsStaticGroup(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
+func TestAccResourceNsxtPolicyBMSDynamicGroup(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
@@ -1723,6 +1724,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -1731,7 +1733,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupBMSDynamicCreateTemplate(name),
+				Config: testAccNsxtPolicyBMSDynamicGroupCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -1749,7 +1751,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGroupBMSDynamicUpdateTemplate(updatedName),
+				Config: testAccNsxtPolicyBMSDynamicGroupUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -1771,7 +1773,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicGroup(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
+func TestAccResourceNsxtPolicyBMSDynamicInterfaceGroup(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
@@ -1779,6 +1781,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
@@ -1787,7 +1790,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupBMSInterfaceDynamicTemplate(name),
+				Config: testAccNsxtPolicyBMSDynamicInterfaceGroupTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -1805,7 +1808,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
 			{
 				// Update: change the interface Tag value, add OR conjunction, and a second
 				// criteria on BareMetalServer — exercises mixed interface/server criteria.
-				Config: testAccNsxtPolicyGroupBMSInterfaceUpdateTemplate(updatedName),
+				Config: testAccNsxtPolicyBMSDynamicInterfaceGroupUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -1832,7 +1835,7 @@ func TestAccResourceNsxtPolicyGroup_bmsDynamicInterfaceGroup(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyGroupBMSStaticCreateTemplate(name string) string {
+func testAccNsxtPolicyBMSStaticGroupCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -1849,7 +1852,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupBMSStaticUpdateTemplate(name string) string {
+func testAccNsxtPolicyBMSStaticGroupUpdateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -1877,7 +1880,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupBMSDynamicCreateTemplate(name string) string {
+func testAccNsxtPolicyBMSDynamicGroupCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -1902,7 +1905,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupBMSDynamicUpdateTemplate(name string) string {
+func testAccNsxtPolicyBMSDynamicGroupUpdateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -1934,7 +1937,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupBMSInterfaceDynamicTemplate(name string) string {
+func testAccNsxtPolicyBMSDynamicInterfaceGroupTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -1953,7 +1956,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupBMSInterfaceUpdateTemplate(name string) string {
+func testAccNsxtPolicyBMSDynamicInterfaceGroupUpdateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"

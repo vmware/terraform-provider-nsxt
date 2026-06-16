@@ -351,6 +351,14 @@ func getTestVCThumbprint() string {
 	return os.Getenv("NSXT_TEST_VC_THUMBPRINT")
 }
 
+func getTestBMSServerID() string {
+	return os.Getenv("NSXT_TEST_BMS_SERVER")
+}
+
+func getTestBMSInterfaceID() string {
+	return os.Getenv("NSXT_TEST_BMS_INTERFACE")
+}
+
 func testAccTestVCCredentials(t *testing.T) {
 	if getTestVCUsername() == "" || getTestVCPassword() == "" || getTestVCIPAddress() == "" || getTestVCThumbprint() == "" {
 		t.Skipf("This test requires a vCenter configuration environment")
