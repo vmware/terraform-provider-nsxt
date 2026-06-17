@@ -164,50 +164,6 @@ func (c *localEndpointClient) Get(connector client.Connector, id string) (model.
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
-// List retrieves a list of IPSecVpnLocalEndpoint objects for the specified gateway, service, and locale configuration.
-// Note: We don't expect pagination to be relevant here.
-func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpnLocalEndpoint, error) {
-	boolFalse := false
-	var cursor string
-	var result model.IPSecVpnLocalEndpointListResult
-	var err error
-	if c.isT0 {
-		if len(c.localeServiceID) > 0 {
-			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
-			if client == nil {
-				return nil, fmt.Errorf("unsupported client type")
-			}
-			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
-		} else {
-			client := cliTier0IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
-			if client == nil {
-				return nil, fmt.Errorf("unsupported client type")
-			}
-			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
-		}
-
-	} else {
-		if len(c.localeServiceID) > 0 {
-			if c.sessionContext.ClientType == utl.Multitenancy {
-				return nil, fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN local endpoints")
-			}
-			client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
-			if client == nil {
-				return nil, fmt.Errorf("unsupported client type")
-			}
-			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
-		} else {
-			client := cliTier1IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
-			if client == nil {
-				return nil, fmt.Errorf("unsupported client type")
-			}
-			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
-		}
-	}
-
-	return result.Results, err
-}
-
 func (c *localEndpointClient) Patch(connector client.Connector, id string, obj model.IPSecVpnLocalEndpoint) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {

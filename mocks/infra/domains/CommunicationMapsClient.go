@@ -92,21 +92,6 @@ func (mr *MockCommunicationMapsClientMockRecorder) Patch(domainIdParam, communic
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockCommunicationMapsClient)(nil).Patch), domainIdParam, communicationMapIdParam, communicationMapParam)
 }
 
-// Revise mocks base method.
-func (m *MockCommunicationMapsClient) Revise(domainIdParam, communicationMapIdParam string, communicationMapParam model.CommunicationMap, anchorPathParam, operationParam *string) (model.CommunicationMap, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Revise", domainIdParam, communicationMapIdParam, communicationMapParam, anchorPathParam, operationParam)
-	ret0, _ := ret[0].(model.CommunicationMap)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Revise indicates an expected call of Revise.
-func (mr *MockCommunicationMapsClientMockRecorder) Revise(domainIdParam, communicationMapIdParam, communicationMapParam, anchorPathParam, operationParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revise", reflect.TypeOf((*MockCommunicationMapsClient)(nil).Revise), domainIdParam, communicationMapIdParam, communicationMapParam, anchorPathParam, operationParam)
-}
-
 // Update mocks base method.
 func (m *MockCommunicationMapsClient) Update(domainIdParam, communicationMapIdParam string, communicationMapParam model.CommunicationMap) (model.CommunicationMap, error) {
 	m.ctrl.T.Helper()

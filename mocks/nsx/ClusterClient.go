@@ -37,20 +37,6 @@ func (m *MockClusterClient) EXPECT() *MockClusterClientMockRecorder {
 	return m.recorder
 }
 
-// Backuptoremote mocks base method.
-func (m *MockClusterClient) Backuptoremote(frameTypeParam *string, siteIdParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Backuptoremote", frameTypeParam, siteIdParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Backuptoremote indicates an expected call of Backuptoremote.
-func (mr *MockClusterClientMockRecorder) Backuptoremote(frameTypeParam, siteIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Backuptoremote", reflect.TypeOf((*MockClusterClient)(nil).Backuptoremote), frameTypeParam, siteIdParam)
-}
-
 // Create mocks base method.
 func (m *MockClusterClient) Create(targetNodeIdParam string, targetUriParam string) error {
 	m.ctrl.T.Helper()
@@ -94,35 +80,6 @@ func (mr *MockClusterClientMockRecorder) Get() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockClusterClient)(nil).Get))
 }
 
-// Get0 mocks base method.
-func (m *MockClusterClient) Get0(nodeIdParam string) (model.ClusterNodeInfo, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get0", nodeIdParam)
-	ret0, _ := ret[0].(model.ClusterNodeInfo)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get0 indicates an expected call of Get0.
-func (mr *MockClusterClientMockRecorder) Get0(nodeIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get0", reflect.TypeOf((*MockClusterClient)(nil).Get0), nodeIdParam)
-}
-
-// Get1 mocks base method.
-func (m *MockClusterClient) Get1(targetNodeIdParam string, targetUriParam string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get1", targetNodeIdParam, targetUriParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Get1 indicates an expected call of Get1.
-func (mr *MockClusterClientMockRecorder) Get1(targetNodeIdParam, targetUriParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get1", reflect.TypeOf((*MockClusterClient)(nil).Get1), targetNodeIdParam, targetUriParam)
-}
-
 // Joincluster mocks base method.
 func (m *MockClusterClient) Joincluster(joinClusterParametersParam model.JoinClusterParameters) (model.ClusterConfiguration, error) {
 	m.ctrl.T.Helper()
@@ -151,20 +108,6 @@ func (m *MockClusterClient) Removenode(nodeIdParam string, forceParam *string, g
 func (mr *MockClusterClientMockRecorder) Removenode(nodeIdParam, forceParam, gracefulShutdownParam, ignoreRepositoryIpCheckParam interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Removenode", reflect.TypeOf((*MockClusterClient)(nil).Removenode), nodeIdParam, forceParam, gracefulShutdownParam, ignoreRepositoryIpCheckParam)
-}
-
-// Summarizeinventorytoremote mocks base method.
-func (m *MockClusterClient) Summarizeinventorytoremote() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Summarizeinventorytoremote")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Summarizeinventorytoremote indicates an expected call of Summarizeinventorytoremote.
-func (mr *MockClusterClientMockRecorder) Summarizeinventorytoremote() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Summarizeinventorytoremote", reflect.TypeOf((*MockClusterClient)(nil).Summarizeinventorytoremote))
 }
 
 // Update mocks base method.

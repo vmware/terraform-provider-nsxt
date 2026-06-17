@@ -44,22 +44,6 @@ func (c LdapIdentitySourcesClientContext) Delete(ldapIdentitySourceIdParam strin
 	return err
 }
 
-func (c LdapIdentitySourcesClientContext) Fetchcertificate(identitySourceLdapServerEndpointParam model0.IdentitySourceLdapServerEndpoint) (model0.PeerCertificateChain, error) {
-	var err error
-	var obj model0.PeerCertificateChain
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.LdapIdentitySourcesClient)
-		obj, err = client.Fetchcertificate(identitySourceLdapServerEndpointParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
 func (c LdapIdentitySourcesClientContext) Get(ldapIdentitySourceIdParam string) (*vapiData_.StructValue, error) {
 	var obj *vapiData_.StructValue
 	var err error
@@ -79,38 +63,6 @@ func (c LdapIdentitySourcesClientContext) Get(ldapIdentitySourceIdParam string) 
 	return obj, err
 }
 
-func (c LdapIdentitySourcesClientContext) List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.LdapIdentitySourceListResult, error) {
-	var err error
-	var obj model0.LdapIdentitySourceListResult
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.LdapIdentitySourcesClient)
-		obj, err = client.List(cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
-func (c LdapIdentitySourcesClientContext) Probe(ldapIdentitySourceIdParam string) (model0.LdapIdentitySourceProbeResults, error) {
-	var err error
-	var obj model0.LdapIdentitySourceProbeResults
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.LdapIdentitySourcesClient)
-		obj, err = client.Probe(ldapIdentitySourceIdParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
 func (c LdapIdentitySourcesClientContext) Probeidentitysource(ldapIdentitySourceParam *vapiData_.StructValue) (model0.LdapIdentitySourceProbeResults, error) {
 	var err error
 	var obj model0.LdapIdentitySourceProbeResults
@@ -120,22 +72,6 @@ func (c LdapIdentitySourcesClientContext) Probeidentitysource(ldapIdentitySource
 	case utl.Local:
 		client := c.Client.(client0.LdapIdentitySourcesClient)
 		obj, err = client.Probeidentitysource(ldapIdentitySourceParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
-func (c LdapIdentitySourcesClientContext) Probeldapserver(identitySourceLdapServerParam model0.IdentitySourceLdapServer) (model0.IdentitySourceLdapServerProbeResult, error) {
-	var err error
-	var obj model0.IdentitySourceLdapServerProbeResult
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.LdapIdentitySourcesClient)
-		obj, err = client.Probeldapserver(identitySourceLdapServerParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

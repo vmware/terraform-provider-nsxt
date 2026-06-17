@@ -33,20 +33,6 @@ func (m *MockUpgradeClient) EXPECT() *MockUpgradeClientMockRecorder {
 	return m.recorder
 }
 
-// Abortpreupgradechecks mocks base method.
-func (m *MockUpgradeClient) Abortpreupgradechecks() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Abortpreupgradechecks")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Abortpreupgradechecks indicates an expected call of Abortpreupgradechecks.
-func (mr *MockUpgradeClientMockRecorder) Abortpreupgradechecks() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Abortpreupgradechecks", reflect.TypeOf((*MockUpgradeClient)(nil).Abortpreupgradechecks))
-}
-
 // Executepostupgradechecks mocks base method.
 func (m *MockUpgradeClient) Executepostupgradechecks(componentTypeParam string) error {
 	m.ctrl.T.Helper()

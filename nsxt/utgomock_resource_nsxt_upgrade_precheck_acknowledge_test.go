@@ -78,7 +78,7 @@ func setupPrecheckAcknowledgeMocks(ctrl *gomock.Controller) (
 	}
 
 	origPreChecks := cliPreUpgradeChecksClient
-	cliPreUpgradeChecksClient = func(_ vapiProtocolClient.Connector) upgrade.PreUpgradeChecksClient {
+	cliPreUpgradeChecksClient = func(_ vapiProtocolClient.Connector) precheckAcknowledgeOps {
 		return mockPreChecks
 	}
 

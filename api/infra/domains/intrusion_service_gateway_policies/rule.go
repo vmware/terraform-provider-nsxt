@@ -34,7 +34,9 @@ func (c IntrusionServiceGatewayRuleClientContext) Get(domainIdParam string, poli
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Get(string, string, string) (model0.IdsRule, error)
+		})
 		obj, err = client.Get(domainIdParam, policyIdParam, ruleIdParam)
 		if err != nil {
 			return obj, err
@@ -52,7 +54,9 @@ func (c IntrusionServiceGatewayRuleClientContext) Delete(domainIdParam string, p
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string) error
+		})
 		err = client.Delete(domainIdParam, policyIdParam, ruleIdParam)
 
 	default:
@@ -67,7 +71,9 @@ func (c IntrusionServiceGatewayRuleClientContext) Patch(domainIdParam string, po
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, model0.IdsRule) error
+		})
 		err = client.Patch(domainIdParam, policyIdParam, ruleIdParam, idsRuleParam)
 
 	default:
@@ -83,7 +89,9 @@ func (c IntrusionServiceGatewayRuleClientContext) Update(domainIdParam string, p
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, model0.IdsRule) (model0.IdsRule, error)
+		})
 		obj, err = client.Update(domainIdParam, policyIdParam, ruleIdParam, idsRuleParam)
 
 	default:
@@ -99,7 +107,9 @@ func (c IntrusionServiceGatewayRuleClientContext) List(domainIdParam string, pol
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			List(string, string, *string, *bool, *string, *int64, *bool, *string) (model0.IdsRuleListResult, error)
+		})
 		obj, err = client.List(domainIdParam, policyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

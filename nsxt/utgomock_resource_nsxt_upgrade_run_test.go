@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/plan"
@@ -64,7 +63,7 @@ func setupUpgradeRunMocks(ctrl *gomock.Controller) (
 	mockGroupStatus := upgrademocks.NewMockUpgradeUnitGroupsStatusClient(ctrl)
 
 	origGroups := cliUpgradeUnitGroupsClient
-	cliUpgradeUnitGroupsClient = func(_ vapiProtocolClient.Connector) upgrade.UpgradeUnitGroupsClient {
+	cliUpgradeUnitGroupsClient = func(_ vapiProtocolClient.Connector) upgradeGroupOps {
 		return mockGroups
 	}
 
@@ -74,7 +73,7 @@ func setupUpgradeRunMocks(ctrl *gomock.Controller) (
 	}
 
 	origPlan := cliUpgradePlanClient
-	cliUpgradePlanClient = func(_ vapiProtocolClient.Connector) upgrade.PlanClient {
+	cliUpgradePlanClient = func(_ vapiProtocolClient.Connector) upgradePlanOps {
 		return mockPlan
 	}
 
@@ -84,7 +83,7 @@ func setupUpgradeRunMocks(ctrl *gomock.Controller) (
 	}
 
 	origUpgrade := cliUpgradeClient
-	cliUpgradeClient = func(_ vapiProtocolClient.Connector) nsx.UpgradeClient {
+	cliUpgradeClient = func(_ vapiProtocolClient.Connector) upgradeOps {
 		return mockUpgrade
 	}
 

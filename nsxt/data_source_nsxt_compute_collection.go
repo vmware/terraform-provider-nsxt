@@ -8,11 +8,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+
+	fabricapi "github.com/vmware/terraform-provider-nsxt/api/nsx/fabric"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliComputeCollectionsClient = fabric.NewComputeCollectionsClient
+var cliComputeCollectionsClient = func(sessionContext utl.SessionContext, connector vapiProtocolClient.Connector) *fabricapi.ComputeCollectionClientContext {
+	return fabricapi.NewComputeCollectionsClient(sessionContext, connector)
+}
 
 func dataSourceNsxtComputeCollection() *schema.Resource {
 	return &schema.Resource{
@@ -49,7 +54,7 @@ func nullIfEmpty(s string) *string {
 
 func dataSourceNsxtComputeCollectionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cliComputeCollectionsClient(connector)
+	client := cliComputeCollectionsClient(getSessionContext(d, m), connector)
 	objID := d.Get("id").(string)
 
 	objName := nullIfEmpty(d.Get("display_name").(string))

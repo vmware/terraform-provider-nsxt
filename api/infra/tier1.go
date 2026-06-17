@@ -44,7 +44,9 @@ func (c Tier1ClientContext) Get(tier1IdParam string) (model0.Tier1, error) {
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier1sClient)
+		client := c.Client.(interface {
+			Get(string) (model0.Tier1, error)
+		})
 		obj, err = client.Get(tier1IdParam)
 		if err != nil {
 			return obj, err
@@ -61,7 +63,9 @@ func (c Tier1ClientContext) Get(tier1IdParam string) (model0.Tier1, error) {
 		obj = rawObj.(model0.Tier1)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.Tier1sClient)
+		client := c.Client.(interface {
+			Get(string, string, string) (model0.Tier1, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, tier1IdParam)
 		if err != nil {
 			return obj, err
@@ -79,7 +83,9 @@ func (c Tier1ClientContext) Patch(tier1IdParam string, tier1Param model0.Tier1) 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier1sClient)
+		client := c.Client.(interface {
+			Patch(string, model0.Tier1) error
+		})
 		err = client.Patch(tier1IdParam, tier1Param)
 
 	case utl.Global:
@@ -91,7 +97,9 @@ func (c Tier1ClientContext) Patch(tier1IdParam string, tier1Param model0.Tier1) 
 		err = client.Patch(tier1IdParam, gmObj.(model1.Tier1))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.Tier1sClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, model0.Tier1) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, tier1IdParam, tier1Param)
 
 	default:
@@ -107,7 +115,9 @@ func (c Tier1ClientContext) Update(tier1IdParam string, tier1Param model0.Tier1)
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier1sClient)
+		client := c.Client.(interface {
+			Update(string, model0.Tier1) (model0.Tier1, error)
+		})
 		obj, err = client.Update(tier1IdParam, tier1Param)
 
 	case utl.Global:
@@ -127,7 +137,9 @@ func (c Tier1ClientContext) Update(tier1IdParam string, tier1Param model0.Tier1)
 		obj = obj1.(model0.Tier1)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.Tier1sClient)
+		client := c.Client.(interface {
+			Update(string, string, string, model0.Tier1) (model0.Tier1, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, tier1IdParam, tier1Param)
 
 	default:
@@ -142,15 +154,17 @@ func (c Tier1ClientContext) Delete(tier1IdParam string) error {
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier1sClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(tier1IdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.Tier1sClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(tier1IdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.Tier1sClient)
+		client := c.Client.(interface {
+			Delete(string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, tier1IdParam)
 
 	default:
@@ -166,7 +180,9 @@ func (c Tier1ClientContext) List(cursorParam *string, includeMarkForDeleteObject
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier1sClient)
+		client := c.Client.(interface {
+			List(*string, *bool, *string, *int64, *bool, *string) (model0.Tier1ListResult, error)
+		})
 		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -182,7 +198,9 @@ func (c Tier1ClientContext) List(cursorParam *string, includeMarkForDeleteObject
 		obj = obj1.(model0.Tier1ListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.Tier1sClient)
+		client := c.Client.(interface {
+			List(string, string, *string, *bool, *string, *int64, *bool, *string) (model0.Tier1ListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

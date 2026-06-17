@@ -5,8 +5,6 @@
 package mocks
 
 import (
-	reflect "reflect"
-
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -31,18 +29,4 @@ func NewMockStatsClient(ctrl *gomock.Controller) *MockStatsClient {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockStatsClient) EXPECT() *MockStatsClientMockRecorder {
 	return m.recorder
-}
-
-// Reset mocks base method.
-func (m *MockStatsClient) Reset(categoryParam, containerClusterPathParam, enforcementPointPathParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Reset", categoryParam, containerClusterPathParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Reset indicates an expected call of Reset.
-func (mr *MockStatsClientMockRecorder) Reset(categoryParam, containerClusterPathParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reset", reflect.TypeOf((*MockStatsClient)(nil).Reset), categoryParam, containerClusterPathParam, enforcementPointPathParam)
 }

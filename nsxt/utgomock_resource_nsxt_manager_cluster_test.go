@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"go.uber.org/mock/gomock"
 
@@ -68,7 +67,7 @@ func setupClusterMock(t *testing.T, ctrl *gomock.Controller) (*nsxmocks.MockClus
 	mockSDK := nsxmocks.NewMockClusterClient(ctrl)
 
 	originalCli := cliClusterClient
-	cliClusterClient = func(_ client.Connector) nsx.ClusterClient {
+	cliClusterClient = func(_ client.Connector) clusterOps {
 		return mockSDK
 	}
 	return mockSDK, func() { cliClusterClient = originalCli }

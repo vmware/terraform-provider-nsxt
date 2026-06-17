@@ -48,34 +48,6 @@ func (mr *MockSegmentsClientMockRecorder) Delete(segmentIdParam interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockSegmentsClient)(nil).Delete), segmentIdParam)
 }
 
-// Delete0 mocks base method.
-func (m *MockSegmentsClient) Delete0(segmentIdParam string, cascadeParam *bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete0", segmentIdParam, cascadeParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Delete0 indicates an expected call of Delete0.
-func (mr *MockSegmentsClientMockRecorder) Delete0(segmentIdParam, cascadeParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete0", reflect.TypeOf((*MockSegmentsClient)(nil).Delete0), segmentIdParam, cascadeParam)
-}
-
-// Deletedhcpleases mocks base method.
-func (m *MockSegmentsClient) Deletedhcpleases(segmentIdParam string, dhcpDeleteLeasesParam model.DhcpDeleteLeases, enforcementPointPathParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Deletedhcpleases", segmentIdParam, dhcpDeleteLeasesParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Deletedhcpleases indicates an expected call of Deletedhcpleases.
-func (mr *MockSegmentsClientMockRecorder) Deletedhcpleases(segmentIdParam, dhcpDeleteLeasesParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deletedhcpleases", reflect.TypeOf((*MockSegmentsClient)(nil).Deletedhcpleases), segmentIdParam, dhcpDeleteLeasesParam, enforcementPointPathParam)
-}
-
 // Get mocks base method.
 func (m *MockSegmentsClient) Get(segmentIdParam string) (model.Segment, error) {
 	m.ctrl.T.Helper()
@@ -120,20 +92,6 @@ func (mr *MockSegmentsClientMockRecorder) Patch(segmentIdParam, segmentParam int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockSegmentsClient)(nil).Patch), segmentIdParam, segmentParam)
 }
 
-// Patch0 mocks base method.
-func (m *MockSegmentsClient) Patch0(segmentIdParam string, segmentParam model.Segment) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Patch0", segmentIdParam, segmentParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Patch0 indicates an expected call of Patch0.
-func (mr *MockSegmentsClientMockRecorder) Patch0(segmentIdParam, segmentParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch0", reflect.TypeOf((*MockSegmentsClient)(nil).Patch0), segmentIdParam, segmentParam)
-}
-
 // Update mocks base method.
 func (m *MockSegmentsClient) Update(segmentIdParam string, segmentParam model.Segment) (model.Segment, error) {
 	m.ctrl.T.Helper()
@@ -147,19 +105,4 @@ func (m *MockSegmentsClient) Update(segmentIdParam string, segmentParam model.Se
 func (mr *MockSegmentsClientMockRecorder) Update(segmentIdParam, segmentParam interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockSegmentsClient)(nil).Update), segmentIdParam, segmentParam)
-}
-
-// Update0 mocks base method.
-func (m *MockSegmentsClient) Update0(segmentIdParam string, segmentParam model.Segment) (model.Segment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update0", segmentIdParam, segmentParam)
-	ret0, _ := ret[0].(model.Segment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Update0 indicates an expected call of Update0.
-func (mr *MockSegmentsClientMockRecorder) Update0(segmentIdParam, segmentParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update0", reflect.TypeOf((*MockSegmentsClient)(nil).Update0), segmentIdParam, segmentParam)
 }

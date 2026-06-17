@@ -8,11 +8,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+
+	fabricapi "github.com/vmware/terraform-provider-nsxt/api/nsx/fabric"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliDiscoveredNodesClient = fabric.NewDiscoveredNodesClient
+var cliDiscoveredNodesClient = func(sessionContext utl.SessionContext, connector vapiProtocolClient.Connector) *fabricapi.DiscoveredNodeClientContext {
+	return fabricapi.NewDiscoveredNodesClient(sessionContext, connector)
+}
 
 func dataSourceNsxtDiscoveredNode() *schema.Resource {
 	return &schema.Resource{
@@ -42,7 +47,7 @@ func dataSourceNsxtDiscoveredNode() *schema.Resource {
 
 func dataSourceNsxtDiscoveredNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	discoveredNodeClient := cliDiscoveredNodesClient(connector)
+	discoveredNodeClient := cliDiscoveredNodesClient(getSessionContext(d, m), connector)
 
 	objID := d.Get("id").(string)
 	ipAddress := d.Get("ip_address").(string)

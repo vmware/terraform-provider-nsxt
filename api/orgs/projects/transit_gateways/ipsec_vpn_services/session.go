@@ -38,11 +38,15 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Delete(orgIdParam string, pr
 	switch c.ClientType {
 
 	case utl.Multitenancy:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string, string) error
+		})
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
 
 	case utl.VPC:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string, string) error
+		})
 		err = client.Delete(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
 
 	default:
@@ -58,14 +62,18 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Get(orgIdParam string, proje
 	switch c.ClientType {
 
 	case utl.Multitenancy:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string, string) (*vapiData_.StructValue, error)
+		})
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.VPC:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string, string) (*vapiData_.StructValue, error)
+		})
 		obj, err = client.Get(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam)
 		if err != nil {
 			return obj, err
@@ -84,11 +92,15 @@ func (c TransitGatewayIpsecVpnSessionClientContext) List(orgIdParam string, proj
 	switch c.ClientType {
 
 	case utl.Multitenancy:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			List(string, string, string, string, *string, *bool, *string, *int64, *bool, *string) (model0.IPSecVpnSessionListResult, error)
+		})
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			List(string, string, string, string, *string, *bool, *string, *int64, *bool, *string) (model0.IPSecVpnSessionListResult, error)
+		})
 		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
@@ -103,11 +115,15 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Patch(orgIdParam string, pro
 	switch c.ClientType {
 
 	case utl.Multitenancy:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, string, *vapiData_.StructValue) error
+		})
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	case utl.VPC:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, string, *vapiData_.StructValue) error
+		})
 		err = client.Patch(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	default:
@@ -123,11 +139,15 @@ func (c TransitGatewayIpsecVpnSessionClientContext) Update(orgIdParam string, pr
 	switch c.ClientType {
 
 	case utl.Multitenancy:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, string, *vapiData_.StructValue) (*vapiData_.StructValue, error)
+		})
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	case utl.VPC:
-		client := c.Client.(client0.SessionsClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, string, *vapiData_.StructValue) (*vapiData_.StructValue, error)
+		})
 		obj, err = client.Update(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, sessionIdParam, ipSecVpnSessionParam)
 
 	default:

@@ -44,7 +44,9 @@ func (c SegmentClientContext) Get(segmentIdParam string) (model0.Segment, error)
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Get(string) (model0.Segment, error)
+		})
 		obj, err = client.Get(segmentIdParam)
 		if err != nil {
 			return obj, err
@@ -61,7 +63,9 @@ func (c SegmentClientContext) Get(segmentIdParam string) (model0.Segment, error)
 		obj = rawObj.(model0.Segment)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Get(string, string, string) (model0.Segment, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentIdParam)
 		if err != nil {
 			return obj, err
@@ -79,7 +83,9 @@ func (c SegmentClientContext) Patch(segmentIdParam string, segmentParam model0.S
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Patch(string, model0.Segment) error
+		})
 		err = client.Patch(segmentIdParam, segmentParam)
 
 	case utl.Global:
@@ -91,7 +97,9 @@ func (c SegmentClientContext) Patch(segmentIdParam string, segmentParam model0.S
 		err = client.Patch(segmentIdParam, gmObj.(model1.Segment))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, model0.Segment) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentParam)
 
 	default:
@@ -107,7 +115,9 @@ func (c SegmentClientContext) Update(segmentIdParam string, segmentParam model0.
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Update(string, model0.Segment) (model0.Segment, error)
+		})
 		obj, err = client.Update(segmentIdParam, segmentParam)
 
 	case utl.Global:
@@ -127,7 +137,9 @@ func (c SegmentClientContext) Update(segmentIdParam string, segmentParam model0.
 		obj = obj1.(model0.Segment)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Update(string, string, string, model0.Segment) (model0.Segment, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, segmentIdParam, segmentParam)
 
 	default:
@@ -142,15 +154,17 @@ func (c SegmentClientContext) Delete(segmentIdParam string) error {
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(segmentIdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.SegmentsClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(segmentIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Delete(string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, segmentIdParam)
 
 	default:
@@ -166,7 +180,9 @@ func (c SegmentClientContext) List(cursorParam *string, includeMarkForDeleteObje
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			List(*string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+		})
 		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -182,7 +198,9 @@ func (c SegmentClientContext) List(cursorParam *string, includeMarkForDeleteObje
 		obj = obj1.(model0.SegmentListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			List(string, string, *string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	default:

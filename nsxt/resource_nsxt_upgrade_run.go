@@ -25,19 +25,42 @@ import (
 var cliUpgradeSummaryClient = func(connector vapiProtocolClient.Connector) upgrade.SummaryClient {
 	return upgrade.NewSummaryClient(connector)
 }
-var cliUpgradeUnitGroupsClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeUnitGroupsClient {
+
+type upgradeGroupOps interface {
+	Create(model.UpgradeUnitGroup) (model.UpgradeUnitGroup, error)
+	Delete(string) error
+	Get(string, *bool) (model.UpgradeUnitGroup, error)
+	List(*string, *string, *string, *int64, *bool, *string, *bool, *bool) (model.UpgradeUnitGroupListResult, error)
+	Reorder(string, model.ReorderRequest) error
+	Update(string, model.UpgradeUnitGroup) (model.UpgradeUnitGroup, error)
+}
+
+type upgradePlanOps interface {
+	Pause() error
+	Reset(string) error
+	Stageupgrade(*string) error
+	Upgrade(*string) error
+}
+
+type upgradeOps interface {
+	Upgradeuc() error
+	Executepreupgradechecks(*string, *string, *string, *int64, *bool, *string) error
+	Executepostupgradechecks(string) error
+}
+
+var cliUpgradeUnitGroupsClient = func(connector vapiProtocolClient.Connector) upgradeGroupOps {
 	return upgrade.NewUpgradeUnitGroupsClient(connector)
 }
 var cliUpgradeSettingsClient = func(connector vapiProtocolClient.Connector) plan.SettingsClient {
 	return plan.NewSettingsClient(connector)
 }
-var cliUpgradePlanClient = func(connector vapiProtocolClient.Connector) upgrade.PlanClient {
+var cliUpgradePlanClient = func(connector vapiProtocolClient.Connector) upgradePlanOps {
 	return upgrade.NewPlanClient(connector)
 }
 var cliUpgradeStatusSummaryClient = func(connector vapiProtocolClient.Connector) upgrade.StatusSummaryClient {
 	return upgrade.NewStatusSummaryClient(connector)
 }
-var cliUpgradeClient = func(connector vapiProtocolClient.Connector) nsx.UpgradeClient {
+var cliUpgradeClient = func(connector vapiProtocolClient.Connector) upgradeOps {
 	return nsx.NewUpgradeClient(connector)
 }
 var cliUpgradeUnitGroupsStatusClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeUnitGroupsStatusClient {
@@ -97,11 +120,11 @@ var inFlightComponentUpgradeStatus = []string{
 }
 
 type upgradeClientSet struct {
-	GroupClient       upgrade.UpgradeUnitGroupsClient
+	GroupClient       upgradeGroupOps
 	SettingClient     plan.SettingsClient
-	PlanClient        upgrade.PlanClient
+	PlanClient        upgradePlanOps
 	StatusClient      upgrade.StatusSummaryClient
-	UpgradeClient     nsx.UpgradeClient
+	UpgradeClient     upgradeOps
 	GroupStatusClient upgrade.UpgradeUnitGroupsStatusClient
 
 	Timeout    int
@@ -930,7 +953,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 	return nil
 }
 
-func runPostcheck(upgradeClient nsx.UpgradeClient, d *schema.ResourceData) {
+func runPostcheck(upgradeClient upgradeOps, d *schema.ResourceData) {
 	for _, component := range postCheckComponentList {
 		settingI := d.Get(componentToSettingKey[component]).([]interface{})
 		if len(settingI) == 0 {

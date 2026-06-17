@@ -14,11 +14,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
+
+	nodeapi "github.com/vmware/terraform-provider-nsxt/api/nsx/node"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliNodeUsersClient = func(connector vapiProtocolClient.Connector) node.UsersClient {
-	return node.NewUsersClient(connector)
+var cliNodeUsersClient = func(sessionContext utl.SessionContext, connector vapiProtocolClient.Connector) *nodeapi.NodeUserPropertiesClientContext {
+	return nodeapi.NewUsersClient(sessionContext, connector)
 }
 
 var nodeUserDeleteSleep = time.Duration(1) * time.Second
@@ -120,7 +122,7 @@ func validateUsername() schema.SchemaValidateFunc {
 
 func resourceNsxtNodeUserCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cliNodeUsersClient(connector)
+	client := cliNodeUsersClient(getSessionContext(d, m), connector)
 
 	fullName := d.Get("full_name").(string)
 	passwordChangeFrequency := int64(d.Get("password_change_frequency").(int))
@@ -150,7 +152,7 @@ func resourceNsxtNodeUserCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cliNodeUsersClient(connector)
+	client := cliNodeUsersClient(getSessionContext(d, m), connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -179,7 +181,7 @@ func resourceNsxtNodeUserRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cliNodeUsersClient(connector)
+	client := cliNodeUsersClient(getSessionContext(d, m), connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
@@ -235,7 +237,7 @@ func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtNodeUserDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := cliNodeUsersClient(connector)
+	client := cliNodeUsersClient(getSessionContext(d, m), connector)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")

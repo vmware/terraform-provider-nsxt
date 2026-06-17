@@ -39,14 +39,18 @@ func (c IdsSecurityPolicyClientContext) Get(domainIdParam string, policyIdParam 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string) (model0.IdsSecurityPolicy, error)
+		})
 		obj, err = client.Get(domainIdParam, policyIdParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.Multitenancy:
-		client := c.Client.(client1.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.IdsSecurityPolicy, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, domainIdParam, policyIdParam)
 		if err != nil {
 			return obj, err
@@ -64,11 +68,13 @@ func (c IdsSecurityPolicyClientContext) Delete(domainIdParam string, policyIdPar
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServicePoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, policyIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client1.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, policyIdParam)
 
 	default:
@@ -84,11 +90,15 @@ func (c IdsSecurityPolicyClientContext) List(domainIdParam string, cursorParam *
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
+		})
 		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client1.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
@@ -103,11 +113,15 @@ func (c IdsSecurityPolicyClientContext) Patch(domainIdParam string, policyIdPara
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, model0.IdsSecurityPolicy) error
+		})
 		err = client.Patch(domainIdParam, policyIdParam, idsSecurityPolicyParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client1.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.IdsSecurityPolicy) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, policyIdParam, idsSecurityPolicyParam)
 
 	default:
@@ -123,11 +137,15 @@ func (c IdsSecurityPolicyClientContext) Update(domainIdParam string, policyIdPar
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, model0.IdsSecurityPolicy) (model0.IdsSecurityPolicy, error)
+		})
 		obj, err = client.Update(domainIdParam, policyIdParam, idsSecurityPolicyParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client1.IntrusionServicePoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.IdsSecurityPolicy) (model0.IdsSecurityPolicy, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, policyIdParam, idsSecurityPolicyParam)
 
 	default:

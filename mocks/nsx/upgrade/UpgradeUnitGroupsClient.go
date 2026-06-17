@@ -34,21 +34,6 @@ func (m *MockUpgradeUnitGroupsClient) EXPECT() *MockUpgradeUnitGroupsClientMockR
 	return m.recorder
 }
 
-// Addupgradeunits mocks base method.
-func (m *MockUpgradeUnitGroupsClient) Addupgradeunits(groupIdParam string, upgradeUnitListParam model.UpgradeUnitList) (model.UpgradeUnitList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Addupgradeunits", groupIdParam, upgradeUnitListParam)
-	ret0, _ := ret[0].(model.UpgradeUnitList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Addupgradeunits indicates an expected call of Addupgradeunits.
-func (mr *MockUpgradeUnitGroupsClientMockRecorder) Addupgradeunits(groupIdParam, upgradeUnitListParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Addupgradeunits", reflect.TypeOf((*MockUpgradeUnitGroupsClient)(nil).Addupgradeunits), groupIdParam, upgradeUnitListParam)
-}
-
 // Create mocks base method.
 func (m *MockUpgradeUnitGroupsClient) Create(upgradeUnitGroupParam model.UpgradeUnitGroup) (model.UpgradeUnitGroup, error) {
 	m.ctrl.T.Helper()
