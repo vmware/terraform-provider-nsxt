@@ -21,7 +21,10 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_basic(t *testing.T) {
 	updatedDescription := "Updated acceptance test policy edge transport node"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPolicyEdgeTransportNodePreCheck(t) },
+		PreCheck: func() {
+			testAccPolicyEdgeTransportNodePreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyEdgeTransportNodeCheckDestroy(state, displayName)
@@ -78,7 +81,10 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_importBasic(t *testing.T) {
 	displayName := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPolicyEdgeTransportNodePreCheck(t) },
+		PreCheck: func() {
+			testAccPolicyEdgeTransportNodePreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyEdgeTransportNodeCheckDestroy(state, displayName)
