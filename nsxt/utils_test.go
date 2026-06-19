@@ -933,3 +933,37 @@ func withIdempotencyChecks(steps []resource.TestStep) []resource.TestStep {
 	}
 	return expanded
 }
+
+// withImportIdempotencyChecks inserts a PlanOnly step after every ImportState
+// step to verify that the post-import plan is empty (no drift). The PlanOnly
+// step reuses the config from the most recent preceding apply step. This is
+// a companion to withIdempotencyChecks and is particularly useful for
+// resources with write-only sensitive fields (e.g. passwords) that cannot be
+// read back from the API after import (e.g. bug 3715433).
+func withImportIdempotencyChecks(steps []resource.TestStep) []resource.TestStep {
+	expanded := make([]resource.TestStep, 0, len(steps)*2)
+	for i, step := range steps {
+		expanded = append(expanded, step)
+		if !step.ImportState {
+			continue
+		}
+		// Walk backwards through the original steps to find the nearest
+		// preceding config that was applied (not an import or plan-only step).
+		var config string
+		for j := i - 1; j >= 0; j-- {
+			if steps[j].Config != "" && !steps[j].ImportState && !steps[j].PlanOnly {
+				config = steps[j].Config
+				break
+			}
+		}
+		if config == "" {
+			continue
+		}
+		expanded = append(expanded, resource.TestStep{
+			Config:             config,
+			PlanOnly:           true,
+			ExpectNonEmptyPlan: false,
+		})
+	}
+	return expanded
+}
