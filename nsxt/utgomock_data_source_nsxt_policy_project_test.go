@@ -191,4 +191,18 @@ func TestMockDataSourceNsxtPolicyProjectRead_ipv6Blocks(t *testing.T) {
 		require.Len(t, blocks, 1)
 		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
+
+	t.Run("by ID does not set ipv6_blocks when API omits it", func(t *testing.T) {
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"id": projectID,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		_, ok := d.GetOk("ipv6_blocks")
+		assert.False(t, ok)
+	})
 }

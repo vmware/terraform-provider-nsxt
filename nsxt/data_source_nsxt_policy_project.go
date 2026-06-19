@@ -142,7 +142,9 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
 	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
-	d.Set("ipv6_blocks", obj.Ipv6Blocks)
+	if obj.Ipv6Blocks != nil {
+		d.Set("ipv6_blocks", obj.Ipv6Blocks)
+	}
 
 	return nil
 }
