@@ -40,7 +40,9 @@ func (c PolicyExcludeListClientContext) Get() (model0.PolicyExcludeList, error) 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.ExcludeListClient)
+		client := c.Client.(interface {
+			Get() (model0.PolicyExcludeList, error)
+		})
 		obj, err = client.Get()
 		if err != nil {
 			return obj, err
@@ -68,7 +70,9 @@ func (c PolicyExcludeListClientContext) Patch(policyExcludeListParam model0.Poli
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.ExcludeListClient)
+		client := c.Client.(interface {
+			Patch(model0.PolicyExcludeList) error
+		})
 		err = client.Patch(policyExcludeListParam)
 
 	case utl.Global:
@@ -92,7 +96,9 @@ func (c PolicyExcludeListClientContext) Update(policyExcludeListParam model0.Pol
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.ExcludeListClient)
+		client := c.Client.(interface {
+			Update(model0.PolicyExcludeList) (model0.PolicyExcludeList, error)
+		})
 		obj, err = client.Update(policyExcludeListParam)
 
 	case utl.Global:

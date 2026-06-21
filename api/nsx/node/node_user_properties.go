@@ -44,6 +44,22 @@ func (c NodeUserPropertiesClientContext) Activate(useridParam string, nodeUserPa
 	return obj, err
 }
 
+func (c NodeUserPropertiesClientContext) Createuser(nodeUserPropertiesParam model0.NodeUserProperties) (model0.NodeUserProperties, error) {
+	var err error
+	var obj model0.NodeUserProperties
+
+	switch c.ClientType {
+
+	case utl.Local:
+		client := c.Client.(client0.UsersClient)
+		obj, err = client.Createuser(nodeUserPropertiesParam)
+
+	default:
+		err = errors.New("invalid infrastructure for model")
+	}
+	return obj, err
+}
+
 func (c NodeUserPropertiesClientContext) Createaudituser(nodeUserPropertiesParam model0.NodeUserProperties) (model0.NodeUserProperties, error) {
 	var err error
 	var obj model0.NodeUserProperties

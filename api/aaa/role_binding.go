@@ -35,7 +35,9 @@ func (c RoleBindingClientContext) Create(roleBindingParam model0.RoleBinding) (m
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
+		client := c.Client.(interface {
+			Create(model0.RoleBinding) (model0.RoleBinding, error)
+		})
 		obj, err = client.Create(roleBindingParam)
 
 	default:
@@ -50,23 +52,10 @@ func (c RoleBindingClientContext) Delete(bindingIdParam string, cursorParam *str
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
+		client := c.Client.(interface {
+			Delete(string, *string, *string, *string, *string, *string, *int64, *string, *string, *string, *bool, *string, *string) error
+		})
 		err = client.Delete(bindingIdParam, cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return err
-}
-
-func (c RoleBindingClientContext) Deletestalebindings(cursorParam *string, identitySourceIdParam *string, identitySourceTypeParam *string, includedFieldsParam *string, nameParam *string, pageSizeParam *int64, pathParam *string, roleParam *string, rootPathParam *string, sortAscendingParam *bool, sortByParam *string, type_Param *string) error {
-	var err error
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
-		err = client.Deletestalebindings(cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -81,7 +70,9 @@ func (c RoleBindingClientContext) Get(bindingIdParam string, cursorParam *string
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
+		client := c.Client.(interface {
+			Get(string, *string, *string, *string, *string, *string, *int64, *string, *string, *string, *bool, *string, *string) (model0.RoleBinding, error)
+		})
 		obj, err = client.Get(bindingIdParam, cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
 		if err != nil {
 			return obj, err
@@ -100,7 +91,9 @@ func (c RoleBindingClientContext) List(cursorParam *string, identitySourceIdPara
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
+		client := c.Client.(interface {
+			List(*string, *string, *string, *string, *string, *int64, *string, *string, *string, *bool, *string, *string) (model0.RoleBindingListResult, error)
+		})
 		obj, err = client.List(cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
 
 	default:
@@ -116,7 +109,9 @@ func (c RoleBindingClientContext) Update(bindingIdParam string, roleBindingParam
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RoleBindingsClient)
+		client := c.Client.(interface {
+			Update(string, model0.RoleBinding) (model0.RoleBinding, error)
+		})
 		obj, err = client.Update(bindingIdParam, roleBindingParam)
 
 	default:

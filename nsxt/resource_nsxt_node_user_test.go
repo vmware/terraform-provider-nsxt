@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
+
+	nodeapi "github.com/vmware/terraform-provider-nsxt/api/nsx/node"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accTestNodeUserCreateAttributes = map[string]string{ //nolint:gosec
@@ -138,7 +140,7 @@ func testAccNodeUserExists(resourceName string) resource.TestCheckFunc {
 		if userID == "" {
 			return fmt.Errorf("User ID not set in resources")
 		}
-		client := node.NewUsersClient(connector)
+		client := nodeapi.NewUsersClient(utl.SessionContext{ClientType: utl.Local}, connector)
 		_, err := client.Get(userID)
 		if err != nil {
 			if isNotFoundError(err) {
@@ -160,7 +162,7 @@ func testAccNodeUserCheckDestroy(state *terraform.State, username string) error 
 		}
 
 		userID := rs.Primary.Attributes["id"]
-		client := node.NewUsersClient(connector)
+		client := nodeapi.NewUsersClient(utl.SessionContext{ClientType: utl.Local}, connector)
 		_, err := client.Get(userID)
 		if err != nil {
 			if isNotFoundError(err) {

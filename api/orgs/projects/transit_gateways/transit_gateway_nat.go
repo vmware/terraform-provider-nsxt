@@ -56,23 +56,3 @@ func (c TransitGatewayNatClientContext) Get(orgIdParam string, projectIdParam st
 	}
 	return obj, err
 }
-
-func (c TransitGatewayNatClientContext) List(orgIdParam string, projectIdParam string, tgwIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.TransitGatewayNatListResult, error) {
-	var err error
-	var obj model0.TransitGatewayNatListResult
-
-	switch c.ClientType {
-
-	case utl.Multitenancy:
-		client := c.Client.(client0.NatClient)
-		obj, err = client.List(orgIdParam, projectIdParam, tgwIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	case utl.VPC:
-		client := c.Client.(client0.NatClient)
-		obj, err = client.List(orgIdParam, projectIdParam, tgwIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}

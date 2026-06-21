@@ -92,34 +92,6 @@ func (mr *MockTier0sClientMockRecorder) Patch(tier0IdParam, tier0Param interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockTier0sClient)(nil).Patch), tier0IdParam, tier0Param)
 }
 
-// Reprocess mocks base method.
-func (m *MockTier0sClient) Reprocess(tier0IdParam string, enforcementPointPathParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Reprocess", tier0IdParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Reprocess indicates an expected call of Reprocess.
-func (mr *MockTier0sClientMockRecorder) Reprocess(tier0IdParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reprocess", reflect.TypeOf((*MockTier0sClient)(nil).Reprocess), tier0IdParam, enforcementPointPathParam)
-}
-
-// Sitefailover mocks base method.
-func (m *MockTier0sClient) Sitefailover(gatewaySiteFailoverActionConfigParam model.GatewaySiteFailoverActionConfig) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sitefailover", gatewaySiteFailoverActionConfigParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Sitefailover indicates an expected call of Sitefailover.
-func (mr *MockTier0sClientMockRecorder) Sitefailover(gatewaySiteFailoverActionConfigParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sitefailover", reflect.TypeOf((*MockTier0sClient)(nil).Sitefailover), gatewaySiteFailoverActionConfigParam)
-}
-
 // Update mocks base method.
 func (m *MockTier0sClient) Update(tier0IdParam string, tier0Param model.Tier0) (model.Tier0, error) {
 	m.ctrl.T.Helper()

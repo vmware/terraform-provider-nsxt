@@ -92,21 +92,6 @@ func (mr *MockRulesClientMockRecorder) Patch(domainIdParam, gatewayPolicyIdParam
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockRulesClient)(nil).Patch), domainIdParam, gatewayPolicyIdParam, ruleIdParam, ruleParam)
 }
 
-// Revise mocks base method.
-func (m *MockRulesClient) Revise(domainIdParam, gatewayPolicyIdParam, ruleIdParam string, ruleParam model.Rule, anchorPathParam, operationParam *string) (model.Rule, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Revise", domainIdParam, gatewayPolicyIdParam, ruleIdParam, ruleParam, anchorPathParam, operationParam)
-	ret0, _ := ret[0].(model.Rule)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Revise indicates an expected call of Revise.
-func (mr *MockRulesClientMockRecorder) Revise(domainIdParam, gatewayPolicyIdParam, ruleIdParam, ruleParam, anchorPathParam, operationParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revise", reflect.TypeOf((*MockRulesClient)(nil).Revise), domainIdParam, gatewayPolicyIdParam, ruleIdParam, ruleParam, anchorPathParam, operationParam)
-}
-
 // Update mocks base method.
 func (m *MockRulesClient) Update(domainIdParam, gatewayPolicyIdParam, ruleIdParam string, ruleParam model.Rule) (model.Rule, error) {
 	m.ctrl.T.Helper()

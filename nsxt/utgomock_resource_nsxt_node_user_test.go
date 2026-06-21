@@ -20,9 +20,10 @@ import (
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 	"go.uber.org/mock/gomock"
 
+	nodeapi "github.com/vmware/terraform-provider-nsxt/api/nsx/node"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	nodemocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx/node"
 )
 
@@ -60,10 +61,11 @@ func nodeUserNotActivatedAPIResponse() nsxModel.NodeUserProperties {
 
 func setupNodeUserMock(t *testing.T, ctrl *gomock.Controller) (*nodemocks.MockUsersClient, func()) {
 	mockSDK := nodemocks.NewMockUsersClient(ctrl)
+	mockWrapper := &nodeapi.NodeUserPropertiesClientContext{Client: mockSDK, ClientType: utl.Local}
 
 	originalCli := cliNodeUsersClient
-	cliNodeUsersClient = func(_ vapiProtocolClient.Connector) node.UsersClient {
-		return mockSDK
+	cliNodeUsersClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *nodeapi.NodeUserPropertiesClientContext {
+		return mockWrapper
 	}
 	return mockSDK, func() { cliNodeUsersClient = originalCli }
 }

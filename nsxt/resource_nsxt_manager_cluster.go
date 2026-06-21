@@ -23,7 +23,13 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliClusterClient = func(connector client.Connector) nsx.ClusterClient {
+type clusterOps interface {
+	Get() (nsxModel.ClusterConfig, error)
+	Joincluster(nsxModel.JoinClusterParameters) (nsxModel.ClusterConfiguration, error)
+	Removenode(string, *string, *string, *string) (nsxModel.ClusterConfiguration, error)
+}
+
+var cliClusterClient = func(connector client.Connector) clusterOps {
 	return nsx.NewClusterClient(connector)
 }
 

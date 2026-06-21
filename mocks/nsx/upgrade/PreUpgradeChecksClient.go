@@ -46,17 +46,3 @@ func (mr *MockPreUpgradeChecksClientMockRecorder) Acknowledge(preUpgradeCheckIdP
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Acknowledge", reflect.TypeOf((*MockPreUpgradeChecksClient)(nil).Acknowledge), preUpgradeCheckIdParam)
 }
-
-// Resolve mocks base method.
-func (m *MockPreUpgradeChecksClient) Resolve(preUpgradeCheckIdParam string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Resolve", preUpgradeCheckIdParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Resolve indicates an expected call of Resolve.
-func (mr *MockPreUpgradeChecksClientMockRecorder) Resolve(preUpgradeCheckIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Resolve", reflect.TypeOf((*MockPreUpgradeChecksClient)(nil).Resolve), preUpgradeCheckIdParam)
-}

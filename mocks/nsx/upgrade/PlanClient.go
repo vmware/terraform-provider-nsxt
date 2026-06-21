@@ -7,7 +7,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -32,20 +31,6 @@ func NewMockPlanClient(ctrl *gomock.Controller) *MockPlanClient {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockPlanClient) EXPECT() *MockPlanClientMockRecorder {
 	return m.recorder
-}
-
-// Continue_ mocks base method.
-func (m *MockPlanClient) Continue_(componentTypeParam *string, skipParam *bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Continue_", componentTypeParam, skipParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Continue_ indicates an expected call of Continue_.
-func (mr *MockPlanClientMockRecorder) Continue_(componentTypeParam, skipParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Continue_", reflect.TypeOf((*MockPlanClient)(nil).Continue_), componentTypeParam, skipParam)
 }
 
 // Pause mocks base method.
@@ -90,20 +75,6 @@ func (mr *MockPlanClientMockRecorder) Stageupgrade(componentTypeParam interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stageupgrade", reflect.TypeOf((*MockPlanClient)(nil).Stageupgrade), componentTypeParam)
 }
 
-// Start mocks base method.
-func (m *MockPlanClient) Start(componentTypeParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Start", componentTypeParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Start indicates an expected call of Start.
-func (mr *MockPlanClientMockRecorder) Start(componentTypeParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockPlanClient)(nil).Start), componentTypeParam)
-}
-
 // Upgrade mocks base method.
 func (m *MockPlanClient) Upgrade(componentTypeParam *string) error {
 	m.ctrl.T.Helper()
@@ -116,18 +87,4 @@ func (m *MockPlanClient) Upgrade(componentTypeParam *string) error {
 func (mr *MockPlanClientMockRecorder) Upgrade(componentTypeParam interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upgrade", reflect.TypeOf((*MockPlanClient)(nil).Upgrade), componentTypeParam)
-}
-
-// Upgradeselectedunits mocks base method.
-func (m *MockPlanClient) Upgradeselectedunits(upgradeUnitListParam model.UpgradeUnitList) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upgradeselectedunits", upgradeUnitListParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Upgradeselectedunits indicates an expected call of Upgradeselectedunits.
-func (mr *MockPlanClientMockRecorder) Upgradeselectedunits(upgradeUnitListParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upgradeselectedunits", reflect.TypeOf((*MockPlanClient)(nil).Upgradeselectedunits), upgradeUnitListParam)
 }

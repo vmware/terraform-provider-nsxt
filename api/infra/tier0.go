@@ -40,7 +40,9 @@ func (c Tier0ClientContext) Get(tier0IdParam string) (model0.Tier0, error) {
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier0sClient)
+		client := c.Client.(interface {
+			Get(string) (model0.Tier0, error)
+		})
 		obj, err = client.Get(tier0IdParam)
 		if err != nil {
 			return obj, err
@@ -68,7 +70,9 @@ func (c Tier0ClientContext) Patch(tier0IdParam string, tier0Param model0.Tier0) 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier0sClient)
+		client := c.Client.(interface {
+			Patch(string, model0.Tier0) error
+		})
 		err = client.Patch(tier0IdParam, tier0Param)
 
 	case utl.Global:
@@ -92,7 +96,9 @@ func (c Tier0ClientContext) Update(tier0IdParam string, tier0Param model0.Tier0)
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier0sClient)
+		client := c.Client.(interface {
+			Update(string, model0.Tier0) (model0.Tier0, error)
+		})
 		obj, err = client.Update(tier0IdParam, tier0Param)
 
 	case utl.Global:
@@ -123,11 +129,11 @@ func (c Tier0ClientContext) Delete(tier0IdParam string) error {
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier0sClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(tier0IdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.Tier0sClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(tier0IdParam)
 
 	default:
@@ -143,7 +149,9 @@ func (c Tier0ClientContext) List(cursorParam *string, includeMarkForDeleteObject
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.Tier0sClient)
+		client := c.Client.(interface {
+			List(*string, *bool, *string, *int64, *bool, *string) (model0.Tier0ListResult, error)
+		})
 		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:

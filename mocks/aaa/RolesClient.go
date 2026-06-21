@@ -34,21 +34,6 @@ func (m *MockRolesClient) EXPECT() *MockRolesClientMockRecorder {
 	return m.recorder
 }
 
-// Clone mocks base method.
-func (m *MockRolesClient) Clone(roleParam string, newRoleParam model.NewRole) (model.NewRole, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Clone", roleParam, newRoleParam)
-	ret0, _ := ret[0].(model.NewRole)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Clone indicates an expected call of Clone.
-func (mr *MockRolesClientMockRecorder) Clone(roleParam, newRoleParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clone", reflect.TypeOf((*MockRolesClient)(nil).Clone), roleParam, newRoleParam)
-}
-
 // Delete mocks base method.
 func (m *MockRolesClient) Delete(roleParam string) error {
 	m.ctrl.T.Helper()
@@ -76,21 +61,6 @@ func (m *MockRolesClient) Get(roleParam string) (model.RoleWithFeatures, error) 
 func (mr *MockRolesClientMockRecorder) Get(roleParam interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRolesClient)(nil).Get), roleParam)
-}
-
-// List mocks base method.
-func (m *MockRolesClient) List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, scopeParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoleListResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", cursorParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam)
-	ret0, _ := ret[0].(model.RoleListResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// List indicates an expected call of List.
-func (mr *MockRolesClientMockRecorder) List(cursorParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRolesClient)(nil).List), cursorParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam)
 }
 
 // Update mocks base method.

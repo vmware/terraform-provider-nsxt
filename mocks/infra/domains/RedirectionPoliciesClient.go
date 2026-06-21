@@ -78,21 +78,6 @@ func (mr *MockRedirectionPoliciesClientMockRecorder) List(cursorParam, includeMa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRedirectionPoliciesClient)(nil).List), cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 }
 
-// List0 mocks base method.
-func (m *MockRedirectionPoliciesClient) List0(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List0", domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-	ret0, _ := ret[0].(model.RedirectionPolicyListResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// List0 indicates an expected call of List0.
-func (mr *MockRedirectionPoliciesClientMockRecorder) List0(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List0", reflect.TypeOf((*MockRedirectionPoliciesClient)(nil).List0), domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-}
-
 // Patch mocks base method.
 func (m *MockRedirectionPoliciesClient) Patch(domainIdParam, redirectionPolicyIdParam string, redirectionPolicyParam model.RedirectionPolicy) error {
 	m.ctrl.T.Helper()

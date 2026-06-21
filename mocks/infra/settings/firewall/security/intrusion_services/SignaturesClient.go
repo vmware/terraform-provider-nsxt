@@ -5,8 +5,6 @@
 package mocks
 
 import (
-	reflect "reflect"
-
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -31,18 +29,4 @@ func NewMockSignaturesClient(ctrl *gomock.Controller) *MockSignaturesClient {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockSignaturesClient) EXPECT() *MockSignaturesClientMockRecorder {
 	return m.recorder
-}
-
-// Updatesignatures mocks base method.
-func (m *MockSignaturesClient) Updatesignatures() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Updatesignatures")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Updatesignatures indicates an expected call of Updatesignatures.
-func (mr *MockSignaturesClientMockRecorder) Updatesignatures() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Updatesignatures", reflect.TypeOf((*MockSignaturesClient)(nil).Updatesignatures))
 }

@@ -44,7 +44,9 @@ func (c SegmentClientContext) Get(tier1IdParam string, segmentIdParam string) (m
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Get(string, string) (model0.Segment, error)
+		})
 		obj, err = client.Get(tier1IdParam, segmentIdParam)
 		if err != nil {
 			return obj, err
@@ -61,7 +63,9 @@ func (c SegmentClientContext) Get(tier1IdParam string, segmentIdParam string) (m
 		obj = rawObj.(model0.Segment)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.Segment, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam)
 		if err != nil {
 			return obj, err
@@ -79,7 +83,9 @@ func (c SegmentClientContext) Patch(tier1IdParam string, segmentIdParam string, 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Patch(string, string, model0.Segment) error
+		})
 		err = client.Patch(tier1IdParam, segmentIdParam, segmentParam)
 
 	case utl.Global:
@@ -91,7 +97,9 @@ func (c SegmentClientContext) Patch(tier1IdParam string, segmentIdParam string, 
 		err = client.Patch(tier1IdParam, segmentIdParam, gmObj.(model1.Segment))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.Segment) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, segmentParam)
 
 	default:
@@ -107,7 +115,9 @@ func (c SegmentClientContext) Update(tier1IdParam string, segmentIdParam string,
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			Update(string, string, model0.Segment) (model0.Segment, error)
+		})
 		obj, err = client.Update(tier1IdParam, segmentIdParam, segmentParam)
 
 	case utl.Global:
@@ -127,7 +137,9 @@ func (c SegmentClientContext) Update(tier1IdParam string, segmentIdParam string,
 		obj = obj1.(model0.Segment)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.Segment) (model0.Segment, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, segmentParam)
 
 	default:
@@ -142,15 +154,17 @@ func (c SegmentClientContext) Delete(tier1IdParam string, segmentIdParam string)
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(tier1IdParam, segmentIdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.SegmentsClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(tier1IdParam, segmentIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam)
 
 	default:
@@ -166,7 +180,9 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SegmentsClient)
+		client := c.Client.(interface {
+			List(string, *string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+		})
 		obj, err = client.List(tier1IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -182,7 +198,9 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 		obj = obj1.(model0.SegmentListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SegmentsClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	default:

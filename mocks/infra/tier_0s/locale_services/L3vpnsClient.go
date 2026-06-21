@@ -92,21 +92,6 @@ func (mr *MockL3vpnsClientMockRecorder) Patch(tier0IdParam, localeServiceIdParam
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockL3vpnsClient)(nil).Patch), tier0IdParam, localeServiceIdParam, l3vpnIdParam, l3VpnParam)
 }
 
-// Showsensitivedata mocks base method.
-func (m *MockL3vpnsClient) Showsensitivedata(tier0IdParam, localeServiceIdParam, l3vpnIdParam string) (model.L3Vpn, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Showsensitivedata", tier0IdParam, localeServiceIdParam, l3vpnIdParam)
-	ret0, _ := ret[0].(model.L3Vpn)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Showsensitivedata indicates an expected call of Showsensitivedata.
-func (mr *MockL3vpnsClientMockRecorder) Showsensitivedata(tier0IdParam, localeServiceIdParam, l3vpnIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Showsensitivedata", reflect.TypeOf((*MockL3vpnsClient)(nil).Showsensitivedata), tier0IdParam, localeServiceIdParam, l3vpnIdParam)
-}
-
 // Update mocks base method.
 func (m *MockL3vpnsClient) Update(tier0IdParam, localeServiceIdParam, l3vpnIdParam string, l3VpnParam model.L3Vpn) (model.L3Vpn, error) {
 	m.ctrl.T.Helper()

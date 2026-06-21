@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	sdkaaa "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/aaa"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/aaa"
@@ -41,10 +42,11 @@ func testAccDeleteAllLdapIdentitySources() error {
 	if ldapClient == nil {
 		return fmt.Errorf("LDAP identity sources client is nil")
 	}
+	listClient := sdkaaa.NewLdapIdentitySourcesClient(connector)
 	converter := bindings.NewTypeConverter()
 	var cursor *string
 	for {
-		listResult, err := ldapClient.List(cursor, nil, nil, nil, nil)
+		listResult, err := listClient.List(cursor, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to list LDAP identity sources: %w", err)
 		}

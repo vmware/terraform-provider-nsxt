@@ -19,7 +19,12 @@ import (
 var cliUpgradeChecksInfoClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeChecksInfoClient {
 	return upgrade.NewUpgradeChecksInfoClient(connector)
 }
-var cliPreUpgradeChecksClient = func(connector vapiProtocolClient.Connector) upgrade.PreUpgradeChecksClient {
+
+type precheckAcknowledgeOps interface {
+	Acknowledge(string) error
+}
+
+var cliPreUpgradeChecksClient = func(connector vapiProtocolClient.Connector) precheckAcknowledgeOps {
 	return upgrade.NewPreUpgradeChecksClient(connector)
 }
 

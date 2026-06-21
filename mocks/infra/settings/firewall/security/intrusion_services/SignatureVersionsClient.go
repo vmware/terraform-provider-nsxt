@@ -63,17 +63,3 @@ func (mr *MockSignatureVersionsClientMockRecorder) List(cursorParam, includeMark
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockSignatureVersionsClient)(nil).List), cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 }
-
-// Makeactiveversion mocks base method.
-func (m *MockSignatureVersionsClient) Makeactiveversion(idsSignatureVersionParam model.IdsSignatureVersion) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Makeactiveversion", idsSignatureVersionParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Makeactiveversion indicates an expected call of Makeactiveversion.
-func (mr *MockSignatureVersionsClientMockRecorder) Makeactiveversion(idsSignatureVersionParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Makeactiveversion", reflect.TypeOf((*MockSignatureVersionsClient)(nil).Makeactiveversion), idsSignatureVersionParam)
-}

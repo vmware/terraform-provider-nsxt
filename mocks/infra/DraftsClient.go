@@ -92,20 +92,6 @@ func (mr *MockDraftsClientMockRecorder) Patch(draftIdParam, policyDraftParam int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockDraftsClient)(nil).Patch), draftIdParam, policyDraftParam)
 }
 
-// Publish mocks base method.
-func (m *MockDraftsClient) Publish(draftIdParam string, infraParam model.Infra) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", draftIdParam, infraParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Publish indicates an expected call of Publish.
-func (mr *MockDraftsClientMockRecorder) Publish(draftIdParam, infraParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockDraftsClient)(nil).Publish), draftIdParam, infraParam)
-}
-
 // Update mocks base method.
 func (m *MockDraftsClient) Update(draftIdParam string, policyDraftParam model.PolicyDraft) (model.PolicyDraft, error) {
 	m.ctrl.T.Helper()
