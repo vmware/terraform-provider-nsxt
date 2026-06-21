@@ -18,7 +18,7 @@ import (
 func TestAccResourceNsxtPolicyIdpsSignatureVersion_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_idps_signature_version.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
@@ -53,7 +53,7 @@ func TestAccResourceNsxtPolicyIdpsSignatureVersion_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyIdpsSignatureVersion_makeActive(t *testing.T) {
 	testResourceName := "nsxt_policy_idps_signature_version.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
