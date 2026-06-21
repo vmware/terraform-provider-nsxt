@@ -262,6 +262,45 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceRead(t *testing.T) {
 		assert.Equal(t, auditUsername, credsMap["audit_username"], "audit_username must be set from API response")
 	})
 
+	// Reproduce the acceptance-test panic (importBasic): the Terraform Plugin
+	// SDK v2 normalises an empty TypeList element to nil when read back via
+	// d.Get, so c[0].(map[string]interface{}) panics. This test forces that
+	// nil-element path by calling d.Set("credentials", []interface{}{nil})
+	// after creating the ResourceData, then verifies that Read neither panics
+	// nor returns an error and that the API-returned usernames are written.
+	t.Run("Read_with_nil_credentials_element_does_not_panic", func(t *testing.T) {
+		cliUser := "admin"
+		auditUser := "audit"
+		returnSV := vnaStructValue(model.VirtualNetworkAppliance{
+			Id:          &vnaID,
+			DisplayName: &vnaName,
+			Path:        &vnaPath,
+			Revision:    &vnaRevision,
+			Credentials: &model.VirtualNetworkApplianceCredential{
+				CliUsername:   &cliUser,
+				AuditUsername: &auditUser,
+			},
+		})
+		mockVNA.EXPECT().Get(vnaClusterSiteID, vnaClusterEPID, vnaClusterID, vnaID).Return(returnSV, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"cluster_path": vnaClusterPath,
+		})
+		d.SetId(vnaID)
+		// Simulate the SDK normalisation: empty map → nil element.
+		require.NoError(t, d.Set("credentials", []interface{}{nil}))
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyVirtualNetworkApplianceRead(d, m)
+		require.NoError(t, err)
+
+		credList := d.Get("credentials").([]interface{})
+		require.Len(t, credList, 1, "credentials block must be written when list had a nil element")
+		creds := credList[0].(map[string]interface{})
+		assert.Equal(t, cliUser, creds["cli_username"], "cli_username must reflect NSX response")
+		assert.Equal(t, auditUser, creds["audit_username"], "audit_username must reflect NSX response")
+	})
+
 	// Verify that no credentials block is written to state when the API
 	// returns a Credentials object but no credentials are configured locally.
 	t.Run("Read_no_credentials_block_when_not_configured", func(t *testing.T) {

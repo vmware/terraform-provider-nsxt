@@ -239,7 +239,14 @@ func setVNACredentialsInSchema(d *schema.ResourceData, obj *model.VirtualNetwork
 	if len(c) == 0 {
 		return nil
 	}
-	creds := c[0].(map[string]interface{})
+	// The Terraform Plugin SDK v2 normalises a TypeList element that was set
+	// as an empty map (e.g. by the importer seeding an empty credentials block)
+	// to nil when the element is read back via d.Get. Guard against that here
+	// so we don't panic on the type assertion.
+	creds, ok := c[0].(map[string]interface{})
+	if !ok || creds == nil {
+		creds = make(map[string]interface{})
+	}
 	if obj.AuditUsername != nil {
 		creds["audit_username"] = *obj.AuditUsername
 	}
