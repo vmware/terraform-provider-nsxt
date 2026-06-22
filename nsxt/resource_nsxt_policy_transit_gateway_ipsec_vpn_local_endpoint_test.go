@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var EpRelatedResourceName = getAccTestResourceName()
 var accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes = map[string]string{
 	"description": "terraform created",
 	"local_id":    "test-create",
@@ -27,6 +26,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test"
 	createDisplayName := getAccTestResourceName()
 	updateDisplayName := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -39,7 +39,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(true, createDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(true, createDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
@@ -54,7 +54,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(false, updateDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(false, updateDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(updateDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
@@ -69,7 +69,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(updateDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(updateDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnLocalEndpointExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -85,6 +85,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -99,7 +100,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnLocalEndpoint_importBasic(t *testing.T)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(name),
+				Config: testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(name, prereqName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -160,14 +161,14 @@ func testAccNsxtPolicyTGWIPSecVpnLocalEndpointCheckDestroy(state *terraform.Stat
 	return nil
 }
 
-func testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(createFlow bool, displayName string) string {
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointTemplate(createFlow bool, displayName string, prereqName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnLocalEndpointCreateAttributes
 	} else {
 		attrMap = accTestPolicyTGWIPSecVpnLocalEndpointUpdateAttributes
 	}
-	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() +
+	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites(prereqName) +
 		fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
@@ -183,8 +184,8 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
 }`, displayName, attrMap["description"], attrMap["local_id"])
 }
 
-func testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(displayName string) string {
-	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointMinimalistic(displayName string, prereqName string) string {
+	return testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites(prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
   display_name = "%s"
   parent_path   =  nsxt_policy_transit_gateway_ipsec_vpn_service.test.path
@@ -192,7 +193,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_local_endpoint" "test" {
 }`, displayName)
 }
 
-func testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites() string {
+func testAccNsxtPolicyTGWIPSecVpnLocalEndpointPrerequisites(prereqName string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
@@ -289,5 +290,5 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, getEdgeClusterName(), EpRelatedResourceName, EpRelatedResourceName, EpRelatedResourceName, EpRelatedResourceName, EpRelatedResourceName)
+}`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName, prereqName)
 }

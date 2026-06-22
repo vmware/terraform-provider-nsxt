@@ -40,6 +40,7 @@ var accTestTransitGatewayNatRuleUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_nat_rule.test"
+	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -53,7 +54,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtTransitGatewayNatRuleTemplate(true),
+				Config: testAccNsxtTransitGatewayNatRuleTemplate(true, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtTransitGatewayNatRuleExists(accTestTransitGatewayNatRuleCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayNatRuleCreateAttributes["display_name"]),
@@ -75,7 +76,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtTransitGatewayNatRuleTemplate(false),
+				Config: testAccNsxtTransitGatewayNatRuleTemplate(false, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtTransitGatewayNatRuleExists(accTestTransitGatewayNatRuleUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayNatRuleUpdateAttributes["display_name"]),
@@ -97,7 +98,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtTransitGatewayNatRuleMinimalistic(),
+				Config: testAccNsxtTransitGatewayNatRuleMinimalistic(prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtTransitGatewayNatRuleExists(accTestTransitGatewayNatRuleCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -116,6 +117,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 	sourceIP := "2.2.2.34"
 	translatedNetwork := accTestTransitGatewayNatRuleCreateAttributes["translated_network"]
 	ruleName := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -129,7 +131,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtTransitGatewayNatRuleSnatTemplate(ruleName, translatedNetwork),
+				Config: testAccNsxtTransitGatewayNatRuleSnatTemplate(ruleName, translatedNetwork, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtTransitGatewayNatRuleExists(ruleName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", ruleName),
@@ -147,7 +149,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtTransitGatewayNatRuleReflexiveTemplate(ruleName, sourceIP, translatedNetwork),
+				Config: testAccNsxtTransitGatewayNatRuleReflexiveTemplate(ruleName, sourceIP, translatedNetwork, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtTransitGatewayNatRuleExists(ruleName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", ruleName),
@@ -170,6 +172,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_changeTypes(t *testing.T) {
 
 func TestAccResourceNsxtTransitGatewayNatRule_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_nat_rule.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -184,7 +187,7 @@ func TestAccResourceNsxtTransitGatewayNatRule_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtTransitGatewayNatRuleMinimalistic(),
+				Config: testAccNsxtTransitGatewayNatRuleMinimalistic(prereqName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -248,8 +251,8 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 	return nil
 }
 
-func testAccNsxtTransitGatewayNatRulePrerequisites(attrMap map[string]string) string {
-	return testAccNsxtPolicyTransitGatewayAttachmentTemplate(true) + fmt.Sprintf(`
+func testAccNsxtTransitGatewayNatRulePrerequisites(attrMap map[string]string, prereqName string) string {
+	return testAccNsxtPolicyTransitGatewayAttachmentTemplate(true, prereqName) + fmt.Sprintf(`
 
 resource "nsxt_policy_project_ip_address_allocation" "dest_nat" {
   context {
@@ -275,14 +278,14 @@ data "nsxt_policy_transit_gateway_nat" "test" {
 `, attrMap["destination_network"], attrMap["translated_network"])
 }
 
-func testAccNsxtTransitGatewayNatRuleTemplate(createFlow bool) string {
+func testAccNsxtTransitGatewayNatRuleTemplate(createFlow bool, prereqName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestTransitGatewayNatRuleCreateAttributes
 	} else {
 		attrMap = accTestTransitGatewayNatRuleUpdateAttributes
 	}
-	return testAccNsxtTransitGatewayNatRulePrerequisites(attrMap) + fmt.Sprintf(`
+	return testAccNsxtTransitGatewayNatRulePrerequisites(attrMap, prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
   display_name        = "%s"
@@ -303,8 +306,8 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }`, attrMap["display_name"], attrMap["description"], attrMap["translated_network"], attrMap["logging"], attrMap["destination_network"], attrMap["action"], attrMap["firewall_match"], attrMap["source_network"], attrMap["enabled"], attrMap["sequence_number"])
 }
 
-func testAccNsxtTransitGatewayNatRuleMinimalistic() string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
+func testAccNsxtTransitGatewayNatRuleMinimalistic(prereqName string) string {
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes, prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path         = data.nsxt_policy_transit_gateway_nat.test.path
   display_name        = "%s"
@@ -314,8 +317,8 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }`, accTestTransitGatewayNatRuleUpdateAttributes["display_name"], accTestTransitGatewayNatRuleUpdateAttributes["translated_network"], accTestTransitGatewayNatRuleUpdateAttributes["destination_network"], accTestTransitGatewayNatRuleUpdateAttributes["action"])
 }
 
-func testAccNsxtTransitGatewayNatRuleSnatTemplate(name string, translatedNetwork string) string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
+func testAccNsxtTransitGatewayNatRuleSnatTemplate(name string, translatedNetwork string, prereqName string) string {
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes, prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
   display_name       = "%s"
@@ -324,8 +327,8 @@ resource "nsxt_policy_transit_gateway_nat_rule" "test" {
 }`, name, translatedNetwork)
 }
 
-func testAccNsxtTransitGatewayNatRuleReflexiveTemplate(name string, sourceIP string, translatedNetwork string) string {
-	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes) + fmt.Sprintf(`
+func testAccNsxtTransitGatewayNatRuleReflexiveTemplate(name string, sourceIP string, translatedNetwork string, prereqName string) string {
+	return testAccNsxtTransitGatewayNatRulePrerequisites(accTestTransitGatewayNatRuleCreateAttributes, prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_nat_rule" "test" {
   parent_path        = data.nsxt_policy_transit_gateway_nat.test.path
   display_name       = "%s"

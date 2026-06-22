@@ -32,24 +32,25 @@ var accTestPolicyLBServiceUpdateAttributes = map[string]string{
 	"size":              "SMALL",
 }
 
-var accTestPolicyLBServiceGateway1Name = getAccTestResourceName()
-var accTestPolicyLBServiceGateway2Name = getAccTestResourceName()
-
 func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_service.test"
+	createName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
+	gw1Name := getAccTestResourceName()
+	gw2Name := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLBServiceCheckDestroy(state, accTestPolicyLBServiceCreateAttributes["display_name"])
+			return testAccNsxtPolicyLBServiceCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyLBServiceTemplate(true),
+				Config: testAccNsxtPolicyLBServiceTemplate(true, createName, updateName, gw1Name, gw2Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBServiceExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLBServiceCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyLBServiceCreateAttributes["enabled"]),
@@ -63,10 +64,10 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyLBServiceTemplate(false),
+				Config: testAccNsxtPolicyLBServiceTemplate(false, createName, updateName, gw1Name, gw2Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBServiceExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBServiceUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLBServiceUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyLBServiceUpdateAttributes["enabled"]),
@@ -80,7 +81,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyLBServiceMinimalistic(),
+				Config: testAccNsxtPolicyLBServiceMinimalistic(updateName, gw1Name, gw2Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -96,7 +97,9 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyLBService_importBasic(t *testing.T) {
-	name := accTestPolicyLBServiceUpdateAttributes["display_name"]
+	name := getAccTestResourceName()
+	gw1Name := getAccTestResourceName()
+	gw2Name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_lb_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -107,7 +110,7 @@ func TestAccResourceNsxtPolicyLBService_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyLBServiceMinimalistic(),
+				Config: testAccNsxtPolicyLBServiceMinimalistic(name, gw1Name, gw2Name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -166,12 +169,16 @@ func testAccNsxtPolicyLBServiceCheckDestroy(state *terraform.State, displayName 
 	return nil
 }
 
-func testAccNsxtPolicyLBServiceTemplate(createFlow bool) string {
+func testAccNsxtPolicyLBServiceTemplate(createFlow bool, createName, updateName, gw1Name, gw2Name string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyLBServiceCreateAttributes
 	} else {
 		attrMap = accTestPolicyLBServiceUpdateAttributes
+	}
+	displayName := updateName
+	if createFlow {
+		displayName = createName
 	}
 	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
 
@@ -203,12 +210,12 @@ resource "nsxt_policy_lb_service" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
-}`, accTestPolicyLBServiceGateway1Name, accTestPolicyLBServiceGateway2Name, attrMap["display_name"], attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
+}`, gw1Name, gw2Name, displayName, attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
 }
 
 // Terraform test does not respect T1-T0 dependency upon destroy,
 // so we need workaround that detaches T1 from T0 to avoid destroy error
-func testAccNsxtPolicyLBServiceMinimalistic() string {
+func testAccNsxtPolicyLBServiceMinimalistic(updateName, gw1Name, gw2Name string) string {
 	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test1" {
   display_name      = "%s"
@@ -225,7 +232,7 @@ resource "nsxt_policy_lb_service" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
-}`, accTestPolicyLBServiceGateway1Name, accTestPolicyLBServiceGateway2Name, accTestPolicyLBServiceUpdateAttributes["display_name"])
+}`, gw1Name, gw2Name, updateName)
 }
 
 func testAccNsxtPolicyLBServiceDeps() string {

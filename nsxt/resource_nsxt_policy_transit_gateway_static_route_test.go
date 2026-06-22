@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var dependantResourceName = getAccTestResourceName()
-
 var accTestPolicyTransitGatewayStaticRouteCreateAttributes = map[string]string{
 	"display_name":         getAccTestResourceName(),
 	"description":          "terraform created",
@@ -32,6 +30,7 @@ var accTestPolicyTransitGatewayStaticRouteUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
+	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -45,7 +44,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(true),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(true, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"]),
@@ -62,7 +61,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(false),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteTemplate(false, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"]),
@@ -79,7 +78,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayStaticRouteExists(accTestPolicyTransitGatewayStaticRouteCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -95,6 +94,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_static_route.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -109,7 +109,7 @@ func TestAccResourceNsxtPolicyTransitGatewayStaticRoute_importBasic(t *testing.T
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(prereqName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -170,14 +170,14 @@ func testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state *terraform.Sta
 	return nil
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRouteTemplate(createFlow bool) string {
+func testAccNsxtPolicyTransitGatewayStaticRouteTemplate(createFlow bool, prereqName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTransitGatewayStaticRouteCreateAttributes
 	} else {
 		attrMap = accTestPolicyTransitGatewayStaticRouteUpdateAttributes
 	}
-	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites(prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
   display_name          = "%s"
   description           = "%s"
@@ -198,8 +198,8 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled_on_secondary"], attrMap["network"], attrMap["admin_distance"])
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic() string {
-	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyTransitGatewayStaticRouteMinimalistic(prereqName string) string {
+	return testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites(prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_static_route" "test" {
   display_name     = "%s"
   parent_path      = data.nsxt_policy_transit_gateway.test.path
@@ -213,7 +213,7 @@ resource "nsxt_policy_transit_gateway_static_route" "test" {
 }`, accTestPolicyTransitGatewayStaticRouteUpdateAttributes["display_name"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["network"], accTestPolicyTransitGatewayStaticRouteUpdateAttributes["admin_distance"])
 }
 
-func testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites() string {
+func testAccNsxtPolicyTransitGatewayStaticRoutePrerequisites(prereqName string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
@@ -255,5 +255,5 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, getEdgeClusterName(), dependantResourceName, dependantResourceName, dependantResourceName, dependantResourceName)
+}`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName)
 }

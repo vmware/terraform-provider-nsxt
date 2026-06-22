@@ -26,19 +26,21 @@ var accTestVpcIpAddressAllocationUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_ip_address_allocation.test"
+	createName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtVpcIpAddressAllocationCheckDestroy(state, accTestVpcIpAddressAllocationUpdateAttributes["display_name"])
+			return testAccNsxtVpcIpAddressAllocationCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcIpAddressAllocationTemplate(true),
+				Config: testAccNsxtVpcIpAddressAllocationTemplate(true, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcIpAddressAllocationExists(accTestVpcIpAddressAllocationCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcIpAddressAllocationCreateAttributes["display_name"]),
+					testAccNsxtVpcIpAddressAllocationExists(createName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcIpAddressAllocationCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
 					resource.TestCheckResourceAttr(testResourceName, "allocation_size", accTestVpcIpAddressAllocationCreateAttributes["allocation_size"]),
@@ -50,10 +52,10 @@ func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcIpAddressAllocationTemplate(false),
+				Config: testAccNsxtVpcIpAddressAllocationTemplate(false, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcIpAddressAllocationExists(accTestVpcIpAddressAllocationUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcIpAddressAllocationUpdateAttributes["display_name"]),
+					testAccNsxtVpcIpAddressAllocationExists(updateName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcIpAddressAllocationUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
 					resource.TestCheckResourceAttr(testResourceName, "allocation_size", accTestVpcIpAddressAllocationUpdateAttributes["allocation_size"]),
@@ -65,9 +67,9 @@ func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtVpcIpAddressAllocationMinimalistic(updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtVpcIpAddressAllocationExists(accTestVpcIpAddressAllocationCreateAttributes["display_name"], testResourceName),
+					testAccNsxtVpcIpAddressAllocationExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -91,7 +93,7 @@ func TestAccResourceNsxtVpcIpAddressAllocation_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtVpcIpAddressAllocationMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -151,12 +153,16 @@ func testAccNsxtVpcIpAddressAllocationCheckDestroy(state *terraform.State, displ
 	return nil
 }
 
-func testAccNsxtVpcIpAddressAllocationTemplate(createFlow bool) string {
+func testAccNsxtVpcIpAddressAllocationTemplate(createFlow bool, createName, updateName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcIpAddressAllocationCreateAttributes
 	} else {
 		attrMap = accTestVpcIpAddressAllocationUpdateAttributes
+	}
+	displayName := updateName
+	if createFlow {
+		displayName = createName
 	}
 	return fmt.Sprintf(`
 resource "nsxt_vpc_ip_address_allocation" "test" {
@@ -173,10 +179,10 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
 data "nsxt_vpc_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_vpc_ip_address_allocation.test.allocation_ips
-}`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtPolicyMultitenancyContext())
+}`, testAccNsxtPolicyMultitenancyContext(), displayName, attrMap["description"], attrMap["allocation_size"], testAccNsxtPolicyMultitenancyContext())
 }
 
-func testAccNsxtVpcIpAddressAllocationMinimalistic() string {
+func testAccNsxtVpcIpAddressAllocationMinimalistic(updateName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vpc_ip_address_allocation" "test" {
   %s
@@ -187,5 +193,5 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
 data "nsxt_vpc_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_vpc_ip_address_allocation.test.allocation_ips
-}`, testAccNsxtPolicyMultitenancyContext(), accTestVpcIpAddressAllocationUpdateAttributes["display_name"], accTestVpcIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtPolicyMultitenancyContext())
+}`, testAccNsxtPolicyMultitenancyContext(), updateName, accTestVpcIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtPolicyMultitenancyContext())
 }
