@@ -29,6 +29,8 @@ var accTestPolicyDistributedVlanConnectionUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_distributed_vlan_connection.test"
 	testDataSourceName := "data.nsxt_policy_distributed_vlan_connection.test"
+	createName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -37,14 +39,14 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDistributedVlanConnectionCheckDestroy(state, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+			return testAccNsxtPolicyDistributedVlanConnectionCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDistributedVlanConnectionTemplate(true),
+				Config: testAccNsxtPolicyDistributedVlanConnectionTemplate(true, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDistributedVlanConnectionExists(accTestPolicyDistributedVlanConnectionCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDistributedVlanConnectionCreateAttributes["display_name"]),
+					testAccNsxtPolicyDistributedVlanConnectionExists(createName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDistributedVlanConnectionCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_id", accTestPolicyDistributedVlanConnectionCreateAttributes["vlan_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_addresses.0", accTestPolicyDistributedVlanConnectionCreateAttributes["gateway_addresses"]),
@@ -57,10 +59,10 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDistributedVlanConnectionTemplate(false),
+				Config: testAccNsxtPolicyDistributedVlanConnectionTemplate(false, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDistributedVlanConnectionExists(accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"]),
+					testAccNsxtPolicyDistributedVlanConnectionExists(updateName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDistributedVlanConnectionUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_id", accTestPolicyDistributedVlanConnectionUpdateAttributes["vlan_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_addresses.0", accTestPolicyDistributedVlanConnectionUpdateAttributes["gateway_addresses"]),
@@ -73,9 +75,9 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDistributedVlanConnectionMinimalistic(),
+				Config: testAccNsxtPolicyDistributedVlanConnectionMinimalistic(updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDistributedVlanConnectionExists(accTestPolicyDistributedVlanConnectionCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyDistributedVlanConnectionExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -104,7 +106,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_importBasic(t *testing.T
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDistributedVlanConnectionMinimalistic(),
+				Config: testAccNsxtPolicyDistributedVlanConnectionMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -195,12 +197,16 @@ func testAccNsxtPolicyDistributedVlanConnectionCheckDestroy(state *terraform.Sta
 	return nil
 }
 
-func testAccNsxtPolicyDistributedVlanConnectionTemplate(createFlow bool) string {
+func testAccNsxtPolicyDistributedVlanConnectionTemplate(createFlow bool, createName, updateName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyDistributedVlanConnectionCreateAttributes
 	} else {
 		attrMap = accTestPolicyDistributedVlanConnectionUpdateAttributes
+	}
+	displayName := createName
+	if !createFlow {
+		displayName = updateName
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_vlan_connection" "test" {
@@ -220,10 +226,10 @@ data "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
 
   depends_on = [nsxt_policy_distributed_vlan_connection.test]
-}`, attrMap["display_name"], attrMap["description"], attrMap["vlan_id"], attrMap["gateway_addresses"], attrMap["display_name"])
+}`, displayName, attrMap["description"], attrMap["vlan_id"], attrMap["gateway_addresses"], displayName)
 }
 
-func testAccNsxtPolicyDistributedVlanConnectionMinimalistic() string {
+func testAccNsxtPolicyDistributedVlanConnectionMinimalistic(updateName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
@@ -236,7 +242,7 @@ data "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
 
   depends_on = [nsxt_policy_distributed_vlan_connection.test]
-}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["vlan_id"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+}`, updateName, accTestPolicyDistributedVlanConnectionUpdateAttributes["vlan_id"], updateName)
 }
 
 func testAccNsxtPolicyDistributedVlanConnectionWithVlanExtension() string {
