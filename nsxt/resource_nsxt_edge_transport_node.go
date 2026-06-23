@@ -1905,12 +1905,7 @@ func setEdgeDeploymentConfigInSchema(d *schema.ResourceData, deploymentConfig *m
 	elem := getElemOrEmptyMapFromSchema(d, "deployment_config")
 
 	elem["form_factor"] = deploymentConfig.FormFactor
-	var nodeUserSettings map[string]interface{}
-	if elem["node_user_settings"] != nil {
-		nodeUserSettings = elem["node_user_settings"].([]interface{})[0].(map[string]interface{})
-	} else {
-		nodeUserSettings = make(map[string]interface{})
-	}
+	nodeUserSettings := getElemOrEmptyMapFromMap(elem, "node_user_settings")
 	// Note: password attributes is sensitive and is not returned by NSX
 	if deploymentConfig.NodeUserSettings.AuditUsername != nil {
 		nodeUserSettings["audit_username"] = deploymentConfig.NodeUserSettings.AuditUsername
