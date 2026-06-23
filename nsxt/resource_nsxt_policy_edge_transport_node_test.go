@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyEdgeTransportNodeCheckDestroy(state, displayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyEdgeTransportNodeCreateTemplate(displayName),
 				Check: resource.ComposeTestCheckFunc(
@@ -72,7 +72,7 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_basic(t *testing.T) {
 					"revision",
 				},
 			},
-		},
+		}),
 	})
 }
 
@@ -89,7 +89,7 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_importBasic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyEdgeTransportNodeCheckDestroy(state, displayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyEdgeTransportNodeCreateTemplate(displayName),
 			},
@@ -105,7 +105,7 @@ func TestAccResourceNsxtPolicyEdgeTransportNode_importBasic(t *testing.T) {
 					"revision",
 				},
 			},
-		},
+		}),
 	})
 }
 

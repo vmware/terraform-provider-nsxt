@@ -54,7 +54,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyBgpNeighborTemplate(true, subnet, false),
 				Check: resource.ComposeTestCheckFunc(
@@ -102,7 +102,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -148,7 +148,7 @@ func TestAccResourceNsxtPolicyBgpNeighborWithLocalAsNeighbour_basic(t *testing.T
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyBgpNeighborTemplate(true, subnet, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -202,7 +202,7 @@ func TestAccResourceNsxtPolicyBgpNeighborWithLocalAsNeighbour_basic(t *testing.T
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 func TestAccResourceNsxtPolicyBgpNeighbor_globalManager(t *testing.T) {
@@ -216,7 +216,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_globalManager(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyBgpNeighborGMTemplate(true, subnet),
 				Check: resource.ComposeTestCheckFunc(
@@ -270,7 +270,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_globalManager(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -307,7 +307,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfig(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, "tfbgp")
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyBgpNeighborSubConfigCreate(),
 				Check: resource.ComposeTestCheckFunc(
@@ -344,7 +344,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "route_filtering.0.maximum_routes", "20"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -455,6 +455,31 @@ func TestAccResourceNsxtPolicyBgpNeighbor_importBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNSXPolicyBgpNeighborImporterGetIDs,
 			},
 		},
+	})
+}
+
+func TestAccResourceNsxtPolicyBgpNeighbor_importWithPassword(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_bgp_neighbor.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, name)
+		},
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
+			{
+				Config: testAccNsxtPolicyBgpNeighborMinimalisticWithPassword(),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateIdFunc:       testAccNSXPolicyBgpNeighborImporterGetIDs,
+			},
+		}),
 	})
 }
 
@@ -652,6 +677,36 @@ resource "nsxt_policy_bgp_neighbor" "test" {
 
 }
 `, getEdgeClusterName(), accTestPolicyBgpNeighborConfigCreateAttributes["display_name"], accTestPolicyBgpNeighborConfigCreateAttributes["neighbor_address"], accTestPolicyBgpNeighborConfigCreateAttributes["remote_as_num"])
+}
+
+func testAccNsxtPolicyBgpNeighborMinimalisticWithPassword() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "terraformt0gw"
+  description       = "Acceptance Test"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+
+  bgp_config {
+    local_as_num    = "60000"
+    multipath_relax = true
+    route_aggregation {
+      prefix = "12.12.12.0/24"
+    }
+  }
+}
+
+resource "nsxt_policy_bgp_neighbor" "test" {
+  bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
+  display_name     = "%s"
+  neighbor_address = "%s"
+  remote_as_num    = "%s"
+  password         = "%s"
+}
+`, getEdgeClusterName(), accTestPolicyBgpNeighborConfigCreateAttributes["display_name"], accTestPolicyBgpNeighborConfigCreateAttributes["neighbor_address"], accTestPolicyBgpNeighborConfigCreateAttributes["remote_as_num"], accTestPolicyBgpNeighborConfigCreateAttributes["password"])
 }
 
 func testAccNsxtPolicyBgpNeighborSubConfigCreate() string {

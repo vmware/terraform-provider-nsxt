@@ -159,7 +159,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 			}
 			return testAccDeleteAllLdapIdentitySources()
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyLdapIdentitySourceCreate(
 					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapAdminUser(), getTestLdapAdminPassword(), getTestLdapURL()),
@@ -170,7 +170,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"ldap_server.0.password"},
 			},
-		},
+		}),
 	})
 }
 

@@ -41,7 +41,7 @@ func TestAccResourceNsxtPolicyBgpConfig_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyBgpConfigTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
@@ -78,7 +78,7 @@ func TestAccResourceNsxtPolicyBgpConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 

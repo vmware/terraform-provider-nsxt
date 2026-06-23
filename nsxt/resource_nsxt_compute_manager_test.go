@@ -29,7 +29,7 @@ func TestAccResourceNsxtComputeManager_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXComputeManagerCheckDestroy(state, updateComputeManagerName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNSXComputeManagerCreateTemplate(computeManagerName),
 				Check: resource.ComposeTestCheckFunc(
@@ -48,7 +48,7 @@ func TestAccResourceNsxtComputeManager_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 

@@ -38,7 +38,7 @@ func testAccResourceNsxtPolicyProxyConfigBasic(t *testing.T, withContext bool, p
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtProxyConfigCheckDestroy(state, updatedName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks(withIdempotencyChecks([]resource.TestStep{
 			{
 				// Test with disabled proxy first (no connectivity validation)
 				Config: testAccNsxtProxyConfigDisabledWithDetails(name, server1, port1, username1, withContext),
@@ -74,7 +74,7 @@ func testAccResourceNsxtPolicyProxyConfigBasic(t *testing.T, withContext bool, p
 				// Password is sensitive and not returned by API
 				ImportStateVerifyIgnore: []string{"password"},
 			},
-		},
+		})),
 	})
 }
 
