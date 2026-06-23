@@ -143,7 +143,7 @@ func testAccNsxtPolicyEvpnTenantCheckDestroy(state *terraform.State, displayName
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyEvpnTenantExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

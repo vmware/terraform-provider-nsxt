@@ -223,7 +223,7 @@ func testAccNsxtVpcNatRuleCheckDestroy(state *terraform.State, displayName strin
 		parentPath := rs.Primary.Attributes["parent_path"]
 
 		exists, err := resourceNsxtPolicyVpcNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

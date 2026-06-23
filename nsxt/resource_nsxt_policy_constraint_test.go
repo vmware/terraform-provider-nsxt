@@ -314,7 +314,7 @@ func testAccNsxtPolicyConstraintCheckDestroy(state *terraform.State, displayName
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyConstraintExists(testAccGetSessionProjectContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

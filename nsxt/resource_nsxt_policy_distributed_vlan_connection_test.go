@@ -186,7 +186,7 @@ func testAccNsxtPolicyDistributedVlanConnectionCheckDestroy(state *terraform.Sta
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyDistributedVlanConnectionExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

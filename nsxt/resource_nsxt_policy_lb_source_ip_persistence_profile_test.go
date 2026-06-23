@@ -122,7 +122,7 @@ func testAccNsxtPolicyLBSourceIpPersistenceProfileCheckDestroy(state *terraform.
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyLBPersistenceProfileExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

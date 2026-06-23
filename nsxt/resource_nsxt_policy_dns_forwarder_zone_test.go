@@ -188,7 +188,7 @@ func testAccNsxtPolicyDNSForwarderZoneCheckDestroy(state *terraform.State, displ
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyDNSForwarderZoneExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

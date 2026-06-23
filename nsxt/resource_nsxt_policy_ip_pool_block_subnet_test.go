@@ -235,6 +235,9 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 		if err == nil {
 			return fmt.Errorf("Block Subnet still exists %s", resourceID)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 
 	}
 	return nil

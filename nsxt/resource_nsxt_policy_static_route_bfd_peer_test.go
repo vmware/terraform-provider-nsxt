@@ -149,7 +149,7 @@ func testAccNsxtPolicyStaticRouteBfdPeerCheckDestroy(state *terraform.State, dis
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
 		exists, err := resourceNsxtPolicyStaticRouteBfdPeerExists(gwID, resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

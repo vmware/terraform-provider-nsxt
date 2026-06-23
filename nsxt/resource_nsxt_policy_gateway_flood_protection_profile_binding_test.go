@@ -200,7 +200,7 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileBindingCheckDestroy(state *te
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingExists(testAccGetSessionContext(), connector, parentPath, resourceID)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -164,7 +164,7 @@ func testAccNsxtVpcConnectivityProfileCheckDestroy(state *terraform.State, displ
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtVpcConnectivityProfileExists(testAccGetMultitenancyContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

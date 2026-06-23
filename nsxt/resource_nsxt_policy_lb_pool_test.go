@@ -269,6 +269,9 @@ func testAccNsxtPolicyLBPoolCheckDestroy(state *terraform.State, displayName str
 		if err == nil {
 			return fmt.Errorf("Policy LBPool %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

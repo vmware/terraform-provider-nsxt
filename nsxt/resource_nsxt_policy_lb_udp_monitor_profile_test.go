@@ -161,7 +161,7 @@ func testAccNsxtPolicyLBUdpMonitorProfileCheckDestroy(state *terraform.State, di
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyLBMonitorProfileExistsWrapper(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

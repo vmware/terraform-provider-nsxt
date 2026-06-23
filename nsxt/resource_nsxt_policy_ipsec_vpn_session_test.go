@@ -758,7 +758,7 @@ func testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state *terraform.State, displa
 		servicePath := rs.Primary.Attributes["service_path"]
 		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), servicePath)
 		exists, err := resourceNsxtPolicyIPSecVpnSessionExists(servicePath, resourceID, connector, sessionContext)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

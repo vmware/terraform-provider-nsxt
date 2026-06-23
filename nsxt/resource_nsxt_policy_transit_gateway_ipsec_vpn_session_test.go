@@ -488,7 +488,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

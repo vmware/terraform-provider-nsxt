@@ -184,7 +184,7 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

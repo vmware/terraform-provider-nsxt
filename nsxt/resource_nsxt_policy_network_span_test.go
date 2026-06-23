@@ -145,7 +145,7 @@ func testAccNsxtPolicyNetworkSpanCheckDestroy(state *terraform.State, displayNam
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyNetworkSpanExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -179,6 +179,9 @@ func testAccNSXPolicyIPPoolCheckDestroy(state *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("IP Pool still exists %s", resourceID)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 
 	}
 	return nil

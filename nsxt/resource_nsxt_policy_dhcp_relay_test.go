@@ -175,7 +175,7 @@ func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displa
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

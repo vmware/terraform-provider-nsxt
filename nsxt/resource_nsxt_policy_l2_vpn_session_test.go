@@ -258,7 +258,7 @@ func testAccNsxtPolicyL2VpnSessionCheckDestroy(state *terraform.State, displayNa
 		d := &schema.ResourceData{}
 		sessionContext := getSessionContext(d, testAccProvider.Meta())
 		exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, resourceID, connector, sessionContext)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

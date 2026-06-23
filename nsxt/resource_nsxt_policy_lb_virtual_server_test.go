@@ -765,6 +765,9 @@ func testAccNsxtPolicyLBVirtualServerCheckDestroy(state *terraform.State, displa
 		if err == nil {
 			return fmt.Errorf("Policy LBVirtualServer %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

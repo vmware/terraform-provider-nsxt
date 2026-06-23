@@ -384,7 +384,7 @@ func testAccNsxtPolicyTransitGatewayCheckDestroy(state *terraform.State, display
 		resourceID := rs.Primary.Attributes["id"]
 		projectID := strings.Split(rs.Primary.Attributes["path"], "/")[4]
 		exists, err := resourceNsxtPolicyTransitGatewayExists(tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -200,11 +200,17 @@ func testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state *terraform.State, displ
 			if err == nil && obj.HaVipConfigs != nil {
 				return fmt.Errorf("Policy Tier0 HA vip config %s still exists", resourceID)
 			}
+			if err != nil && !isNotFoundError(err) {
+				return err
+			}
 		} else {
 			nsxClient := tier_0s.NewLocaleServicesClient(connector)
 			obj, err := nsxClient.Get(gwID, localeServiceID)
 			if err == nil && obj.HaVipConfigs != nil {
 				return fmt.Errorf("Policy Tier0 HA vip config %s still exists", resourceID)
+			}
+			if err != nil && !isNotFoundError(err) {
+				return err
 			}
 		}
 	}

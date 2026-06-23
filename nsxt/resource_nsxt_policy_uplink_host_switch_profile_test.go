@@ -244,7 +244,7 @@ func testAccNsxtUplinkHostSwitchProfileCheckDestroy(state *terraform.State, disp
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtUplinkHostSwitchProfileExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

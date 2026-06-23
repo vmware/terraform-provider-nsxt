@@ -479,6 +479,9 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 		if err == nil {
 			return fmt.Errorf("policy Tier1 Interface %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }
