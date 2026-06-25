@@ -44,10 +44,25 @@ data "nsxt_policy_tier1_gateway" "tier1_router_global" {
 }
 ```
 
+## Example Usage - Lookup by path
+
+This is useful to resolve a gateway from the `connectivity_path` exported by `nsxt_policy_segment`.
+
+```hcl
+data "nsxt_policy_segment" "example" {
+  display_name = "my-segment"
+}
+
+data "nsxt_policy_tier1_gateway" "gw" {
+  path = data.nsxt_policy_segment.example.connectivity_path
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Tier-1 gateway to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Tier-1 gateway to retrieve.
+* `path` - (Optional) The full NSX policy path of the Tier-1 gateway (e.g. `/infra/tier-1s/<id>`). Conflicts with `id` and `display_name`.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Optional) The ID of the project which the object belongs to
     * `from_global` - (Optional) Set to True if the data source will need to search Tier-1 gateway created in a global manager instance (/global-infra)
