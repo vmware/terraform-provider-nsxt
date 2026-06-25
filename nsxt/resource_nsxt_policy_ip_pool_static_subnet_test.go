@@ -238,6 +238,9 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state *terraform.State) erro
 		if err == nil {
 			return fmt.Errorf("Static Subnet still exists %s", resourceID)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 
 	}
 	return nil

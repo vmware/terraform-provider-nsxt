@@ -409,6 +409,9 @@ func testAccNsxtPolicyContextProfileCheckDestroy(state *terraform.State, display
 		if err == nil {
 			return fmt.Errorf("Policy ContextProfile %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

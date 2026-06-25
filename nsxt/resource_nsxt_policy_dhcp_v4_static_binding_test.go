@@ -222,7 +222,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, di
 		resourceID := rs.Primary.Attributes["id"]
 		segmentPath := rs.Primary.Attributes["segment_path"]
 		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetSessionContext(), resourceID, segmentPath, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

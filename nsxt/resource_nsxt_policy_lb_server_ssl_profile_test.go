@@ -167,7 +167,7 @@ func testAccNsxtPolicyLBServerSslProfileCheckDestroy(state *terraform.State, dis
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyLBServerSslProfileExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

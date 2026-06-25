@@ -146,6 +146,9 @@ func testAccNsxtPolicyDomainCheckDestroy(state *terraform.State, displayName str
 		if err == nil {
 			return fmt.Errorf("Policy domain %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

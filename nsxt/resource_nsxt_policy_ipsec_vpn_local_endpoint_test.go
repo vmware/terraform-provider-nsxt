@@ -218,7 +218,7 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state *terraform.State, 
 		resourceID := rs.Primary.Attributes["id"]
 		servicePath := rs.Primary.Attributes["service_path"]
 		exists, err := resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(resourceID, connector, servicePath)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

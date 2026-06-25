@@ -133,7 +133,7 @@ func testAccNsxtPolicyFirewallExcludeListMemberCheckDestroy(state *terraform.Sta
 		}
 
 		exists, err := resourceNsxtPolicyFirewallExcludeListMemberExists(testAccGetSessionContext(), member, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

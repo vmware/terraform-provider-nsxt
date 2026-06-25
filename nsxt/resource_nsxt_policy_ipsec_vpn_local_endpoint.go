@@ -253,6 +253,10 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector
 		return false, nil
 	}
 
+	if _, codeErr := getInvalidRequestErrorCode(err); codeErr == nil {
+		return false, nil
+	}
+
 	return false, logAPIError("Error retrieving resource", err)
 }
 

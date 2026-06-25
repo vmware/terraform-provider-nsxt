@@ -237,7 +237,7 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 		parentPath := rs.Primary.Attributes["parent_path"]
 
 		exists, err := resourceNsxtPolicyTransitGatewayNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

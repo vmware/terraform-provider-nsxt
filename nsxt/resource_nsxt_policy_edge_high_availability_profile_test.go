@@ -180,7 +180,7 @@ func testAccNsxtPolicyEdgeHighAvailabilityProfileCheckDestroy(state *terraform.S
 		sitePath := rs.Primary.Attributes["site_path"]
 		siteID := getPolicyIDFromPath(sitePath)
 		exists, err := resourceNsxtPolicyEdgeHighAvailabilityProfileExists(siteID, epID, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

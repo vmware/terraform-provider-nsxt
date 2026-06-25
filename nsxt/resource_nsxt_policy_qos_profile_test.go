@@ -197,7 +197,7 @@ func testAccNSXPolicyQosProfileCheckDestroy(state *terraform.State, displayName 
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyQosProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

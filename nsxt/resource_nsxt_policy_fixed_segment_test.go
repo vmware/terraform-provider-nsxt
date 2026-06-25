@@ -333,7 +333,7 @@ func testAccNsxtPolicyFixedSegmentCheckDestroy(state *terraform.State, displayNa
 		gwPath := rs.Primary.Attributes["connectivity_path"]
 		context := testAccGetSessionContext()
 		exists, err := resourceNsxtPolicySegmentExists(context, gwPath, true)(context, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

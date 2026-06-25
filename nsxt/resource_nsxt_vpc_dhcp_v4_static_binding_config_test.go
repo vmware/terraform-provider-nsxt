@@ -311,7 +311,7 @@ func testAccNsxtVpcSubnetDhcpV4StaticBindingConfigCheckDestroy(state *terraform.
 		parentPath := rs.Primary.Attributes["parent_path"]
 
 		exists, err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

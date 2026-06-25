@@ -135,7 +135,7 @@ func testAccNsxtPolicyMetadataProxyCheckDestroy(state *terraform.State, displayN
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyMetadataProxyExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -159,6 +159,9 @@ func testAccNsxtPolicyLBServiceCheckDestroy(state *terraform.State, displayName 
 		if err == nil {
 			return fmt.Errorf("Policy LBService %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

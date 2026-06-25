@@ -118,11 +118,12 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		id = newUUID()
 	}
 	sessionContext := getSessionContext(d, m)
-	_, err = resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector, sessionContext)
-	if err == nil {
-		return fmt.Errorf("L2VpnSession with nsx_id '%s' already exists.'", id)
-	} else if !isNotFoundError(err) {
+	exists, err := resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector, sessionContext)
+	if err != nil {
 		return err
+	}
+	if exists {
+		return fmt.Errorf("L2VpnSession with nsx_id '%s' already exists.'", id)
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -337,7 +338,11 @@ func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceI
 	}
 
 	if isNotFoundError(err) {
-		return false, err
+		return false, nil
+	}
+
+	if _, codeErr := getInvalidRequestErrorCode(err); codeErr == nil {
+		return false, nil
 	}
 
 	return false, logAPIError("Error retrieving resource", err)

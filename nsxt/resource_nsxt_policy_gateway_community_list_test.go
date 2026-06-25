@@ -143,7 +143,7 @@ func testAccNsxtPolicyGatewayCommunityListCheckDestroy(state *terraform.State, d
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
 		exists, err := resourceNsxtPolicyGatewayCommunityListExists(gwID, resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -224,7 +224,7 @@ func testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state *terraform.State,
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicySegmentSecurityProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

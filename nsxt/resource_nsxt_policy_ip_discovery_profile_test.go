@@ -225,7 +225,7 @@ func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, dis
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

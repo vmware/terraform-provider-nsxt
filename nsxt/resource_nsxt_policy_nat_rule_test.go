@@ -524,6 +524,9 @@ func testAccNsxtPolicyNATRuleCheckDestroy(state *terraform.State, displayName st
 		if err == nil {
 			return fmt.Errorf("Policy NAT Rule %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

@@ -139,7 +139,7 @@ func testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state *terraform.St
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyProjectIpAddressAllocationExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

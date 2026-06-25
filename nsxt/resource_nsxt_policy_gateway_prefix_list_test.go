@@ -188,6 +188,9 @@ func testAccNsxtPolicyGWPrefixListCheckDestroy(state *terraform.State, displayNa
 		if err == nil {
 			return fmt.Errorf("Policy Gateway Prefix List %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

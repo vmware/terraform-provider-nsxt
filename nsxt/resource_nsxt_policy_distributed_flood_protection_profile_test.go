@@ -202,7 +202,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileCheckDestroy(state *terra
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyFloodProtectionProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 
