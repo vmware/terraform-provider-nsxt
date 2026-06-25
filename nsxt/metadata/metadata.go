@@ -661,7 +661,12 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 	for i, dataElem := range dataList {
 		dataMap := dataElem.(map[string]interface{})
 		for k, v := range dataMap {
-			if len(v.([]interface{})) == 0 {
+			vList, isList := v.([]interface{})
+			if !isList || len(vList) == 0 || vList[0] == nil {
+				continue
+			}
+			nestedSchema, ok := vList[0].(map[string]interface{})
+			if !ok {
 				continue
 			}
 			rType, ok := item.Metadata.ResourceTypeMap[k]
@@ -678,7 +683,6 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 
 			childMeta := childElem.Schema[k]
 			nestedObj := reflect.New(childMeta.Metadata.ReflectType)
-			nestedSchema := v.([]interface{})[0].(map[string]interface{})
 			if err = SchemaToStruct(nestedObj.Elem(), nil, childMeta.Schema.Elem.(*ExtendedResource).Schema, k, nestedSchema); err != nil {
 				return
 			}

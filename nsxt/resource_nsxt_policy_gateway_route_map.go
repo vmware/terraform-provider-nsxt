@@ -230,8 +230,7 @@ func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schema
 		obj.PrefixListMatches = interfaceListToStringList(prefixListMatches)
 	}
 
-	if len(schemaEntry["set"].([]interface{})) > 0 {
-		data := schemaEntry["set"].([]interface{})[0].(map[string]interface{})
+	if data := getElemOrEmptyMapFromMap(schemaEntry, "set"); len(data) > 0 {
 		asPathPrepend := data["as_path_prepend"].(string)
 		community := data["community"].(string)
 		localPreferenceValue, lpSet := d.GetOk(fmt.Sprintf("entry.%d.set.0.local_preference", entryNo))

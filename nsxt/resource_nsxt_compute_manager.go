@@ -288,8 +288,8 @@ func getCredentialData(data map[string]interface{}) (string, map[string]interfac
 		"verifiable_asymmetric_login",
 	}
 	for _, credType := range credTypes {
-		if data[credType] != nil && len(data[credType].([]interface{})) > 0 {
-			return credType, data[credType].([]interface{})[0].(map[string]interface{})
+		if cred := getElemOrEmptyMapFromMap(data, credType); len(cred) > 0 {
+			return credType, cred
 		}
 	}
 	return "", nil

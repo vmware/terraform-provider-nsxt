@@ -990,7 +990,14 @@ func nsxtPolicySegmentProfilesSetInStruct(d *schema.ResourceData, segment *model
 }
 
 func getOldProfileDataForRemoval(oldProfiles interface{}) (string, int64) {
-	profileMap := oldProfiles.([]interface{})[0].(map[string]interface{})
+	profiles, ok := oldProfiles.([]interface{})
+	if !ok || len(profiles) == 0 || profiles[0] == nil {
+		return "", 0
+	}
+	profileMap, ok := profiles[0].(map[string]interface{})
+	if !ok {
+		return "", 0
+	}
 	segmentProfileMapID := getPolicyIDFromPath(profileMap["binding_map_path"].(string))
 	revision := int64(profileMap["revision"].(int))
 
