@@ -1,0 +1,38 @@
+name: Periodic Go Vulnerability Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2:00 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 1: Extract the Go version from go.mod
+      - name: Extract Go version
+        id: go-version
+        run: |
+          # Finds the line starting with "go " and extracts the version number (e.g., 1.22)
+          GO_VERSION=$(awk '/^go [0-9]/ {print $2}' go.mod)
+          echo "Detected Go version: $GO_VERSION"
+          echo "version=$GO_VERSION" >> $GITHUB_OUTPUT
+
+      # Step 2: Pass that dynamic version into setup-go
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ steps.go-version.outputs.version }}
+          cache: true
+
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-package: ./...

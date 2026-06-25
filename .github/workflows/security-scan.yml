@@ -1,0 +1,39 @@
+---
+name: security-scan
+
+on:
+  pull_request:
+    paths-ignore:
+      - README.md
+  push:
+    paths-ignore:
+      - README.md
+  schedule:
+    - cron: 0 0 * * 0
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    name: Trivy scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Scan Go modules for vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: vuln
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Scan for hardcoded secrets
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: secret
+          exit-code: "1"
