@@ -665,11 +665,12 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 
-	_, err = resourceNsxtPolicyIPSecVpnSessionExists(servicePath, id, connector, sessionContext)
-	if err == nil {
-		return fmt.Errorf("IPSecVpnSession with nsx_id '%s' already exists under IPSecVpnService '%s'", id, servicePath)
-	} else if !isNotFoundError(err) {
+	exists, err := resourceNsxtPolicyIPSecVpnSessionExists(servicePath, id, connector, sessionContext)
+	if err != nil {
 		return err
+	}
+	if exists {
+		return fmt.Errorf("IPSecVpnSession with nsx_id '%s' already exists under IPSecVpnService '%s'", id, servicePath)
 	}
 
 	obj, err := getIPSecVPNSessionFromSchema(d)
@@ -698,7 +699,11 @@ func resourceNsxtPolicyIPSecVpnSessionExists(servicePath string, sessionID strin
 	}
 
 	if isNotFoundError(err) {
-		return false, err
+		return false, nil
+	}
+
+	if _, codeErr := getInvalidRequestErrorCode(err); codeErr == nil {
+		return false, nil
 	}
 
 	return false, logAPIError("Error retrieving resource", err)

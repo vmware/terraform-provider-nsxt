@@ -270,6 +270,9 @@ func testAccNsxtPolicyStaticRouteCheckDestroy(state *terraform.State, displayNam
 		if err == nil {
 			return fmt.Errorf("Policy Static Route %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

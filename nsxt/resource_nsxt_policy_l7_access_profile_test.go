@@ -262,7 +262,7 @@ func testAccNsxtPolicyL7AccessProfileCheckDestroy(state *terraform.State, displa
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyL7AccessProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -84,7 +84,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
@@ -164,7 +164,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionRouteBased_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -183,7 +183,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, createDisplayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyTGWIPSecVpnSessionPolicyBasedTemplate(true, createDisplayName),
 				Check: resource.ComposeTestCheckFunc(
@@ -230,7 +230,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSessionPolicyBased_basic(t *testing.T) 
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -435,7 +435,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state, name)
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyTGWIPSecVpnSessionRouteBasedMinimalistic(name),
 			},
@@ -446,7 +446,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnSession_importBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psk"},
 				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
-		},
+		}),
 	})
 }
 
@@ -488,7 +488,7 @@ func testAccNsxtPolicyTGWIPSecVpnSessionCheckDestroy(state *terraform.State, dis
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyTGWIPSecVpnSessionExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

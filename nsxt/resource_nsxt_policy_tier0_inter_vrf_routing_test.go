@@ -102,6 +102,9 @@ func testAccNsxtPolicyTier0InterVRFRoutingCheckDestroy(state *terraform.State, n
 		if err == nil {
 			return fmt.Errorf("policy Tier0InterVRFRouting %s still exists", name)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

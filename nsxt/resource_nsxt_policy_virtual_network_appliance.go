@@ -75,10 +75,11 @@ func resourceNsxtPolicyVirtualNetworkAppliance() *schema.Resource {
 							Description: "Audit username (computed)",
 						},
 						"cli_password": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Sensitive:   true,
-							Description: "Node CLI admin password",
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							DiffSuppressFunc: suppressIfEmptyPriorState,
+							Description:      "Node CLI admin password",
 						},
 						"cli_username": {
 							Type:        schema.TypeString,
@@ -86,10 +87,11 @@ func resourceNsxtPolicyVirtualNetworkAppliance() *schema.Resource {
 							Description: "CLI admin username (computed)",
 						},
 						"root_password": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Sensitive:   true,
-							Description: "Node root user password",
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							DiffSuppressFunc: suppressIfEmptyPriorState,
+							Description:      "Node root user password",
 						},
 					},
 				},
@@ -207,18 +209,44 @@ func getVNACredentialsFromSchema(creds interface{}) *model.VirtualNetworkApplian
 	return obj
 }
 
+// suppressIfEmptyPriorState suppresses a diff for a write-only sensitive field
+// when the prior state holds an empty string AND the resource already exists.
+// This covers the import scenario: the API never returns passwords, so after
+// `terraform import` the provider stores "" in state. Suppressing the
+// config→state diff prevents a spurious "credentials needs to be changed" plan
+// after import while still allowing real password changes once a value has been
+// persisted in state.
+// The d.Id() != "" guard ensures the suppression does not fire during Create
+// (where the resource has no ID yet) or inside schema.TestResourceDataRaw
+// (which builds a ResourceData from nil prior state with an empty ID).
+func suppressIfEmptyPriorState(k, old, new string, d *schema.ResourceData) bool {
+	return old == "" && d.Id() != ""
+}
+
 func setVNACredentialsInSchema(d *schema.ResourceData, obj *model.VirtualNetworkApplianceCredential) error {
 	if obj == nil {
 		return nil
 	}
-	// Only update computed usernames if the credentials block was configured.
-	// Passwords are write-only and not returned by GET, so we preserve whatever
-	// the user set and only refresh the computed username fields.
+	// Passwords are write-only and not returned by GET. We only update state
+	// when a credentials block is already present (user configured credentials
+	// OR the importer seeded an empty block). When no block is in state the
+	// early return is intentional: writing an empty block here would cause
+	// spurious drift for VNAs that have no credentials in the Terraform config.
+	// The import scenario is handled by the Importer, which seeds an empty
+	// block before Read is called so the suppressIfEmptyPriorState
+	// DiffSuppressFunc can suppress the password diff (bug 3715433).
 	c := d.Get("credentials").([]interface{})
 	if len(c) == 0 {
 		return nil
 	}
-	creds := c[0].(map[string]interface{})
+	// The Terraform Plugin SDK v2 normalises a TypeList element that was set
+	// as an empty map (e.g. by the importer seeding an empty credentials block)
+	// to nil when the element is read back via d.Get. Guard against that here
+	// so we don't panic on the type assertion.
+	creds, ok := c[0].(map[string]interface{})
+	if !ok || creds == nil {
+		creds = make(map[string]interface{})
+	}
 	if obj.AuditUsername != nil {
 		creds["audit_username"] = *obj.AuditUsername
 	}
@@ -563,6 +591,15 @@ func resourceNsxtPolicyVirtualNetworkApplianceImporter(d *schema.ResourceData, m
 		getResourceIDFromResourcePath(importID, "virtual-network-appliance-clusters"),
 	)
 	d.Set("cluster_path", clusterPath)
+
+	// Seed an empty credentials block so that setVNACredentialsInSchema writes
+	// NSX-returned usernames to state during the Read that follows import.
+	// Without this seed the function's early return (for no-credentials-in-state)
+	// would leave credentials absent from state, causing the subsequent plan to
+	// show +credentials drift. The suppressIfEmptyPriorState DiffSuppressFunc on
+	// the password fields then ensures the plan shows no changes even though the
+	// config passwords are not yet persisted in state (bug 3715433).
+	d.Set("credentials", []interface{}{map[string]interface{}{}})
 
 	return rd, nil
 }

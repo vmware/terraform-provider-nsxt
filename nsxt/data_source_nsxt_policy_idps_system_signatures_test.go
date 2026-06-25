@@ -67,6 +67,7 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_withVersionID(t *testing.T)
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -115,6 +116,7 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_signatureAttributes(t *test
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "4.2.0")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

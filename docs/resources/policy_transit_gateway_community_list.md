@@ -34,7 +34,7 @@ resource "nsxt_policy_transit_gateway_community_list" "example" {
   communities = [
     "65000:100",
     "65000:200",
-    "no-export",
+    "NO_EXPORT",
   ]
 }
 ```
@@ -48,7 +48,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `communities` - (Required) Set of BGP community string entries. Each entry must be a standard BGP community (`<ASN>:<value>`), a well-known community (`internet`, `no-export`, `no-advertise`, `local-AS`), or a large community (`<ASN>:<local-1>:<local-2>`).
+* `communities` - (Required) Set of BGP community string entries. Each entry must be a standard BGP community (`<ASN>:<value>`), a well-known community (`NO_EXPORT`, `NO_ADVERTISE`, `NO_EXPORT_SUBCONFED`), or a large community (`<ASN>:<local-1>:<local-2>`).
 
 ## Attributes Reference
 

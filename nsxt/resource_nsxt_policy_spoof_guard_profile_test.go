@@ -174,7 +174,7 @@ func testAccNsxtPolicySpoofGuardProfileCheckDestroy(state *terraform.State, disp
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicySpoofGuardProfileExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

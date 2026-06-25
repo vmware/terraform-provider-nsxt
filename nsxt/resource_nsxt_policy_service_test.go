@@ -804,6 +804,9 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 		if err == nil {
 			return fmt.Errorf("Policy service %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

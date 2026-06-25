@@ -154,7 +154,7 @@ func testAccNsxtPolicyGatewayRouteMapCheckDestroy(state *terraform.State, displa
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
 		exists, err := resourceNsxtPolicyGatewayRouteMapExists(gwID, resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

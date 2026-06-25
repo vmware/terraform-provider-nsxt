@@ -350,7 +350,7 @@ func testAccNsxtVpcServiceProfileCheckDestroy(state *terraform.State, displayNam
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtVpcServiceProfileExists(testAccGetSessionProjectContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

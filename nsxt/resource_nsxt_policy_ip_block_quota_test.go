@@ -99,6 +99,23 @@ func testAccResourceNsxtPolicyIpBlockQuota_basic(t *testing.T, multitenancy bool
 				),
 			},
 			{
+				Config: testAccNsxtPolicyIpBlockQuotaTemplateNoRef(multitenancy),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIpBlockQuotaExists(accTestPolicyIpBlockQuotaUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIpBlockQuotaUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIpBlockQuotaUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "quota.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "quota.0.ip_block_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "quota.0.ip_block_visibility", accTestPolicyIpBlockQuotaUpdateAttributes["ip_block_visibility"]),
+					resource.TestCheckResourceAttr(testResourceName, "quota.0.ip_block_address_type", accTestPolicyIpBlockQuotaUpdateAttributes["ip_block_address_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "quota.0.single_ip_cidrs", accTestPolicyIpBlockQuotaUpdateAttributes["single_ip_cidrs"]),
+					resource.TestCheckResourceAttr(testResourceName, "quota.0.other_cidrs.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
 				Config: testAccNsxtPolicyIpBlockQuotaMinimalistic(multitenancy),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIpBlockQuotaExists(accTestPolicyIpBlockQuotaCreateAttributes["display_name"], testResourceName),
@@ -178,7 +195,7 @@ func testAccNsxtPolicyIpBlockQuotaCheckDestroy(state *terraform.State, displayNa
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyIpBlockQuotaExists(testAccGetSessionProjectContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 
@@ -236,6 +253,50 @@ resource "nsxt_policy_ip_block_quota" "test" {
   }
 
 }`, context, attrMap["ip_block_visibility"], attrMap["display_name"], context, attrMap["ip_block_visibility"], attrMap["display_name"], context, attrMap["display_name"], attrMap["description"], ipblock, attrMap["ip_block_visibility"], attrMap["ip_block_address_type"], attrMap["single_ip_cidrs"], attrMap["mask"], attrMap["total_count"])
+}
+
+func testAccNsxtPolicyIpBlockQuotaTemplateNoRef(withContext bool) string {
+	attrMap := accTestPolicyIpBlockQuotaUpdateAttributes
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_ip_block" "test-ipv4" {
+  %s
+  visibility   = "%s"
+  display_name = "%s-ipv4"
+  cidr         = "20.20.20.0/24"
+}
+
+resource "nsxt_policy_ip_block" "test-ipv6" {
+  %s
+  visibility   = "%s"
+  display_name = "%s-ipv6"
+  cidr         = "fc7e:0011:da43::0/48"
+}
+
+resource "nsxt_policy_ip_block_quota" "test" {
+  %s
+  display_name = "%s"
+  description  = "%s"
+
+  quota {
+    ip_block_visibility   = "%s"
+    ip_block_address_type = "%s"
+    single_ip_cidrs       = %s
+
+    other_cidrs {
+      mask        = "%s"
+      total_count = %s
+    }
+  }
+
+}`, context, attrMap["ip_block_visibility"], attrMap["display_name"],
+		context, attrMap["ip_block_visibility"], attrMap["display_name"],
+		context, attrMap["display_name"], attrMap["description"],
+		attrMap["ip_block_visibility"], attrMap["ip_block_address_type"],
+		attrMap["single_ip_cidrs"], attrMap["mask"], attrMap["total_count"])
 }
 
 func testAccNsxtPolicyIpBlockQuotaMinimalistic(withContext bool) string {

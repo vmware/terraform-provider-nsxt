@@ -325,6 +325,9 @@ func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("Policy IP Block %s still exists", resourceID)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

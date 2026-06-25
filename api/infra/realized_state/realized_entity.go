@@ -44,7 +44,9 @@ func (c RealizedEntityClientContext) List(intentPathParam string, sitePathParam 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RealizedEntitiesClient)
+		client := c.Client.(interface {
+			List(string, *string) (model0.GenericPolicyRealizedResourceListResult, error)
+		})
 		obj, err = client.List(intentPathParam, sitePathParam)
 
 	case utl.Global:
@@ -60,7 +62,9 @@ func (c RealizedEntityClientContext) List(intentPathParam string, sitePathParam 
 		obj = obj1.(model0.GenericPolicyRealizedResourceListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RealizedEntitiesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string) (model0.GenericPolicyRealizedResourceListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, intentPathParam, sitePathParam)
 
 	default:

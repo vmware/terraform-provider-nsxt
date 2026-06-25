@@ -28,29 +28,13 @@ func NewRolesClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	return &RoleWithFeaturesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c RoleWithFeaturesClientContext) Clone(roleParam string, newRoleParam model0.NewRole) (model0.NewRole, error) {
-	var err error
-	var obj model0.NewRole
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.RolesClient)
-		obj, err = client.Clone(roleParam, newRoleParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
 func (c RoleWithFeaturesClientContext) Delete(roleParam string) error {
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RolesClient)
+		client := c.Client.(interface{ Delete(string) error })
 		err = client.Delete(roleParam)
 
 	default:
@@ -66,7 +50,9 @@ func (c RoleWithFeaturesClientContext) Get(roleParam string) (model0.RoleWithFea
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RolesClient)
+		client := c.Client.(interface {
+			Get(string) (model0.RoleWithFeatures, error)
+		})
 		obj, err = client.Get(roleParam)
 		if err != nil {
 			return obj, err
@@ -78,22 +64,6 @@ func (c RoleWithFeaturesClientContext) Get(roleParam string) (model0.RoleWithFea
 	return obj, err
 }
 
-func (c RoleWithFeaturesClientContext) List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, scopeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.RoleListResult, error) {
-	var err error
-	var obj model0.RoleListResult
-
-	switch c.ClientType {
-
-	case utl.Local:
-		client := c.Client.(client0.RolesClient)
-		obj, err = client.List(cursorParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam)
-
-	default:
-		err = errors.New("invalid infrastructure for model")
-	}
-	return obj, err
-}
-
 func (c RoleWithFeaturesClientContext) Update(roleParam string, roleWithFeaturesParam model0.RoleWithFeatures) (model0.RoleWithFeatures, error) {
 	var err error
 	var obj model0.RoleWithFeatures
@@ -101,7 +71,9 @@ func (c RoleWithFeaturesClientContext) Update(roleParam string, roleWithFeatures
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RolesClient)
+		client := c.Client.(interface {
+			Update(string, model0.RoleWithFeatures) (model0.RoleWithFeatures, error)
+		})
 		obj, err = client.Update(roleParam, roleWithFeaturesParam)
 
 	default:
@@ -117,7 +89,9 @@ func (c RoleWithFeaturesClientContext) Validate(featurePermissionArrayParam mode
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RolesClient)
+		client := c.Client.(interface {
+			Validate(model0.FeaturePermissionArray) (model0.RecommendedFeaturePermissionListResult, error)
+		})
 		obj, err = client.Validate(featurePermissionArrayParam)
 
 	default:

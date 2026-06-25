@@ -194,6 +194,50 @@ func TestMockResourceNsxtPolicyGroupDelete(t *testing.T) {
 	})
 }
 
+// ─── BMS schema tests ────────────────────────────────────────────────────────
+
+func TestMockResourceNsxtPolicyGroupBMSSchema(t *testing.T) {
+	resource := resourceNsxtPolicyGroup()
+
+	assert.NotNil(t, resource.Schema)
+	resourceSchema := resource.Schema
+	assert.Contains(t, resourceSchema, "display_name")
+	assert.Contains(t, resourceSchema, "description")
+	assert.Contains(t, resourceSchema, "domain")
+	assert.Contains(t, resourceSchema, "group_type")
+	assert.Contains(t, resourceSchema, "criteria")
+	assert.True(t, resourceSchema["display_name"].Required)
+	assert.Equal(t, schema.TypeString, resourceSchema["display_name"].Type)
+	assert.True(t, resourceSchema["group_type"].Optional)
+	assert.Equal(t, schema.TypeString, resourceSchema["group_type"].Type)
+}
+
+func TestMockResourceNsxtPolicyGroupBMSValidation(t *testing.T) {
+	resource := resourceNsxtPolicyGroup()
+
+	assert.NotNil(t, resource.Schema)
+	assert.NotNil(t, resource.Create)
+	assert.NotNil(t, resource.Read)
+	assert.NotNil(t, resource.Update)
+	assert.NotNil(t, resource.Delete)
+	assert.Contains(t, resource.Schema, "display_name")
+	assert.Contains(t, resource.Schema, "criteria")
+}
+
+func TestMockResourceNsxtPolicyGroupBMSCriteria(t *testing.T) {
+	t.Run("BMS group criteria", func(t *testing.T) {
+		memberType := "BareMetalServer"
+		assert.Equal(t, "BareMetalServer", memberType)
+
+		criteria := map[string]interface{}{
+			"member_type": "BareMetalServer",
+			"group_type":  "static",
+		}
+		assert.NotNil(t, criteria)
+		assert.Equal(t, "BareMetalServer", criteria["member_type"])
+	})
+}
+
 // ─── BMS helpers ─────────────────────────────────────────────────────────────
 
 // groupTypeMatcher is a gomock.Matcher that verifies the GroupType field of a
@@ -245,7 +289,7 @@ func TestMockResourceNsxtPolicyGroupBMSCreate(t *testing.T) {
 
 		err := resourceNsxtPolicyGroupCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "requires NSX version 9.0.0")
+		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
 	})
 
 	t.Run("BMS group_type create succeeds on NSX 9.0", func(t *testing.T) {
@@ -367,7 +411,7 @@ func TestMockResourceNsxtPolicyGroupBMSUpdate(t *testing.T) {
 
 		err := resourceNsxtPolicyGroupUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "requires NSX version 9.0.0")
+		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
 	})
 
 	t.Run("BMS group_type update succeeds on NSX 9.0", func(t *testing.T) {

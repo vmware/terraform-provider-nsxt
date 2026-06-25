@@ -153,7 +153,7 @@ func testAccNsxtPolicyConnectivityPolicyCheckDestroy(state *terraform.State, dis
 
 		parentPath := rs.Primary.Attributes["parent_path"]
 		exists, err := resourceNsxtPolicyConnectivityPolicyExists(testAccGetSessionProjectContext(), parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

@@ -63,21 +63,6 @@ func (mr *MockCrlsClientMockRecorder) Get(crlIdParam, detailsParam, fmtParam int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCrlsClient)(nil).Get), crlIdParam, detailsParam, fmtParam)
 }
 
-// Importcrl mocks base method.
-func (m *MockCrlsClient) Importcrl(crlIdParam string, tlsCrlParam model.TlsCrl) (model.TlsCrlListResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Importcrl", crlIdParam, tlsCrlParam)
-	ret0, _ := ret[0].(model.TlsCrlListResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Importcrl indicates an expected call of Importcrl.
-func (mr *MockCrlsClientMockRecorder) Importcrl(crlIdParam, tlsCrlParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Importcrl", reflect.TypeOf((*MockCrlsClient)(nil).Importcrl), crlIdParam, tlsCrlParam)
-}
-
 // List mocks base method.
 func (m *MockCrlsClient) List(cursorParam *string, detailsParam *bool, fmtParam, includedFieldsParam, nodeIdParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam, type_Param *string) (model.TlsCrlListResult, error) {
 	m.ctrl.T.Helper()

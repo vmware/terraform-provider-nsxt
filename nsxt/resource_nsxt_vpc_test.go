@@ -200,7 +200,7 @@ func testAccNsxtVpcCheckDestroy(state *terraform.State, displayName string) erro
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtVpcExists(testAccGetMultitenancyContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

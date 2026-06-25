@@ -209,6 +209,22 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 		assert.Equal(t, ipv6BlockPath, blocks[0])
 	})
 
+	t.Run("Read does not set ipv6_blocks when API omits it", func(t *testing.T) {
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		_, ok := d.GetOk("ipv6_blocks")
+		assert.False(t, ok)
+	})
+
 	t.Run("Read not found clears ID", func(t *testing.T) {
 		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(nsxModel.Project{}, vapiErrors.NotFound{})
 

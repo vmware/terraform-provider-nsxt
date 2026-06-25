@@ -307,7 +307,11 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 	profilePath := testAccAdjustPolicyInfraConfig("/infra/ipv6-ndra-profiles/default")
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.0.0")
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -474,6 +478,9 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 		_, err := client.Get(gwID, localeServicesID, resourceID)
 		if err == nil {
 			return fmt.Errorf("policy Tier1 Interface %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil

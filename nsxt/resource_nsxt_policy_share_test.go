@@ -181,7 +181,7 @@ func testAccNsxtPolicyShareCheckDestroy(state *terraform.State, displayName stri
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyShareExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

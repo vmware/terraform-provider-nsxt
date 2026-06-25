@@ -48,17 +48,3 @@ func (mr *MockRealizedEntityClientMockRecorder) Get(realizedPathParam interface{
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRealizedEntityClient)(nil).Get), realizedPathParam)
 }
-
-// Refresh mocks base method.
-func (m *MockRealizedEntityClient) Refresh(intentPathParam string, enforcementPointPathParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Refresh", intentPathParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Refresh indicates an expected call of Refresh.
-func (mr *MockRealizedEntityClientMockRecorder) Refresh(intentPathParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Refresh", reflect.TypeOf((*MockRealizedEntityClient)(nil).Refresh), intentPathParam, enforcementPointPathParam)
-}

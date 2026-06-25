@@ -48,7 +48,9 @@ func (c SecurityPolicyClientContext) Get(domainIdParam string, securityPolicyIdP
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Get(domainIdParam, securityPolicyIdParam)
 		if err != nil {
 			return obj, err
@@ -65,14 +67,18 @@ func (c SecurityPolicyClientContext) Get(domainIdParam string, securityPolicyIdP
 		obj = rawObj.(model0.SecurityPolicy)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.VPC:
-		client := c.Client.(client3.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, c.VPCID, securityPolicyIdParam)
 		if err != nil {
 			return obj, err
@@ -90,7 +96,9 @@ func (c SecurityPolicyClientContext) Patch(domainIdParam string, securityPolicyI
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, model0.SecurityPolicy) error
+		})
 		err = client.Patch(domainIdParam, securityPolicyIdParam, securityPolicyParam)
 
 	case utl.Global:
@@ -102,11 +110,15 @@ func (c SecurityPolicyClientContext) Patch(domainIdParam string, securityPolicyI
 		err = client.Patch(domainIdParam, securityPolicyIdParam, gmObj.(model1.SecurityPolicy))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.SecurityPolicy) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, securityPolicyParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.SecurityPolicy) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, c.VPCID, securityPolicyIdParam, securityPolicyParam)
 
 	default:
@@ -122,7 +134,9 @@ func (c SecurityPolicyClientContext) Update(domainIdParam string, securityPolicy
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, model0.SecurityPolicy) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Update(domainIdParam, securityPolicyIdParam, securityPolicyParam)
 
 	case utl.Global:
@@ -142,11 +156,15 @@ func (c SecurityPolicyClientContext) Update(domainIdParam string, securityPolicy
 		obj = obj1.(model0.SecurityPolicy)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.SecurityPolicy) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, securityPolicyParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.SecurityPolicy) (model0.SecurityPolicy, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, c.VPCID, securityPolicyIdParam, securityPolicyParam)
 
 	default:
@@ -161,19 +179,23 @@ func (c SecurityPolicyClientContext) Delete(domainIdParam string, securityPolicy
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SecurityPoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, securityPolicyIdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.SecurityPoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, securityPolicyIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, c.VPCID, securityPolicyIdParam)
 
 	default:
@@ -189,7 +211,9 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+		})
 		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -205,11 +229,15 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 		obj = obj1.(model0.SecurityPolicyListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.SecurityPoliciesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

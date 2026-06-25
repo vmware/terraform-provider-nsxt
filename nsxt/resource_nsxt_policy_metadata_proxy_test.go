@@ -84,7 +84,7 @@ func TestAccResourceNsxtPolicyMetadataProxy_importBasic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyMetadataProxyCheckDestroy(state, accTestPolicyMetadataProxyUpdateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyMetadataProxyTemplate(true),
 			},
@@ -94,7 +94,7 @@ func TestAccResourceNsxtPolicyMetadataProxy_importBasic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"secret"},
 			},
-		},
+		}),
 	})
 }
 
@@ -135,7 +135,7 @@ func testAccNsxtPolicyMetadataProxyCheckDestroy(state *terraform.State, displayN
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyMetadataProxyExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

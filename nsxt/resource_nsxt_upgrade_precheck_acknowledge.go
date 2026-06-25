@@ -19,7 +19,12 @@ import (
 var cliUpgradeChecksInfoClient = func(connector vapiProtocolClient.Connector) upgrade.UpgradeChecksInfoClient {
 	return upgrade.NewUpgradeChecksInfoClient(connector)
 }
-var cliPreUpgradeChecksClient = func(connector vapiProtocolClient.Connector) upgrade.PreUpgradeChecksClient {
+
+type precheckAcknowledgeOps interface {
+	Acknowledge(string) error
+}
+
+var cliPreUpgradeChecksClient = func(connector vapiProtocolClient.Connector) precheckAcknowledgeOps {
 	return upgrade.NewPreUpgradeChecksClient(connector)
 }
 
@@ -127,7 +132,11 @@ func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 	}
 	var warns []string
 	for _, warn := range precheckWarnings {
-		warns = append(warns, *warn.Id)
+		// Only append warnings that actually need acknowledgment and are not already acknowledged.
+		// If NeedsAck is nil (e.g. for backward compatibility or in tests), we default to true.
+		if (warn.NeedsAck == nil || *warn.NeedsAck) && (warn.Acked == nil || !*warn.Acked) {
+			warns = append(warns, *warn.Id)
+		}
 	}
 
 	client := cliPreUpgradeChecksClient(connector)
@@ -135,11 +144,19 @@ func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 		if slices.Contains(warns, precheckID) {
 			err := client.Acknowledge(precheckID)
 			if err != nil {
-				msg := fmt.Sprintf("Failed to acknowledge precheck warning with ID %s", precheckID)
-				return logAPIError(msg, err)
+				errStr := err.Error()
+				// If the warning does not need acknowledgment or is already acknowledged,
+				// the NSX API might return error code 30976 (Invalid pre-check id provided).
+				// We ignore this error and log it, since the precheck is already in the desired state.
+				if strings.Contains(errStr, "30976") || strings.Contains(errStr, "Invalid pre-check id provided") {
+					log.Printf("[INFO] Ignoring error acknowledging precheck warning %s: %s", precheckID, errStr)
+				} else {
+					msg := fmt.Sprintf("Failed to acknowledge precheck warning with ID %s", precheckID)
+					return logAPIError(msg, err)
+				}
 			}
 		} else {
-			log.Printf("[INFO] Precheck warning with ID %s has not been triggered by NSX", precheckID)
+			log.Printf("[INFO] Precheck warning with ID %s has not been triggered by NSX, or doesn't need acknowledgment", precheckID)
 		}
 	}
 	return nil

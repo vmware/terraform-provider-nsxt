@@ -124,12 +124,44 @@ func getMgtNetworkID() string {
 	return os.Getenv("NSXT_TEST_MGT_NETWORK")
 }
 
+func getEdgeDataNetworkID() string {
+	id := os.Getenv("NSXT_TEST_PORTGROUP_ID")
+	if id == "" {
+		id = getMgtNetworkID()
+	}
+	return id
+}
+
 func getVNAHostname() string {
 	name := os.Getenv("NSXT_TEST_VNA_HOSTNAME")
 	if name == "" {
 		name = "vna-test.example.com"
 	}
 	return name
+}
+
+func getEdgeHostname() string {
+	name := os.Getenv("NSXT_TEST_EDGE_HOSTNAME")
+	if name == "" {
+		name = "test-edge.example.com"
+	}
+	return name
+}
+
+func getVNACLIPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_CLI_PASSWORD")
+}
+
+func getVNARootPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_ROOT_PASSWORD")
+}
+
+func getRCVNAClusterName() string {
+	return os.Getenv("NSXT_TEST_RC_VNA_CLUSTER_NAME")
+}
+
+func getRCVNAName() string {
+	return os.Getenv("NSXT_TEST_RC_VNA_NAME")
 }
 
 func getHostTransportNodeName() string {
@@ -158,6 +190,10 @@ func getOverlayTransportZoneName() string {
 		name = overlayTransportZoneNamePrefix
 	}
 	return name
+}
+
+func getPortgroupID() string {
+	return os.Getenv("NSXT_TEST_PORTGROUP_ID")
 }
 
 func getTestVMID(isMultitenancy bool) string {
@@ -217,6 +253,30 @@ func getTestManagerClusterNode() string {
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
+	}
+}
+
+// testAccNsxtExtraCoverage skips a test unless NSXT_TEST_EXTRA_COVERAGE is set.
+//
+// Apply this guard to tests that are expensive to run and cover scenarios that
+// are already exercised by a sibling test in the same file, or that target a
+// resource/data-source whose implementation has been stable for a long time.
+// Typical candidates:
+//
+//   - Import-only variants (_importBasic) when a _basic test already deploys
+//     the same resource and the import code path is not under active change.
+//   - IPv6 / protocol-variant tests (_withV6, _withIPv6) when a non-IPv6
+//     sibling test covers the same create/update/read lifecycle.
+//   - Data-source tests that use an identical Terraform config to another
+//     test in the same file and differ only in their Check assertions.
+//   - Any test whose execution time is unusually long (>5 min) and whose
+//     resource has had no functional changes in the past 3–6 months.
+//
+// Tests guarded by this helper still run in periodic CI jobs where
+// NSXT_TEST_EXTRA_COVERAGE=true is set, so coverage is not lost permanently.
+func testAccNsxtExtraCoverage(t *testing.T) {
+	if os.Getenv("NSXT_TEST_EXTRA_COVERAGE") == "" {
+		t.Skipf("set NSXT_TEST_EXTRA_COVERAGE to run extra-coverage tests")
 	}
 }
 
@@ -297,6 +357,20 @@ func testAccTestFabric(t *testing.T) {
 	}
 }
 
+func testAccEdgeTransportNodePreCheck(t *testing.T) {
+	testAccPreCheck(t)
+	testAccOnlyLocalManager(t)
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_MANAGER")
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
+	testAccEnvDefined(t, "NSXT_TEST_DATASTORE_ID")
+	testAccEnvDefined(t, "NSXT_TEST_MGT_NETWORK")
+}
+
+func testAccPolicyEdgeTransportNodePreCheck(t *testing.T) {
+	testAccEdgeTransportNodePreCheck(t)
+	testAccNSXVersion(t, "9.0.0")
+}
+
 func getTestVCUsername() string {
 	return os.Getenv("NSXT_TEST_VC_USERNAME")
 }
@@ -311,6 +385,14 @@ func getTestVCIPAddress() string {
 
 func getTestVCThumbprint() string {
 	return os.Getenv("NSXT_TEST_VC_THUMBPRINT")
+}
+
+func getTestBMSServerID() string {
+	return os.Getenv("NSXT_TEST_BMS_SERVER")
+}
+
+func getTestBMSInterfaceID() string {
+	return os.Getenv("NSXT_TEST_BMS_INTERFACE")
 }
 
 func testAccTestVCCredentials(t *testing.T) {
@@ -845,4 +927,55 @@ resource "nsxt_policy_shared_resource" "test" {
     include_children = true
   }
 }`, context, name, projectPath, name, sharedResourcePath)
+}
+
+// withIdempotencyChecks inserts a PlanOnly step after every non-import,
+// non-plan-only step to verify the apply leaves no residual diff.
+func withIdempotencyChecks(steps []resource.TestStep) []resource.TestStep {
+	expanded := make([]resource.TestStep, 0, len(steps)*2)
+	for _, step := range steps {
+		expanded = append(expanded, step)
+		if step.ImportState || step.PlanOnly || step.Config == "" {
+			continue
+		}
+		expanded = append(expanded, resource.TestStep{
+			Config:   step.Config,
+			PlanOnly: true,
+		})
+	}
+	return expanded
+}
+
+// withImportIdempotencyChecks inserts a PlanOnly step after every ImportState
+// step to verify that the post-import plan is empty (no drift). The PlanOnly
+// step reuses the config from the most recent preceding apply step. This is
+// a companion to withIdempotencyChecks and is particularly useful for
+// resources with write-only sensitive fields (e.g. passwords) that cannot be
+// read back from the API after import (e.g. bug 3715433).
+func withImportIdempotencyChecks(steps []resource.TestStep) []resource.TestStep {
+	expanded := make([]resource.TestStep, 0, len(steps)*2)
+	for i, step := range steps {
+		expanded = append(expanded, step)
+		if !step.ImportState {
+			continue
+		}
+		// Walk backwards through the original steps to find the nearest
+		// preceding config that was applied (not an import or plan-only step).
+		var config string
+		for j := i - 1; j >= 0; j-- {
+			if steps[j].Config != "" && !steps[j].ImportState && !steps[j].PlanOnly {
+				config = steps[j].Config
+				break
+			}
+		}
+		if config == "" {
+			continue
+		}
+		expanded = append(expanded, resource.TestStep{
+			Config:             config,
+			PlanOnly:           true,
+			ExpectNonEmptyPlan: false,
+		})
+	}
+	return expanded
 }

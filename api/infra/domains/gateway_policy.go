@@ -48,7 +48,9 @@ func (c GatewayPolicyClientContext) Get(domainIdParam string, gatewayPolicyIdPar
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Get(domainIdParam, gatewayPolicyIdParam)
 		if err != nil {
 			return obj, err
@@ -65,14 +67,18 @@ func (c GatewayPolicyClientContext) Get(domainIdParam string, gatewayPolicyIdPar
 		obj = rawObj.(model0.GatewayPolicy)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.VPC:
-		client := c.Client.(client3.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam)
 		if err != nil {
 			return obj, err
@@ -90,7 +96,9 @@ func (c GatewayPolicyClientContext) Patch(domainIdParam string, gatewayPolicyIdP
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, model0.GatewayPolicy) error
+		})
 		err = client.Patch(domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	case utl.Global:
@@ -102,11 +110,15 @@ func (c GatewayPolicyClientContext) Patch(domainIdParam string, gatewayPolicyIdP
 		err = client.Patch(domainIdParam, gatewayPolicyIdParam, gmObj.(model1.GatewayPolicy))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.GatewayPolicy) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, model0.GatewayPolicy) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	default:
@@ -122,7 +134,9 @@ func (c GatewayPolicyClientContext) Update(domainIdParam string, gatewayPolicyId
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, model0.GatewayPolicy) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Update(domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	case utl.Global:
@@ -142,11 +156,15 @@ func (c GatewayPolicyClientContext) Update(domainIdParam string, gatewayPolicyId
 		obj = obj1.(model0.GatewayPolicy)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.GatewayPolicy) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, model0.GatewayPolicy) (model0.GatewayPolicy, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	default:
@@ -161,19 +179,23 @@ func (c GatewayPolicyClientContext) Delete(domainIdParam string, gatewayPolicyId
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.GatewayPoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, gatewayPolicyIdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.GatewayPoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, gatewayPolicyIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam)
 
 	default:
@@ -189,7 +211,9 @@ func (c GatewayPolicyClientContext) List(domainIdParam string, cursorParam *stri
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.GatewayPolicyListResult, error)
+		})
 		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -205,11 +229,15 @@ func (c GatewayPolicyClientContext) List(domainIdParam string, cursorParam *stri
 		obj = obj1.(model0.GatewayPolicyListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.GatewayPolicyListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
-		client := c.Client.(client3.GatewayPoliciesClient)
+		client := c.Client.(interface {
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.GatewayPolicyListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

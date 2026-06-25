@@ -92,21 +92,6 @@ func (mr *MockIntrusionServicePoliciesClientMockRecorder) Patch(domainIdParam, p
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockIntrusionServicePoliciesClient)(nil).Patch), domainIdParam, policyIdParam, idsSecurityPolicyParam)
 }
 
-// Revise mocks base method.
-func (m *MockIntrusionServicePoliciesClient) Revise(domainIdParam, policyIdParam string, idsSecurityPolicyParam model.IdsSecurityPolicy, anchorPathParam, operationParam *string) (model.IdsSecurityPolicy, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Revise", domainIdParam, policyIdParam, idsSecurityPolicyParam, anchorPathParam, operationParam)
-	ret0, _ := ret[0].(model.IdsSecurityPolicy)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Revise indicates an expected call of Revise.
-func (mr *MockIntrusionServicePoliciesClientMockRecorder) Revise(domainIdParam, policyIdParam, idsSecurityPolicyParam, anchorPathParam, operationParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revise", reflect.TypeOf((*MockIntrusionServicePoliciesClient)(nil).Revise), domainIdParam, policyIdParam, idsSecurityPolicyParam, anchorPathParam, operationParam)
-}
-
 // Update mocks base method.
 func (m *MockIntrusionServicePoliciesClient) Update(domainIdParam, policyIdParam string, idsSecurityPolicyParam model.IdsSecurityPolicy) (model.IdsSecurityPolicy, error) {
 	m.ctrl.T.Helper()

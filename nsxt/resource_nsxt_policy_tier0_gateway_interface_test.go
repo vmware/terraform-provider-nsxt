@@ -451,7 +451,11 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withV6(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
@@ -678,6 +682,9 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 		}
 		if err == nil {
 			return fmt.Errorf("Policy Tier0 Interface %s still exists", displayName)
+		}
+		if !isNotFoundError(err) {
+			return err
 		}
 	}
 	return nil

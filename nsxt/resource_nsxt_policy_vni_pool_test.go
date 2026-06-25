@@ -135,7 +135,7 @@ func testAccNsxtPolicyVniPoolCheckDestroy(state *terraform.State, displayName st
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyVniPoolExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

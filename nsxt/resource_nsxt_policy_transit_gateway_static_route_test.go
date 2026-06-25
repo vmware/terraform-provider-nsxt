@@ -159,7 +159,7 @@ func testAccNsxtPolicyTransitGatewayStaticRouteCheckDestroy(state *terraform.Sta
 		parentPath := rs.Primary.Attributes["parent_path"]
 		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayStaticRouteExists(sessionContext, parentPath, resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

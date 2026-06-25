@@ -78,21 +78,6 @@ func (mr *MockCsrsClientMockRecorder) Get(csrIdParam interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockCsrsClient)(nil).Get), csrIdParam)
 }
 
-// Importcsr mocks base method.
-func (m *MockCsrsClient) Importcsr(csrIdParam string, tlsTrustDataParam model.TlsTrustData) (model.TlsCertificate, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Importcsr", csrIdParam, tlsTrustDataParam)
-	ret0, _ := ret[0].(model.TlsCertificate)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Importcsr indicates an expected call of Importcsr.
-func (mr *MockCsrsClientMockRecorder) Importcsr(csrIdParam, tlsTrustDataParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Importcsr", reflect.TypeOf((*MockCsrsClient)(nil).Importcsr), csrIdParam, tlsTrustDataParam)
-}
-
 // List mocks base method.
 func (m *MockCsrsClient) List(cursorParam, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.TlsCsrListResult, error) {
 	m.ctrl.T.Helper()
@@ -106,34 +91,4 @@ func (m *MockCsrsClient) List(cursorParam, includedFieldsParam *string, pageSize
 func (mr *MockCsrsClientMockRecorder) List(cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockCsrsClient)(nil).List), cursorParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
-}
-
-// Selfsign mocks base method.
-func (m *MockCsrsClient) Selfsign(csrIdParam string, daysValidParam int64) (model.TlsCertificate, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Selfsign", csrIdParam, daysValidParam)
-	ret0, _ := ret[0].(model.TlsCertificate)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Selfsign indicates an expected call of Selfsign.
-func (mr *MockCsrsClientMockRecorder) Selfsign(csrIdParam, daysValidParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Selfsign", reflect.TypeOf((*MockCsrsClient)(nil).Selfsign), csrIdParam, daysValidParam)
-}
-
-// Selfsign0 mocks base method.
-func (m *MockCsrsClient) Selfsign0(tlsCsrWithDaysValidParam model.TlsCsrWithDaysValid) (model.TlsCertificate, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Selfsign0", tlsCsrWithDaysValidParam)
-	ret0, _ := ret[0].(model.TlsCertificate)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Selfsign0 indicates an expected call of Selfsign0.
-func (mr *MockCsrsClientMockRecorder) Selfsign0(tlsCsrWithDaysValidParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Selfsign0", reflect.TypeOf((*MockCsrsClient)(nil).Selfsign0), tlsCsrWithDaysValidParam)
 }

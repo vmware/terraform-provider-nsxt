@@ -92,20 +92,6 @@ func (mr *MockServiceInstancesClientMockRecorder) Patch(tier0IdParam, localeServ
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockServiceInstancesClient)(nil).Patch), tier0IdParam, localeServiceIdParam, serviceInstanceIdParam, policyServiceInstanceParam)
 }
 
-// Reauth mocks base method.
-func (m *MockServiceInstancesClient) Reauth(tier0IdParam, localeServiceIdParam, serviceInstanceIdParam string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Reauth", tier0IdParam, localeServiceIdParam, serviceInstanceIdParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Reauth indicates an expected call of Reauth.
-func (mr *MockServiceInstancesClientMockRecorder) Reauth(tier0IdParam, localeServiceIdParam, serviceInstanceIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reauth", reflect.TypeOf((*MockServiceInstancesClient)(nil).Reauth), tier0IdParam, localeServiceIdParam, serviceInstanceIdParam)
-}
-
 // Update mocks base method.
 func (m *MockServiceInstancesClient) Update(tier0IdParam, localeServiceIdParam, serviceInstanceIdParam string, policyServiceInstanceParam model.PolicyServiceInstance) (model.PolicyServiceInstance, error) {
 	m.ctrl.T.Helper()

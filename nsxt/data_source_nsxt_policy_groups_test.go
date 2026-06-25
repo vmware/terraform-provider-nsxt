@@ -25,6 +25,34 @@ func TestAccDataSourceNsxtPolicyGroups_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGroups_includeSharedGroups(t *testing.T) {
+	projectName := getAccTestResourceName()
+	groupName := getAccTestDataSourceName()
+	shareName := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_groups.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+			testAccNSXVersion(t, "4.1.1")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return nil
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyGroupsReadSharedTemplate(projectName, groupName, shareName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttr(testResourceName, "items."+groupName, fmt.Sprintf("/infra/domains/default/groups/%s", groupName)),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSourceNsxtPolicyGroupsBasic(t *testing.T, withContext bool, preCheck func()) {
 	domain := "default"
 	groupName := getAccTestDataSourceName()
@@ -75,4 +103,40 @@ data "nsxt_policy_group" "test" {
   id = local.group_id
 }
 `, context, groupName, context)
+}
+
+func testAccNSXPolicyGroupsReadSharedTemplate(projectName, groupName, shareName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_project" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_group" "group_default" {
+  display_name = "%s"
+  nsx_id       = "%s"
+}
+
+resource "nsxt_policy_share" "test" {
+  display_name = "%s"
+  sharing_strategy = "ALL_DESCENDANTS"
+  shared_with      = [nsxt_policy_project.test.path]
+}
+
+resource "nsxt_policy_shared_resource" "test" {
+  display_name = "%s"
+  share_path   = nsxt_policy_share.test.path
+  resource_object {
+    resource_path    = nsxt_policy_group.group_default.path
+    include_children = false
+  }
+}
+
+data "nsxt_policy_groups" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  include_shared_groups = true
+  depends_on            = [nsxt_policy_shared_resource.test]
+}
+`, projectName, groupName, groupName, shareName, groupName)
 }

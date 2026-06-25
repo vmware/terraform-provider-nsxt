@@ -34,7 +34,9 @@ func (c IntrusionServiceGatewayPolicyClientContext) Get(domainIdParam string, po
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServiceGatewayPoliciesClient)
+		client := c.Client.(interface {
+			Get(string, string) (model0.IdsGatewayPolicy, error)
+		})
 		obj, err = client.Get(domainIdParam, policyIdParam)
 		if err != nil {
 			return obj, err
@@ -52,7 +54,7 @@ func (c IntrusionServiceGatewayPolicyClientContext) Delete(domainIdParam string,
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServiceGatewayPoliciesClient)
+		client := c.Client.(interface{ Delete(string, string) error })
 		err = client.Delete(domainIdParam, policyIdParam)
 
 	default:
@@ -68,7 +70,9 @@ func (c IntrusionServiceGatewayPolicyClientContext) List(domainIdParam string, c
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServiceGatewayPoliciesClient)
+		client := c.Client.(interface {
+			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsGatewayPolicyListResult, error)
+		})
 		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
@@ -83,7 +87,9 @@ func (c IntrusionServiceGatewayPolicyClientContext) Patch(domainIdParam string, 
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServiceGatewayPoliciesClient)
+		client := c.Client.(interface {
+			Patch(string, string, model0.IdsGatewayPolicy) error
+		})
 		err = client.Patch(domainIdParam, policyIdParam, idsGatewayPolicyParam)
 
 	default:
@@ -99,7 +105,9 @@ func (c IntrusionServiceGatewayPolicyClientContext) Update(domainIdParam string,
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.IntrusionServiceGatewayPoliciesClient)
+		client := c.Client.(interface {
+			Update(string, string, model0.IdsGatewayPolicy) (model0.IdsGatewayPolicy, error)
+		})
 		obj, err = client.Update(domainIdParam, policyIdParam, idsGatewayPolicyParam)
 
 	default:

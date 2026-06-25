@@ -173,7 +173,7 @@ func testAccNsxtPolicyLBHttpApplicationProfileCheckDestroy(state *terraform.Stat
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtPolicyLBAppProfileExists(resourceID, connector, testAccIsGlobalManager())
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

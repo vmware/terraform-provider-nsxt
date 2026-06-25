@@ -34,21 +34,6 @@ func (m *MockExcludeListClient) EXPECT() *MockExcludeListClientMockRecorder {
 	return m.recorder
 }
 
-// Filter mocks base method.
-func (m *MockExcludeListClient) Filter(intentPathParam string, deepCheckParam *bool, enforcementPointPathParam *string) (model.PolicyResourceReference, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Filter", intentPathParam, deepCheckParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(model.PolicyResourceReference)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Filter indicates an expected call of Filter.
-func (mr *MockExcludeListClientMockRecorder) Filter(intentPathParam, deepCheckParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Filter", reflect.TypeOf((*MockExcludeListClient)(nil).Filter), intentPathParam, deepCheckParam, enforcementPointPathParam)
-}
-
 // Get mocks base method.
 func (m *MockExcludeListClient) Get() (model.PolicyExcludeList, error) {
 	m.ctrl.T.Helper()
@@ -62,21 +47,6 @@ func (m *MockExcludeListClient) Get() (model.PolicyExcludeList, error) {
 func (mr *MockExcludeListClientMockRecorder) Get() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockExcludeListClient)(nil).Get))
-}
-
-// Get0 mocks base method.
-func (m *MockExcludeListClient) Get0() (model.PolicyExcludeList, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get0")
-	ret0, _ := ret[0].(model.PolicyExcludeList)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Get0 indicates an expected call of Get0.
-func (mr *MockExcludeListClientMockRecorder) Get0() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get0", reflect.TypeOf((*MockExcludeListClient)(nil).Get0))
 }
 
 // Patch mocks base method.

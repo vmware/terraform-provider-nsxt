@@ -93,21 +93,6 @@ func (mr *MockSessionsClientMockRecorder) Patch(orgIdParam, projectIdParam, tran
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockSessionsClient)(nil).Patch), orgIdParam, projectIdParam, transitGatewayIdParam, ipsecVpnServiceIdParam, sessionIdParam, ipSecVpnSessionParam)
 }
 
-// Showsensitivedata mocks base method.
-func (m *MockSessionsClient) Showsensitivedata(orgIdParam string, projectIdParam string, transitGatewayIdParam string, ipsecVpnServiceIdParam string, sessionIdParam string) (*data.StructValue, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Showsensitivedata", orgIdParam, projectIdParam, transitGatewayIdParam, ipsecVpnServiceIdParam, sessionIdParam)
-	ret0, _ := ret[0].(*data.StructValue)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Showsensitivedata indicates an expected call of Showsensitivedata.
-func (mr *MockSessionsClientMockRecorder) Showsensitivedata(orgIdParam, projectIdParam, transitGatewayIdParam, ipsecVpnServiceIdParam, sessionIdParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Showsensitivedata", reflect.TypeOf((*MockSessionsClient)(nil).Showsensitivedata), orgIdParam, projectIdParam, transitGatewayIdParam, ipsecVpnServiceIdParam, sessionIdParam)
-}
-
 // Update mocks base method.
 func (m *MockSessionsClient) Update(orgIdParam string, projectIdParam string, transitGatewayIdParam string, ipsecVpnServiceIdParam string, sessionIdParam string, ipSecVpnSessionParam *data.StructValue) (*data.StructValue, error) {
 	m.ctrl.T.Helper()

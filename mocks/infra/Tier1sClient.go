@@ -92,20 +92,6 @@ func (mr *MockTier1sClientMockRecorder) Patch(tier1IdParam, tier1Param interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Patch", reflect.TypeOf((*MockTier1sClient)(nil).Patch), tier1IdParam, tier1Param)
 }
 
-// Reprocess mocks base method.
-func (m *MockTier1sClient) Reprocess(tier1IdParam string, enforcementPointPathParam *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Reprocess", tier1IdParam, enforcementPointPathParam)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Reprocess indicates an expected call of Reprocess.
-func (mr *MockTier1sClientMockRecorder) Reprocess(tier1IdParam, enforcementPointPathParam interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reprocess", reflect.TypeOf((*MockTier1sClient)(nil).Reprocess), tier1IdParam, enforcementPointPathParam)
-}
-
 // Update mocks base method.
 func (m *MockTier1sClient) Update(tier1IdParam string, tier1Param model.Tier1) (model.Tier1, error) {
 	m.ctrl.T.Helper()

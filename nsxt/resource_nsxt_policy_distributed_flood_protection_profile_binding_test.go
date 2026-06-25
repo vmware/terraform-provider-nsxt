@@ -169,7 +169,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state
 		resourceID := rs.Primary.Attributes["id"]
 		groupPath := rs.Primary.Attributes["group_path"]
 		exists, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(testAccGetSessionContext(), connector, groupPath, resourceID)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

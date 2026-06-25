@@ -63,20 +63,6 @@ func (mr *MockRoleBindingsClientMockRecorder) Delete(bindingIdParam, cursorParam
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRoleBindingsClient)(nil).Delete), bindingIdParam, cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
 }
 
-// Deletestalebindings mocks base method.
-func (m *MockRoleBindingsClient) Deletestalebindings(cursorParam *string, identitySourceIdParam *string, identitySourceTypeParam *string, includedFieldsParam *string, nameParam *string, pageSizeParam *int64, pathParam *string, roleParam *string, rootPathParam *string, sortAscendingParam *bool, sortByParam *string, type_Param *string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Deletestalebindings", cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Deletestalebindings indicates an expected call of Deletestalebindings.
-func (mr *MockRoleBindingsClientMockRecorder) Deletestalebindings(cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deletestalebindings", reflect.TypeOf((*MockRoleBindingsClient)(nil).Deletestalebindings), cursorParam, identitySourceIdParam, identitySourceTypeParam, includedFieldsParam, nameParam, pageSizeParam, pathParam, roleParam, rootPathParam, sortAscendingParam, sortByParam, type_Param)
-}
-
 // Get mocks base method.
 func (m *MockRoleBindingsClient) Get(bindingIdParam string, cursorParam *string, identitySourceIdParam *string, identitySourceTypeParam *string, includedFieldsParam *string, nameParam *string, pageSizeParam *int64, pathParam *string, roleParam *string, rootPathParam *string, sortAscendingParam *bool, sortByParam *string, type_Param *string) (model.RoleBinding, error) {
 	m.ctrl.T.Helper()

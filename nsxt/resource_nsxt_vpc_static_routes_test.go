@@ -152,7 +152,7 @@ func testAccNsxtVpcStaticRoutesCheckDestroy(state *terraform.State, displayName 
 
 		resourceID := rs.Primary.Attributes["id"]
 		exists, err := resourceNsxtVpcStaticRoutesExists(testAccGetSessionContext(), resourceID, connector)
-		if err == nil {
+		if err != nil {
 			return err
 		}
 

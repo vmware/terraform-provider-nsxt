@@ -204,6 +204,9 @@ func testAccNsxtPolicyEvpnConfigCheckDestroy(state *terraform.State, displayName
 		if err == nil {
 			return fmt.Errorf("Policy Gateway Route Map %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

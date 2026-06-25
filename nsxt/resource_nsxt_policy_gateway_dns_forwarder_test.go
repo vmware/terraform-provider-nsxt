@@ -207,6 +207,9 @@ func testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state *terraform.State, di
 		if err == nil {
 			return fmt.Errorf("Policy Gateway DNS Forwarder %s still exists", displayName)
 		}
+		if !isNotFoundError(err) {
+			return err
+		}
 	}
 	return nil
 }

@@ -44,7 +44,9 @@ func (c RuleClientContext) Get(domainIdParam string, securityPolicyIdParam strin
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Get(string, string, string) (model0.Rule, error)
+		})
 		obj, err = client.Get(domainIdParam, securityPolicyIdParam, ruleIdParam)
 		if err != nil {
 			return obj, err
@@ -61,7 +63,9 @@ func (c RuleClientContext) Get(domainIdParam string, securityPolicyIdParam strin
 		obj = rawObj.(model0.Rule)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RulesClient)
+		client := c.Client.(interface {
+			Get(string, string, string, string, string) (model0.Rule, error)
+		})
 		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, ruleIdParam)
 		if err != nil {
 			return obj, err
@@ -79,15 +83,21 @@ func (c RuleClientContext) Delete(domainIdParam string, securityPolicyIdParam st
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string) error
+		})
 		err = client.Delete(domainIdParam, securityPolicyIdParam, ruleIdParam)
 
 	case utl.Global:
-		client := c.Client.(client1.RulesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string) error
+		})
 		err = client.Delete(domainIdParam, securityPolicyIdParam, ruleIdParam)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RulesClient)
+		client := c.Client.(interface {
+			Delete(string, string, string, string, string) error
+		})
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, ruleIdParam)
 
 	default:
@@ -102,7 +112,9 @@ func (c RuleClientContext) Patch(domainIdParam string, securityPolicyIdParam str
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, model0.Rule) error
+		})
 		err = client.Patch(domainIdParam, securityPolicyIdParam, ruleIdParam, ruleParam)
 
 	case utl.Global:
@@ -114,7 +126,9 @@ func (c RuleClientContext) Patch(domainIdParam string, securityPolicyIdParam str
 		err = client.Patch(domainIdParam, securityPolicyIdParam, ruleIdParam, gmObj.(model1.Rule))
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RulesClient)
+		client := c.Client.(interface {
+			Patch(string, string, string, string, string, model0.Rule) error
+		})
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, ruleIdParam, ruleParam)
 
 	default:
@@ -130,7 +144,9 @@ func (c RuleClientContext) Update(domainIdParam string, securityPolicyIdParam st
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, model0.Rule) (model0.Rule, error)
+		})
 		obj, err = client.Update(domainIdParam, securityPolicyIdParam, ruleIdParam, ruleParam)
 
 	case utl.Global:
@@ -150,7 +166,9 @@ func (c RuleClientContext) Update(domainIdParam string, securityPolicyIdParam st
 		obj = obj1.(model0.Rule)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RulesClient)
+		client := c.Client.(interface {
+			Update(string, string, string, string, string, model0.Rule) (model0.Rule, error)
+		})
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, ruleIdParam, ruleParam)
 
 	default:
@@ -166,7 +184,9 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 	switch c.ClientType {
 
 	case utl.Local:
-		client := c.Client.(client0.RulesClient)
+		client := c.Client.(interface {
+			List(string, string, *string, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
+		})
 		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
@@ -182,7 +202,9 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 		obj = obj1.(model0.RuleListResult)
 
 	case utl.Multitenancy:
-		client := c.Client.(client2.RulesClient)
+		client := c.Client.(interface {
+			List(string, string, string, string, *string, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
+		})
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:

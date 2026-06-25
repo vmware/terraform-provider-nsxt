@@ -44,10 +44,55 @@ resource "nsxt_policy_transit_gateway_attachment" "test_tgw_att" {
 ### Using CNA path instead of connection path
 
 ```hcl
-resource "nsxt_policy_transit_gateway_attachment" "cna_att" {
-  display_name = "test-cna"
+data "nsxt_policy_edge_cluster" "test_ec" {
+  display_name = "EDGECLUSTER1"
+}
+
+resource "nsxt_policy_project" "test_proj" {
+  display_name = "tf_test_proj"
+  site_info {
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test_ec.path]
+  }
+}
+
+data "nsxt_policy_transit_gateway" "test_tgw" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+  }
+  is_default = true
+}
+
+resource "nsxt_vpc" "test_vpc" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+  }
+  display_name = "tf_test_vpc"
+  short_id     = "tf92att"
+  private_ips  = ["192.168.43.0/24"]
+}
+
+resource "nsxt_vpc_subnet" "test_sub" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+    vpc_id     = nsxt_vpc.test_vpc.id
+  }
+  display_name = "tf_test_sub"
+  ip_addresses = ["192.168.43.0/26"]
+  access_mode  = "Private"
+}
+
+resource "nsxt_policy_project_centralized_network_attachment" "test_cna" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+  }
+  display_name = "tf_att_cna"
+  subnet_path  = nsxt_vpc_subnet.test_sub.path
+}
+
+resource "nsxt_policy_transit_gateway_attachment" "test_tgw_att" {
+  display_name = "tf_test_tgw_att"
   parent_path  = data.nsxt_policy_transit_gateway.test_tgw.path
-  cna_path     = "/orgs/default/projects/proj1/vpcs/vpc1/subnets/sub1"
+  cna_path     = nsxt_policy_project_centralized_network_attachment.test_cna.path
 }
 ```
 

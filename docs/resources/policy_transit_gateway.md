@@ -85,8 +85,7 @@ The following arguments are supported:
     * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
         * `span_path` - (Required) Policy path of the network span object.
     * `zone_based_span` - (Optional) Span based on zones.
-        * `zone_external_ids` - (Optional) An array of Zone object's external IDs.
-        * `use_all_zones` - (Optional) Flag to indicate that TransitGateway is associated with all project zones.
+        * `zone_external_ids` - (Required) An array of Zone object's external IDs.
 
 ## Attributes Reference
 

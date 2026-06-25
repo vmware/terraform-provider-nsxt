@@ -279,15 +279,20 @@ func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, i
 }
 
 func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
-	if len(iSpan.([]interface{})) == 0 {
+	if iSpan == nil {
+		return nil, nil
+	}
+	spanList, ok := iSpan.([]interface{})
+	if !ok || len(spanList) == 0 || spanList[0] == nil {
+		return nil, nil
+	}
+	// We're limiting to one span of any kind in the schema
+	span, ok := spanList[0].(map[string]interface{})
+	if !ok {
 		return nil, nil
 	}
 	converter := bindings.NewTypeConverter()
-
-	// We're limiting to one span of any kind in the schema
-	span := iSpan.([]interface{})[0].(map[string]interface{})
-	if len(span["cluster_based_span"].([]interface{})) > 0 {
-		cbs := span["cluster_based_span"].([]interface{})[0].(map[string]interface{})
+	if cbs := getElemOrEmptyMapFromMap(span, "cluster_based_span"); len(cbs) > 0 {
 		spanPath := cbs["span_path"].(string)
 		clusterBasedSpan := model.ClusterBasedSpan{
 			SpanPath: &spanPath,
@@ -299,8 +304,7 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		}
 		return dataValue.(*data.StructValue), nil
 	}
-	if len(span["zone_based_span"].([]interface{})) > 0 {
-		zbs := span["zone_based_span"].([]interface{})[0].(map[string]interface{})
+	if zbs := getElemOrEmptyMapFromMap(span, "zone_based_span"); len(zbs) > 0 {
 		zoneExternalIds := interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
 		zoneBasedSpan := model.ZoneBasedSpan{
 			ZoneExternalIds: zoneExternalIds,
@@ -312,7 +316,6 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		}
 		return dataValue.(*data.StructValue), nil
 	}
-
 	return nil, nil
 }
 
