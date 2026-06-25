@@ -43,7 +43,7 @@ func TestAccResourceNsxtPolicyOspfArea_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyOspfAreaCheckDestroy(state, accTestPolicyOspfAreaCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyOspfAreaTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
@@ -88,7 +88,7 @@ func TestAccResourceNsxtPolicyOspfArea_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -113,6 +113,31 @@ func TestAccResourceNsxtPolicyOspfArea_importBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNSXPolicyOspfAreaImporterGetIDs,
 			},
 		},
+	})
+}
+
+func TestAccResourceNsxtPolicyOspfArea_importWithSecretKey(t *testing.T) {
+	testResourceName := "nsxt_policy_ospf_area.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.1") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyOspfAreaCheckDestroy(state, accTestPolicyOspfAreaCreateAttributes["display_name"])
+		},
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
+			{
+				Config: testAccNsxtPolicyOspfAreaTemplate(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// key_id and secret_key are sensitive and not returned on API
+				ImportStateVerifyIgnore: []string{"secret_key", "key_id"},
+				ImportStateIdFunc:       testAccNSXPolicyOspfAreaImporterGetIDs,
+			},
+		}),
 	})
 }
 

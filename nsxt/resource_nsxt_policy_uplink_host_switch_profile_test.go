@@ -72,7 +72,7 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtUplinkHostSwitchProfileCheckDestroy(state, updateDisplayName)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtUplinkHostSwitchProfileTemplate(createDisplayName, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -177,7 +177,7 @@ func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "transport_vlan", "0"),
 				),
 			},
-		},
+		}),
 	})
 }
 

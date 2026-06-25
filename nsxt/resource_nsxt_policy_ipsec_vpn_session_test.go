@@ -178,7 +178,7 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -263,7 +263,7 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGatewayTemplate(true),
 			},
-		},
+		}),
 	})
 }
 
@@ -427,7 +427,7 @@ func testAccResourceNsxtPolicyIPSecVpnSessionImport(t *testing.T, withContext bo
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: config,
 			},
@@ -437,7 +437,7 @@ func testAccResourceNsxtPolicyIPSecVpnSessionImport(t *testing.T, withContext bo
 				ImportStateVerify: false,
 				ImportStateIdFunc: testAccNSXPolicyIPSecVpnSessionImporterGetID,
 			},
-		},
+		}),
 	})
 }
 
@@ -450,7 +450,7 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBased_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionPolicyBasedCreateAttributes["display_name"])
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
@@ -512,7 +512,7 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBased_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGatewayTemplate(true),
 			},
-		},
+		}),
 	})
 }
 

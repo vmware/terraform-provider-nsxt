@@ -46,7 +46,7 @@ func TestAccResourceNsxtNodeUser_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNodeUserCheckDestroy(state, testUsername)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNodeUserCreate(testUsername),
 				Check: resource.ComposeTestCheckFunc(
@@ -93,7 +93,7 @@ func TestAccResourceNsxtNodeUser_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "user_id"),
 				),
 			},
-		},
+		}),
 	})
 }
 
@@ -111,7 +111,7 @@ func TestAccResourceNsxtNodeUser_import_basic(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNodeUserCheckDestroy(state, testUsername)
 		},
-		Steps: []resource.TestStep{
+		Steps: withImportIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNodeUserCreate(testUsername),
 			},
@@ -122,7 +122,7 @@ func TestAccResourceNsxtNodeUser_import_basic(t *testing.T) {
 				ImportStateIdFunc:       testAccNodeUserImporterGetID,
 				ImportStateVerifyIgnore: []string{"password"},
 			},
-		},
+		}),
 	})
 }
 

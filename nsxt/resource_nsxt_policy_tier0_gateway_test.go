@@ -301,7 +301,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
 		},
-		Steps: []resource.TestStep{
+		Steps: withIdempotencyChecks([]resource.TestStep{
 			{
 				Config: testAccNsxtPolicyTier0CreateWithRedistribution(name),
 				Check: resource.ComposeTestCheckFunc(
@@ -340,7 +340,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
-		},
+		}),
 	})
 }
 
