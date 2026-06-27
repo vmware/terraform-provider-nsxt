@@ -77,7 +77,7 @@ The following arguments are supported:
     * `network` - (Required) Destination in cidr format.
     * `next_hop` - (Required) IP address of next hop.
 * `dhcp_generic_option` - (Optional) Generic DHCP options.
-    * `dhcp_generic_option` - (Optional) Generic DHCP option number. Please note not all options are supported by the platform.
+    * `code` - (Optional) Generic DHCP option number. Please note not all options are supported by the platform.
     * `values` - (Required) List of DHCP option values.
 
 ## Attributes Reference
