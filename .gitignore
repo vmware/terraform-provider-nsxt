@@ -20,3 +20,7 @@ dist/
 # UT files to ignore
 nsxt.test
 metadata.test
+
+Ignore Claude rules and dirs
+CLAUDE.md
+.claude/
