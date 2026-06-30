@@ -17,9 +17,9 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	tgwbfdmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways"
+	tgwbfdmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/routing"
 )
 
 var (
@@ -67,14 +67,14 @@ func minimalTGWBfdPeerData() map[string]interface{} {
 
 func setupTGWBfdPeerMock(t *testing.T, ctrl *gomock.Controller) (*tgwbfdmocks.MockBfdPeersClient, func()) {
 	mockSDK := tgwbfdmocks.NewMockBfdPeersClient(ctrl)
-	mockWrapper := &transitgateways.TransitGatewayBfdPeerClientContext{
+	mockWrapper := &tgwrouting.TransitGatewayBfdPeerClientContext{
 		Client:     mockSDK,
 		ClientType: utl.Multitenancy,
 		ProjectID:  tgwBfdPeerProjectID,
 	}
 
 	original := cliTGWBfdPeersClient
-	cliTGWBfdPeersClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *transitgateways.TransitGatewayBfdPeerClientContext {
+	cliTGWBfdPeersClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *tgwrouting.TransitGatewayBfdPeerClientContext {
 		return mockWrapper
 	}
 	return mockSDK, func() { cliTGWBfdPeersClient = original }

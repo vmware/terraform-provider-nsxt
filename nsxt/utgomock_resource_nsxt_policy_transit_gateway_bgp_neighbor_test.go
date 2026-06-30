@@ -17,9 +17,9 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	tgwbgp "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/bgp"
+	tgwbgp "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing/bgp"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	tgwbgpmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/bgp"
+	tgwbgpmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/routing/bgp"
 )
 
 var (

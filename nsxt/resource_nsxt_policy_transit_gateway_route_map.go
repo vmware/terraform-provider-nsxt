@@ -12,11 +12,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var cliTGWRouteMapsClient = transitgateways.NewRouteMapsClient
+var cliTGWRouteMapsClient = tgwrouting.NewRouteMapsClient
 
 func resourceNsxtPolicyTransitGatewayRouteMap() *schema.Resource {
 	return &schema.Resource{

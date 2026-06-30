@@ -18,6 +18,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
@@ -25,11 +26,9 @@ import (
 
 var cliTransitGatewaysClient = projects.NewTransitGatewaysClient
 var cliTransitGatewayCentralizedConfigsClient = transitgateways.NewCentralizedConfigsClient
-var cliTransitGatewayRoutingConfigsClient = transitgateways.NewRoutingConfigClient
-var cliTransitGatewayBgpClient = transitgateways.NewBgpClient
+var cliTransitGatewayBgpClient = tgwrouting.NewBgpClient
 
 const centralizedConfigID = "default"
-const routingConfigID = "default"
 
 var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -135,10 +134,10 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 									Elem: &schema.Schema{
 										Type: schema.TypeString,
 										ValidateFunc: validation.StringInSlice([]string{
-											model.TransitGatewayRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_PUBLIC,
-											model.TransitGatewayRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TGW_PRIVATE,
-											model.TransitGatewayRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TGW_STATIC_ROUTE,
-											model.TransitGatewayRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_CONNECTED_SUBNET,
+											model.TransitGatewayBgpRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_PUBLIC,
+											model.TransitGatewayBgpRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TGW_PRIVATE,
+											model.TransitGatewayBgpRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TGW_STATIC_ROUTE,
+											model.TransitGatewayBgpRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_CONNECTED_SUBNET,
 										}, false),
 									},
 								},
@@ -372,135 +371,18 @@ func setCentralizedConfigInSchema(cfg *model.CentralizedConfig, _ interface{}) [
 	return []interface{}{m}
 }
 
-// buildTransitGatewayRoutingConfigChildren builds H-API child structs for TransitGatewayRoutingConfig.
-
-func getRedistributionConfigFromSchema(d *schema.ResourceData) *model.TransitGatewayRedistributionConfig {
-	list := d.Get("redistribution_config").([]interface{})
-	if len(list) == 0 {
-		return nil
-	}
-	raw, ok := list[0].(map[string]interface{})
-	if !ok || raw == nil {
-		return nil
-	}
-	rulesRaw, ok := raw["rule"].([]interface{})
-	if !ok || len(rulesRaw) == 0 {
-		return nil
-	}
-	var rules []model.TransitGatewayRedistributionRule
-	for _, r := range rulesRaw {
-		ruleMap, ok := r.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		rule := model.TransitGatewayRedistributionRule{
-			RouteRedistributionTypes: interfaceListToStringList(ruleMap["types"].([]interface{})),
-		}
-		if routeMapPath, ok := ruleMap["route_map_path"].(string); ok && routeMapPath != "" {
-			rule.RouteMapPath = &routeMapPath
-		}
-		rules = append(rules, rule)
-	}
-	return &model.TransitGatewayRedistributionConfig{Rules: rules}
-}
-
-func setRedistributionConfigInSchema(d *schema.ResourceData, config *model.TransitGatewayRedistributionConfig) error {
-	if config == nil || len(config.Rules) == 0 {
-		return d.Set("redistribution_config", nil)
-	}
-	var rules []interface{}
-	for _, r := range config.Rules {
-		ruleMap := map[string]interface{}{
-			"types":          r.RouteRedistributionTypes,
-			"route_map_path": "",
-		}
-		if r.RouteMapPath != nil {
-			ruleMap["route_map_path"] = *r.RouteMapPath
-		}
-		rules = append(rules, ruleMap)
-	}
-	return d.Set("redistribution_config", []interface{}{
-		map[string]interface{}{"rule": rules},
-	})
-}
-
-func getTransitGatewayRoutingConfigFromSchema(d *schema.ResourceData) (*model.TransitGatewayRoutingConfig, error) {
-	var forwardingUpTimer *int64
-	list := d.Get("advanced_config").([]interface{})
-	if len(list) > 0 {
-		raw, ok := list[0].(map[string]interface{})
-		if ok && raw != nil {
-			if v, ok := raw["forwarding_up_timer"]; ok && v != nil {
-				timer := int64(v.(int))
-				forwardingUpTimer = &timer
-			}
-		}
-	}
-	redistributionConfig := getRedistributionConfigFromSchema(d)
-	if forwardingUpTimer == nil && redistributionConfig == nil {
-		return nil, nil
-	}
-	id := routingConfigID
-	return &model.TransitGatewayRoutingConfig{
-		Id:                   &id,
-		ResourceType:         strPtr("TransitGatewayRoutingConfig"),
-		ForwardingUpTimer:    forwardingUpTimer,
-		RedistributionConfig: redistributionConfig,
-	}, nil
-}
-
-// transitGatewayRoutingConfigForUpdate merges forwarding_up_timer from schema into the existing routing config from the API (preserves redistribution and revision).
-func transitGatewayRoutingConfigForUpdate(d *schema.ResourceData, sessionContext utl.SessionContext, connector client.Connector, parents []string, tgwID string) (*model.TransitGatewayRoutingConfig, error) {
-	rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
-	if rcClient == nil {
-		return nil, nil
-	}
-	fromSchema, err := getTransitGatewayRoutingConfigFromSchema(d)
-	if err != nil {
-		return nil, err
-	}
-	if fromSchema == nil {
-		return nil, nil
-	}
-	existing, err := rcClient.Get(parents[0], parents[1], tgwID)
-	if err != nil {
-		if isNotFoundError(err) {
-			return fromSchema, nil
-		}
-		return nil, err
-	}
-	if fromSchema.ForwardingUpTimer != nil {
-		existing.ForwardingUpTimer = fromSchema.ForwardingUpTimer
-	}
-	existing.RedistributionConfig = fromSchema.RedistributionConfig
-	return &existing, nil
-}
-
-func setTransitGatewayAdvancedConfigInSchema(d *schema.ResourceData, rc *model.TransitGatewayRoutingConfig) error {
-	if rc == nil || rc.ForwardingUpTimer == nil {
-		return d.Set("advanced_config", nil)
-	}
-	configMap := map[string]interface{}{
-		"forwarding_up_timer": int(*rc.ForwardingUpTimer),
-	}
-	return d.Set("advanced_config", []interface{}{configMap})
-}
-
-// buildTGWBgpConfigChildren wraps a BgpRoutingConfig (or delete marker) as a ChildBgpRoutingConfig
-// for inclusion in TransitGateway.Children during H-API calls.
-// The non-delete path delegates to initPolicyTier0ChildBgpConfig (shared with Tier-0 gateway).
-func buildTGWBgpConfigChildren(config *model.BgpRoutingConfig, markDelete bool) ([]*data.StructValue, error) {
+func buildTGWBgpConfigChildren(config *model.TransitGatewayBgpRoutingConfig, markDelete bool) ([]*data.StructValue, error) {
 	if markDelete {
 		converter := bindings.NewTypeConverter()
 		id := "bgp"
 		boolTrue := true
-		child := model.ChildBgpRoutingConfig{
-			Id:               &id,
-			ResourceType:     "ChildBgpRoutingConfig",
-			MarkedForDelete:  &boolTrue,
-			BgpRoutingConfig: &model.BgpRoutingConfig{Id: &id},
+		child := model.ChildTransitGatewayBgpRoutingConfig{
+			Id:                             &id,
+			ResourceType:                   "ChildTransitGatewayBgpRoutingConfig",
+			MarkedForDelete:                &boolTrue,
+			TransitGatewayBgpRoutingConfig: &model.TransitGatewayBgpRoutingConfig{Id: &id},
 		}
-		dataValue, errs := converter.ConvertToVapi(child, model.ChildBgpRoutingConfigBindingType())
+		dataValue, errs := converter.ConvertToVapi(child, model.ChildTransitGatewayBgpRoutingConfigBindingType())
 		if len(errs) > 0 {
 			return nil, errs[0]
 		}
@@ -509,28 +391,134 @@ func buildTGWBgpConfigChildren(config *model.BgpRoutingConfig, markDelete bool) 
 	if config == nil {
 		return nil, nil
 	}
-	dataValue, err := initPolicyTier0ChildBgpConfig(config)
+	dataValue, err := initTGWChildBgpConfig(config)
 	if err != nil {
 		return nil, err
 	}
 	return []*data.StructValue{dataValue}, nil
 }
 
-func getTGWBgpConfigFromSchema(d *schema.ResourceData) *model.BgpRoutingConfig {
+func initTGWChildBgpConfig(config *model.TransitGatewayBgpRoutingConfig) (*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	childConfig := model.ChildTransitGatewayBgpRoutingConfig{
+		ResourceType:                   "ChildTransitGatewayBgpRoutingConfig",
+		TransitGatewayBgpRoutingConfig: config,
+	}
+	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildTransitGatewayBgpRoutingConfigBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting child TGW BGP Routing Configuration: %v", errors[0])
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
+func getTGWBgpConfigFromSchema(d *schema.ResourceData) *model.TransitGatewayBgpRoutingConfig {
 	bgpConfig := d.Get("bgp_config").([]interface{})
 	if len(bgpConfig) == 0 || bgpConfig[0] == nil {
 		return nil
 	}
 	cfgMap := bgpConfig[0].(map[string]interface{})
-	cfg := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfgMap, false, d.Id())
-	return &cfg
+
+	revision := int64(cfgMap["revision"].(int))
+	ecmp := cfgMap["ecmp"].(bool)
+	enabled := cfgMap["enabled"].(bool)
+	localAsNum := cfgMap["local_as_num"].(string)
+	multipathRelax := cfgMap["multipath_relax"].(bool)
+	restartMode := cfgMap["graceful_restart_mode"].(string)
+	restartTimer := int64(cfgMap["graceful_restart_timer"].(int))
+	staleTimer := int64(cfgMap["graceful_restart_stale_route_timer"].(int))
+
+	var tagStructs []model.Tag
+	if cfgMap["tag"] != nil {
+		for _, tag := range cfgMap["tag"].(*schema.Set).List() {
+			data := tag.(map[string]interface{})
+			tagScope := data["scope"].(string)
+			tagTag := data["tag"].(string)
+			tagStructs = append(tagStructs, model.Tag{Scope: &tagScope, Tag: &tagTag})
+		}
+	}
+
+	var aggregationStructs []model.RouteAggregationEntry
+	for _, agg := range cfgMap["route_aggregation"].([]interface{}) {
+		data := agg.(map[string]interface{})
+		prefix := data["prefix"].(string)
+		summary := data["summary_only"].(bool)
+		aggregationStructs = append(aggregationStructs, model.RouteAggregationEntry{
+			Prefix:      &prefix,
+			SummaryOnly: &summary,
+		})
+	}
+
+	restartTimerStruct := model.BgpGracefulRestartTimer{
+		RestartTimer:    &restartTimer,
+		StaleRouteTimer: &staleTimer,
+	}
+	restartConfigStruct := model.BgpGracefulRestartConfig{
+		Mode:  &restartMode,
+		Timer: &restartTimerStruct,
+	}
+
+	id := "bgp"
+	resourceType := "TransitGatewayBgpRoutingConfig"
+	cfg := &model.TransitGatewayBgpRoutingConfig{
+		Ecmp:                  &ecmp,
+		Enabled:               &enabled,
+		RouteAggregations:     aggregationStructs,
+		ResourceType:          &resourceType,
+		Tags:                  tagStructs,
+		Id:                    &id,
+		Revision:              &revision,
+		MultipathRelax:        &multipathRelax,
+		GracefulRestartConfig: &restartConfigStruct,
+	}
+	if len(localAsNum) > 0 {
+		cfg.LocalAsNum = &localAsNum
+	}
+	if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok {
+		cfg.InterSrIbgp = &interSrIbgp
+	}
+	return cfg
 }
 
-func setTGWBgpConfigInSchema(d *schema.ResourceData, bgpConfig *model.BgpRoutingConfig) error {
+func setTGWBgpConfigInSchema(d *schema.ResourceData, bgpConfig *model.TransitGatewayBgpRoutingConfig) error {
 	if bgpConfig == nil {
 		return d.Set("bgp_config", make([]map[string]interface{}, 0))
 	}
-	cfgMap := initPolicyTier0BGPConfigMap(bgpConfig)
+	cfgMap := make(map[string]interface{})
+	cfgMap["revision"] = bgpConfig.Revision
+	cfgMap["path"] = bgpConfig.Path
+	cfgMap["ecmp"] = bgpConfig.Ecmp
+	cfgMap["enabled"] = bgpConfig.Enabled
+	cfgMap["inter_sr_ibgp"] = bgpConfig.InterSrIbgp
+	cfgMap["local_as_num"] = bgpConfig.LocalAsNum
+	cfgMap["multipath_relax"] = bgpConfig.MultipathRelax
+
+	if bgpConfig.GracefulRestartConfig != nil {
+		cfgMap["graceful_restart_mode"] = bgpConfig.GracefulRestartConfig.Mode
+		if bgpConfig.GracefulRestartConfig.Timer != nil {
+			cfgMap["graceful_restart_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.RestartTimer)
+			cfgMap["graceful_restart_stale_route_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.StaleRouteTimer)
+		}
+	} else {
+		cfgMap["graceful_restart_mode"] = model.BgpGracefulRestartConfig_MODE_HELPER_ONLY
+		cfgMap["graceful_restart_timer"] = policyBGPGracefulRestartTimerDefault
+		cfgMap["graceful_restart_stale_route_timer"] = policyBGPGracefulRestartStaleRouteTimerDefault
+	}
+
+	var tagList []map[string]string
+	for _, tag := range bgpConfig.Tags {
+		tagList = append(tagList, map[string]string{"scope": *tag.Scope, "tag": *tag.Tag})
+	}
+	cfgMap["tag"] = tagList
+
+	var aggregationList []map[string]interface{}
+	for _, agg := range bgpConfig.RouteAggregations {
+		aggregationList = append(aggregationList, map[string]interface{}{
+			"prefix":       agg.Prefix,
+			"summary_only": *agg.SummaryOnly,
+		})
+	}
+	cfgMap["route_aggregation"] = aggregationList
+
 	return d.Set("bgp_config", []interface{}{cfgMap})
 }
 
@@ -694,22 +682,6 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 		return handleCreateError("TransitGateway", id, err)
 	}
 
-	// TransitGatewayRoutingConfig is not supported as an H-API child (error 500165), so
-	// apply it via direct API after the TGW is created.
-	rc, err := getTransitGatewayRoutingConfigFromSchema(d)
-	if err != nil {
-		return handleCreateError("TransitGateway RoutingConfig", id, err)
-	}
-	if rc != nil {
-		rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
-		if rcClient != nil {
-			log.Printf("[INFO] Patching TransitGateway %s routing config via direct API", id)
-			if err := rcClient.Patch(parents[0], parents[1], id, *rc); err != nil {
-				return handleCreateError("TransitGateway RoutingConfig", id, err)
-			}
-		}
-	}
-
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -761,27 +733,8 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 		}
 	}
 
-	rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
-	if rcClient != nil {
-		rc, err := rcClient.Get(parents[0], parents[1], id)
-		if err == nil {
-			if err := setTransitGatewayAdvancedConfigInSchema(d, &rc); err != nil {
-				return handleReadError(d, "TransitGateway RoutingConfig", id, err)
-			}
-			if err := setRedistributionConfigInSchema(d, rc.RedistributionConfig); err != nil {
-				return handleReadError(d, "TransitGateway RoutingConfig", id, err)
-			}
-		} else if !isNotFoundError(err) {
-			return handleReadError(d, "TransitGateway RoutingConfig", id, err)
-		} else {
-			if err := d.Set("advanced_config", nil); err != nil {
-				return handleReadError(d, "TransitGateway RoutingConfig", id, err)
-			}
-			if err := d.Set("redistribution_config", nil); err != nil {
-				return handleReadError(d, "TransitGateway RoutingConfig", id, err)
-			}
-		}
-	}
+	_ = d.Set("advanced_config", nil)
+	_ = d.Set("redistribution_config", nil)
 
 	bgpClient := cliTransitGatewayBgpClient(sessionContext, connector)
 	if bgpClient != nil {
@@ -928,24 +881,6 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	log.Printf("[INFO] Updating TransitGateway with ID %s via OrgRoot H-API", id)
 	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleUpdateError("TransitGateway", id, err)
-	}
-
-	// Routing config and BGP config are not supported as H-API children of TransitGateway.
-	// Apply them via direct API calls after the main H-API update completes.
-	if d.HasChange("advanced_config") || d.HasChange("redistribution_config") {
-		rc, rcErr := transitGatewayRoutingConfigForUpdate(d, sessionContext, connector, parents, id)
-		if rcErr != nil {
-			return handleUpdateError("TransitGateway RoutingConfig", id, rcErr)
-		}
-		if rc != nil {
-			rcClient := cliTransitGatewayRoutingConfigsClient(sessionContext, connector)
-			if rcClient != nil {
-				log.Printf("[INFO] Updating TransitGateway %s routing config via direct API", id)
-				if err := rcClient.Patch(parents[0], parents[1], id, *rc); err != nil {
-					return handleUpdateError("TransitGateway RoutingConfig", id, err)
-				}
-			}
-		}
 	}
 
 	if d.HasChange("bgp_config") {

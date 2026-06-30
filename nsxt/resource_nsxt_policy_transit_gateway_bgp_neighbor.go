@@ -13,7 +13,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	tgwbgp "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/bgp"
+	tgwbgp "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing/bgp"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 

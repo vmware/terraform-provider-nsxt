@@ -7,7 +7,7 @@ import (
 
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/bgp"
+	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways/routing/bgp"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )

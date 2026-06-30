@@ -17,9 +17,9 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways"
+	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/routing"
 )
 
 var (
@@ -71,14 +71,14 @@ func minimalTGWRouteMapData() map[string]interface{} {
 
 func setupTGWRouteMapMock(t *testing.T, ctrl *gomock.Controller) (*tgwmocks.MockRouteMapsClient, func()) {
 	mockSDK := tgwmocks.NewMockRouteMapsClient(ctrl)
-	mockWrapper := &transitgateways.TGWRouteMapClientContext{
+	mockWrapper := &tgwrouting.TGWRouteMapClientContext{
 		Client:     mockSDK,
 		ClientType: utl.Multitenancy,
 		ProjectID:  tgwRMProjectID,
 	}
 
 	original := cliTGWRouteMapsClient
-	cliTGWRouteMapsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *transitgateways.TGWRouteMapClientContext {
+	cliTGWRouteMapsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *tgwrouting.TGWRouteMapClientContext {
 		return mockWrapper
 	}
 	return mockSDK, func() { cliTGWRouteMapsClient = original }

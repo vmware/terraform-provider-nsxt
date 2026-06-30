@@ -17,9 +17,9 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways"
+	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/routing"
 )
 
 var (
@@ -59,14 +59,14 @@ func minimalTGWCommunityListData() map[string]interface{} {
 
 func setupTGWCommunityListMock(t *testing.T, ctrl *gomock.Controller) (*tgwmocks.MockCommunityListsClient, func()) {
 	mockSDK := tgwmocks.NewMockCommunityListsClient(ctrl)
-	mockWrapper := &transitgateways.TGWCommunityListClientContext{
+	mockWrapper := &tgwrouting.TGWCommunityListClientContext{
 		Client:     mockSDK,
 		ClientType: utl.Multitenancy,
 		ProjectID:  tgwCLProjectID,
 	}
 
 	original := cliTGWCommunityListsClient
-	cliTGWCommunityListsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *transitgateways.TGWCommunityListClientContext {
+	cliTGWCommunityListsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *tgwrouting.TGWCommunityListClientContext {
 		return mockWrapper
 	}
 	return mockSDK, func() { cliTGWCommunityListsClient = original }
