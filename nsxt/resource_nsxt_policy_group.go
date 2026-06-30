@@ -30,6 +30,9 @@ var conditionKeyValues = []string{
 	model.Condition_KEY_ALL,
 	model.Condition_KEY_IPADDRESS,
 	model.Condition_KEY_PODCIDR,
+	// BareMetalServer condition keys - requires NSX 9.0.0+
+	model.Condition_KEY_MANAGEMENTINTERFACE,
+	model.Condition_KEY_OSVERSION,
 }
 
 var conditionMemberTypeValues = []string{
@@ -58,6 +61,8 @@ var conditionMemberTypeValues = []string{
 	model.Condition_MEMBER_TYPE_VPCSUBNETPORT,
 	model.Condition_MEMBER_TYPE_VPCSUBNET,
 	//model.Condition_MEMBER_TYPE_VPC,
+	model.Condition_MEMBER_TYPE_BAREMETALSERVER,
+	model.Condition_MEMBER_TYPE_BAREMETALSERVERINTERFACE,
 }
 
 var conditionOperatorValues = []string{
@@ -87,6 +92,7 @@ var externalMemberTypeValues = []string{
 var groupTypeValues = []string{
 	model.Group_GROUP_TYPE_IPADDRESS,
 	model.Group_GROUP_TYPE_ANTREA,
+	model.Group_GROUP_TYPE_BAREMETALSERVER,
 }
 
 func resourceNsxtPolicyGroup() *schema.Resource {
@@ -876,6 +882,11 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
+		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
+			if err := validateBMSVersionRequirement(); err != nil {
+				return err
+			}
+		}
 		obj.GroupType = groupTypes
 	}
 
@@ -1008,6 +1019,11 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
+		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
+			if err := validateBMSVersionRequirement(); err != nil {
+				return err
+			}
+		}
 		obj.GroupType = groupTypes
 	}
 

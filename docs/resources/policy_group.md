@@ -76,6 +76,79 @@ resource "nsxt_policy_group" "group1" {
 }
 ```
 
+## Example Usage - Bare Metal Server Group
+
+Note: Bare Metal Server group support requires NSX version 9.0.0 or higher.
+
+```hcl
+# Static BMS group — BareMetalServer, BareMetalServerInterface, and Group members
+resource "nsxt_policy_group" "bms_static" {
+  display_name = "tf-bms-static"
+  description  = "Bare Metal Server group with static membership"
+  group_type   = "BareMetalServer"
+
+  # Static BareMetalServer members by external ID
+  criteria {
+    external_id_expression {
+      member_type  = "BareMetalServer"
+      external_ids = ["bms-external-id-1", "bms-external-id-2"]
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  # Static BareMetalServerInterface members by external ID
+  criteria {
+    external_id_expression {
+      member_type  = "BareMetalServerInterface"
+      external_ids = ["bms-intf-external-id-1"]
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  # Include another Group as a static member by policy path
+  criteria {
+    path_expression {
+      member_paths = [nsxt_policy_group.another_bms_group.path]
+    }
+  }
+}
+
+# Dynamic BMS group using conditions  
+resource "nsxt_policy_group" "bms_dynamic" {
+  display_name = "tf-bms-dynamic"
+  description  = "Bare Metal Server group with dynamic membership"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "BareMetalServer"
+      operator    = "EQUALS"
+      value       = "env|production"
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    condition {
+      key         = "OSName"
+      member_type = "BareMetalServer"
+      operator    = "CONTAINS"
+      value       = "Linux"
+    }
+  }
+}
+```
+
 Note: This usage is for Global Manager only using site
 
 ```hcl
@@ -205,11 +278,15 @@ The following arguments are supported:
     * `path_expression` - (Optional) An expression block to specify direct group members by policy path.
         * `member_paths` - (Required) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
     * `external_id_expression` - (Optional) An expression block to specify external IDs for the specified member type for this Group.
-        * `member_type` - (Optional) External ID member type. Must be one of: `VirtualMachine`, `VirtualNetworkInterface`, `CloudNativeServiceInstance`, or `PhysicalServer`. Defaults to `VirtualMachine`.
+        * `member_type` - (Optional) External ID member type. Must be one of: `VirtualMachine`, `VirtualNetworkInterface`, `CloudNativeServiceInstance`, `PhysicalServer`, `BareMetalServer`, or `BareMetalServerInterface`. Defaults to `VirtualMachine`.
         * `external_ids` - (Required) List of external IDs for the specified member type.
     * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
-        * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`, `NodeType`, `GroupType`, `ALL`, `IPAddress`, `PodCidr`. Please note that certain keys are only applicable to certain member types.
-        * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort`, `VirtualMachine`, `Group`, `DVPG`, `DVPort`, `IPAddress`, `TransportNode`, `Pod`. `Service`, `Namespace`, `KubernetesCluster`, `KubernetesNamespace`, `KubernetesIngress`, `KubernetesService`, `KubernetesNode`, `AntreaEgress`, `AntreaIPPool`, `VpcSubnet`, `VpcSubnetPort`, . Note that certain member types are only applicable to certain environments.
+        * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`, `NodeType`, `GroupType`, `ALL`, `IPAddress`, `PodCidr`, `ManagementInterface`, `OSVersion`.
+          Please note that certain keys are only applicable to certain member types. For BMS groups (requires NSX 9.0.0 or higher):
+          `BareMetalServer` member type supports `Tag`, `Name`, `OSName`, `ALL`, `ManagementInterface`, and `OSVersion` keys.
+          `BareMetalServerInterface` member type supports only the `Tag` key.
+        * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort`, `VirtualMachine`, `Group`, `DVPG`, `DVPort`, `IPAddress`, `TransportNode`, `Pod`, `Service`, `Namespace`, `KubernetesCluster`, `KubernetesNamespace`, `KubernetesIngress`, `KubernetesService`, `KubernetesNode`, `AntreaEgress`, `AntreaIPPool`, `VpcSubnet`, `VpcSubnetPort`, `BareMetalServer`,
+          `BareMetalServerInterface`. Note that certain member types are only applicable to certain environments.
         * `operator` (Required) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS`, `STARTSWITH`, `IN`, `NOTIN`, `MATCHES`. Note that certain operators are only applicable to certain keys/member types.
         * `value` (Required) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.
@@ -219,7 +296,7 @@ The following arguments are supported:
         * `distinguished_name` (Required) LDAP distinguished name (DN). A valid fully qualified distinguished name should be provided here. This value is valid only if it matches to exactly 1 LDAP object on the LDAP server.
         * `domain_base_distinguished_name` (Required) Identity (Directory) domain base distinguished name. This is the base distinguished name for the domain where this identity group resides. (e.g. dc=example,dc=com)
         * `sid` (Optional) Identity (Directory) Group SID (security identifier). A security identifier (SID) is a unique value of variable length used to identify a trustee. This field is only populated for Microsoft Active Directory identity store.
-* `group_type` - (Optional) One of `IPAddress`, `ANTREA`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group.
+* `group_type` - (Optional) One of `IPAddress`, `ANTREA`, `BareMetalServer`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group. `BareMetalServer` group type requires NSX version 9.0.0 or higher. **IMPORTANT**: `group_type = "BareMetalServer"` is **REQUIRED** when using `BareMetalServer` or `BareMetalServerInterface` member types in criteria.
 
 ## Attributes Reference
 

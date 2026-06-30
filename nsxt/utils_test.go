@@ -133,6 +133,38 @@ func getComputeManagerName() string {
 	return os.Getenv("NSXT_TEST_COMPUTE_MANAGER")
 }
 
+func getDatastoreID() string {
+	return os.Getenv("NSXT_TEST_DATASTORE_ID")
+}
+
+func getMgtNetworkID() string {
+	return os.Getenv("NSXT_TEST_MGT_NETWORK")
+}
+
+func getVNAHostname() string {
+	name := os.Getenv("NSXT_TEST_VNA_HOSTNAME")
+	if name == "" {
+		name = "vna-test.example.com"
+	}
+	return name
+}
+
+func getVNACLIPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_CLI_PASSWORD")
+}
+
+func getVNARootPassword() string {
+	return os.Getenv("NSXT_TEST_VNA_ROOT_PASSWORD")
+}
+
+func getRCVNAClusterName() string {
+	return os.Getenv("NSXT_TEST_RC_VNA_CLUSTER_NAME")
+}
+
+func getRCVNAName() string {
+	return os.Getenv("NSXT_TEST_RC_VNA_NAME")
+}
+
 func getHostTransportNodeName() string {
 	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
 }
@@ -159,6 +191,10 @@ func getOverlayTransportZoneName() string {
 		name = overlayTransportZoneNamePrefix
 	}
 	return name
+}
+
+func getPortgroupID() string {
+	return os.Getenv("NSXT_TEST_PORTGROUP_ID")
 }
 
 func getMacPoolName() string {
@@ -329,6 +365,14 @@ func getTestVCIPAddress() string {
 
 func getTestVCThumbprint() string {
 	return os.Getenv("NSXT_TEST_VC_THUMBPRINT")
+}
+
+func getTestBMSServerID() string {
+	return os.Getenv("NSXT_TEST_BMS_SERVER")
+}
+
+func getTestBMSInterfaceID() string {
+	return os.Getenv("NSXT_TEST_BMS_INTERFACE")
 }
 
 func testAccTestVCCredentials(t *testing.T) {
