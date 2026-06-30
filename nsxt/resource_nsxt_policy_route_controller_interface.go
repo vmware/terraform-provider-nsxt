@@ -51,6 +51,7 @@ func resourceNsxtPolicyRouteControllerInterface() *schema.Resource {
 			"mtu": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				Description:  "Maximum transmission unit specifies the size of the largest packet that a network protocol can transmit",
 				ValidateFunc: validation.IntAtLeast(64),
 			},
