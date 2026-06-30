@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -198,7 +199,8 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 									SchemaType: "string",
 								},
 							},
-							Optional: true,
+							Optional:         true,
+							DiffSuppressFunc: suppressDhcpServerAddresses,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "list",
@@ -739,6 +741,104 @@ func validateSubnetDhcpv6Config(d *schema.ResourceData) error {
 	return nil
 }
 
+func isDhcpv4Deactivated(d *schema.ResourceData) bool {
+	if v4Val, ok := d.GetOk("dhcp_config"); ok {
+		v4List := v4Val.([]interface{})
+		if len(v4List) > 0 {
+			v4Map := v4List[0].(map[string]interface{})
+			if mode, ok := v4Map["mode"].(string); ok && mode != "" {
+				return mode == model.SubnetDhcpConfig_MODE_DEACTIVATED
+			}
+		}
+	}
+	return true
+}
+
+func isDhcpv6Deactivated(d *schema.ResourceData) bool {
+	if v6Val, ok := d.GetOk("subnet_dhcpv6_config"); ok {
+		v6List := v6Val.([]interface{})
+		if len(v6List) > 0 {
+			v6Map := v6List[0].(map[string]interface{})
+			if mode, ok := v6Map["mode"].(string); ok && mode != "" {
+				return mode == model.SubnetDhcpv6Config_MODE_DEACTIVATED
+			}
+		}
+	}
+	return true
+}
+
+func suppressDhcpServerAddresses(k, old, new string, d *schema.ResourceData) bool {
+	if strings.HasSuffix(k, ".#") {
+		var listKey string
+		if idx := strings.Index(k, "dhcp_server_addresses"); idx != -1 {
+			listKey = k[:idx] + "dhcp_server_addresses"
+		} else {
+			listKey = "advanced_config.0.dhcp_server_addresses"
+		}
+		o, n := d.GetChange(listKey)
+		oldList, _ := o.([]interface{})
+		newList, _ := n.([]interface{})
+		if len(oldList) == 0 && len(newList) == 0 {
+			return true
+		}
+
+		// Find elements that are present in one list but not the other (mismatched elements)
+		mismatched := make(map[string]bool)
+		oldMap := make(map[string]bool)
+		newMap := make(map[string]bool)
+		for _, v := range oldList {
+			if s, ok := v.(string); ok && s != "" {
+				oldMap[s] = true
+			}
+		}
+		for _, v := range newList {
+			if s, ok := v.(string); ok && s != "" {
+				newMap[s] = true
+			}
+		}
+		for s := range oldMap {
+			if !newMap[s] {
+				mismatched[s] = true
+			}
+		}
+		for s := range newMap {
+			if !oldMap[s] {
+				mismatched[s] = true
+			}
+		}
+
+		if len(mismatched) == 0 {
+			return true
+		}
+		for addr := range mismatched {
+			isIPv6 := strings.Contains(addr, ":")
+			if isIPv6 {
+				if !isDhcpv6Deactivated(d) {
+					return false
+				}
+			} else {
+				if !isDhcpv4Deactivated(d) {
+					return false
+				}
+			}
+		}
+		return true
+	}
+
+	val := new
+	if val == "" {
+		val = old
+	}
+	if val == "" {
+		return true
+	}
+	isIPv6 := strings.Contains(val, ":")
+	if isIPv6 {
+		return isDhcpv6Deactivated(d)
+	}
+	return isDhcpv4Deactivated(d)
+}
+
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -816,6 +916,30 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		if dhcpv6Mode == model.SubnetDhcpv6Config_MODE_RELAY || dhcpv6Mode == model.SubnetDhcpv6Config_MODE_DEACTIVATED {
 			obj.SubnetDhcpv6Config.Dhcpv6ServerAdditionalConfig = nil
 		}
+	}
+
+	// Filter out deactivated server addresses from the list sent to NSX,
+	// to avoid API validation errors such as:
+	// "Field level validation errors: {value '' of property dhcp_server_addresses violates format 'ip-cidr-block'}"
+	// This occurs because metadata.SchemaToStruct populates empty string array elements in the struct
+	// if we suppress elements in the schema, but NSX validates the IP format even for empty strings.
+	if obj.AdvancedConfig != nil && len(obj.AdvancedConfig.DhcpServerAddresses) > 0 {
+		var activeAddrs []string
+		for _, addr := range obj.AdvancedConfig.DhcpServerAddresses {
+			if addr != "" {
+				isIPv6 := strings.Contains(addr, ":")
+				if isIPv6 {
+					if !isDhcpv6Deactivated(d) {
+						activeAddrs = append(activeAddrs, addr)
+					}
+				} else {
+					if !isDhcpv4Deactivated(d) {
+						activeAddrs = append(activeAddrs, addr)
+					}
+				}
+			}
+		}
+		obj.AdvancedConfig.DhcpServerAddresses = activeAddrs
 	}
 
 	sessionContext := getSessionContext(d, m)
