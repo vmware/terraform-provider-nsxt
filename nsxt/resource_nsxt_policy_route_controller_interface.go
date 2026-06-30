@@ -72,7 +72,8 @@ func resourceNsxtPolicyRouteControllerInterface() *schema.Resource {
 			},
 			"interface_address": {
 				Type:        schema.TypeList,
-				Optional:    true,
+				Required:    true,
+				MinItems:    1,
 				Description: "List of interface address configurations",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

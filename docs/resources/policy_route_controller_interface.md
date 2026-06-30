@@ -45,7 +45,7 @@ The following arguments are supported:
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode. One of `NONE`, `STRICT`. Defaults to `STRICT`.
 * `mtu` - (Optional) Maximum transmission unit specifies the size of the largest packet that a network protocol can transmit. Minimum value is `64`.
 * `floating_ip_subnets` - (Optional) List of floating IP subnets in CIDR notation (IP/prefix-length) for this interface. Required when the Route Controller HA mode is `ACTIVE_STANDBY`.
-* `interface_address` - (Optional) List of interface address configurations. The following arguments are supported:
+* `interface_address` - (Required) List of interface address configurations. The following arguments are supported:
     * `subnets` - (Required) List of IP addresses and network prefixes in CIDR notation for this interface address.
     * `portgroup_id` - (Required) DV port group identifier discovered from vCenter.
     * `virtual_network_appliance_path` - (Optional) Policy path for the virtual network appliance.
