@@ -54,14 +54,13 @@ var routeControllerSchema = map[string]*metadata.ExtendedSchema{
 	"virtual_network_appliance_cluster_path": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
-			Optional:     true,
+			Required:     true,
 			Description:  "Policy path for the virtual network appliance cluster.",
 			ValidateFunc: validatePolicyPath(),
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "VirtualNetworkApplianceClusterPath",
-			OmitIfEmpty:  true,
 		},
 	},
 }
@@ -235,8 +234,8 @@ func routeControllerToInfraStruct(d *schema.ResourceData, id string, markBgpDele
 		ResourceType: &rcType,
 	}
 
-	// OmitIfEmpty metadata on ha_mode and virtual_network_appliance_cluster_path
-	// ensures SchemaToStruct leaves those fields nil when the user omits them.
+	// OmitIfEmpty metadata on ha_mode ensures SchemaToStruct leaves that field
+	// nil when the user omits it.
 	elem := reflect.ValueOf(&rcObj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, routeControllerSchema, "", nil); err != nil {
 		return infraStruct, err

@@ -14,9 +14,10 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_route_controller" "test" {
-  display_name = "test"
-  description  = "Terraform provisioned Route Controller"
-  ha_mode      = "ACTIVE_STANDBY"
+  display_name                           = "test"
+  description                            = "Terraform provisioned Route Controller"
+  ha_mode                                = "ACTIVE_STANDBY"
+  virtual_network_appliance_cluster_path = nsxt_policy_virtual_network_appliance_cluster.cluster.path
 
   bgp_config {
     ecmp                   = true
@@ -36,7 +37,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ha_mode` - (Optional) High-availability mode for route controller. Currently only `ACTIVE_STANDBY` is supported. This value is computed if not specified.
-* `virtual_network_appliance_cluster_path` - (Optional) Policy path for the virtual network appliance cluster.
+* `virtual_network_appliance_cluster_path` - (Required) Policy path for the virtual network appliance cluster.
 * `bgp_config` - (Optional) BGP routing configuration block. The following arguments are supported:
     * `ecmp` - (Optional) Flag to enable ECMP. Defaults to `true`.
     * `local_as_num` - (Required) BGP AS number in ASPLAIN/ASDOT format.
