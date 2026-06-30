@@ -90,10 +90,11 @@ func getConnectionInfoSchema() *schema.Schema {
 					Description: "Fully Qualified Domain Name of the Management Node",
 				},
 				"password": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Sensitive:   true,
-					Description: "Password",
+					Type:             schema.TypeString,
+					Optional:         true,
+					Sensitive:        true,
+					Description:      "Password",
+					DiffSuppressFunc: suppressIfEmptyPriorState,
 				},
 				"site_uuid": {
 					Type:        schema.TypeString,
