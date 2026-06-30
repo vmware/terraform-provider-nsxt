@@ -237,10 +237,10 @@ func testAccNsxtPolicyRCBgpNeighborInterfaceTemplate() string {
 resource "nsxt_policy_route_controller_interface" "bgp_src" {
   display_name        = "tf-acc-bgp-nbr-intf"
   parent_path         = nsxt_policy_route_controller.rc.path
-  floating_ip_subnets = ["192.168.200.1/24"]
+  floating_ip_subnets = ["192.168.200.10/24"]
 
   interface_address {
-    subnets                        = ["192.168.201.1/24"]
+    subnets                        = ["192.168.200.1/24"]
     portgroup_id                   = "%s"
     virtual_network_appliance_path = data.nsxt_policy_virtual_network_appliance.vna.path
   }
