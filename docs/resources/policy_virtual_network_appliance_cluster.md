@@ -47,7 +47,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `site_path` - (Optional) The path of the site this cluster belongs to. `path` field of the existing `nsxt_policy_site` can be used here. Defaults to default site path.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the cluster. Defaults to default enforcement point.
-* `appliance_form_factor` - (Optional) The form factor of the virtual network appliances in the cluster. Supported values: `SMALL`, `MEDIUM`, `LARGE`, `XLARGE`. When the form factor is updated, new VNAs deployed at the cluster level will use the updated value. Use the VNA redeploy API to apply the new form factor to existing appliances.
+* `appliance_form_factor` - (Optional, Computed) The form factor of the virtual network appliances in the cluster. Supported values: `SMALL`, `MEDIUM`, `LARGE`, `XLARGE`. When the form factor is updated, new VNAs deployed at the cluster level will use the updated value. Use the VNA redeploy API to apply the new form factor to existing appliances.
 * `appliance_type` - (Optional, Computed) The virtual network appliance type of the cluster.
 * `service_type` - (Optional, Computed, ForceNew) The service type for the cluster. Supported values: `VPC_SERVICES`, `ROUTE_CONTROLLER`. When set to `ROUTE_CONTROLLER`, the cluster is exclusively for route controller and cannot be used to connect VPC workloads. Defaults to `VPC_SERVICES` and cannot be modified after creation.
 * `password_managed_by_vcf` - (Optional, Computed) When set to `true`, enables VCF password management for all virtual network appliances in the cluster.
