@@ -207,11 +207,30 @@ func TestMockResourceNsxtPolicySiteDelete(t *testing.T) {
 	mockSDK, restore := setupSiteMock(t, ctrl)
 	defer restore()
 
-	t.Run("Delete success", func(t *testing.T) {
-		mockSDK.EXPECT().Delete(siteID, nil).Return(nil)
+	t.Run("Delete success with safe_to_force_delete false", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(siteID, gomock.Any()).Do(func(_ string, force *bool) {
+			assert.NotNil(t, force)
+			assert.False(t, *force)
+		}).Return(nil)
 
 		res := resourceNsxtPolicySite()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
+		d.SetId(siteID)
+
+		err := resourceNsxtPolicySiteDelete(d, newGoMockGlobalProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Delete success with safe_to_force_delete true", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(siteID, gomock.Any()).Do(func(_ string, force *bool) {
+			assert.NotNil(t, force)
+			assert.True(t, *force)
+		}).Return(nil)
+
+		res := resourceNsxtPolicySite()
+		data := minimalSiteData()
+		data["safe_to_force_delete"] = true
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
 		d.SetId(siteID)
 
 		err := resourceNsxtPolicySiteDelete(d, newGoMockGlobalProviderClient())

@@ -66,6 +66,12 @@ func resourceNsxtPolicySite() *schema.Resource {
 				Description:  "Persistent Site Type",
 				ValidateFunc: validation.StringInSlice(siteTypeValues, false),
 			},
+			"safe_to_force_delete": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Force delete site on destruction",
+				Default:     false,
+			},
 		},
 	}
 }
@@ -274,7 +280,8 @@ func resourceNsxtPolicySiteDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
 	client := cliSitesClient(sessionContext, connector)
-	err := client.Delete(id, nil)
+	forceDelete := d.Get("safe_to_force_delete").(bool)
+	err := client.Delete(id, &forceDelete)
 	if err != nil {
 		return handleDeleteError("Site", id, err)
 	}
