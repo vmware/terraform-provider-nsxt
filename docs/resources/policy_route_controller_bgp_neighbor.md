@@ -54,7 +54,7 @@ The following arguments are supported:
 * `keep_alive_time` - (Optional) Interval between keep alive messages sent to peer. Must be between 1 and 65535. Defaults to `60`.
 * `maximum_hop_limit` - (Optional) Maximum number of hops allowed to reach BGP neighbor. Must be between 1 and 255. Defaults to `1`.
 * `password` - (Optional) Password for BGP neighbor authentication. Sensitive value. Maximum 32 characters.
-* `source_addresses` - (Optional) List of source IP addresses for BGP peering. Maximum 8 entries.
+* `source_addresses` - (Required) List of source IP addresses for BGP peering. Maximum 8 entries.
 * `bfd_config` - (Optional) BFD configuration for failure detection. The following arguments are supported:
     * `enabled` - (Optional) Flag to enable/disable BFD configuration. Defaults to `false`.
     * `interval` - (Optional) Time interval between heartbeat packets in milliseconds. Must be between 50 and 60000. Defaults to `500`.
