@@ -242,10 +242,6 @@ func converListToMapByType(list []*data.StructValue, resourceType string) map[st
 	return ret
 }
 
-func converListToMap(list []*data.StructValue) map[string]*data.StructValue {
-	return converListToMapByType(list, "")
-}
-
 func getQueryString(resourceType string, context utl.SessionContext) string {
 	switch context.ClientType {
 	case utl.Global:
