@@ -147,7 +147,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("LBService")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -258,7 +258,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleUpdateError("LBService", id, err)
 	}
-	InvalidateCacheForResourceType("LBService")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 

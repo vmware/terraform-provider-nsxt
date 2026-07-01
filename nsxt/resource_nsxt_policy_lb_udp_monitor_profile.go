@@ -112,7 +112,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("LBUdpMonitorProfile")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBUdpMonitorProfile", d)
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }
@@ -202,7 +202,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBUdpMonitorProfile", id, err)
 	}
-	InvalidateCacheForResourceType("LBUdpMonitorProfile")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBUdpMonitorProfile", d)
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }

@@ -161,7 +161,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("ConnectivityPolicy")
+	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d)
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 
@@ -272,7 +272,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("ConnectivityPolicy", id, err)
 	}
-	InvalidateCacheForResourceType("ConnectivityPolicy")
+	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d)
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 

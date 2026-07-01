@@ -153,7 +153,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	InvalidateCacheForResourceType("StaticRoutes")
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
@@ -259,7 +259,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("StaticRoutes", id, err)
 	}
 
-	InvalidateCacheForResourceType("StaticRoutes")
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 

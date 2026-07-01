@@ -178,7 +178,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("DhcpV6StaticBindingConfig")
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV6StaticBindingConfig", d)
 
 	return resourceNsxtPolicyDhcpV6StaticBindingRead(d, m)
 }
@@ -236,7 +236,25 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 			return &typed, nil
 		},
 		func(patchObj *model.DhcpV6StaticBindingConfig) error {
-			return policyDhcpV6StaticBindingConvertAndPatch(d, segmentPath, id, m)
+			// Patch the object we were given (it may already include provider-managed tags
+			// injected by CacheAwareResourceRead) so tags persist in NSX.
+			converter := bindings.NewTypeConverter()
+			convObj, convErrs := converter.ConvertToVapi(*patchObj, model.DhcpV6StaticBindingConfigBindingType())
+			if convErrs != nil {
+				return convErrs[0]
+			}
+			if gwID == "" {
+				c := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
+				if c == nil {
+					return policyResourceNotSupportedError()
+				}
+				return c.Patch(segmentID, id, convObj.(*data.StructValue))
+			}
+			c := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
+			if c == nil {
+				return policyResourceNotSupportedError()
+			}
+			return c.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 		},
 	)
 	if err != nil {
@@ -276,7 +294,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV6 Static Binding Config", id, err)
 	}
-	InvalidateCacheForResourceType("DhcpV6StaticBindingConfig")
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV6StaticBindingConfig", d)
 
 	return resourceNsxtPolicyDhcpV6StaticBindingRead(d, m)
 }

@@ -581,7 +581,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("Tier1")
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -761,7 +761,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
-	InvalidateCacheForResourceType("Tier1")
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
 
