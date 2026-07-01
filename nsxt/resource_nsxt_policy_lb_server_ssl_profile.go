@@ -195,7 +195,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("LBServerSslProfile")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }
@@ -292,7 +292,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("LBServerSslProfile", id, err)
 	}
-	InvalidateCacheForResourceType("LBServerSslProfile")
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }

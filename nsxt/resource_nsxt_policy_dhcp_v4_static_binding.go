@@ -269,7 +269,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -328,8 +328,30 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 			return &typed, nil
 		},
 		func(patchObj *model.DhcpV4StaticBindingConfig) error {
-			// ensureProviderManagedTagsWithPatchFunc requires a patch function; reuse existing conversion+patch
-			return policyDhcpV4StaticBindingConvertAndPatch(d, segmentPath, id, m)
+			// Patch the object we were given (it may already include provider-managed tags
+			// injected by CacheAwareResourceRead) so tags persist in NSX.
+			converter := bindings.NewTypeConverter()
+			isT0, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
+			if isT0 {
+				return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
+			}
+			context := getSessionContext(d, m)
+			convObj, convErrs := converter.ConvertToVapi(*patchObj, model.DhcpV4StaticBindingConfigBindingType())
+			if convErrs != nil {
+				return convErrs[0]
+			}
+			if gwID == "" {
+				c := cliSegmentsDhcpStaticBindingConfigsClient(context, connector)
+				if c == nil {
+					return policyResourceNotSupportedError()
+				}
+				return c.Patch(segmentID, id, convObj.(*data.StructValue))
+			}
+			c := cliT1SegmentsDhcpStaticBindingConfigsClient(context, connector)
+			if c == nil {
+				return policyResourceNotSupportedError()
+			}
+			return c.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 		},
 	)
 	if err != nil {
@@ -377,7 +399,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV4 Static Binding Config", id, err)
 	}
-	InvalidateCacheForResourceType("DhcpV4StaticBindingConfig")
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }

@@ -191,7 +191,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	d.Set("locale_service_id", localeServiceID)
-	InvalidateCacheForResourceType("Tier1Interface")
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -345,7 +345,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
-	InvalidateCacheForResourceType("Tier1Interface")
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }

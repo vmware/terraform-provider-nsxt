@@ -177,7 +177,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	InvalidateCacheForResourceType("VpcIpAddressAllocation")
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d)
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 
@@ -283,7 +283,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcIpAddressAllocation", id, err)
 	}
 
-	InvalidateCacheForResourceType("VpcIpAddressAllocation")
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d)
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 

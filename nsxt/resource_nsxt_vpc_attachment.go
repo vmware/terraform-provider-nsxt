@@ -123,7 +123,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	InvalidateCacheForResourceType("VpcAttachment")
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcAttachment", d)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -231,7 +231,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("VpcAttachment", id, err)
 	}
 
-	InvalidateCacheForResourceType("VpcAttachment")
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcAttachment", d)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 

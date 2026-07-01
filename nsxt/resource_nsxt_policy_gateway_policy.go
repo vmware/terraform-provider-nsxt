@@ -214,7 +214,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m inte
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("gatewaypolicy")
+	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
 
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
@@ -298,7 +298,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m inte
 	if err != nil {
 		return handleUpdateError("Gateway Policy", id, err)
 	}
-	InvalidateCacheForResourceType("gatewaypolicy")
+	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
 
@@ -317,7 +317,7 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)
 	}
-	InvalidateCacheForResourceType("gatewaypolicy")
+	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
 
 	return nil
 }

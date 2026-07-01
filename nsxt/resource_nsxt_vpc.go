@@ -233,7 +233,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	InvalidateCacheForResourceType("Vpc")
+	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d)
 	return resourceNsxtVpcRead(d, m)
 }
 
@@ -341,7 +341,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("Vpc", id, err)
 	}
 
-	InvalidateCacheForResourceType("Vpc")
+	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d)
 	return resourceNsxtVpcRead(d, m)
 }
 

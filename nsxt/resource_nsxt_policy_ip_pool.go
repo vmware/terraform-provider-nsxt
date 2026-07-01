@@ -158,7 +158,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("IpAddressPool")
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 
@@ -198,7 +198,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("IpAddressPool")
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 

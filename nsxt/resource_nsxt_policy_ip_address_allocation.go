@@ -156,7 +156,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 				d.SetId(id)
 				d.Set("nsx_id", id)
 				d.Set("allocation_ip", attr.Values[0])
-				InvalidateCacheForResourceType("IpAddressAllocation")
+				MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
 				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 			}
 		}
@@ -167,7 +167,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("IpAddressAllocation")
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 
@@ -266,7 +266,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("IPAddressAllocation", id, err)
 	}
-	InvalidateCacheForResourceType("IpAddressAllocation")
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 

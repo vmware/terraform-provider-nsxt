@@ -701,7 +701,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	InvalidateCacheForResourceType("TransitGateway")
+	MarkPostWriteAndInvalidateCacheForResourceType("TransitGateway", d)
 
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
@@ -963,7 +963,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	InvalidateCacheForResourceType("TransitGateway")
+	MarkPostWriteAndInvalidateCacheForResourceType("TransitGateway", d)
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
