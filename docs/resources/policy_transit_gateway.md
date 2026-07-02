@@ -84,7 +84,7 @@ The following arguments are supported:
 * `span` - (Optional) Span configuration. Note that one of `cluster_based_span` and `zone_based_span` is required. Available since NSX 9.1.0.
     * `cluster_based_span` - (Optional) Span based on vSphere Clusters.
         * `span_path` - (Required) Policy path of the network span object.
-    * `zone_based_span` - (Optional) Span based on zones.
+    * `zone_based_span` - (Optional, Computed) Span based on zones.
         * `zone_external_ids` - (Required) An array of Zone object's external IDs.
 
 ## Attributes Reference

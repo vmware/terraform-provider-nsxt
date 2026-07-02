@@ -210,6 +210,7 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							Computed: true,
 							Elem: &metadata.ExtendedResource{
 								Schema: map[string]*metadata.ExtendedSchema{
 									"zone_external_ids": {
