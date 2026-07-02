@@ -275,7 +275,7 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 // Tests guarded by this helper still run in periodic CI jobs where
 // NSXT_TEST_EXTRA_COVERAGE=true is set, so coverage is not lost permanently.
 func testAccNsxtExtraCoverage(t *testing.T) {
-	if os.Getenv("NSXT_TEST_EXTRA_COVERAGE") == "" {
+	if os.Getenv("NSXT_TEST_EXTRA_COVERAGE") == "" || os.Getenv("NSXT_TEST_EXTRA_COVERAGE") == "false" {
 		t.Skipf("set NSXT_TEST_EXTRA_COVERAGE to run extra-coverage tests")
 	}
 }
