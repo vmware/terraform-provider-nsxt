@@ -17,9 +17,9 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	transitgateways "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways"
+	tgwrouting "github.com/vmware/terraform-provider-nsxt/api/orgs/projects/transit_gateways/routing"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways"
+	tgwmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects/transit_gateways/routing"
 )
 
 var (
@@ -71,14 +71,14 @@ func minimalTGWPrefixListData() map[string]interface{} {
 
 func setupTGWPrefixListMock(t *testing.T, ctrl *gomock.Controller) (*tgwmocks.MockPrefixListsClient, func()) {
 	mockSDK := tgwmocks.NewMockPrefixListsClient(ctrl)
-	mockWrapper := &transitgateways.TGWPrefixListClientContext{
+	mockWrapper := &tgwrouting.TGWPrefixListClientContext{
 		Client:     mockSDK,
 		ClientType: utl.Multitenancy,
 		ProjectID:  tgwPLProjectID,
 	}
 
 	original := cliTGWPrefixListsClient
-	cliTGWPrefixListsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *transitgateways.TGWPrefixListClientContext {
+	cliTGWPrefixListsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *tgwrouting.TGWPrefixListClientContext {
 		return mockWrapper
 	}
 	return mockSDK, func() { cliTGWPrefixListsClient = original }
