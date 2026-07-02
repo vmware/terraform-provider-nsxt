@@ -13,6 +13,7 @@ import (
 	gatewaypolicies "github.com/vmware/terraform-provider-nsxt/api/infra/domains/gateway_policies"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var cliGatewayPoliciesRulesClient = gatewaypolicies.NewRulesClient
@@ -61,6 +62,8 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
+
+	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
 
 	d.SetId(id)
 
@@ -115,6 +118,28 @@ func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
+
+	if isCacheEnabledForRead(d) {
+		gp, cacheUsed, _, cacheErr := TryCacheRead[model.GatewayPolicy](
+			d,
+			m,
+			connector,
+			policyID,
+			"gatewaypolicy",
+			model.GatewayPolicyBindingType(),
+		)
+		if cacheErr != nil {
+			return handleReadError(d, "GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), cacheErr)
+		}
+		if cacheUsed && gp != nil && len(gp.Rules) > 0 {
+			for _, r := range gp.Rules {
+				if r.Id != nil && *r.Id == id {
+					securityAndGatewayPolicyRuleModelToSchema(d, r)
+					return nil
+				}
+			}
+		}
+	}
 	rule, err := client.Get(domain, policyID, id)
 	if err != nil {
 		return handleReadError(d, "GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
@@ -148,6 +173,8 @@ func resourceNsxtPolicyGatewayPolicyRuleUpdate(d *schema.ResourceData, m interfa
 		return handleUpdateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
+	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
+
 	return resourceNsxtPolicyGatewayPolicyRuleRead(d, m)
 }
 
@@ -168,7 +195,11 @@ func resourceNsxtPolicyGatewayPolicyRuleDelete(d *schema.ResourceData, m interfa
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	return client.Delete(domain, policyID, id)
+	err := client.Delete(domain, policyID, id)
+	if err == nil {
+		MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d)
+	}
+	return err
 }
 
 func nsxtGatewayPolicyRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {

@@ -389,14 +389,19 @@ func useImplicitLocaleService(d *schema.ResourceData) bool {
 	return edgeClusterPathSpecified || edgeClusterPathCleared
 }
 
-func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *schema.ResourceData, connector client.Connector, id string) (model.Infra, error) {
+func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *schema.ResourceData, m interface{}, connector client.Connector, id string) (model.Infra, error) {
 	var infraChildren, gwChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	failoverMode := d.Get("failover_mode").(string)
 	defaultRuleLogging := d.Get("default_rule_logging").(bool)
 	disableFirewall := !d.Get("enable_firewall").(bool)
@@ -561,7 +566,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
+	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, m, connector, id)
 
 	if err != nil {
 		return err
@@ -576,6 +581,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -593,8 +599,35 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	obj, err := client.Get(id)
-
+	var obj *model.Tier1
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.Tier1](
+			d,
+			m,
+			connector,
+			id,
+			"Tier1",
+			model.Tier1BindingType(),
+			func() (*model.Tier1, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.Tier1) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Tier1", id, err)
 	}
@@ -718,7 +751,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
+	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, m, connector, id)
 	if err != nil {
 		return err
 	}
@@ -728,7 +761,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
-
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
 
