@@ -27,19 +27,21 @@ var accTestProjectIpAddressAllocationUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project_ip_address_allocation.test"
+	createName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state, accTestProjectIpAddressAllocationUpdateAttributes["display_name"])
+			return testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(true),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(true, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestProjectIpAddressAllocationCreateAttributes["display_name"]),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(createName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestProjectIpAddressAllocationCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
 					resource.TestCheckResourceAttr(testResourceName, "allocation_size", accTestProjectIpAddressAllocationCreateAttributes["allocation_size"]),
@@ -50,10 +52,10 @@ func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(false),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(false, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestProjectIpAddressAllocationUpdateAttributes["display_name"]),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(updateName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestProjectIpAddressAllocationUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
 					resource.TestCheckResourceAttr(testResourceName, "allocation_size", accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"]),
@@ -64,9 +66,9 @@ func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -90,7 +92,7 @@ func TestAccResourceNsxtPolicyProjectIpAddressAllocation_importBasic(t *testing.
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -150,12 +152,16 @@ func testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state *terraform.St
 	return nil
 }
 
-func testAccNsxtPolicyProjectIpAddressAllocationTemplate(createFlow bool) string {
+func testAccNsxtPolicyProjectIpAddressAllocationTemplate(createFlow bool, createName, updateName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestProjectIpAddressAllocationCreateAttributes
 	} else {
 		attrMap = accTestProjectIpAddressAllocationUpdateAttributes
+	}
+	displayName := updateName
+	if createFlow {
+		displayName = createName
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_project" "test" {
@@ -177,10 +183,10 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
 data "nsxt_policy_project_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_policy_project_ip_address_allocation.test.allocation_ips
-}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtProjectContext())
+}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), displayName, attrMap["description"], attrMap["allocation_size"], testAccNsxtProjectContext())
 }
 
-func testAccNsxtPolicyProjectIpAddressAllocationMinimalistic() string {
+func testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(updateName string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_project" "test" {
   id = "%s"
@@ -196,5 +202,5 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
 data "nsxt_policy_project_ip_address_allocation" "test" {
   %s
   allocation_ips = nsxt_policy_project_ip_address_allocation.test.allocation_ips
-}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), accTestProjectIpAddressAllocationUpdateAttributes["display_name"], accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtProjectContext())
+}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), updateName, accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtProjectContext())
 }

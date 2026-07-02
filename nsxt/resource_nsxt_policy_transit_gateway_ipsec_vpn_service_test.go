@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var RelatedResourceName = getAccTestResourceName()
-
 var accTestPolicyTGWIPSecVpnServicesCreateAttributes = map[string]string{
 	"display_name":  getAccTestResourceName(),
 	"description":   "terraform created",
@@ -38,6 +36,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_service.test"
 	createDisplayName := getAccTestResourceName()
 	updateDisplayName := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -50,7 +49,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(true, createDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(true, createDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnServicesExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
@@ -68,7 +67,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(false, updateDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesTemplate(false, updateDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnServicesExists(updateDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
@@ -86,7 +85,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(updateDisplayName),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(updateDisplayName, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTGWIPSecVpnServicesExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -102,6 +101,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyTGWIPSecVpnServices_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_ipsec_vpn_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -116,7 +116,7 @@ func TestAccResourceNsxtPolicyTGWIPSecVpnServices_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(name),
+				Config: testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(name, prereqName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -177,14 +177,14 @@ func testAccNsxtPolicyTGWIPSecVpnServicesCheckDestroy(state *terraform.State, di
 	return nil
 }
 
-func testAccNsxtPolicyTGWIPSecVpnServicesTemplate(createFlow bool, displayName string) string {
+func testAccNsxtPolicyTGWIPSecVpnServicesTemplate(createFlow bool, displayName string, prereqName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTGWIPSecVpnServicesCreateAttributes
 	} else {
 		attrMap = accTestPolicyTGWIPSecVpnServicesUpdateAttributes
 	}
-	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites(prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   display_name = "%s"
   parent_path  = data.nsxt_policy_transit_gateway.test.path
@@ -204,8 +204,8 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
 }`, displayName, attrMap["description"], attrMap["enabled"], attrMap["ha_sync"], attrMap["ike_log_level"], attrMap["sources"], attrMap["destinations"])
 }
 
-func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(displayName string) string {
-	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyTGWIPSecVpnServicesMinimalistic(displayName string, prereqName string) string {
+	return testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites(prereqName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
   display_name = "%s"
   parent_path      = data.nsxt_policy_transit_gateway.test.path
@@ -213,7 +213,7 @@ resource "nsxt_policy_transit_gateway_ipsec_vpn_service" "test" {
 }`, displayName)
 }
 
-func testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites() string {
+func testAccNsxtPolicyTGWIPSecVpnServicesPrerequisites(prereqName string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
@@ -288,5 +288,5 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     tag   = "tag1"
   }
   depends_on = [data.nsxt_policy_transit_gateway.test]
-}`, getEdgeClusterName(), RelatedResourceName, RelatedResourceName, RelatedResourceName, RelatedResourceName)
+}`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName)
 }

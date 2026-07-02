@@ -12,8 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var dependantEntityName = getAccTestResourceName()
-
 var accTestPolicyTransitGatewayAttachmentCreateAttributes = map[string]string{
 	"display_name": getAccTestResourceName(),
 	"description":  "terraform created",
@@ -26,6 +24,7 @@ var accTestPolicyTransitGatewayAttachmentUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_attachment.test"
+	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -39,7 +38,7 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true),
+				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayAttachmentExists(accTestPolicyTransitGatewayAttachmentCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayAttachmentCreateAttributes["display_name"]),
@@ -52,7 +51,7 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(false),
+				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(false, prereqName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayAttachmentExists(accTestPolicyTransitGatewayAttachmentUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayAttachmentUpdateAttributes["display_name"]),
@@ -70,6 +69,7 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyTransitGatewayAttachment_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
+	prereqName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway_attachment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -84,7 +84,7 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_importBasic(t *testing.T)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true),
+				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true, prereqName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -146,7 +146,7 @@ func testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state *terraform.Stat
 	return nil
 }
 
-func testAccNsxtPolicyTransitGatewayAttachmentTemplate(createFlow bool) string {
+func testAccNsxtPolicyTransitGatewayAttachmentTemplate(createFlow bool, prereqName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyTransitGatewayAttachmentCreateAttributes
@@ -203,5 +203,5 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, getEdgeClusterName(), dependantEntityName, dependantEntityName, dependantEntityName, attrMap["display_name"], attrMap["description"])
+}`, getEdgeClusterName(), prereqName, prereqName, prereqName, attrMap["display_name"], attrMap["description"])
 }

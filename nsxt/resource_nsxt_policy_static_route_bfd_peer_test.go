@@ -28,19 +28,21 @@ var accTestPolicyStaticRouteBfdPeerUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyStaticRouteBfdPeer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_static_route_bfd_peer.test"
+	createName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyStaticRouteBfdPeerCheckDestroy(state, accTestPolicyStaticRouteBfdPeerUpdateAttributes["display_name"])
+			return testAccNsxtPolicyStaticRouteBfdPeerCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyStaticRouteBfdPeerTemplate(true),
+				Config: testAccNsxtPolicyStaticRouteBfdPeerTemplate(true, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyStaticRouteBfdPeerExists(accTestPolicyStaticRouteBfdPeerCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyStaticRouteBfdPeerCreateAttributes["display_name"]),
+					testAccNsxtPolicyStaticRouteBfdPeerExists(createName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyStaticRouteBfdPeerCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyStaticRouteBfdPeerCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyStaticRouteBfdPeerCreateAttributes["peer_address"]),
@@ -53,10 +55,10 @@ func TestAccResourceNsxtPolicyStaticRouteBfdPeer_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyStaticRouteBfdPeerTemplate(false),
+				Config: testAccNsxtPolicyStaticRouteBfdPeerTemplate(false, createName, updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyStaticRouteBfdPeerExists(accTestPolicyStaticRouteBfdPeerUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyStaticRouteBfdPeerUpdateAttributes["display_name"]),
+					testAccNsxtPolicyStaticRouteBfdPeerExists(updateName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyStaticRouteBfdPeerUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", accTestPolicyStaticRouteBfdPeerUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyStaticRouteBfdPeerUpdateAttributes["peer_address"]),
@@ -69,9 +71,9 @@ func TestAccResourceNsxtPolicyStaticRouteBfdPeer_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyStaticRouteBfdPeerMinimalistic(),
+				Config: testAccNsxtPolicyStaticRouteBfdPeerMinimalistic(updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyStaticRouteBfdPeerExists(accTestPolicyStaticRouteBfdPeerCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyStaticRouteBfdPeerExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -95,7 +97,7 @@ func TestAccResourceNsxtPolicyStaticRouteBfdPeer_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyStaticRouteBfdPeerMinimalistic(),
+				Config: testAccNsxtPolicyStaticRouteBfdPeerMinimalistic(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -160,12 +162,16 @@ func testAccNsxtPolicyStaticRouteBfdPeerCheckDestroy(state *terraform.State, dis
 	return nil
 }
 
-func testAccNsxtPolicyStaticRouteBfdPeerTemplate(createFlow bool) string {
+func testAccNsxtPolicyStaticRouteBfdPeerTemplate(createFlow bool, createName, updateName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyStaticRouteBfdPeerCreateAttributes
 	} else {
 		attrMap = accTestPolicyStaticRouteBfdPeerUpdateAttributes
+	}
+	displayName := updateName
+	if createFlow {
+		displayName = createName
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
@@ -186,10 +192,10 @@ resource "nsxt_policy_static_route_bfd_peer" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["peer_address"])
+}`, displayName, attrMap["description"], attrMap["enabled"], attrMap["peer_address"])
 }
 
-func testAccNsxtPolicyStaticRouteBfdPeerMinimalistic() string {
+func testAccNsxtPolicyStaticRouteBfdPeerMinimalistic(updateName string) string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 data "nsxt_policy_bfd_profile" "test" {
@@ -202,5 +208,5 @@ resource "nsxt_policy_static_route_bfd_peer" "test" {
 
   display_name = "%s"
   peer_address = "%s"
-}`, accTestPolicyStaticRouteBfdPeerUpdateAttributes["display_name"], accTestPolicyStaticRouteBfdPeerUpdateAttributes["peer_address"])
+}`, updateName, accTestPolicyStaticRouteBfdPeerUpdateAttributes["peer_address"])
 }
