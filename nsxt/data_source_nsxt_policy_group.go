@@ -6,6 +6,9 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyGroup() *schema.Resource {
@@ -24,10 +27,41 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
+
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "Group", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.GroupBindingType())
+			if len(convErrs) == 0 {
+				obj, ok := goVal.(model.Group)
+				if ok {
+					id := lookupKey
+					if obj.Id != nil {
+						id = *obj.Id
+					}
+					d.SetId(id)
+					d.Set("id", id)
+					d.Set("display_name", obj.DisplayName)
+					d.Set("description", obj.Description)
+					d.Set("path", obj.Path)
+					return nil
+				}
+			}
+		}
+	}
+
 	domain := d.Get("domain").(string)
 	query := make(map[string]string)
 	query["parent_path"] = "*/" + domain
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Group", query)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Group", query)
 	if err != nil {
 		return err
 	}
