@@ -40,9 +40,9 @@ func testAccNsxtPolicyRCBgpNeighborDataSourceTemplate(displayName string) string
 resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
   display_name     = "%s"
   parent_path      = "${nsxt_policy_route_controller.rc.path}/bgp"
-  neighbor_address = "192.168.100.1"
+  neighbor_address = "192.168.200.102"
   remote_as_num    = "65099"
-  source_addresses = ["192.168.200.1"]
+  source_addresses = ["192.168.200.10"]
 
   depends_on = [nsxt_policy_route_controller_interface.bgp_src]
 }
