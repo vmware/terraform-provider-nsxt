@@ -403,6 +403,103 @@ func TestMockResourceNsxtPolicyTransitGatewayBgpConfig(t *testing.T) {
 	})
 }
 
+// TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution guards against a
+// regression where advanced_config and redistribution_config were never
+// merged into the TransitGatewayBgpRoutingConfig sent to NSX. Both map onto
+// fields of that same struct (ForwardingUpTimer, RouteRedistributionConfig)
+// rather than separate API objects, so they must be read alongside
+// bgp_config, not ignored.
+func TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
+	data := minimalTGWData()
+	data["bgp_config"] = minimalBgpConfigData()
+	data["advanced_config"] = []interface{}{
+		map[string]interface{}{"forwarding_up_timer": 10},
+	}
+	data["redistribution_config"] = []interface{}{
+		map[string]interface{}{
+			"rule": []interface{}{
+				map[string]interface{}{
+					"types":          []interface{}{"PUBLIC", "TGW_STATIC_ROUTE"},
+					"route_map_path": "",
+				},
+			},
+		},
+	}
+
+	res := resourceNsxtPolicyTransitGateway()
+	d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+	cfg := getTGWBgpConfigFromSchema(d)
+	require.NotNil(t, cfg)
+	require.NotNil(t, cfg.ForwardingUpTimer)
+	assert.Equal(t, int64(10), *cfg.ForwardingUpTimer)
+
+	require.NotNil(t, cfg.RouteRedistributionConfig)
+	require.Len(t, cfg.RouteRedistributionConfig.Rules, 1)
+	assert.Equal(t, []string{"PUBLIC", "TGW_STATIC_ROUTE"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
+}
+
+// TestMockResourceNsxtPolicyTransitGatewayAdvancedAndRedistributionConfig
+// guards against a regression where Read unconditionally reset
+// advanced_config and redistribution_config to nil regardless of what NSX
+// actually returned, causing perpetual drift.
+func TestMockResourceNsxtPolicyTransitGatewayAdvancedAndRedistributionConfig(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+
+	t.Run("Read sets advanced_config and redistribution_config from bgp API response", func(t *testing.T) {
+		bgpResp := tgwBgpAPIResponse()
+		timer := int64(10)
+		bgpResp.ForwardingUpTimer = &timer
+		bgpResp.RouteRedistributionConfig = &nsxModel.TransitGatewayRouteRedistributionConfig{
+			Rules: []nsxModel.TransitGatewayBgpRedistributionRule{
+				{RouteRedistributionTypes: []string{"PUBLIC", "TGW_STATIC_ROUTE"}},
+			},
+		}
+
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(bgpResp, nil),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		advList := d.Get("advanced_config").([]interface{})
+		require.Len(t, advList, 1)
+		assert.Equal(t, 10, advList[0].(map[string]interface{})["forwarding_up_timer"])
+
+		redisList := d.Get("redistribution_config").([]interface{})
+		require.Len(t, redisList, 1)
+		rules := redisList[0].(map[string]interface{})["rule"].([]interface{})
+		require.Len(t, rules, 1)
+		assert.Equal(t, []interface{}{"PUBLIC", "TGW_STATIC_ROUTE"}, rules[0].(map[string]interface{})["types"])
+	})
+
+	t.Run("Read with no advanced or redistribution config sets empty lists", func(t *testing.T) {
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwBgpAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Empty(t, d.Get("advanced_config").([]interface{}))
+		assert.Empty(t, d.Get("redistribution_config").([]interface{}))
+	})
+}
+
 func TestMockResourceNsxtPolicyTransitGatewayDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
