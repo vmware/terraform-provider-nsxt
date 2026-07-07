@@ -292,8 +292,15 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		return nil, nil
 	}
 	converter := bindings.NewTypeConverter()
-	if cbs := getElemOrEmptyMapFromMap(span, "cluster_based_span"); len(cbs) > 0 {
-		spanPath := cbs["span_path"].(string)
+	// Presence is determined by list length rather than getElemOrEmptyMapFromMap:
+	// when zone_external_ids is explicitly set to an empty list, the SDKv2 diff
+	// engine emits no attribute entries for the nested block's contents (only the
+	// "#" count), so the reconstructed element can be a bare nil even though the
+	// block itself is present. Checking len(list) > 0 matches the correctly
+	// diffed "#" count and avoids treating a present-but-empty block as absent.
+	if cbsList, ok := span["cluster_based_span"].([]interface{}); ok && len(cbsList) > 0 {
+		cbs, _ := cbsList[0].(map[string]interface{})
+		spanPath, _ := cbs["span_path"].(string)
 		clusterBasedSpan := model.ClusterBasedSpan{
 			SpanPath: &spanPath,
 			Type_:    model.BaseSpan_TYPE_CLUSTERBASEDSPAN,
@@ -304,8 +311,11 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		}
 		return dataValue.(*data.StructValue), nil
 	}
-	if zbs := getElemOrEmptyMapFromMap(span, "zone_based_span"); len(zbs) > 0 {
-		zoneExternalIds := interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
+	if zbsList, ok := span["zone_based_span"].([]interface{}); ok && len(zbsList) > 0 {
+		var zoneExternalIds []string
+		if zbs, ok := zbsList[0].(map[string]interface{}); ok {
+			zoneExternalIds = interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
+		}
 		zoneBasedSpan := model.ZoneBasedSpan{
 			ZoneExternalIds: zoneExternalIds,
 			Type_:           model.BaseSpan_TYPE_ZONEBASEDSPAN,
