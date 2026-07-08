@@ -245,3 +245,26 @@ func TestMockResourceNsxtPolicySiteDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestSiteConnectionInfoPasswordDiffSuppress(t *testing.T) {
+	res := resourceNsxtPolicySite()
+
+	// Build a ResourceData that simulates an existing (imported) resource: ID is set.
+	existing := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
+	existing.SetId(siteID)
+
+	// Build a ResourceData that simulates a new resource (no ID yet).
+	fresh := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
+
+	// Existing resource, old state is empty: suppress (import scenario).
+	assert.True(t, suppressIfEmptyPriorState("site_connection_info.0.password", "", "secret-password-123", existing),
+		"must suppress diff when old (state) is empty and resource exists (import)")
+
+	// New resource (no ID), old state is empty: do not suppress so passwords are included in the Create diff.
+	assert.False(t, suppressIfEmptyPriorState("site_connection_info.0.password", "", "secret-password-123", fresh),
+		"must not suppress diff for a new resource (no ID)")
+
+	// Non-empty old value: never suppress so password changes are applied.
+	assert.False(t, suppressIfEmptyPriorState("site_connection_info.0.password", "old-password", "new-password", existing),
+		"must not suppress diff when old (state) is non-empty")
+}
