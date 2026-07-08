@@ -44,6 +44,7 @@ The following arguments are supported:
     * `thumbprint` - (Optional) Thumbprint of Enforcement Point.
     * `username` - (Optional) Username.
 * `site_type` - (Required) Persistent Site Type. Allowed values are `ONPREM_LM`, `SDDC_LM`. This attribute is supported with NSX 4.1.0 onwards.
+* `safe_to_force_delete` - (Optional) Force delete site on destruction. Default is false.
 
 ## Attributes Reference
 
