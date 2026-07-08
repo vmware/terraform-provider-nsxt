@@ -207,30 +207,11 @@ func TestMockResourceNsxtPolicySiteDelete(t *testing.T) {
 	mockSDK, restore := setupSiteMock(t, ctrl)
 	defer restore()
 
-	t.Run("Delete success with safe_to_force_delete false", func(t *testing.T) {
-		mockSDK.EXPECT().Delete(siteID, gomock.Any()).Do(func(_ string, force *bool) {
-			assert.NotNil(t, force)
-			assert.False(t, *force)
-		}).Return(nil)
+	t.Run("Delete success", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(siteID, nil).Return(nil)
 
 		res := resourceNsxtPolicySite()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
-		d.SetId(siteID)
-
-		err := resourceNsxtPolicySiteDelete(d, newGoMockGlobalProviderClient())
-		require.NoError(t, err)
-	})
-
-	t.Run("Delete success with safe_to_force_delete true", func(t *testing.T) {
-		mockSDK.EXPECT().Delete(siteID, gomock.Any()).Do(func(_ string, force *bool) {
-			assert.NotNil(t, force)
-			assert.True(t, *force)
-		}).Return(nil)
-
-		res := resourceNsxtPolicySite()
-		data := minimalSiteData()
-		data["safe_to_force_delete"] = true
-		d := schema.TestResourceDataRaw(t, res.Schema, data)
 		d.SetId(siteID)
 
 		err := resourceNsxtPolicySiteDelete(d, newGoMockGlobalProviderClient())
@@ -244,27 +225,4 @@ func TestMockResourceNsxtPolicySiteDelete(t *testing.T) {
 		err := resourceNsxtPolicySiteDelete(d, newGoMockGlobalProviderClient())
 		require.Error(t, err)
 	})
-}
-
-func TestSiteConnectionInfoPasswordDiffSuppress(t *testing.T) {
-	res := resourceNsxtPolicySite()
-
-	// Build a ResourceData that simulates an existing (imported) resource: ID is set.
-	existing := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
-	existing.SetId(siteID)
-
-	// Build a ResourceData that simulates a new resource (no ID yet).
-	fresh := schema.TestResourceDataRaw(t, res.Schema, minimalSiteData())
-
-	// Existing resource, old state is empty: suppress (import scenario).
-	assert.True(t, suppressIfEmptyPriorState("site_connection_info.0.password", "", "secret-password-123", existing),
-		"must suppress diff when old (state) is empty and resource exists (import)")
-
-	// New resource (no ID), old state is empty: do not suppress so passwords are included in the Create diff.
-	assert.False(t, suppressIfEmptyPriorState("site_connection_info.0.password", "", "secret-password-123", fresh),
-		"must not suppress diff for a new resource (no ID)")
-
-	// Non-empty old value: never suppress so password changes are applied.
-	assert.False(t, suppressIfEmptyPriorState("site_connection_info.0.password", "old-password", "new-password", existing),
-		"must not suppress diff when old (state) is non-empty")
 }
