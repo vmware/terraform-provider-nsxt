@@ -127,11 +127,12 @@ func resourceNsxtPolicyRouteControllerBgpNeighbor() *schema.Resource {
 				ValidateFunc: validateSingleIP(),
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "Password for BGP neighbor authentication",
-				ValidateFunc: validation.StringLenBetween(0, 32),
-				Sensitive:    true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Password for BGP neighbor authentication",
+				ValidateFunc:     validation.StringLenBetween(0, 32),
+				Sensitive:        true,
+				DiffSuppressFunc: suppressIfEmptyPriorState,
 			},
 			"remote_as_num": {
 				Type:         schema.TypeString,
@@ -141,7 +142,8 @@ func resourceNsxtPolicyRouteControllerBgpNeighbor() *schema.Resource {
 			},
 			"source_addresses": {
 				Type:        schema.TypeList,
-				Optional:    true,
+				Required:    true,
+				MinItems:    1,
 				Description: "Source IP Addresses for BGP peering",
 				MaxItems:    8,
 				Elem: &schema.Schema{
@@ -286,11 +288,8 @@ func rcBgpNeighborToStruct(d *schema.ResourceData, id string) (model.RouteContro
 		NeighborAddress:     &neighborAddress,
 		RemoteAsNum:         &remoteAsNum,
 		RouteFiltering:      rFilters,
+		SourceAddresses:     sourceAddresses,
 		Id:                  &id,
-	}
-
-	if len(sourceAddresses) > 0 {
-		obj.SourceAddresses = sourceAddresses
 	}
 	if len(gatewayIPs) > 0 {
 		obj.GatewayIps = gatewayIPs
