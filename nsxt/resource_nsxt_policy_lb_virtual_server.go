@@ -1564,12 +1564,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	applicationProfilePath := d.Get("application_profile_path").(string)
 	clientSSLProfileBinding := getPolicyClientSSLBindingFromSchema(d)
@@ -1624,7 +1619,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d.Id())
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }
@@ -1742,12 +1737,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	clientSSLProfileBinding := getPolicyClientSSLBindingFromSchema(d)
@@ -1828,7 +1818,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleUpdateError("LBVirtualServer", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d.Id())
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }

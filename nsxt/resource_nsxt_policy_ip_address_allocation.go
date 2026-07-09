@@ -108,12 +108,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	allocationIP := d.Get("allocation_ip").(string)
 
 	obj := model.IpAddressAllocation{
@@ -156,7 +151,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 				d.SetId(id)
 				d.Set("nsx_id", id)
 				d.Set("allocation_ip", attr.Values[0])
-				MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
+				MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d.Id())
 				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 			}
 		}
@@ -167,7 +162,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d.Id())
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 
@@ -246,12 +241,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	obj := model.IpAddressAllocation{
@@ -266,7 +256,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("IPAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressAllocation", d.Id())
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 

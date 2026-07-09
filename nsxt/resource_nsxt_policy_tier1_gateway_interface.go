@@ -141,12 +141,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	description := d.Get("description").(string)
 	segmentPath := d.Get("segment_path").(string)
 	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	var ipv6ProfilePaths []string
 	if d.Get("ipv6_ndra_profile_path").(string) != "" {
@@ -191,7 +186,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	d.Set("locale_service_id", localeServiceID)
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d.Id())
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -299,12 +294,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	segmentPath := d.Get("segment_path").(string)
 	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
@@ -345,7 +335,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1Interface", d.Id())
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }

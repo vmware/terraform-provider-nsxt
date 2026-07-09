@@ -130,12 +130,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.ConnectivityPolicy{
 		DisplayName: &displayName,
@@ -161,7 +156,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d.Id())
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 
@@ -243,12 +238,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -272,7 +262,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("ConnectivityPolicy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d.Id())
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 

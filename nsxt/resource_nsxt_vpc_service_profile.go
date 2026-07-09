@@ -631,7 +631,7 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d.Id())
 	return resourceNsxtVpcServiceProfileRead(d, m)
 }
 
@@ -747,7 +747,7 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 		return handleUpdateError("VpcServiceProfile", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d.Id())
 	return resourceNsxtVpcServiceProfileRead(d, m)
 }
 

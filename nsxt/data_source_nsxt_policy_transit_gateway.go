@@ -46,21 +46,16 @@ func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{
 
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
-	displayName := d.Get("display_name").(string)
-	lookupKey := objID
-	if lookupKey == "" {
-		lookupKey = displayName
-	}
 
-	if lookupKey != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(lookupKey, "TransitGateway", d, m, connector)
+	if objID != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(objID, "TransitGateway", d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.TransitGatewayBindingType())
 			if len(convErrs) == 0 {
 				obj, ok := goVal.(model.TransitGateway)
 				if ok {
-					id := lookupKey
+					id := objID
 					if obj.Id != nil {
 						id = *obj.Id
 					}

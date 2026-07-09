@@ -37,20 +37,15 @@ func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
 	}
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
-	displayName := d.Get("display_name").(string)
-	lookupKey := objID
-	if lookupKey == "" {
-		lookupKey = displayName
-	}
-	if lookupKey != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(lookupKey, "Vpc", d, m, connector)
+	if objID != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(objID, "Vpc", d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcBindingType())
 			if len(convErrs) == 0 {
 				obj, ok := goVal.(model.Vpc)
 				if ok {
-					id := lookupKey
+					id := objID
 					if obj.Id != nil {
 						id = *obj.Id
 					}

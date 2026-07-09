@@ -154,12 +154,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	network := d.Get("network").(string)
 
 	var nextHopsStructs []model.RouterNexthop
@@ -204,7 +199,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -315,12 +310,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	network := d.Get("network").(string)
 
 	var nextHopsStructs []model.RouterNexthop
@@ -364,7 +354,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }

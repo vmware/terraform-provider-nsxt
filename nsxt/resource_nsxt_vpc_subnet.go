@@ -670,11 +670,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if isConfigScopedCacheMode() {
-		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		obj.Tags = getPolicyTagsFromSchema(d)
-	}
+	obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
@@ -686,7 +682,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcSubnet", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcSubnet", d.Id())
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -938,12 +934,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if isConfigScopedCacheMode() {
-		// Always regenerate provider-managed default tags to ensure they're present
-		obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		obj.Tags = getPolicyTagsFromSchema(d)
-	}
+	obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	// Since dhcp block is Computed (sent back by NSX even if not specified), we need to
 	// explicitly clear out additional DHCP config in case of DHCP RELAY mode, otherwise
@@ -993,7 +984,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcSubnet", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcSubnet", d.Id())
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 

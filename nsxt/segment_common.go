@@ -714,12 +714,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	domainName := d.Get("domain_name").(string)
 	tzPath := d.Get("transport_zone_path").(string)
 	replicationMode := d.Get("replication_mode").(string)
@@ -1515,7 +1510,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d.Id())
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
@@ -1536,7 +1531,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d.Id())
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }

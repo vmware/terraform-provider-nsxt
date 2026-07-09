@@ -56,12 +56,7 @@ func resourceNsxtPolicyLBTcpMonitorProfilePatch(d *schema.ResourceData, m interf
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	receive := d.Get("receive").(string)
 	send := d.Get("send").(string)
 	fallCount := int64(d.Get("fall_count").(int))
@@ -112,7 +107,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBTcpMonitorProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBTcpMonitorProfile", d.Id())
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }
@@ -202,7 +197,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBTcpMonitorProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBTcpMonitorProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBTcpMonitorProfile", d.Id())
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }

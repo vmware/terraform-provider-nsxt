@@ -114,12 +114,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	connectivityPath := d.Get("connectivity_path").(string)
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
@@ -147,7 +142,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d.Id())
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -228,12 +223,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	connectivityPath := d.Get("connectivity_path").(string)
 	enabled := d.Get("enabled").(bool)
@@ -258,7 +248,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleUpdateError("LBService", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d.Id())
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 

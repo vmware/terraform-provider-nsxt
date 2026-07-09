@@ -124,12 +124,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.StaticRoutes{
 		DisplayName: &displayName,
@@ -153,7 +148,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
@@ -229,12 +224,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -259,7 +249,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("StaticRoutes", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 

@@ -65,12 +65,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.R
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	profilePath := d.Get("profile_path").(string)
 	seqNum := int64(d.Get("sequence_number").(int))
 	obj := model.PolicyFirewallFloodProtectionProfileBindingMap{
@@ -134,7 +129,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate(d *schema.
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap", d.Id())
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }
@@ -210,7 +205,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingUpdate(d *schema.
 	if err != nil {
 		return handleUpdateError("DistributedFloodProtectionProfileBinding", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyFirewallFloodProtectionProfileBindingMap", d.Id())
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }

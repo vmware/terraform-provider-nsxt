@@ -911,7 +911,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Group", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Group", d.Id())
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
@@ -1084,7 +1084,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Group", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Group", d.Id())
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 

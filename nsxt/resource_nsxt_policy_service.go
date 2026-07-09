@@ -524,12 +524,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
@@ -556,7 +551,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Service", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Service", CacheKeyForResourceID("Service", d))
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 
@@ -764,13 +759,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	revision := int64(d.Get("revision").(int))
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		// Always regenerate provider-managed default tags to ensure they're present
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
@@ -793,7 +782,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleUpdateError("Service", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Service", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Service", CacheKeyForResourceID("Service", d))
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 

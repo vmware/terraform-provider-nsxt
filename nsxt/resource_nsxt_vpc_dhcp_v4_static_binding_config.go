@@ -251,12 +251,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.DhcpV4StaticBindingConfig{
 		DisplayName:  &displayName,
@@ -287,7 +282,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
@@ -392,12 +387,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -430,7 +420,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return handleUpdateError("DhcpV4StaticBindingConfig", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 

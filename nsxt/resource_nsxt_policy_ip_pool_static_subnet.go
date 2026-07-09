@@ -250,7 +250,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", CacheKeyForResourceID("IpAddressPoolStaticSubnet", d))
 	return resourceNsxtPolicyIPPoolStaticSubnetRead(d, m)
 }
 
@@ -279,7 +279,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("Static Subnet", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", CacheKeyForResourceID("IpAddressPoolStaticSubnet", d))
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -306,7 +306,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleDeleteError("Static Subnet", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolStaticSubnet", CacheKeyForResourceID("IpAddressPoolStaticSubnet", d))
 
 	return nil
 }

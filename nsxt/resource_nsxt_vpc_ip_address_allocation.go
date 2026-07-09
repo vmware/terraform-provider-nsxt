@@ -148,12 +148,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.VpcIpAddressAllocation{
 		DisplayName: &displayName,
@@ -177,7 +172,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d.Id())
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 
@@ -253,12 +248,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -283,7 +273,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcIpAddressAllocation", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d.Id())
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 

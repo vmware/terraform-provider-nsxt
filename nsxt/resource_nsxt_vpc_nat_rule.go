@@ -220,12 +220,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.PolicyVpcNatRule{
 		DisplayName: &displayName,
@@ -249,7 +244,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", CacheKeyForResourceID("PolicyVpcNatRule", d))
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
@@ -329,12 +324,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -359,7 +349,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("PolicyVpcNatRule", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", CacheKeyForResourceID("PolicyVpcNatRule", d))
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 

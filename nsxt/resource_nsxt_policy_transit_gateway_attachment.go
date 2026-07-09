@@ -177,12 +177,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.TransitGatewayAttachment{
 		DisplayName: &displayName,
@@ -210,7 +205,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d.Id())
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -295,12 +290,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -327,7 +317,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d.Id())
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }

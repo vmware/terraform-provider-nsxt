@@ -163,12 +163,7 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	gatewayAddress := d.Get("gateway_address").(string)
 	hostName := d.Get("hostname").(string)
 	ipAddress := d.Get("ip_address").(string)
@@ -269,7 +264,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -399,7 +394,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV4 Static Binding Config", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }

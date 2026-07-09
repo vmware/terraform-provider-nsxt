@@ -167,12 +167,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.LBServerSslProfile{
 		DisplayName: &displayName,
@@ -195,7 +190,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d.Id())
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }
@@ -266,12 +261,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -292,7 +282,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("LBServerSslProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d.Id())
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }

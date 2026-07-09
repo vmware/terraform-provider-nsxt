@@ -38,7 +38,7 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if err := resourceNsxtPolicyGroupGeneralCreate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("group", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("group", d.Id())
 	return nil
 }
 
@@ -125,7 +125,7 @@ func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if err := resourceNsxtPolicyGroupGeneralUpdate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("group", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("group", d.Id())
 	return nil
 }
 

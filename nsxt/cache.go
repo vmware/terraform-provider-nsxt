@@ -35,6 +35,7 @@ var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 // postWriteByKey tracks recently written resources to bypass cache once on the next read.
 var postWriteByKey sync.Map // string -> struct{}
 
+
 // errCacheUseBackendDirect indicates the cache bucket exists but the ID is missing, so use direct GET.
 var errCacheUseBackendDirect = errors.New("nsxt cache: use direct API read")
 
@@ -83,25 +84,11 @@ func MarkPostWriteForResourceTypeKey(resourceType, resourceID string) {
 	postWriteByKey.Store(postWriteKey(resourceType, resourceID), struct{}{})
 }
 
-// MarkPostWriteForResourceTypeFromData marks a resource instance as just written.
-// Uses d.Get("path") when present, otherwise falls back to d.Id().
-func MarkPostWriteForResourceTypeFromData(resourceType string, d *schema.ResourceData) {
-	if d == nil {
-		return
-	}
-	if p, ok := d.GetOk("path"); ok {
-		if path, ok2 := p.(string); ok2 && path != "" {
-			MarkPostWriteForResourceTypeKey(resourceType, path)
-			return
-		}
-	}
-	if id := d.Id(); id != "" {
-		MarkPostWriteForResourceTypeKey(resourceType, id)
-	}
-}
-
-func MarkPostWriteAndInvalidateCacheForResourceType(resourceType string, d *schema.ResourceData) {
-	MarkPostWriteForResourceTypeFromData(resourceType, d)
+// MarkPostWriteAndInvalidateCacheForResourceType marks resourceID as just written and invalidates
+// the type's cache bucket. resourceID must be the same key used in the corresponding
+// CacheAwareResourceRead/TryCacheRead call (typically d.Id(), or the parent's ID for child resources).
+func MarkPostWriteAndInvalidateCacheForResourceType(resourceType, resourceID string) {
+	MarkPostWriteForResourceTypeKey(resourceType, resourceID)
 	InvalidateCacheForResourceType(resourceType)
 }
 
@@ -147,6 +134,20 @@ func isCacheEnabledForRead(d *schema.ResourceData) bool {
 	return IsCacheEnabled() && isRefreshPhase(d)
 }
 
+// CacheKeyForResourceID returns the key that CacheAwareResourceRead/TryCacheRead will use
+// for this resource. Path-indexed types key by path (when set); all others key by id.
+// Use this when calling MarkPostWriteAndInvalidateCacheForResourceType to ensure the keys match.
+func CacheKeyForResourceID(resourceType string, d *schema.ResourceData) string {
+	if shouldIndexByPath(resourceType) {
+		if p, ok := d.GetOk("path"); ok {
+			if path, ok2 := p.(string); ok2 && path != "" {
+				return path
+			}
+		}
+	}
+	return d.Id()
+}
+
 func shouldIndexByPath(resourceType string) bool {
 	switch resourceType {
 	case "PolicyNatRule", "SegmentPort", "IpAddressPoolStaticSubnet", "IpAddressPoolBlockSubnet", "Service":
@@ -156,17 +157,9 @@ func shouldIndexByPath(resourceType string) bool {
 	}
 }
 
+// indexCacheMapKey inserts key→obj if key is not already present (first-seen wins).
+// Used for both primary keys (id) and secondary keys (display_name, path).
 func indexCacheMapKey(ret map[string]*data.StructValue, key string, obj *data.StructValue) {
-	if existing, seen := ret[key]; seen {
-		// Keep the first-seen mapping to avoid overwriting with duplicates.
-		_ = existing
-		return
-	}
-	ret[key] = obj
-}
-
-func indexCacheMapKeySecondary(ret map[string]*data.StructValue, key string, obj *data.StructValue) {
-	// Secondary keys (e.g. display_name, path) are best-effort, so keep first-seen on collisions.
 	if _, seen := ret[key]; seen {
 		return
 	}
@@ -217,10 +210,10 @@ func converListToMapByType(list []*data.StructValue, resourceType string) map[st
 			}
 		}
 		if resource.DisplayName != nil {
-			indexCacheMapKeySecondary(ret, *resource.DisplayName, obj)
+			indexCacheMapKey(ret, *resource.DisplayName, obj)
 		}
 		if shouldIndexByPath(resourceType) && resource.Path != nil {
-			indexCacheMapKeySecondary(ret, *resource.Path, obj)
+			indexCacheMapKey(ret, *resource.Path, obj)
 		}
 
 		// Also index from raw StructValue fields to cover cases where SDK conversion loses fields.
@@ -231,11 +224,11 @@ func converListToMapByType(list []*data.StructValue, resourceType string) map[st
 			}
 		}
 		if dn, ok := getStructValueStringField(obj, "display_name"); ok {
-			indexCacheMapKeySecondary(ret, dn, obj)
+			indexCacheMapKey(ret, dn, obj)
 		}
 		if shouldIndexByPath(resourceType) {
 			if p, ok := getStructValueStringField(obj, "path"); ok {
-				indexCacheMapKeySecondary(ret, p, obj)
+				indexCacheMapKey(ret, p, obj)
 			}
 		}
 	}
@@ -310,26 +303,48 @@ func getEffectiveCacheContext(d *schema.ResourceData, m interface{}) utl.Session
 }
 
 func getCacheQueryKey(resourceType string, d *schema.ResourceData, m interface{}) string {
+	clients := m.(nsxtClients)
 	context := getEffectiveCacheContext(d, m)
 	query := getQueryString(resourceType, context)
-	runID := m.(nsxtClients).CommonConfig.contextID
+	runID := clients.CommonConfig.contextID
 	additionalQuery := buildTagQuery(d, runID)
+	// Prefix with manager host so aliased provider blocks pointing at different managers
+	// never share a cache bucket even when context_id and resource types are identical.
+	host := clients.Host
+	base := fmt.Sprintf("[%s]%s", host, query)
 	if additionalQuery == "" {
-		return query
+		return base
 	}
-	return fmt.Sprintf("%s AND %s ", query, additionalQuery)
+	return fmt.Sprintf("%s AND %s ", base, additionalQuery)
 }
 
 func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) (interface{}, error) {
 	tc := c.getTypeCache(resourceType)
-
-	tc.mu.Lock()
-	defer tc.mu.Unlock()
-
 	query := getCacheQueryKey(resourceType, d, m)
+
+	// Fast path: read lock allows concurrent hits without blocking each other.
+	tc.mu.RLock()
 	val, qerr := tc.getQueryResult(query, resourceID)
 	if val != nil {
-		tc.cacheHit += 1
+		tc.cacheHit++
+		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		tc.mu.RUnlock()
+		return val, nil
+	}
+	if errors.Is(qerr, errCacheUseBackendDirect) {
+		tc.cacheMis++
+		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		tc.mu.RUnlock()
+		return nil, errCacheUseBackendDirect
+	}
+	tc.mu.RUnlock()
+
+	// Slow path: take exclusive lock to populate the bucket, then double-check.
+	tc.mu.Lock()
+	defer tc.mu.Unlock()
+	val, qerr = tc.getQueryResult(query, resourceID)
+	if val != nil {
+		tc.cacheHit++
 		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
 		return val, nil
 	}
@@ -409,6 +424,30 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 	return nil
 }
 
+// convertCachedValue converts a raw cache value to the typed model, strips provider-managed tags,
+// and returns (typedPtr, true) on success or (nil, false) on conversion/type-assertion failure.
+func convertCachedValue[T any](val interface{}, resourceType, resourceID string, bindingType bindings.BindingType) (*T, bool) {
+	sv, ok := val.(*data.StructValue)
+	if !ok {
+		return nil, false
+	}
+	converter := bindings.NewTypeConverter()
+	goVal, convErrs := converter.ConvertToGolang(sv, bindingType)
+	if len(convErrs) > 0 {
+		log.Printf("[WARNING] Cache: conversion failed for resourceType=%s id=%s (%v); discarding cached value", resourceType, resourceID, convErrs[0]) //nolint:gosec
+		return nil, false
+	}
+	typedVal, ok := goVal.(T)
+	if !ok {
+		log.Printf("[WARNING] Cache: type assertion failed for resourceType=%s id=%s; discarding cached value", resourceType, resourceID) //nolint:gosec
+		return nil, false
+	}
+	if !isGlobalSearchCacheMode() {
+		stripProviderManagedTagsFromAny(&typedVal)
+	}
+	return &typedVal, true
+}
+
 // TryCacheRead reads from cache only and never falls back to a backend GET.
 func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType) (*T, bool, bool, error) {
 	cacheUsed := false
@@ -421,20 +460,8 @@ func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client
 		cacheAttempted = true
 		val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
 		if err == nil {
-			converter := bindings.NewTypeConverter()
-			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), bindingType)
-			if len(convErrs) == 0 {
-				typedVal, ok := goVal.(T)
-				if ok {
-					cacheUsed = true
-					if !isGlobalSearchCacheMode() {
-						stripProviderManagedTagsFromAny(&typedVal)
-					}
-					return &typedVal, cacheUsed, cacheAttempted, nil
-				}
-				log.Printf("[WARNING] Cache: type assertion failed for resourceType=%s id=%s; discarding cached value", resourceType, resourceID) //nolint:gosec
-			} else {
-				log.Printf("[WARNING] Cache: conversion failed for resourceType=%s id=%s (%v); discarding cached value", resourceType, resourceID, convErrs[0]) //nolint:gosec
+			if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType); ok {
+				return typedVal, true, cacheAttempted, nil
 			}
 		}
 	}
@@ -570,41 +597,27 @@ func mergeSecurityPolicyCacheSearchResults(parents, children []*data.StructValue
 }
 
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {
-	cacheUsed := false
 	cacheAttempted := false
 	postWriteBypass := false
 
 	if isRefreshPhase(d) && IsCacheEnabled() {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
-			// Ensure read-your-writes semantics for this resource type (one-shot).
-			// Search-backed cache may be briefly stale right after a write.
+			// Ensure read-your-writes semantics: bypass cache once right after a write.
+			// Search-backed cache may be briefly stale immediately after a write.
 			postWriteBypass = true
 			cacheAttempted = true
-			goto backend
 		}
-		cacheAttempted = true
-		val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
-		if err == nil {
-			converter := bindings.NewTypeConverter()
-			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), bindingType)
-			if len(convErrs) == 0 {
-				typedVal, ok := goVal.(T)
-				if ok {
-					cacheUsed = true
-					// Strip provider-managed tags before returning so they don't appear in state.
-					if !isGlobalSearchCacheMode() {
-						stripProviderManagedTagsFromAny(&typedVal)
-					}
-					return &typedVal, cacheUsed, cacheAttempted, nil
+		if !postWriteBypass {
+			cacheAttempted = true
+			val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
+			if err == nil {
+				if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType); ok {
+					return typedVal, true, cacheAttempted, nil
 				}
-				log.Printf("[WARNING] Cache: type assertion failed for resourceType=%s id=%s; discarding cached value, falling back to direct GET", resourceType, resourceID) //nolint:gosec
-			} else {
-				log.Printf("[WARNING] Cache: conversion failed for resourceType=%s id=%s (%v); discarding cached value, falling back to direct GET", resourceType, resourceID, convErrs[0]) //nolint:gosec
 			}
 		}
 	}
 
-backend:
 	if postWriteBypass {
 		log.Printf("[DEBUG] Cache post-write bypass: direct GET for resourceType=%s id=%s", resourceType, resourceID) //nolint:gosec
 	} else {
@@ -612,7 +625,7 @@ backend:
 	}
 	obj, err := backendRead()
 	if err != nil {
-		return nil, cacheUsed, cacheAttempted, err
+		return nil, false, cacheAttempted, err
 	}
 
 	// Only stamp provider-managed tags in config_scope mode.
@@ -627,7 +640,7 @@ backend:
 		stripProviderManagedTagsFromAny(obj)
 	}
 
-	return obj, cacheUsed, cacheAttempted, nil
+	return obj, false, cacheAttempted, nil
 }
 
 // providerManagedTagsSearchFragments returns NSX search fragments for provider-managed tags.

@@ -205,7 +205,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("NAT Rule", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", CacheKeyForResourceID("PolicyNatRule", d))
 
 	return nil
 }
@@ -530,7 +530,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	d.Set("nsx_id", id)
 	// In case nat type was not specified or got overridden by action
 	d.Set("type", natType)
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", CacheKeyForResourceID("PolicyNatRule", d))
 
 	return resourceNsxtPolicyNATRuleRead(d, m)
 }
@@ -606,7 +606,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", CacheKeyForResourceID("PolicyNatRule", d))
 
 	d.SetId(id)
 	d.Set("nsx_id", id)

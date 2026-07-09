@@ -396,12 +396,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	failoverMode := d.Get("failover_mode").(string)
 	defaultRuleLogging := d.Get("default_rule_logging").(bool)
 	disableFirewall := !d.Get("enable_firewall").(bool)
@@ -581,7 +576,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d.Id())
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -761,7 +756,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d.Id())
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
 

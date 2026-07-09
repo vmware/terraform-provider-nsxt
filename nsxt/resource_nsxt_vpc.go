@@ -204,12 +204,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.Vpc{
 		DisplayName: &displayName,
@@ -233,7 +228,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d.Id())
 	return resourceNsxtVpcRead(d, m)
 }
 
@@ -311,12 +306,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags = getPolicyTagsFromSchema(d)
-	}
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -341,7 +331,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("Vpc", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d)
+	MarkPostWriteAndInvalidateCacheForResourceType("Vpc", d.Id())
 	return resourceNsxtVpcRead(d, m)
 }
 
