@@ -38,7 +38,10 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_basic(t *testing.T) {
 	updatedDisplayName := displayName + "-updated"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccVNAPreCheck(t) },
+		PreCheck: func() {
+			testAccVNAPreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
@@ -80,7 +83,10 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importWithCredentials(t *t
 	displayName := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccVNACredentialsPreCheck(t) },
+		PreCheck: func() {
+			testAccVNACredentialsPreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: withImportIdempotencyChecks([]resource.TestStep{
@@ -112,7 +118,10 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_importBasic(t *testing.T) 
 	displayName := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccVNAPreCheck(t) },
+		PreCheck: func() {
+			testAccVNAPreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{
@@ -305,7 +314,10 @@ func TestAccResourceNsxtPolicyVirtualNetworkAppliance_credentialsDrift(t *testin
 	displayName := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccVNACredentialsPreCheck(t) },
+		PreCheck: func() {
+			testAccVNACredentialsPreCheck(t)
+			testAccNsxtExtraCoverage(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceCheckDestroy(testResourceName),
 		Steps: []resource.TestStep{

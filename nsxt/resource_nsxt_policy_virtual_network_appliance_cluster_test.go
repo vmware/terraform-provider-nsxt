@@ -26,6 +26,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.T)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
@@ -66,6 +67,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_importBasic(t *test
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
@@ -206,6 +208,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_noAdvancedConfig(t 
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
@@ -252,6 +255,7 @@ func TestAccResourceNsxtPolicyVirtualNetworkApplianceCluster_coreAllocationProfi
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.2.0")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
