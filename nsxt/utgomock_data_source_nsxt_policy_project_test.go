@@ -13,9 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	orgsapi "github.com/vmware/terraform-provider-nsxt/api/orgs"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -86,6 +88,23 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 		assert.Equal(t, projectID, d.Id())
 	})
 
+	t.Run("by display_name with a project having nil display_name", func(t *testing.T) {
+		nilDisplayNameProj := projectAPIResponse()
+		nilDisplayNameProj.DisplayName = nil
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
+			Results: []nsxModel.Project{nilDisplayNameProj, projectAPIResponse()},
+		}, nil)
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"display_name": projectDisplayName,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, projectID, d.Id())
+	})
+
 	t.Run("by display_name not found", func(t *testing.T) {
 		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
 			Results: []nsxModel.Project{},
@@ -126,6 +145,23 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 
 		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("unsupported client type", func(t *testing.T) {
+		originalCli := cliProjectsClient
+		cliProjectsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *orgsapi.ProjectClientContext {
+			return nil
+		}
+		defer func() { cliProjectsClient = originalCli }()
+
+		ds := dataSourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"display_name": projectDisplayName,
+		})
+
+		err := dataSourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "policy resource is not supported")
 	})
 }
 
