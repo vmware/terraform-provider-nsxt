@@ -546,7 +546,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBPool", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id())
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }
 
@@ -572,7 +572,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 			m,
 			connector,
 			id,
-			"LBPool",
+			resourceTypeLBPool,
 			model.LBPoolBindingType(),
 			func() (*model.LBPool, error) {
 				readObj, readErr := client.Get(id)
@@ -700,7 +700,7 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleUpdateError("LBPool", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBPool", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id())
 
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }

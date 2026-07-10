@@ -244,7 +244,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", CacheKeyForResourceID("PolicyVpcNatRule", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d))
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
@@ -272,7 +272,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 			m,
 			connector,
 			id,
-			"PolicyVpcNatRule",
+			resourceTypePolicyVpcNatRule,
 			model.PolicyVpcNatRuleBindingType(),
 			func() (*model.PolicyVpcNatRule, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
@@ -349,7 +349,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("PolicyVpcNatRule", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("PolicyVpcNatRule", CacheKeyForResourceID("PolicyVpcNatRule", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d))
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 

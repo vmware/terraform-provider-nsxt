@@ -576,7 +576,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id())
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -602,7 +602,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 			m,
 			connector,
 			id,
-			"Tier1",
+			resourceTypeTier1,
 			model.Tier1BindingType(),
 			func() (*model.Tier1, error) {
 				readObj, readErr := client.Get(id)
@@ -756,7 +756,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Tier1", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id())
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
 

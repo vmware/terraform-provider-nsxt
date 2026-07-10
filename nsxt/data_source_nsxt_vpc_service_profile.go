@@ -53,7 +53,7 @@ func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) 
 
 	objID := d.Get("id").(string)
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "VpcServiceProfile", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeVpcServiceProfile, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcServiceProfileBindingType())

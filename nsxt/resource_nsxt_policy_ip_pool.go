@@ -81,7 +81,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 			m,
 			connector,
 			id,
-			"IpAddressPool",
+			resourceTypeIpAddressPool,
 			model.IpAddressPoolBindingType(),
 			func() (*model.IpAddressPool, error) {
 				readObj, readErr := client.Get(id)
@@ -153,7 +153,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id())
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 
@@ -188,7 +188,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id())
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 

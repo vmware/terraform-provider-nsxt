@@ -156,7 +156,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, d.Id())
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 
@@ -186,7 +186,7 @@ func resourceNsxtPolicyConnectivityPolicyRead(d *schema.ResourceData, m interfac
 			m,
 			connector,
 			id,
-			"ConnectivityPolicy",
+			resourceTypeConnectivityPolicy,
 			model.ConnectivityPolicyBindingType(),
 			func() (*model.ConnectivityPolicy, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
@@ -262,7 +262,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("ConnectivityPolicy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("ConnectivityPolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, d.Id())
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 

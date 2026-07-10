@@ -30,6 +30,49 @@ type typeScopedCache struct {
 	byTyp map[string]*resourceTypeCache
 }
 
+// Resource type identifiers used as cache keys and interpolated into NSX Search
+// queries (resource_type:<value>). Values must match NSX Search's resource_type
+// field exactly, including casing, and must not be changed here.
+const (
+	resourceTypeConnectivityPolicy                             = "ConnectivityPolicy"
+	resourceTypeDhcpV4StaticBindingConfig                      = "DhcpV4StaticBindingConfig"
+	resourceTypeDhcpV6StaticBindingConfig                      = "DhcpV6StaticBindingConfig"
+	resourceTypeGatewayPolicy                                  = "gatewaypolicy"
+	resourceTypeGroup                                          = "Group"
+	resourceTypeVPCGroup                                       = "group"
+	resourceTypeIpAddressAllocation                            = "IpAddressAllocation"
+	resourceTypeIpAddressPool                                  = "IpAddressPool"
+	resourceTypeIpAddressPoolBlockSubnet                       = "IpAddressPoolBlockSubnet"
+	resourceTypeIpAddressPoolStaticSubnet                      = "IpAddressPoolStaticSubnet"
+	resourceTypeLBPool                                         = "LBPool"
+	resourceTypeLBServerSslProfile                             = "LBServerSslProfile"
+	resourceTypeLBService                                      = "LBService"
+	resourceTypeLBSourceIpPersistenceProfile                   = "LBSourceIpPersistenceProfile"
+	resourceTypeLBTcpMonitorProfile                            = "LBTcpMonitorProfile"
+	resourceTypeLBUdpMonitorProfile                            = "LBUdpMonitorProfile"
+	resourceTypeLBVirtualServer                                = "LBVirtualServer"
+	resourceTypePolicyFirewallFloodProtectionProfileBindingMap = "PolicyFirewallFloodProtectionProfileBindingMap"
+	resourceTypePolicyNatRule                                  = "PolicyNatRule"
+	resourceTypePolicyVpcNatRule                               = "PolicyVpcNatRule"
+	resourceTypeProjectIpAddressAllocation                     = "ProjectIpAddressAllocation"
+	resourceTypeRule                                           = "rule"
+	resourceTypeSecurityPolicy                                 = "securitypolicy"
+	resourceTypeSegment                                        = "Segment"
+	resourceTypeSegmentPort                                    = "SegmentPort"
+	resourceTypeService                                        = "Service"
+	resourceTypeStaticRoutes                                   = "StaticRoutes"
+	resourceTypeTier1                                          = "Tier1"
+	resourceTypeTier1Interface                                 = "Tier1Interface"
+	resourceTypeTransitGateway                                 = "TransitGateway"
+	resourceTypeTransitGatewayAttachment                       = "TransitGatewayAttachment"
+	resourceTypeVpc                                            = "Vpc"
+	resourceTypeVpcAttachment                                  = "VpcAttachment"
+	resourceTypeVpcConnectivityProfile                         = "VpcConnectivityProfile"
+	resourceTypeVpcIpAddressAllocation                         = "VpcIpAddressAllocation"
+	resourceTypeVpcServiceProfile                              = "VpcServiceProfile"
+	resourceTypeVpcSubnet                                      = "VpcSubnet"
+)
+
 var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 
 // postWriteByKey tracks recently written resources to bypass cache once on the next read.
@@ -45,12 +88,12 @@ type compositeCacheEntry struct {
 }
 
 var compositeCacheRegistry = map[string]compositeCacheEntry{
-	"gatewaypolicy": {
-		childSearchType: "rule",
+	resourceTypeGatewayPolicy: {
+		childSearchType: resourceTypeRule,
 		merge:           mergeGatewayPolicyCacheSearchResults,
 	},
-	"securitypolicy": {
-		childSearchType: "rule",
+	resourceTypeSecurityPolicy: {
+		childSearchType: resourceTypeRule,
 		merge:           mergeSecurityPolicyCacheSearchResults,
 	},
 }
@@ -149,7 +192,7 @@ func CacheKeyForResourceID(resourceType string, d *schema.ResourceData) string {
 
 func shouldIndexByPath(resourceType string) bool {
 	switch resourceType {
-	case "PolicyNatRule", "SegmentPort", "IpAddressPoolStaticSubnet", "IpAddressPoolBlockSubnet", "Service":
+	case resourceTypePolicyNatRule, resourceTypeSegmentPort, resourceTypeIpAddressPoolStaticSubnet, resourceTypeIpAddressPoolBlockSubnet, resourceTypeService:
 		return true
 	default:
 		return false

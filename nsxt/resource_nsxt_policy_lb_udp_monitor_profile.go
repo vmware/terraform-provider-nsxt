@@ -107,7 +107,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBUdpMonitorProfile", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id())
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }
@@ -130,7 +130,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interfa
 			m,
 			connector,
 			id,
-			"LBUdpMonitorProfile",
+			resourceTypeLBUdpMonitorProfile,
 			model.LBUdpMonitorProfileBindingType(),
 			func() (*model.LBUdpMonitorProfile, error) {
 				converter := bindings.NewTypeConverter()
@@ -197,7 +197,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBUdpMonitorProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBUdpMonitorProfile", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id())
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }

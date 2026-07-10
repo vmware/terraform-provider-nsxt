@@ -55,7 +55,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -74,7 +74,7 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 			m,
 			connector,
 			id,
-			"gatewaypolicy",
+			resourceTypeGatewayPolicy,
 			model.GatewayPolicyBindingType(),
 			func() (*model.GatewayPolicy, error) {
 				readObj, readErr := getGatewayPolicy(getSessionContext(d, m), id, "", connector)
@@ -133,7 +133,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 

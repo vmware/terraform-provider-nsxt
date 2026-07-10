@@ -199,7 +199,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -230,7 +230,7 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 			m,
 			connector,
 			id,
-			"StaticRoutes",
+			resourceTypeStaticRoutes,
 			model.StaticRoutesBindingType(),
 			func() (*model.StaticRoutes, error) {
 				readObj, readErr := getNsxtPolicyStaticRouteByID(context, connector, gwID, isT0, id)
@@ -354,7 +354,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }

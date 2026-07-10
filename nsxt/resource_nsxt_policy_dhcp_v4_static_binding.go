@@ -264,7 +264,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id())
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -293,7 +293,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 		m,
 		connector,
 		id,
-		"DhcpV4StaticBindingConfig",
+		resourceTypeDhcpV4StaticBindingConfig,
 		model.DhcpV4StaticBindingConfigBindingType(),
 		func() (*model.DhcpV4StaticBindingConfig, error) {
 			converter := bindings.NewTypeConverter()
@@ -394,7 +394,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV4 Static Binding Config", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id())
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }

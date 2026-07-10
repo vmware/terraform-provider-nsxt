@@ -134,7 +134,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("ProjectIpAddressAllocation", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id())
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -158,7 +158,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 			m,
 			connector,
 			id,
-			"ProjectIpAddressAllocation",
+			resourceTypeProjectIpAddressAllocation,
 			model.ProjectIpAddressAllocationBindingType(),
 			func() (*model.ProjectIpAddressAllocation, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], id)
@@ -232,7 +232,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 		d.Partial(true)
 		return handleUpdateError("ProjectIpAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("ProjectIpAddressAllocation", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id())
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }

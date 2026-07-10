@@ -205,7 +205,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id())
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -236,7 +236,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 			m,
 			connector,
 			id,
-			"TransitGatewayAttachment",
+			resourceTypeTransitGatewayAttachment,
 			model.TransitGatewayAttachmentBindingType(),
 			func() (*model.TransitGatewayAttachment, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
@@ -317,7 +317,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGatewayAttachment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id())
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }

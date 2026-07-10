@@ -172,7 +172,7 @@ func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcIpAddressAllocation, d.Id())
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 
@@ -191,7 +191,7 @@ func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{
 			m,
 			connector,
 			id,
-			"VpcIpAddressAllocation",
+			resourceTypeVpcIpAddressAllocation,
 			model.VpcIpAddressAllocationBindingType(),
 			func() (*model.VpcIpAddressAllocation, error) {
 				sessionContext := getSessionContext(d, m)
@@ -273,7 +273,7 @@ func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcIpAddressAllocation", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcIpAddressAllocation", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcIpAddressAllocation, d.Id())
 	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 

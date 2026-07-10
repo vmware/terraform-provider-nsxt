@@ -36,7 +36,7 @@ func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error
 	objID := d.Get("id").(string)
 
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "IpAddressPool", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeIpAddressPool, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.IpAddressPoolBindingType())

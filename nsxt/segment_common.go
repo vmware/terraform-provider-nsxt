@@ -1359,7 +1359,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 			m,
 			connector,
 			id,
-			"Segment",
+			resourceTypeSegment,
 			model.SegmentBindingType(),
 			func() (*model.Segment, error) {
 				readObj, readErr := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
@@ -1510,7 +1510,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id())
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
@@ -1531,7 +1531,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("Segment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id())
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }

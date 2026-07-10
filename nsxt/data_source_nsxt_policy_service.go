@@ -30,7 +30,7 @@ func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) erro
 	objID := d.Get("id").(string)
 
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "Service", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeService, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.ServiceBindingType())

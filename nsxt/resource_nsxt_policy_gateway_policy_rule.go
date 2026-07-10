@@ -63,7 +63,7 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", policyID)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
 
 	d.SetId(id)
 
@@ -125,7 +125,7 @@ func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface
 			m,
 			connector,
 			policyID,
-			"gatewaypolicy",
+			resourceTypeGatewayPolicy,
 			model.GatewayPolicyBindingType(),
 		)
 		if cacheErr != nil {
@@ -173,7 +173,7 @@ func resourceNsxtPolicyGatewayPolicyRuleUpdate(d *schema.ResourceData, m interfa
 		return handleUpdateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", policyID)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
 
 	return resourceNsxtPolicyGatewayPolicyRuleRead(d, m)
 }
@@ -197,7 +197,7 @@ func resourceNsxtPolicyGatewayPolicyRuleDelete(d *schema.ResourceData, m interfa
 	}
 	err := client.Delete(domain, policyID, id)
 	if err == nil {
-		MarkPostWriteAndInvalidateCacheForResourceType("gatewaypolicy", policyID)
+		MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
 	}
 	return err
 }

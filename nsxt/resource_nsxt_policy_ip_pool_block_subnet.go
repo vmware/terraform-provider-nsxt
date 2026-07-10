@@ -140,7 +140,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 			m,
 			connector,
 			key,
-			"IpAddressPoolBlockSubnet",
+			resourceTypeIpAddressPoolBlockSubnet,
 			model.IpAddressPoolBlockSubnetBindingType(),
 			backendRead,
 			patchFunc,
@@ -206,7 +206,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolBlockSubnet", CacheKeyForResourceID("IpAddressPoolBlockSubnet", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d))
 	return resourceNsxtPolicyIPPoolBlockSubnetRead(d, m)
 }
 
@@ -235,7 +235,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleUpdateError("Block Subnet", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolBlockSubnet", CacheKeyForResourceID("IpAddressPoolBlockSubnet", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d))
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -262,7 +262,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleDeleteError("Block Subnet", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPoolBlockSubnet", CacheKeyForResourceID("IpAddressPoolBlockSubnet", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d))
 
 	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(getSessionContext(d, m), d, connector)
 }

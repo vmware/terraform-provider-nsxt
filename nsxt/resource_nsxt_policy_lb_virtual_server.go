@@ -1619,7 +1619,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id())
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }
@@ -1645,7 +1645,7 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 			m,
 			connector,
 			id,
-			"LBVirtualServer",
+			resourceTypeLBVirtualServer,
 			model.LBVirtualServerBindingType(),
 			func() (*model.LBVirtualServer, error) {
 				readObj, readErr := client.Get(id)
@@ -1818,7 +1818,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleUpdateError("LBVirtualServer", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBVirtualServer", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id())
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }

@@ -38,7 +38,7 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if err := resourceNsxtPolicyGroupGeneralCreate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("group", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id())
 	return nil
 }
 
@@ -60,7 +60,7 @@ func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
 		m,
 		connector,
 		id,
-		"group",
+		resourceTypeVPCGroup,
 		model.GroupBindingType(),
 		func() (*model.Group, error) {
 			client := cliGroupsClient(getSessionContext(d, m), connector)
@@ -125,7 +125,7 @@ func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if err := resourceNsxtPolicyGroupGeneralUpdate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("group", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id())
 	return nil
 }
 

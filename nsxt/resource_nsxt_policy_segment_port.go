@@ -146,7 +146,7 @@ func resourceNsxtPolicySegmentPortCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", CacheKeyForResourceID("SegmentPort", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegmentPort, CacheKeyForResourceID(resourceTypeSegmentPort, d))
 
 	return resourceNsxtPolicySegmentPortRead(d, m)
 }
@@ -186,7 +186,7 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 			m,
 			connector,
 			key,
-			"SegmentPort",
+			resourceTypeSegmentPort,
 			model.SegmentPortBindingType(),
 			backendRead,
 			patchFunc,
@@ -247,7 +247,7 @@ func resourceNsxtPolicySegmentPortUpdate(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleUpdateError("SegmentPort", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", CacheKeyForResourceID("SegmentPort", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegmentPort, CacheKeyForResourceID(resourceTypeSegmentPort, d))
 
 	return resourceNsxtPolicySegmentPortRead(d, m)
 }
@@ -266,7 +266,7 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("SegmentPort", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", CacheKeyForResourceID("SegmentPort", d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegmentPort, CacheKeyForResourceID(resourceTypeSegmentPort, d))
 
 	return nil
 }

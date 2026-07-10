@@ -631,7 +631,7 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcServiceProfile, d.Id())
 	return resourceNsxtVpcServiceProfileRead(d, m)
 }
 
@@ -650,7 +650,7 @@ func resourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) er
 			m,
 			connector,
 			id,
-			"VpcServiceProfile",
+			resourceTypeVpcServiceProfile,
 			model.VpcServiceProfileBindingType(),
 			func() (*model.VpcServiceProfile, error) {
 				sessionContext := getSessionContext(d, m)
@@ -747,7 +747,7 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 		return handleUpdateError("VpcServiceProfile", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcServiceProfile", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcServiceProfile, d.Id())
 	return resourceNsxtVpcServiceProfileRead(d, m)
 }
 

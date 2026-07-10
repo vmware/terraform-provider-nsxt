@@ -118,7 +118,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcAttachment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id())
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -146,7 +146,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 			m,
 			connector,
 			id,
-			"VpcAttachment",
+			resourceTypeVpcAttachment,
 			model.VpcAttachmentBindingType(),
 			func() (*model.VpcAttachment, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
@@ -221,7 +221,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("VpcAttachment", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("VpcAttachment", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id())
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 

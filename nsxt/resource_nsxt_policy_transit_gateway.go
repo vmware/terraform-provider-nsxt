@@ -701,7 +701,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGateway", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id())
 
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
@@ -725,7 +725,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 			m,
 			connector,
 			id,
-			"TransitGateway",
+			resourceTypeTransitGateway,
 			model.TransitGatewayBindingType(),
 			func() (*model.TransitGateway, error) {
 				readObj, readErr := client.Get(parents[0], parents[1], id)
@@ -963,7 +963,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("TransitGateway", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id())
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 

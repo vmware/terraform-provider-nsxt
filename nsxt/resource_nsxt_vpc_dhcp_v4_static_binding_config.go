@@ -282,7 +282,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id())
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
@@ -309,7 +309,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 			m,
 			connector,
 			id,
-			"DhcpV4StaticBindingConfig",
+			resourceTypeDhcpV4StaticBindingConfig,
 			model.DhcpV4StaticBindingConfigBindingType(),
 			func() (*model.DhcpV4StaticBindingConfig, error) {
 				dhcpObj, readErr := client.Get(parents[0], parents[1], parents[2], parents[3], id)
@@ -420,7 +420,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return handleUpdateError("DhcpV4StaticBindingConfig", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("DhcpV4StaticBindingConfig", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id())
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 

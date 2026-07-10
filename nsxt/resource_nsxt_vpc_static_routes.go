@@ -148,7 +148,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
@@ -167,7 +167,7 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 			m,
 			connector,
 			id,
-			"StaticRoutes",
+			resourceTypeStaticRoutes,
 			model.StaticRoutesBindingType(),
 			func() (*model.StaticRoutes, error) {
 				sessionContext := getSessionContext(d, m)
@@ -249,7 +249,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("StaticRoutes", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType("StaticRoutes", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 

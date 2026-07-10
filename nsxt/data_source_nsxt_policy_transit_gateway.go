@@ -48,7 +48,7 @@ func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{
 	objID := d.Get("id").(string)
 
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "TransitGateway", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeTransitGateway, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.TransitGatewayBindingType())

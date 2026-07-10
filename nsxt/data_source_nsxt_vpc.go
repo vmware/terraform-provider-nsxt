@@ -38,7 +38,7 @@ func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "Vpc", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeVpc, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcBindingType())

@@ -126,7 +126,7 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	if err != nil {
 		return handleDeleteError("Security Policy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, d.Id())
 
 	return nil
 }
@@ -153,7 +153,7 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, d.Id())
 
 	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }
@@ -181,7 +181,7 @@ func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m int
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, d.Id())
 
 	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }

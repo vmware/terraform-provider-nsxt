@@ -142,7 +142,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id())
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -167,7 +167,7 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 			m,
 			connector,
 			id,
-			"LBService",
+			resourceTypeLBService,
 			model.LBServiceBindingType(),
 			func() (*model.LBService, error) {
 				readObj, readErr := client.Get(id)
@@ -248,7 +248,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleUpdateError("LBService", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType("LBService", d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id())
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 

@@ -40,7 +40,7 @@ func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{})
 	objID := d.Get("id").(string)
 
 	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, "Tier1", d, m, connector)
+		val, err := gcache.readCache(objID, resourceTypeTier1, d, m, connector)
 		if err == nil {
 			converter := bindings.NewTypeConverter()
 			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.Tier1BindingType())

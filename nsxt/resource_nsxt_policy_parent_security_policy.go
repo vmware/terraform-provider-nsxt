@@ -86,7 +86,7 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, is
 			m,
 			connector,
 			id,
-			"securitypolicy",
+			resourceTypeSecurityPolicy,
 			model.SecurityPolicyBindingType(),
 			func() (*model.SecurityPolicy, error) {
 				readObj, readErr := client.Get(domainName, id)
