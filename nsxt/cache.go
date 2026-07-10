@@ -35,7 +35,6 @@ var gcache = &typeScopedCache{byTyp: make(map[string]*resourceTypeCache)}
 // postWriteByKey tracks recently written resources to bypass cache once on the next read.
 var postWriteByKey sync.Map // string -> struct{}
 
-
 // errCacheUseBackendDirect indicates the cache bucket exists but the ID is missing, so use direct GET.
 var errCacheUseBackendDirect = errors.New("nsxt cache: use direct API read")
 
