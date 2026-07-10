@@ -924,3 +924,137 @@ resource "nsxt_vpc_subnet" "test" {
 }
 `, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], v4Mode, v6Mode)
 }
+
+var accTestVpcSubnetDhcpv4DeactivatedServerAddress = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+var accTestVpcSubnetDhcpv6DeactivatedServerAddress = map[string]string{
+	"display_name": getAccTestResourceName(),
+}
+
+// TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress covers the
+// regression from bug 3719347 update #11: creating a dual-stack subnet where DHCPv4 is
+// deactivated but an IPv4 entry is still present in advanced_config.dhcp_server_addresses
+// alongside an active IPv6 entry used to fail on create with an NSX ip-cidr-block format
+// validation error on an empty dhcp_server_addresses entry. The plan-time DiffSuppressFunc
+// masked the IPv4 slot as unchanged (since DHCPv4 is deactivated), but
+// resourceNsxtVpcSubnetCreate then sent that suppressed slot to NSX as an empty string instead
+// of omitting it, and NSX rejected the empty string.
+func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+			t.Skip("DHCPv6 disabled on VPC service profile")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnetDhcpv4DeactivatedServerAddress["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv4DeactivatedServerAddress["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv4DeactivatedServerAddress["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_SERVER),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.0", "2001:db8:f200::11/64"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+// TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv4ServerAddress covers
+// the same scenario as TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress
+// with the only difference that DHCPv6 is deactivated, and DHCPv4 is active
+func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv4ServerAddress(t *testing.T) {
+	testResourceName := "nsxt_vpc_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtVpcSubnetCheckDestroy(state, accTestVpcSubnetDhcpv6DeactivatedServerAddress["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv6DeactivatedServerAddress["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv6DeactivatedServerAddress["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", model.SubnetDhcpConfig_MODE_SERVER),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.dhcp_server_addresses.0", "192.168.249.66/26"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config:   testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate() string {
+	return testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(
+		accTestVpcSubnetDhcpv4DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_DEACTIVATED, model.SubnetDhcpv6Config_MODE_SERVER)
+}
+
+func testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate() string {
+	return testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(
+		accTestVpcSubnetDhcpv6DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_SERVER, model.SubnetDhcpv6Config_MODE_DEACTIVATED)
+}
+
+func testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(attrMap map[string]string, v4Mode string, v6Mode string) string {
+	return fmt.Sprintf(`
+resource "nsxt_vpc_subnet" "test" {
+%s
+  display_name    = "%s"
+  ip_addresses    = ["192.168.249.64/26", "2001:db8:f200::/64"]
+  ip_address_type = "IPV4_IPV6"
+  access_mode     = "Isolated"
+
+  dhcp_config {
+    mode = "%s"
+  }
+
+  subnet_dhcpv6_config {
+    mode = "%s"
+  }
+
+  advanced_config {
+    connectivity_state    = "DISCONNECTED"
+    gateway_addresses     = ["192.168.249.65/26", "2001:db8:f200::10/64"]
+    dhcp_server_addresses = ["192.168.249.66/26", "2001:db8:f200::11/64"]
+  }
+}
+`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], v4Mode, v6Mode)
+}
