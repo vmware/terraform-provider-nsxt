@@ -21,6 +21,7 @@ func TestAccDataSourceNsxtPolicyVirtualNetworkApplianceCluster_basic(t *testing.
 			testAccOnlyLocalManager(t)
 			testAccNSXVersion(t, "9.1.1")
 			testAccEnvDefined(t, "NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
+			testAccNsxtExtraCoverage(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyVirtualNetworkApplianceClusterCheckDestroy(testResourceName),
