@@ -10,6 +10,8 @@ This resource provides a method for the management of a VPC Service Profile.
 
 This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards. IPv6-related arguments (`dhcpv6_config`, `dns_forwarder_config`, `ipv6_profile_paths`, `service_subnet_cidrs`) require NSX 9.2.0 or later.
 
+The `dns_config` argument requires NSX 9.2.0 or higher.
+
 ## Example Usage
 
 ```hcl
@@ -109,6 +111,10 @@ The following arguments are supported:
         * `sntp_servers` - (Optional) SNTP server IPv6 addresses
         * `advanced_config` - (Optional) Same semantics as IPv4 `dhcp_config.dhcp_server_config.advanced_config`
             * `is_distributed_dhcp` - (Optional / Computed) Distributed DHCP mode for DHCPv6
+* `dns_config` - (Optional) DNS configuration for this profile. Requires NSX 9.2.0 or higher.
+    * `ipv4_resolver_ip` - (Optional) IPv4 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
+    * `ipv6_resolver_ip` - (Optional) IPv6 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
+    * `enable_proxy` - (Optional) When `true`, DNS requests are proxied through the aDNS service. Defaults to `false`.
 * `dns_forwarder_config` - (Optional) VPC DNS forwarder settings. Supported with NSX v9.2.0 and above.
     * `cache_size` - (Optional) DNS answer cache size
     * `conditional_forwarder_zone_paths` - (Optional) Policy paths of conditional DNS forwarder zones
