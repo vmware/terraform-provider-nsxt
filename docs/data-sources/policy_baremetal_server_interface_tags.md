@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_interface_tags"
+page_title: "NSXT: nsxt_policy_baremetal_server_interface_tags"
 description: A Bare Metal Server Interface Tags data source.
 ---
 
@@ -44,6 +44,7 @@ resource "nsxt_policy_group" "data_plane_interfaces" {
   count = local.network_type == "data-plane" ? 1 : 0
 
   display_name = "Data-Plane-Interfaces"
+  group_type   = "BareMetalServer"
 
   criteria {
     condition {

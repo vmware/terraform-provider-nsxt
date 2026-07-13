@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server"
+page_title: "NSXT: nsxt_policy_baremetal_server"
 description: A bare metal server inventory data source.
 ---
 
@@ -50,6 +50,7 @@ output "server_os" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the data source.
+* `display_name` - Display name of the bare metal server.
 * `source_id` - Source ID of the bare metal server.
 * `cpu_cores` - Number of CPU cores.
 * `os_name` - Operating system name.
