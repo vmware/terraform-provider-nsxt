@@ -66,12 +66,6 @@ func resourceNsxtPolicySite() *schema.Resource {
 				Description:  "Persistent Site Type",
 				ValidateFunc: validation.StringInSlice(siteTypeValues, false),
 			},
-			"safe_to_force_delete": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Force delete site on destruction",
-				Default:     false,
-			},
 		},
 	}
 }
@@ -90,11 +84,10 @@ func getConnectionInfoSchema() *schema.Schema {
 					Description: "Fully Qualified Domain Name of the Management Node",
 				},
 				"password": {
-					Type:             schema.TypeString,
-					Optional:         true,
-					Sensitive:        true,
-					Description:      "Password",
-					DiffSuppressFunc: suppressIfEmptyPriorState,
+					Type:        schema.TypeString,
+					Optional:    true,
+					Sensitive:   true,
+					Description: "Password",
 				},
 				"site_uuid": {
 					Type:        schema.TypeString,
@@ -281,8 +274,7 @@ func resourceNsxtPolicySiteDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := utl.SessionContext{ClientType: utl.Global}
 	client := cliSitesClient(sessionContext, connector)
-	forceDelete := d.Get("safe_to_force_delete").(bool)
-	err := client.Delete(id, &forceDelete)
+	err := client.Delete(id, nil)
 	if err != nil {
 		return handleDeleteError("Site", id, err)
 	}

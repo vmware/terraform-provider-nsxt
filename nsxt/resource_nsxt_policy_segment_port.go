@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func resourceNsxtPolicySegmentPort() *schema.Resource {
@@ -145,6 +146,7 @@ func resourceNsxtPolicySegmentPortCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", d)
 
 	return resourceNsxtPolicySegmentPortRead(d, m)
 }
@@ -154,7 +156,44 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 
 	segmentPath := d.Get("segment_path").(string)
 	id := d.Id()
-	segPort, err := getSegmentPort(segmentPath, id, getSessionContext(d, m), connector)
+	context := getSessionContext(d, m)
+	backendRead := func() (*model.SegmentPort, error) {
+		readObj, readErr := getSegmentPort(segmentPath, id, context, connector)
+		if readErr != nil {
+			return nil, readErr
+		}
+		return &readObj, nil
+	}
+
+	patchFunc := func(patchObj *model.SegmentPort) error {
+		// Ensure provider-managed tags can be persisted in config_scope mode.
+		obj, err := policySegmentPortResourceToInfraStructWithTags(id, d, false, patchObj.Tags)
+		if err != nil {
+			return err
+		}
+		return policyInfraPatch(context, obj, connector, false)
+	}
+
+	var segPort *model.SegmentPort
+	var err error
+	if isCacheEnabledForRead(d) {
+		key := d.Get("path").(string)
+		if key == "" {
+			key = id
+		}
+		segPort, _, _, err = CacheAwareResourceRead[model.SegmentPort](
+			d,
+			m,
+			connector,
+			key,
+			"SegmentPort",
+			model.SegmentPortBindingType(),
+			backendRead,
+			patchFunc,
+		)
+	} else {
+		segPort, err = backendRead()
+	}
 	if err != nil {
 		return fmt.Errorf("Error getting Segment Port : %v", err)
 	}
@@ -208,6 +247,7 @@ func resourceNsxtPolicySegmentPortUpdate(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleUpdateError("SegmentPort", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", d)
 
 	return resourceNsxtPolicySegmentPortRead(d, m)
 }
@@ -226,6 +266,7 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("SegmentPort", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("SegmentPort", d)
 
 	return nil
 }

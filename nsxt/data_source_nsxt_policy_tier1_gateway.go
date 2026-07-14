@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -36,6 +37,47 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
+
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "Tier1", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.Tier1BindingType())
+			if len(convErrs) == 0 {
+				obj, ok := goVal.(model.Tier1)
+				if ok {
+					id := lookupKey
+					if obj.Id != nil {
+						id = *obj.Id
+					}
+					d.SetId(id)
+					d.Set("id", id)
+					d.Set("display_name", obj.DisplayName)
+					d.Set("description", obj.Description)
+					d.Set("path", obj.Path)
+
+					// Single edge cluster is not informative for global manager
+					if isPolicyGlobalManager(m) {
+						d.Set("edge_cluster_path", "")
+						return nil
+					}
+
+					err := resourceNsxtPolicyTier1GatewayReadEdgeCluster(getSessionContext(d, m), d, connector)
+					if err != nil {
+						return fmt.Errorf("failed to get Tier1 %s locale-services: %v", id, err)
+					}
+					return nil
+				}
+			}
+		}
+	}
+
 	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier1", nil)
 	if err != nil {
 		return err
