@@ -205,6 +205,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("NAT Rule", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
 
 	return nil
 }
@@ -314,7 +315,87 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 		natType = getNatTypeByAction(natType, action)
 		d.Set("type", natType)
 	}
-	obj, err := getNsxtPolicyNATRuleByID(context, connector, gwID, isT0, natType, id)
+
+	backendRead := func() (*model.PolicyNatRule, error) {
+		readObj, readErr := getNsxtPolicyNATRuleByID(context, connector, gwID, isT0, natType, id)
+		if readErr != nil {
+			return nil, readErr
+		}
+		return &readObj, nil
+	}
+
+	patchFunc := func(patchObj *model.PolicyNatRule) error {
+		// Ensure provider-managed tags can be persisted in config_scope mode.
+		// Reuse existing schema-to-struct conversion logic from update/create.
+		displayName := d.Get("display_name").(string)
+		description := d.Get("description").(string)
+		action := d.Get("action").(string)
+		enabled := d.Get("enabled").(bool)
+		logging := d.Get("logging").(bool)
+		priority := int64(d.Get("rule_priority").(int))
+		service := d.Get("service").(string)
+		dNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("destination_networks").([]interface{})))
+		sNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("source_networks").([]interface{})))
+		tNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("translated_networks").([]interface{})))
+		// IMPORTANT: use the tags from patchObj (CacheAwareResourceRead may have
+		// injected provider-managed tags into patchObj prior to calling patchFunc).
+		// Recomputing tags from schema would drop provider-managed tags and cause
+		// perpetual re-patching on every refresh.
+		tags := patchObj.Tags
+		scope := getStringListFromSchemaSet(d, "scope")
+
+		ruleStruct := model.PolicyNatRule{
+			Id:                 &id,
+			DisplayName:        &displayName,
+			Description:        &description,
+			Tags:               tags,
+			Action:             &action,
+			DestinationNetwork: dNets,
+			SourceNetwork:      sNets,
+			Enabled:            &enabled,
+			Logging:            &logging,
+			SequenceNumber:     &priority,
+			Service:            &service,
+			TranslatedNetwork:  tNets,
+			Scope:              scope,
+		}
+
+		fwMatch := d.Get("firewall_match").(string)
+		if fwMatch != "" {
+			ruleStruct.FirewallMatch = &fwMatch
+		}
+		tPorts := d.Get("translated_ports").(string)
+		if tPorts != "" {
+			ruleStruct.TranslatedPorts = &tPorts
+		}
+		pbvmMatch := d.Get("policy_based_vpn_mode").(string)
+		if pbvmMatch != "" && util.NsxVersionHigherOrEqual("4.0.0") {
+			ruleStruct.PolicyBasedVpnMode = &pbvmMatch
+		}
+
+		return patchNsxtPolicyNATRule(context, connector, gwID, ruleStruct, isT0, natType)
+	}
+
+	var obj *model.PolicyNatRule
+	var err error
+	if isCacheEnabledForRead(d) {
+		key := d.Get("path").(string)
+		if key == "" {
+			key = id
+		}
+		obj, _, _, err = CacheAwareResourceRead[model.PolicyNatRule](
+			d,
+			m,
+			connector,
+			key,
+			"PolicyNatRule",
+			model.PolicyNatRuleBindingType(),
+			backendRead,
+			patchFunc,
+		)
+	} else {
+		obj, err = backendRead()
+	}
 	if err != nil {
 		return handleReadError(d, "NAT Rule", id, err)
 	}
@@ -449,6 +530,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	d.Set("nsx_id", id)
 	// In case nat type was not specified or got overridden by action
 	d.Set("type", natType)
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
 
 	return resourceNsxtPolicyNATRuleRead(d, m)
 }
@@ -524,6 +606,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("PolicyNatRule", d)
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
