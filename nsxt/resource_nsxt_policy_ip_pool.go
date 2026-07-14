@@ -73,8 +73,35 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining IP Pool ID")
 	}
-
-	pool, err := client.Get(id)
+	var pool *model.IpAddressPool
+	var err error
+	if isCacheEnabledForRead(d) {
+		pool, _, _, err = CacheAwareResourceRead[model.IpAddressPool](
+			d,
+			m,
+			connector,
+			id,
+			"IpAddressPool",
+			model.IpAddressPoolBindingType(),
+			func() (*model.IpAddressPool, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.IpAddressPool) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			pool = &readObj
+		}
+	}
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -109,7 +136,12 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.IpAddressPool{
 		DisplayName: &displayName,
@@ -126,6 +158,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 
@@ -143,7 +176,12 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.IpAddressPool{
 		DisplayName: &displayName,
@@ -160,6 +198,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("IpAddressPool", d)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 

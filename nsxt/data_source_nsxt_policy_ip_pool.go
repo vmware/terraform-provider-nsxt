@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -31,7 +32,39 @@ func dataSourceNsxtPolicyIPPool() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "IpAddressPool", nil)
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
+
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "IpAddressPool", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.IpAddressPoolBindingType())
+			if len(convErrs) == 0 {
+				obj, ok := goVal.(model.IpAddressPool)
+				if ok {
+					id := lookupKey
+					if obj.Id != nil {
+						id = *obj.Id
+					}
+					d.SetId(id)
+					d.Set("id", id)
+					d.Set("display_name", obj.DisplayName)
+					d.Set("description", obj.Description)
+					d.Set("path", obj.Path)
+					d.Set("realized_id", obj.RealizationId)
+					return nil
+				}
+			}
+		}
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "IpAddressPool", nil)
 	if err != nil {
 		return err
 	}
@@ -41,7 +74,7 @@ func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error
 	if len(errors) > 0 {
 		return errors[0]
 	}
-	pool := dataValue.(model.IpAddressPool)
-	d.Set("realized_id", pool.RealizationId)
+	poolObj := dataValue.(model.IpAddressPool)
+	d.Set("realized_id", poolObj.RealizationId)
 	return nil
 }

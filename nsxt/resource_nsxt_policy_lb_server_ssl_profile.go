@@ -167,7 +167,12 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	obj := model.LBServerSslProfile{
 		DisplayName: &displayName,
@@ -190,6 +195,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }
@@ -205,7 +211,35 @@ func resourceNsxtPolicyLBServerSslProfileRead(d *schema.ResourceData, m interfac
 	sessionContext := getSessionContext(d, m)
 	client := cliLbServerSslProfilesClient(sessionContext, connector)
 
-	obj, err := client.Get(id)
+	var obj *model.LBServerSslProfile
+	var err error
+	if isCacheEnabledForRead(d) {
+		obj, _, _, err = CacheAwareResourceRead[model.LBServerSslProfile](
+			d,
+			m,
+			connector,
+			id,
+			"LBServerSslProfile",
+			model.LBServerSslProfileBindingType(),
+			func() (*model.LBServerSslProfile, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.LBServerSslProfile) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBServerSslProfile", id, err)
 	}
@@ -217,7 +251,7 @@ func resourceNsxtPolicyLBServerSslProfileRead(d *schema.ResourceData, m interfac
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, lbServerSslProfileSchema, "", nil)
 }
 
@@ -232,7 +266,12 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	var tags []model.Tag
+	if isConfigScopedCacheMode() {
+		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+	} else {
+		tags = getPolicyTagsFromSchema(d)
+	}
 
 	revision := int64(d.Get("revision").(int))
 
@@ -253,6 +292,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("LBServerSslProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("LBServerSslProfile", d)
 
 	return resourceNsxtPolicyLBServerSslProfileRead(d, m)
 }

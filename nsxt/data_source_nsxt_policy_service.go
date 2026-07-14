@@ -6,6 +6,9 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyService() *schema.Resource {
@@ -23,7 +26,38 @@ func dataSourceNsxtPolicyService() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Service", nil)
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+	displayName := d.Get("display_name").(string)
+	lookupKey := objID
+	if lookupKey == "" {
+		lookupKey = displayName
+	}
+
+	if lookupKey != "" && IsCacheEnabled() {
+		val, err := gcache.readCache(lookupKey, "Service", d, m, connector)
+		if err == nil {
+			converter := bindings.NewTypeConverter()
+			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.ServiceBindingType())
+			if len(convErrs) == 0 {
+				obj, ok := goVal.(model.Service)
+				if ok {
+					id := lookupKey
+					if obj.Id != nil {
+						id = *obj.Id
+					}
+					d.SetId(id)
+					d.Set("id", id)
+					d.Set("display_name", obj.DisplayName)
+					d.Set("description", obj.Description)
+					d.Set("path", obj.Path)
+					return nil
+				}
+			}
+		}
+	}
+
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Service", nil)
 	if err != nil {
 		return err
 	}

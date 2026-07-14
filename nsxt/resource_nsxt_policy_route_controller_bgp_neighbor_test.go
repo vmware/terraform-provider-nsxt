@@ -18,17 +18,17 @@ import (
 var accTestPolicyRCBgpNeighborCreateAttributes = map[string]string{
 	"display_name":     getAccTestResourceName(),
 	"description":      "terraform created",
-	"neighbor_address": "192.168.200.100",
+	"neighbor_address": "192.168.100.1",
 	"remote_as_num":    "65001",
-	"source_address":   "192.168.200.10",
+	"source_address":   "192.168.200.1",
 }
 
 var accTestPolicyRCBgpNeighborUpdateAttributes = map[string]string{
 	"display_name":     getAccTestResourceName(),
 	"description":      "terraform updated",
-	"neighbor_address": "192.168.200.101",
+	"neighbor_address": "192.168.100.2",
 	"remote_as_num":    "65002",
-	"source_address":   "192.168.200.10",
+	"source_address":   "192.168.200.1",
 }
 
 func testAccNsxtPolicyRCBgpNeighborPreCheck(t *testing.T) {
@@ -267,7 +267,7 @@ resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
   neighbor_address = "%s"
   remote_as_num    = "%s"
   enabled          = %s
-  source_addresses = ["192.168.200.10"]
+  source_addresses = ["192.168.200.1"]
 
   tag {
     scope = "scope1"
@@ -294,7 +294,7 @@ resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
   parent_path      = "${nsxt_policy_route_controller.rc.path}/bgp"
   neighbor_address = "%s"
   remote_as_num    = "%s"
-  source_addresses = ["192.168.200.10"]
+  source_addresses = ["192.168.200.1"]
 
   route_filtering {
     address_family = "IPV4"
@@ -313,7 +313,7 @@ resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
   parent_path      = "${nsxt_policy_route_controller.rc.path}/bgp"
   neighbor_address = "%s"
   remote_as_num    = "%s"
-  source_addresses = ["192.168.200.10"]
+  source_addresses = ["192.168.200.1"]
 
   depends_on = [nsxt_policy_route_controller_interface.bgp_src]
 }`, attrMap["display_name"], attrMap["neighbor_address"], attrMap["remote_as_num"])

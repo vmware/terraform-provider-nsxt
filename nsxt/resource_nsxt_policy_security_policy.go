@@ -126,6 +126,7 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	if err != nil {
 		return handleDeleteError("Security Policy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d)
 
 	return nil
 }
@@ -135,6 +136,9 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 	domain := ""
 	if !isVPC {
 		domain = d.Get("domain").(string)
+	}
+	if isConfigScopedCacheMode() {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(domain))
 	if err != nil {
@@ -149,6 +153,7 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d)
 
 	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }
@@ -169,10 +174,14 @@ func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m int
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
+	if isConfigScopedCacheMode() {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+	}
 	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule, isVPC)
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType("securitypolicy", d)
 
 	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }

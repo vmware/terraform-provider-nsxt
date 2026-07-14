@@ -10,7 +10,7 @@ This resource provides a method for the management of a Virtual Network Applianc
 
 A VNA Cluster is a logical grouping of Virtual Network Appliances that share common configuration such as form factor, service type, and advanced settings. Cluster members (VNA appliances and their associated edge transport nodes) are managed by NSX and are exposed as read-only attributes on the `nsxt_policy_virtual_network_appliance_cluster` data source.
 
-This resource is supported with NSX 9.1.1 onwards.
+This resource is supported with NSX 9.2.0 onwards.
 
 ## Example Usage
 
@@ -52,7 +52,7 @@ The following arguments are supported:
 * `service_type` - (Optional, Computed, ForceNew) The service type for the cluster. Supported values: `VPC_SERVICES`, `ROUTE_CONTROLLER`. When set to `ROUTE_CONTROLLER`, the cluster is exclusively for route controller and cannot be used to connect VPC workloads. Defaults to `VPC_SERVICES` and cannot be modified after creation.
 * `password_managed_by_vcf` - (Optional, Computed) When set to `true`, enables VCF password management for all virtual network appliances in the cluster.
 * `advanced_configuration` - (Optional) Advanced configuration for virtual network appliances in the cluster. This block supports:
-    * `core_allocation_profile` - (Optional, Computed) Core allocation profile for VNAs in the cluster. Defines core allocation for new or redeployed VNAs. Supported values: `L4FORWARDING`, `L7LBSERVICE`, `L4LBSERVICE`. For `VPC_SERVICES` clusters, NSX defaults to `L4LBSERVICE` when not set. A manual reboot is required for a profile change to take effect on existing appliances. This attribute is supported with NSX v9.2.0 and above.
+    * `core_allocation_profile` - (Optional, Computed) Core allocation profile for VNAs in the cluster. Defines core allocation for new or redeployed VNAs. Supported values: `L4FORWARDING`, `L7LBSERVICE`, `L4LBSERVICE`. For `VPC_SERVICES` clusters, NSX defaults to `L4LBSERVICE` when not set. A manual reboot is required for a profile change to take effect on existing appliances.
     * `high_availability_profile` - (Optional, Computed) Path to the high availability profile. If not specified, NSX assigns a default profile.
     * `overlay_transport_zone_path` - (Optional) An overlay transport zone path associated with the VNA host switch and TEP.
 
