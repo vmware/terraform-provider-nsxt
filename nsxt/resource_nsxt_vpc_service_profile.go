@@ -593,15 +593,9 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		var tagErr error
-		tags, tagErr = getValidatedTagsFromSchema(d)
-		if tagErr != nil {
-			return tagErr
-		}
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
+	if tagErr != nil {
+		return tagErr
 	}
 
 	obj := model.VpcServiceProfile{
@@ -707,15 +701,9 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		var tagErr error
-		tags, tagErr = getValidatedTagsFromSchema(d)
-		if tagErr != nil {
-			return tagErr
-		}
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
+	if tagErr != nil {
+		return tagErr
 	}
 
 	revision := int64(d.Get("revision").(int))

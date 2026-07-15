@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -37,28 +36,9 @@ func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
 	}
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
-	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, resourceTypeVpc, d, m, connector)
-		if err == nil {
-			converter := bindings.NewTypeConverter()
-			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.VpcBindingType())
-			if len(convErrs) == 0 {
-				obj, ok := goVal.(model.Vpc)
-				if ok {
-					id := objID
-					if obj.Id != nil {
-						id = *obj.Id
-					}
-					d.SetId(id)
-					d.Set("id", id)
-					d.Set("display_name", obj.DisplayName)
-					d.Set("description", obj.Description)
-					d.Set("path", obj.Path)
-					d.Set("short_id", obj.ShortId)
-					return nil
-				}
-			}
-		}
+	if obj, ok := cacheAwareDataSourceReadByID[model.Vpc](d, m, connector, objID, resourceTypeVpc, model.VpcBindingType()); ok {
+		d.Set("short_id", obj.ShortId)
+		return nil
 	}
 
 	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Vpc", nil)

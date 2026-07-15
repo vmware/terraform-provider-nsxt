@@ -511,6 +511,61 @@ func convertCachedValue[T any](val interface{}, resourceType, resourceID string,
 	return &typedVal, true
 }
 
+// reflectStringField returns the value of a *string field named fieldName on obj (a
+// pointer to struct), or nil if the field doesn't exist, isn't a *string, or is nil.
+func reflectStringField(obj interface{}, fieldName string) *string {
+	v := reflect.ValueOf(obj)
+	for v.IsValid() && v.Kind() == reflect.Pointer {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+	if !v.IsValid() || v.Kind() != reflect.Struct {
+		return nil
+	}
+	f := v.FieldByName(fieldName)
+	if !f.IsValid() || f.Kind() != reflect.Pointer || f.Type().Elem().Kind() != reflect.String || f.IsNil() {
+		return nil
+	}
+	s, ok := f.Interface().(*string)
+	if !ok {
+		return nil
+	}
+	return s
+}
+
+// cacheAwareDataSourceReadByID attempts a cache-backed lookup of a data source object by
+// ID, mirroring the common id/display_name/description/path semantics of
+// policyDataSourceResourceFilterAndSet. On success it sets those schema attributes and
+// returns the typed object so the caller can set any resource-specific fields. Returns
+// ok=false when the cache is disabled, objID is empty, or the object can't be
+// found/converted — callers should fall through to the regular (uncached) read path.
+func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, connector client.Connector, objID string, resourceType string, bindingType bindings.BindingType) (*T, bool) {
+	if objID == "" || !IsCacheEnabled() {
+		return nil, false
+	}
+	val, err := gcache.readCache(objID, resourceType, d, m, connector)
+	if err != nil {
+		return nil, false
+	}
+	typedVal, ok := convertCachedValue[T](val, resourceType, objID, bindingType)
+	if !ok {
+		return nil, false
+	}
+
+	id := objID
+	if idField := reflectStringField(typedVal, "Id"); idField != nil {
+		id = *idField
+	}
+	d.SetId(id)
+	d.Set("id", id)
+	d.Set("display_name", reflectStringField(typedVal, "DisplayName"))
+	d.Set("description", reflectStringField(typedVal, "Description"))
+	d.Set("path", reflectStringField(typedVal, "Path"))
+	return typedVal, true
+}
+
 // TryCacheRead reads from cache only and never falls back to a backend GET.
 func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType) (*T, bool, bool, error) {
 	cacheUsed := false

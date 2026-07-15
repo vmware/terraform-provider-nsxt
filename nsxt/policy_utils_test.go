@@ -270,6 +270,45 @@ func TestUnitNsxt_setIgnoredTagsInSchema(t *testing.T) {
 	assert.Equal(t, []interface{}{"s1"}, m["scopes"])
 }
 
+func TestUnitNsxt_getCustomizedPolicyTagsFromSchema_dedupesIgnoredTags(t *testing.T) {
+	schemaMap := map[string]*schema.Schema{
+		"tag":         getTagsSchema(),
+		"ignore_tags": getIgnoreTagsSchema(),
+	}
+
+	t.Run("ignored-tag-not-in-tag-set-is-appended", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, schemaMap, map[string]interface{}{
+			"tag": []interface{}{
+				map[string]interface{}{"scope": "env", "tag": "dev"},
+			},
+		})
+		setIgnoredTagsInSchema(d, []string{"custom-scope"}, []map[string]interface{}{
+			{"scope": "custom-scope", "tag": "abc"},
+		})
+		tags, err := getCustomizedPolicyTagsFromSchema(d, "tag")
+		require.NoError(t, err)
+		require.Len(t, tags, 2)
+	})
+
+	t.Run("ignored-tag-already-baked-into-tag-set-is-not-duplicated", func(t *testing.T) {
+		// Simulates the config-scoped cache mode flow: a caller (e.g.
+		// getPolicyTagsWithProviderManagedDefaults) already merged the ignored tag into
+		// the "tag" attribute via d.Set before this function runs.
+		d := schema.TestResourceDataRaw(t, schemaMap, map[string]interface{}{
+			"tag": []interface{}{
+				map[string]interface{}{"scope": "env", "tag": "dev"},
+				map[string]interface{}{"scope": "custom-scope", "tag": "abc"},
+			},
+		})
+		setIgnoredTagsInSchema(d, []string{"custom-scope"}, []map[string]interface{}{
+			{"scope": "custom-scope", "tag": "abc"},
+		})
+		tags, err := getCustomizedPolicyTagsFromSchema(d, "tag")
+		require.NoError(t, err)
+		require.Len(t, tags, 2, "the ignored tag must not be appended a second time")
+	})
+}
+
 func TestUnitNsxt_getPathListFromMap_and_setPathListInMap(t *testing.T) {
 	t.Run("non-empty set", func(t *testing.T) {
 		st := schema.NewSet(schema.HashString, []interface{}{"/p1", "/p2"})

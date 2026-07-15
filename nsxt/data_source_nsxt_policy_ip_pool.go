@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -35,28 +34,9 @@ func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
 
-	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, resourceTypeIpAddressPool, d, m, connector)
-		if err == nil {
-			converter := bindings.NewTypeConverter()
-			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.IpAddressPoolBindingType())
-			if len(convErrs) == 0 {
-				obj, ok := goVal.(model.IpAddressPool)
-				if ok {
-					id := objID
-					if obj.Id != nil {
-						id = *obj.Id
-					}
-					d.SetId(id)
-					d.Set("id", id)
-					d.Set("display_name", obj.DisplayName)
-					d.Set("description", obj.Description)
-					d.Set("path", obj.Path)
-					d.Set("realized_id", obj.RealizationId)
-					return nil
-				}
-			}
-		}
+	if obj, ok := cacheAwareDataSourceReadByID[model.IpAddressPool](d, m, connector, objID, resourceTypeIpAddressPool, model.IpAddressPoolBindingType()); ok {
+		d.Set("realized_id", obj.RealizationId)
+		return nil
 	}
 
 	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "IpAddressPool", nil)

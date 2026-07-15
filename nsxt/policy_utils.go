@@ -150,6 +150,7 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 	tags := d.Get(schemaName).(*schema.Set).List()
 	ignoredTags := getIgnoredTagsFromSchema(d)
 	tagList := make([]model.Tag, 0)
+	seenScopeTag := make(map[string]struct{}, len(tags))
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
 		tagScope := data["scope"].(string)
@@ -164,9 +165,20 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 			Tag:   &tagTag}
 
 		tagList = append(tagList, elem)
+		seenScopeTag[tagScope+"\x00"+tagTag] = struct{}{}
 	}
-	if len(ignoredTags) > 0 {
-		tagList = append(tagList, ignoredTags...)
+	// A caller may have already merged ignore_tags into schemaName before calling this
+	// function (e.g. config-scoped cache mode stamping provider-managed tags into the
+	// schema ahead of building the model). Skip any ignored tag already present above so
+	// it isn't sent to NSX twice.
+	for _, t := range ignoredTags {
+		if t.Scope == nil || t.Tag == nil {
+			continue
+		}
+		if _, dup := seenScopeTag[*t.Scope+"\x00"+*t.Tag]; dup {
+			continue
+		}
+		tagList = append(tagList, t)
 	}
 	return tagList, nil
 }
@@ -257,6 +269,26 @@ func getPolicyTagsWithProviderManagedDefaults(d *schema.ResourceData, m interfac
 	}
 	managedDefaults := getProviderManagedDefaultTags(runID)
 	return mergeManagedDefaultAndUserTags(managedDefaults, userTags)
+}
+
+// getPolicyTagsWithProviderManagedDefaultsValidated is the error-returning counterpart of
+// getPolicyTagsWithProviderManagedDefaults, for call sites that validate user-supplied tags
+// (e.g. reject an empty scope+tag) and need to propagate that error instead of silently
+// dropping it.
+func getPolicyTagsWithProviderManagedDefaultsValidated(d *schema.ResourceData, m interface{}) ([]model.Tag, error) {
+	userTags, err := getValidatedTagsFromSchema(d)
+	if err != nil {
+		return nil, err
+	}
+	if !isConfigScopedCacheMode() {
+		return userTags, nil
+	}
+	runID := m.(nsxtClients).CommonConfig.contextID
+	if runID == "" {
+		log.Printf("[DEBUG] context_id is empty; skipping provider-managed tag scope %q", managedDefaultTagScope)
+	}
+	managedDefaults := getProviderManagedDefaultTags(runID)
+	return mergeManagedDefaultAndUserTags(managedDefaults, userTags), nil
 }
 
 func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {

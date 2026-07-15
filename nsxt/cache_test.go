@@ -406,3 +406,41 @@ func TestErrCacheUseBackendDirect(t *testing.T) {
 		t.Fatal("errors.Is should unwrap to sentinel")
 	}
 }
+
+func TestReflectStringField(t *testing.T) {
+	t.Run("returns-pointer-value", func(t *testing.T) {
+		obj := &model.Group{DisplayName: strPtr("g1")}
+		got := reflectStringField(obj, "DisplayName")
+		if got == nil || *got != "g1" {
+			t.Fatalf("expected \"g1\", got %v", got)
+		}
+	})
+
+	t.Run("nil-field-returns-nil", func(t *testing.T) {
+		obj := &model.Group{}
+		if got := reflectStringField(obj, "DisplayName"); got != nil {
+			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+
+	t.Run("missing-field-returns-nil", func(t *testing.T) {
+		obj := &model.Group{DisplayName: strPtr("g1")}
+		if got := reflectStringField(obj, "NoSuchField"); got != nil {
+			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+
+	t.Run("non-pointer-string-field-returns-nil", func(t *testing.T) {
+		// SequenceNumber is *int64, not *string.
+		obj := &model.Rule{SequenceNumber: int64Ptr(5)}
+		if got := reflectStringField(obj, "SequenceNumber"); got != nil {
+			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+
+	t.Run("nil-obj-returns-nil", func(t *testing.T) {
+		if got := reflectStringField(nil, "DisplayName"); got != nil {
+			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+}

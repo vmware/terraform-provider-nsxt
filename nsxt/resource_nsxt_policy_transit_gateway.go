@@ -623,15 +623,9 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	var tags []model.Tag
-	var tagErr error
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags, tagErr = getValidatedTagsFromSchema(d)
-		if tagErr != nil {
-			return tagErr
-		}
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
+	if tagErr != nil {
+		return tagErr
 	}
 
 	obj := model.TransitGateway{
@@ -862,15 +856,9 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	var tags []model.Tag
-	var tagErr error
-	if isConfigScopedCacheMode() {
-		tags = getPolicyTagsWithProviderManagedDefaults(d, m)
-	} else {
-		tags, tagErr = getValidatedTagsFromSchema(d)
-		if tagErr != nil {
-			return tagErr
-		}
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
+	if tagErr != nil {
+		return tagErr
 	}
 
 	revision := int64(d.Get("revision").(int))

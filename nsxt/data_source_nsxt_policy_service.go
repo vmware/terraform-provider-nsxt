@@ -6,8 +6,6 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -29,27 +27,8 @@ func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
 
-	if objID != "" && IsCacheEnabled() {
-		val, err := gcache.readCache(objID, resourceTypeService, d, m, connector)
-		if err == nil {
-			converter := bindings.NewTypeConverter()
-			goVal, convErrs := converter.ConvertToGolang(val.(*data.StructValue), model.ServiceBindingType())
-			if len(convErrs) == 0 {
-				obj, ok := goVal.(model.Service)
-				if ok {
-					id := objID
-					if obj.Id != nil {
-						id = *obj.Id
-					}
-					d.SetId(id)
-					d.Set("id", id)
-					d.Set("display_name", obj.DisplayName)
-					d.Set("description", obj.Description)
-					d.Set("path", obj.Path)
-					return nil
-				}
-			}
-		}
+	if _, ok := cacheAwareDataSourceReadByID[model.Service](d, m, connector, objID, resourceTypeService, model.ServiceBindingType()); ok {
+		return nil
 	}
 
 	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Service", nil)
