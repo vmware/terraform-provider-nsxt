@@ -78,6 +78,9 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 	client := cliProjectsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// As Project resource type paths reside under project and not under /infra or /global_infra or such, and since
 	// this data source fetches extra attributes, e.g site_info and tier0_gateway_paths, it's simpler to implement using .List()
@@ -105,11 +108,13 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 		var perfectMatch []model.Project
 		var prefixMatch []model.Project
 		for _, objInList := range objList.Results {
-			if strings.HasPrefix(*objInList.DisplayName, objName) {
-				prefixMatch = append(prefixMatch, objInList)
-			}
-			if *objInList.DisplayName == objName {
-				perfectMatch = append(perfectMatch, objInList)
+			if objInList.DisplayName != nil {
+				if strings.HasPrefix(*objInList.DisplayName, objName) {
+					prefixMatch = append(prefixMatch, objInList)
+				}
+				if *objInList.DisplayName == objName {
+					perfectMatch = append(perfectMatch, objInList)
+				}
 			}
 		}
 		if len(perfectMatch) > 0 {

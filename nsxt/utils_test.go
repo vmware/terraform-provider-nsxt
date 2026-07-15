@@ -13,6 +13,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
+	"log"
 	"math/big"
 	"math/rand"
 	"net/http"
@@ -254,6 +255,29 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
 	}
+}
+
+// testAccRetryOnTransientError retries f a few times when it fails with a
+// service_unavailable or timed_out error. These are typically caused by a
+// transient connection hiccup between the test runner and NSX manager
+// rather than a real API failure, and go away on their own on retry.
+func testAccRetryOnTransientError(f func() error) error {
+	const maxAttempts = 3
+	const retryDelay = 5 * time.Second
+
+	var err error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		err = f()
+		if err == nil {
+			return nil
+		}
+		if !isServiceUnavailableError(err) && !isTimeoutError(err) {
+			return err
+		}
+		log.Printf("[INFO] Transient error on attempt %d/%d, retrying: %v", attempt, maxAttempts, err)
+		time.Sleep(retryDelay)
+	}
+	return err
 }
 
 // testAccNsxtExtraCoverage skips a test unless NSXT_TEST_EXTRA_COVERAGE is set.

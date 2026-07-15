@@ -38,7 +38,12 @@ func testAccTlsCertificateSelfSignedCreateGlobal(displayName string) (string, er
 	if err != nil {
 		return "", err
 	}
-	cert, err := sdkinfra.NewCsrsClient(connector).Selfsign0(testAccTlsCsrWithDaysValidSpec(displayName))
+	var cert model.TlsCertificate
+	err = testAccRetryOnTransientError(func() error {
+		var err error
+		cert, err = sdkinfra.NewCsrsClient(connector).Selfsign0(testAccTlsCsrWithDaysValidSpec(displayName))
+		return err
+	})
 	if err != nil {
 		return "", err
 	}
@@ -57,7 +62,12 @@ func testAccTlsCertificateSelfSignedCreateProject(displayName string) (string, e
 	if err != nil {
 		return "", err
 	}
-	cert, err := projectinfra.NewCsrsClient(connector).Selfsign0(defaultOrgID, projectID, testAccTlsCsrWithDaysValidSpec(displayName))
+	var cert model.TlsCertificate
+	err = testAccRetryOnTransientError(func() error {
+		var err error
+		cert, err = projectinfra.NewCsrsClient(connector).Selfsign0(defaultOrgID, projectID, testAccTlsCsrWithDaysValidSpec(displayName))
+		return err
+	})
 	if err != nil {
 		return "", err
 	}
