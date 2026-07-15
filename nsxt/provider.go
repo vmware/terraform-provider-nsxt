@@ -52,6 +52,7 @@ type commonProviderConfig struct {
 	Password               string //nolint:gosec
 	LicenseKeys            []string
 	contextID              string
+	CacheMode              string
 }
 
 type nsxtClients struct {
@@ -89,6 +90,12 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_CONTEXT_ID", ""),
+			},
+			"cache_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_CACHE_MODE", ""),
+				Description: "Controls in-memory caching of NSX resource lookups: disabled/off, config_scope, or global",
 			},
 			"username": {
 				Type:        schema.TypeString,
@@ -1143,6 +1150,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	contextId := d.Get("context_id").(string)
+	cacheMode := d.Get("cache_mode").(string)
 
 	statuses := d.Get("retry_on_status_codes").([]interface{})
 	retryStatuses := make([]int, 0, len(statuses))
@@ -1167,11 +1175,13 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		Password:               password,
 		LicenseKeys:            licenses,
 		contextID:              contextId,
+		CacheMode:              cacheMode,
 	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	commonConfig := initCommonConfig(d)
+	setConfiguredCacheMode(commonConfig.CacheMode)
 	clients := nsxtClients{
 		CommonConfig: commonConfig,
 	}

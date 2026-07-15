@@ -289,9 +289,10 @@ func getPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
 	}
 	// When tag schema is Optional+Computed, d.Get("tag") may still carry tags from prior state
 	// even if the user removed the tag block from configuration.
-	// In that case, return an empty slice so PATCH clears tags as expected.
+	// In that case, clear user tags but keep any NSX-discovered tags preserved via
+	// ignore_tags, so PATCH doesn't silently wipe them out.
 	if _, ok := d.GetOk("tag"); !ok {
-		return []model.Tag{}
+		return getIgnoredTagsFromSchema(d)
 	}
 	tags, _ := getCustomizedPolicyTagsFromSchema(d, "tag")
 	return tags

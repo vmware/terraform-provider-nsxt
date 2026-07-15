@@ -229,14 +229,16 @@ func TestGroupRulesByValidParentPath(t *testing.T) {
 	pathB := "/policies/b"
 	valid := map[string]struct{}{pathA: {}, pathB: {}}
 
-	t.Run("partitions-preserves-input-order", func(t *testing.T) {
+	t.Run("partitions-sorted-by-sequence-number", func(t *testing.T) {
+		// NSX evaluates rules in ascending sequence_number order, which may not match
+		// the order the Search API returned them in, so buckets must be sorted explicitly.
 		rules := []model.Rule{
 			{Id: strPtr("b"), ParentPath: strPtr(pathA), SequenceNumber: int64Ptr(2)},
 			{Id: strPtr("a"), ParentPath: strPtr(pathA), SequenceNumber: int64Ptr(1)},
 			{Id: strPtr("x"), ParentPath: strPtr(pathB), SequenceNumber: int64Ptr(1)},
 		}
 		got := groupRulesByValidParentPath(valid, rules)
-		if len(got[pathA]) != 2 || *got[pathA][0].Id != "b" || *got[pathA][1].Id != "a" {
+		if len(got[pathA]) != 2 || *got[pathA][0].Id != "a" || *got[pathA][1].Id != "b" {
 			t.Fatalf("pathA bucket: %+v", got[pathA])
 		}
 		if len(got[pathB]) != 1 || *got[pathB][0].Id != "x" {
@@ -315,7 +317,7 @@ func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
 		}
 	})
 
-	t.Run("preserves-input-order", func(t *testing.T) {
+	t.Run("sorted-by-sequence-number-ties-preserve-input-order", func(t *testing.T) {
 		parents := []model.GatewayPolicy{{Path: strPtr(policyPathA)}}
 		rules := []model.Rule{
 			{Id: strPtr("b"), ParentPath: strPtr(policyPathA), SequenceNumber: int64Ptr(2)},
@@ -327,8 +329,9 @@ func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
 			t.Fatalf("expected 3 rules, got %d", len(got[0].Rules))
 		}
 		ids := []string{*got[0].Rules[0].Id, *got[0].Rules[1].Id, *got[0].Rules[2].Id}
-		if ids[0] != "b" || ids[1] != "a" || ids[2] != "c" {
-			t.Fatalf("expected input order b,a,c got %v", ids)
+		// a (seq 1) sorts first; b and c tie at seq 2 so their relative input order (b before c) is preserved.
+		if ids[0] != "a" || ids[1] != "b" || ids[2] != "c" {
+			t.Fatalf("expected sorted order a,b,c got %v", ids)
 		}
 	})
 

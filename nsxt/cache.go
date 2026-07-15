@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -22,8 +23,8 @@ import (
 type resourceTypeCache struct {
 	mu       sync.RWMutex
 	data     map[string]map[string]*data.StructValue // key: query, key: resource ID
-	cacheHit int
-	cacheMis int
+	cacheHit atomic.Int64
+	cacheMis atomic.Int64
 }
 
 type typeScopedCache struct {
@@ -111,6 +112,19 @@ const (
 
 var invalidNSXTCacheModeWarn sync.Map // raw env value -> struct{}; log once per distinct invalid value
 
+// configuredCacheMode holds the *string resolved from the provider's cache_mode
+// attribute once Configure has run. nil means the provider hasn't been configured yet
+// (e.g. in unit tests that set NSXT_CACHE_MODE directly), so currentCacheMode falls
+// back to reading the env var live in that case.
+var configuredCacheMode atomic.Value
+
+// setConfiguredCacheMode is called from providerConfigure with the resolved value of
+// the cache_mode provider attribute (which itself defaults to the NSXT_CACHE_MODE env
+// var via schema.EnvDefaultFunc, mirroring how context_id/NSXT_CONTEXT_ID is handled).
+func setConfiguredCacheMode(raw string) {
+	configuredCacheMode.Store(&raw)
+}
+
 func postWriteKey(resourceType, resourceID string) string {
 	return resourceType + "::" + resourceID
 }
@@ -136,7 +150,13 @@ func MarkPostWriteAndInvalidateCacheForResourceType(resourceType, resourceID str
 }
 
 func currentCacheMode() cacheMode {
-	raw := strings.TrimSpace(os.Getenv(envNSXTCacheMode))
+	var raw string
+	if v, ok := configuredCacheMode.Load().(*string); ok && v != nil {
+		raw = *v
+	} else {
+		raw = os.Getenv(envNSXTCacheMode)
+	}
+	raw = strings.TrimSpace(raw)
 	lower := strings.ToLower(raw)
 	switch lower {
 	case "", "disabled", "off":
@@ -369,14 +389,14 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	tc.mu.RLock()
 	val, qerr := tc.getQueryResult(query, resourceID)
 	if val != nil {
-		tc.cacheHit++
-		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		hit := tc.cacheHit.Add(1)
+		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, hit, tc.cacheMis.Load()) //nolint:gosec
 		tc.mu.RUnlock()
 		return val, nil
 	}
 	if errors.Is(qerr, errCacheUseBackendDirect) {
-		tc.cacheMis++
-		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		miss := tc.cacheMis.Add(1)
+		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
 		tc.mu.RUnlock()
 		return nil, errCacheUseBackendDirect
 	}
@@ -387,17 +407,17 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	defer tc.mu.Unlock()
 	val, qerr = tc.getQueryResult(query, resourceID)
 	if val != nil {
-		tc.cacheHit++
-		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		hit := tc.cacheHit.Add(1)
+		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, hit, tc.cacheMis.Load()) //nolint:gosec
 		return val, nil
 	}
 	if errors.Is(qerr, errCacheUseBackendDirect) {
-		tc.cacheMis++
-		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+		miss := tc.cacheMis.Add(1)
+		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
 		return nil, errCacheUseBackendDirect
 	}
-	tc.cacheMis++
-	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit, tc.cacheMis) //nolint:gosec
+	miss := tc.cacheMis.Add(1)
+	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
 	err := tc.writeCache(query, resourceType, d, m, connector)
 	if err != nil {
 		return nil, err
