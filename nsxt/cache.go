@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -579,6 +580,21 @@ func groupRulesByValidParentPath(validParentPaths map[string]struct{}, rules []m
 			continue
 		}
 		byParent[pp] = append(byParent[pp], r)
+	}
+	// NSX evaluates rules in ascending sequence_number order; the search API result
+	// order is not guaranteed to match, so sort each parent's rules explicitly.
+	for pp, rules := range byParent {
+		sort.SliceStable(rules, func(i, j int) bool {
+			var si, sj int64
+			if rules[i].SequenceNumber != nil {
+				si = *rules[i].SequenceNumber
+			}
+			if rules[j].SequenceNumber != nil {
+				sj = *rules[j].SequenceNumber
+			}
+			return si < sj
+		})
+		byParent[pp] = rules
 	}
 	return byParent
 }
