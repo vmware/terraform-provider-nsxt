@@ -671,6 +671,9 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	obj.Tags = getPolicyTagsWithProviderManagedDefaults(d, m)
+
+	filterDeactivatedDhcpServerAddresses(d, obj.AdvancedConfig)
+
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
@@ -766,6 +769,34 @@ func isDhcpv6Deactivated(d *schema.ResourceData) bool {
 		}
 	}
 	return true
+}
+
+// filterDeactivatedDhcpServerAddresses removes addresses belonging to a deactivated DHCP
+// family (and any empty placeholders introduced by metadata.SchemaToStruct for elements
+// suppressed by suppressDhcpServerAddresses) from the list sent to NSX. Without this, NSX
+// rejects the payload with a dhcp_server_addresses ip-cidr-block format validation error
+// on the empty string placeholder.
+func filterDeactivatedDhcpServerAddresses(d *schema.ResourceData, advancedConfig *model.SubnetAdvancedConfig) {
+	if advancedConfig == nil || len(advancedConfig.DhcpServerAddresses) == 0 {
+		return
+	}
+	var activeAddrs []string
+	for _, addr := range advancedConfig.DhcpServerAddresses {
+		if addr == "" {
+			continue
+		}
+		isIPv6 := strings.Contains(addr, ":")
+		if isIPv6 {
+			if !isDhcpv6Deactivated(d) {
+				activeAddrs = append(activeAddrs, addr)
+			}
+		} else {
+			if !isDhcpv4Deactivated(d) {
+				activeAddrs = append(activeAddrs, addr)
+			}
+		}
+	}
+	advancedConfig.DhcpServerAddresses = activeAddrs
 }
 
 func suppressDhcpServerAddresses(k, old, new string, d *schema.ResourceData) bool {
@@ -950,29 +981,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	// Filter out deactivated server addresses from the list sent to NSX,
-	// to avoid API validation errors such as:
-	// "Field level validation errors: {value '' of property dhcp_server_addresses violates format 'ip-cidr-block'}"
-	// This occurs because metadata.SchemaToStruct populates empty string array elements in the struct
-	// if we suppress elements in the schema, but NSX validates the IP format even for empty strings.
-	if obj.AdvancedConfig != nil && len(obj.AdvancedConfig.DhcpServerAddresses) > 0 {
-		var activeAddrs []string
-		for _, addr := range obj.AdvancedConfig.DhcpServerAddresses {
-			if addr != "" {
-				isIPv6 := strings.Contains(addr, ":")
-				if isIPv6 {
-					if !isDhcpv6Deactivated(d) {
-						activeAddrs = append(activeAddrs, addr)
-					}
-				} else {
-					if !isDhcpv4Deactivated(d) {
-						activeAddrs = append(activeAddrs, addr)
-					}
-				}
-			}
-		}
-		obj.AdvancedConfig.DhcpServerAddresses = activeAddrs
-	}
+	filterDeactivatedDhcpServerAddresses(d, obj.AdvancedConfig)
 
 	sessionContext := getSessionContext(d, m)
 	client := cliVpcSubnetsClient(sessionContext, connector)
