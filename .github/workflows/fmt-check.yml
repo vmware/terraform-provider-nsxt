@@ -2,14 +2,22 @@
 name: Formatting check (nsxt)
 
 on:
-  push:
-    paths:
-      - 'nsxt/**'
-      - '.github/workflows/fmt-check.yml'
   pull_request:
     paths:
       - 'nsxt/**'
       - '.github/workflows/fmt-check.yml'
+  push:
+    branches:
+      - master
+      - 'branch_*'
+      - 'release-*'
+    paths:
+      - 'nsxt/**'
+      - '.github/workflows/fmt-check.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
