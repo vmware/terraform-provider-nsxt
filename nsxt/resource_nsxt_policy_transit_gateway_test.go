@@ -265,9 +265,8 @@ func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				// Step 1: create TGW with centralized_config only so it can realize before
-				// redistribution_config and bgp_config are applied. The NSX API returns empty
-				// bodies for /routing and /bgp endpoints until the TGW is edge-deployed.
+				// Step 1: create TGW with centralized_config only, before
+				// redistribution_config and bgp_config are applied.
 				Config: testAccNsxtPolicyTransitGatewayBgpConfigBaseTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
@@ -279,12 +278,8 @@ func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
 				),
 			},
 			{
-				// Step 2: add redistribution_config and bgp_config. The TGW may still be
-				// realizing on the edge; the /routing and /bgp endpoints return empty bodies
-				// until the TGW is edge-deployed, so redistribution_config may not appear
-				// in state yet. ExpectNonEmptyPlan acknowledges the expected drift.
-				Config:             testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(true),
-				ExpectNonEmptyPlan: true,
+				// Step 2: add redistribution_config and bgp_config.
+				Config: testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
@@ -294,15 +289,18 @@ func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "centralized_config.0.ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.local_as_num", "65001"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.ecmp", "true"),
 				),
 			},
 			{
-				// Step 3: update bgp_config params to verify updates work. redistribution_config
-				// is not checked because the NSX /routing endpoint returns empty bodies until
-				// the TGW routing engine fully initializes on the edge (eventual consistency).
-				// ExpectNonEmptyPlan is set because redistribution_config state may differ from config.
-				Config:             testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(false),
-				ExpectNonEmptyPlan: true,
+				// Step 3: update bgp_config params to verify updates work.
+				Config: testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayUpdateAttributes["display_name"]),
@@ -311,6 +309,10 @@ func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.local_as_num", "65002"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.ecmp", "false"),
 				),
 			},
 		},
@@ -580,13 +582,13 @@ func testAccNsxtPolicyTransitGatewayWithBgpConfigTemplate(createFlow bool) strin
 	}
 	localAsNum := "65001"
 	ecmp := "true"
+	// NSX rejects changing graceful restart timers while BGP is enabled, so
+	// these stay constant across the create/update steps.
 	gracefulRestartTimer := 180
 	gracefulStaleTimer := 600
 	if !createFlow {
 		localAsNum = "65002"
 		ecmp = "false"
-		gracefulRestartTimer = 120
-		gracefulStaleTimer = 300
 	}
 	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway" "test" {

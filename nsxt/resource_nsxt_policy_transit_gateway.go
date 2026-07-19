@@ -115,6 +115,7 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 			Type:        schema.TypeList,
 			Description: "Route redistribution configuration",
 			Optional:    true,
+			Computed:    true,
 			MaxItems:    1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
