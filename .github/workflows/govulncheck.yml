@@ -27,7 +27,7 @@ jobs:
 
       # Step 2: Pass that dynamic version into setup-go
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ steps.go-version.outputs.version }}
           cache: true
