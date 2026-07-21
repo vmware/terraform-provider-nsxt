@@ -2,16 +2,24 @@
 name: Unit Tests (nsxt)
 
 on:
-  push:
-    paths:
-      - 'nsxt/**'
-      - 'mocks/**'
-      - '.github/workflows/unit-tests-nsxt.yml'
   pull_request:
     paths:
       - 'nsxt/**'
       - 'mocks/**'
       - '.github/workflows/unit-tests-nsxt.yml'
+  push:
+    branches:
+      - master
+      - 'branch_*'
+      - 'release-*'
+    paths:
+      - 'nsxt/**'
+      - 'mocks/**'
+      - '.github/workflows/unit-tests-nsxt.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

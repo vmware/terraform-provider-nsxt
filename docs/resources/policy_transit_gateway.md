@@ -60,9 +60,9 @@ The following arguments are supported:
     * `failover_mode` - (Optional) Failover mode for active/standby centralized transit gateway (`PREEMPTIVE` or `NON_PREEMPTIVE`). Available since NSX 9.2.0.
     * `ha_mode` - (Optional) High-availability mode. Values: `ACTIVE_ACTIVE`, `ACTIVE_STANDBY`. Default is `ACTIVE_ACTIVE`.
     * `edge_cluster_paths` - (Optional) Policy paths of edge clusters. At most one item. Must be authorized for the project.
-* `advanced_config` - (Optional) Advanced settings for the transit gateway. Applied via hierarchical API as the `TransitGatewayRoutingConfig` singleton child (same transaction as the transit gateway when possible). Read uses the routing-config GET API.
+* `advanced_config` - (Optional) Advanced settings for the transit gateway. Sent and read as part of the same BGP routing config object as `bgp_config` (via the BGP API), not a separate object.
     * `forwarding_up_timer` - (Optional/Computed) Time in seconds the transit gateway waits before marking forwarding as active after a failover event. Valid range is `0` to `100`. Default is `5`.
-* `redistribution_config` - (Optional) Route redistribution configuration. Applied as part of the `TransitGatewayRoutingConfig` singleton (same API object as `advanced_config`).
+* `redistribution_config` - (Optional) Route redistribution configuration. Sent and read as part of the same BGP routing config object as `bgp_config` (same API object as `advanced_config`).
     * `rule` - (Required) List of redistribution rules. Minimum 1, maximum 5.
         * `types` - (Required) List of route types to redistribute. Supported values: `PUBLIC` (public networks from connected VPC subnets, NAT rules, and VPC static routes), `TGW_PRIVATE` (transit gateway private networks; only redistributed to BGP neighbors whose centralized network attachment has `allow_private` set to `true`), `TGW_STATIC_ROUTE` (user-configured static routes on the transit gateway), `CONNECTED_SUBNET` (centralized network attachment interface subnets).
         * `route_map_path` - (Optional) Policy path of a route map to apply for filtering routes in this rule. The route map must exist under the same transit gateway.

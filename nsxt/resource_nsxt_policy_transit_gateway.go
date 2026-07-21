@@ -115,6 +115,7 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 			Type:        schema.TypeList,
 			Description: "Route redistribution configuration",
 			Optional:    true,
+			Computed:    true,
 			MaxItems:    1,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
@@ -424,76 +425,144 @@ func initTGWChildBgpConfig(config *model.TransitGatewayBgpRoutingConfig) (*data.
 
 func getTGWBgpConfigFromSchema(d *schema.ResourceData) *model.TransitGatewayBgpRoutingConfig {
 	bgpConfig := d.Get("bgp_config").([]interface{})
-	if len(bgpConfig) == 0 || bgpConfig[0] == nil {
+	advancedConfig := d.Get("advanced_config").([]interface{})
+	redistributionConfig := d.Get("redistribution_config").([]interface{})
+
+	haveBgpConfig := len(bgpConfig) > 0 && bgpConfig[0] != nil
+	haveAdvancedConfig := len(advancedConfig) > 0 && advancedConfig[0] != nil
+	haveRedistributionConfig := len(redistributionConfig) > 0 && redistributionConfig[0] != nil
+	if !haveBgpConfig && !haveAdvancedConfig && !haveRedistributionConfig {
 		return nil
-	}
-	cfgMap := bgpConfig[0].(map[string]interface{})
-
-	revision := int64(cfgMap["revision"].(int))
-	ecmp := cfgMap["ecmp"].(bool)
-	enabled := cfgMap["enabled"].(bool)
-	localAsNum := cfgMap["local_as_num"].(string)
-	multipathRelax := cfgMap["multipath_relax"].(bool)
-	restartMode := cfgMap["graceful_restart_mode"].(string)
-	restartTimer := int64(cfgMap["graceful_restart_timer"].(int))
-	staleTimer := int64(cfgMap["graceful_restart_stale_route_timer"].(int))
-
-	var tagStructs []model.Tag
-	if cfgMap["tag"] != nil {
-		for _, tag := range cfgMap["tag"].(*schema.Set).List() {
-			data := tag.(map[string]interface{})
-			tagScope := data["scope"].(string)
-			tagTag := data["tag"].(string)
-			tagStructs = append(tagStructs, model.Tag{Scope: &tagScope, Tag: &tagTag})
-		}
-	}
-
-	var aggregationStructs []model.RouteAggregationEntry
-	for _, agg := range cfgMap["route_aggregation"].([]interface{}) {
-		data := agg.(map[string]interface{})
-		prefix := data["prefix"].(string)
-		summary := data["summary_only"].(bool)
-		aggregationStructs = append(aggregationStructs, model.RouteAggregationEntry{
-			Prefix:      &prefix,
-			SummaryOnly: &summary,
-		})
-	}
-
-	restartTimerStruct := model.BgpGracefulRestartTimer{
-		RestartTimer:    &restartTimer,
-		StaleRouteTimer: &staleTimer,
-	}
-	restartConfigStruct := model.BgpGracefulRestartConfig{
-		Mode:  &restartMode,
-		Timer: &restartTimerStruct,
 	}
 
 	id := "bgp"
 	resourceType := "TransitGatewayBgpRoutingConfig"
 	cfg := &model.TransitGatewayBgpRoutingConfig{
-		Ecmp:                  &ecmp,
-		Enabled:               &enabled,
-		RouteAggregations:     aggregationStructs,
-		ResourceType:          &resourceType,
-		Tags:                  tagStructs,
-		Id:                    &id,
-		Revision:              &revision,
-		MultipathRelax:        &multipathRelax,
-		GracefulRestartConfig: &restartConfigStruct,
+		ResourceType: &resourceType,
+		Id:           &id,
 	}
-	if len(localAsNum) > 0 {
-		cfg.LocalAsNum = &localAsNum
+
+	// advanced_config.forwarding_up_timer and redistribution_config.rule are
+	// not separate API objects: they map onto the ForwardingUpTimer and
+	// RouteRedistributionConfig fields of this same TransitGatewayBgpRoutingConfig,
+	// sent through the same /routing/bgp calls as bgp_config.
+	if haveBgpConfig {
+		cfgMap := bgpConfig[0].(map[string]interface{})
+
+		revision := int64(cfgMap["revision"].(int))
+		ecmp := cfgMap["ecmp"].(bool)
+		enabled := cfgMap["enabled"].(bool)
+		localAsNum := cfgMap["local_as_num"].(string)
+		multipathRelax := cfgMap["multipath_relax"].(bool)
+		restartMode := cfgMap["graceful_restart_mode"].(string)
+		restartTimer := int64(cfgMap["graceful_restart_timer"].(int))
+		staleTimer := int64(cfgMap["graceful_restart_stale_route_timer"].(int))
+
+		var tagStructs []model.Tag
+		if cfgMap["tag"] != nil {
+			for _, tag := range cfgMap["tag"].(*schema.Set).List() {
+				data := tag.(map[string]interface{})
+				tagScope := data["scope"].(string)
+				tagTag := data["tag"].(string)
+				tagStructs = append(tagStructs, model.Tag{Scope: &tagScope, Tag: &tagTag})
+			}
+		}
+
+		var aggregationStructs []model.RouteAggregationEntry
+		for _, agg := range cfgMap["route_aggregation"].([]interface{}) {
+			data := agg.(map[string]interface{})
+			prefix := data["prefix"].(string)
+			summary := data["summary_only"].(bool)
+			aggregationStructs = append(aggregationStructs, model.RouteAggregationEntry{
+				Prefix:      &prefix,
+				SummaryOnly: &summary,
+			})
+		}
+
+		restartTimerStruct := model.BgpGracefulRestartTimer{
+			RestartTimer:    &restartTimer,
+			StaleRouteTimer: &staleTimer,
+		}
+		restartConfigStruct := model.BgpGracefulRestartConfig{
+			Mode:  &restartMode,
+			Timer: &restartTimerStruct,
+		}
+
+		cfg.Ecmp = &ecmp
+		cfg.Enabled = &enabled
+		cfg.RouteAggregations = aggregationStructs
+		cfg.Tags = tagStructs
+		cfg.Revision = &revision
+		cfg.MultipathRelax = &multipathRelax
+		cfg.GracefulRestartConfig = &restartConfigStruct
+		if len(localAsNum) > 0 {
+			cfg.LocalAsNum = &localAsNum
+		}
+		if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok {
+			cfg.InterSrIbgp = &interSrIbgp
+		}
 	}
-	if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok {
-		cfg.InterSrIbgp = &interSrIbgp
+
+	if haveAdvancedConfig {
+		advMap := advancedConfig[0].(map[string]interface{})
+		if v, ok := advMap["forwarding_up_timer"].(int); ok {
+			timer := int64(v)
+			cfg.ForwardingUpTimer = &timer
+		}
 	}
+
+	if haveRedistributionConfig {
+		redisMap := redistributionConfig[0].(map[string]interface{})
+		var rules []model.TransitGatewayBgpRedistributionRule
+		for _, r := range redisMap["rule"].([]interface{}) {
+			ruleMap := r.(map[string]interface{})
+			rule := model.TransitGatewayBgpRedistributionRule{
+				RouteRedistributionTypes: interfaceListToStringList(ruleMap["types"].([]interface{})),
+			}
+			if routeMapPath, ok := ruleMap["route_map_path"].(string); ok && len(routeMapPath) > 0 {
+				rule.RouteMapPath = &routeMapPath
+			}
+			rules = append(rules, rule)
+		}
+		cfg.RouteRedistributionConfig = &model.TransitGatewayRouteRedistributionConfig{
+			Rules: rules,
+		}
+	}
+
 	return cfg
 }
 
 func setTGWBgpConfigInSchema(d *schema.ResourceData, bgpConfig *model.TransitGatewayBgpRoutingConfig) error {
 	if bgpConfig == nil {
+		_ = d.Set("advanced_config", make([]map[string]interface{}, 0))
+		_ = d.Set("redistribution_config", make([]map[string]interface{}, 0))
 		return d.Set("bgp_config", make([]map[string]interface{}, 0))
 	}
+
+	if bgpConfig.ForwardingUpTimer != nil {
+		_ = d.Set("advanced_config", []interface{}{map[string]interface{}{
+			"forwarding_up_timer": int(*bgpConfig.ForwardingUpTimer),
+		}})
+	} else {
+		_ = d.Set("advanced_config", make([]map[string]interface{}, 0))
+	}
+
+	if bgpConfig.RouteRedistributionConfig != nil && len(bgpConfig.RouteRedistributionConfig.Rules) > 0 {
+		var rules []map[string]interface{}
+		for _, rule := range bgpConfig.RouteRedistributionConfig.Rules {
+			ruleMap := map[string]interface{}{
+				"types": rule.RouteRedistributionTypes,
+			}
+			if rule.RouteMapPath != nil {
+				ruleMap["route_map_path"] = *rule.RouteMapPath
+			}
+			rules = append(rules, ruleMap)
+		}
+		_ = d.Set("redistribution_config", []interface{}{map[string]interface{}{"rule": rules}})
+	} else {
+		_ = d.Set("redistribution_config", make([]map[string]interface{}, 0))
+	}
+
 	cfgMap := make(map[string]interface{})
 	cfgMap["revision"] = bgpConfig.Revision
 	cfgMap["path"] = bgpConfig.Path
@@ -785,9 +854,6 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 		}
 	}
 
-	_ = d.Set("advanced_config", nil)
-	_ = d.Set("redistribution_config", nil)
-
 	bgpClient := cliTransitGatewayBgpClient(sessionContext, connector)
 	if bgpClient != nil {
 		bgpConfig, err := bgpClient.Get(parents[0], parents[1], id)
@@ -935,7 +1001,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		return handleUpdateError("TransitGateway", id, err)
 	}
 
-	if d.HasChange("bgp_config") {
+	if d.HasChange("bgp_config") || d.HasChange("advanced_config") || d.HasChange("redistribution_config") {
 		newBgp := getTGWBgpConfigFromSchema(d)
 		bgpAPIClient := cliTransitGatewayBgpClient(sessionContext, connector)
 		if bgpAPIClient != nil {

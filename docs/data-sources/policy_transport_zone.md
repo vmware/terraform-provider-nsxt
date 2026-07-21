@@ -52,4 +52,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the Transport Zone.
 * `path` - The NSX path of the policy resource.
-* `realized_id` - The id of realized transport zone object. This id should be used in `nsxt_edge_transport_node` resource.
+* `realized_id` - The id of realized transport zone object. This id should be used in `nsxt_edge_transport_node` resource. Note: `realized_id` is populated only when this data source is used against NSX Local Manager. On NSX Global Manager, this attribute is not populated by NSX and will be returned as an empty string.
