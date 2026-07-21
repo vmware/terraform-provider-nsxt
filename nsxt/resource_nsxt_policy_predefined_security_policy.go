@@ -26,6 +26,9 @@ func resourceNsxtPolicyPredefinedSecurityPolicy() *schema.Resource {
 		Read:   resourceNsxtPolicyPredefinedSecurityPolicyRead,
 		Update: resourceNsxtPolicyPredefinedSecurityPolicyUpdate,
 		Delete: resourceNsxtPolicyPredefinedSecurityPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			State: nsxtPredefinedPolicyImporter,
+		},
 
 		Schema: getPolicyPredefinedSecurityPolicySchema(),
 	}

@@ -79,17 +79,6 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic_globalManager
 	})
 }
 
-// testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic provisions its
-// own Security Policy via nsxt_policy_parent_security_policy rather than
-// relying on a built-in default policy already existing: NSX does not
-// consistently auto-realize default category policies under GM domains
-// across versions (e.g. a fresh NSX 4.2.x Global Manager may have none at
-// all), so a self-created policy is the only environment-independent target.
-//
-// The predefined_security_policy block intentionally leaves description/tag
-// unset: those fields are also owned by nsxt_policy_parent_security_policy on
-// the same underlying object, and patching them here would fight the parent
-// resource for ownership and show up as drift on its own plan.
 func testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t *testing.T, preCheck func()) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	name := getAccTestResourceName()
@@ -138,7 +127,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
         }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -177,7 +166,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
