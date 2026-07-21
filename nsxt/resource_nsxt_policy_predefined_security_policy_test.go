@@ -64,6 +64,42 @@ func testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t *testing.T, withCo
 	})
 }
 
+func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic_globalManager(t *testing.T) {
+	testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t, func() {
+		testAccPreCheck(t)
+		testAccOnlyGlobalManager(t)
+	})
+}
+
+func testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t *testing.T, preCheck func()) {
+	testResourceName := "nsxt_policy_predefined_security_policy.test"
+
+	// NOTE: This test cannot be parallel, as it modifies the same default policy
+	resource.Test(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic("import test", "", false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	action1 := "DROP"
