@@ -97,6 +97,7 @@ resource "nsxt_policy_security_policy" "policy1" {
 resource "nsxt_policy_group" "production_bms" {
   display_name = "Production-BMS-Servers"
   description  = "Production bare metal servers"
+  group_type   = "BareMetalServer"
 
   criteria {
     condition {
@@ -111,6 +112,7 @@ resource "nsxt_policy_group" "production_bms" {
 resource "nsxt_policy_group" "bms_data_interfaces" {
   display_name = "BMS-Data-Interfaces"
   description  = "Bare metal server data plane interfaces"
+  group_type   = "BareMetalServer"
 
   criteria {
     condition {
@@ -125,6 +127,7 @@ resource "nsxt_policy_group" "bms_data_interfaces" {
 resource "nsxt_policy_group" "web_servers_bms" {
   display_name = "Web-Servers-BMS"
   description  = "Static group of web server BMS"
+  group_type   = "BareMetalServer"
 
   criteria {
     external_id_expression {
@@ -180,52 +183,9 @@ resource "nsxt_policy_security_policy" "bms_security_policy" {
     logged          = true
     sequence_number = 1000
   }
-}
-```
-
-## Example Usage - Mixed BMS and VM Policy
-
-```hcl
-# Mixed environment with both BMS and VMs
-resource "nsxt_policy_group" "all_web_servers" {
-  display_name = "All-Web-Servers"
-  description  = "Web servers across BMS and VMs"
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "BareMetalServer"
-      operator    = "EQUALS"
-      value       = "application|web-server"
-    }
-  }
-
-  conjunction {
-    operator = "OR"
-  }
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "VirtualMachine"
-      operator    = "EQUALS"
-      value       = "application|web-server"
-    }
-  }
-}
-
-resource "nsxt_policy_security_policy" "web_tier_policy" {
-  display_name = "Web-Tier-Policy"
-  description  = "Policy for web tier (BMS + VMs)"
-  category     = "Application"
-
-  rule {
-    display_name       = "allow_load_balancer"
-    description        = "Allow traffic from load balancer to all web servers"
-    source_groups      = [nsxt_policy_group.load_balancers.path]
-    destination_groups = [nsxt_policy_group.all_web_servers.path]
-    action             = "ALLOW"
-    services           = [nsxt_policy_service.http.path, nsxt_policy_service.https.path]
+  
+  lifecycle {
+    create_before_destroy = true
   }
 }
 ```

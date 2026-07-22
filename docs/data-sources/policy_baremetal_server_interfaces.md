@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_interfaces"
+page_title: "NSXT: nsxt_policy_baremetal_server_interfaces"
 description: List of bare metal server interfaces in NSX inventory with advanced filtering.
 ---
 

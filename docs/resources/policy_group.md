@@ -147,7 +147,25 @@ resource "nsxt_policy_group" "bms_dynamic" {
     }
   }
 }
+
+# BMS group selecting management interfaces via ManagementInterface key
+resource "nsxt_policy_group" "bms_mgmt_interfaces" {
+  display_name = "tf-bms-management-interfaces"
+  description  = "All BMS management interfaces"
+  group_type   = "BareMetalServer"
+
+  criteria {
+    condition {
+      key         = "ManagementInterface"
+      member_type = "BareMetalServerInterface"
+      operator    = "EQUALS"
+      value       = "TRUE"
+    }
+  }
+}
 ```
+
+## Global Manager example
 
 Note: This usage is for Global Manager only using site
 
@@ -281,13 +299,10 @@ The following arguments are supported:
         * `member_type` - (Optional) External ID member type. Must be one of: `VirtualMachine`, `VirtualNetworkInterface`, `CloudNativeServiceInstance`, `PhysicalServer`, `BareMetalServer`, or `BareMetalServerInterface`. Defaults to `VirtualMachine`.
         * `external_ids` - (Required) List of external IDs for the specified member type.
     * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
-        * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`, `NodeType`, `GroupType`, `ALL`, `IPAddress`, `PodCidr`, `ManagementInterface`, `OSVersion`.
-          Please note that certain keys are only applicable to certain member types. For BMS groups (requires NSX 9.0.0 or higher):
-          `BareMetalServer` member type supports `Tag`, `Name`, `OSName`, `ALL`, `ManagementInterface`, and `OSVersion` keys.
-          `BareMetalServerInterface` member type supports only the `Tag` key.
-        * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort`, `VirtualMachine`, `Group`, `DVPG`, `DVPort`, `IPAddress`, `TransportNode`, `Pod`, `Service`, `Namespace`, `KubernetesCluster`, `KubernetesNamespace`, `KubernetesIngress`, `KubernetesService`, `KubernetesNode`, `AntreaEgress`, `AntreaIPPool`, `VpcSubnet`, `VpcSubnetPort`, `BareMetalServer`,
-          `BareMetalServerInterface`. Note that certain member types are only applicable to certain environments.
-        * `operator` (Required) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS`, `STARTSWITH`, `IN`, `NOTIN`, `MATCHES`. Note that certain operators are only applicable to certain keys/member types.
+        * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`, `NodeType`, `GroupType`, `ALL`, `IPAddress`, `PodCidr`, `ManagementInterface`, `OSVersion`. Please note that certain keys are only applicable to certain member types. For BMS-specific supported keys and valid operators per member type, refer to the [Bare Metal Server Management guide](../guides/baremetal_server_management).
+        * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort`, `VirtualMachine`, `Group`, `DVPG`, `DVPort`, `IPAddress`, `TransportNode`, `Pod`, `Service`, `Namespace`, `KubernetesCluster`, `KubernetesNamespace`, `KubernetesIngress`, `KubernetesService`, `KubernetesNode`, `AntreaEgress`, `AntreaIPPool`, 
+          `VpcSubnet`, `VpcSubnetPort`, `BareMetalServer`, `BareMetalServerInterface`. Note that certain member types are only applicable to certain environments.
+        * `operator` (Required) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS`, `STARTSWITH`, `IN`, `NOTIN`, `MATCHES`, `TRUE`, `FALSE`. Note that certain operators are only applicable to certain keys/member types.
         * `value` (Required) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.
     * `operator` (Required) The operator to use. Must be one of `AND` or `OR`. If `AND` is used, then the `criteria` block before/after must be of the same type and if using `condition` then also must use the same `member_type`.
@@ -296,7 +311,8 @@ The following arguments are supported:
         * `distinguished_name` (Required) LDAP distinguished name (DN). A valid fully qualified distinguished name should be provided here. This value is valid only if it matches to exactly 1 LDAP object on the LDAP server.
         * `domain_base_distinguished_name` (Required) Identity (Directory) domain base distinguished name. This is the base distinguished name for the domain where this identity group resides. (e.g. dc=example,dc=com)
         * `sid` (Optional) Identity (Directory) Group SID (security identifier). A security identifier (SID) is a unique value of variable length used to identify a trustee. This field is only populated for Microsoft Active Directory identity store.
-* `group_type` - (Optional) One of `IPAddress`, `ANTREA`, `BareMetalServer`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group. `BareMetalServer` group type requires NSX version 9.0.0 or higher. **IMPORTANT**: `group_type = "BareMetalServer"` is **REQUIRED** when using `BareMetalServer` or `BareMetalServerInterface` member types in criteria.
+* `group_type` - (Optional) One of `IPAddress`, `ANTREA`, `BareMetalServer`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group. `BareMetalServer` group type requires NSX version 9.0.0 or higher.
+  * **NOTE**: `group_type = "BareMetalServer"` **must** be set whenever `BareMetalServer` or `BareMetalServerInterface` member types are used. A `BareMetalServer`-typed group can only contain `BareMetalServer` and/or `BareMetalServerInterface` members.
 
 ## Attributes Reference
 

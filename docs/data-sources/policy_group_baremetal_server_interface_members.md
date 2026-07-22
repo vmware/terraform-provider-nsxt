@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_group_baremetal_server_interface_members"
+page_title: "NSXT: nsxt_policy_group_baremetal_server_interface_members"
 description: A policy data source to list bare metal server interface members in a group.
 ---
 
