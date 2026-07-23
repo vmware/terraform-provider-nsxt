@@ -87,7 +87,7 @@ func getOrGenerateIDWithParent(d *schema.ResourceData, m interface{}, presenceCh
 
 	parentPath := d.Get("parent_path").(string)
 
-	exists, err := presenceChecker(getSessionContext(d, m), parentPath, id, connector)
+	exists, err := presenceChecker(getParentContext(d, m, parentPath), parentPath, id, connector)
 	if err != nil {
 		return "", err
 	}
@@ -538,6 +538,22 @@ func nsxtParentPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	truncateSize := len(pathSegs[segCount-1]) + len(pathSegs[segCount-2]) + 2
 	d.Set("parent_path", importID[:len(importID)-truncateSize])
 	return []*schema.ResourceData{d}, nil
+}
+
+// nsxtTGWRoutingChildResourceImporter handles import for Transit Gateway child
+// resources that NSX nests under an intermediate "routing" singleton (prefix
+// lists, route maps, community lists, BFD peers), e.g.
+// .../transit-gateways/[tgw]/routing/prefix-lists/[id]. That singleton has no
+// corresponding schema attribute, so parent_path must resolve to the Transit
+// Gateway path itself, matching what users supply in config.
+func nsxtTGWRoutingChildResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	rd, err := nsxtParentPathResourceImporter(d, m)
+	if err != nil {
+		return rd, err
+	}
+	parentPath := rd[0].Get("parent_path").(string)
+	rd[0].Set("parent_path", strings.TrimSuffix(parentPath, "/routing"))
+	return rd, nil
 }
 
 func isPolicyPath(policyPath string) bool {
