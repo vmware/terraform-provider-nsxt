@@ -401,6 +401,52 @@ func TestMockResourceNsxtPolicyTransitGatewayBgpConfig(t *testing.T) {
 		bgpList := d.Get("bgp_config").([]interface{})
 		assert.Empty(t, bgpList)
 	})
+
+	// Guards against BZ#3742235: NSX omits graceful_restart_config.timer entirely
+	// until it's been explicitly configured (confirmed from a live NSX response -
+	// {"mode": "HELPER_ONLY"}, no "timer" key), leaving GracefulRestartConfig
+	// non-nil but its Timer nil. setTGWBgpConfigInSchema must still fall back to
+	// the schema defaults for the two timer fields instead of zero-filling them,
+	// since a cached 0 violates NSX's own minimum-value-1 validation if it's ever
+	// resent.
+	t.Run("Read defaults graceful restart timers when NSX omits Timer", func(t *testing.T) {
+		enabled := true
+		ecmp := true
+		localAsNum := tgwBgpLocalAsNum
+		restartMode := tgwBgpGracefulMode
+		revision := int64(0)
+		id := "bgp"
+		bgpResponse := nsxModel.TransitGatewayBgpRoutingConfig{
+			Id:         &id,
+			Revision:   &revision,
+			Enabled:    &enabled,
+			Ecmp:       &ecmp,
+			LocalAsNum: &localAsNum,
+			GracefulRestartConfig: &nsxModel.BgpGracefulRestartConfig{
+				Mode: &restartMode,
+				// Timer intentionally nil - matches the real NSX GET response.
+			},
+		}
+
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(bgpResponse, nil),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		bgpList := d.Get("bgp_config").([]interface{})
+		require.Len(t, bgpList, 1)
+		bgpMap := bgpList[0].(map[string]interface{})
+		assert.Equal(t, tgwBgpGracefulTimer, bgpMap["graceful_restart_timer"])
+		assert.Equal(t, tgwBgpGracefulStaleTimer, bgpMap["graceful_restart_stale_route_timer"])
+	})
 }
 
 // TestGetSpanFromSchemaZoneBasedEmptyZones guards against a regression where
@@ -462,7 +508,7 @@ func TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
 	res := resourceNsxtPolicyTransitGateway()
 	d := schema.TestResourceDataRaw(t, res.Schema, data)
 
-	cfg := getTGWBgpConfigFromSchema(d)
+	cfg := getTGWBgpConfigFromSchema(d, true, true, true)
 	require.NotNil(t, cfg)
 	require.NotNil(t, cfg.ForwardingUpTimer)
 	assert.Equal(t, int64(10), *cfg.ForwardingUpTimer)
@@ -470,6 +516,54 @@ func TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
 	require.NotNil(t, cfg.RouteRedistributionConfig)
 	require.Len(t, cfg.RouteRedistributionConfig.Rules, 1)
 	assert.Equal(t, []string{"PUBLIC", "TGW_STATIC_ROUTE"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
+}
+
+// TestGetTGWBgpConfigFromSchemaOnlyIncludesChangedBlocks guards against
+// BZ#3742235's underlying cause: resourceNsxtPolicyTransitGatewayUpdate used to
+// always resend all three of bgp_config/advanced_config/redistribution_config
+// together whenever any single one of them changed, dragging along cached
+// values (including a possibly-invalid graceful restart timer) for blocks the
+// user never touched. NSX's PATCH .../routing/bgp is a documented partial
+// update ("only the provided fields are updated; omitted fields retain their
+// current values"), so Update now passes per-block include flags gated by
+// d.HasChange, and getTGWBgpConfigFromSchema must leave the excluded blocks'
+// fields nil (letting the VAPI binding omit them from the request) even when
+// they're present in ResourceData.
+func TestGetTGWBgpConfigFromSchemaOnlyIncludesChangedBlocks(t *testing.T) {
+	data := minimalTGWData()
+	data["bgp_config"] = minimalBgpConfigData()
+	data["advanced_config"] = []interface{}{
+		map[string]interface{}{"forwarding_up_timer": 10},
+	}
+	data["redistribution_config"] = []interface{}{
+		map[string]interface{}{
+			"rule": []interface{}{
+				map[string]interface{}{
+					"types":          []interface{}{"PUBLIC"},
+					"route_map_path": "",
+				},
+			},
+		},
+	}
+
+	res := resourceNsxtPolicyTransitGateway()
+	d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+	// Simulate only redistribution_config having changed: bgp_config and
+	// advanced_config are present in ResourceData (as they would be for an
+	// already-provisioned TGW) but excluded via their include flags.
+	cfg := getTGWBgpConfigFromSchema(d, false, false, true)
+	require.NotNil(t, cfg)
+
+	assert.Nil(t, cfg.Ecmp, "bgp_config field must be omitted when bgp_config didn't change")
+	assert.Nil(t, cfg.Enabled, "bgp_config field must be omitted when bgp_config didn't change")
+	assert.Nil(t, cfg.LocalAsNum, "bgp_config field must be omitted when bgp_config didn't change")
+	assert.Nil(t, cfg.GracefulRestartConfig, "bgp_config field must be omitted when bgp_config didn't change")
+	assert.Nil(t, cfg.ForwardingUpTimer, "advanced_config field must be omitted when advanced_config didn't change")
+
+	require.NotNil(t, cfg.RouteRedistributionConfig)
+	require.Len(t, cfg.RouteRedistributionConfig.Rules, 1)
+	assert.Equal(t, []string{"PUBLIC"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
 }
 
 // TestMockResourceNsxtPolicyTransitGatewayAdvancedAndRedistributionConfig
