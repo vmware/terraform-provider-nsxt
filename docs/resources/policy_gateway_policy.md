@@ -128,7 +128,7 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `category` - (Required) The category to use for priority of this Gateway Policy. For local manager must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules` and `Default`. For global manager must be `SharedPreRules` or `LocalGatewayRules`.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist. For VMware Cloud on AWS use `cgw`.
+* `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist. For VMware Cloud on AWS use `cgw`. Note: changing this attribute will replace the policy (see note below).
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the Gateway Policy resource.
 * `context` - (Optional) The context which the object belongs to
@@ -195,6 +195,8 @@ In addition to arguments listed above, the following attributes are exported:
     * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ~> **NOTE:** `display_name` argument for service entries is not supported for NSX 3.2.x and below.
+
+~> **NOTE:** `domain` is part of the policy's path in the NSX API and cannot be updated in place. Changing it will delete the existing policy and create a new one, which by default will get a new NSX ID. To keep the NSX ID stable across a domain change, set the `nsx_id` argument explicitly.
 
 ## Importing
 
