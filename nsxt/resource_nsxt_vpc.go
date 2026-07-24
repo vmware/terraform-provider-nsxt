@@ -228,7 +228,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id(), m)
 	return resourceNsxtVpcRead(d, m)
 }
 
@@ -242,7 +242,7 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 	}
 	var obj *model.Vpc
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.Vpc](
 			d,
 			m,
@@ -331,7 +331,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("Vpc", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id(), m)
 	return resourceNsxtVpcRead(d, m)
 }
 

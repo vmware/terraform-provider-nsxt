@@ -546,7 +546,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id(), m)
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }
 
@@ -566,7 +566,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 
 	var obj *model.LBPool
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBPool](
 			d,
 			m,
@@ -700,7 +700,7 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleUpdateError("LBPool", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, d.Id(), m)
 
 	return resourceNsxtPolicyLBPoolRead(d, m)
 }

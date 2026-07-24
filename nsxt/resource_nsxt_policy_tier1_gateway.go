@@ -576,7 +576,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id(), m)
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -596,7 +596,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 	var obj *model.Tier1
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.Tier1](
 			d,
 			m,
@@ -756,7 +756,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, d.Id(), m)
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
 

@@ -80,7 +80,7 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, is
 	}
 	var obj *model.SecurityPolicy
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.SecurityPolicy](
 			d,
 			m,

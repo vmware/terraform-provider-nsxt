@@ -3,7 +3,6 @@ package nsxt
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -59,12 +58,10 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 1) Tag-mode (default): if resource has no tag attribute, we still send provider-managed tags.
 	t.Run("tag-mode/no-user-tags", func(t *testing.T) {
-		old := os.Getenv("NSXT_CACHE_MODE")
-		t.Cleanup(func() { _ = os.Setenv("NSXT_CACHE_MODE", old) })
-		_ = os.Setenv("NSXT_CACHE_MODE", "config-scope")
+		m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{})
-		q := buildTagQuery(d, runID)
+		q := buildTagQuery(d, runID, m)
 
 		assertContainsAll(t, q,
 			expectScope("nsx-tf/tf-run-id"),
@@ -74,16 +71,14 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 2) Tag-mode: if user tags are present and managed tags are not, provider-managed tags are appended.
 	t.Run("tag-mode/user-tags-appends-provider-tags", func(t *testing.T) {
-		old := os.Getenv("NSXT_CACHE_MODE")
-		t.Cleanup(func() { _ = os.Setenv("NSXT_CACHE_MODE", old) })
-		_ = os.Setenv("NSXT_CACHE_MODE", "config-scope")
+		m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{
 			"tag": []interface{}{
 				map[string]interface{}{"scope": "env", "tag": "dev"},
 			},
 		})
-		q := buildTagQuery(d, runID)
+		q := buildTagQuery(d, runID, m)
 
 		assertContainsAll(t, q,
 			expectScope("env"),
@@ -95,12 +90,10 @@ func TestBuildTagQuery(t *testing.T) {
 
 	// 3) Global-search mode: no tag attribute means no additional query.
 	t.Run("global-search/no-user-tags", func(t *testing.T) {
-		old := os.Getenv("NSXT_CACHE_MODE")
-		t.Cleanup(func() { _ = os.Setenv("NSXT_CACHE_MODE", old) })
-		_ = os.Setenv("NSXT_CACHE_MODE", "global")
+		m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "global"}}
 
 		d := schema.TestResourceDataRaw(t, tagSchema, map[string]interface{}{})
-		q := buildTagQuery(d, runID)
+		q := buildTagQuery(d, runID, m)
 		if q != "" {
 			t.Fatalf("expected empty query in global-search mode when no tags exist, got %q", q)
 		}

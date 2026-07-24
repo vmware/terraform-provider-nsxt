@@ -685,7 +685,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id(), m)
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -879,7 +879,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 	}
 	var obj *model.VpcSubnet
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcSubnet](
 			d,
 			m,
@@ -993,7 +993,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id(), m)
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 

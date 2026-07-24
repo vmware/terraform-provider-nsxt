@@ -118,7 +118,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id(), m)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -140,7 +140,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 
 	var obj *model.VpcAttachment
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.VpcAttachment](
 			d,
 			m,
@@ -221,7 +221,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("VpcAttachment", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id(), m)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 

@@ -128,7 +128,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d *schema.ResourceData
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBSourceIpPersistenceProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBSourceIpPersistenceProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, m)
 }
@@ -146,7 +146,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d *schema.ResourceData, 
 	client := cliLbPersistenceProfilesClient(sessionContext, connector)
 	var obj *model.LBSourceIpPersistenceProfile
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBSourceIpPersistenceProfile](
 			d,
 			m,
@@ -242,7 +242,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d *schema.ResourceData
 	if err != nil {
 		return handleUpdateError("LBSourceIpPersistenceProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBSourceIpPersistenceProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBSourceIpPersistenceProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, m)
 }

@@ -107,7 +107,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBTcpMonitorProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBTcpMonitorProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }
@@ -124,7 +124,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileRead(d *schema.ResourceData, m interfa
 	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	var lbTCPMonitor *model.LBTcpMonitorProfile
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		lbTCPMonitor, _, _, err = CacheAwareResourceRead[model.LBTcpMonitorProfile](
 			d,
 			m,
@@ -197,7 +197,7 @@ func resourceNsxtPolicyLBTcpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBTcpMonitorProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBTcpMonitorProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBTcpMonitorProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBTcpMonitorProfileRead(d, m)
 }

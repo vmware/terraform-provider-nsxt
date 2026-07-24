@@ -551,7 +551,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 
@@ -569,7 +569,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	}
 	var obj *model.Service
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		key := d.Get("path").(string)
 		if key == "" {
 			key = id
@@ -782,7 +782,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleUpdateError("Service", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 

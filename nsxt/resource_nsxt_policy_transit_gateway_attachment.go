@@ -205,7 +205,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id(), m)
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -230,7 +230,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 	}
 	var obj *model.TransitGatewayAttachment
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.TransitGatewayAttachment](
 			d,
 			m,
@@ -317,7 +317,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id(), m)
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }

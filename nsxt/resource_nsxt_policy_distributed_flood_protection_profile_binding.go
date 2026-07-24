@@ -129,7 +129,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate(d *schema.
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, d.Id(), m)
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }
@@ -151,7 +151,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 	groupID := getPolicyIDFromPath(groupPath)
 	var binding *model.PolicyFirewallFloodProtectionProfileBindingMap
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		binding, _, _, err = CacheAwareResourceRead[model.PolicyFirewallFloodProtectionProfileBindingMap](
 			d,
 			m,
@@ -205,7 +205,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingUpdate(d *schema.
 	if err != nil {
 		return handleUpdateError("DistributedFloodProtectionProfileBinding", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, d.Id(), m)
 
 	return resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 }

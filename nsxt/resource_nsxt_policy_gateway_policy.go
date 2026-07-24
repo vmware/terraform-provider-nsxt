@@ -197,7 +197,7 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 
 func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
@@ -214,7 +214,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m inte
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
@@ -230,7 +230,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralRead(d *schema.ResourceData, m interf
 	var obj *model.GatewayPolicy
 	var err error
 	domainName := d.Get("domain").(string)
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.GatewayPolicy](
 			d,
 			m,
@@ -290,7 +290,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
@@ -298,7 +298,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m inte
 	if err != nil {
 		return handleUpdateError("Gateway Policy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
 
@@ -317,7 +317,7 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 
 	return nil
 }

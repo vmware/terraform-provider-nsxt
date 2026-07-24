@@ -36,7 +36,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Gateway Policy resource requires NSX version 9.0.0 or higher")
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	connector := getPolicyConnector(m)
@@ -55,7 +55,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -68,7 +68,7 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 	}
 	var obj *model.GatewayPolicy
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.GatewayPolicy](
 			d,
 			m,
@@ -124,7 +124,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 	if id == "" {
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
@@ -133,7 +133,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 

@@ -148,7 +148,7 @@ func resourceNsxtVpcStaticRoutesCreate(d *schema.ResourceData, m interface{}) er
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 
@@ -161,7 +161,7 @@ func resourceNsxtVpcStaticRoutesRead(d *schema.ResourceData, m interface{}) erro
 	}
 	var obj *model.StaticRoutes
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.StaticRoutes](
 			d,
 			m,
@@ -249,7 +249,7 @@ func resourceNsxtVpcStaticRoutesUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("StaticRoutes", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 	return resourceNsxtVpcStaticRoutesRead(d, m)
 }
 

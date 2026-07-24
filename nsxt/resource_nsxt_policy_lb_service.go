@@ -142,7 +142,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id(), m)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -161,7 +161,7 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 	}
 	var obj *model.LBService
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBService](
 			d,
 			m,
@@ -248,7 +248,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleUpdateError("LBService", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id(), m)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 

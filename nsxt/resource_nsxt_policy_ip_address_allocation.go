@@ -151,7 +151,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 				d.SetId(id)
 				d.Set("nsx_id", id)
 				d.Set("allocation_ip", attr.Values[0])
-				MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id())
+				MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id(), m)
 				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 			}
 		}
@@ -162,7 +162,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id(), m)
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 
@@ -181,7 +181,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 	var obj *model.IpAddressAllocation
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.IpAddressAllocation](
 			d,
 			m,
@@ -256,7 +256,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("IPAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id(), m)
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 

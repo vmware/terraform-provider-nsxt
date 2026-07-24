@@ -199,7 +199,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -224,7 +224,7 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 
 	var obj *model.StaticRoutes
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.StaticRoutes](
 			d,
 			m,
@@ -354,7 +354,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }

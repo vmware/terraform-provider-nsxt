@@ -107,7 +107,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }
@@ -124,7 +124,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interfa
 	client := cliLbMonitorProfilesClient(sessionContext, connector)
 	var lbUDPMonitor *model.LBUdpMonitorProfile
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		lbUDPMonitor, _, _, err = CacheAwareResourceRead[model.LBUdpMonitorProfile](
 			d,
 			m,
@@ -197,7 +197,7 @@ func resourceNsxtPolicyLBUdpMonitorProfileUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("LBUdpMonitorProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, d.Id(), m)
 
 	return resourceNsxtPolicyLBUdpMonitorProfileRead(d, m)
 }

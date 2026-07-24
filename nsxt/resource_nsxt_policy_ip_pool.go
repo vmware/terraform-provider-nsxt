@@ -75,7 +75,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	}
 	var pool *model.IpAddressPool
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		pool, _, _, err = CacheAwareResourceRead[model.IpAddressPool](
 			d,
 			m,
@@ -153,7 +153,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id(), m)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 
@@ -188,7 +188,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, d.Id(), m)
 	return resourceNsxtPolicyIPPoolRead(d, m)
 }
 

@@ -186,7 +186,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	d.Set("locale_service_id", localeServiceID)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id(), m)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -205,7 +205,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	sessionContext := getSessionContext(d, m)
 	client := cliTier1InterfacesClient(sessionContext, connector)
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.Tier1Interface](
 			d,
 			m,
@@ -335,7 +335,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id(), m)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }

@@ -695,7 +695,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id(), m)
 
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
@@ -713,7 +713,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 	parents := getVpcParentsFromContext(sessionContext)
 	var obj *model.TransitGateway
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.TransitGateway](
 			d,
 			m,
@@ -951,7 +951,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id(), m)
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 

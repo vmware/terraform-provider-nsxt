@@ -32,18 +32,18 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Group resource requires NSX version 9.0.0 or higher")
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	if err := resourceNsxtPolicyGroupGeneralCreate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
 	return nil
 }
 
 func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
-	if !isCacheEnabledForRead(d) {
+	if !isCacheEnabledForRead(d, m) {
 		return resourceNsxtPolicyGroupGeneralRead(d, m, false)
 	}
 
@@ -119,13 +119,13 @@ func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	if err := resourceNsxtPolicyGroupGeneralUpdate(d, m, false); err != nil {
 		return err
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
 	return nil
 }
 

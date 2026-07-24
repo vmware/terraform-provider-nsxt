@@ -1181,7 +1181,6 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	commonConfig := initCommonConfig(d)
-	setConfiguredCacheMode(commonConfig.CacheMode)
 	clients := nsxtClients{
 		CommonConfig: commonConfig,
 	}

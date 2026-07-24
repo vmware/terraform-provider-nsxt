@@ -63,7 +63,7 @@ func resourceNsxtPolicyGatewayPolicyRuleCreate(d *schema.ResourceData, m interfa
 		return handleCreateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, ruleName), err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID, m)
 
 	d.SetId(id)
 
@@ -119,7 +119,7 @@ func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface
 		return policyResourceNotSupportedError()
 	}
 
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		gp, cacheUsed, _, cacheErr := TryCacheRead[model.GatewayPolicy](
 			d,
 			m,
@@ -173,7 +173,7 @@ func resourceNsxtPolicyGatewayPolicyRuleUpdate(d *schema.ResourceData, m interfa
 		return handleUpdateError("GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID, m)
 
 	return resourceNsxtPolicyGatewayPolicyRuleRead(d, m)
 }
@@ -197,7 +197,7 @@ func resourceNsxtPolicyGatewayPolicyRuleDelete(d *schema.ResourceData, m interfa
 	}
 	err := client.Delete(domain, policyID, id)
 	if err == nil {
-		MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID)
+		MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, policyID, m)
 	}
 	return err
 }

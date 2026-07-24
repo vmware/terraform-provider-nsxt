@@ -173,7 +173,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, d.Id(), m)
 
 	return resourceNsxtPolicyDhcpV6StaticBindingRead(d, m)
 }
@@ -289,7 +289,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV6 Static Binding Config", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, d.Id(), m)
 
 	return resourceNsxtPolicyDhcpV6StaticBindingRead(d, m)
 }

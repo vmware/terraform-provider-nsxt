@@ -871,7 +871,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	if tagErr != nil {
 		return tagErr
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		runID := m.(nsxtClients).CommonConfig.contextID
 		managedDefaults := getProviderManagedDefaultTags(runID)
 		tags = mergeManagedDefaultAndUserTags(managedDefaults, tags)
@@ -911,7 +911,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id(), m)
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
@@ -935,7 +935,7 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	}
 	var obj *model.Group
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.Group](
 			d,
 			m,
@@ -1044,7 +1044,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	if tagErr != nil {
 		return tagErr
 	}
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		runID := m.(nsxtClients).CommonConfig.contextID
 		managedDefaults := getProviderManagedDefaultTags(runID)
 		tags = mergeManagedDefaultAndUserTags(managedDefaults, tags)
@@ -1084,7 +1084,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id(), m)
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 

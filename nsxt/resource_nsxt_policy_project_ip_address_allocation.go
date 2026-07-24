@@ -134,7 +134,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -152,7 +152,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 	parents := getVpcParentsFromContext(sessionContext)
 	var obj *model.ProjectIpAddressAllocation
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.ProjectIpAddressAllocation](
 			d,
 			m,
@@ -232,7 +232,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 		d.Partial(true)
 		return handleUpdateError("ProjectIpAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }

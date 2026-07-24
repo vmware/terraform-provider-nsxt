@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -112,27 +111,14 @@ const (
 
 var invalidNSXTCacheModeWarn sync.Map // raw env value -> struct{}; log once per distinct invalid value
 
-// configuredCacheMode holds the *string resolved from the provider's cache_mode
-// attribute once Configure has run. nil means the provider hasn't been configured yet
-// (e.g. in unit tests that set NSXT_CACHE_MODE directly), so currentCacheMode falls
-// back to reading the env var live in that case.
-var configuredCacheMode atomic.Value
-
-// setConfiguredCacheMode is called from providerConfigure with the resolved value of
-// the cache_mode provider attribute (which itself defaults to the NSXT_CACHE_MODE env
-// var via schema.EnvDefaultFunc, mirroring how context_id/NSXT_CONTEXT_ID is handled).
-func setConfiguredCacheMode(raw string) {
-	configuredCacheMode.Store(&raw)
-}
-
 func postWriteKey(resourceType, resourceID string) string {
 	return resourceType + "::" + resourceID
 }
 
 // MarkPostWriteForResourceTypeKey marks a single resource instance as just written.
 // The next CacheAwareResourceRead/TryCacheRead for that exact resourceID will bypass cache once.
-func MarkPostWriteForResourceTypeKey(resourceType, resourceID string) {
-	if !IsCacheEnabled() {
+func MarkPostWriteForResourceTypeKey(resourceType, resourceID string, m interface{}) {
+	if !IsCacheEnabled(m) {
 		return
 	}
 	if resourceType == "" || resourceID == "" {
@@ -144,18 +130,16 @@ func MarkPostWriteForResourceTypeKey(resourceType, resourceID string) {
 // MarkPostWriteAndInvalidateCacheForResourceType marks resourceID as just written and invalidates
 // the type's cache bucket. resourceID must be the same key used in the corresponding
 // CacheAwareResourceRead/TryCacheRead call (typically d.Id(), or the parent's ID for child resources).
-func MarkPostWriteAndInvalidateCacheForResourceType(resourceType, resourceID string) {
-	MarkPostWriteForResourceTypeKey(resourceType, resourceID)
-	InvalidateCacheForResourceType(resourceType)
+func MarkPostWriteAndInvalidateCacheForResourceType(resourceType, resourceID string, m interface{}) {
+	MarkPostWriteForResourceTypeKey(resourceType, resourceID, m)
+	InvalidateCacheForResourceType(resourceType, m)
 }
 
-func currentCacheMode() cacheMode {
-	var raw string
-	if v, ok := configuredCacheMode.Load().(*string); ok && v != nil {
-		raw = *v
-	} else {
-		raw = os.Getenv(envNSXTCacheMode)
-	}
+// parseCacheModeString parses the raw cache_mode string (from
+// commonProviderConfig.CacheMode, itself resolved from the cache_mode provider
+// attribute / NSXT_CACHE_MODE env var via schema.EnvDefaultFunc in provider.go)
+// into a cacheMode value.
+func parseCacheModeString(raw string) cacheMode {
 	raw = strings.TrimSpace(raw)
 	lower := strings.ToLower(raw)
 	switch lower {
@@ -176,25 +160,33 @@ func currentCacheMode() cacheMode {
 	}
 }
 
-func IsCacheEnabled() bool {
-	return currentCacheMode() != cacheDisabled
+// currentCacheMode reads the cache_mode configured on this specific provider instance
+// (commonProviderConfig.CacheMode, scoped per nsxtClients) rather than any process-global
+// state, so aliased provider blocks with different cache_mode values don't clobber each other.
+func currentCacheMode(m interface{}) cacheMode {
+	raw := m.(nsxtClients).CommonConfig.CacheMode
+	return parseCacheModeString(raw)
 }
 
-func isGlobalSearchCacheMode() bool {
-	return currentCacheMode() == cacheGlobal
+func IsCacheEnabled(m interface{}) bool {
+	return currentCacheMode(m) != cacheDisabled
+}
+
+func isGlobalSearchCacheMode(m interface{}) bool {
+	return currentCacheMode(m) == cacheGlobal
 }
 
 // isConfigScopedCacheMode reports whether tag-filtered caching (with provider-managed tags) is active.
-func isConfigScopedCacheMode() bool {
-	return currentCacheMode() == cacheConfigScoped
+func isConfigScopedCacheMode(m interface{}) bool {
+	return currentCacheMode(m) == cacheConfigScoped
 }
 
 func isRefreshPhase(d *schema.ResourceData) bool {
 	return d.Id() != ""
 }
 
-func isCacheEnabledForRead(d *schema.ResourceData) bool {
-	return IsCacheEnabled() && isRefreshPhase(d)
+func isCacheEnabledForRead(d *schema.ResourceData, m interface{}) bool {
+	return IsCacheEnabled(m) && isRefreshPhase(d)
 }
 
 // CacheKeyForResourceID returns the key that CacheAwareResourceRead/TryCacheRead will use
@@ -337,7 +329,7 @@ func (c *resourceTypeCache) writeCache(query string, resourceType string, d *sch
 	}
 	runID := m.(nsxtClients).CommonConfig.contextID
 	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query) //nolint:gosec
-	err := c.getListOfPolicyResources(query, d, connector, getEffectiveCacheContext(d, m), resourceType, runID)
+	err := c.getListOfPolicyResources(query, d, m, connector, getEffectiveCacheContext(d, m), resourceType, runID)
 	if err != nil {
 		return err
 	}
@@ -370,7 +362,7 @@ func getCacheQueryKey(resourceType string, d *schema.ResourceData, m interface{}
 	context := getEffectiveCacheContext(d, m)
 	query := getQueryString(resourceType, context)
 	runID := clients.CommonConfig.contextID
-	additionalQuery := buildTagQuery(d, runID)
+	additionalQuery := buildTagQuery(d, runID, m)
 	// Prefix with manager host so aliased provider blocks pointing at different managers
 	// never share a cache bucket even when context_id and resource types are identical.
 	host := clients.Host
@@ -429,8 +421,8 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	return nil, errCacheUseBackendDirect
 }
 
-func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
-	additionalQuery := buildTagQuery(d, runID)
+func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, m interface{}, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
+	additionalQuery := buildTagQuery(d, runID, m)
 	log.Printf("[DEBUG] Cache search query: resourceType=%s query=%q additionalQuery=%q", resourceType, query, additionalQuery) //nolint:gosec
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
 	log.Printf("[DEBUG] Cache search results: resourceType=%s query=%q additionalQuery=%q results=%d", resourceType, query, additionalQuery, len(resultList)) //nolint:gosec
@@ -453,7 +445,7 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 
 	// Child rules may be untagged, so try provider-managed tags first and then fall back to no tag filter.
 	var childAdditional *string
-	if !isGlobalSearchCacheMode() {
+	if !isGlobalSearchCacheMode(m) {
 		if q := providerManagedTagsSearchQuery(runID); q != "" {
 			childAdditional = &q
 		}
@@ -489,7 +481,7 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 
 // convertCachedValue converts a raw cache value to the typed model, strips provider-managed tags,
 // and returns (typedPtr, true) on success or (nil, false) on conversion/type-assertion failure.
-func convertCachedValue[T any](val interface{}, resourceType, resourceID string, bindingType bindings.BindingType) (*T, bool) {
+func convertCachedValue[T any](val interface{}, resourceType, resourceID string, bindingType bindings.BindingType, m interface{}) (*T, bool) {
 	sv, ok := val.(*data.StructValue)
 	if !ok {
 		return nil, false
@@ -505,7 +497,7 @@ func convertCachedValue[T any](val interface{}, resourceType, resourceID string,
 		log.Printf("[WARNING] Cache: type assertion failed for resourceType=%s id=%s; discarding cached value", resourceType, resourceID) //nolint:gosec
 		return nil, false
 	}
-	if !isGlobalSearchCacheMode() {
+	if !isGlobalSearchCacheMode(m) {
 		stripProviderManagedTagsFromAny(&typedVal)
 	}
 	return &typedVal, true
@@ -542,14 +534,14 @@ func reflectStringField(obj interface{}, fieldName string) *string {
 // ok=false when the cache is disabled, objID is empty, or the object can't be
 // found/converted — callers should fall through to the regular (uncached) read path.
 func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, connector client.Connector, objID string, resourceType string, bindingType bindings.BindingType) (*T, bool) {
-	if objID == "" || !IsCacheEnabled() {
+	if objID == "" || !IsCacheEnabled(m) {
 		return nil, false
 	}
 	val, err := gcache.readCache(objID, resourceType, d, m, connector)
 	if err != nil {
 		return nil, false
 	}
-	typedVal, ok := convertCachedValue[T](val, resourceType, objID, bindingType)
+	typedVal, ok := convertCachedValue[T](val, resourceType, objID, bindingType, m)
 	if !ok {
 		return nil, false
 	}
@@ -570,7 +562,7 @@ func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, 
 func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType) (*T, bool, bool, error) {
 	cacheUsed := false
 	cacheAttempted := false
-	if isRefreshPhase(d) && IsCacheEnabled() {
+	if isRefreshPhase(d) && IsCacheEnabled(m) {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Bypass cache after a write for this resource instance (one-shot).
 			return nil, cacheUsed, true, nil
@@ -578,7 +570,7 @@ func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client
 		cacheAttempted = true
 		val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
 		if err == nil {
-			if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType); ok {
+			if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType, m); ok {
 				return typedVal, true, cacheAttempted, nil
 			}
 		}
@@ -733,7 +725,7 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 	cacheAttempted := false
 	postWriteBypass := false
 
-	if isRefreshPhase(d) && IsCacheEnabled() {
+	if isRefreshPhase(d) && IsCacheEnabled(m) {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Ensure read-your-writes semantics: bypass cache once right after a write.
 			// Search-backed cache may be briefly stale immediately after a write.
@@ -744,7 +736,7 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 			cacheAttempted = true
 			val, err := gcache.readCache(resourceID, resourceType, d, m, connector)
 			if err == nil {
-				if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType); ok {
+				if typedVal, ok := convertCachedValue[T](val, resourceType, resourceID, bindingType, m); ok {
 					return typedVal, true, cacheAttempted, nil
 				}
 			}
@@ -762,14 +754,14 @@ func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connec
 	}
 
 	// Only stamp provider-managed tags in config_scope mode.
-	if isConfigScopedCacheMode() {
+	if isConfigScopedCacheMode(m) {
 		_, patchErr := ensureProviderManagedTagsWithPatchFunc(obj, m, patchFunc)
 		if patchErr != nil {
 			log.Printf("[WARNING] Failed to patch provider-managed tags for %s %s: %v", resourceType, resourceID, patchErr) //nolint:gosec
 		}
 	}
 	// Strip provider-managed tags from state in non-global mode.
-	if !isGlobalSearchCacheMode() {
+	if !isGlobalSearchCacheMode(m) {
 		stripProviderManagedTagsFromAny(obj)
 	}
 
@@ -797,13 +789,13 @@ func providerManagedTagsSearchQuery(runID string) string {
 }
 
 // buildTagQuery builds the NSX search tag filter, adding provider-managed tags when needed.
-func buildTagQuery(d *schema.ResourceData, runID string) string {
+func buildTagQuery(d *schema.ResourceData, runID string, m interface{}) string {
 	managedTagPresent := false
 	if d == nil {
 		return ""
 	}
 
-	shouldAddProviderTags := !isGlobalSearchCacheMode() && runID != ""
+	shouldAddProviderTags := !isGlobalSearchCacheMode(m) && runID != ""
 
 	tags, exists := d.GetOk("tag")
 	if !exists {
@@ -844,7 +836,7 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 			tagQueries = append(tagQueries, fmt.Sprintf("tags.tag:%s", escapeSpecialCharacters(tag.(string))))
 		}
 	}
-	if !isGlobalSearchCacheMode() && !managedTagPresent && runID != "" {
+	if !isGlobalSearchCacheMode(m) && !managedTagPresent && runID != "" {
 		tagQueries = append(tagQueries, providerManagedTagsSearchFragments(runID)...)
 	}
 
@@ -856,8 +848,8 @@ func buildTagQuery(d *schema.ResourceData, runID string) string {
 }
 
 // InvalidateCacheForResourceType clears the cache bucket for a resource type.
-func InvalidateCacheForResourceType(resourceType string) {
-	if !IsCacheEnabled() {
+func InvalidateCacheForResourceType(resourceType string, m interface{}) {
+	if !IsCacheEnabled(m) {
 		return
 	}
 	tc := gcache.getTypeCache(resourceType)

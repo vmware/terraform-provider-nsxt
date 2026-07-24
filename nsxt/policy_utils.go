@@ -259,7 +259,7 @@ func mergeManagedDefaultAndUserTags(managedDefaults []model.Tag, userTags []mode
 }
 
 func getPolicyTagsWithProviderManagedDefaults(d *schema.ResourceData, m interface{}) []model.Tag {
-	if !isConfigScopedCacheMode() {
+	if !isConfigScopedCacheMode(m) {
 		return getPolicyTagsFromSchema(d)
 	}
 	userTags := getPolicyTagsFromSchema(d)
@@ -280,7 +280,7 @@ func getPolicyTagsWithProviderManagedDefaultsValidated(d *schema.ResourceData, m
 	if err != nil {
 		return nil, err
 	}
-	if !isConfigScopedCacheMode() {
+	if !isConfigScopedCacheMode(m) {
 		return userTags, nil
 	}
 	runID := m.(nsxtClients).CommonConfig.contextID

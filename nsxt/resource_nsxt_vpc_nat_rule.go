@@ -244,7 +244,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d), m)
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 
@@ -266,7 +266,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 
 	var obj *model.PolicyVpcNatRule
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.PolicyVpcNatRule](
 			d,
 			m,
@@ -349,7 +349,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("PolicyVpcNatRule", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d))
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d), m)
 	return resourceNsxtPolicyVpcNatRuleRead(d, m)
 }
 

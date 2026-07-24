@@ -1619,7 +1619,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id(), m)
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }
@@ -1639,7 +1639,7 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 
 	var obj *model.LBVirtualServer
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBVirtualServer](
 			d,
 			m,
@@ -1818,7 +1818,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleUpdateError("LBVirtualServer", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id(), m)
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }

@@ -1353,7 +1353,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 
 	var obj *model.Segment
 	var err error
-	if isCacheEnabledForRead(d) {
+	if isCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.Segment](
 			d,
 			m,
@@ -1510,7 +1510,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id(), m)
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
@@ -1531,7 +1531,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id())
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id(), m)
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
