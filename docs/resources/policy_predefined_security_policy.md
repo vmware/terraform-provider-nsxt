@@ -149,3 +149,16 @@ In addition to arguments listed above, the following attributes are exported:
     * `path` - The NSX path of the policy resource.
     * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
     * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
+
+## Importing
+
+An existing Security Policy can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
+
+```shell
+terraform import nsxt_policy_predefined_security_policy.test POLICY_PATH
+```
+
+The above command imports the predefined Security Policy named `test` with policy path `POLICY_PATH`.
+The import command is recommended in case the NSX policy in question already has rules configured, and you wish to reconfigure the policy from scratch.
