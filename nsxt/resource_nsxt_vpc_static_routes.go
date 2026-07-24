@@ -269,6 +269,7 @@ func resourceNsxtVpcStaticRoutesDelete(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleDeleteError("StaticRoutes", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, id, m)
 
 	return nil
 }

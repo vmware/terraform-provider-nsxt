@@ -149,6 +149,7 @@ func resourceNsxtVPCGatewayPolicyDelete(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return handleDeleteError("VPC Gateway Policy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, id, m)
 
 	return nil
 }

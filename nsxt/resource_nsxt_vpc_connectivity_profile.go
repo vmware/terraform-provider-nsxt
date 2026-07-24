@@ -419,6 +419,7 @@ func resourceNsxtVpcConnectivityProfileDelete(d *schema.ResourceData, m interfac
 	if err != nil {
 		return handleDeleteError("VpcConnectivityProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, id, m)
 
 	return nil
 }

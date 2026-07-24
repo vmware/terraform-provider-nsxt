@@ -360,6 +360,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, id, m)
 
 	return nil
 }

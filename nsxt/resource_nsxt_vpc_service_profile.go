@@ -755,6 +755,7 @@ func resourceNsxtVpcServiceProfileDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("VpcServiceProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcServiceProfile, id, m)
 
 	return nil
 }

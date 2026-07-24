@@ -429,6 +429,8 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleDeleteError("Dhcp Static Binding Config", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, id, m)
 
 	return nil
 }

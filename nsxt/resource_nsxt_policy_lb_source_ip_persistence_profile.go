@@ -261,6 +261,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileDelete(d *schema.ResourceData
 	if err != nil {
 		return handleDeleteError("LBSourceIpPersistenceProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBSourceIpPersistenceProfile, id, m)
 
 	return nil
 }

@@ -1043,6 +1043,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleDeleteError("VpcSubnet", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, id, m)
 
 	return nil
 }

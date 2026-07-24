@@ -1118,6 +1118,7 @@ func resourceNsxtPolicyGroupGeneralDelete(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleDeleteError("Group", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, id, m)
 
 	return nil
 }

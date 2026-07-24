@@ -227,6 +227,12 @@ func resourceNsxtPolicyLBMonitorProfileDelete(d *schema.ResourceData, m interfac
 	if err != nil {
 		return handleDeleteError("LBMonitorProfile", id, err)
 	}
+	// This delete function is shared by all LB monitor profile types; only
+	// TCP and UDP monitor profiles are cache-integrated resource types, and
+	// invalidating both buckets unconditionally is harmless for the other
+	// (non-cached) monitor profile types.
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBTcpMonitorProfile, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBUdpMonitorProfile, id, m)
 	return nil
 }
 

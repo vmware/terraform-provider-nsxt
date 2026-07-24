@@ -807,6 +807,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("Service", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 
 	return nil
 }

@@ -130,5 +130,9 @@ func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtVPCGroupDelete(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicyGroupGeneralDelete(d, m, false)
+	if err := resourceNsxtPolicyGroupGeneralDelete(d, m, false); err != nil {
+		return err
+	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
+	return nil
 }

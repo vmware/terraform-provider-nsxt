@@ -293,6 +293,7 @@ func resourceNsxtVpcIpAddressAllocationDelete(d *schema.ResourceData, m interfac
 	if err != nil {
 		return handleDeleteError("VpcIpAddressAllocation", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcIpAddressAllocation, id, m)
 
 	return nil
 }

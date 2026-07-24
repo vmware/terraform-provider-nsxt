@@ -302,6 +302,7 @@ func resourceNsxtPolicyLBServerSslProfileDelete(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleDeleteError("LBServerSslProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBServerSslProfile, id, m)
 
 	return nil
 }

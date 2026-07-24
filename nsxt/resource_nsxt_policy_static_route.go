@@ -379,6 +379,7 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("Static Route", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, id, m)
 
 	return nil
 }

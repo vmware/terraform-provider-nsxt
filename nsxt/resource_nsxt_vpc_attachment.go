@@ -246,6 +246,7 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("VpcAttachment", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, id, m)
 
 	return nil
 }

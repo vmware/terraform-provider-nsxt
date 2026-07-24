@@ -209,6 +209,7 @@ func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleDeleteError("IP Pool", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPool, id, m)
 
 	return nil
 }

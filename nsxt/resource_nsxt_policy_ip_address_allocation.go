@@ -278,6 +278,7 @@ func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleDeleteError("IPAddressAllocation", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, id, m)
 
 	return nil
 }

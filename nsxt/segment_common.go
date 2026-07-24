@@ -1631,6 +1631,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 		return handleDeleteError("Segment", id, err)
 	}
 	log.Printf("[DEBUG] Success deleting Segment with ID %s", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, id, m)
 
 	return nil
 }

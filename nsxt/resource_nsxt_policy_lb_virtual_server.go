@@ -1841,6 +1841,7 @@ func resourceNsxtPolicyLBVirtualServerDelete(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleDeleteError("LBVirtualServer", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, id, m)
 
 	return nil
 }

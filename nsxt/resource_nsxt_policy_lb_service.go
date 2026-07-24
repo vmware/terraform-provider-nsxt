@@ -270,6 +270,7 @@ func resourceNsxtPolicyLBServiceDelete(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleDeleteError("LBService", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, id, m)
 
 	return nil
 }

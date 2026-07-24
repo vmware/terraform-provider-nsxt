@@ -444,6 +444,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData
 	if err != nil {
 		return handleDeleteError("DhcpV4StaticBindingConfig", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, id, m)
 
 	return nil
 }

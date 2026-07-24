@@ -723,6 +723,7 @@ func resourceNsxtPolicyLBPoolDelete(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleDeleteError("LBPool", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBPool, id, m)
 
 	return nil
 }

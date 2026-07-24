@@ -289,6 +289,7 @@ func resourceNsxtPolicyConnectivityPolicyDelete(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleDeleteError("ConnectivityPolicy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, id, m)
 
 	return nil
 }

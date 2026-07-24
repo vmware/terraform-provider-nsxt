@@ -1047,5 +1047,6 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleDeleteError("TransitGateway", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, id, m)
 	return nil
 }

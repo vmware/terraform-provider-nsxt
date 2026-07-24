@@ -230,6 +230,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingDelete(d *schema.
 	if err != nil {
 		return handleDeleteError("FloodProtectionProfileBinding", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, id, m)
 	return nil
 }
 

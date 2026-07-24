@@ -796,6 +796,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 		return handleDeleteError("Tier1", id, err)
 	}
 	log.Printf("[DEBUG] Success deleting Tier1 with ID %s", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1, id, m)
 
 	return nil
 }

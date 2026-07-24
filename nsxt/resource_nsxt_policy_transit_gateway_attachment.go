@@ -345,6 +345,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 	if err != nil {
 		return handleDeleteError("TransitGatewayAttachment", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, id, m)
 
 	return nil
 }

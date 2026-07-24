@@ -373,6 +373,7 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return handleDeleteError("PolicyVpcNatRule", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypePolicyVpcNatRule, CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d), m)
 
 	return nil
 }

@@ -351,6 +351,7 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleDeleteError("Vpc", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, id, m)
 
 	return nil
 }
