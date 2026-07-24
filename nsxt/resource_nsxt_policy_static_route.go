@@ -154,7 +154,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	network := d.Get("network").(string)
 
 	var nextHopsStructs []model.RouterNexthop
@@ -199,6 +199,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -221,7 +222,35 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 		return handleMultitenancyTier0Error()
 	}
 
-	obj, err := getNsxtPolicyStaticRouteByID(context, connector, gwID, isT0, id)
+	var obj *model.StaticRoutes
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.StaticRoutes](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeStaticRoutes,
+			model.StaticRoutesBindingType(),
+			func() (*model.StaticRoutes, error) {
+				readObj, readErr := getNsxtPolicyStaticRouteByID(context, connector, gwID, isT0, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.StaticRoutes) error {
+				return patchNsxtPolicyStaticRoute(context, connector, gwID, *patchObj, isT0)
+			},
+		)
+	} else {
+		readObj, readErr := getNsxtPolicyStaticRouteByID(context, connector, gwID, isT0, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Static Route", id, err)
 	}
@@ -281,7 +310,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	network := d.Get("network").(string)
 
 	var nextHopsStructs []model.RouterNexthop
@@ -325,6 +354,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -349,6 +379,7 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("Static Route", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, id, m)
 
 	return nil
 }

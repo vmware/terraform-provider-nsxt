@@ -247,6 +247,15 @@ The following arguments are used to configure the provider:
   for VMC environments, and is not supported with deprecated NSX manager resources and
   data sources. Note - this setting is useful when NSX manager is not yet available at
   time of provider evaluation, and not recommended to be turned on otherwise.
+* `context_id` - (Optional) An identifier for this provider configuration, used to scope
+  provider-managed default tags when `cache_mode` is set to `config_scope`. Can also be
+  specified with the `NSXT_CONTEXT_ID` environment variable.
+* `cache_mode` - (Optional) Controls in-memory caching of NSX resource lookups performed
+  by data sources and resources during a single `terraform` run. Accepted values are
+  `disabled`/`off` (no caching, the default), `config_scope` (cache resource lookups,
+  scoped by `context_id`, and apply provider-managed default tags), and `global` (cache
+  resource lookups across the entire run without tag scoping). Can also be specified with
+  the `NSXT_CACHE_MODE` environment variable.
 
 ## NSX Logical Networking
 

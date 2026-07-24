@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
@@ -136,8 +137,51 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 	if id == "" || poolID == "" {
 		return fmt.Errorf("Error obtaining Static Subnet ID")
 	}
+	subnetID := id
+	if strings.Contains(subnetID, "/") {
+		subnetID = getPolicyIDFromPath(subnetID)
+	}
 
-	subnetData, err := client.Get(poolID, id)
+	backendRead := func() (*model.IpAddressPoolStaticSubnet, error) {
+		subnetData, readErr := client.Get(poolID, subnetID)
+		if readErr != nil {
+			return nil, readErr
+		}
+		snet, errs := converter.ConvertToGolang(subnetData, model.IpAddressPoolStaticSubnetBindingType())
+		if len(errs) > 0 {
+			return nil, fmt.Errorf("Error converting Static Subnet %s", errs[0])
+		}
+		obj := snet.(model.IpAddressPoolStaticSubnet)
+		return &obj, nil
+	}
+
+	patchFunc := func(patchObj *model.IpAddressPoolStaticSubnet) error {
+		// IMPORTANT: patchObj may already include provider-managed tags injected by
+		// CacheAwareResourceRead; convert patchObj directly to preserve them.
+		sv, convErrs := converter.ConvertToVapi(*patchObj, model.IpAddressPoolStaticSubnetBindingType())
+		if convErrs != nil {
+			return convErrs[0]
+		}
+		return client.Patch(poolID, subnetID, sv.(*data.StructValue))
+	}
+
+	var staticSubnet *model.IpAddressPoolStaticSubnet
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		key := id
+		staticSubnet, _, _, err = CacheAwareResourceRead[model.IpAddressPoolStaticSubnet](
+			d,
+			m,
+			connector,
+			key,
+			resourceTypeIpAddressPoolStaticSubnet,
+			model.IpAddressPoolStaticSubnetBindingType(),
+			backendRead,
+			patchFunc,
+		)
+	} else {
+		staticSubnet, err = backendRead()
+	}
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -146,12 +190,6 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 		}
 		return handleReadError(d, "Static Subnet", id, err)
 	}
-
-	snet, errs := converter.ConvertToGolang(subnetData, model.IpAddressPoolStaticSubnetBindingType())
-	if len(errs) > 0 {
-		return fmt.Errorf("Error converting Static Subnet %s", errs[0])
-	}
-	staticSubnet := snet.(model.IpAddressPoolStaticSubnet)
 
 	d.Set("display_name", staticSubnet.DisplayName)
 	d.Set("description", staticSubnet.Description)
@@ -212,6 +250,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolStaticSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolStaticSubnet, d), m)
 	return resourceNsxtPolicyIPPoolStaticSubnetRead(d, m)
 }
 
@@ -240,6 +279,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("Static Subnet", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolStaticSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolStaticSubnet, d), m)
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -266,6 +306,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleDeleteError("Static Subnet", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolStaticSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolStaticSubnet, d), m)
 
 	return nil
 }

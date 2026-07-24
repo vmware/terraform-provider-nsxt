@@ -197,6 +197,9 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 
 func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
+	if isConfigScopedCacheMode(m) {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+	}
 
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyExistsPartial(d.Get("domain").(string)))
@@ -211,6 +214,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m inte
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
@@ -223,7 +227,36 @@ func resourceNsxtPolicyGatewayPolicyGeneralRead(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicy(getSessionContext(d, m), id, d.Get("domain").(string), connector)
+	var obj *model.GatewayPolicy
+	var err error
+	domainName := d.Get("domain").(string)
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.GatewayPolicy](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeGatewayPolicy,
+			model.GatewayPolicyBindingType(),
+			func() (*model.GatewayPolicy, error) {
+				readObj, readErr := getGatewayPolicy(getSessionContext(d, m), id, domainName, connector)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.GatewayPolicy) error {
+				return gatewayPolicyInfraPatch(getSessionContext(d, m), *patchObj, domainName, m)
+			},
+		)
+	} else {
+		readObj, readErr := getGatewayPolicy(getSessionContext(d, m), id, domainName, connector)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
@@ -257,12 +290,15 @@ func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
+	if isConfigScopedCacheMode(m) {
+		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+	}
 
 	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false, withRule)
 	if err != nil {
 		return handleUpdateError("Gateway Policy", id, err)
 	}
-
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 	return resourceNsxtPolicyGatewayPolicyGeneralRead(d, m, withRule)
 }
 
@@ -281,6 +317,7 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
 
 	return nil
 }

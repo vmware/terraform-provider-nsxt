@@ -141,7 +141,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	description := d.Get("description").(string)
 	segmentPath := d.Get("segment_path").(string)
 	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	var ipv6ProfilePaths []string
 	if d.Get("ipv6_ndra_profile_path").(string) != "" {
@@ -186,6 +186,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	d.Set("locale_service_id", localeServiceID)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id(), m)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -200,10 +201,37 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining Tier1 Interface id")
 	}
 
-	var obj model.Tier1Interface
+	var obj *model.Tier1Interface
 	sessionContext := getSessionContext(d, m)
 	client := cliTier1InterfacesClient(sessionContext, connector)
-	obj, err := client.Get(tier1ID, localeServiceID, id)
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.Tier1Interface](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeTier1Interface,
+			model.Tier1InterfaceBindingType(),
+			func() (*model.Tier1Interface, error) {
+				readObj, readErr := client.Get(tier1ID, localeServiceID, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.Tier1Interface) error {
+				return client.Patch(tier1ID, localeServiceID, id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(tier1ID, localeServiceID, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Tier1 Interface", id, err)
 	}
@@ -266,7 +294,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	segmentPath := d.Get("segment_path").(string)
 	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
@@ -307,6 +335,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, d.Id(), m)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -331,6 +360,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTier1Interface, id, m)
 
 	return nil
 }

@@ -42,7 +42,16 @@ func dataSourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{
 		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", query)
 		return err
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "TransitGateway", nil)
+
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if obj, ok := cacheAwareDataSourceReadByID[model.TransitGateway](d, m, connector, objID, resourceTypeTransitGateway, model.TransitGatewayBindingType()); ok {
+		d.Set("is_default", obj.IsDefault)
+		return nil
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "TransitGateway", nil)
 	if err != nil {
 		return err
 	}

@@ -130,7 +130,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.ConnectivityPolicy{
 		DisplayName: &displayName,
@@ -156,7 +156,7 @@ func resourceNsxtPolicyConnectivityPolicyCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, d.Id(), m)
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 
@@ -178,7 +178,35 @@ func resourceNsxtPolicyConnectivityPolicyRead(d *schema.ResourceData, m interfac
 	if pathErr != nil {
 		return pathErr
 	}
-	obj, err := client.Get(parents[0], parents[1], parents[2], id)
+	var obj *model.ConnectivityPolicy
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.ConnectivityPolicy](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeConnectivityPolicy,
+			model.ConnectivityPolicyBindingType(),
+			func() (*model.ConnectivityPolicy, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.ConnectivityPolicy) error {
+				return client.Patch(parents[0], parents[1], parents[2], id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], parents[2], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "ConnectivityPolicy", id, err)
 	}
@@ -190,7 +218,7 @@ func resourceNsxtPolicyConnectivityPolicyRead(d *schema.ResourceData, m interfac
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, connectivityPolicySchema, "", nil)
 }
 
@@ -210,7 +238,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -234,7 +262,7 @@ func resourceNsxtPolicyConnectivityPolicyUpdate(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleUpdateError("ConnectivityPolicy", id, err)
 	}
-
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, d.Id(), m)
 	return resourceNsxtPolicyConnectivityPolicyRead(d, m)
 }
 
@@ -261,6 +289,7 @@ func resourceNsxtPolicyConnectivityPolicyDelete(d *schema.ResourceData, m interf
 	if err != nil {
 		return handleDeleteError("ConnectivityPolicy", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeConnectivityPolicy, id, m)
 
 	return nil
 }

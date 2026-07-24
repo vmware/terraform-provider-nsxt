@@ -708,13 +708,13 @@ func nsxtPolicySegmentAddGatewayToInfraStruct(d *schema.ResourceData, dataValue 
 	return dataValue1.(*data.StructValue), nil
 }
 
-func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d *schema.ResourceData, isVlan bool, isFixed bool) (model.Infra, error) {
+func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) (model.Infra, error) {
 	// Read the rest of the configured parameters
 	var infraChildren []*data.StructValue
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	domainName := d.Get("domain_name").(string)
 	tzPath := d.Get("transport_zone_path").(string)
 	replicationMode := d.Get("replication_mode").(string)
@@ -1351,8 +1351,39 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		gwPath = d.Get("connectivity_path").(string)
 	}
 
-	obj, err := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
-
+	var obj *model.Segment
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.Segment](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeSegment,
+			model.SegmentBindingType(),
+			func() (*model.Segment, error) {
+				readObj, readErr := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.Segment) error {
+				infraStruct, buildErr := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, m, isVlan, isFixed)
+				if buildErr != nil {
+					return buildErr
+				}
+				return policyInfraPatch(getSessionContext(d, m), infraStruct, connector, true)
+			},
+		)
+	} else {
+		readObj, readErr := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Segment", id, err)
 	}
@@ -1448,7 +1479,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 	}
 
 	if !isPolicyGlobalManager(m) {
-		setSegmentBridgeConfigInSchema(d, &obj)
+		setSegmentBridgeConfigInSchema(d, obj)
 	}
 
 	return nil
@@ -1467,7 +1498,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return err
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, m, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
@@ -1479,6 +1510,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id(), m)
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
@@ -1490,7 +1522,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, m, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
@@ -1499,6 +1531,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, d.Id(), m)
 
 	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
@@ -1598,6 +1631,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 		return handleDeleteError("Segment", id, err)
 	}
 	log.Printf("[DEBUG] Success deleting Segment with ID %s", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSegment, id, m)
 
 	return nil
 }

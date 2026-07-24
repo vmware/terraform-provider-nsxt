@@ -39,16 +39,24 @@ func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) 
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC Service Profile data source requires NSX version 9.0.0 or higher")
 	}
+	connector := getPolicyConnector(m)
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.
 	value, defaultOK := d.GetOkExists("is_default")
 	if defaultOK {
 		query := make(map[string]string)
 		query["is_default"] = strconv.FormatBool(value.(bool))
-		_, err := policyDataSourceReadWithCustomField(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", query)
+		_, err := policyDataSourceReadWithCustomField(d, connector, getSessionContext(d, m), "VpcServiceProfile", query)
 		return err
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "VpcServiceProfile", nil)
+
+	objID := d.Get("id").(string)
+	if obj, ok := cacheAwareDataSourceReadByID[model.VpcServiceProfile](d, m, connector, objID, resourceTypeVpcServiceProfile, model.VpcServiceProfileBindingType()); ok {
+		d.Set("is_default", obj.IsDefault)
+		return nil
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "VpcServiceProfile", nil)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyGroup() *schema.Resource {
@@ -24,10 +25,17 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if _, ok := cacheAwareDataSourceReadByID[model.Group](d, m, connector, objID, resourceTypeGroup, model.GroupBindingType()); ok {
+		return nil
+	}
+
 	domain := d.Get("domain").(string)
 	query := make(map[string]string)
 	query["parent_path"] = "*/" + domain
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Group", query)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Group", query)
 	if err != nil {
 		return err
 	}

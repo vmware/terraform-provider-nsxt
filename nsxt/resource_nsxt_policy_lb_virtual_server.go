@@ -1564,7 +1564,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	applicationProfilePath := d.Get("application_profile_path").(string)
 	clientSSLProfileBinding := getPolicyClientSSLBindingFromSchema(d)
@@ -1619,6 +1619,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id(), m)
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }
@@ -1636,7 +1637,35 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error obtaining LBVirtualServer ID")
 	}
 
-	obj, err := client.Get(id)
+	var obj *model.LBVirtualServer
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.LBVirtualServer](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeLBVirtualServer,
+			model.LBVirtualServerBindingType(),
+			func() (*model.LBVirtualServer, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.LBVirtualServer) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBVirtualServer", id, err)
 	}
@@ -1708,7 +1737,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	clientSSLProfileBinding := getPolicyClientSSLBindingFromSchema(d)
@@ -1789,6 +1818,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleUpdateError("LBVirtualServer", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, d.Id(), m)
 
 	return resourceNsxtPolicyLBVirtualServerRead(d, m)
 }
@@ -1811,6 +1841,7 @@ func resourceNsxtPolicyLBVirtualServerDelete(d *schema.ResourceData, m interface
 	if err != nil {
 		return handleDeleteError("LBVirtualServer", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBVirtualServer, id, m)
 
 	return nil
 }
