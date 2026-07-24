@@ -129,6 +129,33 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeRTEPCreate(t *testing.T) {
 		assert.Contains(t, err.Error(), "not found")
 	})
 
+	t.Run("Create_fails_when_SwitchSpec_is_nil", func(t *testing.T) {
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(model.PolicyEdgeTransportNode{}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPolicyRTEPData())
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRTEPCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("Create_fails_when_SwitchName_is_nil", func(t *testing.T) {
+		etn := model.PolicyEdgeTransportNode{
+			SwitchSpec: &model.PolicyEdgeTransportNodeSwitchSpec{
+				Switches: []model.PolicyEdgeTransportNodeSwitch{
+					{SwitchName: nil},
+				},
+			},
+		}
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(etn, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPolicyRTEPData())
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRTEPCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
 	t.Run("Create_fails_when_Get_returns_error", func(t *testing.T) {
 		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(model.PolicyEdgeTransportNode{}, vapiErrors.InternalServerError{})
 
@@ -176,6 +203,37 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeRTEPRead(t *testing.T) {
 
 	t.Run("Read_fails_when_no_RTEP_on_switch", func(t *testing.T) {
 		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(policyETNWithSwitch(rtepPolicySwitchName, false), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"edge_transport_node_path": rtepPolicyETNPath,
+			"host_switch_name":         rtepPolicySwitchName,
+		})
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRTEPRead(d, m)
+		require.Error(t, err)
+	})
+
+	t.Run("Read_fails_when_SwitchSpec_is_nil", func(t *testing.T) {
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(model.PolicyEdgeTransportNode{}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"edge_transport_node_path": rtepPolicyETNPath,
+			"host_switch_name":         rtepPolicySwitchName,
+		})
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRTEPRead(d, m)
+		require.Error(t, err)
+	})
+
+	t.Run("Read_fails_when_SwitchName_is_nil", func(t *testing.T) {
+		etn := model.PolicyEdgeTransportNode{
+			SwitchSpec: &model.PolicyEdgeTransportNodeSwitchSpec{
+				Switches: []model.PolicyEdgeTransportNodeSwitch{
+					{SwitchName: nil},
+				},
+			},
+		}
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(etn, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"edge_transport_node_path": rtepPolicyETNPath,

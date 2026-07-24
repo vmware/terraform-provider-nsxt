@@ -73,9 +73,9 @@ func setNsxtPolicyEdgeTransportNodeRTEP(d *schema.ResourceData, m interface{}, o
 	hswName := d.Get("host_switch_name").(string)
 	found := false
 
-	for i, hsw := range obj.SwitchSpec.Switches {
-		if *hsw.SwitchName == hswName {
-			{
+	if obj.SwitchSpec != nil {
+		for i, hsw := range obj.SwitchSpec.Switches {
+			if hsw.SwitchName != nil && *hsw.SwitchName == hswName {
 				found = true
 				if len(hsw.RemoteTunnelEndpoint) > 0 && op == "create" {
 					return fmt.Errorf("remote tunnel endpoint for Edge transport node %s already exists", tnPath)
@@ -146,9 +146,9 @@ func resourceNsxtPolicyEdgeTransportNodeRTEPRead(d *schema.ResourceData, m inter
 
 	hswName := d.Get("host_switch_name").(string)
 
-	for _, hsw := range obj.SwitchSpec.Switches {
-		if *hsw.SwitchName == hswName {
-			{
+	if obj.SwitchSpec != nil {
+		for _, hsw := range obj.SwitchSpec.Switches {
+			if hsw.SwitchName != nil && *hsw.SwitchName == hswName {
 				if len(hsw.RemoteTunnelEndpoint) == 0 {
 					return errors.NotFound{}
 				}
