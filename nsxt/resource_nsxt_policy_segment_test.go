@@ -59,6 +59,44 @@ func TestAccResourceNsxtPolicySegment_basicImport_multitenancy(t *testing.T) {
 	})
 }
 
+// Regression test: advanced_config must survive a terraform import.
+// The Read function used to only write advanced_config back into state when
+// the local config already had a non-empty value, so a fresh import (which
+// starts with no local config) could never populate it. ImportStateVerify
+// below fails if the imported state doesn't exactly match the pre-import
+// state, so this would have caught that regression.
+func TestAccResourceNsxtPolicySegment_advancedConfigImport(t *testing.T) {
+	name := getAccTestResourceName()
+	tzName := getOverlayTransportZoneName()
+	testResourceName := "nsxt_policy_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentAdvancedConfigImportTemplate(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.multicast", "false"),
+				),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -240,7 +278,7 @@ func testAccResourceNsxtPolicySegmentNoTransportZone(t *testing.T, withContext b
 					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 				),
 			},
 			{
@@ -255,7 +293,7 @@ func testAccResourceNsxtPolicySegmentNoTransportZone(t *testing.T, withContext b
 					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 				),
 			},
 		},
@@ -616,6 +654,28 @@ resource "nsxt_policy_segment" "test" {
   }
 }
 `, context, name, tzSetting)
+}
+
+func testAccNsxtPolicySegmentAdvancedConfigImportTemplate(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  description          = "Acceptance Test"
+  connectivity_path    = nsxt_policy_tier1_gateway.tier1ForSegments.path
+  transport_zone_path  = data.nsxt_policy_transport_zone.test.path
+
+  subnet {
+    cidr = "12.12.2.1/24"
+  }
+
+  advanced_config {
+    connectivity = "ON"
+    local_egress = false
+    urpf_mode    = "NONE"
+    multicast    = false
+  }
+}
+`, name)
 }
 
 func testAccNsxtPolicySegmentBasicTemplate(tzName string, name string) string {
