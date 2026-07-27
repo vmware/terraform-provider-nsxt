@@ -79,16 +79,29 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic_globalManager
 	})
 }
 
+// testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic provisions its
+// own Security Policy via nsxt_policy_parent_security_policy rather than
+// relying on a built-in default policy already existing: NSX does not
+// consistently auto-realize default category policies under GM domains
+// across versions (e.g. a fresh NSX 4.2.x Global Manager may have none at
+// all), so a self-created policy is the only environment-independent target.
+//
+// The predefined_security_policy block intentionally leaves description/tag
+// unset: those fields are also owned by nsxt_policy_parent_security_policy on
+// the same underlying object, and patching them here would fight the parent
+// resource for ownership and show up as drift on its own plan.
 func testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t *testing.T, preCheck func()) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
+	name := getAccTestResourceName()
 
-	// NOTE: This test cannot be parallel, as it modifies the same default policy
+	// NOTE: This test cannot be parallel, as sibling tests in this file modify
+	// the same default policy and are not parallel either.
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic("import test", "", false),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyImportBasicConfig(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -98,6 +111,19 @@ func testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t *testing.T, 
 			},
 		},
 	})
+}
+
+func testAccNsxtPolicyPredefinedSecurityPolicyImportBasicConfig(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_parent_security_policy" "parent" {
+  display_name = "%s"
+  domain       = "default"
+  category     = "Application"
+}
+
+resource "nsxt_policy_predefined_security_policy" "test" {
+  path = nsxt_policy_parent_security_policy.parent.path
+}`, name)
 }
 
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T) {

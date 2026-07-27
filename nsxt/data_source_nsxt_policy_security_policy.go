@@ -44,7 +44,6 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 	}
 }
 
-// Local Manager Only
 func listSecurityPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.SecurityPolicy, error) {
 	client := cliSecurityPoliciesClient(context, connector)
 	if client == nil {
@@ -80,12 +79,12 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	category := d.Get("category").(string)
 	domain := d.Get("domain").(string)
 	isDefault := d.Get("is_default").(bool)
+	context := getSessionContext(d, m)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
 
 	var obj model.SecurityPolicy
-	context := getSessionContext(d, m)
 	if objID != "" {
 		// Get by id
 		client := cliSecurityPoliciesClient(context, connector)
