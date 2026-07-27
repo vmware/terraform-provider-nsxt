@@ -358,6 +358,24 @@ func getPolicyGatewayPolicySchema(isVPC bool, withRule bool) map[string]*schema.
 	return secPolicy
 }
 
+// markParentPolicySharedFieldsComputed marks description/tag as Computed for
+// the nsxt_policy_parent_security_policy / nsxt_policy_parent_gateway_policy
+// resources. Those resources are commonly paired with a
+// nsxt_policy_predefined_security_policy / nsxt_policy_predefined_gateway_policy
+// resource pointed at the same underlying object via path, and that sibling
+// resource can PATCH description/tag independently. Without Computed, leaving
+// description/tag unset on the parent resource's own config causes its Read
+// to pick up the sibling's values and show them as spurious drift on the next
+// plan, since the parent's plan otherwise expects an unset field to mean
+// "empty". This does not affect resources where description/tag are declared
+// in the parent resource's own config, since an explicit value still takes
+// precedence over Computed.
+func markParentPolicySharedFieldsComputed(s map[string]*schema.Schema) map[string]*schema.Schema {
+	s["description"].Computed = true
+	s["tag"].Computed = true
+	return s
+}
+
 func getPolicyServiceEntrySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"icmp_entry":        getIcmpEntrySchema(),

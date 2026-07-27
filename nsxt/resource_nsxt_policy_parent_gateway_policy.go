@@ -16,7 +16,7 @@ func resourceNsxtPolicyParentGatewayPolicy() *schema.Resource {
 			State: nsxtDomainResourceImporter,
 		},
 
-		Schema: getPolicyGatewayPolicySchema(false, false),
+		Schema: markParentPolicySharedFieldsComputed(getPolicyGatewayPolicySchema(false, false)),
 	}
 }
 
