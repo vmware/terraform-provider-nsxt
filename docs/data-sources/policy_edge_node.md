@@ -30,9 +30,18 @@ data "nsxt_policy_edge_node" "node1" {
 * `display_name` - (Optional) The Display Name prefix of the edge node to retrieve.
 * `member_index` - (Optional) Member index of the node in edge cluster.
 
+~> **NOTE:** `id` behaves inconsistently on this data source. As an input, it is used to locate the edge
+node. However, once the edge node is found, NSX reports back an `id` that is actually the node's
+`member_index` within the edge cluster rather than a stable, globally unique identifier. If you set `id`
+to look up a specific edge node, do not rely on the resulting `id` attribute value for anything other
+than the lookup - use `path`, `unique_id` or `realization_id` instead to reference this resource
+unambiguously elsewhere in your configuration.
+
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
+* `unique_id` - A unique identifier assigned by the system for this edge node.
+* `realization_id` - The ID used to realize this edge node.
