@@ -473,6 +473,13 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				Default:      model.PolicyEdgeTransportNode_FORM_FACTOR_MEDIUM,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(policyEdgeNodeFormFactorValues, false),
+				// form_factor conflicts with node_id, so it can never be set in
+				// config for an adopted (pre-existing) node. Without this, the
+				// schema Default would still apply and perpetually plan to force
+				// the adopted node's real form factor back to the default value.
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("node_id").(string) != ""
+				},
 			},
 			"hostname": {
 				Type:        schema.TypeString,
@@ -1584,6 +1591,12 @@ func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface
 		return handleReadError(d, "EdgeTransportNode", id, err)
 	}
 
+	// advanced_configuration, credentials and management_interface all
+	// conflict with node_id, so an adopted (pre-existing) node's config never
+	// declares them. Populating them from the API anyway would show up as
+	// permanent, spurious drift wanting to null them back out on every plan.
+	adopted := d.Get("node_id").(string) != ""
+
 	d.Set("site_path", sitePath)
 	d.Set("enforcement_point", epID)
 	d.Set("display_name", obj.DisplayName)
@@ -1592,23 +1605,27 @@ func resourceNsxtPolicyEdgeTransportNodeRead(d *schema.ResourceData, m interface
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	d.Set("advanced_configuration", setPolicyKeyValueListForSchema(obj.AdvancedConfiguration))
+	if !adopted {
+		d.Set("advanced_configuration", setPolicyKeyValueListForSchema(obj.AdvancedConfiguration))
+	}
 
 	err = setApplianceConfigInSchema(d, obj.ApplianceConfig)
 	if err != nil {
 		return handleReadError(d, "EdgeTransportNode", id, err)
 	}
 
-	err = setCredentialsInSchema(d, obj.Credentials)
-	if err != nil {
-		return handleReadError(d, "EdgeTransportNode", id, err)
+	if !adopted {
+		err = setCredentialsInSchema(d, obj.Credentials)
+		if err != nil {
+			return handleReadError(d, "EdgeTransportNode", id, err)
+		}
 	}
 
 	d.Set("failure_domain_path", obj.FailureDomainPath)
 	d.Set("form_factor", obj.FormFactor)
 	d.Set("hostname", obj.Hostname)
 
-	if obj.ManagementInterface != nil {
+	if !adopted && obj.ManagementInterface != nil {
 		mgtInterface := make(map[string]interface{})
 		mgtInterface["ip_assignment"], err = setPolicyIPAssignmentsInSchema(obj.ManagementInterface.IpAssignmentSpecs)
 		if err != nil {
@@ -1722,7 +1739,18 @@ func resourceNsxtPolicyEdgeTransportNodeUpdate(d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] Updating PolicyEdgeTransportNode with ID %s", id)
-	err = policyEdgeTransportNodePatch(siteID, epID, id, d, m)
+	if d.Get("node_id").(string) != "" {
+		// This node was adopted via node_id: management_interface, credentials,
+		// form_factor, vm_deployment_config and advanced_configuration all
+		// conflict with node_id and are never present in config, so building
+		// the request body from config alone (policyEdgeTransportNodePatch)
+		// would send an empty management_interface, which NSX rejects as
+		// missing required fields. Use the same GET-then-merge patch Create
+		// uses for adoption instead.
+		err = policyEdgeTransportNodePredeployedPatch(siteID, epID, id, d, m)
+	} else {
+		err = policyEdgeTransportNodePatch(siteID, epID, id, d, m)
+	}
 	if err != nil {
 		return handleUpdateError("PolicyEdgeTransportNode", id, err)
 	}

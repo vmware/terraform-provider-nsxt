@@ -180,6 +180,19 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeCreate(t *testing.T) {
 	})
 }
 
+// policyETNAdoptedAPIResponse mirrors policyETNAPIResponse but also
+// populates fields that conflict with node_id (credentials,
+// management_interface), simulating what NSX reports for a pre-existing
+// (adopted) edge node.
+func policyETNAdoptedAPIResponse() model.PolicyEdgeTransportNode {
+	obj := policyETNAPIResponse()
+	cliUsername := "admin"
+	obj.Credentials = &model.PolicyEdgeTransportNodeCredential{CliUsername: &cliUsername}
+	networkID := "some-network-id"
+	obj.ManagementInterface = &model.PolicyEdgeTransportManagementInterface{NetworkId: &networkID}
+	return obj
+}
+
 func TestMockResourceNsxtPolicyEdgeTransportNodeRead(t *testing.T) {
 	util.NsxVersion = "3.2.0"
 	defer func() { util.NsxVersion = "" }()
@@ -216,6 +229,28 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, policyETNName, d.Get("display_name"))
 		assert.Equal(t, policyETNHostname, d.Get("hostname"))
+	})
+
+	// Bugzilla 3762385: an adopted (node_id) node's config can never declare
+	// credentials or management_interface (they ConflictsWith node_id), so
+	// Read must not populate them even when NSX reports real values for
+	// them - otherwise every plan shows spurious drift wanting to remove them.
+	t.Run("Read_skips_conflicting_fields_for_adopted_node", func(t *testing.T) {
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(policyETNAdoptedAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_id":           policyETNID,
+			"site_path":         policyETNSitePath,
+			"enforcement_point": policyETNEPID,
+			"hostname":          policyETNHostname,
+			"switch":            minimalPolicyETNSwitchData(),
+		})
+		d.SetId(policyETNID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRead(d, m)
+		require.NoError(t, err)
+		assert.Empty(t, d.Get("credentials").([]interface{}), "credentials must stay unset for an adopted node")
+		assert.Empty(t, d.Get("management_interface").([]interface{}), "management_interface must stay unset for an adopted node")
 	})
 
 	t.Run("Read_clears_id_when_not_found", func(t *testing.T) {
@@ -262,6 +297,31 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeUpdate(t *testing.T) {
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"display_name":      policyETNName,
+			"hostname":          policyETNHostname,
+			"site_path":         policyETNSitePath,
+			"enforcement_point": policyETNEPID,
+			"switch":            minimalPolicyETNSwitchData(),
+		})
+		d.SetId(policyETNID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeUpdate(d, m)
+		require.NoError(t, err)
+	})
+
+	// Bugzilla 3762385: updating an adopted (node_id) node must go through
+	// the GET-then-merge patch (like Create does for adoption), not the
+	// build-from-config patch, since config can never carry
+	// management_interface/credentials/form_factor for such a node - sending
+	// them empty makes NSX reject the request as missing required fields.
+	t.Run("Update_adopted_node_merges_via_predeployed_patch", func(t *testing.T) {
+		gomock.InOrder(
+			mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(policyETNAdoptedAPIResponse(), nil),
+			mockETNSDK.EXPECT().Patch(policyETNSiteID, policyETNEPID, policyETNID, gomock.Any()).Return(nil),
+		)
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(policyETNAdoptedAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_id":           policyETNID,
 			"hostname":          policyETNHostname,
 			"site_path":         policyETNSitePath,
 			"enforcement_point": policyETNEPID,
