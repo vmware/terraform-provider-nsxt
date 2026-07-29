@@ -27,6 +27,8 @@ func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttr(testResourceName, "member_index", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "unique_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "realization_id"),
 				),
 			},
 		},
