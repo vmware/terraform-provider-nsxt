@@ -81,7 +81,12 @@ Quotas and Constraints:
 * `resource/nsxt_policy_constraint` ([#1583](https://github.com/vmware/terraform-provider-nsxt/pull/1583))
 * `resource/nsxt_policy_ip_block_quota` ([#1590](https://github.com/vmware/terraform-provider-nsxt/pull/1590))
 
-## 3.11.1 (April 21, 2026)
+Data Source Extensions:
+
+* `data/nsxt_policy_segment`: Export `transport_zone_path`, `connectivity_path`, `vlan_ids` and `subnet` attributes
+* `data/nsxt_policy_tier1_gateway`: Support lookup by `path`, enabling chaining from `nsxt_policy_segment.connectivity_path`
+
+## 3.11.1 (April 21, 2025)
 
 BUG FIXES:
 * `data/nsxt_policy_groups`: Fix infinite loop when duplicate display names exist ([#1935](https://github.com/vmware/terraform-provider-nsxt/pull/1935))
