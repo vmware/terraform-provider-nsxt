@@ -25,6 +25,13 @@ const (
 	idpsCustomSignatureVersionsPathPrefix = "/infra/settings/firewall/security/intrusion-services/custom-signature-versions"
 )
 
+var cliIdsCustomSignaturesClient = func(connector client.Connector) custom_signature_versions.CustomSignaturesClient {
+	return custom_signature_versions.NewCustomSignaturesClient(connector)
+}
+var cliIdsCustomSignatureVersionsClient = func(connector client.Connector) intrusion_services.CustomSignatureVersionsClient {
+	return intrusion_services.NewCustomSignatureVersionsClient(connector)
+}
+
 func resourceNsxtPolicyIdpsCustomSignature() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIdpsCustomSignatureCreate,
@@ -165,7 +172,7 @@ func resourceNsxtPolicyIdpsCustomSignatureExists(connector client.Connector, id 
 	if err != nil {
 		return false, err
 	}
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	_, err = customSigsClient.Get(versionID, sigID)
 	if err == nil {
 		return true, nil
@@ -190,7 +197,7 @@ func resourceNsxtPolicyIdpsCustomSignatureCreate(d *schema.ResourceData, m inter
 	}
 
 	// Add raw signature via CustomSignatureVersions API
-	versionsClient := intrusion_services.NewCustomSignatureVersionsClient(connector)
+	versionsClient := cliIdsCustomSignatureVersionsClient(connector)
 	signatures := []string{signature}
 	rawSigs := model.IdsRawSignatures{
 		Signatures: signatures,
@@ -201,7 +208,7 @@ func resourceNsxtPolicyIdpsCustomSignatureCreate(d *schema.ResourceData, m inter
 	}
 
 	// List custom signatures (include preview to see newly added) to find the one we just added
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	includePreview := custom_signature_versions.CustomSignatures_LIST_INCLUDE_PREVIEW_CUSTOM_SIGNATURES
 	pageSize := int64(1000)
 	listResult, err := customSigsClient.List(versionID, nil, &includePreview, nil, nil, &pageSize, nil, nil)
@@ -236,14 +243,14 @@ func resourceNsxtPolicyIdpsCustomSignatureCreate(d *schema.ResourceData, m inter
 	if d.Get("publish").(bool) {
 		if err := idpsCustomSignatureValidateAndPublish(connector, versionID); err != nil {
 			// Some backends reject VALIDATE (empty) right after ADD; try Publish only
-			versionsClient := intrusion_services.NewCustomSignatureVersionsClient(connector)
+			versionsClient := cliIdsCustomSignatureVersionsClient(connector)
 			versionObj, verr := versionsClient.Get(versionID)
 			if verr == nil {
 				payload := model.CustomSignatureValidationPayload{}
 				if versionObj.Revision != nil {
 					payload.Revision = versionObj.Revision
 				}
-				if pubErr := custom_signature_versions.NewCustomSignaturesClient(connector).Create(versionID, payload, idpsCustomSignatureActionPublish); pubErr == nil {
+				if pubErr := cliIdsCustomSignaturesClient(connector).Create(versionID, payload, idpsCustomSignatureActionPublish); pubErr == nil {
 					// Publish-only succeeded
 				} else {
 					return fmt.Errorf("failed to validate/publish after create: %w", err)
@@ -263,7 +270,7 @@ func resourceNsxtPolicyIdpsCustomSignatureCreate(d *schema.ResourceData, m inter
 }
 
 func idpsCustomSignatureValidate(connector client.Connector, versionID string) error {
-	versionObj, err := intrusion_services.NewCustomSignatureVersionsClient(connector).Get(versionID)
+	versionObj, err := cliIdsCustomSignatureVersionsClient(connector).Get(versionID)
 	if err != nil {
 		return err
 	}
@@ -271,7 +278,7 @@ func idpsCustomSignatureValidate(connector client.Connector, versionID string) e
 	if versionObj.Revision != nil {
 		payload.Revision = versionObj.Revision
 	}
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	return customSigsClient.Create(versionID, payload, idpsCustomSignatureActionValidate)
 }
 
@@ -279,7 +286,7 @@ func idpsCustomSignatureValidateAndPublish(connector client.Connector, versionID
 	if err := idpsCustomSignatureValidate(connector, versionID); err != nil {
 		return err
 	}
-	versionObj, err := intrusion_services.NewCustomSignatureVersionsClient(connector).Get(versionID)
+	versionObj, err := cliIdsCustomSignatureVersionsClient(connector).Get(versionID)
 	if err != nil {
 		return err
 	}
@@ -287,7 +294,7 @@ func idpsCustomSignatureValidateAndPublish(connector client.Connector, versionID
 	if versionObj.Revision != nil {
 		payload.Revision = versionObj.Revision
 	}
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	return customSigsClient.Create(versionID, payload, idpsCustomSignatureActionPublish)
 }
 
@@ -305,7 +312,7 @@ func resourceNsxtPolicyIdpsCustomSignatureRead(d *schema.ResourceData, m interfa
 		d.SetId("default/" + d.Id())
 	}
 
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	obj, err := customSigsClient.Get(versionID, sigID)
 	if err != nil {
 		if isNotFoundError(err) {
@@ -388,7 +395,7 @@ func idpsCustomSignaturePathSegment(sig *model.IdsCustomSignature) string {
 // When expectedSignature is non-empty, returns the last match (in list order) with that OriginalSignature to prefer the correct one when
 // multiple signatures share the same path segment (e.g. preview vs published). When expectedSignature is empty, returns the first match by sigID.
 func idpsCustomSignatureFindByIDAndContent(connector client.Connector, versionID, sigID, expectedSignature string) *model.IdsCustomSignature {
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	pageSize := int64(1000)
 	matchByContent := expectedSignature != ""
 	expectedTrim := strings.TrimSpace(expectedSignature)
@@ -434,8 +441,8 @@ func resourceNsxtPolicyIdpsCustomSignatureUpdate(d *schema.ResourceData, m inter
 		d.SetId("default/" + d.Id())
 	}
 
-	versionsClient := intrusion_services.NewCustomSignatureVersionsClient(connector)
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	versionsClient := cliIdsCustomSignatureVersionsClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	versionObj, err := versionsClient.Get(versionID)
 	if err != nil {
 		return handleReadError(d, "IdsCustomSignatureVersion", versionID, err)
@@ -482,8 +489,8 @@ func resourceNsxtPolicyIdpsCustomSignatureDelete(d *schema.ResourceData, m inter
 		d.SetId("default/" + d.Id())
 	}
 
-	versionsClient := intrusion_services.NewCustomSignatureVersionsClient(connector)
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	versionsClient := cliIdsCustomSignatureVersionsClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	versionObj, err := versionsClient.Get(versionID)
 	if err != nil {
 		return handleReadError(d, "IdsCustomSignatureVersion", versionID, err)
@@ -604,7 +611,7 @@ func resourceNsxtPolicyIdpsCustomSignatureDelete(d *schema.ResourceData, m inter
 
 // idpsCustomSignatureCountPreview returns the number of custom signatures in preview (unpublished) for the version.
 func idpsCustomSignatureCountPreview(connector client.Connector, versionID string) int {
-	client := custom_signature_versions.NewCustomSignaturesClient(connector)
+	client := cliIdsCustomSignaturesClient(connector)
 	include := custom_signature_versions.CustomSignatures_LIST_INCLUDE_PREVIEW_CUSTOM_SIGNATURES
 	pageSize := int64(1000)
 	listResult, err := client.List(versionID, nil, &include, nil, nil, &pageSize, nil, nil)
@@ -620,7 +627,7 @@ func idpsCustomSignatureCountPreview(connector client.Connector, versionID strin
 // ResourceNsxtPolicyIdpsCustomSignatureExistsByContent returns true if any custom signature in the version
 // has OriginalSignature containing contentSubstring. Used by acceptance tests to verify delete (no signature with that content).
 func ResourceNsxtPolicyIdpsCustomSignatureExistsByContent(connector client.Connector, versionID, contentSubstring string) (bool, error) {
-	customSigsClient := custom_signature_versions.NewCustomSignaturesClient(connector)
+	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	pageSize := int64(1000)
 	for _, include := range []*string{
 		ptr(custom_signature_versions.CustomSignatures_LIST_INCLUDE_PREVIEW_CUSTOM_SIGNATURES),

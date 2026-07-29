@@ -35,7 +35,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-var cliLicensesClient = nsx.NewLicensesClient
+var cliLicensesClient = func(connector client.Connector) nsx.LicensesClient {
+	return nsx.NewLicensesClient(connector)
+}
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 

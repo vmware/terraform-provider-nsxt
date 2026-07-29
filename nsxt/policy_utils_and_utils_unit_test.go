@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -254,4 +255,106 @@ func TestUnitNsxt_setKeyValueListForSchema(t *testing.T) {
 		{Key: &ka2, Value: &vb2},
 	}).([]interface{})
 	require.Len(t, out, 1)
+}
+
+func TestUnitNsxt_getStringValue(t *testing.T) {
+	assert.Equal(t, "", getStringValue(nil))
+	s := "hello"
+	assert.Equal(t, "hello", getStringValue(&s))
+}
+
+func TestUnitNsxt_getInt64Value(t *testing.T) {
+	assert.EqualValues(t, 0, getInt64Value(nil))
+	v := int64(42)
+	assert.EqualValues(t, 42, getInt64Value(&v))
+}
+
+func TestUnitNsxt_interface2Int64List(t *testing.T) {
+	out := interface2Int64List([]interface{}{1, 2, "not-an-int", 3})
+	assert.Equal(t, []int64{1, 2, 3}, out)
+	assert.Empty(t, interface2Int64List(nil))
+}
+
+func TestUnitNsxt_int64List2Interface(t *testing.T) {
+	out := int64List2Interface([]int64{1, 2, 3})
+	assert.Equal(t, []interface{}{1, 2, 3}, out)
+}
+
+func TestUnitNsxt_resourceKeyValueHash(t *testing.T) {
+	// Only single-key maps are compared for equality: with multiple keys, Go's
+	// randomized map iteration order feeds resourceKeyValueHash's buffer in a
+	// different sequence on each call, so even equal-content maps can hash
+	// differently. That's an existing quirk of the hash function, not something
+	// under test here.
+	h1 := resourceKeyValueHash(map[string]interface{}{"a": "1"})
+	h2 := resourceKeyValueHash(map[string]interface{}{"a": "1"})
+	h3 := resourceKeyValueHash(map[string]interface{}{"a": "2"})
+	assert.Equal(t, h1, h2)
+	assert.NotEqual(t, h1, h3)
+	assert.GreaterOrEqual(t, resourceKeyValueHash(nil), 0)
+}
+
+func TestUnitNsxt_resourceNotSupportedError(t *testing.T) {
+	err := resourceNotSupportedError()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not supported")
+}
+
+func TestUnitNsxt_dataSourceNotSupportedError(t *testing.T) {
+	err := dataSourceNotSupportedError()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not supported")
+}
+
+func TestUnitNsxt_handlePagination(t *testing.T) {
+	t.Run("empty list returns zero total with no error", func(t *testing.T) {
+		calls := 0
+		total, err := handlePagination(func(info *paginationInfo) error {
+			calls++
+			info.TotalCount = 0
+			return nil
+		})
+		require.NoError(t, err)
+		assert.EqualValues(t, 0, total)
+		assert.Equal(t, 1, calls)
+	})
+
+	t.Run("paginates across multiple pages until count reaches total", func(t *testing.T) {
+		calls := 0
+		total, err := handlePagination(func(info *paginationInfo) error {
+			calls++
+			info.TotalCount = 5
+			info.PageCount = 2
+			info.Cursor = "next"
+			return nil
+		})
+		require.NoError(t, err)
+		assert.EqualValues(t, 5, total)
+		assert.Equal(t, 3, calls)
+	})
+
+	t.Run("lister error is propagated", func(t *testing.T) {
+		_, err := handlePagination(func(info *paginationInfo) error {
+			return errors.New("lister failed")
+		})
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_attributeRequiredGlobalManagerError(t *testing.T) {
+	err := attributeRequiredGlobalManagerError("attr", "resource")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "attr")
+	assert.Contains(t, err.Error(), "resource")
+}
+
+func TestUnitNsxt_getSitePathFromEdgePath(t *testing.T) {
+	edgePath := "/global-infra/sites/site1/enforcement-points/default/edge-clusters/ec1"
+	assert.Equal(t, "/global-infra/sites/site1", getSitePathFromEdgePath(edgePath))
+}
+
+func TestUnitNsxt_ptr(t *testing.T) {
+	p := ptr("value")
+	require.NotNil(t, p)
+	assert.Equal(t, "value", *p)
 }
