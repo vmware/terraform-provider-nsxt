@@ -25,7 +25,7 @@ func resourceNsxtPolicyTransitGatewayBfdPeer() *schema.Resource {
 		Update: resourceNsxtPolicyTransitGatewayBfdPeerUpdate,
 		Delete: resourceNsxtPolicyTransitGatewayBfdPeerDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtTGWRoutingChildResourceImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),

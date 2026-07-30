@@ -25,7 +25,7 @@ func resourceNsxtPolicyTransitGatewayRouteMap() *schema.Resource {
 		Update: resourceNsxtPolicyTransitGatewayRouteMapUpdate,
 		Delete: resourceNsxtPolicyTransitGatewayRouteMapDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtTGWRoutingChildResourceImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),

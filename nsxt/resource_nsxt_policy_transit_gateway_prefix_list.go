@@ -26,7 +26,7 @@ func resourceNsxtPolicyTransitGatewayPrefixList() *schema.Resource {
 		Update: resourceNsxtPolicyTransitGatewayPrefixListUpdate,
 		Delete: resourceNsxtPolicyTransitGatewayPrefixListDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtTGWRoutingChildResourceImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),

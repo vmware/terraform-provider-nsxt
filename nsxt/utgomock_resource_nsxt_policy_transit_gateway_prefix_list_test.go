@@ -220,6 +220,50 @@ func TestMockResourceNsxtPolicyTransitGatewayPrefixListDelete(t *testing.T) {
 	})
 }
 
+// TestMockResourceNsxtPolicyTransitGatewayPrefixListCreateNsxIDProjectContext verifies that
+// when nsx_id is set and parent_path contains a project path, the existence check inside
+// getOrGenerateIDWithParent uses a Multitenancy context derived from parent_path rather than
+// a Local context derived from the (absent) schema context block. Regression test for BZ#3713681.
+func TestMockResourceNsxtPolicyTransitGatewayPrefixListCreateNsxIDProjectContext(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSDK := tgwmocks.NewMockPrefixListsClient(ctrl)
+	mockWrapper := &tgwrouting.TGWPrefixListClientContext{
+		Client:     mockSDK,
+		ClientType: utl.Multitenancy,
+		ProjectID:  tgwPLProjectID,
+	}
+
+	// Context-sensitive factory: returns nil for non-Multitenancy contexts, mirroring
+	// the real NewPrefixListsClient behaviour. Before the fix, getOrGenerateIDWithParent
+	// derived a Local context (ignoring parent_path), causing a nil client and
+	// "unsupported client type" error.
+	original := cliTGWPrefixListsClient
+	cliTGWPrefixListsClient = func(ctx utl.SessionContext, _ vapiProtocolClient.Connector) *tgwrouting.TGWPrefixListClientContext {
+		if ctx.ClientType != utl.Multitenancy {
+			return nil
+		}
+		return mockWrapper
+	}
+	defer func() { cliTGWPrefixListsClient = original }()
+
+	notFoundErr := vapiErrors.NotFound{}
+	gomock.InOrder(
+		mockSDK.EXPECT().Get(tgwPLOrgID, tgwPLProjectID, tgwPLTGWID, tgwPLID).Return(nsxModel.PrefixList{}, notFoundErr),
+		mockSDK.EXPECT().Patch(tgwPLOrgID, tgwPLProjectID, tgwPLTGWID, tgwPLID, gomock.Any()).Return(nil),
+		mockSDK.EXPECT().Get(tgwPLOrgID, tgwPLProjectID, tgwPLTGWID, tgwPLID).Return(tgwPrefixListAPIResponse(), nil),
+	)
+
+	res := resourceNsxtPolicyTransitGatewayPrefixList()
+	d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWPrefixListData())
+
+	err := resourceNsxtPolicyTransitGatewayPrefixListCreate(d, newGoMockProviderClient())
+	require.NoError(t, err)
+	assert.Equal(t, tgwPLID, d.Id())
+	assert.Equal(t, tgwPLDisplayName, d.Get("display_name"))
+}
+
 func TestMockResourceNsxtPolicyTransitGatewayPrefixListMultiplePrefixes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
