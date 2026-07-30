@@ -273,6 +273,14 @@ func getPolicyBGPConfigSchema() map[string]*schema.Schema {
 	}
 }
 
+// policyBGPConfigSchemaDefault returns the Default declared in getPolicyBGPConfigSchema
+// for the given field, so a read-path fallback (used when NSX hasn't returned a value
+// for that field yet) stays in sync with the schema's own declaration instead of
+// asserting a second, independent literal.
+func policyBGPConfigSchemaDefault(field string) interface{} {
+	return getPolicyBGPConfigSchema()[field].Default
+}
+
 func getVRFRouteSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,

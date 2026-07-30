@@ -319,6 +319,64 @@ func TestAccResourceNsxtPolicyTransitGateway_withBgpConfig(t *testing.T) {
 	})
 }
 
+// TestAccResourceNsxtPolicyTransitGateway_redistributionConfigWithoutBgpConfig guards
+// against BZ#3742235: NSX auto-populates a default BgpRoutingConfig (including a
+// redistribution rule and graceful-restart fields the provider never sent) as soon as
+// the TGW realizes on the edge, even when bgp_config/advanced_config/redistribution_config
+// were never configured in Terraform. Configuring redistribution_config alone, without
+// ever touching bgp_config, must not resend that cached bgp_config back to NSX - it
+// previously triggered "Field level validation errors: ... has violated the minimum
+// valid value 1" on the graceful restart timers.
+func TestAccResourceNsxtPolicyTransitGateway_redistributionConfigWithoutBgpConfig(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				// Step 1: create with centralized_config only, matching the original
+				// bug report (no bgp_config/advanced_config/redistribution_config at
+				// all), and let the TGW realize before changing anything.
+				Config: testAccNsxtPolicyTransitGatewayBgpConfigBaseTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+				),
+			},
+			{
+				// Step 2: configure redistribution_config alone, still without
+				// bgp_config. This is a genuine change to redistribution_config only,
+				// exercising the Update path that used to resend the whole cached
+				// BgpRoutingConfig - including a graceful restart timer for a
+				// bgp_config the user never configured - alongside it.
+				Config: testAccNsxtPolicyTransitGatewayRedistributionOnlyTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "centralized_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.0", "TGW_STATIC_ROUTE"),
+				),
+			},
+			{
+				// Step 3: re-apply the same config to confirm a no-op refresh doesn't
+				// drift or error, matching the original CIBot idempotency check.
+				Config:   testAccNsxtPolicyTransitGatewayRedistributionOnlyTemplate(),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_transit_gateway.test"
@@ -621,6 +679,38 @@ resource "nsxt_policy_transit_gateway" "test" {
   }
 }`, attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
 		localAsNum, ecmp, gracefulRestartTimer, gracefulStaleTimer)
+}
+
+// testAccNsxtPolicyTransitGatewayRedistributionOnlyTemplate configures
+// redistribution_config without ever configuring bgp_config or advanced_config.
+// Deliberately uses TGW_STATIC_ROUTE rather than PUBLIC: NSX auto-populates a
+// default redistribution rule of ["PUBLIC"] on TGW creation, so using that same
+// type here would produce no diff/HasChange at all and never exercise the
+// Update path this test is meant to guard.
+func testAccNsxtPolicyTransitGatewayRedistributionOnlyTemplate() string {
+	return testAccNsxtPolicyTransitGatewayWithCentralizedConfigPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+
+  display_name    = "%s"
+  description     = "%s"
+  transit_subnets = ["%s"]
+
+  centralized_config {
+    ha_mode            = "ACTIVE_ACTIVE"
+    edge_cluster_paths = [data.nsxt_policy_edge_cluster.test.path]
+  }
+
+  redistribution_config {
+    rule {
+      types = ["TGW_STATIC_ROUTE"]
+    }
+  }
+}`, accTestTransitGatewayCreateAttributes["display_name"],
+		accTestTransitGatewayCreateAttributes["description"],
+		accTestTransitGatewayCreateAttributes["transit_subnets"])
 }
 
 func testAccNsxtPolicyTransitGatewayWithCentralizedConfig920FailoverTemplate(createFlow bool) string {

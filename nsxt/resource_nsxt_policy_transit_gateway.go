@@ -423,14 +423,23 @@ func initTGWChildBgpConfig(config *model.TransitGatewayBgpRoutingConfig) (*data.
 	return dataValue.(*data.StructValue), nil
 }
 
-func getTGWBgpConfigFromSchema(d *schema.ResourceData) *model.TransitGatewayBgpRoutingConfig {
+// getTGWBgpConfigFromSchema builds the TransitGatewayBgpRoutingConfig to send to NSX.
+// includeBgpConfig/includeAdvancedConfig/includeRedistributionConfig gate which of the
+// three schema blocks are read from Terraform state onto the result: fields for an
+// excluded block are left as nil pointers rather than resent from possibly-stale
+// Terraform state. Callers that need NSX's own current value for an excluded block
+// (e.g. on Update, so it isn't lost) are responsible for filling that in separately -
+// see resourceNsxtPolicyTransitGatewayUpdate, which merges each excluded block in from
+// a fresh GET rather than leaving it nil, since NSX's PATCH .../routing/bgp does not
+// reliably preserve every omitted field on its own.
+func getTGWBgpConfigFromSchema(d *schema.ResourceData, includeBgpConfig, includeAdvancedConfig, includeRedistributionConfig bool) *model.TransitGatewayBgpRoutingConfig {
 	bgpConfig := d.Get("bgp_config").([]interface{})
 	advancedConfig := d.Get("advanced_config").([]interface{})
 	redistributionConfig := d.Get("redistribution_config").([]interface{})
 
-	haveBgpConfig := len(bgpConfig) > 0 && bgpConfig[0] != nil
-	haveAdvancedConfig := len(advancedConfig) > 0 && advancedConfig[0] != nil
-	haveRedistributionConfig := len(redistributionConfig) > 0 && redistributionConfig[0] != nil
+	haveBgpConfig := includeBgpConfig && len(bgpConfig) > 0 && bgpConfig[0] != nil
+	haveAdvancedConfig := includeAdvancedConfig && len(advancedConfig) > 0 && advancedConfig[0] != nil
+	haveRedistributionConfig := includeRedistributionConfig && len(redistributionConfig) > 0 && redistributionConfig[0] != nil
 	if !haveBgpConfig && !haveAdvancedConfig && !haveRedistributionConfig {
 		return nil
 	}
@@ -572,16 +581,30 @@ func setTGWBgpConfigInSchema(d *schema.ResourceData, bgpConfig *model.TransitGat
 	cfgMap["local_as_num"] = bgpConfig.LocalAsNum
 	cfgMap["multipath_relax"] = bgpConfig.MultipathRelax
 
+	// Seed from the schema's own declared defaults first, then overlay only the
+	// fields NSX actually returned. NSX omits graceful_restart_config.timer
+	// entirely until it's been explicitly configured, so GracefulRestartConfig
+	// can be non-nil with a nil Timer; checking each pointer independently
+	// (rather than an if/else keyed on the outer object alone) means a nil at
+	// any level still leaves the schema default in place instead of silently
+	// zero-filling. This value is display-only: getTGWBgpConfigFromSchema only
+	// resends bgp_config when the user actually changes it, so a synthetic
+	// default here is never round-tripped back to NSX.
+	cfgMap["graceful_restart_mode"] = policyBGPConfigSchemaDefault("graceful_restart_mode")
+	cfgMap["graceful_restart_timer"] = policyBGPConfigSchemaDefault("graceful_restart_timer")
+	cfgMap["graceful_restart_stale_route_timer"] = policyBGPConfigSchemaDefault("graceful_restart_stale_route_timer")
 	if bgpConfig.GracefulRestartConfig != nil {
-		cfgMap["graceful_restart_mode"] = bgpConfig.GracefulRestartConfig.Mode
-		if bgpConfig.GracefulRestartConfig.Timer != nil {
-			cfgMap["graceful_restart_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.RestartTimer)
-			cfgMap["graceful_restart_stale_route_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.StaleRouteTimer)
+		if bgpConfig.GracefulRestartConfig.Mode != nil {
+			cfgMap["graceful_restart_mode"] = *bgpConfig.GracefulRestartConfig.Mode
 		}
-	} else {
-		cfgMap["graceful_restart_mode"] = model.BgpGracefulRestartConfig_MODE_HELPER_ONLY
-		cfgMap["graceful_restart_timer"] = policyBGPGracefulRestartTimerDefault
-		cfgMap["graceful_restart_stale_route_timer"] = policyBGPGracefulRestartStaleRouteTimerDefault
+		if bgpConfig.GracefulRestartConfig.Timer != nil {
+			if bgpConfig.GracefulRestartConfig.Timer.RestartTimer != nil {
+				cfgMap["graceful_restart_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.RestartTimer)
+			}
+			if bgpConfig.GracefulRestartConfig.Timer.StaleRouteTimer != nil {
+				cfgMap["graceful_restart_stale_route_timer"] = int(*bgpConfig.GracefulRestartConfig.Timer.StaleRouteTimer)
+			}
+		}
 	}
 
 	var tagList []map[string]string
@@ -733,7 +756,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 		}
 		childStructs = append(childStructs, ch...)
 	}
-	if bgpCfg := getTGWBgpConfigFromSchema(d); bgpCfg != nil {
+	if bgpCfg := getTGWBgpConfigFromSchema(d, true, true, true); bgpCfg != nil {
 		ch, err := buildTGWBgpConfigChildren(bgpCfg, false)
 		if err != nil {
 			return handleCreateError("TransitGateway BgpConfig", id, err)
@@ -961,12 +984,39 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	}
 
 	if d.HasChange("bgp_config") || d.HasChange("advanced_config") || d.HasChange("redistribution_config") {
-		newBgp := getTGWBgpConfigFromSchema(d)
+		includeBgpConfig := d.HasChange("bgp_config")
+		includeAdvancedConfig := d.HasChange("advanced_config")
+		includeRedistributionConfig := d.HasChange("redistribution_config")
+		newBgp := getTGWBgpConfigFromSchema(d, includeBgpConfig, includeAdvancedConfig, includeRedistributionConfig)
 		bgpAPIClient := cliTransitGatewayBgpClient(sessionContext, connector)
 		if bgpAPIClient != nil {
 			if newBgp != nil {
 				if existing, getErr := bgpAPIClient.Get(parents[0], parents[1], id); getErr == nil {
 					newBgp.Revision = existing.Revision
+					// NSX's PATCH .../routing/bgp does not uniformly preserve every
+					// omitted field: omitting route_redistribution_config while
+					// bgp_config fields are present in the same request clears it
+					// rather than leaving it as-is (confirmed against a live
+					// manager), despite that endpoint's own API spec documenting
+					// omitted fields as retaining their current value. Populating
+					// each unchanged block from this fresh GET, rather than
+					// omitting it, sidesteps relying on that per-field behavior.
+					if !includeBgpConfig {
+						newBgp.Ecmp = existing.Ecmp
+						newBgp.Enabled = existing.Enabled
+						newBgp.LocalAsNum = existing.LocalAsNum
+						newBgp.MultipathRelax = existing.MultipathRelax
+						newBgp.InterSrIbgp = existing.InterSrIbgp
+						newBgp.GracefulRestartConfig = existing.GracefulRestartConfig
+						newBgp.RouteAggregations = existing.RouteAggregations
+						newBgp.Tags = existing.Tags
+					}
+					if !includeAdvancedConfig {
+						newBgp.ForwardingUpTimer = existing.ForwardingUpTimer
+					}
+					if !includeRedistributionConfig {
+						newBgp.RouteRedistributionConfig = existing.RouteRedistributionConfig
+					}
 				}
 				log.Printf("[INFO] Updating TransitGateway %s BGP config via direct API", id)
 				if err := bgpAPIClient.Patch(parents[0], parents[1], id, *newBgp); err != nil {
