@@ -20,7 +20,7 @@ func resourceNsxtPolicyParentSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, false, false),
+		Schema: markParentPolicySharedFieldsComputed(getPolicySecurityPolicySchema(false, true, false, false)),
 	}
 }
 
