@@ -1201,7 +1201,6 @@ func getVMDeploymentConfigFromSchema(iVmDeploymentCfg interface{}) (*data.Struct
 		vmDeploymentCfg := model.PolicyVsphereDeploymentConfig{
 			ComputeId:              &computeId,
 			EdgeHostAffinityConfig: edgeHostAffinityConfig,
-			HostId:                 &hostID,
 			ReservationInfo:        reservationInfo,
 			StorageId:              &storageID,
 			VcId:                   &vcID,
@@ -1209,6 +1208,9 @@ func getVMDeploymentConfigFromSchema(iVmDeploymentCfg interface{}) (*data.Struct
 		}
 		if computeFolderId != "" {
 			vmDeploymentCfg.ComputeFolderId = &computeFolderId
+		}
+		if hostID != "" {
+			vmDeploymentCfg.HostId = &hostID
 		}
 		converter := bindings.NewTypeConverter()
 		dataValue, errs := converter.ConvertToVapi(vmDeploymentCfg, model.PolicyVsphereDeploymentConfigBindingType())
