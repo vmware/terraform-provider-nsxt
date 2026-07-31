@@ -4,7 +4,7 @@ page_title: "NSXT: policy_gateway_interface_realization"
 description: A gateway interface realization information.
 ---
 
-# nsxt_policy_gateway_interface_realization_info
+# nsxt_policy_gateway_interface_realization
 
 This data source provides information about the realization of a Tier0/Tier1 gateway interface resource on NSX manager. This data source will wait until realization is determined as either success or error. It is recommended to use this data source if further configuration depends on resource realization.
 
