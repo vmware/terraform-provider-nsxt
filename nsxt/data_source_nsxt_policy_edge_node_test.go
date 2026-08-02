@@ -14,6 +14,17 @@ func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 	testResourceName := "data.nsxt_policy_edge_node.test"
 
+	checks := []resource.TestCheckFunc{
+		resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+		resource.TestCheckResourceAttr(testResourceName, "member_index", "0"),
+		resource.TestCheckResourceAttrSet(testResourceName, "path"),
+		resource.TestCheckResourceAttrSet(testResourceName, "unique_id"),
+	}
+	if !testAccIsGlobalManager() {
+		// Global Manager does not populate realization_id for PolicyEdgeNode
+		checks = append(checks, resource.TestCheckResourceAttrSet(testResourceName, "realization_id"))
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -23,13 +34,7 @@ func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyEdgeNodeReadTemplate(edgeClusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
-					resource.TestCheckResourceAttr(testResourceName, "member_index", "0"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "unique_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "realization_id"),
-				),
+				Check:  resource.ComposeTestCheckFunc(checks...),
 			},
 		},
 	})
