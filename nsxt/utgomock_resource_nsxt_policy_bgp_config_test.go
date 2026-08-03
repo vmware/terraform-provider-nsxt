@@ -28,13 +28,14 @@ import (
 )
 
 var (
-	bgpCfgGwPath    = "/infra/tier-0s/t0-bgp"
-	bgpCfgGwID      = "t0-bgp"
-	bgpCfgServiceID = "default"
-	bgpCfgRevision  = int64(1)
-	bgpCfgPath      = "/infra/tier-0s/t0-bgp/locale-services/default/bgp"
-	bgpCfgEnabled   = true
-	bgpCfgEcmp      = true
+	bgpCfgGwPath            = "/infra/tier-0s/t0-bgp"
+	bgpCfgGwID              = "t0-bgp"
+	bgpCfgServiceID         = "default"
+	bgpCfgRevision          = int64(1)
+	bgpCfgPath              = "/infra/tier-0s/t0-bgp/locale-services/default/bgp"
+	bgpCfgLocaleServicePath = "/infra/tier-0s/t0-bgp/locale-services/default"
+	bgpCfgEnabled           = true
+	bgpCfgEcmp              = true
 )
 
 func TestMockResourceNsxtPolicyBgpConfigRead(t *testing.T) {
@@ -49,11 +50,23 @@ func TestMockResourceNsxtPolicyBgpConfigRead(t *testing.T) {
 		Client:     mockBgpSDK,
 		ClientType: utl.Local,
 	}
+	mockLocaleServicesSDK := localeServicesMocks.NewMockLocaleServicesClient(ctrl)
+	localeServicesWrapper := &tier0localeservices.LocaleServicesClientContext{
+		Client:     mockLocaleServicesSDK,
+		ClientType: utl.Local,
+	}
 
 	originalBgp := cliBgpClient
-	defer func() { cliBgpClient = originalBgp }()
+	originalLocSvc := cliTier0LocaleServicesClient
+	defer func() {
+		cliBgpClient = originalBgp
+		cliTier0LocaleServicesClient = originalLocSvc
+	}()
 	cliBgpClient = func(sessionContext utl.SessionContext, connector client.Connector) *localeservices.BgpRoutingConfigClientContext {
 		return bgpWrapper
+	}
+	cliTier0LocaleServicesClient = func(sessionContext utl.SessionContext, connector client.Connector) *tier0localeservices.LocaleServicesClientContext {
+		return localeServicesWrapper
 	}
 
 	res := resourceNsxtPolicyBgpConfig()
@@ -76,6 +89,10 @@ func TestMockResourceNsxtPolicyBgpConfigRead(t *testing.T) {
 			Path:                  &bgpCfgPath,
 			Revision:              &bgpCfgRevision,
 			GracefulRestartConfig: &restartCfg,
+		}, nil)
+		mockLocaleServicesSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.LocaleServices{
+			Id:   &bgpCfgServiceID,
+			Path: &bgpCfgLocaleServicePath,
 		}, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
@@ -164,9 +181,13 @@ func TestMockResourceNsxtPolicyBgpConfigCreate(t *testing.T) {
 
 	t.Run("Create_success", func(t *testing.T) {
 		mockTier0sSDK.EXPECT().Get(bgpCfgGwID).Return(model.Tier0{}, nil)
+		// Consumed twice: once by Create's own locale service discovery, and
+		// once more by the Read call at the end of Create (which re-derives
+		// gateway_path/site_path from the locale service).
 		mockLocaleServicesSDK.EXPECT().Get(bgpCfgGwID, defaultPolicyLocaleServiceID).Return(model.LocaleServices{
-			Id: &bgpCfgServiceID,
-		}, nil)
+			Id:   &bgpCfgServiceID,
+			Path: &bgpCfgLocaleServicePath,
+		}, nil).Times(2)
 		mockBgpSDK.EXPECT().Patch(bgpCfgGwID, bgpCfgServiceID, gomock.Any(), gomock.Any()).Return(nil)
 		restartMode := model.BgpGracefulRestartConfig_MODE_HELPER_ONLY
 		restartTimer := int64(180)
@@ -259,6 +280,7 @@ func TestMockResourceNsxtPolicyBgpConfigUpdate(t *testing.T) {
 
 	mockTier0sSDK := t0mocks.NewMockTier0sClient(ctrl)
 	mockBgpSDK := localeSvcBgpMocks.NewMockBgpClient(ctrl)
+	mockLocaleServicesSDK := localeServicesMocks.NewMockLocaleServicesClient(ctrl)
 
 	tier0Wrapper := &cliinfra.Tier0ClientContext{
 		Client:     mockTier0sSDK,
@@ -268,12 +290,18 @@ func TestMockResourceNsxtPolicyBgpConfigUpdate(t *testing.T) {
 		Client:     mockBgpSDK,
 		ClientType: utl.Local,
 	}
+	localeServicesWrapper := &tier0localeservices.LocaleServicesClientContext{
+		Client:     mockLocaleServicesSDK,
+		ClientType: utl.Local,
+	}
 
 	originalTier0s := cliTier0sClient
 	originalBgp := cliBgpClient
+	originalLocSvc := cliTier0LocaleServicesClient
 	defer func() {
 		cliTier0sClient = originalTier0s
 		cliBgpClient = originalBgp
+		cliTier0LocaleServicesClient = originalLocSvc
 	}()
 	cliTier0sClient = func(sessionContext utl.SessionContext, connector client.Connector) *cliinfra.Tier0ClientContext {
 		return tier0Wrapper
@@ -281,12 +309,19 @@ func TestMockResourceNsxtPolicyBgpConfigUpdate(t *testing.T) {
 	cliBgpClient = func(sessionContext utl.SessionContext, connector client.Connector) *localeservices.BgpRoutingConfigClientContext {
 		return bgpWrapper
 	}
+	cliTier0LocaleServicesClient = func(sessionContext utl.SessionContext, connector client.Connector) *tier0localeservices.LocaleServicesClientContext {
+		return localeServicesWrapper
+	}
 
 	res := resourceNsxtPolicyBgpConfig()
 
 	t.Run("Update_success", func(t *testing.T) {
 		mockTier0sSDK.EXPECT().Get(bgpCfgGwID).Return(model.Tier0{}, nil)
 		mockBgpSDK.EXPECT().Update(bgpCfgGwID, bgpCfgServiceID, gomock.Any(), gomock.Any()).Return(model.BgpRoutingConfig{}, nil)
+		mockLocaleServicesSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.LocaleServices{
+			Id:   &bgpCfgServiceID,
+			Path: &bgpCfgLocaleServicePath,
+		}, nil)
 		restartMode := model.BgpGracefulRestartConfig_MODE_HELPER_ONLY
 		restartTimer := int64(180)
 		staleTimer := int64(600)
