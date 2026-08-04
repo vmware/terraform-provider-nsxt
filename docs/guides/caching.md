@@ -45,8 +45,8 @@ Use `config_scope` when several independent Terraform configurations (or teams/p
 
 ## Differences at a glance
 
-| | `disabled` | `global` | `config_scope` |
-|---|---|---|---|
+| Property | `disabled` | `global` | `config_scope` |
+| --- | --- | --- | --- |
 | Caches lookups within a run | No | Yes | Yes |
 | Scope of cached data | N/A | All resources of that type in scope | Only resources tagged for this `context_id` |
 | Writes tags to NSX objects | No | No | Yes (`nsx-tf/tf-run-id`), on first read if missing |
