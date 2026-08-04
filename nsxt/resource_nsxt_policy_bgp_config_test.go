@@ -82,6 +82,36 @@ func TestAccResourceNsxtPolicyBgpConfig_basic(t *testing.T) {
 	})
 }
 
+// Regression test for Bugzilla 3766845: Read never re-derived gateway_path
+// or site_path from the parent Locale Service, and the Importer never set
+// site_path at all. Since site_path is ForceNew, a fresh import left it
+// empty in state while config still declared it, forcing a destroy-and-
+// recreate on the very next plan. ImportStateKind: ImportBlockWithID plans
+// the import (via a native `import` block) against a copy of state with
+// this resource removed, the same way the FVT reproduction did via
+// `terraform state rm` + `terraform import`, and fails unless the resulting
+// plan is a no-op - the resource's own `id` is a synthetic random UUID
+// (regenerated on every import), so ImportStateVerify can't be used here.
+func TestAccResourceNsxtPolicyBgpConfig_importBasic(t *testing.T) {
+	testResourceName := "nsxt_policy_bgp_config.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyBgpConfigTemplate(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateKind:   resource.ImportBlockWithID,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyBgpConfig_minimalistic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_config.test"
 

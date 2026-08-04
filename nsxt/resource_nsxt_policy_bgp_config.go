@@ -79,6 +79,26 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 		d.Set(key, value)
 	}
 
+	// gateway_path and site_path are not part of the BGP config object
+	// itself - they describe the parent Locale Service - and the Importer
+	// never sets site_path at all. Re-derive both from the Locale Service on
+	// every Read so a fresh import doesn't leave site_path empty, which
+	// would force a replace (site_path is ForceNew) on the next apply.
+	lsClient := cliTier0LocaleServicesClient(sessionContext, connector)
+	if lsClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	locSvc, err := lsClient.Get(gwID, serviceID)
+	if err != nil {
+		return handleReadError(d, "BGP Config", serviceID, err)
+	}
+	d.Set("gateway_path", getGatewayPathFromLocaleServicesPath(*locSvc.Path))
+	if isPolicyGlobalManager(m) && locSvc.EdgeClusterPath != nil {
+		d.Set("site_path", getSitePathFromEdgePath(*locSvc.EdgeClusterPath))
+	} else {
+		d.Set("site_path", "")
+	}
+
 	return nil
 }
 
