@@ -531,10 +531,17 @@ func reflectStringField(obj interface{}, fieldName string) *string {
 // ID, mirroring the common id/display_name/description/path semantics of
 // policyDataSourceResourceFilterAndSet. On success it sets those schema attributes and
 // returns the typed object so the caller can set any resource-specific fields. Returns
-// ok=false when the cache is disabled, objID is empty, or the object can't be
-// found/converted — callers should fall through to the regular (uncached) read path.
+// ok=false when the cache is disabled, objID is empty, the ID was just written by this
+// run (see TryCacheRead), or the object can't be found/converted — callers should fall
+// through to the regular (uncached) read path in all of those cases.
 func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, connector client.Connector, objID string, resourceType string, bindingType bindings.BindingType) (*T, bool) {
 	if objID == "" || !IsCacheEnabled(m) {
+		return nil, false
+	}
+	if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, objID)); ok {
+		// Mirrors TryCacheRead/CacheAwareResourceRead's one-shot post-write bypass: skip
+		// a cache hit that could still be serving a bucket snapshot taken before this
+		// exact ID was written in this run, and let the caller fall through to a live read.
 		return nil, false
 	}
 	val, err := gcache.readCache(objID, resourceType, d, m, connector)
