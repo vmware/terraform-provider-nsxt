@@ -126,7 +126,7 @@ func testAccNsxtPolicyTransitGatewayCommunityListExists(displayName string, reso
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayCommunityListExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
@@ -147,7 +147,7 @@ func testAccNsxtPolicyTransitGatewayCommunityListCheckDestroy(state *terraform.S
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayCommunityListExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err

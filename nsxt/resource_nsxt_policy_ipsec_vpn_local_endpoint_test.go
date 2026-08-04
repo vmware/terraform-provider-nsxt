@@ -6,10 +6,14 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accTestPolicyIPSecVpnLocalEndpointCreateAttributes = map[string]string{
@@ -182,6 +186,35 @@ func testAccResourceNsxtPolicyIPSecVpnLocalEndpointImport(t *testing.T, withCont
 	})
 }
 
+func testAccNsxtPolicyIPSecVpnLocalEndpointExistsOnNSXService(id string, connector client.Connector, servicePath string) (bool, error) {
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	if strings.HasPrefix(servicePath, "/orgs/") {
+		projectID := extractProjectIDFromPolicyPath(servicePath)
+		if projectID != "" {
+			sessionContext.ClientType = utl.Multitenancy
+			sessionContext.ProjectID = projectID
+		}
+	}
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
+	if err != nil {
+		return false, err
+	}
+	_, err = client.Get(connector, id)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	if _, codeErr := getInvalidRequestErrorCode(err); codeErr == nil {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving resource", err)
+}
+
 func testAccNsxtPolicyIPSecVpnLocalEndpointExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -195,7 +228,7 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointExists(displayName string, resourceNa
 		resourceID := rs.Primary.Attributes["id"]
 		servicePath := rs.Primary.Attributes["service_path"]
 
-		exists, err := resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(resourceID, connector, servicePath)
+		exists, err := testAccNsxtPolicyIPSecVpnLocalEndpointExistsOnNSXService(resourceID, connector, servicePath)
 		if err != nil {
 			return err
 		}
@@ -217,7 +250,7 @@ func testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state *terraform.State, 
 
 		resourceID := rs.Primary.Attributes["id"]
 		servicePath := rs.Primary.Attributes["service_path"]
-		exists, err := resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(resourceID, connector, servicePath)
+		exists, err := testAccNsxtPolicyIPSecVpnLocalEndpointExistsOnNSXService(resourceID, connector, servicePath)
 		if err != nil {
 			return err
 		}

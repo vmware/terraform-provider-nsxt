@@ -180,27 +180,6 @@ func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMap
 	d.Set("entry", entryList)
 }
 
-func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	var sessionContext utl.SessionContext
-	if isGlobalManager {
-		sessionContext = utl.SessionContext{ClientType: utl.Global}
-	} else {
-		sessionContext = utl.SessionContext{ClientType: utl.Local}
-	}
-	client := cliRouteMapsClient(sessionContext, connector)
-	_, err = client.Get(tier0Id, id)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving resource", err)
-}
-
 func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}) model.RouteMapEntry {
 
 	action := schemaEntry["action"].(string)

@@ -230,36 +230,6 @@ func (c *localEndpointClient) Delete(connector client.Connector, id string) erro
 	return client.Delete(c.gwID, c.serviceID, id)
 }
 
-func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector client.Connector, servicePath string) (bool, error) {
-	// Used by acceptance tests and create flow; infer multitenancy from servicePath when applicable.
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	if strings.HasPrefix(servicePath, "/orgs/") {
-		projectID := extractProjectIDFromPolicyPath(servicePath)
-		if projectID != "" {
-			sessionContext.ClientType = utl.Multitenancy
-			sessionContext.ProjectID = projectID
-		}
-	}
-	client, err := newLocalEndpointClient(servicePath, sessionContext)
-	if err != nil {
-		return false, err
-	}
-	_, err = client.Get(connector, id)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	if _, codeErr := getInvalidRequestErrorCode(err); codeErr == nil {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving resource", err)
-}
-
 func ipSecVpnLocalEndpointInitStruct(d *schema.ResourceData) model.IPSecVpnLocalEndpoint {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)

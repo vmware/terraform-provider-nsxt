@@ -10,7 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func getTestComputeCollectionName() string {
@@ -200,6 +203,24 @@ func TestAccResourceNsxtPolicyIdpsClusterConfig_importBasicLegacy(t *testing.T) 
 	})
 }
 
+func testAccNsxtPolicyIdpsClusterConfigExistsOnNSX(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := intrusion_services.NewClusterConfigsClient(connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
+
+	_, err := client.Get(id, nil)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving IDPS Cluster Config", err)
+}
+
 func testAccNsxtPolicyIdpsClusterConfigExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -215,7 +236,7 @@ func testAccNsxtPolicyIdpsClusterConfigExists(displayName string, resourceName s
 			return fmt.Errorf("Policy IdpsClusterConfig resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIdpsClusterConfigExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := testAccNsxtPolicyIdpsClusterConfigExistsOnNSX(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}

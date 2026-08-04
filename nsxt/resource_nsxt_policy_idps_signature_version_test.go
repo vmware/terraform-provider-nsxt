@@ -10,6 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // NOTE: IDS Signature Versions are system-managed resources.
@@ -83,6 +87,20 @@ func TestAccResourceNsxtPolicyIdpsSignatureVersion_makeActive(t *testing.T) {
 	})
 }
 
+func testAccNsxtPolicyIdpsSignatureVersionExistsOnNSX(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := intrusion_services.NewSignatureVersionsClient(connector)
+	_, err := client.Get(id)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving IDS Signature Version", err)
+}
+
 func testAccNsxtPolicyIdpsSignatureVersionExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -97,7 +115,7 @@ func testAccNsxtPolicyIdpsSignatureVersionExists(resourceName string) resource.T
 			return fmt.Errorf("Policy IDS Signature Version resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIdpsSignatureVersionExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := testAccNsxtPolicyIdpsSignatureVersionExistsOnNSX(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}

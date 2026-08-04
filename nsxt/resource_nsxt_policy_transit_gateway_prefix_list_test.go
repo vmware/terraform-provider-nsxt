@@ -166,7 +166,7 @@ func testAccNsxtPolicyTransitGatewayPrefixListExists(displayName string, resourc
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayPrefixListExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
@@ -187,7 +187,7 @@ func testAccNsxtPolicyTransitGatewayPrefixListCheckDestroy(state *terraform.Stat
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayPrefixListExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err

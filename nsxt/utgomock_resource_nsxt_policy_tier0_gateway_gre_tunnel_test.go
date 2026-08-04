@@ -115,6 +115,7 @@ func TestMockResourceNsxtPolicyTier0GatewayGRETunnelCreate(t *testing.T) {
 
 	t.Run("Create success", func(t *testing.T) {
 		gomock.InOrder(
+			mockSDK.EXPECT().Get(greTunnelTier0ID, greTunnelLocSvcID, greTunnelID).Return(nil, vapiErrors.NotFound{}),
 			mockSDK.EXPECT().Patch(greTunnelTier0ID, greTunnelLocSvcID, greTunnelID, gomock.Any()).Return(nil),
 			mockSDK.EXPECT().Get(greTunnelTier0ID, greTunnelLocSvcID, greTunnelID).Return(greTunnelStructValue(t), nil),
 		)

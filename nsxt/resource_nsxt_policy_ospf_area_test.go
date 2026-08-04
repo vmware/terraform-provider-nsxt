@@ -10,6 +10,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accTestPolicyOspfAreaCreateAttributes = map[string]string{
@@ -158,6 +161,21 @@ func testAccNSXPolicyOspfAreaImporterGetIDs(s *terraform.State) (string, error) 
 	return fmt.Sprintf("%s/%s/%s", gwID, serviceID, resourceID), nil
 }
 
+func testAccNsxtPolicyOspfAreaExistsOnNSX(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector client.Connector) (bool, error) {
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	client := cliOspfAreasClient(sessionContext, connector)
+	_, err := client.Get(gwID, localeServiceID, areaID)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving resource", err)
+}
+
 func testAccNsxtPolicyOspfAreaExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -176,7 +194,7 @@ func testAccNsxtPolicyOspfAreaExists(resourceName string) resource.TestCheckFunc
 		ospfPath := rs.Primary.Attributes["ospf_path"]
 		gwID, serviceID := parseOspfConfigPath(ospfPath)
 
-		exists, err := resourceNsxtPolicyOspfAreaExists(gwID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		exists, err := testAccNsxtPolicyOspfAreaExistsOnNSX(gwID, serviceID, resourceID, testAccIsGlobalManager(), connector)
 		if err != nil {
 			return err
 		}
@@ -199,7 +217,7 @@ func testAccNsxtPolicyOspfAreaCheckDestroy(state *terraform.State, displayName s
 		resourceID := rs.Primary.Attributes["id"]
 		ospfPath := rs.Primary.Attributes["ospf_path"]
 		gwID, serviceID := parseOspfConfigPath(ospfPath)
-		exists, err := resourceNsxtPolicyOspfAreaExists(gwID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		exists, err := testAccNsxtPolicyOspfAreaExistsOnNSX(gwID, serviceID, resourceID, testAccIsGlobalManager(), connector)
 		if err != nil {
 			return err
 		}

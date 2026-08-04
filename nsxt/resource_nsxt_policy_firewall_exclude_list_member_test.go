@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 )
 
 func getGroupPrefix() string {
@@ -97,6 +99,25 @@ func TestAccResourceNsxtPolicyFirewallExcludeListMember_importBasic(t *testing.T
 	})
 }
 
+func testAccNsxtPolicyFirewallExcludeListMemberExistsOnNSX(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+
+	client := cliExcludeListClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
+	obj, err := client.Get()
+	if isNotFoundError(err) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	if 0 <= memberInList(id, obj.Members) {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func testAccNsxtPolicyFirewallExcludeListMemberExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -112,7 +133,7 @@ func testAccNsxtPolicyFirewallExcludeListMemberExists(displayName string, resour
 			return fmt.Errorf("policy FirewallExcludeListMember resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyFirewallExcludeListMemberExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := testAccNsxtPolicyFirewallExcludeListMemberExistsOnNSX(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -132,7 +153,7 @@ func testAccNsxtPolicyFirewallExcludeListMemberCheckDestroy(state *terraform.Sta
 			continue
 		}
 
-		exists, err := resourceNsxtPolicyFirewallExcludeListMemberExists(testAccGetSessionContext(), member, connector)
+		exists, err := testAccNsxtPolicyFirewallExcludeListMemberExistsOnNSX(testAccGetSessionContext(), member, connector)
 		if err != nil {
 			return err
 		}

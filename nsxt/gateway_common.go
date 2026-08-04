@@ -689,13 +689,3 @@ func getComputedGatewayIDSchema() *schema.Schema {
 		Computed:    true,
 	}
 }
-
-func policyTier0GetLocaleService(context utl.SessionContext, gwID string, localeServiceID string, connector client.Connector, isGlobalManager bool) *model.LocaleServices {
-	tier0LocaleservicesClient := cliTier0LocaleServicesClient(context, connector)
-	obj, err := tier0LocaleservicesClient.Get(gwID, localeServiceID)
-	if err != nil {
-		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
-		return nil
-	}
-	return &obj
-}

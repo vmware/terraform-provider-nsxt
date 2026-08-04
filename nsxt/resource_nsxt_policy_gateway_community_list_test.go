@@ -10,6 +10,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var accTestPolicyGatewayCommunityListCreateAttributes = map[string]string{
@@ -101,6 +104,27 @@ func TestAccResourceNsxtPolicyGatewayCommunityList_importBasic(t *testing.T) {
 	})
 }
 
+func testAccNsxtPolicyGatewayCommunityListExistsOnNSX(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	var err error
+	var sessionContext utl.SessionContext
+	if isGlobalManager {
+		sessionContext = utl.SessionContext{ClientType: utl.Global}
+	} else {
+		sessionContext = utl.SessionContext{ClientType: utl.Local}
+	}
+	client := cliCommunityListsClient(sessionContext, connector)
+	_, err = client.Get(tier0Id, id)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving resource", err)
+}
+
 func testAccNsxtPolicyGatewayCommunityListExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -118,7 +142,7 @@ func testAccNsxtPolicyGatewayCommunityListExists(displayName string, resourceNam
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
-		exists, err := resourceNsxtPolicyGatewayCommunityListExists(gwID, resourceID, connector, testAccIsGlobalManager())
+		exists, err := testAccNsxtPolicyGatewayCommunityListExistsOnNSX(gwID, resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}
@@ -142,7 +166,7 @@ func testAccNsxtPolicyGatewayCommunityListCheckDestroy(state *terraform.State, d
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		_, gwID := parseGatewayPolicyPath(gwPath)
 
-		exists, err := resourceNsxtPolicyGatewayCommunityListExists(gwID, resourceID, connector, testAccIsGlobalManager())
+		exists, err := testAccNsxtPolicyGatewayCommunityListExistsOnNSX(gwID, resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}

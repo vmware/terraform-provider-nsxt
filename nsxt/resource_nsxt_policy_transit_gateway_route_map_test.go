@@ -119,7 +119,7 @@ func testAccNsxtPolicyTransitGatewayRouteMapExists(displayName string, resourceN
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayRouteMapExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
@@ -140,7 +140,7 @@ func testAccNsxtPolicyTransitGatewayRouteMapCheckDestroy(state *terraform.State,
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayRouteMapExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
