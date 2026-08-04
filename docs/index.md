@@ -255,7 +255,9 @@ The following arguments are used to configure the provider:
   `disabled`/`off` (no caching, the default), `config_scope` (cache resource lookups,
   scoped by `context_id`, and apply provider-managed default tags), and `global` (cache
   resource lookups across the entire run without tag scoping). Can also be specified with
-  the `NSXT_CACHE_MODE` environment variable.
+  the `NSXT_CACHE_MODE` environment variable. Note that `config_scope` mode writes a
+  tracking tag to NSX objects it reads - see the
+  [In-Memory Resource Caching guide](guides/caching.md) for details and troubleshooting.
 
 ## NSX Logical Networking
 
