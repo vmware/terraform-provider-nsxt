@@ -239,19 +239,19 @@ func resourceNsxtPolicyTier0GatewayGRETunnelExists(id, localeServicePath string,
 	client := cliTunnelsClient(sessionContext, connector)
 	_, err = client.Get(tier0id, localeSvcID, id)
 
+	if err == nil {
+		return true, nil
+	}
 	if isNotFoundError(err) {
 		return false, nil
 	}
-	return true, nil
+	return false, err
 }
 
 func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
-	}
 	localeServicePath := d.Get("locale_service_path").(string)
 	isT0, tier0id, localeSvcID, err := parseLocaleServicePolicyPath(localeServicePath)
 	if err != nil {
@@ -260,6 +260,19 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 	if !isT0 {
 		return fmt.Errorf("locale service path %s is not associated with a tier0 router", localeServicePath)
 	}
+
+	if id == "" {
+		id = newUUID()
+	} else {
+		exists, err := resourceNsxtPolicyTier0GatewayGRETunnelExists(id, localeServicePath, connector, isPolicyGlobalManager(m))
+		if err != nil {
+			return err
+		}
+		if exists {
+			return fmt.Errorf("GRE Tunnel with ID '%s' already exists", id)
+		}
+	}
+
 	sessionContext := utl.SessionContext{ClientType: utl.Local}
 	client := cliTunnelsClient(sessionContext, connector)
 

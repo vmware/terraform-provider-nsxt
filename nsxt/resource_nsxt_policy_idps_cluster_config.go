@@ -9,11 +9,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIdpsClusterConfig() *schema.Resource {
@@ -63,24 +60,6 @@ func resourceNsxtPolicyIdpsClusterConfig() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceNsxtPolicyIdpsClusterConfigExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := intrusion_services.NewClusterConfigsClient(connector)
-	if client == nil {
-		return false, policyResourceNotSupportedError()
-	}
-
-	_, err := client.Get(id, nil)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving IDPS Cluster Config", err)
 }
 
 func buildIdsClusterConfig(d *schema.ResourceData, id string) model.IdsClusterConfig {

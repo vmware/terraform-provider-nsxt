@@ -9,10 +9,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
-
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // NOTE: IDS Signature Versions are system-managed resources in NSX.
@@ -89,20 +86,6 @@ func resourceNsxtPolicyIdpsSignatureVersion() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceNsxtPolicyIdpsSignatureVersionExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-	client := intrusion_services.NewSignatureVersionsClient(connector)
-	_, err := client.Get(id)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving IDS Signature Version", err)
 }
 
 func resourceNsxtPolicyIdpsSignatureVersionCreate(d *schema.ResourceData, m interface{}) error {

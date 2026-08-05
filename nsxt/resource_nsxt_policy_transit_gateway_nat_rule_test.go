@@ -216,7 +216,7 @@ func testAccNsxtTransitGatewayNatRuleExists(displayName string, resourceName str
 
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtPolicyTransitGatewayNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayNatRuleExists(testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -239,7 +239,7 @@ func testAccNsxtTransitGatewayNatRuleCheckDestroy(state *terraform.State, displa
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
 
-		exists, err := resourceNsxtPolicyTransitGatewayNatRuleExists(getSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayNatRuleExists(testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}

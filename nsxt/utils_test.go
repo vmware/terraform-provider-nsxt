@@ -344,6 +344,32 @@ func testAccGetMultitenancyContext() tf_api.SessionContext {
 	return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
 }
 
+func testAccPolicyTier0GetLocaleService(context tf_api.SessionContext, gwID string, localeServiceID string, connector client.Connector) *model.LocaleServices {
+	tier0LocaleservicesClient := cliTier0LocaleServicesClient(context, connector)
+	obj, err := tier0LocaleservicesClient.Get(gwID, localeServiceID)
+	if err != nil {
+		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
+		return nil
+	}
+	return &obj
+}
+
+func testAccGetSessionContextFromParentPath(m interface{}, parentPath string) tf_api.SessionContext {
+	var clientType tf_api.ClientType
+	projectID, vpcID := getContextDataFromParentPath(parentPath)
+	if projectID != "" {
+		clientType = tf_api.Multitenancy
+		if vpcID != "" {
+			clientType = tf_api.VPC
+		}
+	} else if isPolicyGlobalManager(m) {
+		clientType = tf_api.Global
+	} else {
+		clientType = tf_api.Local
+	}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType, FromGlobal: false}
+}
+
 func testAccIsGlobalManager2() tf_api.ClientType {
 	if testAccIsVPC() {
 		return tf_api.VPC

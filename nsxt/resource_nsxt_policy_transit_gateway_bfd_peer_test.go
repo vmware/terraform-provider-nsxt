@@ -106,7 +106,7 @@ func testAccNsxtPolicyTransitGatewayBfdPeerExists(displayName string, resourceNa
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayBfdPeerExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err
@@ -127,7 +127,7 @@ func testAccNsxtPolicyTransitGatewayBfdPeerCheckDestroy(state *terraform.State, 
 		}
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		exists, err := resourceNsxtPolicyTransitGatewayBfdPeerExists(sessionContext, parentPath, resourceID, connector)
 		if err != nil {
 			return err

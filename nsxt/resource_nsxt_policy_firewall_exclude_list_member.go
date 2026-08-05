@@ -6,9 +6,7 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/settings/firewall/security"
@@ -43,25 +41,6 @@ func memberInList(member string, members []string) int {
 		}
 	}
 	return -1
-}
-
-func resourceNsxtPolicyFirewallExcludeListMemberExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-
-	client := cliExcludeListClient(sessionContext, connector)
-	if client == nil {
-		return false, policyResourceNotSupportedError()
-	}
-	obj, err := client.Get()
-	if isNotFoundError(err) {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	if 0 <= memberInList(id, obj.Members) {
-		return true, nil
-	}
-
-	return false, nil
 }
 
 func resourceNsxtPolicyFirewallExcludeListMemberCreate(d *schema.ResourceData, m interface{}) error {

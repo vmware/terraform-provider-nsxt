@@ -733,7 +733,7 @@ func testAccNsxtPolicyIPSecVpnSessionExists(displayName string, resourceName str
 		if resourceID == "" {
 			return fmt.Errorf("Policy IPSecVpnSession resource ID not set in resources")
 		}
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), servicePath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), servicePath)
 		exists, err := resourceNsxtPolicyIPSecVpnSessionExists(servicePath, resourceID, connector, sessionContext)
 		if err != nil {
 			return err
@@ -756,7 +756,7 @@ func testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state *terraform.State, displa
 
 		resourceID := rs.Primary.Attributes["id"]
 		servicePath := rs.Primary.Attributes["service_path"]
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), servicePath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), servicePath)
 		exists, err := resourceNsxtPolicyIPSecVpnSessionExists(servicePath, resourceID, connector, sessionContext)
 		if err != nil {
 			return err

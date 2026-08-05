@@ -11,10 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ospf"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var cliOspfAreasClient = ospf.NewAreasClient
@@ -83,21 +80,6 @@ func resourceNsxtPolicyOspfArea() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector client.Connector) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliOspfAreasClient(sessionContext, connector)
-	_, err := client.Get(gwID, localeServiceID, areaID)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving resource", err)
 }
 
 func parseOspfConfigPath(path string) (string, string) {

@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	tier_0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -47,27 +46,6 @@ func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	var sessionContext utl.SessionContext
-	if isGlobalManager {
-		sessionContext = utl.SessionContext{ClientType: utl.Global}
-	} else {
-		sessionContext = utl.SessionContext{ClientType: utl.Local}
-	}
-	client := cliCommunityListsClient(sessionContext, connector)
-	_, err = client.Get(tier0Id, id)
-	if err == nil {
-		return true, nil
-	}
-
-	if isNotFoundError(err) {
-		return false, nil
-	}
-
-	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m interface{}) error {

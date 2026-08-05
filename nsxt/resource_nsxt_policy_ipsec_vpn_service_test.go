@@ -369,7 +369,7 @@ func testAccNsxtPolicyIPSecVpnServiceExists(displayName string, resourceName str
 		if parentPath == "" {
 			parentPath = localeServicePath
 		}
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
 		if localeServiceID == "" {
 			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
@@ -401,7 +401,7 @@ func testAccNsxtPolicyIPSecVpnServiceCheckDestroy(state *terraform.State, displa
 		if parentPath == "" {
 			parentPath = localeServicePath
 		}
-		sessionContext := getSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), parentPath)
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
 		if localeServiceID == "" {
 			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
