@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_interface_group_associations"
+page_title: "NSXT: nsxt_policy_baremetal_server_interface_group_associations"
 description: Groups a bare metal server interface is a member of.
 ---
 
@@ -22,6 +22,7 @@ data "nsxt_policy_baremetal_server_interface_group_associations" "if1_groups" {
 resource "nsxt_policy_group" "data-network" {
   display_name = "Data-Network-Group"
   description  = "Group containing data network interfaces"
+  group_type   = "BareMetalServer"
 
   criteria {
     condition {

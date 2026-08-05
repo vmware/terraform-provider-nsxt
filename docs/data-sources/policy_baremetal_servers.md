@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_servers"
+page_title: "NSXT: nsxt_policy_baremetal_servers"
 description: List of bare metal servers discovered by NSX with advanced filtering.
 ---
 
