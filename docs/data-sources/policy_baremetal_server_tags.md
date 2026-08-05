@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_tags"
+page_title: "NSXT: nsxt_policy_baremetal_server_tags"
 description: A Bare Metal Server Tags data source.
 ---
 
