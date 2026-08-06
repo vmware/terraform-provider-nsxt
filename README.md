@@ -29,14 +29,6 @@ Learn more:
   - VMWare NSX 9.1.0
   - VMWare NSX 9.0.0
   - VMware NSX 4.2.x
-  - VMware NSX 4.1.x
-  - VMware NSX 4.0.x
-  - VMware NSX-T Data Center 3.2.x
-  - VMware NSX-T Data Center 3.1.x
-  - VMware NSX-T Data Center 3.0.x
-  - VMware NSX-T Data Center 2.5.x [^1]
-
-  [^1]: Support for VMware NSX-T Data Center 2.5.x is limited with v3.2.x and later.
 
   The plugin supports versions in accordance with the [Broadcom Product Lifecycle][product-lifecycle].
 
