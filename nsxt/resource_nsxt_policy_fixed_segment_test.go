@@ -173,7 +173,7 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
@@ -227,7 +227,7 @@ func TestAccResourceNsxtPolicyFixedSegment_withDhcp(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)

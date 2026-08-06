@@ -24,7 +24,6 @@ import (
 	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	segprofmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/segments"
 	t1segmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -108,9 +107,6 @@ func setupFixedSegReadProfileMocks(t *testing.T, ctrl *gomock.Controller) (
 }
 
 func TestMockResourceNsxtPolicyFixedSegmentRead(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -147,9 +143,6 @@ func TestMockResourceNsxtPolicyFixedSegmentRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyFixedSegmentCreate(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -182,9 +175,6 @@ func TestMockResourceNsxtPolicyFixedSegmentCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyFixedSegmentUpdate(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -217,9 +207,6 @@ func TestMockResourceNsxtPolicyFixedSegmentUpdate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyFixedSegmentDelete(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

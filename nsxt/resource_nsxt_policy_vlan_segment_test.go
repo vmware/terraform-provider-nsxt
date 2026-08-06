@@ -115,7 +115,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, name)
@@ -210,7 +210,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
