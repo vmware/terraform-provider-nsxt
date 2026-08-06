@@ -10,7 +10,6 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -888,7 +887,7 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 		ExtendedExpression: extendedExpressionList,
 	}
 
-	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
+	if groupType != "" {
 		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
 			if err := validateBMSVersionRequirement(); err != nil {
 				return err
@@ -975,7 +974,7 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	}
 	d.Set("revision", obj.Revision)
 	groupType := ""
-	if len(obj.GroupType) > 0 && util.NsxVersionHigherOrEqual("3.2.0") {
+	if len(obj.GroupType) > 0 {
 		groupType = obj.GroupType[0]
 		d.Set("group_type", groupType)
 	}
@@ -1061,7 +1060,7 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 		ExtendedExpression: extendedExpressionList,
 	}
 
-	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
+	if groupType != "" {
 		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
 			if err := validateBMSVersionRequirement(); err != nil {
 				return err

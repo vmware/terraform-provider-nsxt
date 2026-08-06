@@ -192,7 +192,6 @@ func TestAccResourceNsxtPolicyGroup_groupTypeIPAddressCriteria(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "3.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

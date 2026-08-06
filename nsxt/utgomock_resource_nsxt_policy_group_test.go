@@ -373,24 +373,6 @@ func TestMockResourceNsxtPolicyGroupBMSRead(t *testing.T) {
 		assert.Equal(t, "", d.Get("group_type"))
 	})
 
-	t.Run("group_type not set when NSX version below 3.2", func(t *testing.T) {
-		util.NsxVersion = "3.1.0"
-		defer func() { util.NsxVersion = "" }()
-
-		// API returns a group with group_type but provider must ignore it below 3.2
-		mockSDK.EXPECT().Get(groupDomain, groupID).Return(
-			groupAPIResponseWithType(nsxModel.Group_GROUP_TYPE_BAREMETALSERVER), nil,
-		)
-
-		res := resourceNsxtPolicyGroup()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalGroupData())
-		d.SetId(groupID)
-
-		err := resourceNsxtPolicyGroupRead(d, newGoMockProviderClient())
-		require.NoError(t, err)
-		// group_type is guarded by NsxVersionHigherOrEqual("3.2.0") in the read path
-		assert.Equal(t, "", d.Get("group_type"))
-	})
 }
 
 // ─── BMS Update tests ─────────────────────────────────────────────────────────
