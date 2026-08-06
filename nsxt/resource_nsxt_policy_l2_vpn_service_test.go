@@ -104,7 +104,7 @@ func TestAccResourceNsxtPolicyL2VpnService_updateFromlocaleServicePathToGatewayP
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceUpdateAttributes["display_name"])
@@ -152,7 +152,7 @@ func TestAccResourceNsxtPolicyL2VpnService_withGateway(t *testing.T) {
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceUpdateAttributes["display_name"])
@@ -246,7 +246,7 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode_withGateway(t *testing.T) 
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"])

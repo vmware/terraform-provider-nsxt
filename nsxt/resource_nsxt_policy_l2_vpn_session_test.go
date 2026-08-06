@@ -41,7 +41,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_basic(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])
@@ -114,7 +114,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_import(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])
@@ -137,7 +137,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_tier1(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])

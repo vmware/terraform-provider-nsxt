@@ -14,7 +14,6 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -508,10 +507,6 @@ func getDhcpOptsFromMap(dhcpConfig map[string]interface{}) *model.DhcpV4Options 
 }
 
 func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (*data.StructValue, error) {
-	if util.NsxVersionLower("3.0.0") {
-		return nil, nil
-	}
-
 	dhcpV4Config := schemaConfig["dhcp_v4_config"].([]interface{})
 	dhcpV6Config := schemaConfig["dhcp_v6_config"].([]interface{})
 
@@ -749,11 +744,9 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 	if tzPath != "" {
 		obj.TransportZonePath = &tzPath
 	}
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		obj.ReplicationMode = &replicationMode
-		if dhcpConfigPath != "" {
-			obj.DhcpConfigPath = &dhcpConfigPath
-		}
+	obj.ReplicationMode = &replicationMode
+	if dhcpConfigPath != "" {
+		obj.DhcpConfigPath = &dhcpConfigPath
 	}
 
 	var vlanIds []string
@@ -831,22 +824,18 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 			advConfigStruct.Connectivity = &connectivity
 		}
 
-		if util.NsxVersionHigherOrEqual("3.0.0") {
-			teamingPolicy := advConfigMap["uplink_teaming_policy"].(string)
-			if teamingPolicy != "" {
-				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
-			}
-
-			poolPath := advConfigMap["address_pool_path"].(string)
-			if poolPath != "" {
-				advConfigStruct.AddressPoolPaths = append(advConfigStruct.AddressPoolPaths, poolPath)
-			}
-
-			if util.NsxVersionHigherOrEqual("3.1.0") {
-				urpfMode := advConfigMap["urpf_mode"].(string)
-				advConfigStruct.UrpfMode = &urpfMode
-			}
+		teamingPolicy := advConfigMap["uplink_teaming_policy"].(string)
+		if teamingPolicy != "" {
+			advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
 		}
+
+		poolPath := advConfigMap["address_pool_path"].(string)
+		if poolPath != "" {
+			advConfigStruct.AddressPoolPaths = append(advConfigStruct.AddressPoolPaths, poolPath)
+		}
+
+		urpfMode := advConfigMap["urpf_mode"].(string)
+		advConfigStruct.UrpfMode = &urpfMode
 		obj.AdvancedConfig = &advConfigStruct
 	}
 
@@ -1411,9 +1400,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		}
 	}
 
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		d.Set("replication_mode", obj.ReplicationMode)
-	}
+	d.Set("replication_mode", obj.ReplicationMode)
 
 	if obj.AdvancedConfig != nil {
 		advConfig := make(map[string]interface{})
@@ -1432,11 +1419,6 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		}
 		if obj.AdvancedConfig.UrpfMode != nil {
 			advConfig["urpf_mode"] = *obj.AdvancedConfig.UrpfMode
-		} else {
-			if util.NsxVersionLower("3.1.0") {
-				// set to default in early versions
-				advConfig["urpf_mode"] = model.SegmentAdvancedConfig_URPF_MODE_STRICT
-			}
 		}
 		// This is a list with 1 element
 		var advConfigList []map[string]interface{}

@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -138,29 +136,27 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		TransportTunnels: transportTunnel,
 	}
 
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		direction := d.Get("direction").(string)
-		maxSegmentSize := int64(d.Get("max_segment_size").(int))
-		if direction != "" {
-			l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
-				Direction: &direction,
-			}
-			if maxSegmentSize > 0 {
-				l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
-			}
-			obj.TcpMssClamping = &l2TcpMSSClamping
+	direction := d.Get("direction").(string)
+	maxSegmentSize := int64(d.Get("max_segment_size").(int))
+	if direction != "" {
+		l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
+			Direction: &direction,
 		}
-		localAddress := d.Get("local_address").(string)
-		peerAddress := d.Get("peer_address").(string)
-		protocol := d.Get("protocol").(string)
-		if localAddress != "" && peerAddress != "" {
-			l2VpnTunnelEncapsulation := model.L2VPNTunnelEncapsulation{
-				LocalEndpointAddress: &localAddress,
-				PeerEndpointAddress:  &peerAddress,
-				Protocol:             &protocol,
-			}
-			obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
+		if maxSegmentSize > 0 {
+			l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
 		}
+		obj.TcpMssClamping = &l2TcpMSSClamping
+	}
+	localAddress := d.Get("local_address").(string)
+	peerAddress := d.Get("peer_address").(string)
+	protocol := d.Get("protocol").(string)
+	if localAddress != "" && peerAddress != "" {
+		l2VpnTunnelEncapsulation := model.L2VPNTunnelEncapsulation{
+			LocalEndpointAddress: &localAddress,
+			PeerEndpointAddress:  &peerAddress,
+			Protocol:             &protocol,
+		}
+		obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
 	}
 
 	if isT0 {
@@ -292,21 +288,19 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	d.Set("enabled", obj.Enabled)
 
 	d.Set("transport_tunnels", obj.TransportTunnels)
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		if obj.TcpMssClamping != nil {
-			direction := obj.TcpMssClamping.Direction
-			mss := obj.TcpMssClamping.MaxSegmentSize
-			d.Set("direction", direction)
-			d.Set("max_segment_size", mss)
-		}
-		if obj.TunnelEncapsulation != nil {
-			localAddress := obj.TunnelEncapsulation.LocalEndpointAddress
-			peerAddress := obj.TunnelEncapsulation.PeerEndpointAddress
-			protocol := obj.TunnelEncapsulation.Protocol
-			d.Set("local_address", localAddress)
-			d.Set("peer_address", peerAddress)
-			d.Set("protocol", protocol)
-		}
+	if obj.TcpMssClamping != nil {
+		direction := obj.TcpMssClamping.Direction
+		mss := obj.TcpMssClamping.MaxSegmentSize
+		d.Set("direction", direction)
+		d.Set("max_segment_size", mss)
+	}
+	if obj.TunnelEncapsulation != nil {
+		localAddress := obj.TunnelEncapsulation.LocalEndpointAddress
+		peerAddress := obj.TunnelEncapsulation.PeerEndpointAddress
+		protocol := obj.TunnelEncapsulation.Protocol
+		d.Set("local_address", localAddress)
+		d.Set("peer_address", peerAddress)
+		d.Set("protocol", protocol)
 	}
 	d.SetId(id)
 
@@ -376,29 +370,27 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 		Revision:         &revision,
 		Enabled:          &enabled,
 	}
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		direction := d.Get("direction").(string)
-		maxSegmentSize := int64(d.Get("max_segment_size").(int))
-		if direction != "" {
-			l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
-				Direction: &direction,
-			}
-			if maxSegmentSize > 0 {
-				l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
-			}
-			obj.TcpMssClamping = &l2TcpMSSClamping
+	direction := d.Get("direction").(string)
+	maxSegmentSize := int64(d.Get("max_segment_size").(int))
+	if direction != "" {
+		l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
+			Direction: &direction,
 		}
-		localAddress := d.Get("local_address").(string)
-		peerAddress := d.Get("peer_address").(string)
-		protocol := d.Get("protocol").(string)
-		if localAddress != "" && peerAddress != "" {
-			l2VpnTunnelEncapsulation := model.L2VPNTunnelEncapsulation{
-				LocalEndpointAddress: &localAddress,
-				PeerEndpointAddress:  &peerAddress,
-				Protocol:             &protocol,
-			}
-			obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
+		if maxSegmentSize > 0 {
+			l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
 		}
+		obj.TcpMssClamping = &l2TcpMSSClamping
+	}
+	localAddress := d.Get("local_address").(string)
+	peerAddress := d.Get("peer_address").(string)
+	protocol := d.Get("protocol").(string)
+	if localAddress != "" && peerAddress != "" {
+		l2VpnTunnelEncapsulation := model.L2VPNTunnelEncapsulation{
+			LocalEndpointAddress: &localAddress,
+			PeerEndpointAddress:  &peerAddress,
+			Protocol:             &protocol,
+		}
+		obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
 	}
 	sessionContext := getSessionContext(d, m)
 	if isT0 {
