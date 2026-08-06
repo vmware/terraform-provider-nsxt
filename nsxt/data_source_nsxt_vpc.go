@@ -34,7 +34,14 @@ func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
 	if !util.NsxVersionHigherOrEqual("9.0.0") {
 		return fmt.Errorf("VPC data source requires NSX version 9.0.0 or higher")
 	}
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Vpc", nil)
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+	if obj, ok := cacheAwareDataSourceReadByID[model.Vpc](d, m, connector, objID, resourceTypeVpc, model.VpcBindingType()); ok {
+		d.Set("short_id", obj.ShortId)
+		return nil
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Vpc", nil)
 	if err != nil {
 		return err
 	}

@@ -111,7 +111,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	obj := model.ProjectIpAddressAllocation{
 		DisplayName: &displayName,
@@ -134,6 +134,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -149,7 +150,35 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 	sessionContext := getSessionContext(d, m)
 	client := cliProjectIpAddressAllocationsClient(sessionContext, connector)
 	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], id)
+	var obj *model.ProjectIpAddressAllocation
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.ProjectIpAddressAllocation](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeProjectIpAddressAllocation,
+			model.ProjectIpAddressAllocationBindingType(),
+			func() (*model.ProjectIpAddressAllocation, error) {
+				readObj, readErr := client.Get(parents[0], parents[1], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.ProjectIpAddressAllocation) error {
+				return client.Patch(parents[0], parents[1], id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(parents[0], parents[1], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "ProjectIpAddressAllocation", id, err)
 	}
@@ -161,7 +190,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, projectIpAddressAllocationSchema, "", nil)
 }
 
@@ -177,7 +206,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	revision := int64(d.Get("revision").(int))
 
@@ -203,6 +232,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 		d.Partial(true)
 		return handleUpdateError("ProjectIpAddressAllocation", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -223,6 +253,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationDelete(d *schema.ResourceData, 
 	if err != nil {
 		return handleDeleteError("ProjectIpAddressAllocation", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, id, m)
 
 	return nil
 }

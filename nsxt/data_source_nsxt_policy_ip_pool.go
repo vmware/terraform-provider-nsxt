@@ -31,7 +31,15 @@ func dataSourceNsxtPolicyIPPool() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "IpAddressPool", nil)
+	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if obj, ok := cacheAwareDataSourceReadByID[model.IpAddressPool](d, m, connector, objID, resourceTypeIpAddressPool, model.IpAddressPoolBindingType()); ok {
+		d.Set("realized_id", obj.RealizationId)
+		return nil
+	}
+
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "IpAddressPool", nil)
 	if err != nil {
 		return err
 	}
@@ -41,7 +49,7 @@ func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error
 	if len(errors) > 0 {
 		return errors[0]
 	}
-	pool := dataValue.(model.IpAddressPool)
-	d.Set("realized_id", pool.RealizationId)
+	poolObj := dataValue.(model.IpAddressPool)
+	d.Set("realized_id", poolObj.RealizationId)
 	return nil
 }

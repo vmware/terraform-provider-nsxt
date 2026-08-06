@@ -268,7 +268,7 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
 	if tagErr != nil {
 		return tagErr
 	}
@@ -295,6 +295,7 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, d.Id(), m)
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 
@@ -305,11 +306,44 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcConnectivityProfile ID")
 	}
-
-	sessionContext := getSessionContext(d, m)
-	client := cliVpcConnectivityProfilesClient(sessionContext, connector)
-	parents := getVpcParentsFromContext(sessionContext)
-	obj, err := client.Get(parents[0], parents[1], id)
+	var obj *model.VpcConnectivityProfile
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.VpcConnectivityProfile](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeVpcConnectivityProfile,
+			model.VpcConnectivityProfileBindingType(),
+			func() (*model.VpcConnectivityProfile, error) {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcConnectivityProfilesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				readObj, readErr := client.Get(parents[0], parents[1], id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.VpcConnectivityProfile) error {
+				sessionContext := getSessionContext(d, m)
+				client := cliVpcConnectivityProfilesClient(sessionContext, connector)
+				parents := getVpcParentsFromContext(sessionContext)
+				return client.Patch(parents[0], parents[1], id, *patchObj)
+			},
+		)
+	} else {
+		sessionContext := getSessionContext(d, m)
+		client := cliVpcConnectivityProfilesClient(sessionContext, connector)
+		parents := getVpcParentsFromContext(sessionContext)
+		readObj, readErr := client.Get(parents[0], parents[1], id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "VpcConnectivityProfile", id, err)
 	}
@@ -321,7 +355,7 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 	d.Set("revision", obj.Revision)
 	d.Set("path", obj.Path)
 
-	elem := reflect.ValueOf(&obj).Elem()
+	elem := reflect.ValueOf(obj).Elem()
 	return metadata.StructToSchema(elem, d, vpcConnectivityProfileSchema, "", nil)
 }
 
@@ -337,7 +371,7 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags, tagErr := getValidatedTagsFromSchema(d)
+	tags, tagErr := getPolicyTagsWithProviderManagedDefaultsValidated(d, m)
 	if tagErr != nil {
 		return tagErr
 	}
@@ -365,6 +399,7 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcConnectivityProfile", id, err)
 	}
 
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, d.Id(), m)
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 
@@ -384,6 +419,7 @@ func resourceNsxtVpcConnectivityProfileDelete(d *schema.ResourceData, m interfac
 	if err != nil {
 		return handleDeleteError("VpcConnectivityProfile", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, id, m)
 
 	return nil
 }

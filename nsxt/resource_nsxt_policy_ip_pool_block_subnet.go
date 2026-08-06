@@ -103,8 +103,51 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 	if id == "" || poolID == "" {
 		return fmt.Errorf("Error obtaining Block Subnet ID")
 	}
+	subnetID := id
+	if strings.Contains(subnetID, "/") {
+		subnetID = getPolicyIDFromPath(subnetID)
+	}
 
-	subnetData, err := client.Get(poolID, id)
+	backendRead := func() (*model.IpAddressPoolBlockSubnet, error) {
+		subnetData, readErr := client.Get(poolID, subnetID)
+		if readErr != nil {
+			return nil, readErr
+		}
+		snet, errs := converter.ConvertToGolang(subnetData, model.IpAddressPoolBlockSubnetBindingType())
+		if len(errs) > 0 {
+			return nil, fmt.Errorf("Error converting Block Subnet %s", errs[0])
+		}
+		obj := snet.(model.IpAddressPoolBlockSubnet)
+		return &obj, nil
+	}
+
+	patchFunc := func(patchObj *model.IpAddressPoolBlockSubnet) error {
+		// IMPORTANT: patchObj may already include provider-managed tags injected by
+		// CacheAwareResourceRead; convert patchObj directly to preserve them.
+		sv, convErrs := converter.ConvertToVapi(*patchObj, model.IpAddressPoolBlockSubnetBindingType())
+		if convErrs != nil {
+			return convErrs[0]
+		}
+		return client.Patch(poolID, subnetID, sv.(*data.StructValue))
+	}
+
+	var blockSubnet *model.IpAddressPoolBlockSubnet
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		key := id
+		blockSubnet, _, _, err = CacheAwareResourceRead[model.IpAddressPoolBlockSubnet](
+			d,
+			m,
+			connector,
+			key,
+			resourceTypeIpAddressPoolBlockSubnet,
+			model.IpAddressPoolBlockSubnetBindingType(),
+			backendRead,
+			patchFunc,
+		)
+	} else {
+		blockSubnet, err = backendRead()
+	}
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -113,12 +156,6 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 		}
 		return handleReadError(d, "Block Subnet", id, err)
 	}
-
-	snet, errs := converter.ConvertToGolang(subnetData, model.IpAddressPoolBlockSubnetBindingType())
-	if len(errs) > 0 {
-		return fmt.Errorf("Error converting Block Subnet %s", errs[0])
-	}
-	blockSubnet := snet.(model.IpAddressPoolBlockSubnet)
 
 	d.Set("display_name", blockSubnet.DisplayName)
 	d.Set("description", blockSubnet.Description)
@@ -169,6 +206,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d), m)
 	return resourceNsxtPolicyIPPoolBlockSubnetRead(d, m)
 }
 
@@ -197,6 +235,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleUpdateError("Block Subnet", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d), m)
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
@@ -223,6 +262,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleDeleteError("Block Subnet", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressPoolBlockSubnet, CacheKeyForResourceID(resourceTypeIpAddressPoolBlockSubnet, d), m)
 
 	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(getSessionContext(d, m), d, connector)
 }

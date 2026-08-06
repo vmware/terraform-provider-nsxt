@@ -26,9 +26,16 @@ var cliT1PortQosProfileBindingMapsClient = t1_port_profiles.NewPortQosProfileBin
 var cliT1PortSecurityProfileBindingMapsClient = t1_port_profiles.NewPortSecurityProfileBindingMapsClient
 
 func policySegmentPortResourceToInfraStruct(id string, d *schema.ResourceData, isDestroy bool) (model.Infra, error) {
+	return policySegmentPortResourceToInfraStructWithTags(id, d, isDestroy, nil)
+}
+
+func policySegmentPortResourceToInfraStructWithTags(id string, d *schema.ResourceData, isDestroy bool, tagsOverride []model.Tag) (model.Infra, error) {
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := tagsOverride
+	if tags == nil {
+		tags = getPolicyTagsFromSchema(d)
+	}
 	revision := int64(d.Get("revision").(int))
 	segmentPath := d.Get("segment_path").(string)
 

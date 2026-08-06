@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtVpcSubnet() *schema.Resource {
@@ -30,6 +31,11 @@ func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("VPC Subnet data source requires NSX version 9.0.0 or higher")
 	}
 	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if _, ok := cacheAwareDataSourceReadByID[model.VpcSubnet](d, m, connector, objID, resourceTypeVpcSubnet, model.VpcSubnetBindingType()); ok {
+		return nil
+	}
 
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "VpcSubnet", nil, false)
 	if err != nil {

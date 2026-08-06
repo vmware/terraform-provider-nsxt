@@ -524,7 +524,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
@@ -551,6 +551,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 
@@ -566,7 +567,39 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	obj, err := client.Get(id)
+	var obj *model.Service
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		key := d.Get("path").(string)
+		if key == "" {
+			key = id
+		}
+		obj, _, _, err = CacheAwareResourceRead[model.Service](
+			d,
+			m,
+			connector,
+			key,
+			resourceTypeService,
+			model.ServiceBindingType(),
+			func() (*model.Service, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.Service) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "Service", id, err)
 	}
@@ -726,7 +759,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	revision := int64(d.Get("revision").(int))
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
@@ -749,6 +782,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleUpdateError("Service", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 	return resourceNsxtPolicyServiceRead(d, m)
 }
 
@@ -773,6 +807,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("Service", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeService, CacheKeyForResourceID(resourceTypeService, d), m)
 
 	return nil
 }

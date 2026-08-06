@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyLbService() *schema.Resource {
@@ -23,6 +24,11 @@ func dataSourceNsxtPolicyLbService() *schema.Resource {
 
 func dataSourceNsxtPolicyLbServiceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if _, ok := cacheAwareDataSourceReadByID[model.LBService](d, m, connector, objID, resourceTypeLBService, model.LBServiceBindingType()); ok {
+		return nil
+	}
 
 	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "LBService", nil)
 	if err != nil {

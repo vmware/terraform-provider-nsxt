@@ -61,6 +61,8 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 		return handleCreateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, policyID, m)
+
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -185,6 +187,28 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
+
+	if isCacheEnabledForRead(d, m) {
+		sp, cacheUsed, _, cacheErr := TryCacheRead[model.SecurityPolicy](
+			d,
+			m,
+			connector,
+			policyID,
+			resourceTypeSecurityPolicy,
+			model.SecurityPolicyBindingType(),
+		)
+		if cacheErr != nil {
+			return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), cacheErr)
+		}
+		if cacheUsed && sp != nil && len(sp.Rules) > 0 {
+			for _, r := range sp.Rules {
+				if r.Id != nil && *r.Id == id {
+					securityAndGatewayPolicyRuleModelToSchema(d, r)
+					return nil
+				}
+			}
+		}
+	}
 	rule, err := client.Get(domain, policyID, id)
 	if err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
@@ -255,6 +279,8 @@ func resourceNsxtPolicySecurityPolicyRuleUpdate(d *schema.ResourceData, m interf
 		return handleUpdateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, policyID, m)
+
 	return resourceNsxtPolicySecurityPolicyRuleRead(d, m)
 }
 
@@ -275,7 +301,11 @@ func resourceNsxtPolicySecurityPolicyRuleDelete(d *schema.ResourceData, m interf
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	return client.Delete(domain, policyID, id)
+	err := client.Delete(domain, policyID, id)
+	if err == nil {
+		MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeSecurityPolicy, policyID, m)
+	}
+	return err
 }
 
 func nsxtSecurityPolicyRuleImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {

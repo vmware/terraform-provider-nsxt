@@ -78,7 +78,35 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, is
 	if client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
-	obj, err := client.Get(domainName, id)
+	var obj *model.SecurityPolicy
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.SecurityPolicy](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeSecurityPolicy,
+			model.SecurityPolicyBindingType(),
+			func() (*model.SecurityPolicy, error) {
+				readObj, readErr := client.Get(domainName, id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.SecurityPolicy) error {
+				return securityPolicyInfraPatch(getSessionContext(d, m), *patchObj, domainName, m)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(domainName, id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +130,7 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, is
 	d.Set("stateful", obj.Stateful)
 	d.Set("tcp_strict", obj.TcpStrict)
 	d.Set("revision", obj.Revision)
-	return &obj, nil
+	return obj, nil
 }
 
 func resourceNsxtPolicyParentSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {

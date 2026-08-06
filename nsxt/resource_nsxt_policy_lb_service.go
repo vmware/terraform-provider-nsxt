@@ -114,7 +114,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 	connectivityPath := d.Get("connectivity_path").(string)
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
@@ -142,7 +142,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id(), m)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -159,8 +159,35 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 	if id == "" {
 		return fmt.Errorf("Error obtaining LBService ID")
 	}
-
-	obj, err := client.Get(id)
+	var obj *model.LBService
+	var err error
+	if isCacheEnabledForRead(d, m) {
+		obj, _, _, err = CacheAwareResourceRead[model.LBService](
+			d,
+			m,
+			connector,
+			id,
+			resourceTypeLBService,
+			model.LBServiceBindingType(),
+			func() (*model.LBService, error) {
+				readObj, readErr := client.Get(id)
+				if readErr != nil {
+					return nil, readErr
+				}
+				return &readObj, nil
+			},
+			func(patchObj *model.LBService) error {
+				return client.Patch(id, *patchObj)
+			},
+		)
+	} else {
+		readObj, readErr := client.Get(id)
+		if readErr != nil {
+			err = readErr
+		} else {
+			obj = &readObj
+		}
+	}
 	if err != nil {
 		return handleReadError(d, "LBService", id, err)
 	}
@@ -196,7 +223,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags := getPolicyTagsWithProviderManagedDefaults(d, m)
 
 	connectivityPath := d.Get("connectivity_path").(string)
 	enabled := d.Get("enabled").(bool)
@@ -221,7 +248,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleUpdateError("LBService", id, err)
 	}
-
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, d.Id(), m)
 	return resourceNsxtPolicyLBServiceRead(d, m)
 }
 
@@ -243,6 +270,7 @@ func resourceNsxtPolicyLBServiceDelete(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleDeleteError("LBService", id, err)
 	}
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeLBService, id, m)
 
 	return nil
 }

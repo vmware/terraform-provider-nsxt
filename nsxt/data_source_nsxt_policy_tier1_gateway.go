@@ -36,6 +36,24 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	objID := d.Get("id").(string)
+
+	if obj, ok := cacheAwareDataSourceReadByID[model.Tier1](d, m, connector, objID, resourceTypeTier1, model.Tier1BindingType()); ok {
+		// Single edge cluster is not informative for global manager
+		if isPolicyGlobalManager(m) {
+			d.Set("edge_cluster_path", "")
+			return nil
+		}
+		id := objID
+		if obj.Id != nil {
+			id = *obj.Id
+		}
+		if err := resourceNsxtPolicyTier1GatewayReadEdgeCluster(getSessionContext(d, m), d, connector); err != nil {
+			return fmt.Errorf("failed to get Tier1 %s locale-services: %v", id, err)
+		}
+		return nil
+	}
+
 	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier1", nil)
 	if err != nil {
 		return err
