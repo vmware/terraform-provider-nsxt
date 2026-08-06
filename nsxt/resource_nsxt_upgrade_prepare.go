@@ -312,9 +312,6 @@ func uploadPrecheckAndUpgradeBundle(d *schema.ResourceData, m interface{}) error
 }
 
 func precheckBundleCompatibilityCheck(precheckBundleURL string) bool {
-	if util.NsxVersionLower("4.1.1") && len(precheckBundleURL) > 0 {
-		return false
-	}
 	return true
 }
 
@@ -360,11 +357,9 @@ func uploadUpgradeBundle(d *schema.ResourceData, m interface{}, bundleType strin
 	bundleFetchRequest := nsxModel.UpgradeBundleFetchRequest{
 		Url: &url,
 	}
-	if util.NsxVersionHigherOrEqual("4.1.1") {
-		bundleFetchRequest.BundleType = &bundleType
-		bundleFetchRequest.Password = &password
-		bundleFetchRequest.Username = &userName
-	}
+	bundleFetchRequest.BundleType = &bundleType
+	bundleFetchRequest.Password = &password
+	bundleFetchRequest.Username = &userName
 	bundleID, err := client.Create(bundleFetchRequest, nil)
 	if err != nil {
 		return fmt.Errorf("Failed to upload upgrade bundle of type %s: %v", bundleType, err)

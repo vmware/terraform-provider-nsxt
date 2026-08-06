@@ -1291,9 +1291,7 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*mpmodel.EdgeNodeSettings, er
 			SearchDomains:         searchDomains,
 			SyslogServers:         syslogServers,
 		}
-		if util.NsxVersionHigherOrEqual("4.0.0") {
-			obj.EnableUptMode = &enableUptMode
-		}
+		obj.EnableUptMode = &enableUptMode
 		return obj, nil
 	}
 

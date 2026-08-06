@@ -12,7 +12,6 @@ import (
 	cont_prof "github.com/vmware/terraform-provider-nsxt/api/infra/context_profiles"
 	custom_attr "github.com/vmware/terraform-provider-nsxt/api/infra/context_profiles/custom_attributes"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -496,12 +495,13 @@ func fillAttributesInSchema(d *schema.ResourceData, policyAttributes []model.Pol
 		key := attributeReverseKeyMap[*policyAttribute.Key]
 		elem["description"] = policyAttribute.Description
 		elem["value"] = policyAttribute.Value
-		if *policyAttribute.Key == model.PolicyAttributes_KEY_APP_ID {
+		switch *policyAttribute.Key {
+		case model.PolicyAttributes_KEY_APP_ID:
 			if len(policyAttribute.SubAttributes) > 0 {
 				elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
 			}
 			elem["is_alg_type"] = policyAttribute.IsALGType
-		} else if *policyAttribute.Key == model.PolicyAttributes_KEY_CUSTOM_URL && util.NsxVersionHigherOrEqual("4.0.0") {
+		case model.PolicyAttributes_KEY_CUSTOM_URL:
 			elem["custom_url_partial_match"] = policyAttribute.CustomUrlPartialMatch
 		}
 		attributes[key] = append(attributes[key], elem)

@@ -243,9 +243,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		obj.ActivateDefaultDfwRules = &activateDefaultDFWRules
 	}
 
-	if util.NsxVersionHigherOrEqual("4.1.1") {
-		obj.ExternalIpv4Blocks = extIpv4BlocksList
-	}
+	obj.ExternalIpv4Blocks = extIpv4BlocksList
 
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		obj.TgwExternalConnections = tgwConnectionsList
@@ -481,9 +479,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	if util.NsxVersionHigherOrEqual("4.2.0") {
 		d.Set("activate_default_dfw_rules", obj.ActivateDefaultDfwRules)
 	}
-	if util.NsxVersionHigherOrEqual("4.1.1") {
-		d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
-	}
+	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		d.Set("tgw_external_connections", obj.TgwExternalConnections)
 		d.Set("vc_folder", obj.VcFolder)
