@@ -375,24 +375,24 @@ func TestUnitNsxt_getGlobalPolicyEnforcementPointPath(t *testing.T) {
 
 func TestUnitNsxt_getSessionContextFromParentPath(t *testing.T) {
 	t.Run("multitenancy project path", func(t *testing.T) {
-		ctx := getSessionContextFromParentPath(nsxtClients{}, "/orgs/default/projects/proj1/groups/g1")
+		ctx := testAccGetSessionContextFromParentPath(nsxtClients{}, "/orgs/default/projects/proj1/groups/g1")
 		assert.EqualValues(t, tf_api.Multitenancy, ctx.ClientType)
 		assert.Equal(t, "proj1", ctx.ProjectID)
 	})
 
 	t.Run("VPC path", func(t *testing.T) {
-		ctx := getSessionContextFromParentPath(nsxtClients{}, "/orgs/default/projects/proj1/vpcs/vpc1/subnets/s1")
+		ctx := testAccGetSessionContextFromParentPath(nsxtClients{}, "/orgs/default/projects/proj1/vpcs/vpc1/subnets/s1")
 		assert.EqualValues(t, tf_api.VPC, ctx.ClientType)
 		assert.Equal(t, "vpc1", ctx.VPCID)
 	})
 
 	t.Run("global manager path falls back to Global", func(t *testing.T) {
-		ctx := getSessionContextFromParentPath(nsxtClients{PolicyGlobalManager: true}, "/infra/domains/default/groups/g1")
+		ctx := testAccGetSessionContextFromParentPath(nsxtClients{PolicyGlobalManager: true}, "/infra/domains/default/groups/g1")
 		assert.EqualValues(t, tf_api.Global, ctx.ClientType)
 	})
 
 	t.Run("local manager path falls back to Local", func(t *testing.T) {
-		ctx := getSessionContextFromParentPath(nsxtClients{}, "/infra/domains/default/groups/g1")
+		ctx := testAccGetSessionContextFromParentPath(nsxtClients{}, "/infra/domains/default/groups/g1")
 		assert.EqualValues(t, tf_api.Local, ctx.ClientType)
 	})
 }

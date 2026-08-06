@@ -232,7 +232,7 @@ func TestMockNsxtPolicyTier0GetLocaleService(t *testing.T) {
 		lsID := "ls-1"
 		mockSDK.EXPECT().Get("gw1", "ls-1").Return(model.LocaleServices{Id: &lsID}, nil)
 
-		out := policyTier0GetLocaleService(ctx, "gw1", "ls-1", nil, false)
+		out := testAccPolicyTier0GetLocaleService(ctx, "gw1", "ls-1", nil)
 		require.NotNil(t, out)
 		assert.Equal(t, "ls-1", *out.Id)
 	})
@@ -245,7 +245,7 @@ func TestMockNsxtPolicyTier0GetLocaleService(t *testing.T) {
 
 		mockSDK.EXPECT().Get("gw1", "ls-1").Return(model.LocaleServices{}, assertErr("not found"))
 
-		out := policyTier0GetLocaleService(ctx, "gw1", "ls-1", nil, false)
+		out := testAccPolicyTier0GetLocaleService(ctx, "gw1", "ls-1", nil)
 		assert.Nil(t, out)
 	})
 }
