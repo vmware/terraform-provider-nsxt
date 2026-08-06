@@ -32,7 +32,6 @@ func TestAccResourceNsxtPrincipalIdentity_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -70,7 +69,6 @@ func TestAccResourceNsxtPrincipalIdentity_import_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

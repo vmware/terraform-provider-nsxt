@@ -204,7 +204,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	defaultProtocol := "IPV4_IPV6"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -299,7 +299,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withIPCidrRange(t *testing.T) {
 	// a bug in NSX would cause permadiff when display_name is used in service_entries
 	// this issue is fixed in 4.0.0 onwards
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "4.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)

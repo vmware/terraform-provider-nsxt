@@ -22,7 +22,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
         }`
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -112,7 +112,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) 
         }`
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -46,7 +46,6 @@ func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
 			testAccOnlyLocalManager(t)
 			testAccTestDeprecated(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "2.3.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -96,7 +95,6 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 			testAccOnlyLocalManager(t)
 			testAccTestDeprecated(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "2.3.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -134,7 +132,6 @@ func testAccResourceNsxtLbL7MonitorImport(t *testing.T, protocol string) {
 			testAccOnlyLocalManager(t)
 			testAccTestDeprecated(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "2.3.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

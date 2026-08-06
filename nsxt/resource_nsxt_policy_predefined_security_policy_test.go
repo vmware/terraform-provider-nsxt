@@ -15,7 +15,6 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 	testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
@@ -68,7 +67,6 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic(t *testing.T)
 	testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
@@ -138,7 +136,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
         }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -177,7 +175,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

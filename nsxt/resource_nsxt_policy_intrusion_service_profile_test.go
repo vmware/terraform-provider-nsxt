@@ -16,7 +16,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIntrusionServiceProfileBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
 	})
 }
 
@@ -97,7 +96,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_importBasic(t *testing.T) 
 	testAccResourceNsxtPolicyIntrusionServiceProfileImportBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
 	})
 }
 

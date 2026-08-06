@@ -20,7 +20,6 @@ func TestAccDataSourceNsxtPolicyIpBlock_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicyIPBlockBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 

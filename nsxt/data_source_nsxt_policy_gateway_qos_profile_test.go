@@ -18,7 +18,6 @@ import (
 func TestAccDataSourceNsxtPolicyGatewayQosProfile_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 

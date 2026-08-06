@@ -19,7 +19,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_default(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "3.0.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -39,7 +38,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 

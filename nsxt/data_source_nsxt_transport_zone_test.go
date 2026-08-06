@@ -20,7 +20,6 @@ func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 			testAccOnlyLocalManager(t)
 			testAccTestDeprecated(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

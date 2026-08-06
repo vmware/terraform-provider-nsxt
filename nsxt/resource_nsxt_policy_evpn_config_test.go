@@ -22,7 +22,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_inline(t *testing.T) {
 	updatedDescription := "terraform updated"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
@@ -78,7 +78,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_routeServer(t *testing.T) {
 	updatedDescription := "terraform updated"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
@@ -132,7 +132,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_evpn_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
