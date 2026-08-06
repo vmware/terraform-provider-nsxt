@@ -22,7 +22,6 @@ import (
 	tier0sAPI "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	tier0smocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func gatewayLocaleServiceTestResource() *schema.Resource {
@@ -39,10 +38,7 @@ func TestUnitNsxt_setLocaleServiceRedistributionConfig(t *testing.T) {
 		assert.Nil(t, serviceStruct.RouteRedistributionConfig)
 	})
 
-	t.Run("sets bgp and ospf flags on 3.1.0+", func(t *testing.T) {
-		util.NsxVersion = "3.1.0"
-		defer func() { util.NsxVersion = "" }()
-
+	t.Run("sets bgp and ospf flags", func(t *testing.T) {
 		serviceStruct := model.LocaleServices{}
 		setLocaleServiceRedistributionConfig([]interface{}{
 			map[string]interface{}{"enabled": true, "ospf_enabled": true, "rule": []interface{}{}},
@@ -52,19 +48,6 @@ func TestUnitNsxt_setLocaleServiceRedistributionConfig(t *testing.T) {
 		assert.True(t, *serviceStruct.RouteRedistributionConfig.BgpEnabled)
 		require.NotNil(t, serviceStruct.RouteRedistributionConfig.OspfEnabled)
 		assert.True(t, *serviceStruct.RouteRedistributionConfig.OspfEnabled)
-	})
-
-	t.Run("ospf flag omitted below 3.1.0", func(t *testing.T) {
-		util.NsxVersion = "3.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		serviceStruct := model.LocaleServices{}
-		setLocaleServiceRedistributionConfig([]interface{}{
-			map[string]interface{}{"enabled": true, "ospf_enabled": true, "rule": []interface{}{}},
-		}, &serviceStruct)
-
-		require.NotNil(t, serviceStruct.RouteRedistributionConfig)
-		assert.Nil(t, serviceStruct.RouteRedistributionConfig.OspfEnabled)
 	})
 }
 
