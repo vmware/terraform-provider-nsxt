@@ -61,7 +61,7 @@ The following arguments are supported:
     * `prefix_list_matches` - (Optional) Set of policy paths for prefix lists to match against.
     * `community_list_match` - (Optional) List of BGP community match criteria. Each item supports:
         * `criteria` - (Required) Community list path or a regular expression.
-        * `match_operator` - (Required) Match operator. Accepted values: `ANY`, `ALL`, `EXACT`, `COMMUNITY_REGEX`, `LARGE_COMMUNITY_REGEX`.
+        * `match_operator` - (Required) Match operator. Accepted values: `MATCH_ANY`, `MATCH_ALL`, `MATCH_EXACT`, `MATCH_COMMUNITY_REGEX`, `MATCH_LARGE_COMMUNITY_REGEX`.
     * `set` - (Optional) Set clause applied to matching routes (max 1 block):
         * `as_path_prepend` - (Optional) AS path string to prepend (influences route selection).
         * `community` - (Optional) BGP regular or large community value to set on matching routes.
