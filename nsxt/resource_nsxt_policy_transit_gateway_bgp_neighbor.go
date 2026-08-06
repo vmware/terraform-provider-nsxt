@@ -107,11 +107,12 @@ func resourceNsxtPolicyTransitGatewayBgpNeighbor() *schema.Resource {
 				ValidateFunc: validateSingleIP(),
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "Password for BGP neighbor authentication",
-				ValidateFunc: validation.StringLenBetween(0, 32),
-				Sensitive:    true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Password for BGP neighbor authentication",
+				ValidateFunc:     validation.StringLenBetween(0, 32),
+				Sensitive:        true,
+				DiffSuppressFunc: suppressIfEmptyPriorState,
 			},
 			"remote_as_num": {
 				Type:         schema.TypeString,
