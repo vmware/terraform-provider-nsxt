@@ -485,6 +485,7 @@ var accTestVpcSubnetDhcpDualStackConfigUpdate = map[string]string{
 
 func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
+	fixtureBase := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -498,7 +499,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(true, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(true, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED", fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigCreate["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigCreate["display_name"]),
@@ -513,7 +514,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED", fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"]),
@@ -528,11 +529,11 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 				),
 			},
 			{
-				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED"),
+				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_DEACTIVATED", "DHCP_DEACTIVATED", fixtureBase),
 				PlanOnly: true,
 			},
 			{
-				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED"),
+				Config: testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED", fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpDualStackConfigUpdate["display_name"]),
@@ -546,7 +547,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 				),
 			},
 			{
-				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED"),
+				Config:   testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(false, "DHCP_SERVER", "DHCP_DEACTIVATED", fixtureBase),
 				PlanOnly: true,
 			},
 		},
@@ -555,6 +556,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpDualStackConfig(t *testing.T) {
 
 func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
+	fixtureBase := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -568,7 +570,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(true),
+				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(true, fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnet920SubnetDhcpv6Create["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Create["display_name"]),
@@ -582,7 +584,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(false),
+				Config: testAccNsxtVpcSubnetSubnetDhcpv6Template(false, fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnet920SubnetDhcpv6Update["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Update["display_name"]),
@@ -596,7 +598,7 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 				),
 			},
 			{
-				Config:   testAccNsxtVpcSubnetSubnetDhcpv6Template(false),
+				Config:   testAccNsxtVpcSubnetSubnetDhcpv6Template(false, fixtureBase),
 				PlanOnly: true,
 			},
 		},
@@ -645,7 +647,10 @@ func testAccNsxtVpcSubnetExists(displayName string, resourceName string) resourc
 			return fmt.Errorf("VpcSubnet resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtVpcSubnetExists(testAccGetSessionContext(), resourceID, connector)
+		// Derive project/vpc from the subnet's own path rather than the shared env-var based
+		// session context, since some fixtures create their own dedicated project/VPC.
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), rs.Primary.Attributes["path"])
+		exists, err := resourceNsxtVpcSubnetExists(sessionContext, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -666,7 +671,8 @@ func testAccNsxtVpcSubnetCheckDestroy(state *terraform.State, displayName string
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtVpcSubnetExists(testAccGetSessionContext(), resourceID, connector)
+		sessionContext := testAccGetSessionContextFromParentPath(testAccProvider.Meta(), rs.Primary.Attributes["path"])
+		exists, err := resourceNsxtVpcSubnetExists(sessionContext, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -736,7 +742,7 @@ resource "nsxt_vpc_subnet" "test" {
   }
   display_name = "${NAME}-vpc-subnet"
 
-  ip_addresses = ["192.168.240.0/26"]
+  # NSX rejects ip_addresses combined with access_mode L2_Only.
   access_mode  = "L2_Only"
   vlan_connection = nsxt_policy_distributed_vlan_connection.test.path
 }`
@@ -832,7 +838,88 @@ resource "nsxt_vpc_subnet" "test" {
 }`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], attrMap["description"], attrMap["ip_addresses"], attrMap["reserved_ip_ranges"])
 }
 
-func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool) string {
+// testAccNsxtVpcSubnetIpv6VpcTemplate returns a self-contained project + VPC with its own IPv6
+// ip block registered on the VPC connectivity profile. NSX rejects IPv6/dual-stack addressing on
+// ISOLATED subnets, and non-ISOLATED subnets require an IPv6 ip block registered on the parent
+// VPC (error 610711) - the shared multitenancy VPC fixture used by other tests has none. NSX also
+// requires every subnet CIDR to fall within a registered block (error 520034), so ipv6BlockCidr
+// must contain whatever IPv6 CIDR the caller's subnet uses, and ipv4PrivateCidr (leave empty for
+// a purely IPv6 subnet) must contain its IPv4 CIDR. preambleHCL is extra HCL (e.g. a
+// vpc_service_profile resource) rendered before the VPC, and vpcExtraLines is spliced into the
+// nsxt_vpc resource body (e.g. a vpc_service_profile reference).
+func testAccNsxtVpcSubnetIpv6VpcTemplate(base, ipv4PrivateCidr, ipv6BlockCidr, preambleHCL, vpcExtraLines string) string {
+	shortID := base
+	if len(shortID) > 8 {
+		shortID = shortID[len(shortID)-8:]
+	}
+	privateIpsLine := ""
+	if ipv4PrivateCidr != "" {
+		privateIpsLine = fmt.Sprintf(`  private_ips  = ["%s"]`, ipv4PrivateCidr)
+	}
+	return fmt.Sprintf(`
+%s
+resource "nsxt_policy_ip_block" "ipv6_vpc_block" {
+  display_name = "%s-ipv6-block"
+  cidr         = "%s"
+  visibility   = "EXTERNAL"
+}
+
+resource "nsxt_policy_project" "ipv6_vpc_proj" {
+  nsx_id       = "%s-proj"
+  display_name = "%s-proj"
+  ipv6_blocks  = [nsxt_policy_ip_block.ipv6_vpc_block.path]
+}
+
+data "nsxt_policy_transit_gateway" "ipv6_vpc_tgw" {
+  context {
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+  }
+  is_default = true
+}
+
+resource "nsxt_vpc_connectivity_profile" "ipv6_vpc_cp" {
+  context {
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+  }
+  display_name         = "%s-cp"
+  transit_gateway_path = data.nsxt_policy_transit_gateway.ipv6_vpc_tgw.path
+  ipv6_blocks          = [nsxt_policy_ip_block.ipv6_vpc_block.path]
+  service_gateway {
+    enable = false
+  }
+}
+
+resource "nsxt_vpc" "ipv6_vpc" {
+  context {
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+  }
+  display_name = "%s-vpc"
+  short_id     = "%s"
+%s
+%s
+}
+
+resource "nsxt_vpc_attachment" "ipv6_vpc_att" {
+  display_name             = "%s-att"
+  parent_path              = nsxt_vpc.ipv6_vpc.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.ipv6_vpc_cp.path
+}
+`, preambleHCL, base, ipv6BlockCidr, base, base, base, base, shortID, privateIpsLine, vpcExtraLines, base)
+}
+
+// testAccNsxtVpcSubnetIpv6VpcContext returns the context block + depends_on line every
+// nsxt_vpc_subnet using testAccNsxtVpcSubnetIpv6VpcTemplate's fixture must include.
+func testAccNsxtVpcSubnetIpv6VpcContext() string {
+	return `
+  context {
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+    vpc_id     = nsxt_vpc.ipv6_vpc.id
+  }
+  depends_on = [nsxt_vpc_attachment.ipv6_vpc_att]
+`
+}
+
+func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool, fixtureBase string) string {
 	var attrMap map[string]string
 	var mode, dnsPref string
 	if createFlow {
@@ -844,13 +931,13 @@ func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool) string {
 		mode = model.SubnetDhcpv6Config_MODE_DEACTIVATED
 		dnsPref = model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS
 	}
-	return fmt.Sprintf(`
+	return testAccNsxtVpcSubnetIpv6VpcTemplate(fixtureBase, "", "2001:db8:f100::/56", "", "") + fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "%s"
   ip_addresses = ["2001:db8:f100::/64"]
   ip_address_type = "IPV6"
-  access_mode  = "Isolated"
+  access_mode  = "Private"
 
   subnet_dhcpv6_config {
     mode                  = "%s"
@@ -863,7 +950,7 @@ resource "nsxt_vpc_subnet" "test" {
     dhcp_server_addresses = ["2001:db8:f100::11/64"]
   }
 }
-`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], mode, dnsPref)
+`, testAccNsxtVpcSubnetIpv6VpcContext(), attrMap["display_name"], mode, dnsPref)
 }
 
 func testAccNsxtVpcSubnetSubnetDhcpv4Template(createFlow bool, dhcpMode string) string {
@@ -893,20 +980,20 @@ resource "nsxt_vpc_subnet" "test" {
 `, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], dhcpMode)
 }
 
-func testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(createFlow bool, v4Mode string, v6Mode string) string {
+func testAccNsxtVpcSubnetSubnetDhcpDualStackTemplate(createFlow bool, v4Mode string, v6Mode string, fixtureBase string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcSubnetDhcpDualStackConfigCreate
 	} else {
 		attrMap = accTestVpcSubnetDhcpDualStackConfigUpdate
 	}
-	return fmt.Sprintf(`
+	return testAccNsxtVpcSubnetIpv6VpcTemplate(fixtureBase, "192.168.240.0/24", "2001:db8:f110::/56", "", "") + fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "%s"
-  ip_addresses = ["192.168.240.0/26", "2001:db8:f100::/64"]
+  ip_addresses = ["192.168.240.0/26", "2001:db8:f110::/64"]
   ip_address_type = "IPV4_IPV6"
-  access_mode  = "Isolated"
+  access_mode  = "Private"
 
   dhcp_config {
     mode = "%s"
@@ -918,11 +1005,11 @@ resource "nsxt_vpc_subnet" "test" {
 
   advanced_config {
     connectivity_state    = "DISCONNECTED"
-    gateway_addresses     = ["192.168.240.10/26", "2001:db8:f100::10/64"]
-    dhcp_server_addresses = ["192.168.240.11/26", "2001:db8:f100::11/64"]
+    gateway_addresses     = ["192.168.240.10/26", "2001:db8:f110::10/64"]
+    dhcp_server_addresses = ["192.168.240.11/26", "2001:db8:f110::11/64"]
   }
 }
-`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], v4Mode, v6Mode)
+`, testAccNsxtVpcSubnetIpv6VpcContext(), attrMap["display_name"], v4Mode, v6Mode)
 }
 
 var accTestVpcSubnetDhcpv4DeactivatedServerAddress = map[string]string{
@@ -943,6 +1030,7 @@ var accTestVpcSubnetDhcpv6DeactivatedServerAddress = map[string]string{
 // of omitting it, and NSX rejected the empty string.
 func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
+	fixtureBase := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -957,7 +1045,7 @@ func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress(t *t
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(),
+				Config: testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv4DeactivatedServerAddress["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv4DeactivatedServerAddress["display_name"]),
@@ -974,7 +1062,7 @@ func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress(t *t
 				),
 			},
 			{
-				Config:   testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(),
+				Config:   testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(fixtureBase),
 				PlanOnly: true,
 			},
 		},
@@ -986,6 +1074,7 @@ func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv6ServerAddress(t *t
 // with the only difference that DHCPv6 is deactivated, and DHCPv4 is active
 func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv4ServerAddress(t *testing.T) {
 	testResourceName := "nsxt_vpc_subnet.test"
+	fixtureBase := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -999,7 +1088,7 @@ func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv4ServerAddress(t *t
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(),
+				Config: testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(fixtureBase),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcSubnetExists(accTestVpcSubnetDhcpv6DeactivatedServerAddress["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnetDhcpv6DeactivatedServerAddress["display_name"]),
@@ -1016,31 +1105,31 @@ func TestAccResourceNsxtVpcSubnet920_createWithDeactivatedIPv4ServerAddress(t *t
 				),
 			},
 			{
-				Config:   testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(),
+				Config:   testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(fixtureBase),
 				PlanOnly: true,
 			},
 		},
 	})
 }
 
-func testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate() string {
+func testAccNsxtVpcSubnetDhcpv4DeactivatedServerAddressTemplate(fixtureBase string) string {
 	return testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(
-		accTestVpcSubnetDhcpv4DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_DEACTIVATED, model.SubnetDhcpv6Config_MODE_SERVER)
+		accTestVpcSubnetDhcpv4DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_DEACTIVATED, model.SubnetDhcpv6Config_MODE_SERVER, fixtureBase)
 }
 
-func testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate() string {
+func testAccNsxtVpcSubnetDhcpv6DeactivatedServerAddressTemplate(fixtureBase string) string {
 	return testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(
-		accTestVpcSubnetDhcpv6DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_SERVER, model.SubnetDhcpv6Config_MODE_DEACTIVATED)
+		accTestVpcSubnetDhcpv6DeactivatedServerAddress, model.SubnetDhcpConfig_MODE_SERVER, model.SubnetDhcpv6Config_MODE_DEACTIVATED, fixtureBase)
 }
 
-func testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(attrMap map[string]string, v4Mode string, v6Mode string) string {
-	return fmt.Sprintf(`
+func testAccNsxtVpcSubnetDeactivatedFamilyServerAddressTemplate(attrMap map[string]string, v4Mode string, v6Mode string, fixtureBase string) string {
+	return testAccNsxtVpcSubnetIpv6VpcTemplate(fixtureBase, "192.168.249.0/24", "2001:db8:f200::/56", "", "") + fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
 %s
   display_name    = "%s"
   ip_addresses    = ["192.168.249.64/26", "2001:db8:f200::/64"]
   ip_address_type = "IPV4_IPV6"
-  access_mode     = "Isolated"
+  access_mode     = "Private"
 
   dhcp_config {
     mode = "%s"
@@ -1056,5 +1145,5 @@ resource "nsxt_vpc_subnet" "test" {
     dhcp_server_addresses = ["192.168.249.66/26", "2001:db8:f200::11/64"]
   }
 }
-`, testAccNsxtPolicyMultitenancyContext(), attrMap["display_name"], v4Mode, v6Mode)
+`, testAccNsxtVpcSubnetIpv6VpcContext(), attrMap["display_name"], v4Mode, v6Mode)
 }

@@ -6,7 +6,6 @@ package nsxt
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -206,21 +205,14 @@ func testAccNsxtVpcSubnetDhcpV6StaticBindingConfigCheckDestroy(state *terraform.
 func testAccNsxtVpcSubnetDhcpV6StaticBindingConfigPrerequisites(base string) string {
 	// CI default VPC service profile may omit dhcpv6_server_config; NSX 641028 requires it when the
 	// subnet uses DHCPv6 DHCP_SERVER. Provision a dedicated VPC + profile with dhcpv6_server_config.
-	shortID := base
-	if len(shortID) > 8 {
-		shortID = shortID[len(shortID)-8:]
-	}
-	projCtx := testAccNsxtMultitenancyContext(false)
-	vpcProjectID := os.Getenv("NSXT_VPC_PROJECT_ID")
-
-	return fmt.Sprintf(`
-data "nsxt_policy_transit_gateway" "dhcpv6_bind_tgw" {
-%s
-  is_default = true
-}
-
+	// The VPC also needs its own IPv6 ip block: NSX rejects IPv6/dual-stack addressing on ISOLATED
+	// subnets, and non-ISOLATED subnets require an IPv6 ip block registered on the parent VPC
+	// (error 610711), which the shared multitenancy VPC fixture doesn't have.
+	preamble := fmt.Sprintf(`
 resource "nsxt_vpc_service_profile" "dhcpv6_bind_sp" {
-%s
+  context {
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+  }
   display_name = "%s-sp"
   dhcp_config {
     dhcp_server_config {
@@ -234,41 +226,17 @@ resource "nsxt_vpc_service_profile" "dhcpv6_bind_sp" {
     }
   }
 }
+`, base)
+	vpcExtraLines := "  vpc_service_profile = nsxt_vpc_service_profile.dhcpv6_bind_sp.path"
 
-resource "nsxt_vpc_connectivity_profile" "dhcpv6_bind_cp" {
-%s
-  display_name         = "%s-cp"
-  transit_gateway_path = data.nsxt_policy_transit_gateway.dhcpv6_bind_tgw.path
-  service_gateway {
-    enable = false
-  }
-}
-
-resource "nsxt_vpc" "dhcpv6_bind_vpc" {
-%s
-  display_name        = "%s-vpc"
-  description         = "tf acc dhcpv6 static binding vpc"
-  private_ips         = ["192.168.246.0/24"]
-  short_id            = "%s"
-  vpc_service_profile = nsxt_vpc_service_profile.dhcpv6_bind_sp.path
-  load_balancer_vpc_endpoint {
-    enabled = false
-  }
-}
-
-resource "nsxt_vpc_attachment" "dhcpv6_bind_att" {
-  display_name             = "%s-att"
-  parent_path              = nsxt_vpc.dhcpv6_bind_vpc.path
-  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.dhcpv6_bind_cp.path
-}
-
+	return testAccNsxtVpcSubnetIpv6VpcTemplate(base, "10.203.240.0/24", "fd00:240:2400::/56", preamble, vpcExtraLines) + `
 resource "nsxt_vpc_subnet" "test" {
   context {
-    project_id = "%s"
-    vpc_id     = nsxt_vpc.dhcpv6_bind_vpc.id
+    project_id = nsxt_policy_project.ipv6_vpc_proj.id
+    vpc_id     = nsxt_vpc.ipv6_vpc.id
   }
   display_name = "test-subnet-dhcpv6-acc"
-  depends_on   = [nsxt_vpc_attachment.dhcpv6_bind_att]
+  depends_on   = [nsxt_vpc_attachment.ipv6_vpc_att]
 
   # Dual-stack: both CIDRs in ip_addresses. NSX 9.2 allows one IPv4 and one IPv6 across ip_addresses
   # and gateway_addresses combined (610716); do not repeat IPv4 in gateway_addresses.
@@ -281,7 +249,7 @@ resource "nsxt_vpc_subnet" "test" {
     gateway_addresses     = ["10.203.240.1/26", "fd00:240:2400::1/64"]
     dhcp_server_addresses = ["10.203.240.2/26", "fd00:240:2400:0:0:0:0:2/64"]
   }
-  access_mode = "Isolated"
+  access_mode = "Private"
   dhcp_config {
     mode = "DHCP_SERVER"
     dhcp_server_additional_config {
@@ -296,7 +264,7 @@ resource "nsxt_vpc_subnet" "test" {
     }
   }
 }
-`, projCtx, projCtx, base, projCtx, base, projCtx, base, shortID, base, vpcProjectID)
+`
 }
 
 func testAccNsxtVpcSubnetDhcpV6StaticBindingConfigTemplate(createFlow bool, fixtureBase string) string {
