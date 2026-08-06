@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -72,9 +70,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 		BgpEnabled: &bgpEnabled,
 	}
 
-	if util.NsxVersionHigherOrEqual("3.1.0") {
-		redistributionStruct.OspfEnabled = &ospfEnabled
-	}
+	redistributionStruct.OspfEnabled = &ospfEnabled
 
 	setLocaleServiceRedistributionRulesConfig(rulesConfig, &redistributionStruct)
 

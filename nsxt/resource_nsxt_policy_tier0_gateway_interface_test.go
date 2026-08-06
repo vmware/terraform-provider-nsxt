@@ -220,84 +220,6 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
-	name := getAccTestResourceName()
-	updatedName := getAccTestResourceName()
-	mtu := "1500"
-	updatedMtu := "1800"
-	subnet := "1.1.12.2/24"
-	updatedSubnet := "1.2.12.2/24"
-	ipAddress := "1.1.12.2"
-	updatedIPAddress := "1.2.12.2"
-	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
-
-	var enablePim string
-	// enablePim is supported only with local manager
-	if testAccIsGlobalManager() {
-		enablePim = "false"
-	} else {
-		enablePim = "true"
-	}
-	resource.Test(t, resource.TestCase{
-		// More edge nodes are required since 3.2.0 for this test
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0"); testAccNSXVersionLessThan(t, "3.2.0") },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu, enablePim, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "mtu", mtu),
-					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
-					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
-					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
-					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu, enablePim, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "mtu", updatedMtu),
-					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
-					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
-					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
-					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccResourceNsxtPolicyTier0GatewayInterface_ospf(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -311,7 +233,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_ospf(t *testing.T) {
 	enablePim := "false"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.1") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)

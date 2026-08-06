@@ -9,7 +9,6 @@ import (
 	"log"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -333,10 +332,6 @@ func resourceNsxtPolicyTier1GatewaySetQos(d *schema.ResourceData, obj *model.Tie
 }
 
 func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceData, obj *model.Tier1) {
-	if util.NsxVersionLower("3.0.0") {
-		return
-	}
-
 	resourceNsxtPolicyTier1GatewaySetQos(d, obj)
 	poolAllocation := d.Get("pool_allocation").(string)
 	if poolAllocation != "" {
@@ -413,10 +408,6 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	connectivityType := d.Get("type").(string)
 	revision := int64(d.Get("revision").(int))
 
-	if haMode == model.Tier1_HA_MODE_ACTIVE && util.NsxVersionLower("4.0.0") {
-		return infraStruct, fmt.Errorf("ACTIVE_ACTIVE HA mode is not supported in NSX versions lower than 4.0.0. Use ACTIVE_BACKUP instead")
-	}
-
 	t1Type := "Tier1"
 	obj := model.Tier1{
 		Id:                      &id,
@@ -438,10 +429,8 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		obj.Tier0Path = &tier0Path
 	}
 
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		if haMode != "NONE" && haMode != "" {
-			obj.HaMode = &haMode
-		}
+	if haMode != "NONE" && haMode != "" {
+		obj.HaMode = &haMode
 	}
 	if len(connectivityType) > 0 {
 		obj.Type_ = &connectivityType
@@ -639,12 +628,10 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("enable_firewall", !(*obj.DisableFirewall))
 	d.Set("enable_standby_relocation", obj.EnableStandbyRelocation)
 	d.Set("force_whitelisting", obj.ForceWhitelisting)
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		if obj.HaMode == nil {
-			d.Set("ha_mode", "NONE")
-		} else {
-			d.Set("ha_mode", obj.HaMode)
-		}
+	if obj.HaMode == nil {
+		d.Set("ha_mode", "NONE")
+	} else {
+		d.Set("ha_mode", obj.HaMode)
 	}
 	d.Set("tier0_path", obj.Tier0Path)
 	if obj.Type_ != nil {
