@@ -19,14 +19,12 @@ import (
 func TestAccResourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
 func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, true, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyMultitenancy(t)
 	})
 }

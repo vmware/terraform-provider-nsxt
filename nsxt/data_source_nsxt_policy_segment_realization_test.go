@@ -34,7 +34,6 @@ func TestAccDataSourceNsxtPolicySegmentRealization_basic(t *testing.T) {
 	testAccDataSourceNsxtPolicySegmentRealization(t, false, false, func() {
 		testAccOnlyLocalManager(t)
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
@@ -42,7 +41,6 @@ func TestAccDataSourceNsxtPolicySegmentRealization_vlan(t *testing.T) {
 	testAccDataSourceNsxtPolicySegmentRealization(t, true, false, func() {
 		testAccOnlyLocalManager(t)
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 

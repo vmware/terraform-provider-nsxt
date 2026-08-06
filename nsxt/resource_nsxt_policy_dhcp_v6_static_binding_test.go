@@ -42,7 +42,6 @@ var testAccPolicyDhcpV6StaticBindingResourceName = "nsxt_policy_dhcp_v6_static_b
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_basic(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, false, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyLocalManagerForFixedSegments(t, false)
 	})
 }
@@ -57,7 +56,6 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_multitenancy(t *testing.T) {
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_fixed(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, true, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyLocalManagerForFixedSegments(t, true)
 	})
 }
@@ -148,7 +146,7 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpV6StaticBindingCheckDestroy(state, name)

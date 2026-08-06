@@ -19,7 +19,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
 	})
 }
 
@@ -144,7 +143,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_withDependencies(t *testing
 	defaultProtocol := "IPV4_IPV6"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
@@ -219,7 +218,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic(t *testing.T) {
 	testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "3.1.0")
 	})
 }
 

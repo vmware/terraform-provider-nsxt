@@ -73,7 +73,7 @@ func TestAccDataSourceNsxtPolicySecurityPolicy_default(t *testing.T) {
 	category2 := "Application"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
