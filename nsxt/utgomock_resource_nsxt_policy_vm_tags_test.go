@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
 // To generate the mocks for this test, run:
-// mockgen -destination=mocks/infra/realized_state/VirtualMachinesClient.go -package=mocks -source=<local path>/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/VirtualMachinesClient.go VirtualMachinesClient
 // mockgen -destination=mocks/infra/realized_state/enforcement_points/VirtualMachinesClient.go -package=mocks -source=<local path>/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points/VirtualMachinesClient.go VirtualMachinesClient
 // mockgen -destination=mocks/infra/realized_state/enforcement_points/VifsClient.go -package=mocks -source=<local path>/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points/VifsClient.go VifsClient
 // mockgen -destination=mocks/infra/realized_state/virtual_machines/TagsClient.go -package=mocks -source=<local path>/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/virtual_machines/TagsClient.go TagsClient
@@ -18,25 +17,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
-	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	realizedep "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state/enforcement_points"
 	virtualmachines "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state/virtual_machines"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	rsmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/realized_state"
 	epmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/realized_state/enforcement_points"
 	vmmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/realized_state/virtual_machines"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
-	vmExternalID   = "vm-external-uuid-1"
-	vmDisplayName  = "test-vm"
-	vmInstanceID   = "vm-external-uuid-1"
-	vmResultCount1 = int64(1)
+	vmExternalID  = "vm-external-uuid-1"
+	vmDisplayName = "test-vm"
+	vmInstanceID  = "vm-external-uuid-1"
 )
 
 func vmAPIResponse() model.VirtualMachine {
@@ -48,11 +45,14 @@ func vmAPIResponse() model.VirtualMachine {
 	}
 }
 
-func vmListResponse() model.VirtualMachineListResult {
-	return model.VirtualMachineListResult{
-		Results:     []model.VirtualMachine{vmAPIResponse()},
-		ResultCount: &vmResultCount1,
-	}
+// vmToStructValue converts a VirtualMachine into the *data.StructValue shape
+// returned by the inventory search API, for use with seqQueryListClient.
+func vmToStructValue(t *testing.T, vm model.VirtualMachine) *data.StructValue {
+	t.Helper()
+	converter := bindings.NewTypeConverter()
+	val, errs := converter.ConvertToVapi(vm, model.VirtualMachineBindingType())
+	require.Empty(t, errs)
+	return val.(*data.StructValue)
 }
 
 func emptyVifListResponse() model.VirtualNetworkInterfaceListResult {
@@ -70,22 +70,12 @@ func minimalVMTagsData() map[string]interface{} {
 }
 
 func TestMockResourceNsxtPolicyVMTagsCreate(t *testing.T) {
-	// Use version < 4.1.1 so VMs are found via list API and tags updated via Updatetags
-	util.NsxVersion = "3.0.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockRealizedVMSDK := rsmocks.NewMockVirtualMachinesClient(ctrl)
-	mockRealizedVMWrapper := &realizedstate.VirtualMachineClientContext{
-		Client:     mockRealizedVMSDK,
-		ClientType: utl.Local,
-	}
-
-	mockEPVMSDK := epmocks.NewMockVirtualMachinesClient(ctrl)
-	mockEPVMWrapper := &realizedep.VirtualMachineClientContext{
-		Client:     mockEPVMSDK,
+	mockVMTagsSDK := vmmocks.NewMockTagsClient(ctrl)
+	mockVMTagsWrapper := &virtualmachines.TagsClientContext{
+		Client:     mockVMTagsSDK,
 		ClientType: utl.Local,
 	}
 
@@ -95,36 +85,35 @@ func TestMockResourceNsxtPolicyVMTagsCreate(t *testing.T) {
 		ClientType: utl.Local,
 	}
 
-	originalRealizedVM := cliRealizedVirtualMachinesClient
-	originalEPVM := cliVirtualMachinesClient
+	originalVMTags := cliVirtualMachineTagsClient
 	originalVifs := cliVifsClient
 	defer func() {
-		cliRealizedVirtualMachinesClient = originalRealizedVM
-		cliVirtualMachinesClient = originalEPVM
+		cliVirtualMachineTagsClient = originalVMTags
 		cliVifsClient = originalVifs
 	}()
-	cliRealizedVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedstate.VirtualMachineClientContext {
-		return mockRealizedVMWrapper
-	}
-	cliVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedep.VirtualMachineClientContext {
-		return mockEPVMWrapper
+	cliVirtualMachineTagsClient = func(sessionContext utl.SessionContext, connector client.Connector) *virtualmachines.TagsClientContext {
+		return mockVMTagsWrapper
 	}
 	cliVifsClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedep.VirtualNetworkInterfaceClientContext {
 		return mockVifsWrapper
 	}
 
 	t.Run("Create success", func(t *testing.T) {
-		// findNsxtPolicyVMByID → listAllPolicyVirtualMachines (Create)
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
-		// updateNsxtPolicyVMTags
-		mockEPVMSDK.EXPECT().Updatetags(gomock.Any(), gomock.Any()).Return(nil)
+		vmSV := vmToStructValue(t, vmAPIResponse())
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			// findNsxtPolicyVMByID (Create)
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+			// resourceNsxtPolicyVMTagsRead → findNsxtPolicyVMByID
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		// updateNsxtPolicyVMTags via cliVirtualMachineTagsClient.Create
+		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nil)
 		// updateNsxtPolicyVMPortTags → listPolicyVifAttachmentsForVM → listAllPolicyVifs (empty portTags)
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)
-		// resourceNsxtPolicyVMTagsRead → findNsxtPolicyVMByID
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
 		// setPolicyVMPortTagsInSchema → listPolicyVifAttachmentsForVM → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)
@@ -139,8 +128,10 @@ func TestMockResourceNsxtPolicyVMTagsCreate(t *testing.T) {
 	})
 
 	t.Run("Create fails when VM not found", func(t *testing.T) {
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(model.VirtualMachineListResult{Results: []model.VirtualMachine{}}, nil)
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			{Results: []*data.StructValue{}, ResultCount: i64(0)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
 
 		res := resourceNsxtPolicyVMTags()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalVMTagsData())
@@ -153,18 +144,8 @@ func TestMockResourceNsxtPolicyVMTagsCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVMTagsRead(t *testing.T) {
-	// Use version < 4.1.1 so VMs are found via list API
-	util.NsxVersion = "3.0.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-
-	mockRealizedVMSDK := rsmocks.NewMockVirtualMachinesClient(ctrl)
-	mockRealizedVMWrapper := &realizedstate.VirtualMachineClientContext{
-		Client:     mockRealizedVMSDK,
-		ClientType: utl.Local,
-	}
 
 	mockVifsSDK := epmocks.NewMockVifsClient(ctrl)
 	mockVifsWrapper := &realizedep.VirtualNetworkInterfaceClientContext{
@@ -172,22 +153,19 @@ func TestMockResourceNsxtPolicyVMTagsRead(t *testing.T) {
 		ClientType: utl.Local,
 	}
 
-	originalRealizedVM := cliRealizedVirtualMachinesClient
 	originalVifs := cliVifsClient
-	defer func() {
-		cliRealizedVirtualMachinesClient = originalRealizedVM
-		cliVifsClient = originalVifs
-	}()
-	cliRealizedVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedstate.VirtualMachineClientContext {
-		return mockRealizedVMWrapper
-	}
+	defer func() { cliVifsClient = originalVifs }()
 	cliVifsClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedep.VirtualNetworkInterfaceClientContext {
 		return mockVifsWrapper
 	}
 
 	t.Run("Read success", func(t *testing.T) {
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
+		vmSV := vmToStructValue(t, vmAPIResponse())
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
+
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)
 
@@ -214,8 +192,10 @@ func TestMockResourceNsxtPolicyVMTagsRead(t *testing.T) {
 	})
 
 	t.Run("Read clears ID when VM not found", func(t *testing.T) {
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(model.VirtualMachineListResult{Results: []model.VirtualMachine{}}, nil)
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			{Results: []*data.StructValue{}, ResultCount: i64(0)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
 
 		res := resourceNsxtPolicyVMTags()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
@@ -231,22 +211,12 @@ func TestMockResourceNsxtPolicyVMTagsRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVMTagsDelete(t *testing.T) {
-	// Use version < 4.1.1 so VMs are found via list API and tags cleared via Updatetags
-	util.NsxVersion = "3.0.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockRealizedVMSDK := rsmocks.NewMockVirtualMachinesClient(ctrl)
-	mockRealizedVMWrapper := &realizedstate.VirtualMachineClientContext{
-		Client:     mockRealizedVMSDK,
-		ClientType: utl.Local,
-	}
-
-	mockEPVMSDK := epmocks.NewMockVirtualMachinesClient(ctrl)
-	mockEPVMWrapper := &realizedep.VirtualMachineClientContext{
-		Client:     mockEPVMSDK,
+	mockVMTagsSDK := vmmocks.NewMockTagsClient(ctrl)
+	mockVMTagsWrapper := &virtualmachines.TagsClientContext{
+		Client:     mockVMTagsSDK,
 		ClientType: utl.Local,
 	}
 
@@ -256,30 +226,30 @@ func TestMockResourceNsxtPolicyVMTagsDelete(t *testing.T) {
 		ClientType: utl.Local,
 	}
 
-	originalRealizedVM := cliRealizedVirtualMachinesClient
-	originalEPVM := cliVirtualMachinesClient
+	originalVMTags := cliVirtualMachineTagsClient
 	originalVifs := cliVifsClient
 	defer func() {
-		cliRealizedVirtualMachinesClient = originalRealizedVM
-		cliVirtualMachinesClient = originalEPVM
+		cliVirtualMachineTagsClient = originalVMTags
 		cliVifsClient = originalVifs
 	}()
-	cliRealizedVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedstate.VirtualMachineClientContext {
-		return mockRealizedVMWrapper
-	}
-	cliVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedep.VirtualMachineClientContext {
-		return mockEPVMWrapper
+	cliVirtualMachineTagsClient = func(sessionContext utl.SessionContext, connector client.Connector) *virtualmachines.TagsClientContext {
+		return mockVMTagsWrapper
 	}
 	cliVifsClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedep.VirtualNetworkInterfaceClientContext {
 		return mockVifsWrapper
 	}
 
 	t.Run("Delete success", func(t *testing.T) {
-		// findNsxtPolicyVMByID
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
-		// updateNsxtPolicyVMTags (clear tags)
-		mockEPVMSDK.EXPECT().Updatetags(gomock.Any(), gomock.Any()).Return(nil)
+		vmSV := vmToStructValue(t, vmAPIResponse())
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			// findNsxtPolicyVMByID
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		// updateNsxtPolicyVMTags (clear tags) via cliVirtualMachineTagsClient.Create
+		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nil)
 		// updateNsxtPolicyVMPortTags → listPolicyVifAttachmentsForVM → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)
@@ -296,8 +266,10 @@ func TestMockResourceNsxtPolicyVMTagsDelete(t *testing.T) {
 	})
 
 	t.Run("Delete clears ID when VM not found", func(t *testing.T) {
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(model.VirtualMachineListResult{Results: []model.VirtualMachine{}}, nil)
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			{Results: []*data.StructValue{}, ResultCount: i64(0)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
 
 		res := resourceNsxtPolicyVMTags()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
@@ -313,18 +285,8 @@ func TestMockResourceNsxtPolicyVMTagsDelete(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVMTagsUpdate(t *testing.T) {
-	// Use version 4.1.1+ so tags are updated via the newer TagsClient.Create path
-	util.NsxVersion = "4.1.1"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-
-	mockRealizedVMSDK := rsmocks.NewMockVirtualMachinesClient(ctrl)
-	mockRealizedVMWrapper := &realizedstate.VirtualMachineClientContext{
-		Client:     mockRealizedVMSDK,
-		ClientType: utl.Local,
-	}
 
 	mockVMTagsSDK := vmmocks.NewMockTagsClient(ctrl)
 	mockVMTagsWrapper := &virtualmachines.TagsClientContext{
@@ -338,17 +300,12 @@ func TestMockResourceNsxtPolicyVMTagsUpdate(t *testing.T) {
 		ClientType: utl.Local,
 	}
 
-	originalRealizedVM := cliRealizedVirtualMachinesClient
 	originalVMTags := cliVirtualMachineTagsClient
 	originalVifs := cliVifsClient
 	defer func() {
-		cliRealizedVirtualMachinesClient = originalRealizedVM
 		cliVirtualMachineTagsClient = originalVMTags
 		cliVifsClient = originalVifs
 	}()
-	cliRealizedVirtualMachinesClient = func(sessionContext utl.SessionContext, connector client.Connector) *realizedstate.VirtualMachineClientContext {
-		return mockRealizedVMWrapper
-	}
 	cliVirtualMachineTagsClient = func(sessionContext utl.SessionContext, connector client.Connector) *virtualmachines.TagsClientContext {
 		return mockVMTagsWrapper
 	}
@@ -357,18 +314,21 @@ func TestMockResourceNsxtPolicyVMTagsUpdate(t *testing.T) {
 	}
 
 	t.Run("Update success (uses newer TagsClient)", func(t *testing.T) {
-		// findNsxtPolicyVMByID → list (version < 4.1.2 uses list API)
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
+		vmSV := vmToStructValue(t, vmAPIResponse())
+		stub := &seqQueryListClient{responses: []model.SearchResponse{
+			// findNsxtPolicyVMByID (Update/Create)
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+			// Read after update → findNsxtPolicyVMByID
+			{Results: []*data.StructValue{vmSV}, ResultCount: i64(1)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
+
 		// updateNsxtPolicyVMTags via cliVirtualMachineTagsClient.Create (version >= 4.1.1)
 		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nil)
 		// updateNsxtPolicyVMPortTags → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)
-		// Read after update → findNsxtPolicyVMByID
-		mockRealizedVMSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-			Return(vmListResponse(), nil)
 		// setPolicyVMPortTagsInSchema → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(emptyVifListResponse(), nil)

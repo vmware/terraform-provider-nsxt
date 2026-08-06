@@ -15,7 +15,6 @@ import (
 	realized_virtual_machines "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state/virtual_machines"
 	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -33,7 +32,6 @@ var (
 
 var cliT1SegmentsPortsClient = t1_segments.NewPortsClient
 var cliVifsClient = realized_enforcement_points.NewVifsClient
-var cliVirtualMachinesClient = realized_enforcement_points.NewVirtualMachinesClient
 var cliRealizedVirtualMachinesClient = realizedstate.NewVirtualMachinesClient
 var cliVirtualMachineTagsClient = realized_virtual_machines.NewTagsClient
 
@@ -211,17 +209,14 @@ func listAllPolicyVifs(m interface{}, sessionContext utl.SessionContext) ([]mode
 	connector := getPolicyConnector(m)
 
 	// Multitenancy/VPC: SDK has no org/project realized-state enforcement-point Vifs API;
-	// use inventory search (same approach as VM lookup on NSX 4.1.2+).
+	// use inventory search (same approach as VM lookup).
 	if sessionContext.ClientType == utl.Multitenancy || sessionContext.ClientType == utl.VPC {
-		if util.NsxVersionHigherOrEqual("4.1.2") {
-			const resourceType = "VirtualNetworkInterface"
-			resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
-			if err != nil {
-				return nil, err
-			}
-			return convertSearchResultToVifList(resultValues)
+		const resourceType = "VirtualNetworkInterface"
+		resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
+		if err != nil {
+			return nil, err
 		}
-		return nil, policyResourceNotSupportedError()
+		return convertSearchResultToVifList(resultValues)
 	}
 
 	client := cliVifsClient(sessionContext, connector)
@@ -249,34 +244,25 @@ func listAllPolicyVifs(m interface{}, sessionContext utl.SessionContext) ([]mode
 		}
 	}
 
-	if util.NsxVersionHigherOrEqual("4.1.2") {
-		const resourceType = "VirtualNetworkInterface"
-		resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
-		if err != nil {
-			return nil, err
-		}
-		return convertSearchResultToVifList(resultValues)
+	const resourceType = "VirtualNetworkInterface"
+	resultValues, err := listInventoryResourcesByType(connector, sessionContext, resourceType, nil)
+	if err != nil {
+		return nil, err
 	}
-	return nil, policyResourceNotSupportedError()
+	return convertSearchResultToVifList(resultValues)
 }
 
 func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
 	var perfectMatch, prefixMatch, allVMs []model.VirtualMachine
 	var err error
 
-	if util.NsxVersionHigherOrEqual("4.1.2") {
-		// Search API works for inventory objects for 4.1.2 and above
-		resourceType := "VirtualMachine"
-		resultValues, err1 := listInventoryResourcesByNameAndType(connector, context, namePrefix, resourceType, nil)
-		if err1 != nil {
-			log.Printf("[INFO] Error searching for Virtual Machine with name: %s", namePrefix)
-			return perfectMatch, prefixMatch, err1
-		}
-		allVMs, err = convertSearchResultToVMList(resultValues)
-
-	} else {
-		allVMs, err = listAllPolicyVirtualMachines(context, connector, m)
+	resourceType := "VirtualMachine"
+	resultValues, err1 := listInventoryResourcesByNameAndType(connector, context, namePrefix, resourceType, nil)
+	if err1 != nil {
+		log.Printf("[INFO] Error searching for Virtual Machine with name: %s", namePrefix)
+		return perfectMatch, prefixMatch, err1
 	}
+	allVMs, err = convertSearchResultToVMList(resultValues)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machine with name: %s", namePrefix)
 		return perfectMatch, prefixMatch, err
@@ -327,19 +313,14 @@ func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector
 	var vms []model.VirtualMachine
 	var err error
 
-	if util.NsxVersionHigherOrEqual("4.1.2") {
-		// Search API works for inventory objects for 4.1.2 and above
-		resourceType := "VirtualMachine"
-		resultValues, err1 := listInventoryResourcesByAnyFieldAndType(connector, context, vmID, resourceType, nil)
-		if err1 != nil {
-			log.Printf("[INFO] Error searching for Virtual Machine with id: %s", vmID)
-			return virtualMachineStruct, err1
-		}
-
-		vms, err = convertSearchResultToVMList(resultValues)
-	} else {
-		vms, err = listAllPolicyVirtualMachines(context, connector, m)
+	resourceType := "VirtualMachine"
+	resultValues, err1 := listInventoryResourcesByAnyFieldAndType(connector, context, vmID, resourceType, nil)
+	if err1 != nil {
+		log.Printf("[INFO] Error searching for Virtual Machine with id: %s", vmID)
+		return virtualMachineStruct, err1
 	}
+
+	vms, err = convertSearchResultToVMList(resultValues)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for ID: %s", vmID)
 		return virtualMachineStruct, err
@@ -364,18 +345,11 @@ func updateNsxtPolicyVMTags(connector client.Connector, externalID string, tags 
 		Tags:             tags,
 		VirtualMachineId: &externalID,
 	}
-	if util.NsxVersionHigherOrEqual("4.1.1") {
-		client := cliVirtualMachineTagsClient(sessionContext, connector)
-		if client == nil {
-			return policyResourceNotSupportedError()
-		}
-		return client.Create(externalID, tagUpdate, nil, nil, nil, nil, nil, nil, nil)
-	}
-	client := cliVirtualMachinesClient(sessionContext, connector)
+	client := cliVirtualMachineTagsClient(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	return client.Updatetags(getPolicyEnforcementPoint(m), tagUpdate)
+	return client.Create(externalID, tagUpdate, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func listPolicyVifAttachmentsForVM(m interface{}, externalID string, sessionContext utl.SessionContext) ([]string, error) {
