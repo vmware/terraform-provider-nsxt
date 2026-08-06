@@ -144,7 +144,7 @@ func TestAccResourceNsxtPolicyLBPool_snat(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBPoolCheckDestroy(state, accTestPolicyLBPoolCreateAttributes["display_name"])

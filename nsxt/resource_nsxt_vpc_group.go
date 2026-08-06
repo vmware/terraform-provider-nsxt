@@ -93,7 +93,7 @@ func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	groupType := ""
-	if len(obj.GroupType) > 0 && util.NsxVersionHigherOrEqual("3.2.0") {
+	if len(obj.GroupType) > 0 {
 		groupType = obj.GroupType[0]
 		d.Set("group_type", groupType)
 	}

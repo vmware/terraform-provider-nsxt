@@ -287,15 +287,9 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 
 	var rFilters []model.BgpRouteFiltering
 	routeFiltering := d.Get("route_filtering").([]interface{})
-	if len(routeFiltering) > 1 && util.NsxVersionLower("3.0.0") {
-		return neighborStruct, fmt.Errorf("Only 1 element for 'route_filtering' is supported with NSX-T versions up to 3.0.0")
-	}
 	for _, filter := range routeFiltering {
 		data := filter.(map[string]interface{})
 		addrFamily := data["address_family"].(string)
-		if addrFamily == model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN && util.NsxVersionLower("3.0.0") {
-			return neighborStruct, fmt.Errorf("'%s' is not supported for 'address_family' with NSX-T versions less than 3.0.0", model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN)
-		}
 		enabled := data["enabled"].(bool)
 
 		filterStruct := model.BgpRouteFiltering{
@@ -315,7 +309,7 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 			filterStruct.OutRouteFilters = outFilters
 		}
 
-		if util.NsxVersionHigherOrEqual("3.0.0") && data["maximum_routes"] != 0 {
+		if data["maximum_routes"] != 0 {
 			maxRoutes := int64(data["maximum_routes"].(int))
 			filterStruct.MaximumRoutes = &maxRoutes
 		}
@@ -470,7 +464,7 @@ func setBgpNeighborConfigInSchema(d *schema.ResourceData, obj model.BgpNeighborC
 		}
 		rf["in_route_filter"] = inFilter
 		rf["out_route_filter"] = outFilter
-		if util.NsxVersionHigherOrEqual("3.0.0") && filter.MaximumRoutes != nil {
+		if filter.MaximumRoutes != nil {
 			rf["maximum_routes"] = int(*filter.MaximumRoutes)
 		}
 		rFilters = append(rFilters, rf)
