@@ -62,6 +62,7 @@ func resourceNsxtProxyConfig() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Proxy server host (IP address or FQDN)",
 				Optional:    true,
+				Computed:    true,
 			},
 			"port": {
 				Type:         schema.TypeInt,
