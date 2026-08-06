@@ -26,9 +26,18 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 			"context": getContextSchema(false, false, false),
 			"gateway_path": {
 				Type:         schema.TypeString,
-				Description:  "The path for the gateway",
-				Required:     true,
+				Description:  "The path for the gateway interface",
+				Optional:     true,
+				Deprecated:   "Use gateway_interface_path instead. Despite its name, this attribute expects the path of the gateway interface, not the gateway.",
 				ValidateFunc: validatePolicyPath(),
+				ExactlyOneOf: []string{"gateway_path", "gateway_interface_path"},
+			},
+			"gateway_interface_path": {
+				Type:         schema.TypeString,
+				Description:  "The path for the gateway interface",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+				ExactlyOneOf: []string{"gateway_path", "gateway_interface_path"},
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -79,7 +88,10 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 	}
 
 	id := d.Get("id").(string)
-	gatewayPath := d.Get("gateway_path").(string)
+	gatewayInterfacePath := d.Get("gateway_interface_path").(string)
+	if gatewayInterfacePath == "" {
+		gatewayInterfacePath = d.Get("gateway_path").(string)
+	}
 	displayName := d.Get("display_name").(string)
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
@@ -90,7 +102,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			result, err := client.List(gatewayPath, nil)
+			result, err := client.List(gatewayInterfacePath, nil)
 			if err != nil {
 				return result, "", err
 			}
@@ -160,7 +172,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Failed to get gateway interface realization information for %s: %v", gatewayPath, err)
+		return fmt.Errorf("Failed to get gateway interface realization information for %s: %v", gatewayInterfacePath, err)
 	}
 	return nil
 }

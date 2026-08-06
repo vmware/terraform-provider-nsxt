@@ -728,7 +728,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 data "nsxt_policy_gateway_interface_realization" "gw_realization" {
-  gateway_path = nsxt_policy_tier0_gateway_interface.test.path
+  gateway_interface_path = nsxt_policy_tier0_gateway_interface.test.path
 }`
 	}
 	return `
@@ -737,7 +737,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 data "nsxt_policy_gateway_interface_realization" "gw_realization" {
-  gateway_path = nsxt_policy_tier0_gateway_interface.test.path
+  gateway_interface_path = nsxt_policy_tier0_gateway_interface.test.path
 }`
 }
 

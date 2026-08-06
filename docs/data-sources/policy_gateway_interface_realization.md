@@ -17,10 +17,16 @@ data "nsxt_policy_tier1_gateway" "tier1_gw" {
   display_name = "tier1_gw"
 }
 
-data "nsxt_policy_gateway_interface_realization" "info" {
+resource "nsxt_policy_tier1_gateway_interface" "tier1_gw_if" {
+  display_name = "tier1_gw_if"
   gateway_path = data.nsxt_policy_tier1_gateway.tier1_gw.path
-  display_name = "pepsi-it_t1-t1_lrp"
-  timeout      = 60
+  segment_path = nsxt_policy_segment.segment1.path
+  subnets      = ["12.12.2.13/24"]
+}
+
+data "nsxt_policy_gateway_interface_realization" "info" {
+  gateway_interface_path = nsxt_policy_tier1_gateway_interface.tier1_gw_if.path
+  timeout                = 60
 }
 ```
 
@@ -35,19 +41,29 @@ data "nsxt_policy_tier1_gateway" "tier1_gw" {
   display_name = "tier1_gw"
 }
 
+resource "nsxt_policy_tier1_gateway_interface" "tier1_gw_if" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "tier1_gw_if"
+  gateway_path = data.nsxt_policy_tier1_gateway.tier1_gw.path
+  segment_path = nsxt_policy_segment.segment1.path
+  subnets      = ["12.12.2.13/24"]
+}
+
 data "nsxt_policy_gateway_interface_realization" "info" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
-  gateway_path = data.nsxt_policy_tier1_gateway.tier1_gw.path
-  display_name = "pepsi-it_t1-t1_lrp"
-  timeout      = 60
+  gateway_interface_path = nsxt_policy_tier1_gateway_interface.tier1_gw_if.path
+  timeout                = 60
 }
 ```
 
 ## Argument Reference
 
-* `gateway_path` - (Required) The policy path of the resource.
+* `gateway_interface_path` - (Required) The policy path of the gateway interface.
+* `gateway_path` - (Deprecated) Use `gateway_interface_path` instead. Despite its name, this attribute expects the path of the gateway interface, not the gateway.
 * `id`  - (Optional) The ID of gateway interface.
 * `display_name` - (Optional) The display name of the resource. If neither ID nor display name are set, the realized gateway interface with IP addresses will be retrieved.
 * `delay` - (Optional) Delay (in seconds) before realization polling is started. Default is set to 1.
