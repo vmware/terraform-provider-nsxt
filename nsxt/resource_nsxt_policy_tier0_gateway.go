@@ -522,11 +522,6 @@ func isInterSrIbgpSetInConfig(d *schema.ResourceData) bool {
 
 func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig {
 
-	if util.NsxVersionLower("3.0.0") {
-		// VRF Lite is supported from 3.0.0 onwards
-		return nil
-	}
-
 	vrfConfigs := d.Get("vrf_config").([]interface{})
 	if len(vrfConfigs) == 0 || vrfConfigs[0] == nil {
 		return nil
@@ -867,18 +862,12 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		VrfConfig:              vrfConfig,
 	}
 
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		t0Struct.RdAdminField = rdAdminField
-	}
+	t0Struct.RdAdminField = rdAdminField
 
-	if util.NsxVersionHigherOrEqual("4.1.0") {
-		t0Struct.VrfTransitSubnets = vrfTransitSubnets
-	}
+	t0Struct.VrfTransitSubnets = vrfTransitSubnets
 
-	if util.NsxVersionHigherOrEqual("3.1.0") {
-		advancedConfig := getTier0AdvancedConfigFromSchema(d)
-		t0Struct.AdvancedConfig = advancedConfig
-	}
+	advancedConfig := getTier0AdvancedConfigFromSchema(d)
+	t0Struct.AdvancedConfig = advancedConfig
 
 	if util.NsxVersionHigherOrEqual("4.2.0") {
 		t0Struct.EnableRdPerEdge = &enableRdPerEdge
@@ -1048,9 +1037,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("multi_vrf_inter_sr", obj.MultiVrfInterSrRouting)
 	d.Set("enable_rd_per_edge", obj.EnableRdPerEdge)
 
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		d.Set("rd_admin_address", obj.RdAdminField)
-	}
+	d.Set("rd_admin_address", obj.RdAdminField)
 	vrfErr := setPolicyVRFConfigInSchema(d, obj.VrfConfig)
 	if vrfErr != nil {
 		return vrfErr
