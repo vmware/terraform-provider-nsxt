@@ -190,7 +190,7 @@ func TestAccResourceNsxtPolicyNATRule_withPolicyBasedVpnMode(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "4.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name, false)

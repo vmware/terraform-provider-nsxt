@@ -81,33 +81,6 @@ func TestMockResourceNsxtClusterVirtualIPCreate(t *testing.T) {
 		assert.Equal(t, vipIPv6Address, d.Get("ipv6_address"))
 	})
 
-	t.Run("Create success with NSX < 4.0.0 (IPv4 only)", func(t *testing.T) {
-		util.NsxVersion = "3.2.0"
-		defer func() { util.NsxVersion = "" }()
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		mockVipSDK, restore := setupVirtualIPMock(t, ctrl)
-		defer restore()
-
-		ipv4Only := vipIPv4Address
-		defaultIPv6 := DefaultIPv6VirtualAddress
-		mockVipSDK.EXPECT().Setvirtualip((*string)(nil), (*string)(nil), &ipv4Only).
-			Return(virtualIPProperties(vipIPv4Address, defaultIPv6), nil)
-		mockVipSDK.EXPECT().Get().
-			Return(virtualIPProperties(vipIPv4Address, defaultIPv6), nil)
-
-		res := resourceNsxtClusterVirtualIP()
-		data := clusterVirtualIPData()
-		data["ipv6_address"] = DefaultIPv6VirtualAddress
-		d := schema.TestResourceDataRaw(t, res.Schema, data)
-
-		err := resourceNsxtClusterVirtualIPCreate(d, newGoMockProviderClient())
-		require.NoError(t, err)
-		assert.NotEmpty(t, d.Id())
-	})
-
 	t.Run("Create fails when Setvirtualip returns error", func(t *testing.T) {
 		util.NsxVersion = "4.0.0"
 		defer func() { util.NsxVersion = "" }()
@@ -242,27 +215,6 @@ func TestMockResourceNsxtClusterVirtualIPDelete(t *testing.T) {
 		mockVipSDK.EXPECT().Clearvirtualip().
 			Return(virtualIPProperties(DefaultIPv4VirtualAddress, vipIPv6Address), nil)
 		mockVipSDK.EXPECT().Clearvirtualip6().
-			Return(virtualIPProperties(DefaultIPv4VirtualAddress, DefaultIPv6VirtualAddress), nil)
-
-		res := resourceNsxtClusterVirtualIP()
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
-		d.SetId("some-id")
-
-		err := resourceNsxtClusterVirtualIPDelete(d, newGoMockProviderClient())
-		require.NoError(t, err)
-	})
-
-	t.Run("Delete success with NSX < 4.0.0 (IPv4 only)", func(t *testing.T) {
-		util.NsxVersion = "3.2.0"
-		defer func() { util.NsxVersion = "" }()
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-
-		mockVipSDK, restore := setupVirtualIPMock(t, ctrl)
-		defer restore()
-
-		mockVipSDK.EXPECT().Clearvirtualip().
 			Return(virtualIPProperties(DefaultIPv4VirtualAddress, DefaultIPv6VirtualAddress), nil)
 
 		res := resourceNsxtClusterVirtualIP()
