@@ -39,7 +39,6 @@ func TestAccResourceNsxtPolicyVtepHAHostSwitchProfile_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "4.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -106,7 +105,6 @@ func TestAccResourceNsxtPolicyVtepHAHostSwitchProfile_importBasic(t *testing.T) 
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "4.1.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

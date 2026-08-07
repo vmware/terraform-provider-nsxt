@@ -114,7 +114,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
@@ -241,9 +241,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			// NSX pre-4.0.0 sends wrong revision, therefore we can't validate
-			// the gateway is not recreated
-			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -344,7 +341,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {

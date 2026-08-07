@@ -32,7 +32,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_evpn_tunnel_endpoint.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
@@ -85,7 +85,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_evpn_tunnel_endpoint.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {

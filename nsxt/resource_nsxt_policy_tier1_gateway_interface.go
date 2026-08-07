@@ -14,7 +14,6 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -166,10 +165,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		urpfMode := d.Get("urpf_mode").(string)
-		obj.UrpfMode = &urpfMode
-	}
+	urpfMode := d.Get("urpf_mode").(string)
+	obj.UrpfMode = &urpfMode
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
@@ -322,10 +319,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
-	if util.NsxVersionHigherOrEqual("3.0.0") {
-		urpfMode := d.Get("urpf_mode").(string)
-		obj.UrpfMode = &urpfMode
-	}
+	urpfMode := d.Get("urpf_mode").(string)
+	obj.UrpfMode = &urpfMode
 	var err error
 	client := cliTier1InterfacesClient(getSessionContext(d, m), connector)
 	if client == nil {

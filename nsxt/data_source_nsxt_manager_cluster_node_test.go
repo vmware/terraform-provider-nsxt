@@ -18,7 +18,6 @@ func TestAccDataSourceNsxtManagerClusterNode_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			testAccNSXVersion(t, "4.1.0")
 			testAccEnvDefined(t, "NSXT_TEST_MANAGER_CLUSTER_NODE")
 		},
 		Providers: testAccProviders,

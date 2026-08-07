@@ -99,8 +99,6 @@ func setupT0InterfaceMocks(t *testing.T, ctrl *gomock.Controller) (
 }
 
 func TestMockResourceNsxtPolicyTier0GatewayInterfaceCreate(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -127,8 +125,6 @@ func TestMockResourceNsxtPolicyTier0GatewayInterfaceCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyTier0GatewayInterfaceRead(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -169,8 +165,6 @@ func TestMockResourceNsxtPolicyTier0GatewayInterfaceRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyTier0GatewayInterfaceUpdate(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -228,8 +222,6 @@ func TestMockResourceNsxtPolicyTier0GatewayInterfaceDelete(t *testing.T) {
 
 func TestMockResourceNsxtPolicyTier0GatewayInterface_subnetPathVersion(t *testing.T) {
 	t.Run("Create fails with subnet_path before NSX 9.2.0", func(t *testing.T) {
-		util.NsxVersion = "3.2.0"
-		defer func() { util.NsxVersion = "" }()
 
 		res := resourceNsxtPolicyTier0GatewayInterface()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
@@ -258,8 +250,6 @@ func TestMockResourceNsxtPolicyTier0GatewayInterfaceRead_subnetPathVersion(t *te
 	sp := "/orgs/default/projects/p1/vpcs/v1/subnets/s1"
 
 	t.Run("subnet_path omitted in state before 9.2.0", func(t *testing.T) {
-		util.NsxVersion = "3.2.0"
-		defer func() { util.NsxVersion = "" }()
 
 		iface := t0InterfaceAPIResponse()
 		iface.SubnetPath = &sp

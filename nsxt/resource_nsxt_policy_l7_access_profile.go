@@ -18,7 +18,6 @@ import (
 
 	clientLayer "github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var cliL7AccessProfilesClient = clientLayer.NewL7AccessProfilesClient
@@ -306,9 +305,7 @@ func childL7AccessEntryFromSchema(id string, obj map[string]interface{}, markedF
 			Value:           values,
 		}
 
-		if util.NsxVersionHigherOrEqual("4.0.0") {
-			attribute.CustomUrlPartialMatch = &customUrlPartialMatch
-		}
+		attribute.CustomUrlPartialMatch = &customUrlPartialMatch
 		attributes = append(attributes, attribute)
 	}
 

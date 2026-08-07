@@ -11,7 +11,6 @@ import (
 
 	nsx_policy "github.com/vmware/terraform-provider-nsxt/api"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -567,13 +566,11 @@ func setLocaleServiceRedistributionRulesConfig(rulesConfig []interface{}, config
 			rule.RouteMapPath = &routeMapPath
 		}
 
-		if util.NsxVersionHigherOrEqual("3.1.0") {
-			if bgp {
-				rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_BGP)
-			}
-			if ospf {
-				rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF)
-			}
+		if bgp {
+			rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_BGP)
+		}
+		if ospf {
+			rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF)
 		}
 
 		rules = append(rules, rule)
@@ -598,9 +595,7 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 		BgpEnabled: &bgpEnabled,
 	}
 
-	if util.NsxVersionHigherOrEqual("3.1.0") {
-		redistributionStruct.OspfEnabled = &ospfEnabled
-	}
+	redistributionStruct.OspfEnabled = &ospfEnabled
 
 	setLocaleServiceRedistributionRulesConfig(rulesConfig, &redistributionStruct)
 	serviceStruct.RouteRedistributionConfig = &redistributionStruct
@@ -613,20 +608,18 @@ func getLocaleServiceRedistributionRuleConfig(config *model.Tier0RouteRedistribu
 		rule["name"] = ruleConfig.Name
 		rule["route_map_path"] = ruleConfig.RouteMapPath
 		rule["types"] = ruleConfig.RouteRedistributionTypes
-		if util.NsxVersionHigherOrEqual("3.1.0") {
-			bgp := false
-			ospf := false
-			for _, destination := range ruleConfig.Destinations {
-				if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_BGP {
-					bgp = true
-				}
-				if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF {
-					ospf = true
-				}
+		bgp := false
+		ospf := false
+		for _, destination := range ruleConfig.Destinations {
+			if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_BGP {
+				bgp = true
 			}
-			rule["bgp"] = bgp
-			rule["ospf"] = ospf
+			if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF {
+				ospf = true
+			}
 		}
+		rule["bgp"] = bgp
+		rule["ospf"] = ospf
 
 		rules = append(rules, rule)
 	}

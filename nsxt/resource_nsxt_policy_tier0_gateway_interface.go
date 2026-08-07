@@ -154,9 +154,6 @@ func getGatewayInterfaceOspfSchema() *schema.Schema {
 }
 
 func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) error {
-	if util.NsxVersionLower("3.0.0") {
-		return nil
-	}
 	interfaceType := d.Get("type").(string)
 	// PIM config can only be configured on external interface and local manager
 	if interfaceType == model.Tier0Interface_TYPE_EXTERNAL && !isPolicyGlobalManager(m) {

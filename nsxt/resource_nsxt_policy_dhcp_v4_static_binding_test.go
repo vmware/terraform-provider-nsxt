@@ -49,7 +49,6 @@ func testAccOnlyLocalManagerForFixedSegments(t *testing.T, isFixed bool) {
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, false, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyLocalManagerForFixedSegments(t, false)
 	})
 }
@@ -64,7 +63,6 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_multitenancy(t *testing.T) {
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, true, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyLocalManagerForFixedSegments(t, true)
 	})
 }
@@ -141,7 +139,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name)

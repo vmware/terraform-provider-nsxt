@@ -22,7 +22,7 @@ func TestAccDataSourceNsxtPolicyBfdProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_bfd_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name)

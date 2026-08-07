@@ -23,7 +23,6 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	t1lsmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -101,8 +100,6 @@ func setupT1GatewayMocks(t *testing.T, ctrl *gomock.Controller) (
 }
 
 func TestMockResourceNsxtPolicyTier1GatewayCreate(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -129,8 +126,6 @@ func TestMockResourceNsxtPolicyTier1GatewayCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyTier1GatewayRead(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -174,8 +169,6 @@ func TestMockResourceNsxtPolicyTier1GatewayRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyTier1GatewayUpdate(t *testing.T) {
-	util.NsxVersion = "3.2.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

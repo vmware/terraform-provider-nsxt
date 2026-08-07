@@ -105,7 +105,6 @@ func testAccDataSourceNsxtPolicyRealizationInfoTier1DataSourceEntity(t *testing.
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 	testAccDataSourceNsxtPolicyRealizationInfoTier1Resource(t, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyLocalManager(t)
 	})
 }
@@ -113,7 +112,6 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource_multitenancy(t *testing.T) {
 	testAccDataSourceNsxtPolicyRealizationInfoTier1Resource(t, true, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyMultitenancy(t)
 	})
 }

@@ -31,7 +31,6 @@ func TestAccDataSourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_DOMAIN")
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_BASE_DN")
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

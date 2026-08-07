@@ -20,7 +20,6 @@ func TestAccResourceNsxtPolicyTier0GatewayGRETunnel_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.1.2")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -50,7 +49,6 @@ func TestAccResourceNsxtPolicyTier0GatewayGRETunnel_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.1.2")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

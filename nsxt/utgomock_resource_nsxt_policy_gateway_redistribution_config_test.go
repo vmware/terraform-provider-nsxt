@@ -18,7 +18,6 @@ import (
 	t0lsapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	t0lsmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -78,8 +77,6 @@ func setupRedistT0LSMock(t *testing.T, ctrl *gomock.Controller) (*t0lsmocks.Mock
 }
 
 func TestMockResourceNsxtPolicyGatewayRedistributionConfigCreate(t *testing.T) {
-	util.NsxVersion = "3.1.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -118,8 +115,6 @@ func TestMockResourceNsxtPolicyGatewayRedistributionConfigCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyGatewayRedistributionConfigRead(t *testing.T) {
-	util.NsxVersion = "3.1.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -150,8 +145,6 @@ func TestMockResourceNsxtPolicyGatewayRedistributionConfigRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyGatewayRedistributionConfigUpdate(t *testing.T) {
-	util.NsxVersion = "3.1.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -177,8 +170,6 @@ func TestMockResourceNsxtPolicyGatewayRedistributionConfigUpdate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyGatewayRedistributionConfigDelete(t *testing.T) {
-	util.NsxVersion = "3.1.0"
-	defer func() { util.NsxVersion = "" }()
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

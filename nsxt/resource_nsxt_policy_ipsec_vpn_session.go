@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -273,16 +272,14 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 			Psk:                      &psk,
 			Tags:                     tags,
 		}
-		if util.NsxVersionHigherOrEqual("3.2.0") {
-			if direction != "" {
-				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
-					Direction: &direction,
-				}
-				if mss > 0 {
-					tcpMSSClamping.MaxSegmentSize = &mss
-				}
-				routeObj.TcpMssClamping = &tcpMSSClamping
+		if direction != "" {
+			tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
+				Direction: &direction,
 			}
+			if mss > 0 {
+				tcpMSSClamping.MaxSegmentSize = &mss
+			}
+			routeObj.TcpMssClamping = &tcpMSSClamping
 		}
 		if len(ikeProfilePath) > 0 {
 			routeObj.IkeProfilePath = &ikeProfilePath
@@ -321,16 +318,14 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 			Psk:                      &psk,
 			Tags:                     tags,
 		}
-		if util.NsxVersionHigherOrEqual("3.2.0") {
-			if direction != "" {
-				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
-					Direction: &direction,
-				}
-				if mss > 0 {
-					tcpMSSClamping.MaxSegmentSize = &mss
-				}
-				policyObj.TcpMssClamping = &tcpMSSClamping
+		if direction != "" {
+			tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
+				Direction: &direction,
 			}
+			if mss > 0 {
+				tcpMSSClamping.MaxSegmentSize = &mss
+			}
+			policyObj.TcpMssClamping = &tcpMSSClamping
 		}
 		if len(ikeProfilePath) > 0 {
 			policyObj.IkeProfilePath = &ikeProfilePath
@@ -743,13 +738,11 @@ func setIPSecVpnSessionResourceData(d *schema.ResourceData, obj *data.StructValu
 		d.Set("tunnel_profile_path", blockVPN.TunnelProfilePath)
 		d.Set("peer_address", blockVPN.PeerAddress)
 		d.Set("peer_id", blockVPN.PeerId)
-		if util.NsxVersionHigherOrEqual("3.2.0") {
-			if blockVPN.TcpMssClamping != nil {
-				direction := blockVPN.TcpMssClamping.Direction
-				mss := blockVPN.TcpMssClamping.MaxSegmentSize
-				d.Set("direction", direction)
-				d.Set("max_segment_size", mss)
-			}
+		if blockVPN.TcpMssClamping != nil {
+			direction := blockVPN.TcpMssClamping.Direction
+			mss := blockVPN.TcpMssClamping.MaxSegmentSize
+			d.Set("direction", direction)
+			d.Set("max_segment_size", mss)
 		}
 		var subnets []string
 		var prefixLength int64
@@ -800,13 +793,11 @@ func setIPSecVpnSessionResourceData(d *schema.ResourceData, obj *data.StructValu
 		if blockVPN.Rules != nil {
 			setRuleInSchema(d, blockVPN.Rules)
 		}
-		if util.NsxVersionHigherOrEqual("3.2.0") {
-			if blockVPN.TcpMssClamping != nil {
-				direction := blockVPN.TcpMssClamping.Direction
-				mss := blockVPN.TcpMssClamping.MaxSegmentSize
-				d.Set("direction", direction)
-				d.Set("max_segment_size", mss)
-			}
+		if blockVPN.TcpMssClamping != nil {
+			direction := blockVPN.TcpMssClamping.Direction
+			mss := blockVPN.TcpMssClamping.MaxSegmentSize
+			d.Set("direction", direction)
+			d.Set("max_segment_size", mss)
 		}
 	}
 	return nil

@@ -42,14 +42,12 @@ var accTestPolicyGatewayDNSForwarderUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier0(t *testing.T) {
 	testAccResourceNsxtPolicyGatewayDNSForwarder(t, true, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
 func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1(t *testing.T) {
 	testAccResourceNsxtPolicyGatewayDNSForwarder(t, false, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 

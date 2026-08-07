@@ -302,7 +302,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfig(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, "tfbgp")
