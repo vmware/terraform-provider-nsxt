@@ -317,3 +317,125 @@ func TestMockResourceNsxtVpcServiceProfileDelete(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestMockResourceNsxtVpcServiceProfileDnsForwarderConfig(t *testing.T) {
+	zonePath := "/orgs/default/projects/p1/infra/dns-forwarder-zones/default"
+	condZonePath := "/orgs/default/projects/p1/infra/dns-forwarder-zones/corp"
+	logLevel := nsxModel.PolicyVpcDnsForwarder_LOG_LEVEL_INFO
+	cacheSize := int64(1024)
+
+	t.Run("Read populates dns_forwarder_config from API response", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVspMock(t, ctrl)
+		defer restore()
+
+		response := vspAPIResponse()
+		response.DnsForwarderConfig = &nsxModel.PolicyVpcDnsForwarder{
+			DefaultForwarderZonePath:      &zonePath,
+			ConditionalForwarderZonePaths: []string{condZonePath},
+			LogLevel:                      &logLevel,
+			CacheSize:                     &cacheSize,
+		}
+		mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(response, nil)
+
+		res := resourceNsxtVpcServiceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVspData())
+		d.SetId(vspID)
+
+		err := resourceNsxtVpcServiceProfileRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		configs := d.Get("dns_forwarder_config").([]interface{})
+		require.Len(t, configs, 1)
+		config := configs[0].(map[string]interface{})
+		assert.Equal(t, zonePath, config["default_forwarder_zone_path"])
+		assert.Equal(t, logLevel, config["log_level"])
+		assert.Equal(t, int(cacheSize), config["cache_size"])
+		condPaths := config["conditional_forwarder_zone_paths"].([]interface{})
+		require.Len(t, condPaths, 1)
+		assert.Equal(t, condZonePath, condPaths[0])
+	})
+
+	t.Run("Create sends dns_forwarder_config to API", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVspMock(t, ctrl)
+		defer restore()
+
+		var capturedProfile nsxModel.VpcServiceProfile
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(nsxModel.VpcServiceProfile{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), vspID, gomock.Any()).Do(
+				func(_, _, _ string, p nsxModel.VpcServiceProfile) {
+					capturedProfile = p
+				}).Return(nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(vspAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcServiceProfile()
+		data := minimalVspData()
+		data["dns_forwarder_config"] = []interface{}{
+			map[string]interface{}{
+				"default_forwarder_zone_path":      zonePath,
+				"conditional_forwarder_zone_paths": []interface{}{condZonePath},
+				"cache_size":                       int(cacheSize),
+				"log_level":                        logLevel,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtVpcServiceProfileCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.NotNil(t, capturedProfile.DnsForwarderConfig)
+		assert.Equal(t, zonePath, *capturedProfile.DnsForwarderConfig.DefaultForwarderZonePath)
+		assert.Equal(t, logLevel, *capturedProfile.DnsForwarderConfig.LogLevel)
+		assert.Equal(t, cacheSize, *capturedProfile.DnsForwarderConfig.CacheSize)
+		require.Len(t, capturedProfile.DnsForwarderConfig.ConditionalForwarderZonePaths, 1)
+		assert.Equal(t, condZonePath, capturedProfile.DnsForwarderConfig.ConditionalForwarderZonePaths[0])
+	})
+
+	t.Run("Update sends dns_forwarder_config to API", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVspMock(t, ctrl)
+		defer restore()
+
+		var capturedProfile nsxModel.VpcServiceProfile
+		gomock.InOrder(
+			mockSDK.EXPECT().Update(gomock.Any(), gomock.Any(), vspID, gomock.Any()).Do(
+				func(_, _, _ string, p nsxModel.VpcServiceProfile) {
+					capturedProfile = p
+				}).Return(vspAPIResponse(), nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vspID).Return(vspAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcServiceProfile()
+		data := minimalVspData()
+		data["dns_forwarder_config"] = []interface{}{
+			map[string]interface{}{
+				"default_forwarder_zone_path":      zonePath,
+				"conditional_forwarder_zone_paths": []interface{}{},
+				"cache_size":                       0,
+				"log_level":                        "",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(vspID)
+
+		err := resourceNsxtVpcServiceProfileUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.NotNil(t, capturedProfile.DnsForwarderConfig)
+		assert.Equal(t, zonePath, *capturedProfile.DnsForwarderConfig.DefaultForwarderZonePath)
+	})
+}
