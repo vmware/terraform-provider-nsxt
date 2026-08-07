@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_group_associations"
+page_title: "NSXT: nsxt_policy_baremetal_server_group_associations"
 description: Groups a bare metal server is a member of.
 ---
 
@@ -41,6 +41,7 @@ resource "nsxt_policy_service" "https" {
 resource "nsxt_policy_group" "web-servers" {
   display_name = "Web-Servers-Group"
   description  = "Group containing web server bare metal resources"
+  group_type   = "BareMetalServer"
 
   criteria {
     condition {
