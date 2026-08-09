@@ -18,7 +18,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 
@@ -807,7 +806,10 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	caCert := d.Get("ca").(string)
-	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
+	tlsConfig := tls.Config{}
+	if insecure {
+		tlsConfig.InsecureSkipVerify = true // #nosec G402 -- user-controlled via allow_unverified_ssl provider option
+	}
 
 	if len(clientAuthCertFile) > 0 {
 

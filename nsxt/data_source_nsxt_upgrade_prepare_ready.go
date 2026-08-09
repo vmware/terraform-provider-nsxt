@@ -7,7 +7,6 @@ package nsxt
 import (
 	"errors"
 	"fmt"
-	"slices"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
