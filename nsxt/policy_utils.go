@@ -686,13 +686,22 @@ func isValidID(id string) bool {
 	return !strings.ContainsAny(id, "/&")
 }
 
+// validateNsxID returns an error if id is non-empty and contains characters
+// that are illegal in NSX-T resource identifiers.
+func validateNsxID(id string) error {
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
+	return nil
+}
+
 // getNsxIDFromSchema reads nsx_id from the resource schema, validates it, and
 // returns a generated UUID when no id was supplied. Returns an error if the
 // supplied id contains characters that are illegal in NSX-T resource identifiers.
 func getNsxIDFromSchema(d *schema.ResourceData) (string, error) {
 	id := d.Get("nsx_id").(string)
-	if id != "" && !isValidID(id) {
-		return "", fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	if err := validateNsxID(id); err != nil {
+		return "", err
 	}
 	if id == "" {
 		return newUUID(), nil

@@ -93,8 +93,8 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	id := d.Get("nsx_id").(string)
-	if id != "" && !isValidID(id) {
-		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	if err := validateNsxID(id); err != nil {
+		return err
 	}
 	if id == "" {
 		uuid, _ := uuid.NewRandom()

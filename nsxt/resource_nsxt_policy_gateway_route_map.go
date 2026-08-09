@@ -275,8 +275,8 @@ func resourceNsxtPolicyGatewayRouteMapCreate(d *schema.ResourceData, m interface
 
 	// Initialize resource Id and verify this ID is not yet used
 	id := d.Get("nsx_id").(string)
-	if id != "" && !isValidID(id) {
-		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	if err := validateNsxID(id); err != nil {
+		return err
 	}
 	gwPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPath)

@@ -227,8 +227,8 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 	poolID := getPolicyIDFromPath(poolPath)
 
 	id := d.Get("nsx_id").(string)
-	if id != "" && !isValidID(id) {
-		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	if err := validateNsxID(id); err != nil {
+		return err
 	}
 	if id == "" {
 		id = newUUID()

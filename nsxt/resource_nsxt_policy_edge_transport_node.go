@@ -1331,8 +1331,8 @@ func resourceNsxtPolicyEdgeTransportNodeCreate(d *schema.ResourceData, m interfa
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
-	if id != "" && !isValidID(id) {
-		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	if err := validateNsxID(id); err != nil {
+		return err
 	}
 	nodeID := d.Get("node_id").(string)
 	if id == "" {
