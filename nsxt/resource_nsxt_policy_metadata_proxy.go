@@ -80,7 +80,7 @@ func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Description:  "Server Address",
-				ValidateFunc: validateSingleIPOrHostName(),
+				ValidateFunc: validation.IsURLWithScheme([]string{"http", "https"}),
 			},
 			"server_certificates": {
 				Type:        schema.TypeList,

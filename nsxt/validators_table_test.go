@@ -356,33 +356,6 @@ func TestUnitNsxt_validateFQDN(t *testing.T) {
 	require.NotEmpty(t, es)
 }
 
-func TestUnitNsxt_validateHTTPURIPath(t *testing.T) {
-	v := validateHTTPURIPath()
-	cases := []struct {
-		name    string
-		val     string
-		wantErr bool
-	}{
-		{"simple path", "/api/v1/resource", false},
-		{"root", "/", false},
-		{"missing leading slash", "api/v1", true},
-		{"contains space", "/api v1", true},
-		{"contains angle bracket", "/api<v1>", true},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			_, es := v(tc.val, "k")
-			if tc.wantErr {
-				assert.NotEmpty(t, es)
-			} else {
-				assert.Empty(t, es)
-			}
-		})
-	}
-	_, es := v(1, "k")
-	require.NotEmpty(t, es)
-}
-
 func TestUnitNsxt_validateLogLabel(t *testing.T) {
 	v := validateLogLabel()
 	cases := []struct {

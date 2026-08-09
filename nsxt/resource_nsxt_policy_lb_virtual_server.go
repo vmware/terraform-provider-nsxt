@@ -399,9 +399,8 @@ func getPolicyLbRuleHTTPRequestURIConditionSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
 				"uri": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ValidateFunc: validateHTTPURIPath(),
+					Type:     schema.TypeString,
+					Required: true,
 				},
 				"case_sensitive": getLbRuleCaseSensitiveSchema(),
 				"match_type":     getLbRuleMatchTypeSchema(),
@@ -660,9 +659,8 @@ func getPolicyLbRuleHTTPRequestURIRewriteActionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"uri": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ValidateFunc: validateHTTPURIPath(),
+					Type:     schema.TypeString,
+					Required: true,
 				},
 				"uri_arguments": {
 					Type:     schema.TypeString,
@@ -771,7 +769,7 @@ func getPolicyLbRuleSelectPoolActionSchema() *schema.Schema {
 				"pool_id": {
 					Type:         schema.TypeString,
 					Required:     true,
-					ValidateFunc: validateID(),
+					ValidateFunc: validatePolicyPath(),
 				},
 			},
 		},

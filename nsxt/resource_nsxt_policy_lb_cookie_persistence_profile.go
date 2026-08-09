@@ -104,9 +104,8 @@ var lbCookiePersistenceProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"cookie_path": {
 		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			Optional:     true,
-			ValidateFunc: validateHTTPURIPath(),
+			Type:     schema.TypeString,
+			Optional: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",

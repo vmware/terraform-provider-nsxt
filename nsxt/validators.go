@@ -434,27 +434,6 @@ func validateFQDN() schema.SchemaValidateFunc {
 	}
 }
 
-func validateHTTPURIPath() schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (warnings []string, errors []error) {
-		v, ok := i.(string)
-		if !ok {
-			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
-			return
-		}
-		if !strings.HasPrefix(v, "/") {
-			errors = append(errors, fmt.Errorf(
-				"%q must start with '/', got: %q", k, v))
-			return
-		}
-		matched, _ := regexp.MatchString(`^[^\s<>"{}|\\^`+"`"+`]*$`, v)
-		if !matched {
-			errors = append(errors, fmt.Errorf(
-				"%q contains invalid URI path characters, got: %q", k, v))
-		}
-		return
-	}
-}
-
 func validateLogLabel() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (warnings []string, errors []error) {
 		v, ok := i.(string)
