@@ -58,8 +58,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `entry` - (Required) Ordered list of route map entries. Each entry supports:
     * `action` - (Optional) Action for the entry. Accepted values: `PERMIT`, `DENY`. Defaults to `PERMIT`.
-    * `prefix_list_matches` - (Optional) Set of policy paths for prefix lists to match against.
-    * `community_list_match` - (Optional) List of BGP community match criteria. Each item supports:
+    * `prefix_list_matches` - (Optional) Set of policy paths for prefix lists to match against. Mutually exclusive with `community_list_match`.
+    * `community_list_match` - (Optional) List of BGP community match criteria. Mutually exclusive with `prefix_list_matches`. Each item supports:
         * `criteria` - (Required) Community list path or a regular expression.
         * `match_operator` - (Required) Match operator. Accepted values: `MATCH_ANY`, `MATCH_ALL`, `MATCH_EXACT`, `MATCH_COMMUNITY_REGEX`, `MATCH_LARGE_COMMUNITY_REGEX`.
     * `set` - (Optional) Set clause applied to matching routes (max 1 block):

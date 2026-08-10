@@ -72,7 +72,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 			},
 			"community_list_match": {
 				Type:        schema.TypeList,
-				Description: "Prefix list match criteria for route map",
+				Description: "Community list match criteria for route map. Mutually exclusive with prefix_list_matches",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -93,7 +93,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 			"prefix_list_matches": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Description: "List of paths for prefix lists for route map",
+				Description: "List of paths for prefix lists for route map. Mutually exclusive with community_list_match",
 				Elem:        getElemPolicyPathSchema(),
 			},
 			"set": {
@@ -180,7 +180,7 @@ func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMap
 	d.Set("entry", entryList)
 }
 
-func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}) model.RouteMapEntry {
+func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}) (model.RouteMapEntry, error) {
 
 	action := schemaEntry["action"].(string)
 	obj := model.RouteMapEntry{
@@ -189,6 +189,10 @@ func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schema
 
 	commListMatches := schemaEntry["community_list_match"].([]interface{})
 	prefixListMatches := schemaEntry["prefix_list_matches"].(*schema.Set).List()
+
+	if len(commListMatches) > 0 && len(prefixListMatches) > 0 {
+		return obj, fmt.Errorf("entry %d: community_list_match and prefix_list_matches are mutually exclusive and cannot be used in the same route map entry", entryNo)
+	}
 
 	if len(commListMatches) > 0 {
 		var commCriteriaList []model.CommunityMatchCriteria
@@ -239,7 +243,7 @@ func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schema
 		obj.Set = &entrySet
 	}
 
-	return obj
+	return obj, nil
 }
 
 func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.ResourceData, isGlobalManager bool, connector client.Connector) error {
@@ -250,7 +254,11 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
 	for entryNo, entry := range schemaEntries {
-		entries = append(entries, policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{})))
+		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{}))
+		if err != nil {
+			return err
+		}
+		entries = append(entries, entryObj)
 	}
 
 	obj := model.Tier0RouteMap{

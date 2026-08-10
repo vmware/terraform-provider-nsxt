@@ -121,6 +121,33 @@ func TestMockResourceNsxtPolicyGatewayRouteMapCreate(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Tier0")
 	})
+
+	t.Run("Create fails when prefix_list_matches and community_list_match are both set", func(t *testing.T) {
+		notFoundErr := vapiErrors.NotFound{}
+		mockSDK.EXPECT().Get(routeMapGwID, routeMapID).Return(nsxModel.Tier0RouteMap{}, notFoundErr)
+
+		data := minimalRouteMapData()
+		data["entry"] = []interface{}{
+			map[string]interface{}{
+				"action":              routeMapEntryAction,
+				"prefix_list_matches": []interface{}{"/infra/tier-0s/t0-rm-gw-1/prefix-lists/pl-1"},
+				"community_list_match": []interface{}{
+					map[string]interface{}{
+						"criteria":       "11:22",
+						"match_operator": nsxModel.CommunityMatchCriteria_MATCH_OPERATOR_ANY,
+					},
+				},
+				"set": []interface{}{},
+			},
+		}
+
+		res := resourceNsxtPolicyGatewayRouteMap()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyGatewayRouteMapCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "mutually exclusive")
+	})
 }
 
 func TestMockResourceNsxtPolicyGatewayRouteMapRead(t *testing.T) {

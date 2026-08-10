@@ -64,7 +64,7 @@ func resourceNsxtPolicyTransitGatewayRouteMapExists(sessionContext utl.SessionCo
 	return false, logAPIError("Error retrieving TransitGatewayRouteMap", err)
 }
 
-func tgwRouteMapBuildObj(d *schema.ResourceData, id string) model.TransitGatewayRouteMap {
+func tgwRouteMapBuildObj(d *schema.ResourceData, id string) (model.TransitGatewayRouteMap, error) {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -72,7 +72,11 @@ func tgwRouteMapBuildObj(d *schema.ResourceData, id string) model.TransitGateway
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
 	for entryNo, entry := range schemaEntries {
-		entries = append(entries, policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{})))
+		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{}))
+		if err != nil {
+			return model.TransitGatewayRouteMap{}, err
+		}
+		entries = append(entries, entryObj)
 	}
 
 	return model.TransitGatewayRouteMap{
@@ -81,7 +85,7 @@ func tgwRouteMapBuildObj(d *schema.ResourceData, id string) model.TransitGateway
 		Description: &description,
 		Tags:        tags,
 		Entries:     entries,
-	}
+	}, nil
 }
 
 func resourceNsxtPolicyTransitGatewayRouteMapCreate(d *schema.ResourceData, m interface{}) error {
@@ -97,7 +101,10 @@ func resourceNsxtPolicyTransitGatewayRouteMapCreate(d *schema.ResourceData, m in
 		return pathErr
 	}
 
-	obj := tgwRouteMapBuildObj(d, id)
+	obj, err := tgwRouteMapBuildObj(d, id)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Creating TransitGatewayRouteMap with ID %s", id)
 	sessionContext := getParentContext(d, m, parentPath)
@@ -163,7 +170,10 @@ func resourceNsxtPolicyTransitGatewayRouteMapUpdate(d *schema.ResourceData, m in
 		return pathErr
 	}
 
-	obj := tgwRouteMapBuildObj(d, id)
+	obj, err := tgwRouteMapBuildObj(d, id)
+	if err != nil {
+		return err
+	}
 	revision := int64(d.Get("revision").(int))
 	obj.Revision = &revision
 
