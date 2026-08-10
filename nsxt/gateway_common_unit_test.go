@@ -17,7 +17,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func TestUnitNsxt_parseGatewayInterfacePolicyPath(t *testing.T) {
@@ -183,8 +182,6 @@ func TestUnitNsxt_gatewayIntersiteConfigSchemaRoundTrip(t *testing.T) {
 }
 
 func TestUnitNsxt_setLocaleServiceRedistributionRulesConfig(t *testing.T) {
-	defer func() { util.NsxVersion = "" }()
-	util.NsxVersion = "3.2.0"
 	rule := map[string]interface{}{
 		"name":           "r1",
 		"route_map_path": "/infra/rm1",

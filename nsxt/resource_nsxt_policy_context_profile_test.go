@@ -20,7 +20,6 @@ const (
 func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyContextProfileBasic(t, false, func() {
 		testAccPreCheck(t)
-		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
@@ -90,7 +89,7 @@ func TestAccResourceNsxtPolicyContextProfile_CustomDomain(t *testing.T) {
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(fqdn)
 	dependsOn := testAccNsxtPolicyContextProfileDependsOnTemplate("nsxt_policy_context_profile_custom_attribute.test")
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
@@ -123,7 +122,7 @@ func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, name)
@@ -174,7 +173,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName) + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
@@ -233,7 +232,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 	attributesDomainName := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
@@ -336,7 +335,7 @@ func TestAccResourceNsxtPolicyContextProfile_customUrl(t *testing.T) {
 	dependsOn := testAccNsxtPolicyContextProfileDependsOnTemplate("nsxt_policy_context_profile_custom_attribute.test")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "4.0.0") },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)

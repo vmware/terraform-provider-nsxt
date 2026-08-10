@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyDhcpServer_basic(t *testing.T) {
-	testAccDataSourceNsxtPolicyDhcpServerBasic(t, false, func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") })
+	testAccDataSourceNsxtPolicyDhcpServerBasic(t, false, func() { testAccPreCheck(t) })
 }
 
 func TestAccDataSourceNsxtPolicyDhcpServer_multitenancy(t *testing.T) {

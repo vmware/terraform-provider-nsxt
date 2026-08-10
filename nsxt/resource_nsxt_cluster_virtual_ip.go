@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -107,12 +105,7 @@ func setClusterVirtualIP(d *schema.ResourceData, m interface{}) error {
 		forceStr = nsxModel.ClusterVirtualIpProperties_FORCE_FALSE
 	}
 	var err error
-	if util.NsxVersionHigherOrEqual("4.0.0") {
-		_, err = client.Setvirtualip(&forceStr, &ipv6Address, &ipAddress)
-	} else {
-		// IPv6 not supported
-		_, err = client.Setvirtualip(nil, nil, &ipAddress)
-	}
+	_, err = client.Setvirtualip(&forceStr, &ipv6Address, &ipAddress)
 	if err != nil {
 		log.Printf("[WARNING] Failed to set virtual ip: %v", err)
 		return err
@@ -141,12 +134,10 @@ func resourceNsxtClusterVirtualIPDelete(d *schema.ResourceData, m interface{}) e
 		log.Printf("[WARNING] Failed to clear virtual ip: %v", err)
 		return handleDeleteError("ClusterVirtualIP", id, err)
 	}
-	if util.NsxVersionHigherOrEqual("4.0.0") {
-		_, err = client.Clearvirtualip6()
-		if err != nil {
-			log.Printf("[WARNING] Failed to clear virtual ipv6 ip: %v", err)
-			return handleDeleteError("ClusterVirtualIP", id, err)
-		}
+	_, err = client.Clearvirtualip6()
+	if err != nil {
+		log.Printf("[WARNING] Failed to clear virtual ipv6 ip: %v", err)
+		return handleDeleteError("ClusterVirtualIP", id, err)
 	}
 	return nil
 }

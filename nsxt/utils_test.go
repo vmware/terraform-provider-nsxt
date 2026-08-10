@@ -452,7 +452,6 @@ func testAccTestVCCredentials(t *testing.T) {
 }
 
 func testAccOnlyMultitenancy(t *testing.T) {
-	testAccNSXVersion(t, "4.1.0")
 	if !testAccIsMultitenancy() {
 		t.Skipf("This test requires a multitenancy environment")
 	}

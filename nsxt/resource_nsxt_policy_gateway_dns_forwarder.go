@@ -11,7 +11,6 @@ import (
 	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -162,9 +161,7 @@ func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, conne
 		obj.ConditionalForwarderZonePaths = conditionalZonePaths
 	}
 
-	if util.NsxVersionHigherOrEqual("3.2.0") {
-		obj.CacheSize = &cacheSize
-	}
+	obj.CacheSize = &cacheSize
 
 	if isT0 {
 		client := cliTier0DnsForwarderClient(sessionContext, connector)

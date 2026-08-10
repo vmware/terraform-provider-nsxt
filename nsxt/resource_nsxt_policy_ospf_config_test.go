@@ -39,7 +39,7 @@ func TestAccResourceNsxtPolicyOspfConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ospf_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.1") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -94,7 +94,7 @@ func TestAccResourceNsxtPolicyOspfConfig_minimalistic(t *testing.T) {
 	testResourceName := "nsxt_policy_ospf_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.1") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

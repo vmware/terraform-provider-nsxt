@@ -25,7 +25,6 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	segmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	segprofmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/segments"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -85,9 +84,6 @@ func setupVlanSegReadProfileMocks(t *testing.T, ctrl *gomock.Controller) (
 }
 
 func TestMockResourceNsxtPolicyVlanSegmentRead(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -153,9 +149,6 @@ func TestMockResourceNsxtPolicyVlanSegmentRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVlanSegmentCreate(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -204,9 +197,6 @@ func TestMockResourceNsxtPolicyVlanSegmentCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVlanSegmentUpdate(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -265,9 +255,6 @@ func TestMockResourceNsxtPolicyVlanSegmentUpdate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyVlanSegmentDelete(t *testing.T) {
-	util.NsxVersion = "9.1.0"
-	defer func() { util.NsxVersion = "" }()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

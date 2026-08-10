@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 
@@ -87,8 +86,8 @@ func getConnectionInfoSchema() *schema.Schema {
 				"fqdn": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Description:  "Fully Qualified Domain Name of the Management Node",
-					ValidateFunc: validateFQDN(),
+					Description:  "Fully Qualified Domain Name or IP Address of the Management Node",
+					ValidateFunc: validateFQDNOrIP(),
 				},
 				"password": {
 					Type:             schema.TypeString,
@@ -135,9 +134,7 @@ func getConnectionInfosFromSchema(d *schema.ResourceData, key string) []gm_model
 			Thumbprint: &thumbprint,
 			Username:   &username,
 		}
-		if util.NsxVersionHigherOrEqual("4.1.0") {
-			connectionInfo.SiteUuid = &siteUUID
-		}
+		connectionInfo.SiteUuid = &siteUUID
 		connectionInfos = append(connectionInfos, connectionInfo)
 	}
 	return connectionInfos
@@ -177,9 +174,7 @@ func getSiteFromSchema(d *schema.ResourceData) gm_model.Site {
 		MaximumRtt:              &maximumRtt,
 		SiteConnectionInfo:      siteConnectionInfos,
 	}
-	if util.NsxVersionHigherOrEqual("4.1.0") {
-		site.SiteType = &siteType
-	}
+	site.SiteType = &siteType
 	return site
 }
 
