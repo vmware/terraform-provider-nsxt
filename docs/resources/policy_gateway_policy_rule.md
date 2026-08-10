@@ -121,3 +121,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `path` - The NSX path of the policy resource.
 * `sequence_number` - Sequence number for the rule.
 * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
+
+## Importing
+
+An existing gateway policy rule can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
+
+```shell
+terraform import nsxt_policy_gateway_policy_rule.rule1 RULE_PATH
+```
+
+The above command imports the gateway policy rule named `rule1` with the NSX policy path `RULE_PATH`, for example `/infra/domains/default/gateway-policies/policy1/rules/rule1`.
