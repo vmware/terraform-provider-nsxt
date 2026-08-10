@@ -434,6 +434,10 @@ func validateFQDN() schema.SchemaValidateFunc {
 	}
 }
 
+func validateFQDNOrIP() schema.SchemaValidateFunc {
+	return validation.Any(validateFQDN(), validateSingleIP())
+}
+
 func validateLogLabel() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (warnings []string, errors []error) {
 		v, ok := i.(string)

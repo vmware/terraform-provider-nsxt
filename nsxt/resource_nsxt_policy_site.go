@@ -86,8 +86,8 @@ func getConnectionInfoSchema() *schema.Schema {
 				"fqdn": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					Description:  "Fully Qualified Domain Name of the Management Node",
-					ValidateFunc: validateFQDN(),
+					Description:  "Fully Qualified Domain Name or IP Address of the Management Node",
+					ValidateFunc: validateFQDNOrIP(),
 				},
 				"password": {
 					Type:             schema.TypeString,
