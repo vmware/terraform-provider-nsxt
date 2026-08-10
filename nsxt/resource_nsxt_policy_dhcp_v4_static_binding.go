@@ -46,9 +46,10 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 				Optional:     true,
 			},
 			"hostname": {
-				Type:        schema.TypeString,
-				Description: "Hostname to assign to the host",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Hostname to assign to the host",
+				Optional:     true,
+				ValidateFunc: validateSingleIPOrHostName(),
 			},
 			"ip_address": {
 				Type:         schema.TypeString,

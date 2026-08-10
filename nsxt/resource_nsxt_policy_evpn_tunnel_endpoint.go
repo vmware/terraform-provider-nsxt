@@ -107,6 +107,9 @@ func resourceNsxtPolicyEvpnTunnelEndpointCreate(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
+	if err := validateNsxID(id); err != nil {
+		return err
+	}
 	interfacePath := d.Get("external_interface_path").(string)
 	isT0, gwID, localeServiceID, _ := parseGatewayInterfacePolicyPath(interfacePath)
 	if !isT0 || gwID == "" {

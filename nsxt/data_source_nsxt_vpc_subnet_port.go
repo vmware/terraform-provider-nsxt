@@ -30,9 +30,10 @@ func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"vm_id": {
-				Type:        schema.TypeString,
-				Description: "external ID of VM",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "external ID of VM",
+				Required:     true,
+				ValidateFunc: validateID(),
 			},
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),

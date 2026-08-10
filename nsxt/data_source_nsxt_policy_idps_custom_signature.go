@@ -25,9 +25,10 @@ func dataSourceNsxtPolicyIdpsCustomSignature() *schema.Resource {
 				Description: "ID of the custom signature. Use format signature_version_id/signature_id (e.g. default/5000001).",
 			},
 			"signature_version_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Custom signature version ID (e.g. \"default\"). Required if id is only the signature_id.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Custom signature version ID (e.g. \"default\"). Required if id is only the signature_id.",
+				ValidateFunc: validateID(),
 			},
 			"path": {
 				Type:        schema.TypeString,

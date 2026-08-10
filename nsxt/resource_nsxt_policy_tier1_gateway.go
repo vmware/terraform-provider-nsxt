@@ -289,7 +289,9 @@ func setAdvRulesInSchema(d *schema.ResourceData, rules []model.RouteAdvertisemen
 		elem["action"] = rule.Action
 		elem["subnets"] = rule.Subnets
 		elem["route_advertisement_types"] = rule.RouteAdvertisementTypes
-		elem["prefix_operator"] = *rule.PrefixOperator
+		if rule.PrefixOperator != nil {
+			elem["prefix_operator"] = *rule.PrefixOperator
+		}
 		rulesList = append(rulesList, elem)
 	}
 	err := d.Set("route_advertisement_rule", rulesList)

@@ -22,14 +22,16 @@ func dataSourceNsxtPolicySegmentPort() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"vif_id": {
-				Type:        schema.TypeString,
-				Description: "Segment Port attachment id",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Segment Port attachment id",
+				Optional:     true,
+				ValidateFunc: validateID(),
 			},
 			"segment_path": {
-				Type:        schema.TypeString,
-				Description: "Segment path",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Segment path",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 		},
 	}

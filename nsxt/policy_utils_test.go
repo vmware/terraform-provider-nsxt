@@ -188,6 +188,39 @@ func TestUnitNsxt_IsValidID(t *testing.T) {
 	assert.False(t, isValidID("a&b"))
 }
 
+func TestUnitNsxt_ValidateNsxID(t *testing.T) {
+	assert.NoError(t, validateNsxID(""))
+	assert.NoError(t, validateNsxID("id-1"))
+	assert.Error(t, validateNsxID("a/b"))
+	assert.Error(t, validateNsxID("a&b"))
+}
+
+func TestUnitNsxt_GetNsxIDFromSchema(t *testing.T) {
+	sch := map[string]*schema.Schema{
+		"nsx_id": getNsxIDSchema(),
+	}
+
+	t.Run("empty id generates a UUID", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, sch, map[string]interface{}{})
+		id, err := getNsxIDFromSchema(d)
+		require.NoError(t, err)
+		assert.NotEmpty(t, id)
+	})
+
+	t.Run("valid id is returned as-is", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, sch, map[string]interface{}{"nsx_id": "my-id"})
+		id, err := getNsxIDFromSchema(d)
+		require.NoError(t, err)
+		assert.Equal(t, "my-id", id)
+	})
+
+	t.Run("invalid id returns an error", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, sch, map[string]interface{}{"nsx_id": "a/b"})
+		_, err := getNsxIDFromSchema(d)
+		assert.Error(t, err)
+	})
+}
+
 func TestUnitNsxt_IsSpaceString(t *testing.T) {
 	assert.True(t, isSpaceString(""))
 	assert.True(t, isSpaceString("  \t "))

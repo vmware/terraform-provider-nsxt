@@ -301,6 +301,143 @@ func TestUnitNsxt_validateStringIntBetween(t *testing.T) {
 	require.NotEmpty(t, es)
 }
 
+func TestUnitNsxt_validateSHA256Thumbprint(t *testing.T) {
+	v := validateSHA256Thumbprint()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"valid thumbprint", strings.Repeat("a1", 32), false},
+		{"uppercase hex", strings.Repeat("A1", 32), false},
+		{"too short", strings.Repeat("a1", 16), true},
+		{"non hex chars", strings.Repeat("g", 64), true},
+		{"empty", "", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+	_, es := v(1, "k")
+	require.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_validateFQDN(t *testing.T) {
+	v := validateFQDN()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"simple domain", "example.com", false},
+		{"subdomain", "host.example.com", false},
+		{"no dot", "nodothost", true},
+		{"numeric tld", "example.123", true},
+		{"leading hyphen label", "-bad.com", true},
+		{"underscore", "under_score.com", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+	_, es := v(1, "k")
+	require.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_validateLogLabel(t *testing.T) {
+	v := validateLogLabel()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"empty", "", false},
+		{"alnum with underscore and hyphen", "my_label-1", false},
+		{"contains space", "my label", true},
+		{"contains dot", "my.label", true},
+		{"too long", strings.Repeat("a", 65), true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+	_, es := v(1, "k")
+	require.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_validateCookiePathValue(t *testing.T) {
+	v := validateCookiePathValue()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"no leading slash, matches NSX doc example", "cookie/path", false},
+		{"absolute path", "/api/v1", false},
+		{"empty", "", false},
+		{"contains semicolon", "cookie;path", true},
+		{"contains newline", "cookie\npath", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+	_, es := v(1, "k")
+	require.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_validateNoControlCharacters(t *testing.T) {
+	v := validateNoControlCharacters()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"absolute path", "/api/v1", false},
+		{"regex pattern", `^/api/v[0-9]+\.json$`, false},
+		{"contains pipe and braces", "a|b{2,3}", false},
+		{"no leading slash", "xyz", false},
+		{"contains null byte", "abc\x00def", true},
+		{"contains newline", "abc\ndef", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
+	_, es := v(1, "k")
+	require.NotEmpty(t, es)
+}
+
 func TestUnitNsxt_validateSingleIPOrHostName(t *testing.T) {
 	v := validateSingleIPOrHostName()
 	cases := []struct {

@@ -212,6 +212,9 @@ func resourceNsxtPolicyL2VpnServiceCreate(d *schema.ResourceData, m interface{})
 	}
 	isGlobalManager := isPolicyGlobalManager(m)
 	id := d.Get("nsx_id").(string)
+	if err := validateNsxID(id); err != nil {
+		return err
+	}
 	if id == "" {
 		id = newUUID()
 	} else {

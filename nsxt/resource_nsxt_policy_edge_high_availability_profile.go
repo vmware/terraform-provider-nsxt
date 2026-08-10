@@ -45,11 +45,12 @@ var policyEdgeHighAvailabilityProfileSchema = map[string]*metadata.ExtendedSchem
 	},
 	"enforcement_point": {
 		Schema: schema.Schema{
-			Type:        schema.TypeString,
-			Description: "ID of the enforcement point this Host Transport Node belongs to",
-			Optional:    true,
-			ForceNew:    true,
-			Default:     "default",
+			Type:         schema.TypeString,
+			Description:  "ID of the enforcement point this Host Transport Node belongs to",
+			Optional:     true,
+			ForceNew:     true,
+			Default:      "default",
+			ValidateFunc: validateID(),
 		},
 		Metadata: metadata.Metadata{
 			SchemaType: "string",
@@ -159,9 +160,9 @@ func resourceNsxtPolicyEdgeHighAvailabilityProfileExists(siteID, epID, id string
 }
 
 func resourceNsxtPolicyEdgeHighAvailabilityProfileCreate(d *schema.ResourceData, m interface{}) error {
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

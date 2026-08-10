@@ -32,7 +32,7 @@ func dataSourceNsxtProjectIpAddressAllocationRead(d *schema.ResourceData, m inte
 
 	ips := d.Get("allocation_ips").(string)
 	query := make(map[string]string)
-	query["allocation_ips"] = ips
+	query["allocation_ips"] = escapeSpecialCharacters(ips)
 
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "ProjectIpAddressAllocation", query, false)
 	if err != nil {

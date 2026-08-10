@@ -41,10 +41,11 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"nsx_id": {
-				Type:        schema.TypeString,
-				Description: "NSX ID for this resource",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "NSX ID for this resource",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateID(),
 			},
 			"description": getDescriptionSchema(),
 			"revision":    getRevisionSchema(),
@@ -57,9 +58,10 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 				ForceNew:     true,
 			},
 			"domain_name": {
-				Type:        schema.TypeString,
-				Description: "Authentication domain name",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Authentication domain name",
+				Required:     true,
+				ValidateFunc: validateFQDN(),
 			},
 			"base_dn": {
 				Type:        schema.TypeString,

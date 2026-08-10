@@ -70,11 +70,12 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this Transport Zone belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this Transport Zone belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"realized_id": {
 				Type:        schema.TypeString,
@@ -190,9 +191,9 @@ func policyIDSiteEPTuple(d *schema.ResourceData, m interface{}) (id, siteID, epI
 func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

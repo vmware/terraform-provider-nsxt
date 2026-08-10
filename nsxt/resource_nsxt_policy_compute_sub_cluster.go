@@ -45,16 +45,18 @@ func resourceNsxtPolicyComputeSubCluster() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this subcluster belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this subcluster belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "default",
+				ValidateFunc: validateID(),
 			},
 			"compute_collection_id": {
-				Type:        schema.TypeString,
-				Description: "Compute collection ID under which subcluster is created",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Compute collection ID under which subcluster is created",
+				Required:     true,
+				ValidateFunc: validateID(),
 			},
 			"discovered_node_ids": {
 				Type:        schema.TypeList,
@@ -62,7 +64,8 @@ func resourceNsxtPolicyComputeSubCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validateID(),
 				},
 			},
 		},
@@ -165,9 +168,9 @@ func policyComputeSubClusterPatch(siteID, epID, id string, d *schema.ResourceDat
 
 func resourceNsxtPolicyComputeSubClusterCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

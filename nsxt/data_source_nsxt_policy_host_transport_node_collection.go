@@ -28,10 +28,11 @@ func dataSourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"transport_node_profile_id": {
-				Type:        schema.TypeString,
-				Description: "Transport Node Profile Path",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "Transport Node Profile Path",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateID(),
 			},
 			"unique_id": {
 				Type:        schema.TypeString,

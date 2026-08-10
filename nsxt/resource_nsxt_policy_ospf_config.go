@@ -150,6 +150,9 @@ func resourceNsxtPolicyOspfConfigCreate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return fmt.Errorf("Tier0 Gateway path with configured edge cluster expected, got %s", gwPath)
 	}
+	if localeService == nil {
+		return fmt.Errorf("No locale service with edge cluster found for gateway %s", gwPath)
+	}
 
 	err = policyOspfConfigPatch(d, m, gwID, *localeService.Id)
 	if err != nil {

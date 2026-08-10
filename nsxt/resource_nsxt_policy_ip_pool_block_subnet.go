@@ -182,6 +182,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 	poolID := getPolicyIDFromPath(poolPath)
 
 	id := d.Get("nsx_id").(string)
+	if err := validateNsxID(id); err != nil {
+		return err
+	}
 	if id == "" {
 		id = newUUID()
 	} else {

@@ -33,7 +33,7 @@ func dataSourceNsxtPolicyRouteControllerInterfaceRead(d *schema.ResourceData, m 
 		if _, err := parseStandardPolicyPathVerifySize(parentPath, 1, routeControllerInterfacePathExample); err != nil {
 			return fmt.Errorf("invalid parent_path: %w", err)
 		}
-		query["parent_path"] = fmt.Sprintf("%s*", parentPath)
+		query["parent_path"] = escapeSpecialCharacters(parentPath) + "*"
 	}
 
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "RouteControllerInterface", query, false)

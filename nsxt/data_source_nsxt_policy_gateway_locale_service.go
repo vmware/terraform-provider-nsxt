@@ -24,10 +24,11 @@ func dataSourceNsxtPolicyGatewayLocaleService() *schema.Resource {
 			"path":         getPathSchema(),
 			"bgp_path":     getComputedPolicyPathSchema("Path for BGP config"),
 			"edge_cluster_path": {
-				Type:        schema.TypeString,
-				Description: "The path of the edge cluster connected to this Tier0 gateway",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "The path of the edge cluster connected to this Tier0 gateway",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"context": getContextSchema(false, false, false),
 		},
@@ -39,7 +40,7 @@ func dataSourceNsxtPolicyGatewayLocaleServiceRead(d *schema.ResourceData, m inte
 
 	gwPath := d.Get("gateway_path").(string)
 	query := make(map[string]string)
-	query["parent_path"] = gwPath
+	query["parent_path"] = escapeSpecialCharacters(gwPath)
 	obj, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "LocaleServices", query, false)
 
 	if err != nil {

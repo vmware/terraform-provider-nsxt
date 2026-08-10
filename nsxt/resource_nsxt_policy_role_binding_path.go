@@ -30,10 +30,11 @@ func resourceNsxtPolicyUserManagementRoleBindingPath() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"role_binding_id": {
-				Type:        schema.TypeString,
-				Description: "ID of the role binding to add this path to. Use the id from nsxt_policy_user_management_role_binding or the data source.",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "ID of the role binding to add this path to. Use the id from nsxt_policy_user_management_role_binding or the data source.",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateID(),
 			},
 			"path": {
 				Type:        schema.TypeString,

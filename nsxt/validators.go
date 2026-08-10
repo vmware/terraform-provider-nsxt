@@ -21,6 +21,9 @@ func isSinglePort(vi interface{}) bool {
 	var i uint64
 	switch vi := vi.(type) {
 	case int:
+		if vi < 0 {
+			return false
+		}
 		i = uint64(vi)
 	case string:
 		var err error
@@ -394,6 +397,93 @@ func validateID() schema.SchemaValidateFunc {
 			es = append(es, fmt.Errorf("invalid ID atrribute: %s", v))
 		}
 
+		return
+	}
+}
+
+func validateSHA256Thumbprint() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(`^[0-9a-fA-F]{64}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be a 64-character hex SHA-256 thumbprint, got: %q", k, v))
+		}
+		return
+	}
+}
+
+func validateFQDN() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(
+			`^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be a valid fully-qualified domain name, got: %q", k, v))
+		}
+		return
+	}
+}
+
+func validateLogLabel() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		matched, _ := regexp.MatchString(`^[a-zA-Z0-9_\-]{0,64}$`, v)
+		if !matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must be alphanumeric, underscore or hyphen, max 64 characters, got: %q", k, v))
+		}
+		return
+	}
+}
+
+// validateCookiePathValue enforces the path-value grammar from RFC 6265 (any
+// character except CTLs or ';', which delimits Set-Cookie attributes). It
+// deliberately does not require a leading '/', since NSX's own documented
+// example ("cookie/path") omits one.
+func validateCookiePathValue() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		if matched, _ := regexp.MatchString(`[\x00-\x1F\x7F;]`, v); matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must not contain control characters or ';', got: %q", k, v))
+		}
+		return
+	}
+}
+
+// validateNoControlCharacters rejects control characters (e.g. embedded null
+// bytes or newlines). It is intentionally permissive otherwise, since callers
+// may hold regex or substring match patterns that need punctuation such as
+// '\', '^', '|', '{', '}' to remain usable.
+func validateNoControlCharacters() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		v, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		if matched, _ := regexp.MatchString(`[\x00-\x1F\x7F]`, v); matched {
+			errors = append(errors, fmt.Errorf(
+				"%q must not contain control characters, got: %q", k, v))
+		}
 		return
 	}
 }

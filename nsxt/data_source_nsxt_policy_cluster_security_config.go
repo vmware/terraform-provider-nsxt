@@ -19,9 +19,10 @@ func dataSourceNsxtPolicyClusterSecurityConfig() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
-				Type:        schema.TypeString,
-				Description: "Cluster external ID (e.g., uuid:domain-c20)",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Cluster external ID (e.g., uuid:domain-c20)",
+				Required:     true,
+				ValidateFunc: validateID(),
 			},
 			"dfw_enabled": {
 				Type:        schema.TypeBool,

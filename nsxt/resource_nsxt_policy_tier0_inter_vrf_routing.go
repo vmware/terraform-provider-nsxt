@@ -257,6 +257,9 @@ func resourceNsxtPolicyTier0InterVRFRoutingCreate(d *schema.ResourceData, m inte
 	}
 
 	id := d.Get("nsx_id").(string)
+	if err := validateNsxID(id); err != nil {
+		return err
+	}
 	if id == "" {
 		id = newUUID()
 	} else {

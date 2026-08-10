@@ -16,8 +16,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 
@@ -195,6 +195,7 @@ func Provider() *schema.Provider {
 				DefaultFunc:   schema.EnvDefaultFunc("NSXT_VMC_CLIENT_ID", nil),
 				ConflictsWith: []string{"vmc_token"},
 				RequiredWith:  []string{"vmc_client_secret"},
+				ValidateFunc:  validateID(),
 			},
 			"vmc_client_secret": {
 				Type:          schema.TypeString,
@@ -212,10 +213,11 @@ func Provider() *schema.Provider {
 				Description:  "Mode for VMC authorization",
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Enforcement Point for NSXT Policy",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "Enforcement Point for NSXT Policy",
+				DefaultFunc:  schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
+				ValidateFunc: validateID(),
 			},
 			"global_manager": {
 				Type:        schema.TypeBool,
@@ -804,7 +806,10 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	caCert := d.Get("ca").(string)
-	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
+	tlsConfig := tls.Config{}
+	if insecure {
+		tlsConfig.InsecureSkipVerify = true // #nosec G402 -- user-controlled via allow_unverified_ssl provider option
+	}
 
 	if len(clientAuthCertFile) > 0 {
 
@@ -842,7 +847,7 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	}
 
 	if len(caFile) > 0 {
-		caCert, err := os.ReadFile(caFile)
+		caCert, err := os.ReadFile(filepath.Clean(caFile)) // #nosec G304 -- path cleaned; user-supplied CA file path
 		if err != nil {
 			return nil, err
 		}
@@ -1026,7 +1031,7 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
 	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
 
-	log.Printf("Issuing request towards NSX:\n%s", replaced) //nolint:gosec
+	log.Printf("Issuing request towards NSX:\n%s", replaced) // #nosec G706 -- intentional debug dump; auth headers already scrubbed above
 	return nil
 }
 
@@ -1096,7 +1101,7 @@ func getLicenses(connector client.Connector) ([]string, error) {
 	defaultLicenseMarkers := []string{"NSX for vShield Endpoint"}
 	for _, item := range list.Results {
 		// Ignore default licenses
-		if item.Description != nil && slices.Contains(defaultLicenseMarkers, *item.Description) {
+		if item.Description != nil && stringInList(*item.Description, defaultLicenseMarkers) {
 			continue
 		}
 		licenseList = append(licenseList, *item.LicenseKey)
@@ -1128,7 +1133,7 @@ func configureLicenses(connector client.Connector, intentLicenses []string) erro
 	}
 	// Apply new licenses
 	for _, license := range intentLicenses {
-		if slices.Contains(existingLicenses, license) {
+		if stringInList(license, existingLicenses) {
 			continue
 		}
 		err := applyLicense(connector, license)
@@ -1244,10 +1249,13 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 
 		minRetryInterval := c.CommonConfig.MinRetryInterval
 		maxRetryInterval := c.CommonConfig.MaxRetryInterval
-		if maxRetryInterval > 0 {
-			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval)
+		if maxRetryInterval > minRetryInterval {
+			interval := (rand.Intn(maxRetryInterval-minRetryInterval) + minRetryInterval) // #nosec G404 -- non-cryptographic retry jitter
 			time.Sleep(time.Duration(interval) * time.Millisecond)
 			log.Printf("[DEBUG]: Waited %d ms before retrying", interval)
+		} else if maxRetryInterval > 0 {
+			time.Sleep(time.Duration(maxRetryInterval) * time.Millisecond)
+			log.Printf("[DEBUG]: Waited %d ms before retrying (fixed interval)", maxRetryInterval)
 		}
 
 		return true

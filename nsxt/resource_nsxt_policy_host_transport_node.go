@@ -49,16 +49,18 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point": {
-				Type:        schema.TypeString,
-				Description: "ID of the enforcement point this Host Transport Node belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "default",
+				Type:         schema.TypeString,
+				Description:  "ID of the enforcement point this Host Transport Node belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "default",
+				ValidateFunc: validateID(),
 			},
 			"discovered_node_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Discovered node id to create Host Transport Node",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Discovered node id to create Host Transport Node",
+				ValidateFunc: validateID(),
 			},
 			// host_switch_spec
 			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
@@ -166,9 +168,9 @@ func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.Resource
 
 func resourceNsxtPolicyHostTransportNodeCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	id := d.Get("nsx_id").(string)
-	if id == "" {
-		id = newUUID()
+	id, err := getNsxIDFromSchema(d)
+	if err != nil {
+		return err
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")

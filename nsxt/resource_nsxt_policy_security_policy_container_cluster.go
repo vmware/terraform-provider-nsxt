@@ -36,9 +36,10 @@ func resourceNsxtPolicySecurityPolicyContainerCluster() *schema.Resource {
 			"tag":          getTagsSchema(),
 			"policy_path":  getPolicyPathSchema(true, true, "Security Policy path"),
 			"container_cluster_path": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Path to the container cluster entity in NSX",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Path to the container cluster entity in NSX",
+				ValidateFunc: validatePolicyPath(),
 			},
 		},
 	}

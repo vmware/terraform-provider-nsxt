@@ -39,10 +39,11 @@ func resourceNsxtPolicyTier0GatewayGRETunnel() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"locale_service_path": {
-				Type:        schema.TypeString,
-				Description: "Policy path of associated Gateway Locale Service on NSX",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeString,
+				Description:  "Policy path of associated Gateway Locale Service on NSX",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"destination_address": {
 				Type:         schema.TypeString,
@@ -252,6 +253,9 @@ func resourceNsxtPolicyTier0GatewayGRETunnelCreate(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 
 	id := d.Get("nsx_id").(string)
+	if id != "" && !isValidID(id) {
+		return fmt.Errorf("nsx_id %q is invalid: '/' and '&' characters are not allowed", id)
+	}
 	localeServicePath := d.Get("locale_service_path").(string)
 	isT0, tier0id, localeSvcID, err := parseLocaleServicePolicyPath(localeServicePath)
 	if err != nil {
