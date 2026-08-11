@@ -233,7 +233,6 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 
-	revision := int64(d.Get("revision").(int))
 	gwPath := d.Get("gateway_path").(string)
 	_, gwID := parseGatewayPolicyPath(gwPath)
 	serviceID := d.Get("locale_service_id").(string)
@@ -248,11 +247,27 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}
 
-	obj.Revision = &revision
 	client := cliBgpClient(sessionContext, connector)
-	_, err = client.Update(gwID, serviceID, *obj, nil)
 
-	if err != nil {
+	// The BGP config object is a singleton child of the Tier0 gateway's locale
+	// service, and nsxt_policy_tier0_gateway's own inline bgp_config block can
+	// update that same object. When both resources change in the same apply,
+	// the revision cached in this resource's state can already be stale by the
+	// time this Update runs, so re-fetch the current revision immediately
+	// before each write attempt and retry on conflict.
+	doUpdate := func() error {
+		current, getErr := client.Get(gwID, serviceID)
+		if getErr != nil {
+			return getErr
+		}
+		obj.Revision = current.Revision
+
+		_, updateErr := client.Update(gwID, serviceID, *obj, nil)
+		return updateErr
+	}
+
+	commonProviderConfig := getCommonProviderConfig(m)
+	if err := retryUponPreconditionFailed(doUpdate, commonProviderConfig.MaxRetries); err != nil {
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}
 
