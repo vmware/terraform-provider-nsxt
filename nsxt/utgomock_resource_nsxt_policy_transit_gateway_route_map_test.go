@@ -117,6 +117,33 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapCreate(t *testing.T) {
 		err := resourceNsxtPolicyTransitGatewayRouteMapCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Create fails when prefix_list_matches and community_list_match are both set", func(t *testing.T) {
+		notFoundErr := vapiErrors.NotFound{}
+		mockSDK.EXPECT().Get(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID).Return(nsxModel.TransitGatewayRouteMap{}, notFoundErr)
+
+		data := minimalTGWRouteMapData()
+		data["entry"] = []interface{}{
+			map[string]interface{}{
+				"action":              tgwRMAction,
+				"prefix_list_matches": []interface{}{tgwRMPrefixPath},
+				"community_list_match": []interface{}{
+					map[string]interface{}{
+						"criteria":       "11:22",
+						"match_operator": nsxModel.CommunityMatchCriteria_MATCH_OPERATOR_ANY,
+					},
+				},
+				"set": []interface{}{},
+			},
+		}
+
+		res := resourceNsxtPolicyTransitGatewayRouteMap()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyTransitGatewayRouteMapCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "mutually exclusive")
+	})
 }
 
 func TestMockResourceNsxtPolicyTransitGatewayRouteMapRead(t *testing.T) {

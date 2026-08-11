@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -102,6 +103,52 @@ func TestAccResourceNsxtPolicyTransitGatewayRouteMap_importBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccResourceNsxtPolicyTransitGatewayRouteMap_mutuallyExclusiveMatches(t *testing.T) {
+	prereqName := getAccTestResourceName()
+	displayName := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNsxtPolicyTransitGatewayRouteMapMutuallyExclusiveTemplate(prereqName, displayName),
+				ExpectError: regexp.MustCompile(`community_list_match and prefix_list_matches are mutually exclusive`),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyTransitGatewayRouteMapMutuallyExclusiveTemplate(prereqName string, displayName string) string {
+	return testAccNsxtPolicyTransitGatewayRouteMapPrerequisites(prereqName) + fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway_prefix_list" "test" {
+  display_name = "%s-pl"
+  parent_path  = nsxt_policy_transit_gateway.test.path
+  prefix {
+    action  = "PERMIT"
+    network = "10.10.0.0/16"
+  }
+}
+
+resource "nsxt_policy_transit_gateway_route_map" "test" {
+  parent_path  = nsxt_policy_transit_gateway.test.path
+  display_name = "%s"
+
+  entry {
+    action              = "PERMIT"
+    prefix_list_matches = [nsxt_policy_transit_gateway_prefix_list.test.path]
+    community_list_match {
+      criteria       = "11:22"
+      match_operator = "MATCH_COMMUNITY_REGEX"
+    }
+  }
+}`, displayName, displayName)
 }
 
 func testAccNsxtPolicyTransitGatewayRouteMapExists(displayName string, resourceName string) resource.TestCheckFunc {
