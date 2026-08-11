@@ -408,10 +408,12 @@ func validateSHA256Thumbprint() schema.SchemaValidateFunc {
 			errors = append(errors, fmt.Errorf("expected type of %s to be string", k))
 			return
 		}
-		matched, _ := regexp.MatchString(`^[0-9a-fA-F]{64}$`, v)
+		matched, _ := regexp.MatchString(
+			`^([0-9a-fA-F]{64}|([0-9a-fA-F]{2}:){31}[0-9a-fA-F]{2})$`, v)
 		if !matched {
 			errors = append(errors, fmt.Errorf(
-				"%q must be a 64-character hex SHA-256 thumbprint, got: %q", k, v))
+				"%q must be a 64-character hex SHA-256 thumbprint, "+
+					"optionally colon-delimited, got: %q", k, v))
 		}
 		return
 	}
