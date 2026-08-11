@@ -333,13 +333,15 @@ func TestMockResourceNsxtPolicyBgpConfigUpdate(t *testing.T) {
 			Mode:  &restartMode,
 			Timer: &restartTimerStruct,
 		}
+		// Update now fetches the current revision immediately before writing
+		// (bug 3773090), then Read fetches again afterward - two Get calls.
 		mockBgpSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.BgpRoutingConfig{
 			Enabled:               &bgpCfgEnabled,
 			Ecmp:                  &bgpCfgEcmp,
 			Path:                  &bgpCfgPath,
 			Revision:              &bgpCfgRevision,
 			GracefulRestartConfig: &restartCfg,
-		}, nil)
+		}, nil).Times(2)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 			"gateway_path":                       bgpCfgGwPath,
@@ -356,8 +358,77 @@ func TestMockResourceNsxtPolicyBgpConfigUpdate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("Update_retries_and_succeeds_after_precondition_failed", func(t *testing.T) {
+		// Regression test for bug 3773090: a sibling resource (nsxt_policy_tier0_gateway's
+		// inline bgp_config) can bump the shared BgpRoutingConfig's revision between this
+		// resource's last Read and this Update call. The first Update attempt should fail
+		// with a precondition/version-conflict error, and the retry loop should re-fetch
+		// the current revision and succeed on the next attempt.
+		mockTier0sSDK.EXPECT().Get(bgpCfgGwID).Return(model.Tier0{}, nil)
+
+		restartMode := model.BgpGracefulRestartConfig_MODE_HELPER_ONLY
+		restartTimer := int64(180)
+		staleTimer := int64(600)
+		restartCfg := model.BgpGracefulRestartConfig{
+			Mode: &restartMode,
+			Timer: &model.BgpGracefulRestartTimer{
+				RestartTimer:    &restartTimer,
+				StaleRouteTimer: &staleTimer,
+			},
+		}
+		staleRevision := int64(3)
+		freshRevision := int64(4)
+
+		getStale := mockBgpSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.BgpRoutingConfig{
+			Enabled:               &bgpCfgEnabled,
+			Ecmp:                  &bgpCfgEcmp,
+			Path:                  &bgpCfgPath,
+			Revision:              &staleRevision,
+			GracefulRestartConfig: &restartCfg,
+		}, nil)
+		updateFails := mockBgpSDK.EXPECT().Update(bgpCfgGwID, bgpCfgServiceID, gomock.Any(), gomock.Any()).
+			Return(model.BgpRoutingConfig{}, vapiErrors.InvalidRequest{}).After(getStale)
+		getFresh := mockBgpSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.BgpRoutingConfig{
+			Enabled:               &bgpCfgEnabled,
+			Ecmp:                  &bgpCfgEcmp,
+			Path:                  &bgpCfgPath,
+			Revision:              &freshRevision,
+			GracefulRestartConfig: &restartCfg,
+		}, nil).After(updateFails)
+		updateSucceeds := mockBgpSDK.EXPECT().Update(bgpCfgGwID, bgpCfgServiceID, gomock.Any(), gomock.Any()).
+			Return(model.BgpRoutingConfig{}, nil).After(getFresh)
+		mockBgpSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.BgpRoutingConfig{
+			Enabled:               &bgpCfgEnabled,
+			Ecmp:                  &bgpCfgEcmp,
+			Path:                  &bgpCfgPath,
+			Revision:              &freshRevision,
+			GracefulRestartConfig: &restartCfg,
+		}, nil).After(updateSucceeds)
+		mockLocaleServicesSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.LocaleServices{
+			Id:   &bgpCfgServiceID,
+			Path: &bgpCfgLocaleServicePath,
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"gateway_path":                       bgpCfgGwPath,
+			"locale_service_id":                  bgpCfgServiceID,
+			"enabled":                            true,
+			"ecmp":                               true,
+			"graceful_restart_mode":              model.BgpGracefulRestartConfig_MODE_HELPER_ONLY,
+			"graceful_restart_timer":             180,
+			"graceful_restart_stale_route_timer": 600,
+		})
+		d.SetId("bgp-uuid-update-retry")
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyBgpConfigUpdate(d, m)
+		require.NoError(t, err)
+	})
+
 	t.Run("Update_fails_when_Update_returns_error", func(t *testing.T) {
 		mockTier0sSDK.EXPECT().Get(bgpCfgGwID).Return(model.Tier0{}, nil)
+		mockBgpSDK.EXPECT().Get(bgpCfgGwID, bgpCfgServiceID).Return(model.BgpRoutingConfig{
+			Revision: &bgpCfgRevision,
+		}, nil)
 		mockBgpSDK.EXPECT().Update(bgpCfgGwID, bgpCfgServiceID, gomock.Any(), gomock.Any()).Return(model.BgpRoutingConfig{}, vapiErrors.InternalServerError{})
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
