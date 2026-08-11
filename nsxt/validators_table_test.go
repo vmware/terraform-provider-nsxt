@@ -310,6 +310,8 @@ func TestUnitNsxt_validateSHA256Thumbprint(t *testing.T) {
 	}{
 		{"valid thumbprint", strings.Repeat("a1", 32), false},
 		{"uppercase hex", strings.Repeat("A1", 32), false},
+		{"colon delimited", strings.TrimSuffix(strings.Repeat("a1:", 32), ":"), false},
+		{"uppercase colon delimited", strings.TrimSuffix(strings.Repeat("A1:", 32), ":"), false},
 		{"too short", strings.Repeat("a1", 16), true},
 		{"non hex chars", strings.Repeat("g", 64), true},
 		{"empty", "", true},
@@ -326,6 +328,32 @@ func TestUnitNsxt_validateSHA256Thumbprint(t *testing.T) {
 	}
 	_, es := v(1, "k")
 	require.NotEmpty(t, es)
+}
+
+func TestUnitNsxt_validateFQDNOrIP(t *testing.T) {
+	v := validateFQDNOrIP()
+	cases := []struct {
+		name    string
+		val     string
+		wantErr bool
+	}{
+		{"simple domain", "example.com", false},
+		{"subdomain", "host.example.com", false},
+		{"ipv4", "192.161.136.0", false},
+		{"ipv6", "2001:db8::1", false},
+		{"no dot no ip", "nodothost", true},
+		{"invalid ip octet", "192.161.136.999", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, es := v(tc.val, "k")
+			if tc.wantErr {
+				assert.NotEmpty(t, es)
+			} else {
+				assert.Empty(t, es)
+			}
+		})
+	}
 }
 
 func TestUnitNsxt_validateFQDN(t *testing.T) {
