@@ -101,7 +101,7 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 							Computed:     true,
 							Description:  "sub-cluster Id",
 							Deprecated:   "Use with sub_cluster_path instead of sub_cluster_id",
-							ValidateFunc: validateID(),
+							ValidateFunc: validatePolicyPath(),
 						},
 						"sub_cluster_path": {
 							Type:         schema.TypeString,
