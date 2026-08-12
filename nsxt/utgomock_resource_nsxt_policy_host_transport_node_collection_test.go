@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -23,15 +24,16 @@ import (
 )
 
 var (
-	htncID          = "htnc-1"
-	htncDisplayName = "Test HTNC"
-	htncDescription = "test host transport node collection"
-	htncRevision    = int64(1)
-	htncSitePath    = "/infra/sites/default"
-	htncSiteID      = "default"
-	htncEPID        = "default"
-	htncPath        = "/infra/sites/default/enforcement-points/default/transport-node-collections/htnc-1"
-	htncCCID        = "cc-domain-c1"
+	htncID             = "htnc-1"
+	htncDisplayName    = "Test HTNC"
+	htncDescription    = "test host transport node collection"
+	htncRevision       = int64(1)
+	htncSitePath       = "/infra/sites/default"
+	htncSiteID         = "default"
+	htncEPID           = "default"
+	htncPath           = "/infra/sites/default/enforcement-points/default/transport-node-collections/htnc-1"
+	htncCCID           = "cc-domain-c1"
+	htncSubClusterPath = "/infra/sites/default/enforcement-points/default/sub-clusters/11111111-1111-1111-1111-111111111111"
 )
 
 func htncAPIResponse() nsxModel.HostTransportNodeCollection {
@@ -141,6 +143,42 @@ func TestMockResourceNsxtPolicyHostTransportNodeCollectionUpdate(t *testing.T) {
 
 		res := resourceNsxtPolicyHostTransportNodeCollection()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalHtncData())
+		d.SetId(htncID)
+
+		err := resourceNsxtPolicyHostTransportNodeCollectionUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update success with policy path in deprecated sub_cluster_id", func(t *testing.T) {
+		data := minimalHtncData()
+		data["sub_cluster_config"] = []interface{}{
+			map[string]interface{}{
+				"sub_cluster_id": htncSubClusterPath,
+				"host_switch_config_source": []interface{}{
+					map[string]interface{}{
+						"host_switch_id":                         "hs-1",
+						"transport_node_profile_sub_config_name": "profile-cfg-1",
+					},
+				},
+			},
+		}
+
+		res := resourceNsxtPolicyHostTransportNodeCollection()
+
+		diags := res.Validate(terraform.NewResourceConfigRaw(data))
+		require.False(t, diags.HasError(), "sub_cluster_id should accept a policy path, got: %v", diags)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Update(htncSiteID, htncEPID, htncID, gomock.Any(), gomock.Any(), gomock.Any()).
+				DoAndReturn(func(_, _, _ string, obj nsxModel.HostTransportNodeCollection, _, _ *bool) (nsxModel.HostTransportNodeCollection, error) {
+					require.Len(t, obj.SubClusterConfig, 1)
+					assert.Equal(t, htncSubClusterPath, *obj.SubClusterConfig[0].SubClusterId)
+					return htncAPIResponse(), nil
+				}),
+			mockSDK.EXPECT().Get(htncSiteID, htncEPID, htncID).Return(htncAPIResponse(), nil),
+		)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
 		d.SetId(htncID)
 
 		err := resourceNsxtPolicyHostTransportNodeCollectionUpdate(d, newGoMockProviderClient())
