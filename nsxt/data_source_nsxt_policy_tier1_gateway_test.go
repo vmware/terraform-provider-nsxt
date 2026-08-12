@@ -112,6 +112,36 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 	return fmt.Errorf("Error while deleting Tier1 '%s': resource not found", routerName)
 }
 
+func TestAccDataSourceNsxtPolicyTier1Gateway_byPath(t *testing.T) {
+	routerName := getAccTestDataSourceName()
+	testResourceName := "data.nsxt_policy_tier1_gateway.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName); err != nil {
+						t.Error(err)
+					}
+				},
+				Config: testAccNsxtPolicyTier1ReadByPathTemplate(routerName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", routerName),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyTier1ReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
@@ -122,4 +152,15 @@ data "nsxt_policy_tier1_gateway" "test" {
 %s
   display_name = "%s"
 }`, context, name)
+}
+
+func testAccNsxtPolicyTier1ReadByPathTemplate(name string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_tier1_gateway" "by_name" {
+  display_name = "%s"
+}
+
+data "nsxt_policy_tier1_gateway" "test" {
+  path = data.nsxt_policy_tier1_gateway.by_name.path
+}`, name)
 }
