@@ -146,7 +146,7 @@ data "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentWithAttributesTemplate(tzName string, name string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, false) + fmt.Sprintf(`
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name = "%s-t1"
 }
