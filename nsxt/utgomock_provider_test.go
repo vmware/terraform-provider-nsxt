@@ -14,6 +14,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"math/big"
@@ -61,10 +62,14 @@ func TestUnitNsxt_customHeaderProcessor(t *testing.T) {
 func TestUnitNsxt_remoteAuthHeaderProcessor(t *testing.T) {
 	p := newRemoteAuthHeaderProcessor()
 	req, _ := http.NewRequest("GET", "http://example.com", nil)
-	req.Header.Set("Authorization", "Basic dXNlcjpwYXNz")
-	err := p.Process(req)
+	credentials := make([]byte, 16)
+	_, err := rand.Read(credentials)
 	require.NoError(t, err)
-	assert.Equal(t, "Remote dXNlcjpwYXNz", req.Header.Get("Authorization"))
+	encoded := base64.StdEncoding.EncodeToString(credentials)
+	req.Header.Set("Authorization", "Basic "+encoded)
+	err = p.Process(req)
+	require.NoError(t, err)
+	assert.Equal(t, "Remote "+encoded, req.Header.Get("Authorization"))
 }
 
 func TestUnitNsxt_logRequestProcessor(t *testing.T) {
