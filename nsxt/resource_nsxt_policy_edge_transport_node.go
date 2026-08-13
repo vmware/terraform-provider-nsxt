@@ -503,7 +503,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							Description:  "Portgroup, logical switch identifier or segment path for management network connectivity",
-							ValidateFunc: validateID(),
+							ValidateFunc: validateIDOrPolicyPath(),
 						},
 					},
 				},
@@ -526,7 +526,7 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Description:  "A portgroup, logical switch identifier or segment path for datapath connectivity",
-										ValidateFunc: validateID(),
+										ValidateFunc: validateIDOrPolicyPath(),
 									},
 									"device_name": {
 										Type:        schema.TypeString,

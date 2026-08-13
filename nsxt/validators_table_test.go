@@ -501,6 +501,14 @@ func TestUnitNsxt_validatePolicyPathAndIDAndProjectID(t *testing.T) {
 	_, es = vid("bad/id", "k")
 	assert.NotEmpty(t, es)
 
+	vidp := validateIDOrPolicyPath()
+	_, es = vidp("ok-id", "k")
+	assert.Empty(t, es)
+	_, es = vidp("/infra/segments/seg1", "k")
+	assert.Empty(t, es)
+	_, es = vidp("/badpath", "k")
+	assert.NotEmpty(t, es)
+
 	vpdef := validateProjectID(true)
 	_, es = vpdef("default", "k")
 	assert.Empty(t, es)

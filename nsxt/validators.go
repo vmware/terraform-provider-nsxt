@@ -401,6 +401,22 @@ func validateID() schema.SchemaValidateFunc {
 	}
 }
 
+func validateIDOrPolicyPath() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isValidID(v) && !isPolicyPath(v) {
+			es = append(es, fmt.Errorf("expected %s to be a valid ID or policy path, got: %s", k, v))
+		}
+
+		return
+	}
+}
+
 func validateSHA256Thumbprint() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (warnings []string, errors []error) {
 		v, ok := i.(string)
