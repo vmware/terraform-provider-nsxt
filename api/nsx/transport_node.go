@@ -312,6 +312,7 @@ func (c TransportNodeClientContext) Updatemaintenancemode(transportnodeIdParam s
 
 	case utl.Local:
 		client := c.Client.(client0.TransportNodesClient)
+		//nolint:noctx
 		err = client.Updatemaintenancemode(transportnodeIdParam, actionParam)
 
 	default:

@@ -1020,7 +1020,7 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 			return nil
 		}
 	}
-	reqDump, err := httputil.DumpRequestOut(req, true)
+	reqDump, err := httputil.DumpRequest(req, true)
 	if err != nil {
 		log.Fatal(err)
 	}
