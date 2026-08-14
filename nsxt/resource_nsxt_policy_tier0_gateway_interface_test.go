@@ -53,6 +53,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr("data.nsxt_policy_gateway_interface_realization.gw_realization", "state", "REALIZED"),
 				),
 			},
 			{
@@ -693,6 +694,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 
 data "nsxt_policy_gateway_interface_realization" "gw_realization" {
   gateway_interface_path = nsxt_policy_tier0_gateway_interface.test.path
+  site_path              = data.nsxt_policy_site.test.path
 }`
 	}
 	return `
