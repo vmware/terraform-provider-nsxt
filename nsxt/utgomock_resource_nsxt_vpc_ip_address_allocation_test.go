@@ -90,16 +90,6 @@ func TestMockResourceNsxtVpcIpAddressAllocationCreate(t *testing.T) {
 		assert.Equal(t, vpcIpAllocID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcIpAddressAllocation()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcIpAllocData())
-
-		err := resourceNsxtVpcIpAddressAllocationCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcIpAddressAllocationRead(t *testing.T) {

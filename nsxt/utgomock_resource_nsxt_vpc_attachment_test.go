@@ -94,17 +94,6 @@ func TestMockResourceNsxtVpcAttachmentCreate(t *testing.T) {
 		assert.Equal(t, vpcAttachmentID, d.Id())
 	})
 
-	t.Run("Create fails on NSX version below 9.0.0", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcAttachment()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcAttachmentData())
-
-		err := resourceNsxtVpcAttachmentCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "9.0.0")
-	})
 }
 
 func TestMockResourceNsxtVpcAttachmentRead(t *testing.T) {

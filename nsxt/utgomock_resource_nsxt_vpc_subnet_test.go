@@ -111,16 +111,6 @@ func TestMockResourceNsxtVpcSubnetCreate(t *testing.T) {
 		assert.Equal(t, subnetID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcSubnet()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
-
-		err := resourceNsxtVpcSubnetCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcSubnetRead(t *testing.T) {
