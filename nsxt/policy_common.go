@@ -32,6 +32,7 @@ var failOverModeDefaultPolicyT0Value = model.Tier0_FAILOVER_MODE_NON_PREEMPTIVE
 var defaultPolicyLocaleServiceID = "default"
 
 var mpObjectDataSourceDeprecationMessage = "Please use corresponding policy data source instead"
+var mpObjectResourceDeprecationMessage = "Please use corresponding policy resource instead"
 
 func getNsxIDSchema() *schema.Schema {
 	return &schema.Schema{

@@ -1,5 +1,5 @@
 ---
-subcategory: "Realization"
+subcategory: "Deprecated"
 page_title: "NSXT: transport_node_realization"
 description: Transport node resource realization information.
 ---
