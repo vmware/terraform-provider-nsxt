@@ -64,10 +64,6 @@ func updateNsxtPolicyBareMetalServerTags(ctx utl.SessionContext, connector clien
 }
 
 func resourceNsxtPolicyBareMetalServerTagsCreate(d *schema.ResourceData, m interface{}) error {
-	// Enhanced version validation with detailed error message
-	if err := validateBMSVersionRequirement(); err != nil {
-		return err
-	}
 
 	connector := getPolicyConnector(m)
 	ctx := utl.SessionContext{ClientType: utl.Local}
