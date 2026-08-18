@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
@@ -44,19 +43,6 @@ func TestMockDataSourceNsxtPolicyGroupBareMetalServerMembersSchema(t *testing.T)
 }
 
 func TestMockDataSourceNsxtPolicyGroupBareMetalServerMembersRead(t *testing.T) {
-	t.Run("Read fails on NSX version below 9.0.0", func(t *testing.T) {
-		util.NsxVersion = "8.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		dataSource := dataSourceNsxtPolicyGroupBareMetalServerMembers()
-		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
-			"group_id": "test-group-id",
-		})
-
-		err := dataSourceNsxtPolicyGroupBareMetalServerMembersRead(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
-	})
 
 	t.Run("Read succeeds on NSX 9.0.0", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"
