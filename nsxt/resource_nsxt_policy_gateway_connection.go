@@ -16,7 +16,6 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var cliGatewayConnectionsClient = infra.NewGatewayConnectionsClient
@@ -229,9 +228,6 @@ func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Conne
 
 func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interface{}) error {
 
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Policy Gateway Connection resource requires NSX version 9.0.0 or higher")
-	}
 	connector := getPolicyConnector(m)
 
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayConnectionExists)
