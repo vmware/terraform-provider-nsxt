@@ -531,7 +531,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withMultiVRF(t *testing.T) {
 	testBgpResourceName := "nsxt_policy_bgp_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.2.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)

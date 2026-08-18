@@ -19,7 +19,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicyRule_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -50,7 +49,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicyRule_byID(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -81,7 +79,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicyRule_multitenancy(t *testi
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyMultitenancy(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

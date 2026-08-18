@@ -17,7 +17,6 @@ func TestAccDataSourceNsxtProxyConfig_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

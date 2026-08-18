@@ -496,7 +496,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_extendedFields(t *testing.T
 	testAccResourceNsxtPolicyIntrusionServicePolicyExtendedFields(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "4.2.0")
 	})
 }
 

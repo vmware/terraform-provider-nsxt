@@ -31,7 +31,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_basic(t *testing.T) 
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -131,7 +130,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_withDependencies(t *
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -215,7 +213,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_importBasic(t *testi
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
