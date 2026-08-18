@@ -15,7 +15,8 @@ import (
 
 func dataSourceNsxtTransportNode() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtTransportNodeRead,
+		Read:               dataSourceNsxtTransportNodeRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
