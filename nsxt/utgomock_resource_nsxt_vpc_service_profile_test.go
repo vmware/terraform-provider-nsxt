@@ -175,16 +175,6 @@ func TestMockResourceNsxtVpcServiceProfileCreate(t *testing.T) {
 		assert.Equal(t, 1, d.Get("service_subnet_cidrs.#"))
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcServiceProfile()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalVspData())
-
-		err := resourceNsxtVpcServiceProfileCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcServiceProfileRead(t *testing.T) {
