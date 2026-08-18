@@ -10,8 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var bgpConfigPathExample = getMultitenancyPathExample("/infra/tier-0s/[gateway]/locale-services/[service]/bgp")
@@ -152,7 +150,7 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 		if restartMode != model.BgpGracefulRestartConfig_MODE_HELPER_ONLY {
 			return &routeStruct, fmt.Errorf(vrfError, "graceful_restart_mode")
 		}
-		if util.NsxVersionHigherOrEqual("4.2.1") && d.HasChange("inter_sr_ibgp") {
+		if d.HasChange("inter_sr_ibgp") {
 			// NSX rejects including this attribute in config unless multi_vrf_inter_sr_routing
 			// is enabled on parent gateway, even if the setting is the default one
 			routeStruct.InterSrIbgp = &interSrIbgp
