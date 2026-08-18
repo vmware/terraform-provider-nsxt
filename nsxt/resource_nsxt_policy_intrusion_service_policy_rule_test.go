@@ -16,7 +16,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicyRule_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIntrusionServicePolicyRuleBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "4.2.0")
 	})
 }
 
@@ -101,7 +100,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicyRule_withAllFields(t *testin
 	testAccResourceNsxtPolicyIntrusionServicePolicyRuleWithAllFields(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "4.2.0")
 	})
 }
 
@@ -172,7 +170,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicyRule_importBasic(t *testing.
 	testAccResourceNsxtPolicyIntrusionServicePolicyRuleImportBasic(t, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "4.2.0")
 	})
 }
 

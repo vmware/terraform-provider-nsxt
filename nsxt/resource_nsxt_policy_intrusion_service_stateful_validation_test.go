@@ -20,7 +20,6 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_statefulComputedOnly(t *tes
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -48,7 +47,6 @@ func TestAccResourceNsxtPolicyIntrusionServiceGatewayPolicy_statefulComputedOnly
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -76,7 +74,6 @@ func TestAccResourceNsxtPolicyParentIntrusionServicePolicy_statefulComputedOnly(
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -104,7 +101,6 @@ func TestAccResourceNsxtPolicyParentIntrusionServiceGatewayPolicy_statefulComput
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
