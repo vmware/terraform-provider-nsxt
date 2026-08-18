@@ -121,10 +121,7 @@ func setupComputeManagerMock(t *testing.T, ctrl *gomock.Controller) (*fabricmock
 }
 
 func TestMockResourceNsxtComputeManagerCreate(t *testing.T) {
-	t.Run("Create success with NSX < 9.0.0 (sets CreateServiceAccount)", func(t *testing.T) {
-		util.NsxVersion = "8.0.0"
-		defer func() { util.NsxVersion = "" }()
-
+	t.Run("Create success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockSDK, restore := setupComputeManagerMock(t, ctrl)
@@ -143,30 +140,7 @@ func TestMockResourceNsxtComputeManagerCreate(t *testing.T) {
 		assert.Equal(t, cmServer, d.Get("server"))
 	})
 
-	t.Run("Create success with NSX >= 9.0.0 (ignores CreateServiceAccount)", func(t *testing.T) {
-		util.NsxVersion = "9.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		mockSDK, restore := setupComputeManagerMock(t, ctrl)
-		defer restore()
-
-		mockSDK.EXPECT().Create(gomock.Any()).Return(computeManagerAPIResponse(), nil)
-		mockSDK.EXPECT().Get(cmID).Return(computeManagerAPIResponse(), nil)
-
-		res := resourceNsxtComputeManager()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalComputeManagerData())
-
-		err := resourceNsxtComputeManagerCreate(d, newGoMockProviderClient())
-		require.NoError(t, err)
-		assert.Equal(t, cmID, d.Id())
-	})
-
 	t.Run("Create fails when API returns error", func(t *testing.T) {
-		util.NsxVersion = "9.0.0"
-		defer func() { util.NsxVersion = "" }()
-
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockSDK, restore := setupComputeManagerMock(t, ctrl)
@@ -232,10 +206,7 @@ func TestMockResourceNsxtComputeManagerRead(t *testing.T) {
 }
 
 func TestMockResourceNsxtComputeManagerUpdate(t *testing.T) {
-	t.Run("Update success with NSX < 9.0.0", func(t *testing.T) {
-		util.NsxVersion = "8.0.0"
-		defer func() { util.NsxVersion = "" }()
-
+	t.Run("Update success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockSDK, restore := setupComputeManagerMock(t, ctrl)

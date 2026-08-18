@@ -245,11 +245,9 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 	obj.ExternalIpv4Blocks = extIpv4BlocksList
 
-	if util.NsxVersionHigherOrEqual("9.0.0") {
-		obj.TgwExternalConnections = tgwConnectionsList
-		obj.VcFolder = &vcFolder
-		obj.Limits = quotasList
-	}
+	obj.TgwExternalConnections = tgwConnectionsList
+	obj.VcFolder = &vcFolder
+	obj.Limits = quotasList
 
 	if util.NsxVersionHigherOrEqual("9.2.0") {
 		obj.Ipv6Blocks = getStringListFromSchemaList(d, "ipv6_blocks")
@@ -311,7 +309,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		return err
 	}
 
-	if d.HasChanges("default_security_profile") && util.NsxVersionHigherOrEqual("9.0.0") {
+	if d.HasChanges("default_security_profile") {
 		err = patchVpcSecurityProfile(d, connector, id)
 	}
 	return err
@@ -470,19 +468,15 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
 
-	if util.NsxVersionHigherOrEqual("9.0.0") {
-		err = setVpcSecurityProfileInSchema(d, connector, id)
-	}
+	err = setVpcSecurityProfileInSchema(d, connector, id)
 	if err != nil {
 		return err
 	}
 	d.Set("activate_default_dfw_rules", obj.ActivateDefaultDfwRules)
 	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
-	if util.NsxVersionHigherOrEqual("9.0.0") {
-		d.Set("tgw_external_connections", obj.TgwExternalConnections)
-		d.Set("vc_folder", obj.VcFolder)
-		d.Set("quotas", obj.Limits)
-	}
+	d.Set("tgw_external_connections", obj.TgwExternalConnections)
+	d.Set("vc_folder", obj.VcFolder)
+	d.Set("quotas", obj.Limits)
 
 	if obj.Ipv6Blocks != nil {
 		d.Set("ipv6_blocks", obj.Ipv6Blocks)

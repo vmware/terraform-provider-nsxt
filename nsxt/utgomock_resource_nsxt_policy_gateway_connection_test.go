@@ -89,18 +89,6 @@ func TestMockResourceNsxtPolicyGatewayConnectionCreate(t *testing.T) {
 		assert.Contains(t, err.Error(), "already exists")
 	})
 
-	t.Run("Create fails when NSX version below 9.0.0", func(t *testing.T) {
-		util.NsxVersion = "8.0.0"
-		defer func() { util.NsxVersion = "9.1.0" }()
-
-		res := resourceNsxtPolicyGatewayConnection()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalGatewayConnectionData())
-
-		m := newGoMockProviderClient()
-		err := resourceNsxtPolicyGatewayConnectionCreate(d, m)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "9.0.0")
-	})
 }
 
 func TestMockResourceNsxtPolicyGatewayConnectionRead(t *testing.T) {
