@@ -28,7 +28,6 @@ Learn more:
 
   - VMWare NSX 9.1.0
   - VMWare NSX 9.0.0
-  - VMware NSX 4.2.x
 
   The plugin supports versions in accordance with the [Broadcom Product Lifecycle][product-lifecycle].
 
