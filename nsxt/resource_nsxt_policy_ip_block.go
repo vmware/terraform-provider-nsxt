@@ -124,9 +124,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("nsx_id", block.Id)
 	d.Set("path", block.Path)
 	d.Set("revision", block.Revision)
-	if util.NsxVersionHigherOrEqual("4.2.0") {
-		d.Set("visibility", block.Visibility)
-	}
+	d.Set("visibility", block.Visibility)
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		if len(d.Get("cidrs").([]interface{})) > 0 {
 			d.Set("cidrs", block.Cidrs)
@@ -175,7 +173,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		Description: &description,
 		Tags:        tags,
 	}
-	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+	if len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
 	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrs) > 0 {
@@ -232,7 +230,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		Tags:        tags,
 		Revision:    &revision,
 	}
-	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+	if len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
 	if util.NsxVersionHigherOrEqual("9.1.0") && len(cidrs) > 0 {

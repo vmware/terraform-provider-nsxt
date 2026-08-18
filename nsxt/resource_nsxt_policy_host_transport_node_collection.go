@@ -215,10 +215,8 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate b
 		obj.NetworkSpanPaths = networkSitePaths
 	}
 
-	if util.NsxVersionHigherOrEqual("4.2.0") {
-		enableNsxOnDvpg := d.Get("enable_nsx_on_dvpg").(bool)
-		obj.EnableNsxOnDvpg = &enableNsxOnDvpg
-	}
+	enableNsxOnDvpg := d.Get("enable_nsx_on_dvpg").(bool)
+	obj.EnableNsxOnDvpg = &enableNsxOnDvpg
 
 	if !isCreate {
 		revision := int64(d.Get("revision").(int))
@@ -288,9 +286,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionRead(d *schema.ResourceData, m
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 
-	if util.NsxVersionHigherOrEqual("4.2.0") {
-		d.Set("enable_nsx_on_dvpg", obj.EnableNsxOnDvpg)
-	}
+	d.Set("enable_nsx_on_dvpg", obj.EnableNsxOnDvpg)
 
 	d.Set("revision", obj.Revision)
 	d.Set("compute_collection_id", obj.ComputeCollectionId)
