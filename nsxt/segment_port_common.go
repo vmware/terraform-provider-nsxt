@@ -465,9 +465,11 @@ func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) er
 	if segmentPathValue, ok := d.GetOk("segment_path"); ok {
 		segmentPath = segmentPathValue.(string)
 	} else if segmentPortPathValue, ok := d.GetOk("segment_port_path"); ok {
-		segmentPortPath := segmentPortPathValue.(string)
-		pathParts := strings.Split(segmentPortPath, "/")
-		segmentPath = strings.Join(pathParts[:len(pathParts)-2], "/")
+		var err error
+		segmentPath, err = getPolicySegmentPathFromPortPath(segmentPortPathValue.(string))
+		if err != nil {
+			return err
+		}
 	} else {
 		return fmt.Errorf("neither segment_path nor segment_port_path found in resource data")
 	}

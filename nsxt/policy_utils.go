@@ -633,6 +633,8 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 		}
 		d.Set("context", []interface{}{ctxMap})
 		d.SetId(pathSegs[len(pathSegs)-1])
+	} else {
+		return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
