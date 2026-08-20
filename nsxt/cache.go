@@ -297,6 +297,9 @@ func getQueryString(resourceType string, context utl.SessionContext) string {
 	case utl.Local:
 		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:Local", resourceType)
 	case utl.VPC, utl.Multitenancy:
+		if context.VPCID == "" {
+			return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:%s-*", resourceType, context.ProjectID)
+		}
 		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:%s-%s", resourceType, context.ProjectID, context.VPCID)
 	default:
 		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
@@ -349,12 +352,23 @@ func (c *typeScopedCache) getTypeCache(resourceType string) *resourceTypeCache {
 
 // getEffectiveCacheContext derives the cache context, preferring parent_path when context{} is absent.
 func getEffectiveCacheContext(d *schema.ResourceData, m interface{}) utl.SessionContext {
+	var ctx utl.SessionContext
 	if pp, ok := d.GetOk("parent_path"); ok {
 		if parentPath := pp.(string); parentPath != "" {
-			return getParentContext(d, m, parentPath)
+			ctx = getParentContext(d, m, parentPath)
+		} else {
+			ctx = getSessionContext(d, m)
 		}
+	} else {
+		ctx = getSessionContext(d, m)
 	}
-	return getSessionContext(d, m)
+
+	// For VPC and Multitenancy contexts, batch cache queries at the Project level
+	// rather than the individual VPC level to improve cache performance.
+	if IsCacheEnabled(m) && (ctx.ClientType == utl.VPC || ctx.ClientType == utl.Multitenancy) {
+		ctx.VPCID = ""
+	}
+	return ctx
 }
 
 func getCacheQueryKey(resourceType string, d *schema.ResourceData, m interface{}) string {
