@@ -17,7 +17,6 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -42,7 +41,6 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_withFilters(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -66,7 +64,6 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_withVersionID(t *testing.T)
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 			testAccNsxtExtraCoverage(t)
 		},
 		Providers: testAccProviders,
@@ -90,7 +87,6 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_withMultipleFilters(t *test
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -115,7 +111,6 @@ func TestAccDataSourceNsxtPolicyIdpsSystemSignatures_signatureAttributes(t *test
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 			testAccNsxtExtraCoverage(t)
 		},
 		Providers: testAccProviders,

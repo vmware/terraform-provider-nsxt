@@ -25,7 +25,6 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var cliHostSwitchProfilesClient = infra.NewHostSwitchProfilesClient
@@ -111,10 +110,11 @@ var syslogProtocolValues = []string{
 
 func resourceNsxtEdgeTransportNode() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtEdgeTransportNodeCreate,
-		Read:   resourceNsxtEdgeTransportNodeRead,
-		Update: resourceNsxtEdgeTransportNodeUpdate,
-		Delete: resourceNsxtEdgeTransportNodeDelete,
+		Create:             resourceNsxtEdgeTransportNodeCreate,
+		Read:               resourceNsxtEdgeTransportNodeRead,
+		Update:             resourceNsxtEdgeTransportNodeUpdate,
+		Delete:             resourceNsxtEdgeTransportNodeDelete,
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -910,12 +910,9 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
 	}
 
-	var nodeSettings *mpmodel.EdgeNodeSettings
-	if util.NsxVersionHigherOrEqual("9.0.0") || nodeID == "" {
-		nodeSettings, err = getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
-		if err != nil {
-			return nil, err
-		}
+	nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
+	if err != nil {
+		return nil, err
 	}
 
 	var nodeDeploymentInfo *data.StructValue

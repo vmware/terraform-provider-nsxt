@@ -94,20 +94,6 @@ func TestMockResourceNsxtVpcExternalAddressCreate(t *testing.T) {
 		assert.Equal(t, extAddrAllocPath, d.Get("allocated_external_ip_path"))
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcExternalAddress()
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"parent_path":                extAddrPortPath,
-			"allocated_external_ip_path": extAddrAllocPath,
-		})
-
-		err := resourceNsxtVpcExternalAddressCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
-
 	t.Run("Create fails when port Get returns error", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"
 		defer func() { util.NsxVersion = "" }()

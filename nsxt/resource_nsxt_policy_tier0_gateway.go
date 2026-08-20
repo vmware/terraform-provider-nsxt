@@ -711,7 +711,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfgMap map[string]int
 		routeStruct.GracefulRestartConfig = &restartConfigStruct
 	}
 
-	if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok && (!isVrf || util.NsxVersionHigherOrEqual("4.2.1")) {
+	if interSrIbgp, ok := cfgMap["inter_sr_ibgp"].(bool); ok {
 		routeStruct.InterSrIbgp = &interSrIbgp
 	}
 
@@ -875,13 +875,9 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	advancedConfig := getTier0AdvancedConfigFromSchema(d)
 	t0Struct.AdvancedConfig = advancedConfig
 
-	if util.NsxVersionHigherOrEqual("4.2.0") {
-		t0Struct.EnableRdPerEdge = &enableRdPerEdge
-	}
+	t0Struct.EnableRdPerEdge = &enableRdPerEdge
 
-	if util.NsxVersionHigherOrEqual("4.2.1") {
-		t0Struct.MultiVrfInterSrRouting = &multiVrfInterSr
-	}
+	t0Struct.MultiVrfInterSrRouting = &multiVrfInterSr
 
 	if util.NsxVersionHigherOrEqual("9.1.0") {
 		t0Struct.TgwTransitSubnets = tgwTransitSubnets

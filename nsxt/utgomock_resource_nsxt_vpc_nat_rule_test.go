@@ -93,16 +93,6 @@ func TestMockResourceNsxtVpcNatRuleCreate(t *testing.T) {
 		assert.Equal(t, vpcNatRuleID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtPolicyVpcNatRule()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcNatRuleData())
-
-		err := resourceNsxtPolicyVpcNatRuleCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcNatRuleRead(t *testing.T) {

@@ -889,11 +889,6 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" {
-		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
-			if err := validateBMSVersionRequirement(); err != nil {
-				return err
-			}
-		}
 		obj.GroupType = groupTypes
 	}
 
@@ -1062,11 +1057,6 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	}
 
 	if groupType != "" {
-		if groupType == model.Group_GROUP_TYPE_BAREMETALSERVER {
-			if err := validateBMSVersionRequirement(); err != nil {
-				return err
-			}
-		}
 		obj.GroupType = groupTypes
 	}
 

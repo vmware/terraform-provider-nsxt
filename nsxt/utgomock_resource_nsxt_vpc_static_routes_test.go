@@ -92,16 +92,6 @@ func TestMockResourceNsxtVpcStaticRoutesCreate(t *testing.T) {
 		assert.Equal(t, srID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcStaticRoutes()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalSrData())
-
-		err := resourceNsxtVpcStaticRoutesCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcStaticRoutesRead(t *testing.T) {

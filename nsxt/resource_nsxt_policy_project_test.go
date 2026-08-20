@@ -103,62 +103,6 @@ func runChecksNsx920(testResourceName string, expectedValues map[string]string) 
 	)
 }
 
-func TestAccResourceNsxtPolicyProject_420basic(t *testing.T) {
-	testResourceName := "nsxt_policy_project.test"
-	siteCount := getExpectedSiteInfoCount(t)
-	expectedValuesStep1 := map[string]string{
-		"t0_count":                   "1",
-		"ip_block_count":             "1",
-		"site_count":                 siteCount,
-		"activate_default_dfw_rules": "false",
-	}
-	expectedValuesStep2 := expectedValuesStep1
-	expectedValuesStep3 := map[string]string{
-		"t0_count":                   "0",
-		"ip_block_count":             "0",
-		"site_count":                 siteCount,
-		"activate_default_dfw_rules": "true",
-	}
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccOnlyLocalManager(t)
-			testAccNSXVersionLessThan(t, "9.0.0")
-		},
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNsxtPolicyProjectTemplate420(true, true, true, false),
-				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectCreateAttributes, expectedValuesStep1),
-					runChecksNsx411(testResourceName, expectedValuesStep1),
-					runChecksNsx420(testResourceName, expectedValuesStep1),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyProjectTemplate420(false, true, true, false),
-				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep2),
-					runChecksNsx411(testResourceName, expectedValuesStep2),
-					runChecksNsx420(testResourceName, expectedValuesStep2),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyProjectTemplate420(false, false, false, true),
-				Check: resource.ComposeTestCheckFunc(
-					runChecksNsx410(testResourceName, accTestPolicyProjectUpdateAttributes, expectedValuesStep3),
-					runChecksNsx411(testResourceName, expectedValuesStep3),
-					runChecksNsx420(testResourceName, expectedValuesStep3),
-				),
-			},
-		},
-	})
-}
-
 func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 	siteCount := getExpectedSiteInfoCount(t)
@@ -181,7 +125,6 @@ func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "9.0.0")
 			testAccNSXVersionLessThan(t, "9.1.0")
 		},
 		Providers: testAccProviders,
@@ -219,7 +162,6 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "9.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -641,25 +583,6 @@ func getBasicAttrMap(createAttrs, updateAttrs map[string]string, createFlow, inc
 	attrMap["ClusterName"] = getEdgeClusterName()
 	attrMap["RenderIpv6Block"] = "false"
 	return attrMap
-}
-
-func testAccNsxtPolicyProjectTemplate420(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {
-	attrMap := getBasicAttrMap(accTestPolicyProjectCreateAttributes, accTestPolicyProjectUpdateAttributes, createFlow, includeT0GW)
-	if includeExternalIPv4Block {
-		attrMap["ExternalIPv4BlockPath"] = "nsxt_policy_ip_block.test_ip_block.path"
-	}
-	attrMap["SetIpBlockVisibility"] = "true"
-	attrMap["ActivateDefaultDfwRules"] = strconv.FormatBool(activateDefaultDfwRules)
-	buffer := new(bytes.Buffer)
-	tmpl, err := template.New("testAccNsxtPolicyProjectTemplate420").Parse(templateData)
-	if err != nil {
-		panic(err)
-	}
-	err = tmpl.Execute(buffer, attrMap)
-	if err != nil {
-		panic(err)
-	}
-	return buffer.String()
 }
 
 func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExternalIPv4Block, activateDefaultDfwRules bool) string {

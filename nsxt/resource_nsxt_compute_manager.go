@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/nsx/fabric"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -240,7 +239,6 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 	if alfo != "" {
 		accessLevelForOidc = &alfo
 	}
-	createServiceAccount := d.Get("create_service_account").(bool)
 	multiNSX := d.Get("multi_nsx").(bool)
 	originType := d.Get("origin_type").(string)
 	var reverseProxyHTTPSsPort *int64
@@ -267,12 +265,6 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 		ReverseProxyHttpsPort: reverseProxyHTTPSsPort,
 		Server:                &server,
 		SetAsOidcProvider:     &setAsOidcProvider,
-	}
-
-	// From 9.0.0 onwards CreateServiceAccount can not be false
-	// so we can effectively ignore this field
-	if util.NsxVersionLower("9.0.0") {
-		obj.CreateServiceAccount = &createServiceAccount
 	}
 
 	log.Printf("[INFO] Creating Compute Manager %s", displayName)
@@ -526,7 +518,6 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 	if alfo != "" {
 		accessLevelForOidc = &alfo
 	}
-	createServiceAccount := d.Get("create_service_account").(bool)
 	multiNSX := d.Get("multi_nsx").(bool)
 	originType := d.Get("origin_type").(string)
 	var reverseProxyHTTPSPort *int64
@@ -554,12 +545,6 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 		Server:                &server,
 		SetAsOidcProvider:     &setAsOidcProvider,
 		Revision:              &revision,
-	}
-
-	// From 9.0.0 onwards CreateServiceAccount can not be false
-	// so we can effectively ignore this field
-	if util.NsxVersionLower("9.0.0") {
-		obj.CreateServiceAccount = &createServiceAccount
 	}
 
 	_, err = client.Update(id, obj)

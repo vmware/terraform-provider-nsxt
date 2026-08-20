@@ -118,6 +118,8 @@ func TestMockResourceNsxtPolicyProjectCreate(t *testing.T) {
 	t.Run("Create success", func(t *testing.T) {
 		util.NsxVersion = "4.1.0"
 		defer func() { util.NsxVersion = "" }()
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
 
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
@@ -157,6 +159,9 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 	defer restore()
 
 	t.Run("Read success", func(t *testing.T) {
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
 		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
 
 		res := resourceNsxtPolicyProject()
@@ -255,6 +260,8 @@ func TestMockResourceNsxtPolicyProjectUpdate(t *testing.T) {
 	t.Run("Update success", func(t *testing.T) {
 		util.NsxVersion = "4.1.0"
 		defer func() { util.NsxVersion = "" }()
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
 
 		gomock.InOrder(
 			mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, gomock.Any()).Return(nil),

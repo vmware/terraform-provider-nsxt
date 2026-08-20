@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -21,7 +20,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVersionCheckImporter("9.0.0", "VPC Group", getVpcPathResourceImporter(vpcGroupPathExample)),
+			State: getVpcPathResourceImporter(vpcGroupPathExample),
 		},
 
 		Schema: getPolicyGroupSchema(false),
@@ -29,9 +28,6 @@ func resourceNsxtVPCGroup() *schema.Resource {
 }
 
 func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Group resource requires NSX version 9.0.0 or higher")
-	}
 	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}

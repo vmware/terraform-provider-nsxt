@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Deprecated"
 page_title: "NSXT: transport_node"
 description: An Transport Node data source.
 ---
