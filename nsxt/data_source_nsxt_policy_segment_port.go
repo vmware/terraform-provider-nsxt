@@ -115,14 +115,11 @@ func dataSourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) 
 	if segmentPort.Attachment != nil && segmentPort.Attachment.Id != nil {
 		d.Set("vif_id", segmentPort.Attachment.Id)
 	}
-	d.Set("segment_path", getSegmentPathFromPortPath(*segmentPort.Path))
+	segmentPath, err := getPolicySegmentPathFromPortPath(*segmentPort.Path)
+	if err != nil {
+		return err
+	}
+	d.Set("segment_path", segmentPath)
 
 	return nil
-}
-
-func getSegmentPathFromPortPath(portPath string) string {
-	parts := strings.Split(portPath, "/")
-	parts = parts[:len(parts)-2]
-
-	return strings.Join(parts, "/")
 }

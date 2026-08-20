@@ -433,3 +433,63 @@ func TestMockGetT1IdFromSegPath(t *testing.T) {
 		})
 	}
 }
+
+func TestMockSegmentPortImporter(t *testing.T) {
+	res := resourceNsxtPolicySegmentPort()
+
+	t.Run("Import with invalid ID (not policy path) returns error without panic", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("port-123")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Invalid policy path port-123")
+		assert.Nil(t, rd)
+	})
+
+	t.Run("Import with empty ID returns error without panic", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.Error(t, err)
+		assert.Nil(t, rd)
+	})
+
+	t.Run("Import with segment path (missing /ports/) returns error without panic", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/segments/seg-1")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Invalid policy path /infra/segments/seg-1")
+		assert.Nil(t, rd)
+	})
+
+	t.Run("Import with valid infra segment port path succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/segments/seg-1/ports/port-123")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, rd)
+		assert.Equal(t, "port-123", d.Id())
+		assert.Equal(t, "/infra/segments/seg-1", d.Get("segment_path"))
+	})
+
+	t.Run("Import with valid tier-1 segment port path succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/t1-1/segments/seg-1/ports/port-123")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, rd)
+		assert.Equal(t, "port-123", d.Id())
+		assert.Equal(t, "/infra/tier-1s/t1-1/segments/seg-1", d.Get("segment_path"))
+	})
+
+	t.Run("Import with valid multitenancy segment port path succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/orgs/default/projects/proj-1/infra/segments/seg-1/ports/port-123")
+		rd, err := getSegmentPortPathOrIDResourceImporter(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, rd)
+		assert.Equal(t, "port-123", d.Id())
+		assert.Equal(t, "/orgs/default/projects/proj-1/infra/segments/seg-1", d.Get("segment_path"))
+	})
+}
