@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_interface_tags"
+page_title: "NSXT: nsxt_policy_baremetal_server_interface_tags"
 description: A resource for applying tags to Bare Metal Server Interfaces.
 ---
 
