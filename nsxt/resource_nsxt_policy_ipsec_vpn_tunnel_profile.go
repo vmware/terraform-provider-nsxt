@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var tunnelProfilePathExample = "/infra/ipsec-vpn-tunnel-profiles/[profile]"
+
 var ipSecVpnTunnelProfileDfPolicyValues = []string{
 	model.IPSecVpnTunnelProfile_DF_POLICY_COPY,
 	model.IPSecVpnTunnelProfile_DF_POLICY_CLEAR,
@@ -57,7 +59,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPSecVpnTunnelProfileUpdate,
 		Delete: resourceNsxtPolicyIPSecVpnTunnelProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: getPolicyPathOrIDResourceImporter(tunnelProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

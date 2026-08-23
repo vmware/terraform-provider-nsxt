@@ -58,3 +58,9 @@ terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test UUID
 ```
 
 The above command imports IPSec VPN IKE Profile named `test` with the NSX ID `UUID`.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test /infra/ipsec-vpn-tunnel-profiles/my-tunnel-profile
+```
