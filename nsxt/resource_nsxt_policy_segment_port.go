@@ -1,8 +1,8 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -274,17 +274,22 @@ func resourceNsxtPolicySegmentPortDelete(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func getSegmentPortPathOrIDResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	var policyPath = d.Id()
-	var segmentPath string
-	policyPathSegs := strings.Split(policyPath, "/")
-	segmentPath = strings.Join(policyPathSegs[:len(policyPathSegs)-2], "/")
+var segmentPortPathExample = getMultitenancyPathExample("/infra/segments/[segment]/ports/[port]")
 
-	d.Set("segment_path", segmentPath)
+func getSegmentPortPathOrIDResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
-	if err != nil {
+	if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
+		return nil, fmt.Errorf("Invalid policy path %s; expected format: %s", importID, segmentPortPathExample)
+	} else if err != nil {
 		return nil, err
 	}
-	d.SetId(policyPathSegs[len(policyPathSegs)-1])
+
+	segmentPath, err := getPolicySegmentPathFromPortPath(importID)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid policy path %s; expected format: %s", importID, segmentPortPathExample)
+	}
+
+	d.Set("segment_path", segmentPath)
 	return rd, nil
 }
