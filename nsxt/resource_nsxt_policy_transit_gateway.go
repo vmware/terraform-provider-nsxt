@@ -194,13 +194,20 @@ func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, i
 }
 
 func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
-	if len(iSpan.([]interface{})) == 0 {
+	if iSpan == nil {
+		return nil, nil
+	}
+	spanList, ok := iSpan.([]interface{})
+	if !ok || len(spanList) == 0 || spanList[0] == nil {
 		return nil, nil
 	}
 	converter := bindings.NewTypeConverter()
 
 	// We're limiting to one span of any kind in the schema
-	span := iSpan.([]interface{})[0].(map[string]interface{})
+	span, ok := spanList[0].(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
 	// Presence is determined by list length: when a nested block's contents
 	// stay at their zero value, the SDKv2 diff engine can reconstruct the
 	// single list element as a bare nil even though the block itself is
