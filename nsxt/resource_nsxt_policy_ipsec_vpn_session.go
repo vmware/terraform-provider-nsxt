@@ -122,10 +122,11 @@ func getIPSecVpnSessionCommon(isTransitGateway bool) map[string]*metadata.Extend
 		},
 		"psk": {
 			Schema: schema.Schema{
-				Type:        schema.TypeString,
-				Description: "IPSec Pre-shared key. Maximum length of this field is 128 characters.",
-				Optional:    true,
-				Sensitive:   true,
+				Type:             schema.TypeString,
+				Description:      "IPSec Pre-shared key. Maximum length of this field is 128 characters.",
+				Optional:         true,
+				Sensitive:        true,
+				DiffSuppressFunc: suppressIfEmptyPriorState,
 			},
 		},
 		"peer_id": {
