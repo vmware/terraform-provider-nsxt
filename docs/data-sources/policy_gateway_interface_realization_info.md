@@ -30,6 +30,32 @@ data "nsxt_policy_gateway_interface_realization" "info" {
 }
 ```
 
+## Example Usage - Global Manager
+
+```hcl
+data "nsxt_policy_site" "site" {
+  display_name = "site"
+}
+
+data "nsxt_policy_tier1_gateway" "tier1_gw" {
+  display_name = "tier1_gw"
+}
+
+resource "nsxt_policy_tier1_gateway_interface" "tier1_gw_if" {
+  display_name = "tier1_gw_if"
+  gateway_path = data.nsxt_policy_tier1_gateway.tier1_gw.path
+  segment_path = nsxt_policy_segment.segment1.path
+  subnets      = ["12.12.2.13/24"]
+  site_path    = data.nsxt_policy_site.site.path
+}
+
+data "nsxt_policy_gateway_interface_realization" "info" {
+  gateway_interface_path = nsxt_policy_tier1_gateway_interface.tier1_gw_if.path
+  site_path              = data.nsxt_policy_site.site.path
+  timeout                = 60
+}
+```
+
 ## Example Usage - Multi-Tenancy
 
 ```hcl
@@ -64,6 +90,7 @@ data "nsxt_policy_gateway_interface_realization" "info" {
 
 * `gateway_interface_path` - (Required) The policy path of the gateway interface.
 * `gateway_path` - (Deprecated) Use `gateway_interface_path` instead. Despite its name, this attribute expects the path of the gateway interface, not the gateway.
+* `site_path` - (Optional) The path of the site which the resource belongs to, this configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 * `id`  - (Optional) The ID of gateway interface.
 * `display_name` - (Optional) The display name of the resource. If neither ID nor display name are set, the realized gateway interface with IP addresses will be retrieved.
 * `delay` - (Optional) Delay (in seconds) before realization polling is started. Default is set to 1.
