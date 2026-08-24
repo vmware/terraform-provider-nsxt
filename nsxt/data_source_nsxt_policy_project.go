@@ -98,6 +98,9 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 		var perfectMatch []model.Project
 		var prefixMatch []model.Project
 		for _, objInList := range objList.Results {
+			if objInList.DisplayName == nil {
+				continue
+			}
 			if strings.HasPrefix(*objInList.DisplayName, objName) {
 				prefixMatch = append(prefixMatch, objInList)
 			}
