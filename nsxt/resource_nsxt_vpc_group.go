@@ -35,11 +35,9 @@ func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
-	if err := resourceNsxtPolicyGroupGeneralCreate(d, m, false); err != nil {
-		return err
-	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
-	return nil
+	// resourceNsxtPolicyGroupGeneralCreate already marks/invalidates resourceTypeVPCGroup
+	// internally via groupCacheResourceType(false) — no separate call needed here.
+	return resourceNsxtPolicyGroupGeneralCreate(d, m, false)
 }
 
 func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
@@ -59,7 +57,7 @@ func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
 		d,
 		m,
 		connector,
-		id,
+		CacheKeyForResourceID(resourceTypeVPCGroup, d),
 		resourceTypeVPCGroup,
 		model.GroupBindingType(),
 		func() (*model.Group, error) {
@@ -122,17 +120,13 @@ func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if isConfigScopedCacheMode(m) {
 		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
-	if err := resourceNsxtPolicyGroupGeneralUpdate(d, m, false); err != nil {
-		return err
-	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
-	return nil
+	// resourceNsxtPolicyGroupGeneralUpdate already marks/invalidates resourceTypeVPCGroup
+	// internally via groupCacheResourceType(false) — no separate call needed here.
+	return resourceNsxtPolicyGroupGeneralUpdate(d, m, false)
 }
 
 func resourceNsxtVPCGroupDelete(d *schema.ResourceData, m interface{}) error {
-	if err := resourceNsxtPolicyGroupGeneralDelete(d, m, false); err != nil {
-		return err
-	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVPCGroup, d.Id(), m)
-	return nil
+	// resourceNsxtPolicyGroupGeneralDelete already marks/invalidates resourceTypeVPCGroup
+	// internally via groupCacheResourceType(false) — no separate call needed here.
+	return resourceNsxtPolicyGroupGeneralDelete(d, m, false)
 }

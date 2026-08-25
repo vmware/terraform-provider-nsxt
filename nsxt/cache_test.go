@@ -442,6 +442,12 @@ func TestShouldIndexByPathForVPCScopedTypes(t *testing.T) {
 		resourceTypeVpcIpAddressAllocation, resourceTypeVpcServiceProfile, resourceTypeVpcSubnet,
 		resourceTypeTransitGateway, resourceTypeTransitGatewayAttachment,
 		resourceTypeProjectIpAddressAllocation, resourceTypePolicyVpcNatRule,
+		// Also reachable via CacheAwareResourceRead under a VPC-scoped SessionContext
+		// (resource_nsxt_vpc_group.go, resource_nsxt_vpc_gateway_policy.go,
+		// resource_nsxt_vpc_static_routes.go, resource_nsxt_vpc_dhcp_v4_static_binding_config.go),
+		// so they need the same path-indexing safety even though some are shared with
+		// non-VPC-scoped sibling resources (GatewayPolicy, StaticRoutes, DhcpV4StaticBindingConfig).
+		resourceTypeVPCGroup, resourceTypeGatewayPolicy, resourceTypeStaticRoutes, resourceTypeDhcpV4StaticBindingConfig,
 	}
 	for _, rt := range vpcScopedTypes {
 		if !shouldIndexByPath(rt) {
@@ -522,6 +528,42 @@ func TestReflectStringField(t *testing.T) {
 	t.Run("nil-obj-returns-nil", func(t *testing.T) {
 		if got := reflectStringField(nil, "DisplayName"); got != nil {
 			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+}
+
+func TestCacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	dsSchema := map[string]*schema.Schema{
+		"id":           getDataSourceIDSchema(),
+		"display_name": getDataSourceExtendedDisplayNameSchema(),
+		"description":  getDataSourceDescriptionSchema(),
+		"path":         getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{"id": "subnet1"})
+		_, ok := cacheAwareDataSourceReadByID[model.VpcSubnet](d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if ok {
+			t.Fatal("expected cache bypass (ok=false) for a short id on a path-indexed resource type")
+		}
+		if d.Id() != "" {
+			t.Fatalf("expected d.Id() to be untouched on bypass, got %q", d.Id())
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		// A full path contains "/", so the new short-id bypass must not trigger; this proves
+		// the check is specific to short (non-path) ids, not to shouldIndexByPath types broadly.
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{"id": path})
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, ok := cacheAwareDataSourceReadByID[model.VpcSubnet](d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if ok {
+			t.Fatal("expected ok=false (post-write bypass), proving control reached the postWriteByKey check rather than the short-id bypass")
 		}
 	})
 }

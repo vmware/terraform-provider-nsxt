@@ -202,7 +202,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, CacheKeyForResourceID(resourceTypeStaticRoutes, d), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -232,7 +232,7 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeStaticRoutes, d),
 			resourceTypeStaticRoutes,
 			model.StaticRoutesBindingType(),
 			func() (*model.StaticRoutes, error) {
@@ -357,7 +357,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, CacheKeyForResourceID(resourceTypeStaticRoutes, d), m)
 
 	return resourceNsxtPolicyStaticRouteRead(d, m)
 }
@@ -382,7 +382,7 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("Static Route", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeStaticRoutes, CacheKeyForResourceID(resourceTypeStaticRoutes, d), m)
 
 	return nil
 }

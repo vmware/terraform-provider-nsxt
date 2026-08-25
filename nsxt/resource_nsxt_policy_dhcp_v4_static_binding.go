@@ -265,7 +265,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -293,7 +293,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 		d,
 		m,
 		connector,
-		id,
+		CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d),
 		resourceTypeDhcpV4StaticBindingConfig,
 		model.DhcpV4StaticBindingConfigBindingType(),
 		func() (*model.DhcpV4StaticBindingConfig, error) {
@@ -395,7 +395,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingUpdate(d *schema.ResourceData, m inter
 	if err != nil {
 		return handleUpdateError("DhcpV4 Static Binding Config", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 
 	return resourceNsxtPolicyDhcpV4StaticBindingRead(d, m)
 }
@@ -430,7 +430,7 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	if err != nil {
 		return handleDeleteError("Dhcp Static Binding Config", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV6StaticBindingConfig, id, m)
 
 	return nil

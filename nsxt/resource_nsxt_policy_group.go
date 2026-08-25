@@ -832,6 +832,17 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	return resourceNsxtPolicyGroupGeneralCreate(d, m, true)
 }
 
+// groupCacheResourceType returns the cache bucket for a Group resource: withDomain=true is the
+// non-VPC (Tier-0/Tier-1-scoped) resourceNsxtPolicyGroup* caller, withDomain=false is the
+// VPC-scoped resourceNsxtVPCGroup* caller. Keeping this as the single source of truth avoids
+// the General* functions below hardcoding resourceTypeGroup regardless of caller.
+func groupCacheResourceType(withDomain bool) string {
+	if withDomain {
+		return resourceTypeGroup
+	}
+	return resourceTypeVPCGroup
+}
+
 func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{}, withDomain bool) error {
 	connector := getPolicyConnector(m)
 
@@ -911,7 +922,8 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id(), m)
+	resourceType := groupCacheResourceType(withDomain)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceType, CacheKeyForResourceID(resourceType, d), m)
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
@@ -936,12 +948,13 @@ func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, w
 	var obj *model.Group
 	var err error
 	if isCacheEnabledForRead(d, m) {
+		resourceType := groupCacheResourceType(withDomain)
 		obj, _, _, err = CacheAwareResourceRead[model.Group](
 			d,
 			m,
 			connector,
-			id,
-			resourceTypeGroup,
+			CacheKeyForResourceID(resourceType, d),
+			resourceType,
 			model.GroupBindingType(),
 			func() (*model.Group, error) {
 				readObj, readErr := client.Get(domainName, id)
@@ -1084,7 +1097,8 @@ func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, d.Id(), m)
+	resourceType := groupCacheResourceType(withDomain)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceType, CacheKeyForResourceID(resourceType, d), m)
 	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
@@ -1118,7 +1132,8 @@ func resourceNsxtPolicyGroupGeneralDelete(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return handleDeleteError("Group", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGroup, id, m)
+	resourceType := groupCacheResourceType(withDomain)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceType, CacheKeyForResourceID(resourceType, d), m)
 
 	return nil
 }
