@@ -271,7 +271,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypePolicyVpcNatRule, d),
 			resourceTypePolicyVpcNatRule,
 			model.PolicyVpcNatRuleBindingType(),
 			func() (*model.PolicyVpcNatRule, error) {

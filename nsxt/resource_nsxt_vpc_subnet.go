@@ -685,7 +685,7 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, CacheKeyForResourceID(resourceTypeVpcSubnet, d), m)
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -884,7 +884,7 @@ func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeVpcSubnet, d),
 			resourceTypeVpcSubnet,
 			model.VpcSubnetBindingType(),
 			func() (*model.VpcSubnet, error) {
@@ -993,7 +993,7 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, CacheKeyForResourceID(resourceTypeVpcSubnet, d), m)
 	return resourceNsxtVpcSubnetRead(d, m)
 }
 
@@ -1043,7 +1043,7 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleDeleteError("VpcSubnet", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcSubnet, CacheKeyForResourceID(resourceTypeVpcSubnet, d), m)
 
 	return nil
 }

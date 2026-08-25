@@ -295,7 +295,7 @@ func resourceNsxtVpcConnectivityProfileCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, CacheKeyForResourceID(resourceTypeVpcConnectivityProfile, d), m)
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 
@@ -313,7 +313,7 @@ func resourceNsxtVpcConnectivityProfileRead(d *schema.ResourceData, m interface{
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeVpcConnectivityProfile, d),
 			resourceTypeVpcConnectivityProfile,
 			model.VpcConnectivityProfileBindingType(),
 			func() (*model.VpcConnectivityProfile, error) {
@@ -399,7 +399,7 @@ func resourceNsxtVpcConnectivityProfileUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcConnectivityProfile", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, CacheKeyForResourceID(resourceTypeVpcConnectivityProfile, d), m)
 	return resourceNsxtVpcConnectivityProfileRead(d, m)
 }
 
@@ -419,7 +419,7 @@ func resourceNsxtVpcConnectivityProfileDelete(d *schema.ResourceData, m interfac
 	if err != nil {
 		return handleDeleteError("VpcConnectivityProfile", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcConnectivityProfile, CacheKeyForResourceID(resourceTypeVpcConnectivityProfile, d), m)
 
 	return nil
 }
