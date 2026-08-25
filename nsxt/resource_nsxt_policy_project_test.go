@@ -35,6 +35,9 @@ var accTestPolicyProjectUpdateAttributes = map[string]string{
 }
 
 func getExpectedSiteInfoCount(t *testing.T) string {
+	if os.Getenv(resource.EnvTfAcc) == "" {
+		return "0"
+	}
 	if util.NsxVersion == "" {
 		connector, err := testAccGetPolicyConnector()
 		if err != nil {
