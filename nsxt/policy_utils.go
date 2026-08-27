@@ -132,6 +132,9 @@ func getPolicyTagsFromSet(tagSet *schema.Set) []model.Tag {
 func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 	var tagList []map[string]interface{}
 	for _, tag := range tags {
+		if isManagedDefaultTag(tag) {
+			continue
+		}
 		elem := make(map[string]interface{})
 		elem["scope"] = tag.Scope
 		elem["tag"] = tag.Tag
@@ -305,6 +308,9 @@ func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, s
 	var ignoredTagList []map[string]interface{}
 	scopesToIgnore := getTagScopesToIgnore(d)
 	for _, tag := range tags {
+		if isManagedDefaultTag(tag) {
+			continue
+		}
 		elem := make(map[string]interface{})
 		elem["scope"] = tag.Scope
 		elem["tag"] = tag.Tag
