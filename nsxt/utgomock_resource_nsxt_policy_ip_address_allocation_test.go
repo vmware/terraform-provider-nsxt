@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,8 +19,10 @@ import (
 	"go.uber.org/mock/gomock"
 
 	ippoolsapi "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
+	realizedstateapi "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	ippoolmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/ip_pools"
+	realizedstatemocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/realized_state"
 )
 
 var (
@@ -55,6 +58,13 @@ func minimalNsxtIpAllocData() map[string]interface{} {
 	}
 }
 
+func minimalNsxtIpAllocDataNoIP() map[string]interface{} {
+	data := minimalNsxtIpAllocData()
+	delete(data, "allocation_ip")
+	data["timeout"] = 5
+	return data
+}
+
 func setupNsxtIpAllocMock(t *testing.T, ctrl *gomock.Controller) (*ippoolmocks.MockIpAllocationsClient, func()) {
 	mockSDK := ippoolmocks.NewMockIpAllocationsClient(ctrl)
 	mockWrapper := &ippoolsapi.IpAddressAllocationClientContext{
@@ -67,6 +77,20 @@ func setupNsxtIpAllocMock(t *testing.T, ctrl *gomock.Controller) (*ippoolmocks.M
 		return mockWrapper
 	}
 	return mockSDK, func() { cliIpAllocationsClient = original }
+}
+
+func setupNsxtIpAllocRealizedMock(t *testing.T, ctrl *gomock.Controller) (*realizedstatemocks.MockRealizedEntitiesClient, func()) {
+	mockSDK := realizedstatemocks.NewMockRealizedEntitiesClient(ctrl)
+	mockWrapper := &realizedstateapi.RealizedEntityClientContext{
+		Client:     mockSDK,
+		ClientType: utl.Local,
+	}
+
+	original := cliRealizedEntitiesClient
+	cliRealizedEntitiesClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *realizedstateapi.RealizedEntityClientContext {
+		return mockWrapper
+	}
+	return mockSDK, func() { cliRealizedEntitiesClient = original }
 }
 
 func TestMockResourceNsxtPolicyIPAddressAllocationCreate(t *testing.T) {
@@ -100,6 +124,64 @@ func TestMockResourceNsxtPolicyIPAddressAllocationCreate(t *testing.T) {
 
 		err := resourceNsxtPolicyIPAddressAllocationCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyIPAddressAllocationCreateRealizationCleanup(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restoreAlloc := setupNsxtIpAllocMock(t, ctrl)
+	defer restoreAlloc()
+	mockRealizedSDK, restoreRealized := setupNsxtIpAllocRealizedMock(t, ctrl)
+	defer restoreRealized()
+
+	t.Run("Create cleans up and clears ID when realization fails", func(t *testing.T) {
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nsxModel.IpAddressAllocation{}, notFoundErr),
+			mockSDK.EXPECT().Patch(nsxtIpAllocPoolID, nsxtIpAllocID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nsxtIpAllocAPIResponse(), nil),
+		)
+		mockRealizedSDK.EXPECT().List(nsxtIpAllocPath, nil).Return(nsxModel.GenericPolicyRealizedResourceListResult{}, errors.New("realization query failed"))
+		// Cleanup must delete the already-created NSX object, keyed by the
+		// resource ID directly (not read back from d.Id(), which isn't set yet).
+		mockSDK.EXPECT().Delete(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nil)
+
+		res := resourceNsxtPolicyIPAddressAllocation()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalNsxtIpAllocDataNoIP())
+
+		err := resourceNsxtPolicyIPAddressAllocationCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, "", d.Id())
+	})
+
+	t.Run("Create cleans up and clears ID when realized IP attribute is missing", func(t *testing.T) {
+		notFoundErr := vapiErrors.NotFound{}
+		realizedState := "REALIZED"
+		otherAttrKey := "other_attr"
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nsxModel.IpAddressAllocation{}, notFoundErr),
+			mockSDK.EXPECT().Patch(nsxtIpAllocPoolID, nsxtIpAllocID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nsxtIpAllocAPIResponse(), nil),
+		)
+		mockRealizedSDK.EXPECT().List(nsxtIpAllocPath, nil).Return(nsxModel.GenericPolicyRealizedResourceListResult{
+			Results: []nsxModel.GenericPolicyRealizedResource{
+				{
+					State: &realizedState,
+					ExtendedAttributes: []nsxModel.AttributeVal{
+						{Key: &otherAttrKey, Values: []string{"x"}},
+					},
+				},
+			},
+		}, nil)
+		mockSDK.EXPECT().Delete(nsxtIpAllocPoolID, nsxtIpAllocID).Return(nil)
+
+		res := resourceNsxtPolicyIPAddressAllocation()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalNsxtIpAllocDataNoIP())
+
+		err := resourceNsxtPolicyIPAddressAllocationCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, "", d.Id())
 	})
 }
 
