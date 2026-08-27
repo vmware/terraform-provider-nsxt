@@ -433,6 +433,7 @@ func getDhcpPreferredTimeSchema() *schema.Schema {
 		Type:         schema.TypeInt,
 		Description:  "The time interval in seconds, in which the prefix is advertised as preferred",
 		Optional:     true,
+		Computed:     true,
 		ValidateFunc: validation.IntAtLeast(48),
 	}
 }
