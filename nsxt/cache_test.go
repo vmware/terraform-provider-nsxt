@@ -567,3 +567,113 @@ func TestCacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t
 		}
 	})
 }
+
+func TestCacheAwareResourceReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	// CacheAwareResourceRead's resourceID is a short id (not yet path) during the Create-then-Read
+	// sequence (path isn't set on d until the Read populates it from the live object) and after
+	// terraform import (importers call d.SetId(shortID) without setting path). Without this bypass,
+	// such a call falls through to gcache.readCache keyed by the short id against the shared
+	// project-wide bucket, which can return a different VPC's same-short-id object.
+	rSchema := map[string]*schema.Schema{
+		"path": getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache-and-calls-backendRead", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{})
+		d.SetId("subnet1")
+		backendReadCalled := false
+		obj, cacheUsed, cacheAttempted, err := CacheAwareResourceRead[model.VpcSubnet](
+			d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType(),
+			func() (*model.VpcSubnet, error) {
+				backendReadCalled = true
+				return &model.VpcSubnet{Id: strPtr("subnet1")}, nil
+			},
+			func(*model.VpcSubnet) error { return nil },
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !backendReadCalled {
+			t.Fatal("expected backendRead to be called when bypassing cache for a short id on a path-indexed type")
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false when bypassing cache")
+		}
+		if cacheAttempted {
+			t.Fatal("expected cacheAttempted=false: the short-id bypass should skip the cache attempt entirely, not count as a failed attempt")
+		}
+		if obj == nil || obj.Id == nil || *obj.Id != "subnet1" {
+			t.Fatalf("expected backendRead's object to be returned, got %+v", obj)
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{"path": path})
+		d.SetId(path)
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, cacheUsed, cacheAttempted, err := CacheAwareResourceRead[model.VpcSubnet](
+			d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType(),
+			func() (*model.VpcSubnet, error) { return &model.VpcSubnet{Id: strPtr("subnet1")}, nil },
+			func(*model.VpcSubnet) error { return nil },
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false (post-write bypass path, not a cache hit)")
+		}
+		if !cacheAttempted {
+			t.Fatal("expected cacheAttempted=true, proving control reached the postWriteByKey check rather than the short-id bypass")
+		}
+	})
+}
+
+func TestTryCacheReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	rSchema := map[string]*schema.Schema{
+		"path": getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{})
+		d.SetId("subnet1")
+		obj, cacheUsed, cacheAttempted, err := TryCacheRead[model.VpcSubnet](d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if obj != nil {
+			t.Fatalf("expected nil object on bypass, got %+v", obj)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false when bypassing cache")
+		}
+		if cacheAttempted {
+			t.Fatal("expected cacheAttempted=false: the short-id bypass should skip the cache attempt entirely")
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{"path": path})
+		d.SetId(path)
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, cacheUsed, cacheAttempted, err := TryCacheRead[model.VpcSubnet](d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false (post-write bypass path, not a cache hit)")
+		}
+		if !cacheAttempted {
+			t.Fatal("expected cacheAttempted=true, proving control reached the postWriteByKey check rather than the short-id bypass")
+		}
+	})
+}

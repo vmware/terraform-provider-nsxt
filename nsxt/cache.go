@@ -661,7 +661,10 @@ func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, 
 func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType) (*T, bool, bool, error) {
 	cacheUsed := false
 	cacheAttempted := false
-	if isRefreshPhase(d) && IsCacheEnabled(m) {
+	// See the matching comment in CacheAwareResourceRead: skip the cache attempt entirely when
+	// resourceID is a short id for a path-indexed type, since the shared bucket is keyed by path.
+	shortIDBypass := shouldIndexByPath(resourceType) && !strings.Contains(resourceID, "/")
+	if isRefreshPhase(d) && IsCacheEnabled(m) && !shortIDBypass {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Bypass cache after a write for this resource instance (one-shot).
 			return nil, cacheUsed, true, nil
@@ -828,8 +831,16 @@ func mergeSecurityPolicyCacheSearchResults(parents, children []*data.StructValue
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {
 	cacheAttempted := false
 	postWriteBypass := false
+	// shortIDBypass is true when resourceID is a short id (not yet the path CacheKeyForResourceID
+	// would prefer) for a path-indexed type: path isn't set on d during Create-then-Read (it's
+	// only populated by this same Read once it has the live object), and importers set only the
+	// id via d.SetId without setting path. The shared bucket for this type is keyed by path; a
+	// short-id lookup here would hit whichever object converListToMapByType indexed first under
+	// that colliding short id, which may belong to a different VPC. Skip the cache attempt
+	// entirely — backendRead is always correctly scoped by the caller's own session context.
+	shortIDBypass := shouldIndexByPath(resourceType) && !strings.Contains(resourceID, "/")
 
-	if isRefreshPhase(d) && IsCacheEnabled(m) {
+	if isRefreshPhase(d) && IsCacheEnabled(m) && !shortIDBypass {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Ensure read-your-writes semantics: bypass cache once right after a write.
 			// Search-backed cache may be briefly stale immediately after a write.
