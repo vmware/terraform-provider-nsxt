@@ -101,6 +101,32 @@ func TestUnitNsxt_setCustomizedPolicyTagsInSchema(t *testing.T) {
 	require.Equal(t, 1, st.Len())
 }
 
+func TestUnitNsxt_setCustomizedPolicyTagsInSchema_skipsManagedTags(t *testing.T) {
+	sch := map[string]*schema.Schema{"tag": getTagsSchema()}
+	d := schema.TestResourceDataRaw(t, sch, map[string]interface{}{})
+	s1, t1 := "scope1", "tag1"
+	sManaged, tManaged := managedDefaultTagScope, "some-run-id"
+	setCustomizedPolicyTagsInSchema(d, []model.Tag{
+		{Scope: &s1, Tag: &t1},
+		{Scope: &sManaged, Tag: &tManaged},
+	}, "tag")
+	st := d.Get("tag").(*schema.Set)
+	require.Equal(t, 1, st.Len())
+	elem := st.List()[0].(map[string]interface{})
+	assert.Equal(t, "scope1", elem["scope"])
+}
+
+func TestUnitNsxt_initPolicyTagsSet_skipsManagedTags(t *testing.T) {
+	s1, t1 := "scope1", "tag1"
+	sManaged, tManaged := managedDefaultTagScope, "some-run-id"
+	out := initPolicyTagsSet([]model.Tag{
+		{Scope: &s1, Tag: &t1},
+		{Scope: &sManaged, Tag: &tManaged},
+	})
+	require.Len(t, out, 1)
+	assert.Equal(t, "scope1", *out[0]["scope"].(*string))
+}
+
 func TestUnitNsxt_setPathListInSchema(t *testing.T) {
 	sch := map[string]*schema.Schema{
 		"paths": {
