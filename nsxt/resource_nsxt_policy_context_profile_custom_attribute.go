@@ -26,9 +26,12 @@ var customAttributeKeys = []string{
 	model.PolicyCustomAttributes_KEY_CUSTOM_URL,
 }
 
-func splitCustomAttributeID(id string) (string, string) {
-	s := strings.Split(id, "~")
-	return s[0], s[1]
+func splitCustomAttributeID(id string) (string, string, error) {
+	s := strings.SplitN(id, "~", 2)
+	if len(s) != 2 || s[0] == "" || s[1] == "" {
+		return "", "", fmt.Errorf("invalid Context Profile Custom Attribute ID %q: expected format <key>~<attribute>", id)
+	}
+	return s[0], s[1], nil
 }
 
 func makeCustomAttributeID(key string, attribute string) string {
@@ -67,7 +70,10 @@ func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.Se
 	var err error
 	var attrList model.PolicyContextProfileListResult
 
-	key, attribute := splitCustomAttributeID(id)
+	key, attribute, err := splitCustomAttributeID(id)
+	if err != nil {
+		return false, err
+	}
 	source := model.PolicyCustomAttributes_ATTRIBUTE_SOURCE_CUSTOM
 	client := cliDefaultClient(sessionContext, connector)
 	if client == nil {
@@ -104,7 +110,10 @@ func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.Se
 
 func resourceNsxtPolicyContextProfileCustomAttributeRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
-	key, attribute := splitCustomAttributeID(id)
+	key, attribute, err := splitCustomAttributeID(id)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Reading ContextProfileCustomAttribute with ID %s", d.Id())
 
@@ -155,10 +164,13 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 }
 
 func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceData, m interface{}) error {
-	key, attribute := splitCustomAttributeID(d.Id())
+	key, attribute, err := splitCustomAttributeID(d.Id())
+	if err != nil {
+		return err
+	}
 	log.Printf("[INFO] Deleting ContextProfileCustomAttribute with ID %s", attribute)
 	attributes := []string{attribute}
-	err := resourceNsxtPolicyContextProfileCustomAttributeRead(d, m)
+	err = resourceNsxtPolicyContextProfileCustomAttributeRead(d, m)
 
 	if err != nil {
 		return err

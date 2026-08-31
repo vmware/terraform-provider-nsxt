@@ -148,6 +148,23 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeRead(t *testing.T) {
 		err := resourceNsxtPolicyContextProfileCustomAttributeRead(d, m)
 		require.Error(t, err)
 	})
+
+	t.Run("Read_fails_when_invalid_id", func(t *testing.T) {
+		invalidIDs := []string{
+			"invalid_id_no_tilde",
+			"",
+			"~example.com",
+			"DOMAIN_NAME~",
+		}
+		for _, id := range invalidIDs {
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			d.SetId(id)
+			m := newGoMockProviderClient()
+			err := resourceNsxtPolicyContextProfileCustomAttributeRead(d, m)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "invalid Context Profile Custom Attribute ID")
+		}
+	})
 }
 
 func TestMockResourceNsxtPolicyContextProfileCustomAttributeDelete(t *testing.T) {
@@ -213,5 +230,53 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeDelete(t *testing.T)
 		m := newGoMockProviderClient()
 		err := resourceNsxtPolicyContextProfileCustomAttributeDelete(d, m)
 		require.Error(t, err)
+	})
+
+	t.Run("Delete_fails_when_invalid_id", func(t *testing.T) {
+		invalidIDs := []string{
+			"invalid_id_no_tilde",
+			"",
+			"~example.com",
+			"DOMAIN_NAME~",
+		}
+		for _, id := range invalidIDs {
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			d.SetId(id)
+			m := newGoMockProviderClient()
+			err := resourceNsxtPolicyContextProfileCustomAttributeDelete(d, m)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "invalid Context Profile Custom Attribute ID")
+		}
+	})
+}
+
+func TestUnitNsxt_splitCustomAttributeID(t *testing.T) {
+	t.Run("valid_id", func(t *testing.T) {
+		key, attr, err := splitCustomAttributeID("DOMAIN_NAME~example.com")
+		require.NoError(t, err)
+		assert.Equal(t, "DOMAIN_NAME", key)
+		assert.Equal(t, "example.com", attr)
+	})
+
+	t.Run("valid_id_with_nested_tilde", func(t *testing.T) {
+		key, attr, err := splitCustomAttributeID("CUSTOM_URL~https://example.com/~path")
+		require.NoError(t, err)
+		assert.Equal(t, "CUSTOM_URL", key)
+		assert.Equal(t, "https://example.com/~path", attr)
+	})
+
+	t.Run("invalid_ids", func(t *testing.T) {
+		testCases := []string{
+			"",
+			"invalid_id_no_tilde",
+			"plain_attribute_id",
+			"~example.com",
+			"DOMAIN_NAME~",
+		}
+		for _, tc := range testCases {
+			_, _, err := splitCustomAttributeID(tc)
+			require.Error(t, err, "expected error for input %q", tc)
+			assert.Contains(t, err.Error(), "invalid Context Profile Custom Attribute ID")
+		}
 	})
 }
