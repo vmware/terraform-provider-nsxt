@@ -120,9 +120,9 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		if resourceType == "PolicyEdgeNode" {
 			// Edge Node is a special case where id != nsx_id
 			// TODO: consider switching all searches to nsx id
-			resultValues, err = listPolicyResourcesByNsxID(connector, context, &objID, &additionalQueryString)
+			resultValues, err = listPolicyResourcesByNsxID(connector, context, &objID, resourceType, &additionalQueryString)
 		} else {
-			resultValues, err = listPolicyResourcesByID(connector, context, &objID, &additionalQueryString, isGlobal)
+			resultValues, err = listPolicyResourcesByID(connector, context, &objID, resourceType, &additionalQueryString, isGlobal)
 		}
 	} else {
 		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString, isGlobal)
@@ -218,13 +218,23 @@ func escapeSpecialCharacters(str string) string {
 	return str
 }
 
-func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
+func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, resourceType string, additionalQuery *string, isGlobal bool) ([]*data.StructValue, error) {
+	var query string
+	if resourceType != "" {
+		query = fmt.Sprintf("resource_type:%s AND id:%s AND marked_for_delete:false", resourceType, escapeSpecialCharacters(*resourceID))
+	} else {
+		query = fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
+	}
 	return searchByContext(connector, context, query, additionalQuery)
 }
 
-func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
+func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionContext, resourceID *string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	var query string
+	if resourceType != "" {
+		query = fmt.Sprintf("resource_type:%s AND nsx_id:%s AND marked_for_delete:false", resourceType, escapeSpecialCharacters(*resourceID))
+	} else {
+		query = fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
+	}
 	return searchByContext(connector, context, query, additionalQuery)
 }
 
