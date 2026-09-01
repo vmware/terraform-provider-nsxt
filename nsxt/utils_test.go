@@ -280,6 +280,52 @@ func testAccRetryOnTransientError(f func() error) error {
 	return err
 }
 
+// testAccNsxtDnsProjectID returns the ID of the project used for DNS test
+// dependencies. The DnsService listener IP is allocated from the project's
+// external_ipv4_blocks, which is only reliably provisioned on the VPC
+// project in test environments, so prefer NSXT_VPC_PROJECT_ID when a VPC
+// environment is configured and fall back to the plain multitenancy
+// project otherwise.
+func testAccNsxtDnsProjectID() string {
+	if testAccIsVPC() {
+		return os.Getenv("NSXT_VPC_PROJECT_ID")
+	}
+	return os.Getenv("NSXT_PROJECT_ID")
+}
+
+// testAccNsxtDnsTransitGatewayTemplate returns HCL that creates an inline
+// transit gateway required by DnsService.
+// Exposed reference:
+//   - nsxt_policy_transit_gateway.dns_tgw.path
+func testAccNsxtDnsTransitGatewayTemplate(displayName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_transit_gateway" "dns_tgw" {
+  %s
+  display_name    = "%s-tgw"
+  transit_subnets = ["192.168.200.0/24"]
+}
+`, testAccNsxtMultitenancyContext(false), displayName)
+}
+
+// testAccNsxtDnsListenerIPTemplate returns HCL that allocates a project IP
+// address to use as a DnsService listener IP.
+// Exposed reference:
+//   - nsxt_policy_project_ip_address_allocation.dns_listener.path
+func testAccNsxtDnsListenerIPTemplate(displayName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_project" "dns_listener" {
+  id = "%s"
+}
+
+resource "nsxt_policy_project_ip_address_allocation" "dns_listener" {
+  %s
+  display_name    = "%s-listener-ip"
+  allocation_size = 1
+  ip_block        = data.nsxt_policy_project.dns_listener.external_ipv4_blocks[0]
+}
+`, testAccNsxtDnsProjectID(), testAccNsxtMultitenancyContext(false), displayName)
+}
+
 // testAccNsxtExtraCoverage skips a test unless NSXT_TEST_EXTRA_COVERAGE is set.
 //
 // Apply this guard to tests that are expensive to run and cover scenarios that
@@ -303,7 +349,6 @@ func testAccNsxtExtraCoverage(t *testing.T) {
 		t.Skipf("set NSXT_TEST_EXTRA_COVERAGE to run extra-coverage tests")
 	}
 }
-
 func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
