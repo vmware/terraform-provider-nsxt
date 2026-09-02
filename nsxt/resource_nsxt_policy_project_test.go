@@ -17,7 +17,6 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/orgs"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var shortID = getAccTestRandomString(6)
@@ -32,26 +31,6 @@ var accTestPolicyProjectUpdateAttributes = map[string]string{
 	"DisplayName": getAccTestResourceName(),
 	"Description": "terraform updated",
 	"ShortId":     shortID,
-}
-
-func getExpectedSiteInfoCount(t *testing.T) string {
-	if util.NsxVersion == "" {
-		connector, err := testAccGetPolicyConnector()
-		if err != nil {
-			t.Errorf("Failed to get policy connector")
-			return "0"
-		}
-
-		err = initNSXVersion(connector)
-		if err != nil {
-			t.Errorf("Failed to retrieve NSX version")
-			return "0"
-		}
-	}
-	if util.NsxVersionHigherOrEqual("4.1.1") {
-		return "1"
-	}
-	return "0"
 }
 
 func runChecksNsx410(testResourceName string, attributes map[string]string, expectedValues map[string]string) resource.TestCheckFunc {
@@ -105,7 +84,7 @@ func runChecksNsx920(testResourceName string, expectedValues map[string]string) 
 
 func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
-	siteCount := getExpectedSiteInfoCount(t)
+	siteCount := "1"
 	expectedValuesStep1 := map[string]string{
 		"t0_count":                   "1",
 		"ip_block_count":             "1",
@@ -202,7 +181,7 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 
 func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
-	siteCount := getExpectedSiteInfoCount(t)
+	siteCount := "1"
 	localShortID := getAccTestRandomString(6)
 	createAttrs := map[string]string{
 		"DisplayName": getAccTestResourceName(),
@@ -272,7 +251,7 @@ func TestAccResourceNsxtPolicyProject_910basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyProject_920basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
-	siteCount := getExpectedSiteInfoCount(t)
+	siteCount := "1"
 	localShortID := getAccTestRandomString(6)
 	createAttrs := map[string]string{
 		"DisplayName": getAccTestResourceName(),
