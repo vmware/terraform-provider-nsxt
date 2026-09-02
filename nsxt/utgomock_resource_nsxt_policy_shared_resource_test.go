@@ -81,7 +81,7 @@ func TestMockResourceNsxtPolicySharedResourceCreate(t *testing.T) {
 
 	t.Run("Create success", func(t *testing.T) {
 		gomock.InOrder(
-			mockSDK.EXPECT().Patch(sharedResShareID, gomock.Any(), gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Patch(sharedResShareID, gomock.Any(), gomock.Any(), nil).Return(nil),
 			mockSDK.EXPECT().Get(sharedResShareID, gomock.Any()).Return(sharedResAPIResponse(), nil),
 		)
 
@@ -141,7 +141,7 @@ func TestMockResourceNsxtPolicySharedResourceUpdate(t *testing.T) {
 
 	t.Run("Update success", func(t *testing.T) {
 		gomock.InOrder(
-			mockSDK.EXPECT().Patch(sharedResShareID, sharedResID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Patch(sharedResShareID, sharedResID, gomock.Any(), nil).Return(nil),
 			mockSDK.EXPECT().Get(sharedResShareID, sharedResID).Return(sharedResAPIResponse(), nil),
 		)
 
@@ -161,7 +161,7 @@ func TestMockResourceNsxtPolicySharedResourceDelete(t *testing.T) {
 	defer restore()
 
 	t.Run("Delete success", func(t *testing.T) {
-		mockSDK.EXPECT().Delete(sharedResShareID, sharedResID).Return(nil)
+		mockSDK.EXPECT().Delete(sharedResShareID, sharedResID, nil).Return(nil)
 
 		res := resourceNsxtPolicySharedResource()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalSharedResData())

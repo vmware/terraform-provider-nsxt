@@ -150,9 +150,9 @@ func (c Tier0ClientContext) List(cursorParam *string, includeMarkForDeleteObject
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(*string, *bool, *string, *int64, *bool, *string) (model0.Tier0ListResult, error)
+			List(*string, *bool, *bool, *string, *int64, *bool, *string) (model0.Tier0ListResult, error)
 		})
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.Tier0sClient)

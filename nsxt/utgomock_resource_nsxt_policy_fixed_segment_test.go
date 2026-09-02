@@ -92,7 +92,7 @@ func setupFixedSegReadProfileMocks(t *testing.T, ctrl *gomock.Controller) (
 		return &segments.SegmentSecurityProfileBindingMapClientContext{Client: mockSecuritySDK, ClientType: utl.Local}
 	}
 
-	mockDiscoverySDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+	mockDiscoverySDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(model.SegmentDiscoveryProfileBindingMapListResult{}, nil).AnyTimes()
 	mockQosSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(model.SegmentQosProfileBindingMapListResult{}, nil).AnyTimes()

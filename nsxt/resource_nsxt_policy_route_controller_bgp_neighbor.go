@@ -247,13 +247,13 @@ func rcBgpNeighborToStruct(d *schema.ResourceData, id string) (model.RouteContro
 		break
 	}
 
-	var rFilters []model.BgpRouteFiltering
+	var rFilters []model.RouteControllerBgpRouteFiltering
 	for _, filter := range d.Get("route_filtering").([]interface{}) {
 		data := filter.(map[string]interface{})
 		addrFamily := data["address_family"].(string)
 		filterEnabled := data["enabled"].(bool)
 
-		filterStruct := model.BgpRouteFiltering{
+		filterStruct := model.RouteControllerBgpRouteFiltering{
 			AddressFamily: &addrFamily,
 			Enabled:       &filterEnabled,
 		}

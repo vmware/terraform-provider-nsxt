@@ -181,9 +181,9 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(string, *string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+			List(string, *string, *bool, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
 		})
-		obj, err = client.List(tier1IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.SegmentsClient)
@@ -199,9 +199,9 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 
 	case utl.Multitenancy:
 		client := c.Client.(interface {
-			List(string, string, string, *string, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
+			List(string, string, string, *string, *bool, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

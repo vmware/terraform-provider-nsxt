@@ -70,7 +70,7 @@ func (c TransitGatewayAttachmentClientContext) List(orgIdParam string, projectId
 
 	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.AttachmentsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

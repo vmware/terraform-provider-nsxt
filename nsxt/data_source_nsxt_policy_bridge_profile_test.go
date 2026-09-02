@@ -52,7 +52,7 @@ func getEdgeClusterPath() (string, error) {
 		return "", fmt.Errorf("error during test client initialization: %v", err)
 	}
 	client := enforcement_points.NewEdgeClustersClient(connector)
-	clusterList, err := client.List(defaultSite, defaultEnforcementPoint, nil, nil, nil, nil, nil, nil)
+	clusterList, err := client.List(defaultSite, defaultEnforcementPoint, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("error during edge cluster list retrieval: %v", err)
 	}
@@ -68,7 +68,7 @@ func getEdgeClusterPath() (string, error) {
 	}
 	if clusterID != "" {
 		enClient := edge_clusters.NewEdgeNodesClient(connector)
-		objList, err := enClient.List(defaultSite, defaultEnforcementPoint, clusterID, nil, nil, nil, nil, nil, nil)
+		objList, err := enClient.List(defaultSite, defaultEnforcementPoint, clusterID, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return "", fmt.Errorf("error during edge node list retrieval: %v", err)
 		}

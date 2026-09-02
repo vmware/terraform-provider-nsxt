@@ -52,7 +52,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 	isDefaultFalse := false
 
 	t.Run("default project, built_in_only = false (default behavior)", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: &svcName, Path: &svcPath},
 				{DisplayName: ptrString("svc-def"), Path: ptrString("/infra/services/svc-def"), IsDefault: &isDefaultTrue},
@@ -71,7 +71,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 	})
 
 	t.Run("default project, built_in_only = true", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: &svcName, Path: &svcPath},
 				{DisplayName: ptrString("svc-def"), Path: ptrString("/infra/services/svc-def"), IsDefault: &isDefaultTrue},
@@ -103,7 +103,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		}
 		defer func() { cliServicesClient = originalCli }()
 
-		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: ptrString("proj-svc"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc")},
 				{DisplayName: ptrString("proj-svc-def"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc-def"), IsDefault: &isDefaultTrue},
@@ -143,7 +143,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		}
 		defer func() { cliServicesClient = originalCli }()
 
-		mockDefaultSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockDefaultSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: ptrString("proj-svc-custom"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc-custom"), IsDefault: &isDefaultFalse},
 				{DisplayName: ptrString("proj-svc-built-in"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc-built-in"), IsDefault: &isDefaultTrue},
@@ -189,7 +189,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		}
 		defer func() { cliServicesClient = originalCli }()
 
-		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: ptrString("proj-svc"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc")},
 			},
@@ -201,7 +201,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		sharedSvcPath := "/infra/services/shared-svc"
 		sharedSvcName := "shared-svc"
 
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: &orgSharedSvcName, Path: &orgSharedSvcPath},
 				{DisplayName: &sharedSvcName, Path: &sharedSvcPath},
@@ -290,14 +290,14 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		defer func() { cliServicesClient = originalCli }()
 
 		// Project-level services query (since built_in_only=true, non-default custom services will be filtered out)
-		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: ptrString("proj-svc-custom"), Path: ptrString("/orgs/default/projects/project1/infra/services/proj-svc-custom"), IsDefault: &isDefaultFalse},
 			},
 		}, nil)
 
 		// Expect list call to fetch default space built-in services to filter shared services
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{
 			Results: []nsxModel.Service{
 				{DisplayName: ptrString("svc-def-1"), Path: ptrString("/infra/services/svc-def-1"), IsDefault: &isDefaultTrue},
 				{DisplayName: ptrString("svc-custom"), Path: ptrString("/infra/services/svc-custom"), IsDefault: &isDefaultFalse},
@@ -392,8 +392,8 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 		}
 		defer func() { cliServicesClient = originalCli }()
 
-		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, nil)
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, nil)
+		mockProjectSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, nil)
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, nil)
 
 		mockOrgShared := orgsmocks.NewMockSharedWithMeClient(ctrl)
 		originalOrgShared := cliOrgSharedWithMeClient
@@ -431,7 +431,7 @@ func TestMockDataSourceNsxtPolicyServicesRead(t *testing.T) {
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ServiceListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyServices()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{})

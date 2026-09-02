@@ -212,7 +212,7 @@ func resourceNsxtPolicyIdpsCustomSignatureCreate(d *schema.ResourceData, m inter
 	customSigsClient := cliIdsCustomSignaturesClient(connector)
 	includePreview := custom_signature_versions.CustomSignatures_LIST_INCLUDE_PREVIEW_CUSTOM_SIGNATURES
 	pageSize := int64(1000)
-	listResult, err := customSigsClient.List(versionID, nil, &includePreview, nil, nil, &pageSize, nil, nil)
+	listResult, err := customSigsClient.List(versionID, nil, &includePreview, nil, nil, nil, &pageSize, nil, nil)
 	if err != nil {
 		return handleListError("IdsCustomSignature", err)
 	}
@@ -406,7 +406,7 @@ func idpsCustomSignatureFindByIDAndContent(connector client.Connector, versionID
 		ptr(custom_signature_versions.CustomSignatures_LIST_INCLUDE_CUSTOM_SIGNATURES),
 		nil,
 	} {
-		listResult, err := customSigsClient.List(versionID, nil, include, nil, nil, &pageSize, nil, nil)
+		listResult, err := customSigsClient.List(versionID, nil, include, nil, nil, nil, &pageSize, nil, nil)
 		if err != nil {
 			continue
 		}
@@ -615,7 +615,7 @@ func idpsCustomSignatureCountPreview(connector client.Connector, versionID strin
 	client := cliIdsCustomSignaturesClient(connector)
 	include := custom_signature_versions.CustomSignatures_LIST_INCLUDE_PREVIEW_CUSTOM_SIGNATURES
 	pageSize := int64(1000)
-	listResult, err := client.List(versionID, nil, &include, nil, nil, &pageSize, nil, nil)
+	listResult, err := client.List(versionID, nil, &include, nil, nil, nil, &pageSize, nil, nil)
 	if err != nil {
 		return 0
 	}
@@ -635,7 +635,7 @@ func ResourceNsxtPolicyIdpsCustomSignatureExistsByContent(connector client.Conne
 		ptr(custom_signature_versions.CustomSignatures_LIST_INCLUDE_CUSTOM_SIGNATURES),
 		nil,
 	} {
-		listResult, err := customSigsClient.List(versionID, nil, include, nil, nil, &pageSize, nil, nil)
+		listResult, err := customSigsClient.List(versionID, nil, include, nil, nil, nil, &pageSize, nil, nil)
 		if err != nil {
 			continue
 		}

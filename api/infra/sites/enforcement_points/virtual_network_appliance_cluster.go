@@ -75,7 +75,7 @@ func (c VirtualNetworkApplianceClusterClientContext) List(siteIdParam string, en
 
 	case utl.Local:
 		client := c.Client.(client0.VirtualNetworkApplianceClustersClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -167,7 +167,7 @@ func (c VirtualNetworkAppliancesClientContext) List(siteIdParam string, enforcem
 	switch c.ClientType {
 	case utl.Local:
 		client := c.Client.(clusterClient0.VirtualNetworkAppliancesClient)
-		return client.List(siteIdParam, enforcementpointIdParam, virtualNetworkApplianceClusterIdParam, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		return client.List(siteIdParam, enforcementpointIdParam, virtualNetworkApplianceClusterIdParam, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -300,7 +300,7 @@ func (c VirtualNetworkApplianceCRUDClientContext) List(siteIdParam, enforcementp
 	switch c.ClientType {
 	case utl.Local:
 		client := c.Client.(clusterClient0.VirtualNetworkAppliancesClient)
-		return client.List(siteIdParam, enforcementpointIdParam, clusterIdParam, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		return client.List(siteIdParam, enforcementpointIdParam, clusterIdParam, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	default:
 		return empty, errors.New("invalid infrastructure for model")
 	}

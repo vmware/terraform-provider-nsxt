@@ -123,11 +123,11 @@ func (c VpcSubnetPortClientContext) List(orgIdParam string, projectIdParam strin
 
 	case utl.Local:
 		client := c.Client.(client0.PortsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.PortsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, subnetIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

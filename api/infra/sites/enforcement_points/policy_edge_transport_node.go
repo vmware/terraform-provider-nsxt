@@ -70,7 +70,7 @@ func (c PolicyEdgeTransportNodeClientContext) List(siteIdParam string, enforceme
 
 	case utl.Local:
 		client := c.Client.(client0.EdgeTransportNodesClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, inMaintenanceModeParam, includeMarkForDeleteObjectsParam, includedFieldsParam, managementIpParam, nodeTypesParam, pageSizeParam, sortAscendingParam, sortByParam, transportZonePathParam)
+		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, inMaintenanceModeParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, managementIpParam, nodeTypesParam, pageSizeParam, sortAscendingParam, sortByParam, transportZonePathParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

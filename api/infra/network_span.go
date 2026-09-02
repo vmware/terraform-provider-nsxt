@@ -70,7 +70,7 @@ func (c NetworkSpanClientContext) List(cursorParam *string, includeMarkForDelete
 
 	case utl.Local:
 		client := c.Client.(client0.NetworkSpansClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

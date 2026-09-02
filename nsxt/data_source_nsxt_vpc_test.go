@@ -98,7 +98,7 @@ func testAccDataSourceNsxtVPCDeleteByName(name string) error {
 	projID := os.Getenv("NSXT_PROJECT_ID")
 
 	// Find the object by name
-	objList, err := client.List(defaultOrgID, projID, nil, nil, nil, nil, nil, nil)
+	objList, err := client.List(defaultOrgID, projID, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("VPC", err)
 	}

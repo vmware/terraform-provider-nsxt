@@ -71,7 +71,7 @@ func (c IpsecVpnSessionClientContext) List(tier1IdParam string, localeServiceIdP
 
 	case utl.Local:
 		client := c.Client.(client0.SessionsClient)
-		obj, err = client.List(tier1IdParam, localeServiceIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, localeServiceIdParam, serviceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

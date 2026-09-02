@@ -40,11 +40,11 @@ func (c VirtualMachineClientContext) List(cursorParam *string, enforcementPointP
 
 	case utl.Local:
 		client := c.Client.(client0.VirtualMachinesClient)
-		obj, err = client.List(cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.VirtualMachinesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

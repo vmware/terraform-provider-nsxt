@@ -185,9 +185,9 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(string, string, *string, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
+			List(string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
 		})
-		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.RulesClient)
@@ -203,9 +203,9 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 
 	case utl.Multitenancy:
 		client := c.Client.(interface {
-			List(string, string, string, string, *string, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
+			List(string, string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

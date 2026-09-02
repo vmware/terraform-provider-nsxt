@@ -128,7 +128,7 @@ func testAccDataSourceNsxtPolicyProjectDeleteByName(name string) error {
 	client := orgs.NewProjectsClient(connector)
 
 	// Find the object by name
-	objList, err := client.List(defaultOrgID, nil, nil, nil, nil, nil, nil, nil)
+	objList, err := client.List(defaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Project", err)
 	}

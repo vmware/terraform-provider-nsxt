@@ -50,7 +50,7 @@ func TestMockDataSourceNsxtPolicyLBAppProfileErrors(t *testing.T) {
 	})
 
 	t.Run("Read by name - List API error is propagated", func(t *testing.T) {
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBAppProfileListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBAppProfileListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyLBAppProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -62,7 +62,7 @@ func TestMockDataSourceNsxtPolicyLBAppProfileErrors(t *testing.T) {
 	})
 
 	t.Run("Read by name - not found returns error", func(t *testing.T) {
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBAppProfileListResult{}, nil)
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBAppProfileListResult{}, nil)
 
 		ds := dataSourceNsxtPolicyLBAppProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{

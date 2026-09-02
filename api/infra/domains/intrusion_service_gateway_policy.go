@@ -71,9 +71,9 @@ func (c IntrusionServiceGatewayPolicyClientContext) List(domainIdParam string, c
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsGatewayPolicyListResult, error)
+			List(string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsGatewayPolicyListResult, error)
 		})
-		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

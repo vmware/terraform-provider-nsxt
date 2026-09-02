@@ -52,11 +52,11 @@ func resourceNsxtPolicyDnsRecordAutoConfig() *schema.Resource {
 				ValidateFunc: validatePolicyPath(),
 				Description:  "Policy path to a DnsZone (local or shared) in which auto-created A records are placed.",
 			},
-			"ptr_record_zone_path": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validatePolicyPath(),
-				Description:  "Optional policy path to a DnsZone for auto-created PTR (reverse DNS) records. When absent, no PTR record is auto-created.",
+			"ptr_record_zone_paths": {
+				Type:        schema.TypeSet,
+				Description: "Optional policy paths to DnsZones for auto-created PTR (reverse DNS) records. When absent or empty, no PTR record is auto-created. If the IP block spans multiple CIDRs, the PTR record for an allocated IP is placed in whichever referenced zone's domain name matches that IP's CIDR.",
+				Optional:    true,
+				Elem:        getElemPolicyPathSchema(),
 			},
 			"ttl": {
 				Type:         schema.TypeInt,
@@ -102,10 +102,7 @@ func policyDnsRecordAutoConfigFromSchema(d *schema.ResourceData) model.DnsAutoRe
 		Ttl:             &ttl,
 	}
 
-	if v, ok := d.GetOk("ptr_record_zone_path"); ok {
-		ptrPath := v.(string)
-		obj.PtrRecordZonePath = &ptrPath
-	}
+	obj.PtrRecordZonePaths = getStringListFromSchemaSet(d, "ptr_record_zone_paths")
 
 	return obj
 }
@@ -166,7 +163,7 @@ func resourceNsxtPolicyDnsRecordAutoConfigRead(d *schema.ResourceData, m interfa
 	d.Set("nsx_id", obj.Id)
 	d.Set("ip_block_path", obj.IpBlockPath)
 	d.Set("a_record_zone_path", obj.ARecordZonePath)
-	d.Set("ptr_record_zone_path", obj.PtrRecordZonePath)
+	d.Set("ptr_record_zone_paths", obj.PtrRecordZonePaths)
 	if obj.Ttl != nil {
 		d.Set("ttl", int(*obj.Ttl))
 	}

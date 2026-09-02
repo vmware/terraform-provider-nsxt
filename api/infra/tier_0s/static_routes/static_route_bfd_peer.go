@@ -101,7 +101,7 @@ func (c StaticRouteBfdPeerClientContext) List(tier0IdParam string, cursorParam *
 
 	case utl.Local:
 		client := c.Client.(client1.BfdPeersClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

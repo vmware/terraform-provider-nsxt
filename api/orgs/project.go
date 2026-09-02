@@ -70,7 +70,7 @@ func (c ProjectClientContext) List(orgIdParam string, cursorParam *string, inclu
 
 	case utl.Local, utl.Multitenancy:
 		client := c.Client.(client0.ProjectsClient)
-		obj, err = client.List(orgIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, instanceIdParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, instanceIdParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

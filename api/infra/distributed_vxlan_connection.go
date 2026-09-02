@@ -70,7 +70,7 @@ func (c DistributedVxlanConnectionClientContext) List(cursorParam *string, inclu
 
 	case utl.Local:
 		client := c.Client.(client0.DistributedVxlanConnectionsClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

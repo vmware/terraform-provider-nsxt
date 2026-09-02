@@ -72,7 +72,7 @@ func (c PolicyCustomAttributesClientContext) List(attributeKeyParam *string, att
 
 	case utl.Local:
 		client := c.Client.(client0.DefaultClient)
-		obj, err = client.List(attributeKeyParam, attributeSourceParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(attributeKeyParam, attributeSourceParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.DefaultClient)
@@ -88,7 +88,7 @@ func (c PolicyCustomAttributesClientContext) List(attributeKeyParam *string, att
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.DefaultClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, attributeKeyParam, attributeSourceParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, attributeKeyParam, attributeSourceParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

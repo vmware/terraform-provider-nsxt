@@ -144,7 +144,7 @@ func (c Tier0InterfaceClientContext) List(tier0IdParam string, localeServicesIdP
 
 	case utl.Local:
 		client := c.Client.(client0.InterfacesClient)
-		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.InterfacesClient)

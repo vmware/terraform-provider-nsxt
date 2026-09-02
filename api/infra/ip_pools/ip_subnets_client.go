@@ -125,11 +125,11 @@ func (c StructValueClientContext) List(ipPoolIdParam string, cursorParam *string
 
 	case utl.Local:
 		client := c.Client.(client0.IpSubnetsClient)
-		obj, err = client.List(ipPoolIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(ipPoolIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.IpSubnetsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

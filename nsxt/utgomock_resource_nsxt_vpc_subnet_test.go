@@ -330,7 +330,7 @@ func TestMockResourceNsxtVpcSubnetDelete(t *testing.T) {
 		defer restore()
 
 		emptyPorts := nsxModel.VpcSubnetPortListResult{Results: []nsxModel.VpcSubnetPort{}}
-		mockPortsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), subnetID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(emptyPorts, nil)
+		mockPortsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), subnetID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(emptyPorts, nil)
 		mockSubnetSDK.EXPECT().Delete(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(nil)
 
 		res := resourceNsxtVpcSubnet()
@@ -354,7 +354,7 @@ func TestMockResourceNsxtVpcSubnetDelete(t *testing.T) {
 		_, mockPortsSDK, restore := setupSubnetMock(t, ctrl)
 		defer restore()
 
-		mockPortsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), subnetID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.VpcSubnetPortListResult{}, errors.New("list error"))
+		mockPortsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), subnetID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.VpcSubnetPortListResult{}, errors.New("list error"))
 
 		res := resourceNsxtVpcSubnet()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())

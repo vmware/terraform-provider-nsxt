@@ -153,7 +153,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(t *testing.T)
 
 	t.Run("by display_name via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
+		mockSDK.EXPECT().List(idsGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
 			Results:     []nsxModel.IdsGatewayPolicy{idsGatewayPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -171,7 +171,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServiceGatewayPolicyRead(t *testing.T)
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(idsGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(idsGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyIntrusionServiceGatewayPolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{

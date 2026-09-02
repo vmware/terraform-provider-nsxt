@@ -238,7 +238,7 @@ func TestMockResourceNsxtPolicyBgpConfigCreate(t *testing.T) {
 		mockLocaleServicesSDK.EXPECT().Get(bgpCfgGwID, defaultPolicyLocaleServiceID).Return(model.LocaleServices{},
 			vapiErrors.NotFound{})
 		resultCount := int64(0)
-		mockLocaleServicesSDK.EXPECT().List(bgpCfgGwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockLocaleServicesSDK.EXPECT().List(bgpCfgGwID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{}, ResultCount: &resultCount}, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{

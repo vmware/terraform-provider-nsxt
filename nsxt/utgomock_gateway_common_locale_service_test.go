@@ -164,7 +164,7 @@ func TestMockNsxtFindTier0LocaleServiceForSite(t *testing.T) {
 		lsID := "ls-1"
 		edgeClusterPath := "/infra/sites/default/enforcement-points/default/edge-clusters/ec1"
 		count := int64(1)
-		mockSDK.EXPECT().List("gw1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSDK.EXPECT().List("gw1", (*string)(nil), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.LocaleServicesListResult{
 				Results:     []model.LocaleServices{{Id: &lsID, EdgeClusterPath: &edgeClusterPath}},
 				ResultCount: &count,
@@ -182,7 +182,7 @@ func TestMockNsxtFindTier0LocaleServiceForSite(t *testing.T) {
 		defer restore()
 
 		count := int64(0)
-		mockSDK.EXPECT().List("gw1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSDK.EXPECT().List("gw1", (*string)(nil), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.LocaleServicesListResult{Results: []model.LocaleServices{}, ResultCount: &count}, nil)
 
 		_, err := findTier0LocaleServiceForSite(ctx, nil, "gw1", "/infra/sites/other")
@@ -195,7 +195,7 @@ func TestMockNsxtFindTier0LocaleServiceForSite(t *testing.T) {
 		mockSDK, restore := setupTier0LocaleServicesMock(ctrl)
 		defer restore()
 
-		mockSDK.EXPECT().List("gw1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSDK.EXPECT().List("gw1", (*string)(nil), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.LocaleServicesListResult{}, assertErr("list error"))
 
 		_, err := findTier0LocaleServiceForSite(ctx, nil, "gw1", "/infra/sites/default")

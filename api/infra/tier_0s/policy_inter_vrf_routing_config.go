@@ -70,7 +70,7 @@ func (c PolicyInterVrfRoutingConfigClientContext) List(tier0IdParam string, curs
 
 	case utl.Local:
 		client := c.Client.(client0.InterVrfRoutingClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

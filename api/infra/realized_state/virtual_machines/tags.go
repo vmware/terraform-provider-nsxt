@@ -43,15 +43,15 @@ func (c TagsClientContext) Create(virtualMachineIdParam string, virtualMachineTa
 
 	case utl.Local:
 		client := c.Client.(client0.TagsClient)
-		err = client.Create(virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		err = client.Create(virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.TagsClient)
-		err = client.Create(utl.DefaultOrgID, c.ProjectID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		err = client.Create(utl.DefaultOrgID, c.ProjectID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client2.TagsClient)
-		err = client.Create(utl.DefaultOrgID, c.ProjectID, c.VPCID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		err = client.Create(utl.DefaultOrgID, c.ProjectID, c.VPCID, virtualMachineIdParam, virtualMachineTagsUpdateParam, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

@@ -61,7 +61,7 @@ func TestMockResourceNsxtPolicySegmentRead(t *testing.T) {
 			Path:        &segPath,
 			Revision:    &segRevision,
 		}, nil)
-		mockDiscoverySDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockDiscoverySDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentDiscoveryProfileBindingMapListResult{Results: []model.SegmentDiscoveryProfileBindingMap{}}, nil)
 		mockQosSDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentQosProfileBindingMapListResult{Results: []model.SegmentQosProfileBindingMap{}}, nil)
@@ -167,7 +167,7 @@ func TestMockResourceNsxtPolicySegmentCreate(t *testing.T) {
 			Path:        &segPath,
 			Revision:    &segRevision,
 		}, nil)
-		mockDiscoverySDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockDiscoverySDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentDiscoveryProfileBindingMapListResult{Results: []model.SegmentDiscoveryProfileBindingMap{}}, nil)
 		mockQosSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentQosProfileBindingMapListResult{Results: []model.SegmentQosProfileBindingMap{}}, nil)
@@ -244,7 +244,7 @@ func TestMockResourceNsxtPolicySegmentUpdate(t *testing.T) {
 			Path:        &segPath,
 			Revision:    &segRevision,
 		}, nil)
-		mockDiscoverySDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockDiscoverySDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentDiscoveryProfileBindingMapListResult{Results: []model.SegmentDiscoveryProfileBindingMap{}}, nil)
 		mockQosSDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentQosProfileBindingMapListResult{Results: []model.SegmentQosProfileBindingMap{}}, nil)
@@ -305,7 +305,7 @@ func TestMockResourceNsxtPolicySegmentDelete(t *testing.T) {
 	}
 
 	t.Run("Delete success", func(t *testing.T) {
-		mockPortsSDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockPortsSDK.EXPECT().List(segID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.SegmentPortListResult{Results: []model.SegmentPort{}}, nil)
 		mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
 

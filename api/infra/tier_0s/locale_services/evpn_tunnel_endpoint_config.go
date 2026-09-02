@@ -70,7 +70,7 @@ func (c EvpnTunnelEndpointConfigClientContext) List(tier0IdParam string, localeS
 
 	case utl.Local:
 		client := c.Client.(client0.EvpnTunnelEndpointsClient)
-		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

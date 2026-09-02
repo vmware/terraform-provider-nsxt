@@ -84,11 +84,11 @@ func (c TransitGatewayIpsecVpnLocalEndpointClientContext) List(orgIdParam string
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.LocalEndpointsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.LocalEndpointsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, serviceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

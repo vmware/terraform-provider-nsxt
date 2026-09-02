@@ -89,7 +89,7 @@ func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjects
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		lmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		lmObj, err := client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

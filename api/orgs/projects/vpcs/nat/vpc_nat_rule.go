@@ -123,11 +123,11 @@ func (c VpcNatRuleClientContext) List(orgIdParam string, projectIdParam string, 
 
 	case utl.Local:
 		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

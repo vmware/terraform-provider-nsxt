@@ -173,7 +173,7 @@ func dataSourceNsxtPolicyIdpsSystemSignaturesRead(d *schema.ResourceData, m inte
 			return policyResourceNotSupportedError()
 		}
 
-		versionsList, err := versionsClient.List(nil, nil, nil, nil, nil, nil)
+		versionsList, err := versionsClient.List(nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("IdsSignatureVersion", err)
 		}
@@ -222,7 +222,7 @@ func dataSourceNsxtPolicyIdpsSystemSignaturesRead(d *schema.ResourceData, m inte
 	total := 0
 
 	for {
-		signaturesList, err := signaturesClient.List(versionID, cursor, nil, nil, nil, nil, nil)
+		signaturesList, err := signaturesClient.List(versionID, cursor, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("IdsSignature", err)
 		}

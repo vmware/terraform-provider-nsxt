@@ -71,7 +71,7 @@ func (c HostSwitchProfilesClientContext) List(cursorParam *string, deploymentTyp
 
 	case utl.Local:
 		client := c.Client.(client0.HostSwitchProfilesClient)
-		obj, err = client.List(cursorParam, deploymentTypeParam, hostswitchProfileTypeParam, includeMarkForDeleteObjectsParam, includeSystemOwnedParam, includedFieldsParam, maxActiveUplinkCountParam, nodeTypeParam, pageSizeParam, sortAscendingParam, sortByParam, uplinkTeamingPolicyNameParam)
+		obj, err = client.List(cursorParam, deploymentTypeParam, hostswitchProfileTypeParam, nil, includeMarkForDeleteObjectsParam, includeSystemOwnedParam, includedFieldsParam, maxActiveUplinkCountParam, nodeTypeParam, pageSizeParam, nil, sortAscendingParam, sortByParam, uplinkTeamingPolicyNameParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

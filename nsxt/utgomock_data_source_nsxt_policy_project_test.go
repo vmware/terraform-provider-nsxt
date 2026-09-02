@@ -74,7 +74,7 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 	})
 
 	t.Run("by display_name single exact match", func(t *testing.T) {
-		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
 			Results: []nsxModel.Project{projectAPIResponse()},
 		}, nil)
 
@@ -91,7 +91,7 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 	t.Run("by display_name with a project having nil display_name", func(t *testing.T) {
 		nilDisplayNameProj := projectAPIResponse()
 		nilDisplayNameProj.DisplayName = nil
-		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
 			Results: []nsxModel.Project{nilDisplayNameProj, projectAPIResponse()},
 		}, nil)
 
@@ -106,7 +106,7 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 	})
 
 	t.Run("by display_name not found", func(t *testing.T) {
-		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
 			Results: []nsxModel.Project{},
 		}, nil)
 
@@ -121,7 +121,7 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 	})
 
 	t.Run("by display_name multiple exact matches", func(t *testing.T) {
-		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{
 			Results: []nsxModel.Project{projectAPIResponse(), projectAPIResponse()},
 		}, nil)
 
@@ -136,7 +136,7 @@ func TestMockDataSourceNsxtPolicyProjectRead(t *testing.T) {
 	})
 
 	t.Run("list API error", func(t *testing.T) {
-		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{}, vapiErrors.ServiceUnavailable{})
+		mockSDK.EXPECT().List(utl.DefaultOrgID, nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.ProjectListResult{}, vapiErrors.ServiceUnavailable{})
 
 		ds := dataSourceNsxtPolicyProject()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -211,7 +211,7 @@ func TestMockDataSourceNsxtPolicyProjectRead_ipv6Blocks(t *testing.T) {
 		util.NsxVersion = "9.2.0"
 		defer func() { util.NsxVersion = "" }()
 
-		mockSDK.EXPECT().List(utl.DefaultOrgID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockSDK.EXPECT().List(utl.DefaultOrgID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nsxModel.ProjectListResult{
 				Results: []nsxModel.Project{projectAPIResponseWithIPv6Blocks()},
 			}, nil)

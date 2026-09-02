@@ -144,7 +144,7 @@ func (c LocaleServicesClientContext) List(tier0IdParam string, cursorParam *stri
 
 	case utl.Local:
 		client := c.Client.(client0.LocaleServicesClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.LocaleServicesClient)

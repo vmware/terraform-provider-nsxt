@@ -101,7 +101,7 @@ func (c Tier0RouteMapClientContext) List(tier0IdParam string, cursorParam *strin
 
 	case utl.Local:
 		client := c.Client.(client1.RouteMapsClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

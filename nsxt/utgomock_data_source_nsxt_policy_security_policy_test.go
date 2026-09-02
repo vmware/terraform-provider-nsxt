@@ -100,7 +100,7 @@ func TestMockDataSourceNsxtPolicySecurityPolicyRead(t *testing.T) {
 	})
 
 	t.Run("by display_name single match via list", func(t *testing.T) {
-		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
+		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
 			Results: []nsxModel.SecurityPolicy{secPolicyAPIResponse()},
 		}, nil)
 
@@ -116,7 +116,7 @@ func TestMockDataSourceNsxtPolicySecurityPolicyRead(t *testing.T) {
 	})
 
 	t.Run("list API error", func(t *testing.T) {
-		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{}, vapiErrors.ServiceUnavailable{})
+		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{}, vapiErrors.ServiceUnavailable{})
 
 		ds := dataSourceNsxtPolicySecurityPolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -130,7 +130,7 @@ func TestMockDataSourceNsxtPolicySecurityPolicyRead(t *testing.T) {
 	})
 
 	t.Run("by display_name multiple exact matches", func(t *testing.T) {
-		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
+		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
 			Results: []nsxModel.SecurityPolicy{secPolicyAPIResponse(), secPolicyAPIResponse()},
 		}, nil)
 
@@ -147,7 +147,7 @@ func TestMockDataSourceNsxtPolicySecurityPolicyRead(t *testing.T) {
 
 	t.Run("by category single match without display_name", func(t *testing.T) {
 		p := secPolicyAPIResponse()
-		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
+		mockSDK.EXPECT().List(secPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.SecurityPolicyListResult{
 			Results: []nsxModel.SecurityPolicy{p},
 		}, nil)
 

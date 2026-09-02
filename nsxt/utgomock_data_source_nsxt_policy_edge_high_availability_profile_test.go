@@ -83,7 +83,7 @@ func TestMockDataSourceNsxtPolicyEdgeHighAvailabilityProfileRead(t *testing.T) {
 	})
 
 	t.Run("by display_name via list", func(t *testing.T) {
-		mockSDK.EXPECT().List(policyHAProfileSiteID, ep, nil, nil, nil, nil, nil, nil, nil).Return(model.EdgeClusterHighAvailabilityProfileListResult{
+		mockSDK.EXPECT().List(policyHAProfileSiteID, ep, nil, nil, nil, nil, nil, nil, nil, nil).Return(model.EdgeClusterHighAvailabilityProfileListResult{
 			Results: []model.PolicyEdgeHighAvailabilityProfile{dsEdgeHAProfileModel()},
 		}, nil)
 

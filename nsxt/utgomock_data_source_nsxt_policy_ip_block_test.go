@@ -97,7 +97,7 @@ func TestMockDataSourceNsxtPolicyIPBlockRead(t *testing.T) {
 	})
 
 	t.Run("by display_name single match", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{
 			Results: []nsxModel.IpAddressBlock{dsIPBlockModel()},
 		}, nil)
 
@@ -112,7 +112,7 @@ func TestMockDataSourceNsxtPolicyIPBlockRead(t *testing.T) {
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyIPBlock()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -134,7 +134,7 @@ func TestMockDataSourceNsxtPolicyIPBlockRead(t *testing.T) {
 	})
 
 	t.Run("by name not found", func(t *testing.T) {
-		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.IpAddressBlockListResult{
 			Results: []nsxModel.IpAddressBlock{},
 		}, nil)
 

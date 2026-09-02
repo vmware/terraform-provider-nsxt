@@ -167,7 +167,7 @@ func (c Tier1InterfaceClientContext) List(tier1IdParam string, localeServicesIdP
 
 	case utl.Local:
 		client := c.Client.(client0.InterfacesClient)
-		obj, err = client.List(tier1IdParam, localeServicesIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, localeServicesIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.InterfacesClient)
@@ -183,7 +183,7 @@ func (c Tier1InterfaceClientContext) List(tier1IdParam string, localeServicesIdP
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.InterfacesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, localeServicesIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, localeServicesIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

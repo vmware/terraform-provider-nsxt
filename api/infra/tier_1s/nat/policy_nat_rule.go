@@ -167,7 +167,7 @@ func (c PolicyNatRuleClientContext) List(tier1IdParam string, natIdParam string,
 
 	case utl.Local:
 		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(tier1IdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.NatRulesClient)
@@ -183,7 +183,7 @@ func (c PolicyNatRuleClientContext) List(tier1IdParam string, natIdParam string,
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.NatRulesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

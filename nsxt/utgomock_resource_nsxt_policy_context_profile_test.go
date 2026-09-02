@@ -82,7 +82,7 @@ func TestMockResourceNsxtPolicyContextProfileCreate(t *testing.T) {
 	t.Run("Create_success", func(t *testing.T) {
 		domainKey := model.PolicyAttributes_KEY_DOMAIN_NAME
 		resultCount := int64(1)
-		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -93,7 +93,7 @@ func TestMockResourceNsxtPolicyContextProfileCreate(t *testing.T) {
 					},
 				},
 			}, nil).AnyTimes()
-		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{}, nil).AnyTimes()
 
 		mockContextProfilesSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
@@ -131,7 +131,7 @@ func TestMockResourceNsxtPolicyContextProfileCreate(t *testing.T) {
 	t.Run("Create_fails_when_Patch_returns_error", func(t *testing.T) {
 		domainKey := model.PolicyAttributes_KEY_DOMAIN_NAME
 		resultCount := int64(1)
-		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -142,7 +142,7 @@ func TestMockResourceNsxtPolicyContextProfileCreate(t *testing.T) {
 					},
 				},
 			}, nil).AnyTimes()
-		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{}, nil).AnyTimes()
 
 		mockContextProfilesSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any()).Return(vapiErrors.InternalServerError{})
@@ -265,7 +265,7 @@ func TestMockResourceNsxtPolicyContextProfileUpdate(t *testing.T) {
 	t.Run("Update_success", func(t *testing.T) {
 		domainKey := model.PolicyAttributes_KEY_DOMAIN_NAME
 		resultCount := int64(1)
-		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockAttributesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -276,7 +276,7 @@ func TestMockResourceNsxtPolicyContextProfileUpdate(t *testing.T) {
 					},
 				},
 			}, nil).AnyTimes()
-		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockCustomAttrSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{}, nil).AnyTimes()
 
 		mockContextProfilesSDK.EXPECT().Patch(ctxProfileID, gomock.Any(), gomock.Any()).Return(nil)

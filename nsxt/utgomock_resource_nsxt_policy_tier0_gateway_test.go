@@ -83,7 +83,7 @@ func TestMockResourceNsxtPolicyTier0GatewayRead(t *testing.T) {
 			DisableFirewall: &t0DisableFirewall,
 		}, nil)
 		resultCount := int64(0)
-		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{}, ResultCount: &resultCount}, nil)
 
 		res := resourceNsxtPolicyTier0Gateway()
@@ -161,7 +161,7 @@ func TestMockResourceNsxtPolicyTier0GatewayCreate(t *testing.T) {
 			DisableFirewall: &t0DisableFirewall,
 		}, nil)
 		resultCount := int64(0)
-		mockLocaleServicesSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockLocaleServicesSDK.EXPECT().List(gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{}, ResultCount: &resultCount}, nil)
 
 		res := resourceNsxtPolicyTier0Gateway()
@@ -228,7 +228,7 @@ func TestMockResourceNsxtPolicyTier0GatewayUpdate(t *testing.T) {
 			DisableFirewall: &t0DisableFirewall,
 		}, nil)
 		resultCount := int64(0)
-		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{}, ResultCount: &resultCount}, nil)
 
 		res := resourceNsxtPolicyTier0Gateway()

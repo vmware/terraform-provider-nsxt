@@ -36,7 +36,7 @@ func (c BareMetalServerInterfaceGroupAssociationsClientContext) List(bmsiExterna
 
 	case utl.Local:
 		client := c.Client.(client0.BmsiGroupAssociationsClient)
-		obj, err = client.List(bmsiExternalIdParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(bmsiExternalIdParam, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

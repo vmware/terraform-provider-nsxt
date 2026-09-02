@@ -184,7 +184,7 @@ func TestMockNsxtResourceNsxtPolicyIdpsCustomSignatureExists(t *testing.T) {
 		defer restore()
 		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{}, vapiErrors.NotFound{})
 		sigID := "sig-1"
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID}}}, nil,
 		).AnyTimes()
 
@@ -272,7 +272,7 @@ func TestMockNsxtIdpsCustomSignatureFindByIDAndContent(t *testing.T) {
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
 		sigID := "sig-1"
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID}}}, nil,
 		).AnyTimes()
 
@@ -288,7 +288,7 @@ func TestMockNsxtIdpsCustomSignatureFindByIDAndContent(t *testing.T) {
 		defer restore()
 		sigID := "sig-1"
 		content := "alert tcp"
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID, OriginalSignature: &content}}}, nil,
 		).AnyTimes()
 
@@ -301,7 +301,7 @@ func TestMockNsxtIdpsCustomSignatureFindByIDAndContent(t *testing.T) {
 		defer ctrl.Finish()
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{}, vapiErrors.InternalServerError{},
 		).AnyTimes()
 
@@ -316,7 +316,7 @@ func TestMockNsxtIdpsCustomSignatureFindByID(t *testing.T) {
 	mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 	defer restore()
 	sigID := "sig-1"
-	mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+	mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 		model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID}}}, nil,
 	).AnyTimes()
 
@@ -333,7 +333,7 @@ func TestMockNsxtIdpsCustomSignatureCountPreview(t *testing.T) {
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
 		sigID1, sigID2 := "sig-1", "sig-2"
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID1}, {Id: &sigID2}}}, nil,
 		)
 
@@ -346,7 +346,7 @@ func TestMockNsxtIdpsCustomSignatureCountPreview(t *testing.T) {
 		defer ctrl.Finish()
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{}, vapiErrors.InternalServerError{},
 		)
 
@@ -362,7 +362,7 @@ func TestMockNsxtResourceNsxtPolicyIdpsCustomSignatureExistsByContent(t *testing
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
 		content := "alert tcp any any"
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{OriginalSignature: &content}}}, nil,
 		).AnyTimes()
 
@@ -376,7 +376,7 @@ func TestMockNsxtResourceNsxtPolicyIdpsCustomSignatureExistsByContent(t *testing
 		defer ctrl.Finish()
 		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
 		defer restore()
-		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{}}, nil,
 		).AnyTimes()
 

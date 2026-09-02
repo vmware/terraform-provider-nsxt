@@ -109,7 +109,7 @@ func TestMockResourceNsxtPolicyVMTagsCreate(t *testing.T) {
 		defer setupCliQueryClientStub(t, stub)()
 
 		// updateNsxtPolicyVMTags via cliVirtualMachineTagsClient.Create
-		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nil)
 		// updateNsxtPolicyVMPortTags → listPolicyVifAttachmentsForVM → listAllPolicyVifs (empty portTags)
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -248,7 +248,7 @@ func TestMockResourceNsxtPolicyVMTagsDelete(t *testing.T) {
 		defer setupCliQueryClientStub(t, stub)()
 
 		// updateNsxtPolicyVMTags (clear tags) via cliVirtualMachineTagsClient.Create
-		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nil)
 		// updateNsxtPolicyVMPortTags → listPolicyVifAttachmentsForVM → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -324,7 +324,7 @@ func TestMockResourceNsxtPolicyVMTagsUpdate(t *testing.T) {
 		defer setupCliQueryClientStub(t, stub)()
 
 		// updateNsxtPolicyVMTags via cliVirtualMachineTagsClient.Create (version >= 4.1.1)
-		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockVMTagsSDK.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nil)
 		// updateNsxtPolicyVMPortTags → listAllPolicyVifs
 		mockVifsSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).

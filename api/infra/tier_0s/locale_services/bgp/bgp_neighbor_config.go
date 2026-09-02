@@ -89,7 +89,7 @@ func (c BgpNeighborConfigClientContext) List(tier0IdParam string, localeServiceI
 
 	case utl.Local:
 		client := c.Client.(client0.NeighborsClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.NeighborsClient)
