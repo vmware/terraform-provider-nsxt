@@ -73,6 +73,32 @@ resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
 }
 ```
 
+## Example Usage - With DNS Configuration (NSX 9.2.0+)
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_vpc_service_profile" "vpc_dns_service_profile" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
+  display_name = "vpc_dns_service_profile"
+  description  = "Terraform provisioned VPC Service Profile with DNS configuration"
+
+  dhcp_config {
+  }
+
+  dns_config {
+    ipv4_resolver_ip = "192.168.1.10"
+    ipv6_resolver_ip = "fd00:bc::1"
+    enable_proxy     = true
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -113,7 +139,7 @@ The following arguments are supported:
             * `is_distributed_dhcp` - (Optional / Computed) Distributed DHCP mode for DHCPv6
 * `dns_config` - (Optional) DNS configuration for this profile. Requires NSX 9.2.0 or higher.
     * `ipv4_resolver_ip` - (Optional) IPv4 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
-    * `ipv6_resolver_ip` - (Optional) IPv6 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
+    * `ipv6_resolver_ip` - (Optional / Computed) IPv6 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
     * `enable_proxy` - (Optional) When `true`, DNS requests are proxied through the aDNS service. Defaults to `false`.
 * `dns_forwarder_config` - (Optional) VPC DNS forwarder settings. Supported with NSX v9.2.0 and above.
     * `cache_size` - (Optional) DNS answer cache size
