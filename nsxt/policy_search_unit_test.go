@@ -132,9 +132,34 @@ func TestUnitNsxt_listPolicyResourcesByNsxID(t *testing.T) {
 	nsxID := "nsx-uuid-1"
 	add := ""
 	ctx := utl.SessionContext{ClientType: utl.Local}
-	out, err := listPolicyResourcesByNsxID(nil, ctx, &nsxID, &add)
+	out, err := listPolicyResourcesByNsxID(nil, ctx, &nsxID, "PolicyEdgeNode", &add)
 	require.NoError(t, err)
 	assert.Len(t, out, 1)
+}
+
+func TestUnitNsxt_listPolicyResourcesByID(t *testing.T) {
+	rt := "PolicyTransportZone"
+	sv := policyResourceToStructValue(t, gmModel.PolicyResource{
+		Id: str("tz-id"), DisplayName: str("tz-name"), Path: str("/infra/tz"), ResourceType: &rt,
+	})
+	stub := &seqQueryListClient{responses: []nsxModel.SearchResponse{
+		{Results: []*data.StructValue{sv}, ResultCount: i64(1)},
+		{Results: []*data.StructValue{sv}, ResultCount: i64(1)},
+	}}
+	defer setupCliQueryClientStub(t, stub)()
+	resID := "tz-id"
+	add := ""
+	ctx := utl.SessionContext{ClientType: utl.Local}
+
+	// with resourceType
+	out, err := listPolicyResourcesByID(nil, ctx, &resID, rt, &add, false)
+	require.NoError(t, err)
+	assert.Len(t, out, 1)
+
+	// without resourceType
+	out2, err2 := listPolicyResourcesByID(nil, ctx, &resID, "", &add, false)
+	require.NoError(t, err2)
+	assert.Len(t, out2, 1)
 }
 
 func TestUnitNsxt_listInventoryResourcesByAnyFieldAndType(t *testing.T) {
