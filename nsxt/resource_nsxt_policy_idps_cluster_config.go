@@ -9,9 +9,16 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+// cliIdsClusterConfigsClient is wrapped in a package-level var (returning the exported
+// ClusterConfigsClient interface) so it can be substituted with a mock in tests.
+var cliIdsClusterConfigsClient = func(connector client.Connector) intrusion_services.ClusterConfigsClient {
+	return intrusion_services.NewClusterConfigsClient(connector)
+}
 
 func resourceNsxtPolicyIdpsClusterConfig() *schema.Resource {
 	return &schema.Resource{
@@ -94,7 +101,7 @@ func buildIdsClusterConfig(d *schema.ResourceData, id string) model.IdsClusterCo
 
 func resourceNsxtPolicyIdpsClusterConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := intrusion_services.NewClusterConfigsClient(connector)
+	client := cliIdsClusterConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -128,7 +135,7 @@ func resourceNsxtPolicyIdpsClusterConfigRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining IDPS Cluster Config ID")
 	}
 
-	client := intrusion_services.NewClusterConfigsClient(connector)
+	client := cliIdsClusterConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -166,7 +173,7 @@ func resourceNsxtPolicyIdpsClusterConfigUpdate(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining IDPS Cluster Config ID")
 	}
 
-	client := intrusion_services.NewClusterConfigsClient(connector)
+	client := cliIdsClusterConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -189,7 +196,7 @@ func resourceNsxtPolicyIdpsClusterConfigDelete(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining IDPS Cluster Config ID")
 	}
 
-	client := intrusion_services.NewClusterConfigsClient(connector)
+	client := cliIdsClusterConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
