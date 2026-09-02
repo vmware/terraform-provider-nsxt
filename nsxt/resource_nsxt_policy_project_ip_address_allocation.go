@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -19,6 +20,11 @@ import (
 )
 
 var cliProjectIpAddressAllocationsClient = projects.NewIpAddressAllocationsClient
+
+var projectIpAddressAllocationIpAddressTypeValues = []string{
+	model.ProjectIpAddressAllocation_IP_ADDRESS_TYPE_IPV4,
+	model.ProjectIpAddressAllocation_IP_ADDRESS_TYPE_IPV6,
+}
 
 var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -44,15 +50,49 @@ var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"allocation_size": {
 		Schema: schema.Schema{
-			Type:     schema.TypeInt,
-			Optional: true,
-			Computed: true,
-			ForceNew: true,
+			Type:          schema.TypeInt,
+			Optional:      true,
+			Computed:      true,
+			ForceNew:      true,
+			ConflictsWith: []string{"ipv6_allocation_prefix_length"},
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "int",
 			SdkFieldName: "AllocationSize",
 			OmitIfEmpty:  true,
+		},
+	},
+	"ip_address_type": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			ValidateFunc: validation.StringInSlice(projectIpAddressAllocationIpAddressTypeValues, false),
+			Optional:     true,
+			Computed:     true,
+			// NSX API does not allow modifying IP address type on an existing allocation
+			ForceNew: true,
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "string",
+			SdkFieldName:        "IpAddressType",
+			OmitIfEmpty:         true,
+		},
+	},
+	"ipv6_allocation_prefix_length": {
+		Schema: schema.Schema{
+			Type:          schema.TypeInt,
+			Optional:      true,
+			Computed:      true,
+			ValidateFunc:  validation.IntBetween(64, 128),
+			ConflictsWith: []string{"allocation_size"},
+			// NSX API does not allow modifying IPv6 prefix length on an existing allocation
+			ForceNew: true,
+		},
+		Metadata: metadata.Metadata{
+			IntroducedInVersion: "9.2.0",
+			SchemaType:          "int",
+			SdkFieldName:        "Ipv6AllocationPrefixLength",
+			OmitIfEmpty:         true,
 		},
 	},
 	"ip_block": {

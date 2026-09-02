@@ -20,6 +20,7 @@ import (
 	projectsapi "github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	projectsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -77,11 +78,18 @@ func TestMockResourceNsxtPolicyProjectIpAddressAllocationCreate(t *testing.T) {
 	mockSDK, restore := setupIpAllocMock(t, ctrl)
 	defer restore()
 
-	t.Run("Create success", func(t *testing.T) {
+	t.Run("Create success (defaults omitted on NSX 9.1)", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
 			mockSDK.EXPECT().Get(ipAllocOrgID, ipAllocProjectID, ipAllocID).Return(nsxModel.ProjectIpAddressAllocation{}, notFoundErr),
-			mockSDK.EXPECT().Patch(ipAllocOrgID, ipAllocProjectID, ipAllocID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Patch(ipAllocOrgID, ipAllocProjectID, ipAllocID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, req nsxModel.ProjectIpAddressAllocation) error {
+					assert.Nil(t, req.IpAddressType)
+					assert.Nil(t, req.Ipv6AllocationPrefixLength)
+					return nil
+				}),
 			mockSDK.EXPECT().Get(ipAllocOrgID, ipAllocProjectID, ipAllocID).Return(ipAllocAPIResponse(), nil),
 		)
 
@@ -92,6 +100,50 @@ func TestMockResourceNsxtPolicyProjectIpAddressAllocationCreate(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, ipAllocID, d.Id())
 		assert.Equal(t, ipAllocDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Create success IPv6 on NSX 9.2", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+		notFoundErr := vapiErrors.NotFound{}
+		ipType := nsxModel.ProjectIpAddressAllocation_IP_ADDRESS_TYPE_IPV6
+		prefixLen := int64(64)
+		ipBlock := "/infra/ip-blocks/block-v6"
+		v6Response := nsxModel.ProjectIpAddressAllocation{
+			Id:                         &ipAllocID,
+			DisplayName:                &ipAllocDisplayName,
+			Description:                &ipAllocDescription,
+			Revision:                   &ipAllocRevision,
+			IpAddressType:              &ipType,
+			Ipv6AllocationPrefixLength: &prefixLen,
+			IpBlock:                    &ipBlock,
+		}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(ipAllocOrgID, ipAllocProjectID, ipAllocID).Return(nsxModel.ProjectIpAddressAllocation{}, notFoundErr),
+			mockSDK.EXPECT().Patch(ipAllocOrgID, ipAllocProjectID, ipAllocID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, req nsxModel.ProjectIpAddressAllocation) error {
+					assert.Equal(t, &ipType, req.IpAddressType)
+					assert.Equal(t, &prefixLen, req.Ipv6AllocationPrefixLength)
+					assert.Nil(t, req.AllocationSize)
+					assert.Equal(t, &ipBlock, req.IpBlock)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(ipAllocOrgID, ipAllocProjectID, ipAllocID).Return(v6Response, nil),
+		)
+
+		res := resourceNsxtPolicyProjectIpAddressAllocation()
+		data := minimalIpAllocData()
+		data["ip_address_type"] = "IPV6"
+		data["ipv6_allocation_prefix_length"] = 64
+		data["ip_block"] = "/infra/ip-blocks/block-v6"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyProjectIpAddressAllocationCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, ipAllocID, d.Id())
+		assert.Equal(t, "IPV6", d.Get("ip_address_type"))
+		assert.Equal(t, 64, d.Get("ipv6_allocation_prefix_length"))
+		assert.Equal(t, 0, d.Get("allocation_size"))
 	})
 
 	t.Run("Create fails when already exists", func(t *testing.T) {
@@ -159,6 +211,40 @@ func TestMockResourceNsxtPolicyProjectIpAddressAllocationUpdate(t *testing.T) {
 
 		res := resourceNsxtPolicyProjectIpAddressAllocation()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalIpAllocData())
+		d.SetId(ipAllocID)
+
+		err := resourceNsxtPolicyProjectIpAddressAllocationUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update success IPv6 on NSX 9.2", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+		ipType := nsxModel.ProjectIpAddressAllocation_IP_ADDRESS_TYPE_IPV6
+		prefixLen := int64(64)
+		v6Response := nsxModel.ProjectIpAddressAllocation{
+			Id:                         &ipAllocID,
+			DisplayName:                &ipAllocDisplayName,
+			Description:                &ipAllocDescription,
+			Revision:                   &ipAllocRevision,
+			IpAddressType:              &ipType,
+			Ipv6AllocationPrefixLength: &prefixLen,
+		}
+		gomock.InOrder(
+			mockSDK.EXPECT().Update(ipAllocOrgID, ipAllocProjectID, ipAllocID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, req nsxModel.ProjectIpAddressAllocation) (nsxModel.ProjectIpAddressAllocation, error) {
+					assert.Equal(t, &ipType, req.IpAddressType)
+					assert.Equal(t, &prefixLen, req.Ipv6AllocationPrefixLength)
+					return v6Response, nil
+				}),
+			mockSDK.EXPECT().Get(ipAllocOrgID, ipAllocProjectID, ipAllocID).Return(v6Response, nil),
+		)
+
+		res := resourceNsxtPolicyProjectIpAddressAllocation()
+		data := minimalIpAllocData()
+		data["ip_address_type"] = "IPV6"
+		data["ipv6_allocation_prefix_length"] = 64
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
 		d.SetId(ipAllocID)
 
 		err := resourceNsxtPolicyProjectIpAddressAllocationUpdate(d, newGoMockProviderClient())
