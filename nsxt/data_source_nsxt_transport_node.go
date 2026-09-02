@@ -43,7 +43,7 @@ func dataSourceNsxtTransportNodeRead(d *schema.ResourceData, m interface{}) erro
 
 		// Make sure that found obj is an EdgeNode
 		converter := bindings.NewTypeConverter()
-		base, errs := converter.ConvertToGolang(obj.NodeDeploymentInfo, model.NodeBindingType())
+		base, errs := converter.ConvertToGolang(objGet.NodeDeploymentInfo, model.NodeBindingType())
 		if errs != nil {
 			return fmt.Errorf("failed to convert NodeDeploymentInfo for node %s %v", objID, errs[0])
 		}
