@@ -119,6 +119,54 @@ func TestAccResourceNsxtPolicyParentSecurityPolicy_importBasic_multitenancy(t *t
 	})
 }
 
+// TestAccResourceNsxtPolicyParentSecurityPolicy_predefinedSiblingNoDrift
+// reproduces Bugzilla 3761445: a nsxt_policy_predefined_security_policy
+// resource pointed at the same path as this parent resource can PATCH
+// description/tag on the shared underlying object. Since the parent
+// resource's own config never sets those fields, its next refresh must not
+// show drift wanting to null them back out.
+func TestAccResourceNsxtPolicyParentSecurityPolicy_predefinedSiblingNoDrift(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyParentSecurityPolicyCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyParentSecurityPolicyPredefinedSiblingTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("nsxt_policy_parent_security_policy.parent", "description", ""),
+					resource.TestCheckResourceAttr("nsxt_policy_parent_security_policy.parent", "tag.#", "0"),
+					resource.TestCheckResourceAttr("nsxt_policy_predefined_security_policy.predef", "description", "predefined description"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyParentSecurityPolicyPredefinedSiblingTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_parent_security_policy" "parent" {
+  display_name    = "%s"
+  domain          = "default"
+  category        = "Application"
+  sequence_number = 10
+}
+
+resource "nsxt_policy_predefined_security_policy" "predef" {
+  path        = nsxt_policy_parent_security_policy.parent.path
+  description = "predefined description"
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+}`, name)
+}
+
 func testAccNsxtPolicyParentSecurityPolicyCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
