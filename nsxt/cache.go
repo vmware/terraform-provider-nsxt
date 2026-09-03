@@ -19,6 +19,12 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+// resourceTypeCache holds every populated search bucket for one NSX resource type. The
+// outer data map is keyed by the query string (see getCacheQueryKey) that produced a given
+// bucket — the same resource type can have more than one bucket if it's queried under
+// different tag filters or provider configs. The inner map is that bucket's contents,
+// keyed by whatever CacheKeyForResourceID/data-source id was used to look objects up
+// (see converListToMapByType for how an object ends up under multiple keys).
 type resourceTypeCache struct {
 	mu       sync.RWMutex
 	data     map[string]map[string]*data.StructValue // key: query, key: resource ID
@@ -26,6 +32,10 @@ type resourceTypeCache struct {
 	cacheMis atomic.Int64
 }
 
+// typeScopedCache is the process-wide root: one resourceTypeCache per NSX resource type
+// (see gcache). Its own mutex only protects the byTyp map itself (creating/looking up a
+// type's cache); it is never held while a search runs or a bucket is read, so looking up
+// one resource type never blocks concurrent access to another.
 type typeScopedCache struct {
 	mu    sync.RWMutex
 	byTyp map[string]*resourceTypeCache
@@ -35,11 +45,19 @@ type typeScopedCache struct {
 // queries (resource_type:<value>). Values must match NSX Search's resource_type
 // field exactly, including casing, and must not be changed here.
 const (
-	resourceTypeConnectivityPolicy                             = "ConnectivityPolicy"
-	resourceTypeDhcpV4StaticBindingConfig                      = "DhcpV4StaticBindingConfig"
-	resourceTypeDhcpV6StaticBindingConfig                      = "DhcpV6StaticBindingConfig"
-	resourceTypeGatewayPolicy                                  = "gatewaypolicy"
-	resourceTypeGroup                                          = "Group"
+	resourceTypeConnectivityPolicy        = "ConnectivityPolicy"
+	resourceTypeDhcpV4StaticBindingConfig = "DhcpV4StaticBindingConfig"
+	resourceTypeDhcpV6StaticBindingConfig = "DhcpV6StaticBindingConfig"
+	// resourceTypeGatewayPolicy is shared by the Tier-0/Tier-1 gateway policy resource and the
+	// VPC gateway policy resource: both cache under this one bucket. Same sharing applies to
+	// resourceTypeStaticRoutes and resourceTypeDhcpV4StaticBindingConfig below. Keep these
+	// path-indexed (see shouldIndexByPath) since the VPC-scoped side of each pair can collide
+	// on short id once its cache bucket is project-wide-shared.
+	resourceTypeGatewayPolicy = "gatewaypolicy"
+	resourceTypeGroup         = "Group"
+	// resourceTypeVPCGroup is a distinct NSX Search resource_type ("group", lowercase) from
+	// resourceTypeGroup ("Group") above — VPC-scoped groups and Tier-0/Tier-1-scoped groups are
+	// never in the same bucket, unlike the shared types noted above.
 	resourceTypeVPCGroup                                       = "group"
 	resourceTypeIpAddressAllocation                            = "IpAddressAllocation"
 	resourceTypeIpAddressPool                                  = "IpAddressPool"
@@ -82,12 +100,30 @@ var postWriteByKey sync.Map // string -> struct{}
 // errCacheUseBackendDirect indicates the cache bucket exists but the ID is missing, so use direct GET.
 var errCacheUseBackendDirect = errors.New("nsxt cache: use direct API read")
 
+// cacheLogEvent defers a log message describing bulk-populate work until after the caller
+// releases tc.mu, so exclusive-lock hold time and contention on log's internal mutex don't
+// grow with the number of DEBUG/WARNING lines a populate call produces.
+type cacheLogEvent struct {
+	level string // "DEBUG" or "WARNING"
+	msg   string
+}
+
+func logCacheEvents(events []cacheLogEvent) {
+	for _, e := range events {
+		log.Printf("[%s] %s", e.level, e.msg) //nolint:gosec
+	}
+}
+
 // compositeCacheEntry defines a parent type with an extra child search and merge step.
 type compositeCacheEntry struct {
 	childSearchType string
 	merge           func(parents, children []*data.StructValue) ([]*data.StructValue, error)
 }
 
+// compositeCacheRegistry lists resource types whose NSX Search result doesn't already embed
+// everything the Terraform schema needs: GatewayPolicy/SecurityPolicy objects come back from
+// Search without their Rules, so a second search for the child rule type is required, and the
+// two result sets have to be merged (by parent path) before the combined object can be cached.
 var compositeCacheRegistry = map[string]compositeCacheEntry{
 	resourceTypeGatewayPolicy: {
 		childSearchType: resourceTypeRule,
@@ -110,6 +146,12 @@ const (
 )
 
 var invalidNSXTCacheModeWarn sync.Map // raw env value -> struct{}; log once per distinct invalid value
+
+// sharedTypeConverter is reused across all cache conversions: bindings.TypeConverter is a
+// stateless, field-less struct (all conversion state lives in per-call visitors), so a single
+// instance is safe to share across goroutines and avoids an allocation on every cached
+// object read/write at 100+ resource scale.
+var sharedTypeConverter = bindings.NewTypeConverter()
 
 func postWriteKey(resourceType, resourceID string) string {
 	return resourceType + "::" + resourceID
@@ -203,9 +245,19 @@ func CacheKeyForResourceID(resourceType string, d *schema.ResourceData) string {
 	return d.Id()
 }
 
+// VPC-scoped resource types are path-indexed because their short NSX id (often
+// user-chosen via nsx_id) is only guaranteed unique within its own VPC, not project-wide,
+// while the cache populate search/bucket for utl.VPC/utl.Multitenancy contexts is now
+// shared across all VPCs in a project (see projectScopedSearchContext). Path is unique
+// project/system-wide, so keying by path avoids one VPC's resource shadowing another's.
+// Known gap: data source cache reads (cacheAwareDataSourceReadByID) key off a short
+// user-supplied id with no path available, so they remain exposed to this collision.
 func shouldIndexByPath(resourceType string) bool {
 	switch resourceType {
-	case resourceTypePolicyNatRule, resourceTypeSegmentPort, resourceTypeIpAddressPoolStaticSubnet, resourceTypeIpAddressPoolBlockSubnet, resourceTypeService:
+	case resourceTypePolicyNatRule, resourceTypeSegmentPort, resourceTypeIpAddressPoolStaticSubnet, resourceTypeIpAddressPoolBlockSubnet, resourceTypeService,
+		resourceTypeVpc, resourceTypeVpcAttachment, resourceTypeVpcConnectivityProfile, resourceTypeVpcIpAddressAllocation, resourceTypeVpcServiceProfile,
+		resourceTypeVpcSubnet, resourceTypeTransitGateway, resourceTypeTransitGatewayAttachment, resourceTypeProjectIpAddressAllocation, resourceTypePolicyVpcNatRule,
+		resourceTypeVPCGroup, resourceTypeGatewayPolicy, resourceTypeStaticRoutes, resourceTypeDhcpV4StaticBindingConfig:
 		return true
 	default:
 		return false
@@ -246,17 +298,17 @@ func getStructValueStringField(obj *data.StructValue, field string) (string, boo
 }
 
 func converListToMapByType(list []*data.StructValue, resourceType string) map[string]*data.StructValue {
-	converter := bindings.NewTypeConverter()
 	ret := make(map[string]*data.StructValue)
 	for _, obj := range list {
-		dataValue, errors := converter.ConvertToGolang(obj, model.PolicyConfigResourceBindingType())
+		dataValue, errors := sharedTypeConverter.ConvertToGolang(obj, model.PolicyConfigResourceBindingType())
 		if len(errors) > 0 {
 			return nil
 		}
 		resource := dataValue.(model.PolicyConfigResource)
 
 		// Primary indexing via PolicyConfigResource conversion.
-		if resource.Id != nil {
+		idIndexed := resource.Id != nil
+		if idIndexed {
 			id := *resource.Id
 			indexCacheMapKey(ret, id, obj)
 			// Index both raw and extracted policy IDs when Search returns a full path.
@@ -264,24 +316,32 @@ func converListToMapByType(list []*data.StructValue, resourceType string) map[st
 				indexCacheMapKey(ret, getPolicyIDFromPath(id), obj)
 			}
 		}
-		if resource.DisplayName != nil {
+		displayNameIndexed := resource.DisplayName != nil
+		if displayNameIndexed {
 			indexCacheMapKey(ret, *resource.DisplayName, obj)
 		}
-		if shouldIndexByPath(resourceType) && resource.Path != nil {
+		indexByPath := shouldIndexByPath(resourceType)
+		pathIndexed := indexByPath && resource.Path != nil
+		if pathIndexed {
 			indexCacheMapKey(ret, *resource.Path, obj)
 		}
 
-		// Also index from raw StructValue fields to cover cases where SDK conversion loses fields.
-		if id, ok := getStructValueStringField(obj, "id"); ok {
-			indexCacheMapKey(ret, id, obj)
-			if strings.Contains(id, "/") {
-				indexCacheMapKey(ret, getPolicyIDFromPath(id), obj)
+		// Fall back to raw StructValue fields only when the typed conversion above didn't
+		// already index that field, to cover cases where SDK conversion loses fields.
+		if !idIndexed {
+			if id, ok := getStructValueStringField(obj, "id"); ok {
+				indexCacheMapKey(ret, id, obj)
+				if strings.Contains(id, "/") {
+					indexCacheMapKey(ret, getPolicyIDFromPath(id), obj)
+				}
 			}
 		}
-		if dn, ok := getStructValueStringField(obj, "display_name"); ok {
-			indexCacheMapKey(ret, dn, obj)
+		if !displayNameIndexed {
+			if dn, ok := getStructValueStringField(obj, "display_name"); ok {
+				indexCacheMapKey(ret, dn, obj)
+			}
 		}
-		if shouldIndexByPath(resourceType) {
+		if indexByPath && !pathIndexed {
 			if p, ok := getStructValueStringField(obj, "path"); ok {
 				indexCacheMapKey(ret, p, obj)
 			}
@@ -297,45 +357,56 @@ func getQueryString(resourceType string, context utl.SessionContext) string {
 	case utl.Local:
 		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:Local", resourceType)
 	case utl.VPC, utl.Multitenancy:
-		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:%s-%s", resourceType, context.ProjectID, context.VPCID)
+		// Scoped to the project only (VPCID intentionally omitted): NSX policy paths/IDs are
+		// unique across VPCs within a project, and searchMultitenancyResources already searches
+		// the whole project in one call when VPCID is empty. Narrowing the cache bucket to a
+		// single VPC here caused a fresh bucket (and full search) per VPC, which regressed cache
+		// mode below no-cache performance when a run touches many VPCs (e.g. 100 VpcAttachments
+		// across 100 VPCs).
+		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false AND context:%s", resourceType, context.ProjectID)
 	default:
 		return fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
 	}
 }
 
+// projectScopedSearchContext strips VPCID from a VPC/Multitenancy context so the cache
+// populate search covers the whole project in one call instead of one call per VPC. Only
+// the search/query scope is widened; the resource lookup within the populated bucket still
+// keys by resourceID, which remains unique within the project.
+func projectScopedSearchContext(context utl.SessionContext) utl.SessionContext {
+	if context.ClientType == utl.VPC || context.ClientType == utl.Multitenancy {
+		context.VPCID = ""
+	}
+	return context
+}
+
 func (c *resourceTypeCache) getQueryResult(query string, resourceID string) (*data.StructValue, error) {
 	if inner, ok := c.data[query]; ok {
+		// converListToMapByType indexes every object under its raw "id" field (in addition to
+		// the typed id) at populate time, so a miss here means no O(n) scan can find it either.
 		if v := inner[resourceID]; v != nil {
 			return v, nil
-		}
-		// As a safety net, scan the bucket for a matching raw "id" field.
-		for _, v := range inner {
-			if v == nil {
-				continue
-			}
-			if id, ok := getStructValueStringField(v, "id"); ok && id == resourceID {
-				return v, nil
-			}
 		}
 		return nil, errCacheUseBackendDirect
 	}
 	return nil, fmt.Errorf("element is not found")
 }
 
-func (c *resourceTypeCache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
+func (c *resourceTypeCache) writeCache(query string, resourceType string, d *schema.ResourceData, m interface{}, connector client.Connector) ([]cacheLogEvent, error) {
 	if _, ok := c.data[query]; ok {
-		log.Printf("[DEBUG] Cache skip bulk refill for resourceType=%s query=%q (bucket already present)", resourceType, query) //nolint:gosec
-		return nil
+		return []cacheLogEvent{{"DEBUG", fmt.Sprintf("Cache skip bulk refill for resourceType=%s query=%q (bucket already present)", resourceType, query)}}, nil
 	}
 	runID := m.(nsxtClients).CommonConfig.contextID
-	log.Printf("[DEBUG] Cache miss: populating cache for resourceType=%s query=%q", resourceType, query) //nolint:gosec
-	err := c.getListOfPolicyResources(query, d, m, connector, getEffectiveCacheContext(d, m), resourceType, runID)
-	if err != nil {
-		return err
-	}
-	return nil
+	events := []cacheLogEvent{{"DEBUG", fmt.Sprintf("Cache miss: populating cache for resourceType=%s query=%q", resourceType, query)}}
+	childEvents, err := c.getListOfPolicyResources(query, d, m, connector, getEffectiveCacheContext(d, m), resourceType, runID)
+	events = append(events, childEvents...)
+	return events, err
 }
 
+// getTypeCache returns (creating if needed) the resourceTypeCache for resourceType. Held only
+// long enough to read or insert the map entry, so this never serializes callers working with
+// different resource types, and never blocks on a search/populate happening under the returned
+// resourceTypeCache's own (separate) mutex.
 func (c *typeScopedCache) getTypeCache(resourceType string) *resourceTypeCache {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -357,6 +428,11 @@ func getEffectiveCacheContext(d *schema.ResourceData, m interface{}) utl.Session
 	return getSessionContext(d, m)
 }
 
+// getCacheQueryKey returns the string that selects which bucket in resourceTypeCache.data a
+// resource read hits. Two reads share a bucket (and its search results) only when this key is
+// identical, so anything that should force a distinct search — the resource's own tag filter,
+// the run's context_id, the manager host — is folded in here rather than compared separately
+// after the fact.
 func getCacheQueryKey(resourceType string, d *schema.ResourceData, m interface{}) string {
 	clients := m.(nsxtClients)
 	context := getEffectiveCacheContext(d, m)
@@ -380,67 +456,77 @@ func (c *typeScopedCache) readCache(resourceID string, resourceType string, d *s
 	// Fast path: read lock allows concurrent hits without blocking each other.
 	tc.mu.RLock()
 	val, qerr := tc.getQueryResult(query, resourceID)
+	tc.mu.RUnlock()
 	if val != nil {
 		hit := tc.cacheHit.Add(1)
 		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, hit, tc.cacheMis.Load()) //nolint:gosec
-		tc.mu.RUnlock()
 		return val, nil
 	}
 	if errors.Is(qerr, errCacheUseBackendDirect) {
 		miss := tc.cacheMis.Add(1)
 		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
-		tc.mu.RUnlock()
 		return nil, errCacheUseBackendDirect
 	}
-	tc.mu.RUnlock()
 
 	// Slow path: take exclusive lock to populate the bucket, then double-check.
+	// All logging below is accumulated into populateEvents and flushed by the deferred
+	// logCacheEvents call, which is registered before (and therefore, by defer's LIFO
+	// order, runs after) tc.mu.Unlock — so no log.Printf in this path ever executes while
+	// tc.mu is held, regardless of which return point is taken.
+	var populateEvents []cacheLogEvent
+	defer func() { logCacheEvents(populateEvents) }()
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
 	val, qerr = tc.getQueryResult(query, resourceID)
 	if val != nil {
 		hit := tc.cacheHit.Add(1)
-		log.Printf("[DEBUG] Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, hit, tc.cacheMis.Load()) //nolint:gosec
+		populateEvents = append(populateEvents, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache hit: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, hit, tc.cacheMis.Load())})
 		return val, nil
 	}
 	if errors.Is(qerr, errCacheUseBackendDirect) {
 		miss := tc.cacheMis.Add(1)
-		log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
+		populateEvents = append(populateEvents, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss)})
 		return nil, errCacheUseBackendDirect
 	}
 	miss := tc.cacheMis.Add(1)
-	log.Printf("[DEBUG] Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss) //nolint:gosec
-	err := tc.writeCache(query, resourceType, d, m, connector)
+	var err error
+	var writeCacheEvents []cacheLogEvent
+	writeCacheEvents, err = tc.writeCache(query, resourceType, d, m, connector)
+	populateEvents = append(populateEvents, writeCacheEvents...)
 	if err != nil {
+		populateEvents = append(populateEvents, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss)})
 		return nil, err
 	}
 	val, _ = tc.getQueryResult(query, resourceID)
+	populateEvents = append(populateEvents, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache lookup miss: resourceType=%s id=%s query=%q (hit=%d miss=%d)", resourceType, resourceID, query, tc.cacheHit.Load(), miss)})
 	if val != nil {
 		return val, nil
 	}
 	return nil, errCacheUseBackendDirect
 }
 
-func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, m interface{}, connector client.Connector, context utl.SessionContext, resourceType string, runID string) error {
+func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.ResourceData, m interface{}, connector client.Connector, context utl.SessionContext, resourceType string, runID string) ([]cacheLogEvent, error) {
+	var events []cacheLogEvent
+	context = projectScopedSearchContext(context)
 	additionalQuery := buildTagQuery(d, runID, m)
-	log.Printf("[DEBUG] Cache search query: resourceType=%s query=%q additionalQuery=%q", resourceType, query, additionalQuery) //nolint:gosec
+	events = append(events, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache search query: resourceType=%s query=%q additionalQuery=%q", resourceType, query, additionalQuery)})
 	resultList, err := listPolicyResources(connector, context, resourceType, &additionalQuery)
-	log.Printf("[DEBUG] Cache search results: resourceType=%s query=%q additionalQuery=%q results=%d", resourceType, query, additionalQuery, len(resultList)) //nolint:gosec
+	events = append(events, cacheLogEvent{"DEBUG", fmt.Sprintf("Cache search results: resourceType=%s query=%q additionalQuery=%q results=%d", resourceType, query, additionalQuery, len(resultList))})
 	if err != nil && len(resultList) == 0 {
-		return fmt.Errorf("error listing resource %s %w", resourceType, err)
+		return events, fmt.Errorf("error listing resource %s %w", resourceType, err)
 	}
 	if err != nil {
-		log.Printf("[WARNING] Partial search results for resourceType=%s query=%q: %d parent results before error: %v", resourceType, query, len(resultList), err) //nolint:gosec
+		events = append(events, cacheLogEvent{"WARNING", fmt.Sprintf("Partial search results for resourceType=%s query=%q: %d parent results before error: %v", resourceType, query, len(resultList), err)})
 	}
 
 	entry, composite := compositeCacheRegistry[resourceType]
 	if !composite {
 		tmp := converListToMapByType(resultList, resourceType)
 		if tmp == nil {
-			return fmt.Errorf("error converting resources to cache map for resource type %s", resourceType)
+			return events, fmt.Errorf("error converting resources to cache map for resource type %s", resourceType)
 		}
 		c.data[query] = tmp
-		return nil
+		return events, nil
 	}
 
 	// Child rules may be untagged, so try provider-managed tags first and then fall back to no tag filter.
@@ -452,31 +538,31 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 	}
 	childList, childErr := listPolicyResources(connector, context, entry.childSearchType, childAdditional)
 	if childErr != nil && len(childList) == 0 {
-		return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
+		return events, fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
 	}
 	if childErr != nil {
-		log.Printf("[WARNING] Partial child search for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr) //nolint:gosec
+		events = append(events, cacheLogEvent{"WARNING", fmt.Sprintf("Partial child search for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr)})
 	}
 	if childAdditional != nil && len(resultList) > 0 && len(childList) == 0 {
 		childList, childErr = listPolicyResources(connector, context, entry.childSearchType, nil)
 		if childErr != nil && len(childList) == 0 {
-			return fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
+			return events, fmt.Errorf("error listing composite child resource %s for parent %s: %w", entry.childSearchType, resourceType, childErr)
 		}
 		if childErr != nil {
-			log.Printf("[WARNING] Partial child search (fallback) for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr) //nolint:gosec
+			events = append(events, cacheLogEvent{"WARNING", fmt.Sprintf("Partial child search (fallback) for resourceType=%s childType=%s query=%q: %d results before error: %v", resourceType, entry.childSearchType, query, len(childList), childErr)})
 		}
 	}
 
 	mergedSVs, err := entry.merge(resultList, childList)
 	if err != nil {
-		return err
+		return events, err
 	}
 	tmp := converListToMapByType(mergedSVs, resourceType)
 	if tmp == nil {
-		return fmt.Errorf("error converting merged resources to cache map for resource type %s", resourceType)
+		return events, fmt.Errorf("error converting merged resources to cache map for resource type %s", resourceType)
 	}
 	c.data[query] = tmp
-	return nil
+	return events, nil
 }
 
 // convertCachedValue converts a raw cache value to the typed model, strips provider-managed tags,
@@ -486,8 +572,7 @@ func convertCachedValue[T any](val interface{}, resourceType, resourceID string,
 	if !ok {
 		return nil, false
 	}
-	converter := bindings.NewTypeConverter()
-	goVal, convErrs := converter.ConvertToGolang(sv, bindingType)
+	goVal, convErrs := sharedTypeConverter.ConvertToGolang(sv, bindingType)
 	if len(convErrs) > 0 {
 		log.Printf("[WARNING] Cache: conversion failed for resourceType=%s id=%s (%v); discarding cached value", resourceType, resourceID, convErrs[0]) //nolint:gosec
 		return nil, false
@@ -538,6 +623,13 @@ func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, 
 	if objID == "" || !IsCacheEnabled(m) {
 		return nil, false
 	}
+	if shouldIndexByPath(resourceType) && !strings.Contains(objID, "/") {
+		// The cache bucket for this type is populated/keyed by path (see shouldIndexByPath),
+		// but objID here is a short user-supplied id, which is only unique within its own
+		// VPC/project, not across the shared project-wide bucket. Fall through to a live,
+		// correctly-scoped read instead of risking a cross-VPC id collision.
+		return nil, false
+	}
 	if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, objID)); ok {
 		// Mirrors TryCacheRead/CacheAwareResourceRead's one-shot post-write bypass: skip
 		// a cache hit that could still be serving a bucket snapshot taken before this
@@ -569,7 +661,10 @@ func cacheAwareDataSourceReadByID[T any](d *schema.ResourceData, m interface{}, 
 func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType) (*T, bool, bool, error) {
 	cacheUsed := false
 	cacheAttempted := false
-	if isRefreshPhase(d) && IsCacheEnabled(m) {
+	// See the matching comment in CacheAwareResourceRead: skip the cache attempt entirely when
+	// resourceID is a short id for a path-indexed type, since the shared bucket is keyed by path.
+	shortIDBypass := shouldIndexByPath(resourceType) && !strings.Contains(resourceID, "/")
+	if isRefreshPhase(d) && IsCacheEnabled(m) && !shortIDBypass {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Bypass cache after a write for this resource instance (one-shot).
 			return nil, cacheUsed, true, nil
@@ -586,10 +681,9 @@ func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client
 }
 
 func structValuesToModels[T any](list []*data.StructValue, bt bindings.BindingType) ([]T, error) {
-	converter := bindings.NewTypeConverter()
 	out := make([]T, 0, len(list))
 	for _, obj := range list {
-		dataValue, errors := converter.ConvertToGolang(obj, bt)
+		dataValue, errors := sharedTypeConverter.ConvertToGolang(obj, bt)
 		if len(errors) > 0 {
 			var zero T
 			return nil, fmt.Errorf("converting %T for cache: %w", zero, errors[0])
@@ -604,10 +698,9 @@ func structValuesToModels[T any](list []*data.StructValue, bt bindings.BindingTy
 }
 
 func modelsToStructValues[T any](models []T, bt bindings.BindingType) ([]*data.StructValue, error) {
-	converter := bindings.NewTypeConverter()
 	out := make([]*data.StructValue, 0, len(models))
 	for i := range models {
-		dataValue, errors := converter.ConvertToVapi(models[i], bt)
+		dataValue, errors := sharedTypeConverter.ConvertToVapi(models[i], bt)
 		if len(errors) > 0 {
 			var zero T
 			return nil, fmt.Errorf("converting %T to struct value: %w", zero, errors[0])
@@ -622,10 +715,9 @@ func modelsToStructValues[T any](models []T, bt bindings.BindingType) ([]*data.S
 }
 
 func structValuesToRules(list []*data.StructValue) []model.Rule {
-	converter := bindings.NewTypeConverter()
 	out := make([]model.Rule, 0, len(list))
 	for _, obj := range list {
-		dataValue, errors := converter.ConvertToGolang(obj, model.RuleBindingType())
+		dataValue, errors := sharedTypeConverter.ConvertToGolang(obj, model.RuleBindingType())
 		if len(errors) > 0 {
 			continue
 		}
@@ -728,11 +820,27 @@ func mergeSecurityPolicyCacheSearchResults(parents, children []*data.StructValue
 	return modelsToStructValues(merged, model.SecurityPolicyBindingType())
 }
 
+// CacheAwareResourceRead is the standard read path for a policy resource's Read function: try
+// the shared search-backed cache first, and fall back to backendRead (a direct GET) on a cache
+// miss, a conversion failure, cache being disabled, or the resource having just been written by
+// this run (postWriteBypass — avoids reading a search snapshot that predates the write). resourceID
+// must be the same key used by the corresponding MarkPostWriteAndInvalidateCacheForResourceType
+// call for this resource (use CacheKeyForResourceID to guarantee that for path-indexed types).
+// Returns (object, cacheUsed, cacheAttempted, error): callers generally only need the object and
+// error; cacheUsed/cacheAttempted exist for tests and diagnostics.
 func CacheAwareResourceRead[T any](d *schema.ResourceData, m interface{}, connector client.Connector, resourceID string, resourceType string, bindingType bindings.BindingType, backendRead func() (*T, error), patchFunc func(obj *T) error) (*T, bool, bool, error) {
 	cacheAttempted := false
 	postWriteBypass := false
+	// shortIDBypass is true when resourceID is a short id (not yet the path CacheKeyForResourceID
+	// would prefer) for a path-indexed type: path isn't set on d during Create-then-Read (it's
+	// only populated by this same Read once it has the live object), and importers set only the
+	// id via d.SetId without setting path. The shared bucket for this type is keyed by path; a
+	// short-id lookup here would hit whichever object converListToMapByType indexed first under
+	// that colliding short id, which may belong to a different VPC. Skip the cache attempt
+	// entirely — backendRead is always correctly scoped by the caller's own session context.
+	shortIDBypass := shouldIndexByPath(resourceType) && !strings.Contains(resourceID, "/")
 
-	if isRefreshPhase(d) && IsCacheEnabled(m) {
+	if isRefreshPhase(d) && IsCacheEnabled(m) && !shortIDBypass {
 		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, resourceID)); ok {
 			// Ensure read-your-writes semantics: bypass cache once right after a write.
 			// Search-backed cache may be briefly stale immediately after a write.

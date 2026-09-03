@@ -134,7 +134,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, CacheKeyForResourceID(resourceTypeProjectIpAddressAllocation, d), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -157,7 +157,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m 
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeProjectIpAddressAllocation, d),
 			resourceTypeProjectIpAddressAllocation,
 			model.ProjectIpAddressAllocationBindingType(),
 			func() (*model.ProjectIpAddressAllocation, error) {
@@ -232,7 +232,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 		d.Partial(true)
 		return handleUpdateError("ProjectIpAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, CacheKeyForResourceID(resourceTypeProjectIpAddressAllocation, d), m)
 
 	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
@@ -253,7 +253,7 @@ func resourceNsxtPolicyProjectIpAddressAllocationDelete(d *schema.ResourceData, 
 	if err != nil {
 		return handleDeleteError("ProjectIpAddressAllocation", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeProjectIpAddressAllocation, CacheKeyForResourceID(resourceTypeProjectIpAddressAllocation, d), m)
 
 	return nil
 }

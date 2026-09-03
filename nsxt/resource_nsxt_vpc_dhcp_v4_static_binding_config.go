@@ -282,7 +282,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
@@ -308,7 +308,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d),
 			resourceTypeDhcpV4StaticBindingConfig,
 			model.DhcpV4StaticBindingConfigBindingType(),
 			func() (*model.DhcpV4StaticBindingConfig, error) {
@@ -420,7 +420,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 		return handleUpdateError("DhcpV4StaticBindingConfig", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
@@ -444,7 +444,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData
 	if err != nil {
 		return handleDeleteError("DhcpV4StaticBindingConfig", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeDhcpV4StaticBindingConfig, CacheKeyForResourceID(resourceTypeDhcpV4StaticBindingConfig, d), m)
 
 	return nil
 }

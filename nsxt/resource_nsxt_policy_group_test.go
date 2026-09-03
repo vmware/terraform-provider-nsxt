@@ -2008,3 +2008,12 @@ resource "nsxt_policy_group" "test" {
 }
 `, testAccNsxtProjectContext(), os.Getenv("NSXT_VPC_ID"), name)
 }
+
+func TestGroupCacheResourceType(t *testing.T) {
+	if got := groupCacheResourceType(true); got != resourceTypeGroup {
+		t.Errorf("groupCacheResourceType(true) = %q, want %q (non-VPC Group cache bucket)", got, resourceTypeGroup)
+	}
+	if got := groupCacheResourceType(false); got != resourceTypeVPCGroup {
+		t.Errorf("groupCacheResourceType(false) = %q, want %q (VPC Group cache bucket)", got, resourceTypeVPCGroup)
+	}
+}

@@ -787,7 +787,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, CacheKeyForResourceID(resourceTypeTransitGateway, d), m)
 
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
@@ -810,7 +810,7 @@ func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{})
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeTransitGateway, d),
 			resourceTypeTransitGateway,
 			model.TransitGatewayBindingType(),
 			func() (*model.TransitGateway, error) {
@@ -1067,7 +1067,7 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 		}
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, CacheKeyForResourceID(resourceTypeTransitGateway, d), m)
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
@@ -1097,6 +1097,6 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	if err := orgRootClient.Patch(orgRoot, nil); err != nil {
 		return handleDeleteError("TransitGateway", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGateway, CacheKeyForResourceID(resourceTypeTransitGateway, d), m)
 	return nil
 }

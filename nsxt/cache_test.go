@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -390,6 +391,99 @@ func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
 	})
 }
 
+func TestGetQueryStringVPCScopedToProjectNotVPC(t *testing.T) {
+	// VPCID must be omitted from the cache bucket key: NSX policy paths/IDs are unique
+	// within a project across all VPCs, and narrowing the key (and the underlying search)
+	// to a single VPC caused a fresh cache bucket per VPC, regressing cache mode below
+	// no-cache performance for VPC-scoped resource types touching many VPCs.
+	for _, clientType := range []utl.ClientType{utl.VPC, utl.Multitenancy} {
+		context := utl.SessionContext{ClientType: clientType, ProjectID: "proj-1", VPCID: "vpc-1"}
+		got := getQueryString(resourceTypeVpcAttachment, context)
+		if strings.Contains(got, "vpc-1") {
+			t.Fatalf("clientType=%v: query %q must not be scoped to a specific VPCID", clientType, got)
+		}
+		if !strings.Contains(got, "proj-1") {
+			t.Fatalf("clientType=%v: query %q must still be scoped to the project", got, got)
+		}
+
+		otherVPC := context
+		otherVPC.VPCID = "vpc-2"
+		if got2 := getQueryString(resourceTypeVpcAttachment, otherVPC); got2 != got {
+			t.Fatalf("clientType=%v: query must be identical across VPCs in the same project so the cache bucket is shared; got %q vs %q", clientType, got, got2)
+		}
+	}
+}
+
+func TestProjectScopedSearchContextStripsVPCID(t *testing.T) {
+	for _, clientType := range []utl.ClientType{utl.VPC, utl.Multitenancy} {
+		in := utl.SessionContext{ClientType: clientType, ProjectID: "proj-1", VPCID: "vpc-1"}
+		out := projectScopedSearchContext(in)
+		if out.VPCID != "" {
+			t.Fatalf("clientType=%v: expected VPCID stripped, got %q", clientType, out.VPCID)
+		}
+		if out.ProjectID != "proj-1" {
+			t.Fatalf("clientType=%v: ProjectID must be preserved, got %q", clientType, out.ProjectID)
+		}
+	}
+
+	// Non-VPC-scoped contexts must be returned unchanged.
+	local := utl.SessionContext{ClientType: utl.Local, ProjectID: "", VPCID: ""}
+	if got := projectScopedSearchContext(local); got != local {
+		t.Fatalf("Local context should be unchanged, got %+v", got)
+	}
+}
+
+func TestShouldIndexByPathForVPCScopedTypes(t *testing.T) {
+	// VPC-scoped types must key by path, not short id: NSX ids for these types (often
+	// user-chosen via nsx_id) are only guaranteed unique within their own VPC, but the cache
+	// populate search/bucket for these types is now shared across all VPCs in a project.
+	vpcScopedTypes := []string{
+		resourceTypeVpc, resourceTypeVpcAttachment, resourceTypeVpcConnectivityProfile,
+		resourceTypeVpcIpAddressAllocation, resourceTypeVpcServiceProfile, resourceTypeVpcSubnet,
+		resourceTypeTransitGateway, resourceTypeTransitGatewayAttachment,
+		resourceTypeProjectIpAddressAllocation, resourceTypePolicyVpcNatRule,
+		// Also reachable via CacheAwareResourceRead under a VPC-scoped SessionContext
+		// (resource_nsxt_vpc_group.go, resource_nsxt_vpc_gateway_policy.go,
+		// resource_nsxt_vpc_static_routes.go, resource_nsxt_vpc_dhcp_v4_static_binding_config.go),
+		// so they need the same path-indexing safety even though some are shared with
+		// non-VPC-scoped sibling resources (GatewayPolicy, StaticRoutes, DhcpV4StaticBindingConfig).
+		resourceTypeVPCGroup, resourceTypeGatewayPolicy, resourceTypeStaticRoutes, resourceTypeDhcpV4StaticBindingConfig,
+	}
+	for _, rt := range vpcScopedTypes {
+		if !shouldIndexByPath(rt) {
+			t.Errorf("shouldIndexByPath(%q) = false, want true", rt)
+		}
+	}
+}
+
+func TestConverListToMapByTypeVpcScopedResourcesIndexedByPath(t *testing.T) {
+	// Two different VPCs in the same project can legitimately have a VpcSubnet with the same
+	// user-chosen short id (getOrGenerateID2 only checks uniqueness within the current VPC).
+	// Since the cache bucket for VPC-scoped types is now shared project-wide, both objects
+	// land in the same map; this test confirms each remains independently retrievable via its
+	// distinct (project/system-unique) path, even though they share a colliding short id.
+	pathA := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+	pathB := "/orgs/o/projects/p/vpcs/vpcB/subnets/subnet1"
+	subnetA := model.VpcSubnet{Id: strPtr("subnet1"), DisplayName: strPtr("subnet1-a"), Path: strPtr(pathA)}
+	subnetB := model.VpcSubnet{Id: strPtr("subnet1"), DisplayName: strPtr("subnet1-b"), Path: strPtr(pathB)}
+
+	svs, err := modelsToStructValues([]model.VpcSubnet{subnetA, subnetB}, model.VpcSubnetBindingType())
+	if err != nil {
+		t.Fatalf("modelsToStructValues: %v", err)
+	}
+
+	got := converListToMapByType(svs, resourceTypeVpcSubnet)
+	if got == nil {
+		t.Fatal("converListToMapByType returned nil")
+	}
+	if got[pathA] == nil {
+		t.Errorf("VPC A's subnet not retrievable by its path %q", pathA)
+	}
+	if got[pathB] == nil {
+		t.Errorf("VPC B's subnet not retrievable by its path %q", pathB)
+	}
+}
+
 func TestErrCacheUseBackendDirect(t *testing.T) {
 	if !errors.Is(errCacheUseBackendDirect, errCacheUseBackendDirect) {
 		t.Fatal("errors.Is should match sentinel to itself")
@@ -434,6 +528,152 @@ func TestReflectStringField(t *testing.T) {
 	t.Run("nil-obj-returns-nil", func(t *testing.T) {
 		if got := reflectStringField(nil, "DisplayName"); got != nil {
 			t.Fatalf("expected nil, got %v", got)
+		}
+	})
+}
+
+func TestCacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	dsSchema := map[string]*schema.Schema{
+		"id":           getDataSourceIDSchema(),
+		"display_name": getDataSourceExtendedDisplayNameSchema(),
+		"description":  getDataSourceDescriptionSchema(),
+		"path":         getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{"id": "subnet1"})
+		_, ok := cacheAwareDataSourceReadByID[model.VpcSubnet](d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if ok {
+			t.Fatal("expected cache bypass (ok=false) for a short id on a path-indexed resource type")
+		}
+		if d.Id() != "" {
+			t.Fatalf("expected d.Id() to be untouched on bypass, got %q", d.Id())
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		// A full path contains "/", so the new short-id bypass must not trigger; this proves
+		// the check is specific to short (non-path) ids, not to shouldIndexByPath types broadly.
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{"id": path})
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, ok := cacheAwareDataSourceReadByID[model.VpcSubnet](d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if ok {
+			t.Fatal("expected ok=false (post-write bypass), proving control reached the postWriteByKey check rather than the short-id bypass")
+		}
+	})
+}
+
+func TestCacheAwareResourceReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	// CacheAwareResourceRead's resourceID is a short id (not yet path) during the Create-then-Read
+	// sequence (path isn't set on d until the Read populates it from the live object) and after
+	// terraform import (importers call d.SetId(shortID) without setting path). Without this bypass,
+	// such a call falls through to gcache.readCache keyed by the short id against the shared
+	// project-wide bucket, which can return a different VPC's same-short-id object.
+	rSchema := map[string]*schema.Schema{
+		"path": getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache-and-calls-backendRead", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{})
+		d.SetId("subnet1")
+		backendReadCalled := false
+		obj, cacheUsed, cacheAttempted, err := CacheAwareResourceRead[model.VpcSubnet](
+			d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType(),
+			func() (*model.VpcSubnet, error) {
+				backendReadCalled = true
+				return &model.VpcSubnet{Id: strPtr("subnet1")}, nil
+			},
+			func(*model.VpcSubnet) error { return nil },
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !backendReadCalled {
+			t.Fatal("expected backendRead to be called when bypassing cache for a short id on a path-indexed type")
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false when bypassing cache")
+		}
+		if cacheAttempted {
+			t.Fatal("expected cacheAttempted=false: the short-id bypass should skip the cache attempt entirely, not count as a failed attempt")
+		}
+		if obj == nil || obj.Id == nil || *obj.Id != "subnet1" {
+			t.Fatalf("expected backendRead's object to be returned, got %+v", obj)
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{"path": path})
+		d.SetId(path)
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, cacheUsed, cacheAttempted, err := CacheAwareResourceRead[model.VpcSubnet](
+			d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType(),
+			func() (*model.VpcSubnet, error) { return &model.VpcSubnet{Id: strPtr("subnet1")}, nil },
+			func(*model.VpcSubnet) error { return nil },
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false (post-write bypass path, not a cache hit)")
+		}
+		if !cacheAttempted {
+			t.Fatal("expected cacheAttempted=true, proving control reached the postWriteByKey check rather than the short-id bypass")
+		}
+	})
+}
+
+func TestTryCacheReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+	rSchema := map[string]*schema.Schema{
+		"path": getPathSchema(),
+	}
+	m := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+
+	t.Run("short-id-on-path-indexed-type-bypasses-cache", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{})
+		d.SetId("subnet1")
+		obj, cacheUsed, cacheAttempted, err := TryCacheRead[model.VpcSubnet](d, m, nil, "subnet1", resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if obj != nil {
+			t.Fatalf("expected nil object on bypass, got %+v", obj)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false when bypassing cache")
+		}
+		if cacheAttempted {
+			t.Fatal("expected cacheAttempted=false: the short-id bypass should skip the cache attempt entirely")
+		}
+	})
+
+	t.Run("full-path-on-path-indexed-type-not-bypassed-by-this-check", func(t *testing.T) {
+		path := "/orgs/o/projects/p/vpcs/vpcA/subnets/subnet1"
+		d := schema.TestResourceDataRaw(t, rSchema, map[string]interface{}{"path": path})
+		d.SetId(path)
+		if _, ok := postWriteByKey.LoadAndDelete(postWriteKey(resourceTypeVpcSubnet, path)); ok {
+			t.Fatal("test setup: unexpected post-write marker present")
+		}
+		postWriteByKey.Store(postWriteKey(resourceTypeVpcSubnet, path), struct{}{})
+		_, cacheUsed, cacheAttempted, err := TryCacheRead[model.VpcSubnet](d, m, nil, path, resourceTypeVpcSubnet, model.VpcSubnetBindingType())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cacheUsed {
+			t.Fatal("expected cacheUsed=false (post-write bypass path, not a cache hit)")
+		}
+		if !cacheAttempted {
+			t.Fatal("expected cacheAttempted=true, proving control reached the postWriteByKey check rather than the short-id bypass")
 		}
 	})
 }

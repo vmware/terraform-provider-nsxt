@@ -118,7 +118,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, CacheKeyForResourceID(resourceTypeVpcAttachment, d), m)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -145,7 +145,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeVpcAttachment, d),
 			resourceTypeVpcAttachment,
 			model.VpcAttachmentBindingType(),
 			func() (*model.VpcAttachment, error) {
@@ -221,7 +221,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("VpcAttachment", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, CacheKeyForResourceID(resourceTypeVpcAttachment, d), m)
 	return resourceNsxtVpcAttachmentRead(d, m)
 }
 
@@ -246,7 +246,7 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return handleDeleteError("VpcAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpcAttachment, CacheKeyForResourceID(resourceTypeVpcAttachment, d), m)
 
 	return nil
 }

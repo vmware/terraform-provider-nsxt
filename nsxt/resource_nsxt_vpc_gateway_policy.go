@@ -55,7 +55,7 @@ func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) e
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, CacheKeyForResourceID(resourceTypeGatewayPolicy, d), m)
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -73,7 +73,7 @@ func resourceNsxtVPCGatewayPolicyRead(d *schema.ResourceData, m interface{}) err
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeGatewayPolicy, d),
 			resourceTypeGatewayPolicy,
 			model.GatewayPolicyBindingType(),
 			func() (*model.GatewayPolicy, error) {
@@ -133,7 +133,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return handleUpdateError("VPC Gateway Policy", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, CacheKeyForResourceID(resourceTypeGatewayPolicy, d), m)
 	return resourceNsxtVPCGatewayPolicyRead(d, m)
 }
 
@@ -149,7 +149,7 @@ func resourceNsxtVPCGatewayPolicyDelete(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return handleDeleteError("VPC Gateway Policy", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeGatewayPolicy, CacheKeyForResourceID(resourceTypeGatewayPolicy, d), m)
 
 	return nil
 }

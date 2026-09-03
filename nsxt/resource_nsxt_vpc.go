@@ -229,7 +229,7 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, CacheKeyForResourceID(resourceTypeVpc, d), m)
 	return resourceNsxtVpcRead(d, m)
 }
 
@@ -248,7 +248,7 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeVpc, d),
 			resourceTypeVpc,
 			model.VpcBindingType(),
 			func() (*model.Vpc, error) {
@@ -332,7 +332,7 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		return handleUpdateError("Vpc", id, err)
 	}
 
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, CacheKeyForResourceID(resourceTypeVpc, d), m)
 	return resourceNsxtVpcRead(d, m)
 }
 
@@ -352,7 +352,7 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleDeleteError("Vpc", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeVpc, CacheKeyForResourceID(resourceTypeVpc, d), m)
 
 	return nil
 }

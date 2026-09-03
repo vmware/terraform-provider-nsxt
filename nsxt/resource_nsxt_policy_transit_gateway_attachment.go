@@ -205,7 +205,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, CacheKeyForResourceID(resourceTypeTransitGatewayAttachment, d), m)
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -235,7 +235,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 			d,
 			m,
 			connector,
-			id,
+			CacheKeyForResourceID(resourceTypeTransitGatewayAttachment, d),
 			resourceTypeTransitGatewayAttachment,
 			model.TransitGatewayAttachmentBindingType(),
 			func() (*model.TransitGatewayAttachment, error) {
@@ -317,7 +317,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, d.Id(), m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, CacheKeyForResourceID(resourceTypeTransitGatewayAttachment, d), m)
 
 	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
 }
@@ -345,7 +345,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 	if err != nil {
 		return handleDeleteError("TransitGatewayAttachment", id, err)
 	}
-	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, id, m)
+	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeTransitGatewayAttachment, CacheKeyForResourceID(resourceTypeTransitGatewayAttachment, d), m)
 
 	return nil
 }
