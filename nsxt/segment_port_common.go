@@ -405,7 +405,7 @@ func getSegmentPort(segmentPath, segmentPortId string, context utl.SessionContex
 
 func isT1Segment(segmentPath string) bool {
 	pathSplit := strings.Split(segmentPath, "/")
-	if len(pathSplit) >= 3 && pathSplit[len(pathSplit)-4] == "tier-1s" {
+	if len(pathSplit) >= 4 && pathSplit[len(pathSplit)-4] == "tier-1s" {
 		return true
 	}
 	return false
@@ -418,7 +418,7 @@ func getSegmentIdFromSegPath(segPortPath string) string {
 
 func getT1IdFromSegPath(segPortPath string) string {
 	pathSplit := strings.Split(segPortPath, "/")
-	if len(pathSplit) >= 3 && pathSplit[len(pathSplit)-4] == "tier-1s" {
+	if len(pathSplit) >= 4 && pathSplit[len(pathSplit)-4] == "tier-1s" {
 		return pathSplit[len(pathSplit)-3]
 	}
 	return ""
