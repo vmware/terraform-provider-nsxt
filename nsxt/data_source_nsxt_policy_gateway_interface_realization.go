@@ -26,8 +26,23 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 			"context": getContextSchema(false, false, false),
 			"gateway_path": {
 				Type:         schema.TypeString,
-				Description:  "The path for the gateway",
-				Required:     true,
+				Description:  "The path for the gateway interface",
+				Optional:     true,
+				Deprecated:   "Use gateway_interface_path instead. Despite its name, this attribute expects the path of the gateway interface, not the gateway.",
+				ValidateFunc: validatePolicyPath(),
+				ExactlyOneOf: []string{"gateway_path", "gateway_interface_path"},
+			},
+			"gateway_interface_path": {
+				Type:         schema.TypeString,
+				Description:  "The path for the gateway interface",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+				ExactlyOneOf: []string{"gateway_path", "gateway_interface_path"},
+			},
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site this resource belongs to. Required on Global Manager, since the realized entity is site-scoped there.",
+				Optional:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
 			"display_name": {
@@ -79,10 +94,25 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 	}
 
 	id := d.Get("id").(string)
-	gatewayPath := d.Get("gateway_path").(string)
+	gatewayInterfacePath := d.Get("gateway_interface_path").(string)
+	if gatewayInterfacePath == "" {
+		gatewayInterfacePath = d.Get("gateway_path").(string)
+	}
 	displayName := d.Get("display_name").(string)
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
+
+	sitePath := d.Get("site_path").(string)
+	if !isPolicyGlobalManager(m) && sitePath != "" {
+		return globalManagerOnlyError()
+	}
+	if isPolicyGlobalManager(m) && sitePath == "" {
+		return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_gateway_interface_realization")
+	}
+	var sitePathPtr *string
+	if sitePath != "" {
+		sitePathPtr = &sitePath
+	}
 
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
@@ -90,7 +120,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			result, err := client.List(gatewayPath, nil)
+			result, err := client.List(gatewayInterfacePath, sitePathPtr)
 			if err != nil {
 				return result, "", err
 			}
@@ -160,7 +190,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Failed to get gateway interface realization information for %s: %v", gatewayPath, err)
+		return fmt.Errorf("Failed to get gateway interface realization information for %s: %v", gatewayInterfacePath, err)
 	}
 	return nil
 }
