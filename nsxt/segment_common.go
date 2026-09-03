@@ -282,6 +282,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Description: "Advanced segment configuration",
 			Elem:        getPolicySegmentAdvancedConfigurationSchema(),
 			Optional:    true,
+			Computed:    true,
 			MaxItems:    1,
 		},
 		"connectivity_path": {
@@ -1431,10 +1432,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		// This is a list with 1 element
 		var advConfigList []map[string]interface{}
 		advConfigList = append(advConfigList, advConfig)
-		userConfig := d.Get("advanced_config").([]interface{})
-		if len(userConfig) > 0 {
-			d.Set("advanced_config", advConfigList)
-		}
+		d.Set("advanced_config", advConfigList)
 	}
 
 	if obj.L2Extension != nil {
