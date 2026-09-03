@@ -313,7 +313,7 @@ An existing policy Group can be [imported][docs-import] into this resource, via 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_group.group1 ID
+terraform import nsxt_policy_group.group ID
 ```
 
 The above command imports the policy Group named `group` with the NSX Policy ID `ID`.
@@ -323,5 +323,11 @@ If the Group to import isn't in the `default` domain, the domain name can be add
 For example to import a Group with `ID` in the `MyDomain` domain:
 
 ```shell
-terraform import nsxt_policy_group.group1 MyDomain/ID
+terraform import nsxt_policy_group.group MyDomain/ID
 ```
+
+```shell
+terraform import nsxt_policy_group.group POLICY_PATH
+```
+
+The above command imports the policy Group named `group` with the policy path `POLICY_PATH`.
