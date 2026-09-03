@@ -193,13 +193,20 @@ func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, i
 }
 
 func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
-	if len(iSpan.([]interface{})) == 0 {
+	if iSpan == nil {
+		return nil, nil
+	}
+	spanList, ok := iSpan.([]interface{})
+	if !ok || len(spanList) == 0 || spanList[0] == nil {
 		return nil, nil
 	}
 	converter := bindings.NewTypeConverter()
 
 	// We're limiting to one span of any kind in the schema
-	span := iSpan.([]interface{})[0].(map[string]interface{})
+	span, ok := spanList[0].(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
 	if len(span["cluster_based_span"].([]interface{})) > 0 {
 		cbs := span["cluster_based_span"].([]interface{})[0].(map[string]interface{})
 		spanPath := cbs["span_path"].(string)
