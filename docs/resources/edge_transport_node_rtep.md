@@ -21,7 +21,7 @@ resource "nsxt_edge_transport_node_rtep" "test_rtep" {
 
   host_switch_name = "someSwitch"
   ip_assignment {
-    assigned_by_dhcp = true
+    static_ip_pool = "ip-pool-uuid"
   }
   named_teaming_policy = "tp123"
   rtep_vlan            = 500
@@ -35,7 +35,6 @@ The following arguments are supported:
 * `edge_id` - (Required) Edge ID to associate with remote tunnel endpoint.
 * `host_switch_name` - (Required) The host switch name to be used for the remote tunnel endpoint.
 * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
-    * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
     * `static_ip` - (Optional) IP assignment specification for Static IP List.
         * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
         * `subnet_mask` - (Required) Subnet mask.

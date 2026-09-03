@@ -35,7 +35,7 @@ func resourceNsxtEdgeTransportNodeRTEP() *schema.Resource {
 				Description: "The host switch name to be used for the remote tunnel endpoint",
 				Required:    true,
 			},
-			"ip_assignment": getIPAssignmentSchema(true),
+			"ip_assignment": getIPAssignmentSchemaForRTEP(),
 			"named_teaming_policy": {
 				Type:        schema.TypeString,
 				Description: "The named teaming policy to be used by the remote tunnel endpoint",
@@ -97,7 +97,7 @@ func resourceNsxtEdgeTransportNodeRTEPRead(d *schema.ResourceData, m interface{}
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
 
-	id := d.Get("edge_id").(string)
+	id := d.Id()
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -108,6 +108,7 @@ func resourceNsxtEdgeTransportNodeRTEPRead(d *schema.ResourceData, m interface{}
 		return errors.NotFound{}
 	}
 
+	d.Set("edge_id", id)
 	d.Set("host_switch_name", obj.RemoteTunnelEndpoint.HostSwitchName)
 	ipAssignment, err := setIPAssignmentInSchema(obj.RemoteTunnelEndpoint.IpAssignmentSpec)
 	if err != nil {
@@ -124,7 +125,7 @@ func resourceNsxtEdgeTransportNodeRTEPUpdate(d *schema.ResourceData, m interface
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
 
-	id := d.Get("edge_id").(string)
+	id := d.Id()
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -145,10 +146,12 @@ func resourceNsxtEdgeTransportNodeRTEPUpdate(d *schema.ResourceData, m interface
 	}
 
 	rtep := model.TransportNodeRemoteTunnelEndpointConfig{
-		HostSwitchName:     &hostSwitchName,
-		IpAssignmentSpec:   ipAssignment,
-		NamedTeamingPolicy: &namedTeamingPolicy,
-		RtepVlan:           &rtepVlan,
+		HostSwitchName:   &hostSwitchName,
+		IpAssignmentSpec: ipAssignment,
+		RtepVlan:         &rtepVlan,
+	}
+	if namedTeamingPolicy != "" {
+		rtep.NamedTeamingPolicy = &namedTeamingPolicy
 	}
 	obj.RemoteTunnelEndpoint = &rtep
 	_, err = client.Update(id, obj, nil, nil, nil, nil, nil, nil, nil)
@@ -163,7 +166,7 @@ func resourceNsxtEdgeTransportNodeRTEPDelete(d *schema.ResourceData, m interface
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
 
-	id := d.Get("edge_id").(string)
+	id := d.Id()
 
 	obj, err := client.Get(id)
 	if err != nil {
