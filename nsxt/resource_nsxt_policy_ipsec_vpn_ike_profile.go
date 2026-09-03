@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var ikeProfilePathExample = "/infra/ipsec-vpn-ike-profiles/[profile]"
+
 var iPSecVpnIkeProfileDhGroupsValues = []string{
 	model.IPSecVpnIkeProfile_DH_GROUPS_GROUP2,
 	model.IPSecVpnIkeProfile_DH_GROUPS_GROUP5,
@@ -54,7 +56,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPSecVpnIkeProfileUpdate,
 		Delete: resourceNsxtPolicyIPSecVpnIkeProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: getPolicyPathOrIDResourceImporter(ikeProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

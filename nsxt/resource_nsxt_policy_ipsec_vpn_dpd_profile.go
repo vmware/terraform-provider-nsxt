@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var dpdProfilePathExample = "/infra/ipsec-vpn-dpd-profiles/[profile]"
+
 var iPSecVpnDpdProfileDpdProbeModeValues = []string{
 	model.IPSecVpnDpdProfile_DPD_PROBE_MODE_ON_DEMAND,
 	model.IPSecVpnDpdProfile_DPD_PROBE_MODE_PERIODIC,
@@ -27,7 +29,7 @@ func resourceNsxtPolicyIPSecVpnDpdProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPSecVpnDpdProfileUpdate,
 		Delete: resourceNsxtPolicyIPSecVpnDpdProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: getPolicyPathOrIDResourceImporter(dpdProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{
