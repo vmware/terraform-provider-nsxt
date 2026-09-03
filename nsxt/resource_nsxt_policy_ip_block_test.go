@@ -148,7 +148,6 @@ func TestAccResourceNsxtPolicyIPBlock_visibility(t *testing.T) {
 	testAccResourceNsxtPolicyIPBlockBasic(t, false, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
-		testAccNSXVersion(t, "4.2.0")
 	})
 }
 
@@ -230,7 +229,7 @@ func TestAccResourceNsxtPolicyIPBlock_importVisibility(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_block.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.2.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPBlockCheckDestroy(state)

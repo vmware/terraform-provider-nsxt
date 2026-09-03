@@ -97,18 +97,6 @@ func TestMockResourceNsxtPolicyTransitGatewayNatRuleCreate(t *testing.T) {
 		assert.Equal(t, tgwNatRuleID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtPolicyTransitGatewayNatRule()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWNatRuleData())
-
-		err := resourceNsxtPolicyTransitGatewayNatRuleCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "9.0.0")
-	})
-
 	t.Run("Create fails with invalid parent_path", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"
 		defer func() { util.NsxVersion = "" }()

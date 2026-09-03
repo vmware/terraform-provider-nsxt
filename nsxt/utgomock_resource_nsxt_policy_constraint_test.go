@@ -69,19 +69,6 @@ func TestMockResourceNsxtPolicyConstraintCreate(t *testing.T) {
 		assert.Equal(t, constraintName, d.Get("display_name"))
 	})
 
-	t.Run("Create_fails_below_version_9_0_0", func(t *testing.T) {
-		util.NsxVersion = "3.2.0"
-		defer func() { util.NsxVersion = "9.0.0" }()
-
-		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"display_name": constraintName,
-		})
-		m := newGoMockProviderClient()
-		err := resourceNsxtPolicyConstraintCreate(d, m)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "9.0.0")
-	})
-
 	t.Run("Create_fails_when_already_exists", func(t *testing.T) {
 		mockConstraintsSDK.EXPECT().Get(constraintID).Return(model.Constraint{}, nil)
 

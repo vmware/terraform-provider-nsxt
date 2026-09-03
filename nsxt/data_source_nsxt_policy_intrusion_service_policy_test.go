@@ -19,7 +19,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -57,7 +56,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicy_byID(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -90,7 +88,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicy_byCategory(t *testing.T) 
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -123,7 +120,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicy_multitenancy(t *testing.T
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyMultitenancy(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -287,7 +283,6 @@ func TestAccDataSourceNsxtPolicyIntrusionServicePolicy_withDetailedRules(t *test
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

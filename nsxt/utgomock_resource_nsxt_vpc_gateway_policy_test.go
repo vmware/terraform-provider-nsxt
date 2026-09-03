@@ -120,18 +120,6 @@ func TestMockResourceNsxtVpcGatewayPolicyCreate(t *testing.T) {
 		assert.Equal(t, vpcGwPolicyDisplayName, d.Get("display_name"))
 	})
 
-	t.Run("Create fails on NSX version check", func(t *testing.T) {
-		util.NsxVersion = "8.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVPCGatewayPolicy()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcGwPolicyData())
-
-		err := resourceNsxtVPCGatewayPolicyCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "9.0.0")
-	})
-
 	t.Run("Create fails when already exists", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"
 		defer func() { util.NsxVersion = "" }()

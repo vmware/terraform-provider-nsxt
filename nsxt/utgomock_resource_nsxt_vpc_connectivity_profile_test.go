@@ -129,16 +129,6 @@ func TestMockResourceNsxtVpcConnectivityProfileCreate(t *testing.T) {
 		assert.Equal(t, cpDisplayName, d.Get("display_name"))
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcConnectivityProfile()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalCpData())
-
-		err := resourceNsxtVpcConnectivityProfileCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcConnectivityProfileRead(t *testing.T) {

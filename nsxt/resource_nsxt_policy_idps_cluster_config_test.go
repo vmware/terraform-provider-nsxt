@@ -92,7 +92,6 @@ func TestAccResourceNsxtPolicyIdpsClusterConfig_basicLegacy(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 			testAccNSXVersionLessThan(t, "9.1.0")
 			testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
 		},
@@ -182,7 +181,6 @@ func TestAccResourceNsxtPolicyIdpsClusterConfig_importBasicLegacy(t *testing.T) 
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.2.0")
 			testAccNSXVersionLessThan(t, "9.1.0")
 			testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
 		},

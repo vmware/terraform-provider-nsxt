@@ -277,21 +277,6 @@ func TestMockResourceNsxtPolicyGroupBMSCreate(t *testing.T) {
 	mockSDK, restore := setupGroupMock(t, ctrl)
 	defer restore()
 
-	t.Run("BMS group_type rejected on NSX 4.2", func(t *testing.T) {
-		util.NsxVersion = "4.2.0"
-		defer func() { util.NsxVersion = "" }()
-
-		// Existence check still happens before the version guard
-		mockSDK.EXPECT().Get(groupDomain, groupID).Return(nsxModel.Group{}, vapiErrors.NotFound{})
-
-		res := resourceNsxtPolicyGroup()
-		d := schema.TestResourceDataRaw(t, res.Schema, bmsGroupData())
-
-		err := resourceNsxtPolicyGroupCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
-	})
-
 	t.Run("BMS group_type create succeeds on NSX 9.0", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"
 		defer func() { util.NsxVersion = "" }()
@@ -382,19 +367,6 @@ func TestMockResourceNsxtPolicyGroupBMSUpdate(t *testing.T) {
 	defer ctrl.Finish()
 	mockSDK, restore := setupGroupMock(t, ctrl)
 	defer restore()
-
-	t.Run("BMS group_type update rejected on NSX 4.2", func(t *testing.T) {
-		util.NsxVersion = "4.2.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtPolicyGroup()
-		d := schema.TestResourceDataRaw(t, res.Schema, bmsGroupData())
-		d.SetId(groupID)
-
-		err := resourceNsxtPolicyGroupUpdate(d, newGoMockProviderClient())
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "Bare Metal Server features require NSX-T version 9.0.0 or higher")
-	})
 
 	t.Run("BMS group_type update succeeds on NSX 9.0", func(t *testing.T) {
 		util.NsxVersion = "9.0.0"

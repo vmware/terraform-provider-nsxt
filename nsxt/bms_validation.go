@@ -7,8 +7,6 @@ package nsxt
 import (
 	"fmt"
 	"regexp"
-
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 // validateBMSExternalID validates the format of BMS external IDs
@@ -33,12 +31,4 @@ func validateBMSExternalID(v interface{}, k string) (warnings []string, errors [
 func isValidBMSExternalID(id string) bool {
 	_, errors := validateBMSExternalID(id, "external_id")
 	return len(errors) == 0
-}
-
-// validateBMSVersionRequirement checks NSX version compatibility
-func validateBMSVersionRequirement() error {
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("Bare Metal Server features require NSX-T version 9.0.0 or higher. Current version does not support BMS management. Please upgrade NSX-T to version 9.0.0 or later")
-	}
-	return nil
 }

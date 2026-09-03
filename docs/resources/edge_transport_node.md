@@ -1,10 +1,12 @@
 ---
-subcategory: "Fabric"
+subcategory: "Deprecated"
 page_title: "NSXT: nsxt_edge_transport_node"
 description: A resource to configure an Edge Transport Node.
 ---
 
 # nsxt_edge_transport_node
+
+~> **NOTE:** This resource has been deprecated and replaced with nsxt_policy_edge_transport_node.
 
 This resource provides a method for the management of an Edge Transport Node.
 This resource is supported with NSX 4.1.0 onwards.

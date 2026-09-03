@@ -50,9 +50,6 @@ func dataSourceNsxtPolicyGroupBareMetalServerMembers() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyGroupBareMetalServerMembersRead(d *schema.ResourceData, m interface{}) error {
-	if err := validateBMSVersionRequirement(); err != nil {
-		return err
-	}
 
 	connector := getPolicyConnector(m)
 	client := cliGroupBareMetalServerMembersClient(getSessionContext(d, m), connector)

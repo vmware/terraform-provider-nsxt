@@ -5,10 +5,7 @@
 package nsxt
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -27,9 +24,6 @@ func dataSourceNsxtVpcSubnet() *schema.Resource {
 }
 
 func dataSourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Subnet data source requires NSX version 9.0.0 or higher")
-	}
 	connector := getPolicyConnector(m)
 	objID := d.Get("id").(string)
 

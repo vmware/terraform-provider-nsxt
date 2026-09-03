@@ -110,16 +110,6 @@ func TestMockResourceNsxtVpcDhcpV4StaticBindingCreate(t *testing.T) {
 		assert.Equal(t, dhcpBindingID, d.Id())
 	})
 
-	t.Run("Create fails on old NSX version", func(t *testing.T) {
-		util.NsxVersion = "4.0.0"
-		defer func() { util.NsxVersion = "" }()
-
-		res := resourceNsxtVpcSubnetDhcpV4StaticBindingConfig()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalDhcpBindingData())
-
-		err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
 }
 
 func TestMockResourceNsxtVpcDhcpV4StaticBindingRead(t *testing.T) {

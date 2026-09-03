@@ -5,11 +5,7 @@
 package nsxt
 
 import (
-	"fmt"
-
 	"strconv"
-
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -36,9 +32,6 @@ func dataSourceNsxtVpcServiceProfile() *schema.Resource {
 }
 
 func dataSourceNsxtVpcServiceProfileRead(d *schema.ResourceData, m interface{}) error {
-	if !util.NsxVersionHigherOrEqual("9.0.0") {
-		return fmt.Errorf("VPC Service Profile data source requires NSX version 9.0.0 or higher")
-	}
 	connector := getPolicyConnector(m)
 	// Using deprecated API because GetOk is not behaving as expected when is_default = "false".
 	// It does not return true for a key that's explicitly set to false.
