@@ -154,7 +154,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 
 	t.Run("by display_name via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsDfwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
+		mockSDK.EXPECT().List(idsDfwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
 			Results:     []nsxModel.IdsSecurityPolicy{idsDfwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -175,7 +175,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 
 	t.Run("by category via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsDfwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
+		mockSDK.EXPECT().List(idsDfwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
 			Results:     []nsxModel.IdsSecurityPolicy{idsDfwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -196,7 +196,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(idsDfwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(idsDfwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyIntrusionServicePolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -214,7 +214,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRead(t *testing.T) {
 		id2 := "ids-dfw-pol-2"
 		policy2.Id = &id2
 
-		mockSDK.EXPECT().List(idsDfwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
+		mockSDK.EXPECT().List(idsDfwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsSecurityPolicyListResult{
 			Results:     []nsxModel.IdsSecurityPolicy{idsDfwPolicyModel(), policy2},
 			ResultCount: &rc,
 		}, nil)

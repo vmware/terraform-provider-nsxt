@@ -167,7 +167,7 @@ func (c IPDiscoveryProfileClientContext) List(cursorParam *string, includeMarkFo
 
 	case utl.Local:
 		client := c.Client.(client0.IpDiscoveryProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.IpDiscoveryProfilesClient)
@@ -183,7 +183,7 @@ func (c IPDiscoveryProfileClientContext) List(cursorParam *string, includeMarkFo
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.IpDiscoveryProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

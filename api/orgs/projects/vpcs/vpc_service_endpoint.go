@@ -84,11 +84,11 @@ func (c VpcServiceEndpointClientContext) List(orgIdParam string, projectIdParam 
 
 	case utl.Local:
 		client := c.Client.(client0.VpcServiceEndpointsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.VpcServiceEndpointsClient)
-		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, vpcIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

@@ -84,11 +84,11 @@ func (c ConnectivityPolicyClientContext) List(orgIdParam string, projectIdParam 
 
 	case utl.Multitenancy:
 		client := c.Client.(client0.ConnectivityPoliciesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client0.ConnectivityPoliciesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

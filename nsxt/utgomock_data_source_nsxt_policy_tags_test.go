@@ -51,7 +51,7 @@ func TestMockDataSourceNsxtTagsRead(t *testing.T) {
 				{Tag: &tag2},
 			},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtTags()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -70,7 +70,7 @@ func TestMockDataSourceNsxtTagsRead(t *testing.T) {
 		listResult := nsxModel.TagInfoListResult{
 			Results: []nsxModel.TagInfo{},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtTags()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -84,7 +84,7 @@ func TestMockDataSourceNsxtTagsRead(t *testing.T) {
 	})
 
 	t.Run("Read List API error is propagated", func(t *testing.T) {
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.TagInfoListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.TagInfoListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtTags()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{

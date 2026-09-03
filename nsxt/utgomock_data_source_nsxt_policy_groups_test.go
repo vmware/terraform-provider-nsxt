@@ -39,7 +39,7 @@ func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
 			Path:        &g2Path,
 		}
 
-		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
+		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
 			Results: []nsxModel.Group{groupAPIResponse(), g2},
 			Cursor:  nil,
 		}, nil)
@@ -69,11 +69,11 @@ func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
 		}
 
 		gomock.InOrder(
-			mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
+			mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
 				Results: []nsxModel.Group{groupAPIResponse()},
 				Cursor:  &cursor1,
 			}, nil),
-			mockSDK.EXPECT().List(groupDomain, &cursor1, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
+			mockSDK.EXPECT().List(groupDomain, &cursor1, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
 				Results: []nsxModel.Group{g2},
 				Cursor:  nil,
 			}, nil),
@@ -92,7 +92,7 @@ func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
 	})
 
 	t.Run("List API error", func(t *testing.T) {
-		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyGroups()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -104,7 +104,7 @@ func TestMockDataSourceNsxtPolicyGroupsRead(t *testing.T) {
 	})
 
 	t.Run("include shared groups", func(t *testing.T) {
-		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
+		mockSDK.EXPECT().List(groupDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GroupListResult{
 			Results: []nsxModel.Group{groupAPIResponse()},
 			Cursor:  nil,
 		}, nil)

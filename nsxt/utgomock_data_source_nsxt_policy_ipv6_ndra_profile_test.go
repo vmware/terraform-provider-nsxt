@@ -98,7 +98,7 @@ func TestMockDataSourceNsxtPolicyIpv6NdraProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{
 			Results: []nsxModel.Ipv6NdraProfile{ipv6NdraProfileModel()},
 		}, nil)
 
@@ -119,7 +119,7 @@ func TestMockDataSourceNsxtPolicyIpv6NdraProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyIpv6NdraProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -138,7 +138,7 @@ func TestMockDataSourceNsxtPolicyIpv6NdraProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.Ipv6NdraProfileListResult{
 			Results: []nsxModel.Ipv6NdraProfile{},
 		}, nil)
 

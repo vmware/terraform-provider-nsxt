@@ -74,7 +74,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkAppliance(t *testing.T) {
 			Path:        &vnaPath,
 		})
 		mockVNA.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		).Return(model.VirtualNetworkApplianceListResult{
 			ResultCount: &oneCount,
 			Results:     []model.VirtualNetworkAppliance{{Id: &vnaID, DisplayName: &vnaName, Path: &vnaPath}},
@@ -95,7 +95,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkAppliance(t *testing.T) {
 	t.Run("Read_by_display_name_multiple_found", func(t *testing.T) {
 		otherID := vnaID + "-2"
 		mockVNA.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		).Return(model.VirtualNetworkApplianceListResult{
 			ResultCount: func() *int64 { v := int64(2); return &v }(),
 			Results: []model.VirtualNetworkAppliance{

@@ -70,7 +70,7 @@ func (c L2VPNServiceClientContext) List(tier1IdParam string, localeServiceIdPara
 
 	case utl.Local:
 		client := c.Client.(client0.L2vpnServicesClient)
-		obj, err = client.List(tier1IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, localeServiceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

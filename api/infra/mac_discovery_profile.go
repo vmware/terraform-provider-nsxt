@@ -167,7 +167,7 @@ func (c MacDiscoveryProfileClientContext) List(cursorParam *string, includeMarkF
 
 	case utl.Local:
 		client := c.Client.(client0.MacDiscoveryProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.MacDiscoveryProfilesClient)
@@ -183,7 +183,7 @@ func (c MacDiscoveryProfileClientContext) List(cursorParam *string, includeMarkF
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.MacDiscoveryProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

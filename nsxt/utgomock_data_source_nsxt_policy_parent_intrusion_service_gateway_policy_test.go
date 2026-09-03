@@ -129,7 +129,7 @@ func TestMockDataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead(t *test
 
 	t.Run("by display_name via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
+		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
 			Results:     []nsxModel.IdsGatewayPolicy{idsParentGwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -149,7 +149,7 @@ func TestMockDataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead(t *test
 
 	t.Run("by category via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
+		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
 			Results:     []nsxModel.IdsGatewayPolicy{idsParentGwPolicyModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -168,7 +168,7 @@ func TestMockDataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead(t *test
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -186,7 +186,7 @@ func TestMockDataSourceNsxtPolicyParentIntrusionServiceGatewayPolicyRead(t *test
 		id2 := "ids-parent-gw-pol-2"
 		policy2.Id = &id2
 
-		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
+		mockSDK.EXPECT().List(idsParentGwPolDomain, nil, nil, &boolFalse, nil, nil, nil, nil, nil).Return(nsxModel.IdsGatewayPolicyListResult{
 			Results:     []nsxModel.IdsGatewayPolicy{idsParentGwPolicyModel(), policy2},
 			ResultCount: &rc,
 		}, nil)

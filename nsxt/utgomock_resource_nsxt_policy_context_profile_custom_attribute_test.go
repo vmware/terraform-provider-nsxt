@@ -53,7 +53,7 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeCreate(t *testing.T)
 	t.Run("Create_success", func(t *testing.T) {
 		mockDefaultSDK.EXPECT().Create(gomock.Any(), "add").Return(nil)
 		resultCount := int64(1)
-		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -113,7 +113,7 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeRead(t *testing.T) {
 
 	t.Run("Read_success", func(t *testing.T) {
 		resultCount := int64(1)
-		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -136,7 +136,7 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeRead(t *testing.T) {
 
 	t.Run("Read_fails_when_not_found", func(t *testing.T) {
 		resultCount := int64(0)
-		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results:     []model.PolicyContextProfile{},
@@ -190,7 +190,7 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeDelete(t *testing.T)
 
 	t.Run("Delete_success", func(t *testing.T) {
 		resultCount := int64(1)
-		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{
@@ -212,7 +212,7 @@ func TestMockResourceNsxtPolicyContextProfileCustomAttributeDelete(t *testing.T)
 
 	t.Run("Delete_fails_when_Create_remove_returns_error", func(t *testing.T) {
 		resultCount := int64(1)
-		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDefaultSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.PolicyContextProfileListResult{
 				ResultCount: &resultCount,
 				Results: []model.PolicyContextProfile{

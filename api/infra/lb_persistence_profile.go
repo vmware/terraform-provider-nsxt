@@ -71,7 +71,7 @@ func (c LBPersistenceProfileClientContext) List(cursorParam *string, includeMark
 
 	case utl.Local:
 		client := c.Client.(client0.LbPersistenceProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

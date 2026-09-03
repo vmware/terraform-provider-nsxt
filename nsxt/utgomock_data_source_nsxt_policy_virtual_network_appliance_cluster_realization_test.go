@@ -94,7 +94,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRealizationRead(t
 			model.VirtualNetworkApplianceClusterState{ConsolidatedStatus: &statusSuccess}, nil,
 		)
 		mockVNAs.EXPECT().List(gomock.Any(), gomock.Any(), vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
 			model.VirtualNetworkApplianceListResult{ResultCount: &zeroCount, Results: []model.VirtualNetworkAppliance{}}, nil,
 		)
 
@@ -116,7 +116,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRealizationRead(t
 		)
 		oneCount := int64(1)
 		mockVNAs.EXPECT().List(gomock.Any(), gomock.Any(), vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
 			model.VirtualNetworkApplianceListResult{
 				ResultCount: &oneCount,
 				Results:     []model.VirtualNetworkAppliance{{Id: &vnaID, Path: &vnaPath}},
@@ -147,7 +147,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRealizationRead(t
 			model.VirtualNetworkApplianceClusterState{ConsolidatedStatus: &statusError}, nil,
 		)
 		mockVNAs.EXPECT().List(gomock.Any(), gomock.Any(), vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
 			model.VirtualNetworkApplianceListResult{ResultCount: &zeroCount, Results: []model.VirtualNetworkAppliance{}}, nil,
 		)
 
@@ -181,7 +181,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRealizationRead(t
 		)
 		oneCount := int64(1)
 		mockVNAs.EXPECT().List(gomock.Any(), gomock.Any(), vnaClusterID,
-			nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
+			nil, nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(
 			model.VirtualNetworkApplianceListResult{
 				ResultCount: &oneCount,
 				Results:     []model.VirtualNetworkAppliance{{Id: &vnaID}},

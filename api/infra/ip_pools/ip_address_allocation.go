@@ -124,11 +124,11 @@ func (c IpAddressAllocationClientContext) List(ipPoolIdParam string, cursorParam
 
 	case utl.Local:
 		client := c.Client.(client0.IpAllocationsClient)
-		obj, err = client.List(ipPoolIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(ipPoolIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.IpAllocationsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

@@ -70,7 +70,7 @@ func (c PolicyEdgeHighAvailabilityProfileClientContext) List(siteIdParam string,
 
 	case utl.Local:
 		client := c.Client.(client0.EdgeClusterHighAvailabilityProfilesClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeSystemOwnedParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeSystemOwnedParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

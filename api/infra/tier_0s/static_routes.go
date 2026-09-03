@@ -144,7 +144,7 @@ func (c StaticRoutesClientContext) List(tier0IdParam string, cursorParam *string
 
 	case utl.Local:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.StaticRoutesClient)

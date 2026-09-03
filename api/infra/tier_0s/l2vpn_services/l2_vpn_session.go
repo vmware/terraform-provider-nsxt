@@ -85,7 +85,7 @@ func (c L2VPNSessionClientContext) List(tier0IdParam string, serviceIdParam stri
 
 	case utl.Local:
 		client := c.Client.(client0.SessionsClient)
-		obj, err = client.List(tier0IdParam, serviceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, serviceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

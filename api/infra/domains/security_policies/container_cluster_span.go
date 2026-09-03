@@ -70,7 +70,7 @@ func (c ContainerClusterSpanClientContext) List(domainIdParam string, securityPo
 
 	case utl.Local:
 		client := c.Client.(client0.ContainerClusterSpanClient)
-		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

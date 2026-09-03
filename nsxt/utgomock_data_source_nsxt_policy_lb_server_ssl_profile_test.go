@@ -74,7 +74,7 @@ func TestMockDataSourceNsxtPolicyLBServerSslProfileListByName(t *testing.T) {
 		listResult := nsxModel.LBServerSslProfileListResult{
 			Results: []nsxModel.LBServerSslProfile{lbServerSslAPIResponse()},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtPolicyLBServerSslProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -91,7 +91,7 @@ func TestMockDataSourceNsxtPolicyLBServerSslProfileListByName(t *testing.T) {
 		listResult := nsxModel.LBServerSslProfileListResult{
 			Results: []nsxModel.LBServerSslProfile{lbServerSslAPIResponse()},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtPolicyLBServerSslProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -107,7 +107,7 @@ func TestMockDataSourceNsxtPolicyLBServerSslProfileListByName(t *testing.T) {
 		listResult := nsxModel.LBServerSslProfileListResult{
 			Results: []nsxModel.LBServerSslProfile{},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtPolicyLBServerSslProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -124,7 +124,7 @@ func TestMockDataSourceNsxtPolicyLBServerSslProfileListByName(t *testing.T) {
 		listResult := nsxModel.LBServerSslProfileListResult{
 			Results: []nsxModel.LBServerSslProfile{lbServerSslAPIResponse(), dup},
 		}
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(listResult, nil)
 
 		ds := dataSourceNsxtPolicyLBServerSslProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -137,7 +137,7 @@ func TestMockDataSourceNsxtPolicyLBServerSslProfileListByName(t *testing.T) {
 	})
 
 	t.Run("Read by name List API error is propagated", func(t *testing.T) {
-		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBServerSslProfileListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.LBServerSslProfileListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyLBServerSslProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{

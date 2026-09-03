@@ -100,7 +100,7 @@ func TestMockDataSourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 	})
 
 	t.Run("by display_name single match via list", func(t *testing.T) {
-		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
+		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
 			Results: []nsxModel.GatewayPolicy{gwPolicyAPIResponse()},
 		}, nil)
 
@@ -116,7 +116,7 @@ func TestMockDataSourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 	})
 
 	t.Run("list API error", func(t *testing.T) {
-		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{}, vapiErrors.ServiceUnavailable{})
+		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{}, vapiErrors.ServiceUnavailable{})
 
 		ds := dataSourceNsxtPolicyGatewayPolicy()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -130,7 +130,7 @@ func TestMockDataSourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 	})
 
 	t.Run("by display_name multiple exact matches", func(t *testing.T) {
-		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
+		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
 			Results: []nsxModel.GatewayPolicy{gwPolicyAPIResponse(), gwPolicyAPIResponse()},
 		}, nil)
 
@@ -147,7 +147,7 @@ func TestMockDataSourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 
 	t.Run("by category single match without display_name", func(t *testing.T) {
 		p := gwPolicyAPIResponse()
-		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
+		mockSDK.EXPECT().List(gwPolicyDomain, nil, nil, nil, nil, nil, nil, &boolFalse, nil).Return(nsxModel.GatewayPolicyListResult{
 			Results: []nsxModel.GatewayPolicy{p},
 		}, nil)
 

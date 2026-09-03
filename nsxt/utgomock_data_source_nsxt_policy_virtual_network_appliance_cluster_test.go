@@ -130,7 +130,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T
 	})
 
 	t.Run("by_display_name_success", func(t *testing.T) {
-		mockSDK.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSDK.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.VirtualNetworkApplianceClusterListResult{
 				Results:     []model.VirtualNetworkApplianceCluster{clusterModel},
 				ResultCount: &resultCount,
@@ -151,7 +151,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceClusterRead(t *testing.T
 
 	t.Run("by_display_name_not_found", func(t *testing.T) {
 		zeroCount := int64(0)
-		mockSDK.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockSDK.EXPECT().List(vnaClusterSiteID, vnaClusterEPID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			model.VirtualNetworkApplianceClusterListResult{
 				Results:     []model.VirtualNetworkApplianceCluster{},
 				ResultCount: &zeroCount,

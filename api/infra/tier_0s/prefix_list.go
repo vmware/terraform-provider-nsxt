@@ -101,7 +101,7 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 
 	case utl.Local:
 		client := c.Client.(client1.PrefixListsClient)
-		obj, err = client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

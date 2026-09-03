@@ -100,7 +100,7 @@ func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, s
 
 	case utl.Local:
 		client := c.Client.(client0.PortDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.PortDiscoveryProfileBindingMapsClient)
@@ -116,7 +116,7 @@ func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, s
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.PortDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

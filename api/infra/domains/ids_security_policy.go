@@ -91,15 +91,15 @@ func (c IdsSecurityPolicyClientContext) List(domainIdParam string, cursorParam *
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
+			List(string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
 		})
-		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(interface {
-			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
+			List(string, string, string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.IdsSecurityPolicyListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

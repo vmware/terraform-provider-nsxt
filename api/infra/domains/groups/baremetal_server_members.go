@@ -35,7 +35,7 @@ func (c BmsMembersClientContext) List(domainIdParam string, groupIdParam string,
 
 	case utl.Local:
 		client := c.Client.(client0.BmsClient)
-		obj, err = client.List(domainIdParam, groupIdParam, cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, groupIdParam, cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

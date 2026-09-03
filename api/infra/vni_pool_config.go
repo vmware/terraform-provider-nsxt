@@ -70,7 +70,7 @@ func (c VniPoolConfigClientContext) List(cursorParam *string, includeMarkForDele
 
 	case utl.Local:
 		client := c.Client.(client0.VniPoolsClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

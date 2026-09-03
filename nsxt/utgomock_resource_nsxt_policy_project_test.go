@@ -81,7 +81,7 @@ func (vpcSecurityProfilesClientStub) Get(string, string, string) (nsxModel.VpcSe
 	return nsxModel.VpcSecurityProfile{}, vapiErrors.NotFound{}
 }
 
-func (vpcSecurityProfilesClientStub) List(string, string, *string, *bool, *string, *int64, *bool, *string) (nsxModel.VpcSecurityProfileListResult, error) {
+func (vpcSecurityProfilesClientStub) List(string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (nsxModel.VpcSecurityProfileListResult, error) {
 	return nsxModel.VpcSecurityProfileListResult{}, nil
 }
 

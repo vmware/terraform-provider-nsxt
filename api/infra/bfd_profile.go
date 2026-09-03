@@ -101,7 +101,7 @@ func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteO
 
 	case utl.Local:
 		client := c.Client.(client1.BfdProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

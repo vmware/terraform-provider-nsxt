@@ -212,9 +212,9 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 
 	case utl.Local:
 		client := c.Client.(interface {
-			List(string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+			List(string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.SecurityPoliciesClient)
@@ -230,15 +230,15 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 
 	case utl.Multitenancy:
 		client := c.Client.(interface {
-			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+			List(string, string, string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(interface {
-			List(string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
+			List(string, string, string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

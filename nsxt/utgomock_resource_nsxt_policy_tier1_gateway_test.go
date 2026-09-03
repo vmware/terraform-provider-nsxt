@@ -111,7 +111,7 @@ func TestMockResourceNsxtPolicyTier1GatewayCreate(t *testing.T) {
 		gomock.InOrder(
 			mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
 			mockT1SDK.EXPECT().Get(gomock.Any()).Return(t1GatewayAPIResponse(), nil),
-			mockLSSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockLSSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Return(nsxModel.LocaleServicesListResult{Results: []nsxModel.LocaleServices{}, ResultCount: &resultCount}, nil),
 		)
 
@@ -135,7 +135,7 @@ func TestMockResourceNsxtPolicyTier1GatewayRead(t *testing.T) {
 	t.Run("Read success", func(t *testing.T) {
 		resultCount := int64(0)
 		mockT1SDK.EXPECT().Get(t1GwID).Return(t1GatewayAPIResponse(), nil)
-		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return(nsxModel.LocaleServicesListResult{Results: []nsxModel.LocaleServices{}, ResultCount: &resultCount}, nil)
 
 		res := resourceNsxtPolicyTier1Gateway()
@@ -180,7 +180,7 @@ func TestMockResourceNsxtPolicyTier1GatewayUpdate(t *testing.T) {
 		gomock.InOrder(
 			mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
 			mockT1SDK.EXPECT().Get(t1GwID).Return(t1GatewayAPIResponse(), nil),
-			mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 				Return(nsxModel.LocaleServicesListResult{Results: []nsxModel.LocaleServices{}, ResultCount: &resultCount}, nil),
 		)
 

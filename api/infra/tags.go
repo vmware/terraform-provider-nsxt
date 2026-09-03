@@ -36,7 +36,7 @@ func (c TagsClientContext) List(cursorParam *string, enforcementPointPathParam *
 
 	case utl.Local:
 		client := c.Client.(client0.TagsClient)
-		obj, err = client.List(cursorParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam, sourceParam, tagParam)
+		obj, err = client.List(cursorParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, scopeParam, sortAscendingParam, sortByParam, sourceParam, tagParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

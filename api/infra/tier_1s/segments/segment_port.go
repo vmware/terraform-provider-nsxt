@@ -40,11 +40,11 @@ func (c SegmentPortClientContext) List(tier1IdParam string, segmentIdParam strin
 
 	case utl.Local:
 		client := c.Client.(client0.PortsClient)
-		obj, err = client.List(tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.PortsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

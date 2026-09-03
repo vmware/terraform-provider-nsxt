@@ -145,7 +145,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRuleRead(t *testing.T) {
 
 	t.Run("by display_name via list", func(t *testing.T) {
 		rc := int64(1)
-		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{
+		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{
 			Results:     []nsxModel.IdsRule{idsDfwRuleModel()},
 			ResultCount: &rc,
 		}, nil)
@@ -164,7 +164,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRuleRead(t *testing.T) {
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyIntrusionServicePolicyRule()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -182,7 +182,7 @@ func TestMockDataSourceNsxtPolicyIntrusionServicePolicyRuleRead(t *testing.T) {
 		id2 := "ids-dfw-rule-2"
 		rule2.Id = &id2
 
-		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{
+		mockSDK.EXPECT().List(idsDfwRuleDomain, idsDfwRulePolicyID, nil, nil, &boolFalse, nil, nil, nil, nil).Return(nsxModel.IdsRuleListResult{
 			Results:     []nsxModel.IdsRule{idsDfwRuleModel(), rule2},
 			ResultCount: &rc,
 		}, nil)

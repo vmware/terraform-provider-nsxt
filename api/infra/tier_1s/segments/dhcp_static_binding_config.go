@@ -149,7 +149,7 @@ func (c StructValueClientContext) List(tier1IdParam string, segmentIdParam strin
 
 	case utl.Local:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
-		obj, err = client.List(tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
@@ -165,7 +165,7 @@ func (c StructValueClientContext) List(tier1IdParam string, segmentIdParam strin
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

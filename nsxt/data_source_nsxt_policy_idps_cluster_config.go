@@ -78,7 +78,7 @@ func dataSourceNsxtPolicyIdpsClusterConfigRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining IdsClusterConfig ID or name during read")
 	} else {
 		// List and search by display name
-		objList, err := client.List(nil, nil, nil, nil, nil, nil, nil)
+		objList, err := client.List(nil, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("IdsClusterConfig", err)
 		}

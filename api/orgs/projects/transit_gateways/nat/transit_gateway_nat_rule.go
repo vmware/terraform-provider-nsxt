@@ -101,7 +101,7 @@ func (c TransitGatewayNatRuleClientContext) List(orgIdParam string, projectIdPar
 
 	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

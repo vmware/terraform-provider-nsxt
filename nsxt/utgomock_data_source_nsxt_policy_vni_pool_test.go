@@ -106,7 +106,7 @@ func TestMockDataSourceNsxtPolicyVniPoolRead(t *testing.T) {
 
 	t.Run("by display_name single match", func(t *testing.T) {
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{
 			Results: []nsxModel.VniPoolConfig{vniPoolModel()},
 		}, nil)
 
@@ -122,7 +122,7 @@ func TestMockDataSourceNsxtPolicyVniPoolRead(t *testing.T) {
 
 	t.Run("by display_name list error", func(t *testing.T) {
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyVniPool()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -145,7 +145,7 @@ func TestMockDataSourceNsxtPolicyVniPoolRead(t *testing.T) {
 
 	t.Run("by name not found", func(t *testing.T) {
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.VniPoolConfigListResult{
 			Results: []nsxModel.VniPoolConfig{},
 		}, nil)
 

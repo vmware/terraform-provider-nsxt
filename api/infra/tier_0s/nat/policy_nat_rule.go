@@ -144,7 +144,7 @@ func (c PolicyNatRuleClientContext) List(tier0IdParam string, natIdParam string,
 
 	case utl.Local:
 		client := c.Client.(client0.NatRulesClient)
-		obj, err = client.List(tier0IdParam, natIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, natIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.NatRulesClient)

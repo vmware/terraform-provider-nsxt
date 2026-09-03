@@ -116,7 +116,7 @@ func TestMockDataSourceNsxtPolicyBfdProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{
 			Results: []nsxModel.BfdProfile{bfdProfileModel()},
 		}, nil)
 
@@ -137,7 +137,7 @@ func TestMockDataSourceNsxtPolicyBfdProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{}, vapiErrors.InternalServerError{})
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{}, vapiErrors.InternalServerError{})
 
 		ds := dataSourceNsxtPolicyBfdProfile()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -156,7 +156,7 @@ func TestMockDataSourceNsxtPolicyBfdProfileRead(t *testing.T) {
 		defer restore()
 
 		inc := false
-		mockSDK.EXPECT().List(nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{
+		mockSDK.EXPECT().List(nil, nil, &inc, nil, nil, nil, nil).Return(nsxModel.BfdProfileListResult{
 			Results: []nsxModel.BfdProfile{},
 		}, nil)
 

@@ -73,7 +73,7 @@ func TestMockDataSourceNsxtPolicyTransportZoneRead(t *testing.T) {
 	})
 
 	t.Run("by display_name single match from list", func(t *testing.T) {
-		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
 			Results: []nsxModel.PolicyTransportZone{tzAPIResponse()},
 		}, nil)
 
@@ -88,7 +88,7 @@ func TestMockDataSourceNsxtPolicyTransportZoneRead(t *testing.T) {
 	})
 
 	t.Run("list error", func(t *testing.T) {
-		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{}, vapiErrors.ServiceUnavailable{})
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{}, vapiErrors.ServiceUnavailable{})
 
 		ds := dataSourceNsxtPolicyTransportZone()
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
@@ -104,7 +104,7 @@ func TestMockDataSourceNsxtPolicyTransportZoneRead(t *testing.T) {
 		tzDef := tzAPIResponse()
 		tzDef.IsDefault = &def
 
-		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
 			Results: []nsxModel.PolicyTransportZone{tzDef},
 		}, nil)
 
@@ -130,7 +130,7 @@ func TestMockDataSourceNsxtPolicyTransportZoneRead(t *testing.T) {
 	})
 
 	t.Run("multiple exact display_name matches", func(t *testing.T) {
-		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
 			Results: []nsxModel.PolicyTransportZone{tzAPIResponse(), tzAPIResponse()},
 		}, nil)
 

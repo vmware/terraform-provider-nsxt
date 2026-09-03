@@ -149,7 +149,7 @@ func (c StructValueClientContext) List(cursorParam *string, includeMarkForDelete
 
 	case utl.Local:
 		client := c.Client.(client0.FloodProtectionProfilesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.FloodProtectionProfilesClient)
@@ -165,7 +165,7 @@ func (c StructValueClientContext) List(cursorParam *string, includeMarkForDelete
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.FloodProtectionProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

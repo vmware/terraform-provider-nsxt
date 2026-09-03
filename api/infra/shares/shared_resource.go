@@ -65,11 +65,11 @@ func (c SharedResourceClientContext) Delete(shareIdParam string, sharedResourceI
 
 	case utl.Local:
 		client := c.Client.(client0.ResourcesClient)
-		err = client.Delete(shareIdParam, sharedResourceIdParam)
+		err = client.Delete(shareIdParam, sharedResourceIdParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.ResourcesClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -84,11 +84,11 @@ func (c SharedResourceClientContext) Patch(shareIdParam string, sharedResourceId
 
 	case utl.Local:
 		client := c.Client.(client0.ResourcesClient)
-		err = client.Patch(shareIdParam, sharedResourceIdParam, sharedResourceParam)
+		err = client.Patch(shareIdParam, sharedResourceIdParam, sharedResourceParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.ResourcesClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam, sharedResourceParam)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam, sharedResourceParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -104,11 +104,11 @@ func (c SharedResourceClientContext) Update(shareIdParam string, sharedResourceI
 
 	case utl.Local:
 		client := c.Client.(client0.ResourcesClient)
-		obj, err = client.Update(shareIdParam, sharedResourceIdParam, sharedResourceParam)
+		obj, err = client.Update(shareIdParam, sharedResourceIdParam, sharedResourceParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.ResourcesClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam, sharedResourceParam)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, shareIdParam, sharedResourceIdParam, sharedResourceParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

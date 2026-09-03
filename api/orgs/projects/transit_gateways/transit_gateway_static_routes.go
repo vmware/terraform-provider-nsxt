@@ -101,7 +101,7 @@ func (c TransitGatewayStaticRoutesClientContext) List(orgIdParam string, project
 
 	case utl.Multitenancy, utl.Local, utl.VPC:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(orgIdParam, projectIdParam, transitGatewayIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

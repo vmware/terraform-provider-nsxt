@@ -56,7 +56,7 @@ func TestMockResourceNsxtPolicyShareCreate(t *testing.T) {
 	}
 
 	t.Run("Create success", func(t *testing.T) {
-		mockShareSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
+		mockShareSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), nil).Return(nil)
 		mockShareSDK.EXPECT().Get(gomock.Any()).Return(model.Share{
 			Id:              &shareID,
 			DisplayName:     &shareDisplayName,
@@ -167,7 +167,7 @@ func TestMockResourceNsxtPolicyShareUpdate(t *testing.T) {
 	}
 
 	t.Run("Update success", func(t *testing.T) {
-		mockShareSDK.EXPECT().Patch(shareID, gomock.Any()).Return(nil)
+		mockShareSDK.EXPECT().Patch(shareID, gomock.Any(), nil).Return(nil)
 		mockShareSDK.EXPECT().Get(shareID).Return(model.Share{
 			Id:              &shareID,
 			DisplayName:     &shareDisplayName,
@@ -218,7 +218,7 @@ func TestMockResourceNsxtPolicyShareDelete(t *testing.T) {
 	}
 
 	t.Run("Delete success", func(t *testing.T) {
-		mockShareSDK.EXPECT().Delete(shareID).Return(nil)
+		mockShareSDK.EXPECT().Delete(shareID, nil).Return(nil)
 
 		res := resourceNsxtPolicyShare()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
@@ -240,7 +240,7 @@ func TestMockResourceNsxtPolicyShareDelete(t *testing.T) {
 	})
 
 	t.Run("Delete fails when API returns error", func(t *testing.T) {
-		mockShareSDK.EXPECT().Delete(shareID).Return(errors.New("API error"))
+		mockShareSDK.EXPECT().Delete(shareID, nil).Return(errors.New("API error"))
 
 		res := resourceNsxtPolicyShare()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})

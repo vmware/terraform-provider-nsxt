@@ -65,11 +65,11 @@ func (c ShareClientContext) Delete(shareIdParam string) error {
 
 	case utl.Local:
 		client := c.Client.(client0.SharesClient)
-		err = client.Delete(shareIdParam)
+		err = client.Delete(shareIdParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.SharesClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, shareIdParam)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, shareIdParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -84,11 +84,11 @@ func (c ShareClientContext) Patch(shareIdParam string, shareParam model0.Share) 
 
 	case utl.Local:
 		client := c.Client.(client0.SharesClient)
-		err = client.Patch(shareIdParam, shareParam)
+		err = client.Patch(shareIdParam, shareParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.SharesClient)
-		err = client.Patch(utl.DefaultOrgID, c.ProjectID, shareIdParam, shareParam)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, shareIdParam, shareParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -104,11 +104,11 @@ func (c ShareClientContext) Update(shareIdParam string, shareParam model0.Share)
 
 	case utl.Local:
 		client := c.Client.(client0.SharesClient)
-		obj, err = client.Update(shareIdParam, shareParam)
+		obj, err = client.Update(shareIdParam, shareParam, nil)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.SharesClient)
-		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, shareIdParam, shareParam)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, shareIdParam, shareParam, nil)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

@@ -72,7 +72,7 @@ func (c RouteControllerClientContext) List(cursorParam *string, includeMarkForDe
 
 	case utl.Local:
 		client := c.Client.(client0.RouteControllersClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -216,7 +216,7 @@ func (c RouteControllerBgpNeighborClientContext) List(routerControllerIdParam st
 
 	case utl.Local:
 		client := c.Client.(rcBgpClient.NeighborsClient)
-		obj, err = client.List(routerControllerIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(routerControllerIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -313,7 +313,7 @@ func (c RouteControllerInterfaceClientContext) List(routerControllerIdParam stri
 
 	case utl.Local:
 		client := c.Client.(rcClient.InterfacesClient)
-		obj, err = client.List(routerControllerIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(routerControllerIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

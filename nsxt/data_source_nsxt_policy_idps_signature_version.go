@@ -101,7 +101,7 @@ func dataSourceNsxtPolicyIdpsSignatureVersionRead(d *schema.ResourceData, m inte
 		}
 	} else if objName != "" {
 		// List and find by display name
-		versionsList, listErr := client.List(nil, nil, nil, nil, nil, nil)
+		versionsList, listErr := client.List(nil, nil, nil, nil, nil, nil, nil)
 		if listErr != nil {
 			return handleListError("IdsSignatureVersion", listErr)
 		}

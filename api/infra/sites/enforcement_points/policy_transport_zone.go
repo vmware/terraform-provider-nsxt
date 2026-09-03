@@ -55,7 +55,7 @@ func (c PolicyTransportZoneClientContext) List(siteIdParam string, enforcementpo
 
 	case utl.Local:
 		client := c.Client.(client0.TransportZonesClient)
-		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(siteIdParam, enforcementpointIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
