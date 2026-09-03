@@ -49,7 +49,7 @@ The following arguments are supported:
     * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
     * `uplink_profile` - (Optional) Uplink host switch profile path.
     * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile path. Only applicable with VDS switch.
-    * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
+    * `ip_assignment` - (Optional) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
         * `static_ip` - (Optional) IP assignment specification for Static IP List.
             * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
