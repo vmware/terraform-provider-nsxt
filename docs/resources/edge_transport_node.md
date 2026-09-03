@@ -20,10 +20,10 @@ resource "nsxt_edge_transport_node" "test" {
       assigned_by_dhcp = true
     }
     transport_zone_endpoint {
-      transport_zone          = data.nsxt_policy_transport_zone.tz1.id
+      transport_zone          = data.nsxt_policy_transport_zone.tz1.path
       transport_zone_profiles = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
-    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.id]
+    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
@@ -55,7 +55,7 @@ resource "nsxt_edge_transport_node" "test" {
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are
 obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashicorp/vsphere/) provider.
 
-**NOTE** while policy path values are acceptable for `transport_zone`,  `host_switch_profile` attributes, it is better to use id values to avoid state issues.
+**NOTE:** `transport_zone`, `host_switch_profile`, `uplink_profile` and `vtep_ha_profile` must be policy paths. Bare UUIDs are no longer accepted.
 
 ## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
 
@@ -73,12 +73,12 @@ resource "nsxt_edge_transport_node" "test_node" {
       static_ip_pool = data.nsxt_policy_ip_pool.vtep_ip_pool.realized_id
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_policy_transport_zone.overlay_tz.id
+      transport_zone = data.nsxt_policy_transport_zone.overlay_tz.path
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_policy_transport_zone.vlan_tz.id
+      transport_zone = data.nsxt_policy_transport_zone.vlan_tz.path
     }
-    uplink_profile = data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.id
+    uplink_profile = data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.path
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
@@ -103,8 +103,8 @@ The following arguments are supported:
     * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
     * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
     * `host_switch_profile` - (Deprecated) Identifiers of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
-    * `uplink_profile` - (Optional) Uplink host switch profile id.
-    * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile id. Only applicable with VDS switch.
+    * `uplink_profile` - (Optional) Uplink host switch profile policy path.
+    * `vtep_ha_profile` - (Optional) VTEP high availability host switch profile policy path. Only applicable with VDS switch.
     * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
         * `no_ipv4` - (Optional) No IPv4 for this host switch.
@@ -137,7 +137,7 @@ The following arguments are supported:
         * `device_name` - (Required) Device name or key.
         * `uplink_name` - (Required) Uplink name for this Pnic.
     * `transport_zone_endpoint` - (Optional) Transport zone endpoints
-        * `transport_zone` - (Required) Unique ID identifying the transport zone for this endpoint.
+        * `transport_zone` - (Required) Policy path of the transport zone for this endpoint.
         * `transport_zone_profiles` - (Optional) Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node.
 * `external_id` - (Optional) ID of the Node.
 * `fqdn` - (Optional) Fully qualified domain name of the fabric node.
@@ -147,7 +147,7 @@ The following arguments are supported:
     * `form_factor` - (Optional) Accepted values - 'SMALL', 'MEDIUM', 'LARGE', 'XLARGE'. The default value is 'MEDIUM'.
     * `node_user_settings` - (Required) Node user settings.
         * `audit_password` - (Optional) Node audit user password.
-        * `audit_username` - (Optional) CLI "audit" username. Defaults to "audit".
+        * `audit_username` - (Optional, Computed) CLI "audit" username. When omitted, NSX defaults this to `audit`.
         * `cli_password` - (Required) Node cli password.
         * `cli_username` - (Optional) CLI "admin" username. Defaults to "admin".
         * `root_password` - (Required) Node root user password.
