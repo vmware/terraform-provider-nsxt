@@ -23,6 +23,13 @@ import (
 var cliHostTransportNodesClient = enforcement_points.NewHostTransportNodesClient
 var cliHostTransportNodeStateClient = host_transport_nodes.NewStateClient
 
+// hostTransportNodeStatePoll{Delay,Interval,Timeout} control the busy-wait performed
+// after Delete when remove_nsx_on_destroy is set. They are package-level vars (rather
+// than inline constants) so unit tests can shrink them to avoid real sleeps.
+var hostTransportNodeStatePollDelay = 5
+var hostTransportNodeStatePollInterval = 5
+var hostTransportNodeStatePollTimeout = 1200
+
 func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyHostTransportNodeCreate,
@@ -237,9 +244,9 @@ func getHostTransportNodeStateConf(connector client.Connector, d *schema.Resourc
 
 			return "notyet", "notyet", nil
 		},
-		Delay:        time.Duration(5) * time.Second,
-		Timeout:      time.Duration(1200) * time.Second,
-		PollInterval: time.Duration(5) * time.Second,
+		Delay:        time.Duration(hostTransportNodeStatePollDelay) * time.Second,
+		Timeout:      time.Duration(hostTransportNodeStatePollTimeout) * time.Second,
+		PollInterval: time.Duration(hostTransportNodeStatePollInterval) * time.Second,
 	}
 }
 

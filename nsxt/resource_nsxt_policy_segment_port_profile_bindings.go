@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/terraform-provider-nsxt/api/infra/segments/ports"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -154,7 +153,7 @@ func resourceNsxtPolicySegmentPortProfileBindingsDelete(d *schema.ResourceData, 
 	segmentId := getSegmentIdFromSegPath(segmentPath)
 	securityProfileBindingMapID := getBindingMapID(d, "security_profile")
 	if securityProfileBindingMapID != "" {
-		securityProfileClient := ports.NewPortSecurityProfileBindingMapsClient(context, connector)
+		securityProfileClient := cliPortSecurityProfileBindingMapsClient(context, connector)
 		err = securityProfileClient.Delete(segmentId, segmentPortID, securityProfileBindingMapID)
 		if err != nil {
 			return fmt.Errorf("Error deleting the security profile: %v", err)
@@ -162,7 +161,7 @@ func resourceNsxtPolicySegmentPortProfileBindingsDelete(d *schema.ResourceData, 
 	}
 	discoveryProfileBindingMapID := getBindingMapID(d, "discovery_profile")
 	if discoveryProfileBindingMapID != "" {
-		discoveryProfileClient := ports.NewPortDiscoveryProfileBindingMapsClient(context, connector)
+		discoveryProfileClient := cliPortDiscoveryProfileBindingMapsClient(context, connector)
 		err = discoveryProfileClient.Delete(segmentId, segmentPortID, discoveryProfileBindingMapID)
 		if err != nil {
 			return fmt.Errorf("Error deleting the discovery profile: %v", err)
@@ -170,7 +169,7 @@ func resourceNsxtPolicySegmentPortProfileBindingsDelete(d *schema.ResourceData, 
 	}
 	qosProfileBindingMapID := getBindingMapID(d, "qos_profile")
 	if qosProfileBindingMapID != "" {
-		qosProfileClient := ports.NewPortQosProfileBindingMapsClient(context, connector)
+		qosProfileClient := cliPortQosProfileBindingMapsClient(context, connector)
 		err = qosProfileClient.Delete(segmentId, segmentPortID, qosProfileBindingMapID)
 		if err != nil {
 			return fmt.Errorf("Error deleting the qos profile: %v", err)
