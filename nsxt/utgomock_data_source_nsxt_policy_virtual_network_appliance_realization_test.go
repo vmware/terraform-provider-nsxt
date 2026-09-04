@@ -96,6 +96,7 @@ func TestMockDataSourceNsxtPolicyVirtualNetworkApplianceRealization(t *testing.T
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
 			"path":    vnaPath,
 			"timeout": 1,
+			"delay":   0,
 		})
 		err := dataSourceNsxtPolicyVirtualNetworkApplianceRealizationRead(d, newGoMockProviderClient())
 		require.Error(t, err)
