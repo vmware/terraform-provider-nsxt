@@ -1,3 +1,9 @@
+//go:build unittest
+
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
+
 package nsxt
 
 import (
@@ -11,7 +17,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func TestProviderManagedTagsSearchQuery(t *testing.T) {
+func TestUnitNsxt_providerManagedTagsSearchQuery(t *testing.T) {
 	if got := providerManagedTagsSearchQuery(""); got != "" {
 		t.Fatalf("empty runID: want empty, got %q", got)
 	}
@@ -27,7 +33,7 @@ func TestProviderManagedTagsSearchQuery(t *testing.T) {
 	}
 }
 
-func TestBuildTagQuery(t *testing.T) {
+func TestUnitNsxt_buildTagQuery(t *testing.T) {
 	tagSchema := map[string]*schema.Schema{
 		"tag": {
 			Type:     schema.TypeSet,
@@ -101,7 +107,7 @@ func TestBuildTagQuery(t *testing.T) {
 	})
 }
 
-func TestAttachRulesByParentPathSecurityPolicy(t *testing.T) {
+func TestUnitNsxt_attachRulesByParentPathSecurityPolicy(t *testing.T) {
 	policyPathA := "/infra/domains/default/security-policies/pol-a"
 	policyPathB := "/infra/domains/default/security-policies/pol-b"
 
@@ -139,7 +145,7 @@ func TestAttachRulesByParentPathSecurityPolicy(t *testing.T) {
 	})
 }
 
-func TestEnsureProviderManagedTagsWithPatchFunc(t *testing.T) {
+func TestUnitNsxt_ensureProviderManagedTagsWithPatchFunc(t *testing.T) {
 	type testTagObj struct {
 		Tags []model.Tag
 	}
@@ -218,7 +224,7 @@ func int64Ptr(v int64) *int64 {
 	return &v
 }
 
-func TestGroupRulesByValidParentPath(t *testing.T) {
+func TestUnitNsxt_groupRulesByValidParentPath(t *testing.T) {
 	pathA := "/policies/a"
 	pathB := "/policies/b"
 	valid := map[string]struct{}{pathA: {}, pathB: {}}
@@ -286,7 +292,7 @@ func attachRulesToSecurityPoliciesForTest(parents []model.SecurityPolicy, rules 
 	)
 }
 
-func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
+func TestUnitNsxt_attachRulesByParentPathGatewayPolicy(t *testing.T) {
 	policyPathA := "/orgs/p/proj/vpcs/vpc/gateway-policies/pol-a"
 	policyPathB := "/orgs/p/proj/vpcs/vpc/gateway-policies/pol-b"
 
@@ -391,7 +397,7 @@ func TestAttachRulesByParentPathGatewayPolicy(t *testing.T) {
 	})
 }
 
-func TestGetQueryStringVPCScopedToProjectNotVPC(t *testing.T) {
+func TestUnitNsxt_getQueryStringVPCScopedToProjectNotVPC(t *testing.T) {
 	// VPCID must be omitted from the cache bucket key: NSX policy paths/IDs are unique
 	// within a project across all VPCs, and narrowing the key (and the underlying search)
 	// to a single VPC caused a fresh cache bucket per VPC, regressing cache mode below
@@ -414,7 +420,7 @@ func TestGetQueryStringVPCScopedToProjectNotVPC(t *testing.T) {
 	}
 }
 
-func TestProjectScopedSearchContextStripsVPCID(t *testing.T) {
+func TestUnitNsxt_projectScopedSearchContextStripsVPCID(t *testing.T) {
 	for _, clientType := range []utl.ClientType{utl.VPC, utl.Multitenancy} {
 		in := utl.SessionContext{ClientType: clientType, ProjectID: "proj-1", VPCID: "vpc-1"}
 		out := projectScopedSearchContext(in)
@@ -433,7 +439,7 @@ func TestProjectScopedSearchContextStripsVPCID(t *testing.T) {
 	}
 }
 
-func TestShouldIndexByPathForVPCScopedTypes(t *testing.T) {
+func TestUnitNsxt_shouldIndexByPathForVPCScopedTypes(t *testing.T) {
 	// VPC-scoped types must key by path, not short id: NSX ids for these types (often
 	// user-chosen via nsx_id) are only guaranteed unique within their own VPC, but the cache
 	// populate search/bucket for these types is now shared across all VPCs in a project.
@@ -456,7 +462,7 @@ func TestShouldIndexByPathForVPCScopedTypes(t *testing.T) {
 	}
 }
 
-func TestConverListToMapByTypeVpcScopedResourcesIndexedByPath(t *testing.T) {
+func TestUnitNsxt_converListToMapByTypeVpcScopedResourcesIndexedByPath(t *testing.T) {
 	// Two different VPCs in the same project can legitimately have a VpcSubnet with the same
 	// user-chosen short id (getOrGenerateID2 only checks uniqueness within the current VPC).
 	// Since the cache bucket for VPC-scoped types is now shared project-wide, both objects
@@ -484,7 +490,7 @@ func TestConverListToMapByTypeVpcScopedResourcesIndexedByPath(t *testing.T) {
 	}
 }
 
-func TestErrCacheUseBackendDirect(t *testing.T) {
+func TestUnitNsxt_errCacheUseBackendDirect(t *testing.T) {
 	if !errors.Is(errCacheUseBackendDirect, errCacheUseBackendDirect) {
 		t.Fatal("errors.Is should match sentinel to itself")
 	}
@@ -494,7 +500,7 @@ func TestErrCacheUseBackendDirect(t *testing.T) {
 	}
 }
 
-func TestReflectStringField(t *testing.T) {
+func TestUnitNsxt_reflectStringField(t *testing.T) {
 	t.Run("returns-pointer-value", func(t *testing.T) {
 		obj := &model.Group{DisplayName: strPtr("g1")}
 		got := reflectStringField(obj, "DisplayName")
@@ -532,7 +538,7 @@ func TestReflectStringField(t *testing.T) {
 	})
 }
 
-func TestCacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+func TestUnitNsxt_cacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
 	dsSchema := map[string]*schema.Schema{
 		"id":           getDataSourceIDSchema(),
 		"display_name": getDataSourceExtendedDisplayNameSchema(),
@@ -568,7 +574,7 @@ func TestCacheAwareDataSourceReadByIDBypassesCacheForShortIDOnPathIndexedTypes(t
 	})
 }
 
-func TestCacheAwareResourceReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+func TestUnitNsxt_cacheAwareResourceReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
 	// CacheAwareResourceRead's resourceID is a short id (not yet path) during the Create-then-Read
 	// sequence (path isn't set on d until the Read populates it from the live object) and after
 	// terraform import (importers call d.SetId(shortID) without setting path). Without this bypass,
@@ -633,7 +639,7 @@ func TestCacheAwareResourceReadBypassesCacheForShortIDOnPathIndexedTypes(t *test
 	})
 }
 
-func TestTryCacheReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
+func TestUnitNsxt_tryCacheReadBypassesCacheForShortIDOnPathIndexedTypes(t *testing.T) {
 	rSchema := map[string]*schema.Schema{
 		"path": getPathSchema(),
 	}
