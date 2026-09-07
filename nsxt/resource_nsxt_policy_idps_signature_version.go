@@ -9,8 +9,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 )
+
+// cliIdsSignatureVersionsClient is swapped out in unit tests to inject a mock client.
+var cliIdsSignatureVersionsClient = func(connector client.Connector) intrusion_services.SignatureVersionsClient {
+	return intrusion_services.NewSignatureVersionsClient(connector)
+}
 
 // NOTE: IDS Signature Versions are system-managed resources in NSX.
 // They are created automatically by NSX when signature updates are downloaded.
@@ -108,7 +114,7 @@ func resourceNsxtPolicyIdpsSignatureVersionCreate(d *schema.ResourceData, m inte
 	}
 
 	// Verify the version exists
-	client := intrusion_services.NewSignatureVersionsClient(connector)
+	client := cliIdsSignatureVersionsClient(connector)
 	_, err := client.Get(id)
 	if err != nil {
 		return handleCreateError("IdsSignatureVersion", id, err)
@@ -132,7 +138,7 @@ func resourceNsxtPolicyIdpsSignatureVersionRead(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error obtaining IDS Signature Version ID")
 	}
 
-	client := intrusion_services.NewSignatureVersionsClient(connector)
+	client := cliIdsSignatureVersionsClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IdsSignatureVersion", id, err)
@@ -179,7 +185,7 @@ func resourceNsxtPolicyIdpsSignatureVersionUpdate(d *schema.ResourceData, m inte
 		case "ACTIVE":
 			log.Printf("[INFO] Making IDS Signature Version %s ACTIVE", id)
 
-			client := intrusion_services.NewSignatureVersionsClient(connector)
+			client := cliIdsSignatureVersionsClient(connector)
 
 			// Get current version object
 			obj, err := client.Get(id)

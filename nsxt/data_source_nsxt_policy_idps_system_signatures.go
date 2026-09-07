@@ -10,10 +10,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services/signature_versions"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+// cliIdsSignaturesClient is swapped out in unit tests to inject a mock client.
+var cliIdsSignaturesClient = func(connector client.Connector) signature_versions.SignaturesClient {
+	return signature_versions.NewSignaturesClient(connector)
+}
 
 func dataSourceNsxtPolicyIdpsSystemSignatures() *schema.Resource {
 	return &schema.Resource{
@@ -168,7 +173,7 @@ func dataSourceNsxtPolicyIdpsSystemSignaturesRead(d *schema.ResourceData, m inte
 
 	// If version_id not specified, get the active version
 	if versionID == "" {
-		versionsClient := intrusion_services.NewSignatureVersionsClient(connector)
+		versionsClient := cliIdsSignatureVersionsClient(connector)
 		if versionsClient == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -210,7 +215,7 @@ func dataSourceNsxtPolicyIdpsSystemSignaturesRead(d *schema.ResourceData, m inte
 	d.Set("version_id", versionID)
 
 	// Get signatures client for the specific version
-	signaturesClient := signature_versions.NewSignaturesClient(connector)
+	signaturesClient := cliIdsSignaturesClient(connector)
 	if signaturesClient == nil {
 		return policyResourceNotSupportedError()
 	}

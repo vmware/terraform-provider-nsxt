@@ -10,10 +10,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services/custom_signature_versions"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+// cliIdsSettingsClient and cliIdsCustomSigSettingsClient are swapped out in unit tests to
+// inject mock clients.
+var cliIdsSettingsClient = func(connector client.Connector) security.IntrusionServicesClient {
+	return security.NewIntrusionServicesClient(connector)
+}
+
+var cliIdsCustomSigSettingsClient = func(connector client.Connector) custom_signature_versions.SettingsClient {
+	return custom_signature_versions.NewSettingsClient(connector)
+}
 
 var idpsOversubscriptionValues = []string{"BYPASSED", "DROPPED"}
 
@@ -101,7 +112,7 @@ func resourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Read IdsSettings
-	client := security.NewIntrusionServicesClient(connector)
+	client := cliIdsSettingsClient(connector)
 
 	obj, err := client.Get()
 	if err != nil {
@@ -123,7 +134,7 @@ func resourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{}) e
 	// Read IdsCustomSignatureSettings if custom_signature_version_id is set
 	customSigVersionID := d.Get("custom_signature_version_id").(string)
 	if customSigVersionID != "" {
-		customSigSettingsClient := custom_signature_versions.NewSettingsClient(connector)
+		customSigSettingsClient := cliIdsCustomSigSettingsClient(connector)
 		customSigSettings, err := customSigSettingsClient.Get(customSigVersionID)
 		if err != nil {
 			log.Printf("[WARN] Failed to read custom signature settings for version %s: %v", customSigVersionID, err)
@@ -167,7 +178,7 @@ func resourceNsxtPolicyIdpsSettingsUpdate(d *schema.ResourceData, m interface{})
 	}
 
 	// Get current revision
-	client := security.NewIntrusionServicesClient(connector)
+	client := cliIdsSettingsClient(connector)
 
 	existingObj, err := client.Get()
 	if err == nil && existingObj.Revision != nil {
@@ -195,7 +206,7 @@ func resourceNsxtPolicyIdpsSettingsUpdate(d *schema.ResourceData, m interface{})
 			EnableCustomSignatures: &enableCustomSig,
 		}
 
-		customSigSettingsClient := custom_signature_versions.NewSettingsClient(connector)
+		customSigSettingsClient := cliIdsCustomSigSettingsClient(connector)
 
 		// Get current revision
 		existingCustomSigSettings, err := customSigSettingsClient.Get(customSigVersionID)
@@ -232,7 +243,7 @@ func resourceNsxtPolicyIdpsSettingsDelete(d *schema.ResourceData, m interface{})
 	// Reset to default values
 	log.Printf("[INFO] Resetting IDPS Settings to defaults with ID %s (DELETE operation)", id)
 
-	client := security.NewIntrusionServicesClient(connector)
+	client := cliIdsSettingsClient(connector)
 
 	// Get current object to preserve revision
 	existingObj, err := client.Get()
@@ -271,7 +282,7 @@ func resourceNsxtPolicyIdpsSettingsDelete(d *schema.ResourceData, m interface{})
 			EnableCustomSignatures: &defaultEnableCustomSig,
 		}
 
-		customSigSettingsClient := custom_signature_versions.NewSettingsClient(connector)
+		customSigSettingsClient := cliIdsCustomSigSettingsClient(connector)
 
 		existingCustomSigSettings, err := customSigSettingsClient.Get(customSigVersionID)
 		if err == nil && existingCustomSigSettings.Revision != nil {

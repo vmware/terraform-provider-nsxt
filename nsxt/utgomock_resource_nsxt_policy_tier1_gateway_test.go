@@ -226,3 +226,226 @@ func TestMockResourceNsxtPolicyTier1GatewayDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_tier1GatewayAdvRulesRoundTrip(t *testing.T) {
+	t.Run("set then get round-trips the rules", func(t *testing.T) {
+		res := resourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
+
+		prefix := "GE"
+		rules := []nsxModel.RouteAdvertisementRule{
+			{
+				Name:                    strPtr("rule-1"),
+				Action:                  strPtr("PERMIT"),
+				Subnets:                 []string{"10.0.0.0/24"},
+				RouteAdvertisementTypes: []string{"TIER1_CONNECTED"},
+				PrefixOperator:          &prefix,
+			},
+		}
+
+		err := setAdvRulesInSchema(d, rules)
+		require.NoError(t, err)
+
+		out := getAdvRulesFromSchema(d)
+		require.Len(t, out, 1)
+		assert.Equal(t, "rule-1", *out[0].Name)
+		assert.Equal(t, "PERMIT", *out[0].Action)
+		assert.Equal(t, "GE", *out[0].PrefixOperator)
+		assert.ElementsMatch(t, []string{"10.0.0.0/24"}, out[0].Subnets)
+		assert.ElementsMatch(t, []string{"TIER1_CONNECTED"}, out[0].RouteAdvertisementTypes)
+	})
+
+	t.Run("empty rules round-trip to an empty list", func(t *testing.T) {
+		res := resourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
+
+		err := setAdvRulesInSchema(d, nil)
+		require.NoError(t, err)
+		assert.Empty(t, getAdvRulesFromSchema(d))
+	})
+}
+
+func TestMockResourceNsxtPolicyTier1GatewayExistsMocked(t *testing.T) {
+	t.Run("returns true when found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT1SDK, _, _, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		mockT1SDK.EXPECT().Get(t1GwID).Return(t1GatewayAPIResponse(), nil)
+
+		exists, err := resourceNsxtPolicyTier1GatewayExists(utl.SessionContext{ClientType: utl.Local}, t1GwID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("returns false when not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT1SDK, _, _, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		mockT1SDK.EXPECT().Get(t1GwID).Return(nsxModel.Tier1{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyTier1GatewayExists(utl.SessionContext{ClientType: utl.Local}, t1GwID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("propagates other API errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT1SDK, _, _, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		mockT1SDK.EXPECT().Get(t1GwID).Return(nsxModel.Tier1{}, vapiErrors.InternalServerError{})
+
+		_, err := resourceNsxtPolicyTier1GatewayExists(utl.SessionContext{ClientType: utl.Local}, t1GwID, nil)
+		require.Error(t, err)
+	})
+}
+
+func TestMockGetPolicyTier1GatewayLocaleServiceEntry(t *testing.T) {
+	ctx := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("returns the default-ID locale service when Get succeeds", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		edgeCluster := "/infra/edge-clusters/ec-1"
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{EdgeClusterPath: &edgeCluster}, nil)
+
+		obj, err := getPolicyTier1GatewayLocaleServiceEntry(ctx, t1GwID, nil)
+		require.NoError(t, err)
+		require.NotNil(t, obj)
+		assert.Equal(t, edgeCluster, *obj.EdgeClusterPath)
+	})
+
+	t.Run("falls back to listing and prefers an entry with an edge cluster path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		edgeCluster := "/infra/edge-clusters/ec-1"
+		resultCount := int64(2)
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, vapiErrors.NotFound{})
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			nsxModel.LocaleServicesListResult{
+				Results:     []nsxModel.LocaleServices{{}, {EdgeClusterPath: &edgeCluster}},
+				ResultCount: &resultCount,
+			}, nil,
+		)
+
+		obj, err := getPolicyTier1GatewayLocaleServiceEntry(ctx, t1GwID, nil)
+		require.NoError(t, err)
+		require.NotNil(t, obj)
+		assert.Equal(t, edgeCluster, *obj.EdgeClusterPath)
+	})
+
+	t.Run("falls back to any entry when none has an edge cluster path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		id := "ls-1"
+		resultCount := int64(1)
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, vapiErrors.NotFound{})
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			nsxModel.LocaleServicesListResult{Results: []nsxModel.LocaleServices{{Id: &id}}, ResultCount: &resultCount}, nil,
+		)
+
+		obj, err := getPolicyTier1GatewayLocaleServiceEntry(ctx, t1GwID, nil)
+		require.NoError(t, err)
+		require.NotNil(t, obj)
+		assert.Equal(t, "ls-1", *obj.Id)
+	})
+
+	t.Run("returns nil, nil when no locale services exist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		resultCount := int64(0)
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, vapiErrors.NotFound{})
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			nsxModel.LocaleServicesListResult{ResultCount: &resultCount}, nil,
+		)
+
+		obj, err := getPolicyTier1GatewayLocaleServiceEntry(ctx, t1GwID, nil)
+		require.NoError(t, err)
+		assert.Nil(t, obj)
+	})
+
+	t.Run("propagates the list error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, vapiErrors.NotFound{})
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			nsxModel.LocaleServicesListResult{}, vapiErrors.InternalServerError{},
+		)
+
+		_, err := getPolicyTier1GatewayLocaleServiceEntry(ctx, t1GwID, nil)
+		require.Error(t, err)
+	})
+}
+
+func TestMockInitImplicitTier1GatewayLocaleService(t *testing.T) {
+	ctx := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("create flow with edge_cluster_path builds a fresh locale service, no API call", func(t *testing.T) {
+		res := resourceNsxtPolicyTier1Gateway()
+		data := minimalT1GatewayData()
+		data["edge_cluster_path"] = "/infra/edge-clusters/ec-1"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		structValue, err := initImplicitTier1GatewayLocaleService(ctx, d, nil)
+		require.NoError(t, err)
+		assert.NotNil(t, structValue)
+	})
+
+	t.Run("create flow without edge_cluster_path clears it, no API call", func(t *testing.T) {
+		res := resourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
+
+		structValue, err := initImplicitTier1GatewayLocaleService(ctx, d, nil)
+		require.NoError(t, err)
+		assert.NotNil(t, structValue)
+	})
+
+	t.Run("update flow reuses the existing locale service entry", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		existingID := "custom-ls"
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{Id: &existingID}, nil)
+
+		res := resourceNsxtPolicyTier1Gateway()
+		data := minimalT1GatewayData()
+		data["edge_cluster_path"] = "/infra/edge-clusters/ec-1"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(t1GwID)
+
+		structValue, err := initImplicitTier1GatewayLocaleService(ctx, d, nil)
+		require.NoError(t, err)
+		assert.NotNil(t, structValue)
+	})
+
+	t.Run("update flow propagates the lookup error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockLSSDK, restore := setupT1GatewayMocks(t, ctrl)
+		defer restore()
+		mockLSSDK.EXPECT().Get(t1GwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, vapiErrors.NotFound{})
+		mockLSSDK.EXPECT().List(t1GwID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			nsxModel.LocaleServicesListResult{}, vapiErrors.InternalServerError{},
+		)
+
+		res := resourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
+		d.SetId(t1GwID)
+
+		_, err := initImplicitTier1GatewayLocaleService(ctx, d, nil)
+		require.Error(t, err)
+	})
+}

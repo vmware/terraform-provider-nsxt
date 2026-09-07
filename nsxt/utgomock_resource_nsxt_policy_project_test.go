@@ -18,10 +18,13 @@ import (
 	sdkprojects "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 	"go.uber.org/mock/gomock"
 
+	cliinfra "github.com/vmware/terraform-provider-nsxt/api/infra"
 	orgsapi "github.com/vmware/terraform-provider-nsxt/api/orgs"
 	"github.com/vmware/terraform-provider-nsxt/api/orgs/projects"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	networkspanmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	orgsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs"
+	projectsmocks "github.com/vmware/terraform-provider-nsxt/mocks/orgs/projects"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -94,6 +97,32 @@ func (vpcSecurityProfilesClientStub) Update(string, string, string, nsxModel.Vpc
 }
 
 var _ sdkprojects.VpcSecurityProfilesClient = vpcSecurityProfilesClientStub{}
+
+func setupNetworkSpansMock(ctrl *gomock.Controller) (*networkspanmocks.MockNetworkSpansClient, func()) {
+	mockSDK := networkspanmocks.NewMockNetworkSpansClient(ctrl)
+	mockWrapper := &cliinfra.NetworkSpanClientContext{
+		Client:     mockSDK,
+		ClientType: utl.Local,
+	}
+	original := cliNetworkSpansClient
+	cliNetworkSpansClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.NetworkSpanClientContext {
+		return mockWrapper
+	}
+	return mockSDK, func() { cliNetworkSpansClient = original }
+}
+
+func setupVpcSecurityProfilesMock(ctrl *gomock.Controller) (*projectsmocks.MockVpcSecurityProfilesClient, func()) {
+	mockSDK := projectsmocks.NewMockVpcSecurityProfilesClient(ctrl)
+	mockWrapper := &projects.VpcSecurityProfileClientContext{
+		Client:     mockSDK,
+		ClientType: utl.Multitenancy,
+	}
+	original := cliVpcSecurityProfilesClient
+	cliVpcSecurityProfilesClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *projects.VpcSecurityProfileClientContext {
+		return mockWrapper
+	}
+	return mockSDK, func() { cliVpcSecurityProfilesClient = original }
+}
 
 func setupVpcSecurityProfilesStub(t *testing.T) func() {
 	t.Helper()
@@ -307,6 +336,228 @@ func TestMockResourceNsxtPolicyProjectDelete(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
 
 		err := resourceNsxtPolicyProjectDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockGetDefaultSpan(t *testing.T) {
+	t.Run("returns the default span path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupNetworkSpansMock(ctrl)
+		defer restore()
+
+		isDefault, notDefault := true, false
+		defaultPath, otherPath := "/infra/network-spans/default", "/infra/network-spans/other"
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.NetworkSpanListResult{
+			Results: []nsxModel.NetworkSpan{
+				{Path: &otherPath, IsDefault: &notDefault},
+				{Path: &defaultPath, IsDefault: &isDefault},
+			},
+		}, nil)
+
+		path, err := getDefaultSpan(nil)
+		require.NoError(t, err)
+		assert.Equal(t, defaultPath, path)
+	})
+
+	t.Run("returns empty string on unauthorized error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupNetworkSpansMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.NetworkSpanListResult{}, vapiErrors.Unauthorized{})
+
+		path, err := getDefaultSpan(nil)
+		require.NoError(t, err)
+		assert.Empty(t, path)
+	})
+
+	t.Run("fails when no default span exists", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupNetworkSpansMock(ctrl)
+		defer restore()
+
+		notDefault := false
+		otherPath := "/infra/network-spans/other"
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.NetworkSpanListResult{
+			Results: []nsxModel.NetworkSpan{{Path: &otherPath, IsDefault: &notDefault}},
+		}, nil)
+
+		_, err := getDefaultSpan(nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "no default span path found")
+	})
+
+	t.Run("propagates other API errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupNetworkSpansMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.NetworkSpanListResult{}, vapiErrors.InternalServerError{})
+
+		_, err := getDefaultSpan(nil)
+		require.Error(t, err)
+	})
+}
+
+func TestMockPatchVpcSecurityProfile(t *testing.T) {
+	t.Run("patches with enabled true from schema", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		name := "default"
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{DisplayName: &name}, nil)
+		mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, "default", gomock.Any()).DoAndReturn(
+			func(_, _, _ string, obj nsxModel.VpcSecurityProfile) error {
+				assert.True(t, *obj.NorthSouthFirewall.Enabled)
+				return nil
+			},
+		)
+
+		res := resourceNsxtPolicyProject()
+		data := minimalProjectData()
+		data["default_security_profile"] = []interface{}{
+			map[string]interface{}{
+				"north_south_firewall": []interface{}{
+					map[string]interface{}{"enabled": true},
+				},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := patchVpcSecurityProfile(d, nil, projectID)
+		require.NoError(t, err)
+	})
+
+	t.Run("defaults to disabled when default_security_profile is unset", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{}, nil)
+		mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, "default", gomock.Any()).DoAndReturn(
+			func(_, _, _ string, obj nsxModel.VpcSecurityProfile) error {
+				assert.False(t, *obj.NorthSouthFirewall.Enabled)
+				return nil
+			},
+		)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := patchVpcSecurityProfile(d, nil, projectID)
+		require.NoError(t, err)
+	})
+
+	t.Run("fails when the profile is not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := patchVpcSecurityProfile(d, nil, projectID)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to fetch")
+	})
+}
+
+func TestMockSetVpcSecurityProfileInSchema(t *testing.T) {
+	t.Run("sets default_security_profile from the API response", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		enabled := true
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{
+			NorthSouthFirewall: &nsxModel.NorthSouthFirewall{Enabled: &enabled},
+		}, nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := setVpcSecurityProfileInSchema(d, nil, projectID)
+		require.NoError(t, err)
+		dsp := d.Get("default_security_profile").([]interface{})
+		require.Len(t, dsp, 1)
+	})
+
+	t.Run("no-ops when the profile is not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := setVpcSecurityProfileInSchema(d, nil, projectID)
+		require.NoError(t, err)
+	})
+
+	t.Run("propagates other API errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSecurityProfilesMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, "default").Return(nsxModel.VpcSecurityProfile{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+
+		err := setVpcSecurityProfileInSchema(d, nil, projectID)
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyProjectExistsMocked(t *testing.T) {
+	t.Run("returns true when found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupProjectMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil)
+
+		exists, err := resourceNsxtPolicyProjectExists(projectID, nil, false)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("returns false when not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupProjectMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(nsxModel.Project{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyProjectExists(projectID, nil, false)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("propagates other API errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupProjectMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(nsxModel.Project{}, vapiErrors.InternalServerError{})
+
+		_, err := resourceNsxtPolicyProjectExists(projectID, nil, false)
 		require.Error(t, err)
 	})
 }

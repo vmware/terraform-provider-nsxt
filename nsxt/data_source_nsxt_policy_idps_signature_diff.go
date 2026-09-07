@@ -6,8 +6,14 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services/custom_signature_versions"
 )
+
+// cliIdsCustomSignaturesDiffClient is swapped out in unit tests to inject a mock client.
+var cliIdsCustomSignaturesDiffClient = func(connector client.Connector) custom_signature_versions.CustomSignaturesDiffClient {
+	return custom_signature_versions.NewCustomSignaturesDiffClient(connector)
+}
 
 func dataSourceNsxtPolicyIdpsSignatureDiff() *schema.Resource {
 	return &schema.Resource{
@@ -55,7 +61,7 @@ func dataSourceNsxtPolicyIdpsSignatureDiffRead(d *schema.ResourceData, m interfa
 	}
 
 	versionID := d.Get("signature_version_id").(string)
-	client := custom_signature_versions.NewCustomSignaturesDiffClient(connector)
+	client := cliIdsCustomSignaturesDiffClient(connector)
 	diff, err := client.Get(versionID)
 	if err != nil {
 		return handleDataSourceReadError(d, "IdsCustomSignaturesDiff", versionID, err)

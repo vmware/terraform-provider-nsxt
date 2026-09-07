@@ -489,3 +489,146 @@ func TestMockResourceNsxtPolicyIPSecVpnSessionTier1Locale(t *testing.T) {
 		assert.Contains(t, err.Error(), "project context is not supported")
 	})
 }
+
+func TestUnitNsxt_nsxtVpnSessionImporter(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnSession()
+
+	t.Run("valid path sets id, service_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/t1-gw-1/locale-services/default/ipsec-vpn-services/svc-1/sessions/sess-1")
+
+		out, err := nsxtVpnSessionImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "sess-1", d.Id())
+		assert.Equal(t, "/infra/tier-1s/t1-gw-1/locale-services/default/ipsec-vpn-services/svc-1", d.Get("service_path"))
+	})
+
+	t.Run("project-scoped path sets context", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/orgs/default/projects/proj-1/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1/sessions/sess-1")
+
+		out, err := nsxtVpnSessionImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		ctxList := d.Get("context").([]interface{})
+		require.Len(t, ctxList, 1)
+		assert.Equal(t, "proj-1", ctxList[0].(map[string]interface{})["project_id"])
+	})
+
+	t.Run("too-short path fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/t1-gw-1")
+
+		_, err := nsxtVpnSessionImporter(d, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("path without /sessions/ segment fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1/foo/bar/baz")
+
+		_, err := nsxtVpnSessionImporter(d, nil)
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_parseIPSecVPNServicePolicyPath(t *testing.T) {
+	t.Run("T0 non-locale path", func(t *testing.T) {
+		isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath("/infra/tier-0s/t0-gw-1/ipsec-vpn-services/svc-1")
+		require.NoError(t, err)
+		assert.True(t, isT0)
+		assert.Equal(t, "t0-gw-1", gwID)
+		assert.Equal(t, "", localeServiceID)
+		assert.Equal(t, "svc-1", serviceID)
+	})
+
+	t.Run("T1 locale-service path", func(t *testing.T) {
+		isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath("/infra/tier-1s/t1-gw-1/locale-services/default/ipsec-vpn-services/svc-1")
+		require.NoError(t, err)
+		assert.False(t, isT0)
+		assert.Equal(t, "t1-gw-1", gwID)
+		assert.Equal(t, "default", localeServiceID)
+		assert.Equal(t, "svc-1", serviceID)
+	})
+
+	t.Run("missing tier segment fails", func(t *testing.T) {
+		_, _, _, _, err := parseIPSecVPNServicePolicyPath("/infra/foo/bar/ipsec-vpn-services/svc-1")
+		require.Error(t, err)
+	})
+
+	t.Run("missing ipsec-vpn-services segment fails", func(t *testing.T) {
+		_, _, _, _, err := parseIPSecVPNServicePolicyPath("/infra/tier-1s/t1-gw-1")
+		require.Error(t, err)
+	})
+
+	t.Run("too-short path fails", func(t *testing.T) {
+		_, _, _, _, err := parseIPSecVPNServicePolicyPath("x")
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_getIPSecVPNSessionFromSchemaValidation(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnSession()
+
+	t.Run("route-based session requires ip_addresses and prefix_length", func(t *testing.T) {
+		data := minimalIPSecSessionData()
+		delete(data, "ip_addresses")
+		delete(data, "prefix_length")
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		_, err := getIPSecVPNSessionFromSchema(d)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Route Based VPN")
+	})
+
+	t.Run("unknown vpn_type fails", func(t *testing.T) {
+		data := minimalIPSecSessionData()
+		data["vpn_type"] = "BogusType"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		_, err := getIPSecVPNSessionFromSchema(d)
+		require.Error(t, err)
+	})
+
+	t.Run("policy-based session converts successfully", func(t *testing.T) {
+		data := minimalIPSecSessionData()
+		data["vpn_type"] = policyBasedIPSecVpnSession
+		delete(data, "ip_addresses")
+		delete(data, "prefix_length")
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		sv, err := getIPSecVPNSessionFromSchema(d)
+		require.NoError(t, err)
+		assert.NotNil(t, sv)
+	})
+}
+
+func TestMockResourceNsxtPolicyIPSecVpnSessionExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupIPSecSessionMock(t, ctrl)
+	defer restore()
+
+	t.Run("Get succeeds means it exists", func(t *testing.T) {
+		sv := ipsecRouteBasedStructValue(t, ipsecSessionID, "Test IPSec Session")
+		mockSDK.EXPECT().Get(ipsecSessionGwID, ipsecSessionSvcID, ipsecSessionID).Return(sv, nil)
+
+		exists, err := resourceNsxtPolicyIPSecVpnSessionExists(ipsecSessionServicePath, ipsecSessionID, nil, utl.SessionContext{ClientType: utl.Local})
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("NotFound means it doesn't exist", func(t *testing.T) {
+		mockSDK.EXPECT().Get(ipsecSessionGwID, ipsecSessionSvcID, ipsecSessionID).Return(nil, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyIPSecVpnSessionExists(ipsecSessionServicePath, ipsecSessionID, nil, utl.SessionContext{ClientType: utl.Local})
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("invalid service path errors", func(t *testing.T) {
+		_, err := resourceNsxtPolicyIPSecVpnSessionExists("not-a-valid-path", ipsecSessionID, nil, utl.SessionContext{ClientType: utl.Local})
+		require.Error(t, err)
+	})
+}

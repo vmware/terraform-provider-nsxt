@@ -13,7 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
 	ippoolsapi "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
@@ -44,6 +47,24 @@ func minimalStaticSubnetData() map[string]interface{} {
 	}
 }
 
+func staticSubnetAPIStructValue(t *testing.T) *data.StructValue {
+	displayName := "Test Static Subnet"
+	description := "Test static subnet"
+	gateway := "10.0.0.1"
+	obj := model.IpAddressPoolStaticSubnet{
+		Id:           &staticSubnetID,
+		DisplayName:  &displayName,
+		Description:  &description,
+		ResourceType: "IpAddressPoolStaticSubnet",
+		Cidr:         &staticSubnetCIDR,
+		GatewayIp:    &gateway,
+	}
+	converter := bindings.NewTypeConverter()
+	dataValue, errs := converter.ConvertToVapi(obj, model.IpAddressPoolStaticSubnetBindingType())
+	require.Empty(t, errs)
+	return dataValue.(*data.StructValue)
+}
+
 func setupStaticSubnetMock(t *testing.T, ctrl *gomock.Controller) (*ipSubnetMocks.MockIpSubnetsClient, func()) {
 	mockSDK := ipSubnetMocks.NewMockIpSubnetsClient(ctrl)
 	mockWrapper := &ippoolsapi.StructValueClientContext{
@@ -72,6 +93,34 @@ func TestMockResourceNsxtPolicyIPPoolStaticSubnetCreate(t *testing.T) {
 		err := resourceNsxtPolicyIPPoolStaticSubnetCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "already exists")
+	})
+
+	t.Run("Create success", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(nil, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(staticSubnetPoolID, staticSubnetID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(staticSubnetAPIStructValue(t), nil),
+		)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, staticSubnetID, d.Id())
+	})
+
+	t.Run("Create propagates a Patch error", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(nil, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(staticSubnetPoolID, staticSubnetID, gomock.Any()).Return(vapiErrors.InternalServerError{}),
+		)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }
 
@@ -111,12 +160,36 @@ func TestMockResourceNsxtPolicyIPPoolStaticSubnetRead(t *testing.T) {
 		err := resourceNsxtPolicyIPPoolStaticSubnetRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Read success populates fields from the API object", func(t *testing.T) {
+		mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(staticSubnetAPIStructValue(t), nil)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, staticSubnetCIDR, d.Get("cidr"))
+		assert.Equal(t, "10.0.0.1", d.Get("gateway"))
+	})
+
+	t.Run("Read succeeds when the ID is a path and gets normalized", func(t *testing.T) {
+		mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(staticSubnetAPIStructValue(t), nil)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId("/infra/ip-pools/pool-2/ip-subnets/" + staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
 }
 
 func TestMockResourceNsxtPolicyIPPoolStaticSubnetUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	_, restore := setupStaticSubnetMock(t, ctrl)
+	mockSDK, restore := setupStaticSubnetMock(t, ctrl)
 	defer restore()
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
@@ -126,12 +199,37 @@ func TestMockResourceNsxtPolicyIPPoolStaticSubnetUpdate(t *testing.T) {
 		err := resourceNsxtPolicyIPPoolStaticSubnetUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Update success", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(staticSubnetPoolID, staticSubnetID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(staticSubnetAPIStructValue(t), nil),
+		)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update propagates a Patch error", func(t *testing.T) {
+		mockSDK.EXPECT().Patch(staticSubnetPoolID, staticSubnetID, gomock.Any()).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
 }
 
 func TestMockResourceNsxtPolicyIPPoolStaticSubnetDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	_, restore := setupStaticSubnetMock(t, ctrl)
+	mockSDK, restore := setupStaticSubnetMock(t, ctrl)
 	defer restore()
 
 	t.Run("Delete fails when ID is empty", func(t *testing.T) {
@@ -140,5 +238,45 @@ func TestMockResourceNsxtPolicyIPPoolStaticSubnetDelete(t *testing.T) {
 
 		err := resourceNsxtPolicyIPPoolStaticSubnetDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Delete success", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(staticSubnetPoolID, staticSubnetID, nil).Return(nil)
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Delete propagates an API error", func(t *testing.T) {
+		mockSDK.EXPECT().Delete(staticSubnetPoolID, staticSubnetID, nil).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(t *testing.T) {
+	t.Run("converts schema data to a StructValue round-trippable back to the model", func(t *testing.T) {
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+
+		sv, err := resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d, staticSubnetID)
+		require.NoError(t, err)
+		require.NotNil(t, sv)
+
+		converter := bindings.NewTypeConverter()
+		golangValue, errs := converter.ConvertToGolang(sv, model.IpAddressPoolStaticSubnetBindingType())
+		require.Empty(t, errs)
+		obj := golangValue.(model.IpAddressPoolStaticSubnet)
+		assert.Equal(t, staticSubnetCIDR, *obj.Cidr)
+		assert.Equal(t, staticSubnetID, *obj.Id)
 	})
 }

@@ -201,3 +201,159 @@ func TestMockResourceNsxtPolicyPredefinedGatewayPolicyDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockResourceNsxtPolicyPredefinedGatewayPolicyUpdateSystemPolicy(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, _, restore := setupPredefinedGwPolicyMock(t, ctrl)
+	defer restore()
+
+	t.Run("Update fails when policy is a system policy", func(t *testing.T) {
+		systemCategory := "SystemRules"
+		systemPolicy := predefinedGwPolicyAPIResponse()
+		systemPolicy.Category = &systemCategory
+		mockSDK.EXPECT().Get(predefinedGwPolicyDomain, predefinedGwPolicyID).Return(systemPolicy, nil)
+
+		res := resourceNsxtPolicyPredefinedGatewayPolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedGwPolicyData())
+		d.SetId(predefinedGwPolicyID)
+
+		err := resourceNsxtPolicyPredefinedGatewayPolicyUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "System policy")
+	})
+
+	t.Run("Update fails when path has no domain segment", func(t *testing.T) {
+		res := resourceNsxtPolicyPredefinedGatewayPolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"path": "not-a-valid-path"})
+		d.SetId(predefinedGwPolicyID)
+
+		err := resourceNsxtPolicyPredefinedGatewayPolicyUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_revertGatewayPolicyDefaultRule(t *testing.T) {
+	id := "rule-1"
+	description := "custom description"
+	action := nsxModel.Rule_ACTION_DROP
+	tags := []nsxModel.Tag{{Scope: strPtr("s"), Tag: strPtr("t")}}
+	rule := nsxModel.Rule{Id: &id, Description: &description, Action: &action, Tags: tags}
+
+	reverted := revertGatewayPolicyDefaultRule(rule)
+	assert.Equal(t, "", *reverted.Description)
+	assert.Equal(t, nsxModel.Rule_ACTION_ALLOW, *reverted.Action)
+	assert.Empty(t, reverted.Tags)
+}
+
+func TestUnitNsxt_createPolicyChildRule(t *testing.T) {
+	ruleID := "rule-1"
+	rule := nsxModel.Rule{Id: &ruleID}
+
+	dataValue, err := createPolicyChildRule(ruleID, rule, false)
+	require.NoError(t, err)
+	assert.NotNil(t, dataValue)
+
+	deleteValue, err := createPolicyChildRule(ruleID, rule, true)
+	require.NoError(t, err)
+	assert.NotNil(t, deleteValue)
+}
+
+func TestUnitNsxt_createChildDomainWithGatewayPolicy(t *testing.T) {
+	policyID := "default"
+	policy := nsxModel.GatewayPolicy{Id: &policyID}
+
+	dataValue, err := createChildDomainWithGatewayPolicy("default", policyID, policy)
+	require.NoError(t, err)
+	assert.NotNil(t, dataValue)
+}
+
+func TestUnitNsxt_revertPolicyPredefinedGatewayPolicy(t *testing.T) {
+	defaultRuleID := "default-rule"
+	nonDefaultRuleID := "custom-rule"
+	isDefault := true
+	notDefault := false
+	tags := []nsxModel.Tag{{Scope: strPtr("s"), Tag: strPtr("t")}}
+
+	policy := nsxModel.GatewayPolicy{
+		Rules: []nsxModel.Rule{
+			{Id: &defaultRuleID, IsDefault: &isDefault},
+			{Id: &nonDefaultRuleID, IsDefault: &notDefault},
+		},
+		Tags: tags,
+	}
+
+	reverted, err := revertPolicyPredefinedGatewayPolicy(policy, newGoMockProviderClient())
+	require.NoError(t, err)
+	assert.Equal(t, "", *reverted.Description)
+	assert.Nil(t, reverted.Rules)
+	assert.Len(t, reverted.Children, 2)
+	assert.Empty(t, reverted.Tags)
+}
+
+func TestUnitNsxt_setPolicyDefaultRulesInSchema(t *testing.T) {
+	res := resourceNsxtPolicyPredefinedGatewayPolicy()
+	d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedGwPolicyData())
+
+	ruleID := "rule-1"
+	description := "a default rule"
+	scope := []string{"ANY"}
+	rules := []nsxModel.Rule{{Id: &ruleID, Description: &description, Scope: scope}}
+
+	err := setPolicyDefaultRulesInSchema(d, rules)
+	require.NoError(t, err)
+	set := d.Get("default_rule").(*schema.Set)
+	assert.Equal(t, 1, set.Len())
+}
+
+func TestUnitNsxt_updateGatewayPolicyDefaultRuleByScope(t *testing.T) {
+	res := resourceNsxtPolicyPredefinedGatewayPolicy()
+
+	t.Run("matches rule by scope and updates fields", func(t *testing.T) {
+		data := minimalPredefinedGwPolicyData()
+		data["default_rule"] = []interface{}{
+			map[string]interface{}{
+				"nsx_id":      "rule-1",
+				"scope":       "/infra/domains/default/groups/g1",
+				"description": "updated desc",
+				"action":      nsxModel.Rule_ACTION_DROP,
+				"logged":      true,
+				"log_label":   "lbl",
+				"tag":         []interface{}{},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		ruleID := "rule-1"
+		rule := nsxModel.Rule{Id: &ruleID, Scope: []string{"/infra/domains/default/groups/g1"}}
+
+		updated := updateGatewayPolicyDefaultRuleByScope(rule, d, nil, false)
+		require.NotNil(t, updated)
+		assert.Equal(t, "updated desc", *updated.Description)
+		assert.Equal(t, nsxModel.Rule_ACTION_DROP, *updated.Action)
+	})
+
+	t.Run("no match and not previously deleted returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedGwPolicyData())
+
+		ruleID := "rule-unmatched"
+		rule := nsxModel.Rule{Id: &ruleID, Scope: []string{"/infra/domains/default/groups/other"}}
+
+		updated := updateGatewayPolicyDefaultRuleByScope(rule, d, nil, false)
+		assert.Nil(t, updated)
+	})
+}
+
+func TestUnitNsxt_nsxtPredefinedPolicyImporter(t *testing.T) {
+	res := resourceNsxtPolicyPredefinedGatewayPolicy()
+
+	t.Run("non-policy-path ID sets path and id directly", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		out, err := nsxtPredefinedPolicyImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "plain-id", d.Get("path"))
+	})
+}
