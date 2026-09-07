@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/proxy"
 )
 
 func dataSourceNsxtProxyConfig() *schema.Resource {
@@ -68,7 +67,7 @@ func dataSourceNsxtProxyConfigRead(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Reading Proxy Config data source with ID %s", id)
 
 	// Create proxy config client
-	client := proxy.NewConfigClient(connector)
+	client := cliProxyConfigClient(connector)
 
 	// Get proxy configuration
 	proxyConfig, err := client.Get()

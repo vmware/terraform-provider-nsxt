@@ -10,9 +10,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+// cliClusterSecurityConfigsClient is wrapped in a package-level var (returning the
+// exported ClusterConfigsClient interface) so it can be substituted with a mock in tests.
+var cliClusterSecurityConfigsClient = func(connector client.Connector) security.ClusterConfigsClient {
+	return security.NewClusterConfigsClient(connector)
+}
 
 func resourceNsxtPolicyClusterSecurityConfig() *schema.Resource {
 	return &schema.Resource{
@@ -137,7 +144,7 @@ func resourceNsxtPolicyClusterSecurityConfigRead(d *schema.ResourceData, m inter
 	}
 
 	connector := getPolicyConnector(m)
-	client := security.NewClusterConfigsClient(connector)
+	client := cliClusterSecurityConfigsClient(connector)
 
 	clusterID := d.Id()
 	if clusterID == "" {
@@ -160,7 +167,7 @@ func resourceNsxtPolicyClusterSecurityConfigUpdate(d *schema.ResourceData, m int
 	}
 
 	connector := getPolicyConnector(m)
-	client := security.NewClusterConfigsClient(connector)
+	client := cliClusterSecurityConfigsClient(connector)
 
 	clusterID := d.Id()
 	if clusterID == "" {
@@ -186,7 +193,7 @@ func resourceNsxtPolicyClusterSecurityConfigDelete(d *schema.ResourceData, m int
 	}
 
 	connector := getPolicyConnector(m)
-	client := security.NewClusterConfigsClient(connector)
+	client := cliClusterSecurityConfigsClient(connector)
 
 	clusterID := d.Id()
 	if clusterID == "" {
