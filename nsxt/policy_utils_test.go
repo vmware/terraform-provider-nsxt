@@ -9,12 +9,14 @@ package nsxt
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"go.uber.org/mock/gomock"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -485,4 +487,55 @@ func TestUnitNsxt_nsxtTGWRoutingChildResourceImporter(t *testing.T) {
 func TestUnitNsxt_getVpcParentsFromContext(t *testing.T) {
 	out := getVpcParentsFromContext(utl.SessionContext{ProjectID: "proj1", VPCID: "vpc1"})
 	assert.Equal(t, []string{utl.DefaultOrgID, "proj1", "vpc1"}, out)
+}
+
+func TestUnitNsxt_nsxtPolicyWaitForRealizationStateConf(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupRealizationInfoMock(t, ctrl)
+	defer restore()
+
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+		"context": getContextSchema(false, false, true),
+	}, map[string]interface{}{})
+	m := newGoMockProviderClient()
+
+	conf := nsxtPolicyWaitForRealizationStateConf(nil, d, m, "/infra/tier-1s/t1", 5)
+	require.NotNil(t, conf)
+	assert.ElementsMatch(t, []string{"UNKNOWN", "UNREALIZED"}, conf.Pending)
+	assert.ElementsMatch(t, []string{"REALIZED", "ERROR"}, conf.Target)
+	assert.Equal(t, 5*time.Second, conf.Timeout)
+	assert.Equal(t, 1*time.Second, conf.MinTimeout)
+	assert.Equal(t, 1*time.Second, conf.Delay)
+
+	t.Run("refresh finds the realized entry", func(t *testing.T) {
+		state := "REALIZED"
+		mockSDK.EXPECT().List("/infra/tier-1s/t1", (*string)(nil)).Return(model.GenericPolicyRealizedResourceListResult{
+			Results: []model.GenericPolicyRealizedResource{{State: &state}},
+		}, nil)
+
+		obj, gotState, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "REALIZED", gotState)
+		assert.NotNil(t, obj)
+	})
+
+	t.Run("refresh reports unknown when nothing realized yet", func(t *testing.T) {
+		mockSDK.EXPECT().List("/infra/tier-1s/t1", (*string)(nil)).Return(model.GenericPolicyRealizedResourceListResult{}, nil)
+
+		obj, gotState, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "UNKNOWN", gotState)
+		assert.Nil(t, obj)
+	})
+
+	t.Run("refresh surfaces API errors", func(t *testing.T) {
+		mockSDK.EXPECT().List("/infra/tier-1s/t1", (*string)(nil)).Return(
+			model.GenericPolicyRealizedResourceListResult{}, errors.New("boom"),
+		)
+
+		_, _, err := conf.Refresh()
+		require.Error(t, err)
+		assert.Equal(t, "boom", err.Error())
+	})
 }
