@@ -35,7 +35,7 @@ Learn more:
 
   For general information about Terraform, visit [HashiCorp Developer][terraform-install] and [the project][terraform-github] on GitHub.
 
-- [Go 1.23.0][golang-install]
+- [Go 1.26.6][golang-install]
 
   Required, if [building][provider-build] and [testing][provider-test].
 
