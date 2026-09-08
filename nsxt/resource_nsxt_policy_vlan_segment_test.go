@@ -180,7 +180,7 @@ func TestAccResourceNsxtPolicyVlanSegment_noTransportZone(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 				),
 			},
 			{
@@ -194,7 +194,7 @@ func TestAccResourceNsxtPolicyVlanSegment_noTransportZone(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 				),
 			},
 		},
