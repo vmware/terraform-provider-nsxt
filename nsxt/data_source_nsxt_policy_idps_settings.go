@@ -9,8 +9,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services/custom_signature_versions"
 )
 
 func dataSourceNsxtPolicyIdpsSettings() *schema.Resource {
@@ -60,7 +58,7 @@ func dataSourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{})
 	}
 
 	// Read IdsSettings
-	client := security.NewIntrusionServicesClient(connector)
+	client := cliIdsSettingsClient(connector)
 
 	obj, err := client.Get()
 	if err != nil {
@@ -80,7 +78,7 @@ func dataSourceNsxtPolicyIdpsSettingsRead(d *schema.ResourceData, m interface{})
 	// Read IdsCustomSignatureSettings if custom_signature_version_id is provided
 	customSigVersionID := d.Get("custom_signature_version_id").(string)
 	if customSigVersionID != "" {
-		customSigSettingsClient := custom_signature_versions.NewSettingsClient(connector)
+		customSigSettingsClient := cliIdsCustomSigSettingsClient(connector)
 		customSigSettings, err := customSigSettingsClient.Get(customSigVersionID)
 		if err != nil {
 			log.Printf("[WARN] Failed to read custom signature settings for version %s: %v", customSigVersionID, err)

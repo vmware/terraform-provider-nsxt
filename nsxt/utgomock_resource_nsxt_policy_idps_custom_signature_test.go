@@ -355,6 +355,281 @@ func TestMockNsxtIdpsCustomSignatureCountPreview(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtPolicyIdpsCustomSignatureCreateMocked(t *testing.T) {
+	t.Run("Create succeeds without publish (validate-only, warns on validate failure)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+
+		mockVersions.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureCreateActionAdd).Return(nil)
+		sigID := "sig-1"
+		origSig := `alert tcp any any -> any 80 (msg:"Test"; sid:9000001; rev:1;)`
+		mockSigs.EXPECT().List("default", nil, gomock.Any(), nil, nil, nil, gomock.Any(), nil, nil).Return(
+			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID, OriginalSignature: &origSig}}}, nil,
+		)
+		rev := int64(1)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionValidate).Return(vapiErrors.InternalServerError{})
+
+		// Read after create
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{OriginalSignature: &origSig}, nil)
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+
+		err := resourceNsxtPolicyIdpsCustomSignatureCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "default/sig-1", d.Id())
+	})
+
+	t.Run("Create with publish=true validates and publishes", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+
+		mockVersions.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureCreateActionAdd).Return(nil)
+		sigID := "sig-1"
+		origSig := `alert tcp any any -> any 80 (msg:"Test"; sid:9000001; rev:1;)`
+		mockSigs.EXPECT().List("default", nil, gomock.Any(), nil, nil, nil, gomock.Any(), nil, nil).Return(
+			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &sigID, OriginalSignature: &origSig}}}, nil,
+		)
+		rev := int64(1)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil).Times(2)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionValidate).Return(nil)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionPublish).Return(nil)
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{OriginalSignature: &origSig}, nil)
+
+		data := minimalIdpsCustomSigData()
+		data["publish"] = true
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIdpsCustomSignatureCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Create fails when signature is empty", func(t *testing.T) {
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		data := minimalIdpsCustomSigData()
+		data["signature"] = ""
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIdpsCustomSignatureCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "signature is required")
+	})
+
+	t.Run("Create fails when the ADD call errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockVersions.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureCreateActionAdd).Return(vapiErrors.InternalServerError{})
+		_ = mockSigs
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+
+		err := resourceNsxtPolicyIdpsCustomSignatureCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Create fails when the newly added signature can't be found in the list", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockVersions.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureCreateActionAdd).Return(nil)
+		mockSigs.EXPECT().List("default", nil, gomock.Any(), nil, nil, nil, gomock.Any(), nil, nil).Return(
+			model.IdsCustomSignatureListResult{}, nil,
+		)
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+
+		err := resourceNsxtPolicyIdpsCustomSignatureCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to find newly created")
+	})
+}
+
+func TestMockResourceNsxtPolicyIdpsCustomSignatureReadMocked(t *testing.T) {
+	t.Run("Read succeeds via direct Get", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		name := "sig-name"
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{DisplayName: &name}, nil)
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "sig-name", d.Get("display_name"))
+	})
+
+	t.Run("Read falls back to list search on NotFound, clears state when absent", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{}, vapiErrors.NotFound{})
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			model.IdsCustomSignatureListResult{}, nil,
+		).AnyTimes()
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Id())
+	})
+
+	t.Run("Read propagates non-NotFound errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, _, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyIdpsCustomSignatureUpdateMocked(t *testing.T) {
+	t.Run("Update with no signature change and no publish just re-reads", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		rev := int64(2)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil)
+		origSig := `alert tcp any any -> any 80 (msg:"Test"; sid:9000001; rev:1;)`
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{OriginalSignature: &origSig}, nil)
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		// Deliberately omit "signature" so HasChange("signature") is false: TestResourceDataRaw
+		// has no prior state to diff against, so any populated field would otherwise look changed.
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"signature_version_id": "default"})
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update propagates the version Get error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Update with publish=true validates and publishes after re-read", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		rev := int64(2)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil).Times(3)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionValidate).Return(nil)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionPublish).Return(nil)
+		origSig := `alert tcp any any -> any 80 (msg:"Test"; sid:9000001; rev:1;)`
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{OriginalSignature: &origSig}, nil)
+
+		// Omit "signature" so HasChange("signature") is false and only the publish branch fires.
+		data := map[string]interface{}{"signature_version_id": "default", "publish": true}
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyIdpsCustomSignatureDeleteMocked(t *testing.T) {
+	t.Run("Delete succeeds: validate accepts first path, publish succeeds, signature gone", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		rev := int64(1)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil).Times(2)
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{}, vapiErrors.NotFound{})
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionValidate).Return(nil)
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionPublish).Return(nil)
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			model.IdsCustomSignatureListResult{}, nil,
+		).AnyTimes()
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Delete propagates the initial version Get error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Delete falls back to CANCEL when all VALIDATE paths fail and preview signatures exist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSigs, mockVersions, restore := setupIdpsCustomSignatureMocks(ctrl)
+		defer restore()
+		rev := int64(1)
+		mockVersions.EXPECT().Get("default").Return(model.IdsCustomSignatureVersion{Revision: &rev}, nil)
+		mockSigs.EXPECT().Get("default", "sig-1").Return(model.IdsCustomSignature{}, vapiErrors.NotFound{})
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionValidate).Return(vapiErrors.InvalidRequest{}).AnyTimes()
+		previewID := "sig-1"
+		mockSigs.EXPECT().List("default", gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			model.IdsCustomSignatureListResult{Results: []model.IdsCustomSignature{{Id: &previewID}}}, nil,
+		).AnyTimes()
+		mockSigs.EXPECT().Create("default", gomock.Any(), idpsCustomSignatureActionCancel).Return(nil)
+
+		res := resourceNsxtPolicyIdpsCustomSignature()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIdpsCustomSigData())
+		d.SetId("default/sig-1")
+
+		err := resourceNsxtPolicyIdpsCustomSignatureDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Id())
+	})
+}
+
 func TestMockNsxtResourceNsxtPolicyIdpsCustomSignatureExistsByContent(t *testing.T) {
 	t.Run("finds matching content", func(t *testing.T) {
 		ctrl := gomock.NewController(t)

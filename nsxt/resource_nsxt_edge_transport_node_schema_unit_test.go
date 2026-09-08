@@ -9,8 +9,11 @@ package nsxt
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	mpmodel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
@@ -278,4 +281,97 @@ func TestUnitNsxt_setHostSwitchProfileIDsInSchema(t *testing.T) {
 	assert.Equal(t, &uplinkVal, parentMap["uplink_profile"])
 	assert.Equal(t, &haVal, parentMap["vtep_ha_profile"])
 	assert.Equal(t, []interface{}{&uplinkVal, &haVal}, parentMap["host_switch_profile"])
+}
+
+func hostSwitchSpecStructValue(t *testing.T, nodeType string) *data.StructValue {
+	t.Helper()
+	hostSwitchID, hostSwitchName := "hs-1", "hs-name"
+	hostSwitchMode := mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD
+	isMigrate := true
+	deviceName, uplinkName := "vmnic0", "uplink-1"
+	numLcores, numaIdx := int64(4), int64(0)
+	vdsUplinkName, vdsLagName := "uplink-1", "lag-1"
+	tzID := "tz-1"
+	tzpID := "tzp-1"
+	subConfigName := "sub-1"
+	destNetwork, vmkDevice := "dvpg-1", "vmk0"
+
+	ipSV, err := getIPAssignmentFromSchema([]interface{}{map[string]interface{}{"assigned_by_dhcp": true}})
+	require.NoError(t, err)
+	ip6SV, err := getIPv6AssignmentFromSchema([]interface{}{map[string]interface{}{"assigned_by_autoconf": true}})
+	require.NoError(t, err)
+
+	sw := mpmodel.StandardHostSwitch{
+		HostSwitchId:       &hostSwitchID,
+		HostSwitchName:     &hostSwitchName,
+		Pnics:              []mpmodel.Pnic{{DeviceName: &deviceName, UplinkName: &uplinkName}},
+		IpAssignmentSpec:   ipSV,
+		Ipv6AssignmentSpec: ip6SV,
+		TransportZoneEndpoints: []mpmodel.TransportZoneEndPoint{
+			{TransportZoneId: &tzID, TransportZoneProfileIds: []mpmodel.TransportZoneProfileTypeIdEntry{{ProfileId: &tzpID}}},
+		},
+	}
+	if nodeType == nodeTypeHost {
+		sw.CpuConfig = []mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch{{NumLcores: &numLcores, NumaNodeIndex: &numaIdx}}
+		sw.IsMigratePnics = &isMigrate
+		sw.HostSwitchMode = &hostSwitchMode
+		sw.Uplinks = []mpmodel.VdsUplink{{UplinkName: &uplinkName, VdsLagName: &vdsLagName, VdsUplinkName: &vdsUplinkName}}
+		sw.TransportNodeProfileSubConfigs = []mpmodel.TransportNodeProfileSubConfig{
+			{
+				Name: &subConfigName,
+				HostSwitchConfigOption: &mpmodel.HostSwitchConfigOption{
+					HostSwitchId:       &hostSwitchID,
+					IpAssignmentSpec:   ipSV,
+					Ipv6AssignmentSpec: ip6SV,
+					Uplinks:            []mpmodel.VdsUplink{{UplinkName: &uplinkName}},
+				},
+			},
+		}
+		sw.VmkInstallMigration = []mpmodel.VmknicNetwork{{DestinationNetwork: &destNetwork, DeviceName: &vmkDevice}}
+	}
+
+	spec := mpmodel.StandardHostSwitchSpec{
+		HostSwitches: []mpmodel.StandardHostSwitch{sw},
+		ResourceType: mpmodel.HostSwitchSpec_RESOURCE_TYPE_STANDARDHOSTSWITCHSPEC,
+	}
+	converter := bindings.NewTypeConverter()
+	sv, errs := converter.ConvertToVapi(spec, mpmodel.StandardHostSwitchSpecBindingType())
+	require.Empty(t, errs)
+	return sv.(*data.StructValue)
+}
+
+func TestUnitNsxt_setHostSwitchSpecInSchema(t *testing.T) {
+	t.Run("edge node type populates the standard fields only", func(t *testing.T) {
+		res := resourceNsxtEdgeTransportNode()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+
+		err := setHostSwitchSpecInSchema(d, hostSwitchSpecStructValue(t, nodeTypeEdge), nodeTypeEdge)
+		require.NoError(t, err)
+
+		list := d.Get("standard_host_switch").([]interface{})
+		require.Len(t, list, 1)
+		elem := list[0].(map[string]interface{})
+		assert.Equal(t, "hs-1", elem["host_switch_id"])
+		require.Len(t, elem["pnic"].([]interface{}), 1)
+		require.NotNil(t, elem["ip_assignment"])
+		require.NotNil(t, elem["ipv6_assignment"])
+	})
+
+	t.Run("host node type also populates host-only fields", func(t *testing.T) {
+		// getStandardHostSwitchSchema(nodeTypeHost) is only wired into the policy host
+		// transport node resource's schema, not the (edge-only) manager resource's.
+		res := resourceNsxtPolicyHostTransportNode()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+
+		err := setHostSwitchSpecInSchema(d, hostSwitchSpecStructValue(t, nodeTypeHost), nodeTypeHost)
+		require.NoError(t, err)
+
+		list := d.Get("standard_host_switch").([]interface{})
+		require.Len(t, list, 1)
+		elem := list[0].(map[string]interface{})
+		require.Len(t, elem["cpu_config"].([]interface{}), 1)
+		assert.Equal(t, true, elem["is_migrate_pnics"])
+		require.Len(t, elem["transport_node_profile_sub_config"].([]interface{}), 1)
+		require.Len(t, elem["vmk_install_migration"].([]interface{}), 1)
+	})
 }

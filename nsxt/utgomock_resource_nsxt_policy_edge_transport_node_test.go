@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -267,6 +269,95 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeRead(t *testing.T) {
 		err := resourceNsxtPolicyEdgeTransportNodeRead(d, m)
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Read_populates_switch_details_and_vm_deployment_config", func(t *testing.T) {
+		converter := bindings.NewTypeConverter()
+		// dhcp_v4 is the one assignment type allowed by both the management_interface and
+		// tunnel_endpoint ip_assignment schemas (managementAssignments / tepAssignments).
+		dhcpSV, errs := converter.ConvertToVapi(model.Dhcpv4{IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_DHCPV4}, model.Dhcpv4BindingType())
+		require.Empty(t, errs)
+
+		hostGroup := "hg-1"
+		computeID := "compute-1"
+		cpuMhz := int64(2000)
+		memPct := int64(50)
+		vmDeployConfig := model.PolicyVsphereDeploymentConfig{
+			ComputeId:              &computeID,
+			EdgeHostAffinityConfig: &model.EdgeHostAffinityConfig{HostGroupName: &hostGroup},
+			ReservationInfo: &model.ReservationInfo{
+				CpuReservation:    &model.CPUReservation{ReservationInMhz: &cpuMhz},
+				MemoryReservation: &model.MemoryReservation{ReservationPercentage: &memPct},
+			},
+			PlacementType: model.PolicyVmDeploymentConfig_PLACEMENT_TYPE_POLICYVSPHEREDEPLOYMENTCONFIG,
+		}
+		vmDeployConfigSV, errs := converter.ConvertToVapi(vmDeployConfig, model.PolicyVsphereDeploymentConfigBindingType())
+		require.Empty(t, errs)
+
+		datapathID := "dp-1"
+		deviceName := "eth0"
+		uplinkName := "uplink-1"
+		uplinkKey := model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_UPLINKHOSTSWITCHPROFILE
+		uplinkVal := "/infra/host-switch-profiles/uplink-1"
+		lldpKey := model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry_KEY_LLDPHOSTSWITCHPROFILE
+		lldpVal := "/infra/host-switch-profiles/lldp-1"
+		switchName := "nsxDefaultHostSwitch"
+		vlan := int64(100)
+
+		obj := policyETNAPIResponse()
+		obj.ManagementInterface = &model.PolicyEdgeTransportManagementInterface{
+			IpAssignmentSpecs: []*data.StructValue{dhcpSV.(*data.StructValue)},
+			NetworkId:         &policyETNID,
+		}
+		obj.VmDeploymentConfig = vmDeployConfigSV.(*data.StructValue)
+		obj.SwitchSpec = &model.PolicyEdgeTransportNodeSwitchSpec{
+			Switches: []model.PolicyEdgeTransportNodeSwitch{
+				{
+					SwitchName:                &switchName,
+					OverlayTransportZonePaths: []string{"/infra/sites/default/enforcement-points/default/transport-zones/tz-1"},
+					VlanTransportZonePaths:    []string{"/infra/sites/default/enforcement-points/default/transport-zones/tz-2"},
+					Pnics: []model.PolicyEdgeTransportNodePnic{
+						{DatapathNetworkId: &datapathID, DeviceName: &deviceName, UplinkName: &uplinkName},
+					},
+					ProfilePaths: []model.PolicyEdgeTransportNodeSwitchProfileTypePathEntry{
+						{Key: &uplinkKey, Value: &uplinkVal},
+						{Key: &lldpKey, Value: &lldpVal},
+					},
+					TunnelEndpoints: []model.PolicyEdgeTransportNodeSwitchTunnelEndPoint{
+						{IpAssignmentSpecs: []*data.StructValue{dhcpSV.(*data.StructValue)}, Vlan: &vlan},
+					},
+				},
+			},
+		}
+
+		mockETNSDK.EXPECT().Get(policyETNSiteID, policyETNEPID, policyETNID).Return(obj, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"site_path":         policyETNSitePath,
+			"enforcement_point": policyETNEPID,
+			"hostname":          policyETNHostname,
+			"switch":            minimalPolicyETNSwitchData(),
+		})
+		d.SetId(policyETNID)
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyEdgeTransportNodeRead(d, m)
+		require.NoError(t, err)
+
+		switches := d.Get("switch").([]interface{})
+		require.Len(t, switches, 1)
+		sw := switches[0].(map[string]interface{})
+		assert.Equal(t, "/infra/sites/default/enforcement-points/default/transport-zones/tz-1", sw["overlay_transport_zone_path"])
+		assert.Equal(t, uplinkVal, sw["uplink_host_switch_profile_path"])
+		assert.Equal(t, lldpVal, sw["lldp_host_switch_profile_path"])
+		pnics := sw["pnic"].([]interface{})
+		require.Len(t, pnics, 1)
+		assert.Equal(t, deviceName, pnics[0].(map[string]interface{})["device_name"])
+		teps := sw["tunnel_endpoint"].([]interface{})
+		require.Len(t, teps, 1)
+
+		mgmt := d.Get("management_interface").([]interface{})
+		require.Len(t, mgmt, 1)
+		assert.Equal(t, policyETNID, mgmt[0].(map[string]interface{})["network_id"])
 	})
 }
 

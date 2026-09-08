@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"go.uber.org/mock/gomock"
@@ -552,5 +553,116 @@ func TestUnitNsxt_configureNsxtClient(t *testing.T) {
 		require.NotNil(t, clients.NsxtClientConfig)
 		assert.Equal(t, "nsxmanager.example.com", clients.NsxtClientConfig.Host)
 		assert.NotNil(t, clients.NsxtClient)
+	})
+}
+
+func TestUnitNsxt_getConfiguredSecurityContext(t *testing.T) {
+	t.Run("username/password auth sets user-password scheme", func(t *testing.T) {
+		ctx, err := getConfiguredSecurityContext(&nsxtClients{}, nil, "admin", "password")
+		require.NoError(t, err)
+		assert.Equal(t, security.USER_PASSWORD_SCHEME_ID, ctx.Property(security.AUTHENTICATION_SCHEME_ID))
+		assert.Equal(t, "admin", ctx.Property(security.USER_KEY))
+		assert.Equal(t, "password", ctx.Property(security.PASSWORD_KEY))
+	})
+
+	t.Run("zero vmcAuthInfo falls back to username/password", func(t *testing.T) {
+		ctx, err := getConfiguredSecurityContext(&nsxtClients{}, &vmcAuthInfo{}, "admin", "password")
+		require.NoError(t, err)
+		assert.Equal(t, security.USER_PASSWORD_SCHEME_ID, ctx.Property(security.AUTHENTICATION_SCHEME_ID))
+	})
+
+	t.Run("missing username errors", func(t *testing.T) {
+		_, err := getConfiguredSecurityContext(&nsxtClients{}, nil, "", "password")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "username")
+	})
+
+	t.Run("missing password errors", func(t *testing.T) {
+		_, err := getConfiguredSecurityContext(&nsxtClients{}, nil, "admin", "")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "password")
+	})
+
+	t.Run("vmc auth sets bearer token and oauth scheme", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"access_token":"abc123"}`))
+		}))
+		defer server.Close()
+		restore := redirectDefaultClientTo(server)
+		defer restore()
+
+		clients := &nsxtClients{}
+		vmc := &vmcAuthInfo{authHost: "vmc.example.com", accessToken: "refresh-token"}
+		ctx, err := getConfiguredSecurityContext(clients, vmc, "", "")
+		require.NoError(t, err)
+		assert.Equal(t, "abc123", clients.CommonConfig.BearerToken)
+		assert.Equal(t, security.OAUTH_SCHEME_ID, ctx.Property(security.AUTHENTICATION_SCHEME_ID))
+	})
+
+	t.Run("vmc auth with Bearer authMode skips oauth scheme property", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"access_token":"abc123"}`))
+		}))
+		defer server.Close()
+		restore := redirectDefaultClientTo(server)
+		defer restore()
+
+		clients := &nsxtClients{}
+		vmc := &vmcAuthInfo{authHost: "vmc.example.com", accessToken: "refresh-token", authMode: "Bearer"}
+		ctx, err := getConfiguredSecurityContext(clients, vmc, "", "")
+		require.NoError(t, err)
+		assert.Equal(t, "abc123", clients.CommonConfig.BearerToken)
+		assert.Nil(t, ctx.Property(security.AUTHENTICATION_SCHEME_ID))
+	})
+
+	t.Run("vmc token exchange error propagates", func(t *testing.T) {
+		clients := &nsxtClients{}
+		vmc := &vmcAuthInfo{authHost: "example.com"}
+		_, err := getConfiguredSecurityContext(clients, vmc, "", "")
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_logRequestProcessorFilter(t *testing.T) {
+	p := newLogRequestProcessor()
+
+	t.Run("filter set and path does not match skips logging", func(t *testing.T) {
+		t.Setenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER", "/other")
+		req, _ := http.NewRequest("GET", "http://example.com/path", nil)
+		err := p.Process(req)
+		require.NoError(t, err)
+	})
+
+	t.Run("filter set and path matches logs the request", func(t *testing.T) {
+		t.Setenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER", "/path")
+		req, _ := http.NewRequest("GET", "http://example.com/path", nil)
+		err := p.Process(req)
+		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_logResponseAcceptorFilter(t *testing.T) {
+	a := newLogResponseAcceptor()
+
+	t.Run("filter set and path does not match skips logging", func(t *testing.T) {
+		t.Setenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER", "/other")
+		req, _ := http.NewRequest("GET", "http://example.com/path", nil)
+		resp := &http.Response{StatusCode: 200, Body: http.NoBody, Request: req}
+		a.Accept(resp)
+	})
+
+	t.Run("filter set and path matches logs the response", func(t *testing.T) {
+		t.Setenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER", "/path")
+		req, _ := http.NewRequest("GET", "http://example.com/path", nil)
+		resp := &http.Response{StatusCode: 200, Body: http.NoBody, Request: req}
+		a.Accept(resp)
+	})
+
+	t.Run("nil request with filter set is skipped safely", func(t *testing.T) {
+		t.Setenv("TF_LOG_PROVIDER_NSX_HTTP_URI_FILTER", "/path")
+		resp := &http.Response{StatusCode: 200, Body: http.NoBody, Request: nil}
+		a.Accept(resp)
 	})
 }

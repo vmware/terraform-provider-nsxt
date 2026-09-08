@@ -189,7 +189,7 @@ func TestMockResourceNsxtPolicyL2VPNSessionDelete(t *testing.T) {
 	})
 }
 
-func TestMockNormalizeL2VpnTransportTunnelPath(t *testing.T) {
+func TestMockNsxtNormalizeL2VpnTransportTunnelPath(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -243,7 +243,7 @@ func TestMockNormalizeL2VpnTransportTunnelPath(t *testing.T) {
 	}
 }
 
-func TestMockSuppressL2VpnTransportTunnelsDiff(t *testing.T) {
+func TestMockNsxtSuppressL2VpnTransportTunnelsDiff(t *testing.T) {
 	flatPath := "/infra/tier-1s/t1/ipsec-vpn-services/svc1/sessions/sess1"
 	localeServicePath := "/infra/tier-1s/t1/locale-services/default/ipsec-vpn-services/svc1/sessions/sess1"
 	localeServicePathCustom := "/infra/tier-1s/t1/locale-services/custom/ipsec-vpn-services/svc1/sessions/sess1"
@@ -413,5 +413,45 @@ func TestMockResourceNsxtPolicyL2VPNSessionReadTransportTunnels(t *testing.T) {
 
 		err := resourceNsxtPolicyL2VPNSessionRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_nsxtL2VpnSessionImporter(t *testing.T) {
+	res := resourceNsxtPolicyL2VPNSession()
+
+	t.Run("path too short is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/aaa")
+
+		_, err := nsxtL2VpnSessionImporter(d, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("path missing /sessions/ segment is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb/notsessions/ccc")
+
+		_, err := nsxtL2VpnSessionImporter(d, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("project-scoped path is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/orgs/o1/projects/p1/infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb/sessions/ccc")
+
+		_, err := nsxtL2VpnSessionImporter(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+	})
+
+	t.Run("valid infra-scoped path succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb/sessions/ccc")
+
+		out, err := nsxtL2VpnSessionImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "ccc", d.Id())
+		assert.Equal(t, "/infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb", d.Get("service_path"))
 	})
 }

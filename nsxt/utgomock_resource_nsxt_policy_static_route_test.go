@@ -204,3 +204,26 @@ func TestMockResourceNsxtPolicyStaticRouteDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyStaticRouteImport(t *testing.T) {
+	res := resourceNsxtPolicyStaticRoute()
+
+	t.Run("full policy path succeeds and sets gateway_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-0s/gw-1/static-routes/route-1")
+
+		out, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "/infra/tier-0s/gw-1", d.Get("gateway_path"))
+	})
+
+	t.Run("legacy format missing a slash is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("route-1")
+
+		_, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "gateway-id")
+	})
+}

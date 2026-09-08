@@ -10,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services/custom_signature_versions"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -123,7 +122,7 @@ func dataSourceNsxtPolicyIdpsCustomSignatureRead(d *schema.ResourceData, m inter
 		sigID = id
 	}
 
-	client := custom_signature_versions.NewCustomSignaturesClient(connector)
+	client := cliIdsCustomSignaturesClient(connector)
 	obj, err := client.Get(versionID, sigID)
 	if err != nil {
 		if isNotFoundError(err) {

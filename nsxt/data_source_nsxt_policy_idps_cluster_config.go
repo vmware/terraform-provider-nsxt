@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -62,7 +61,7 @@ func dataSourceNsxtPolicyIdpsClusterConfigRead(d *schema.ResourceData, m interfa
 
 	var obj model.IdsClusterConfig
 
-	client := intrusion_services.NewClusterConfigsClient(connector)
+	client := cliIdsClusterConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

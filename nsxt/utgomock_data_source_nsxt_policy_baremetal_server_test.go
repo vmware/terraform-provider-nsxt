@@ -55,7 +55,7 @@ func TestMockDataSourceNsxtPolicyBareMetalServerValidation(t *testing.T) {
 	assert.Contains(t, dataSource.Schema, "display_name")
 }
 
-func TestMockBareMetalServerConversion(t *testing.T) {
+func TestMockNsxtBareMetalServerConversion(t *testing.T) {
 	// Test the conversion function for bare metal servers
 	externalId := "test-server-id"
 	displayName := "test-server"

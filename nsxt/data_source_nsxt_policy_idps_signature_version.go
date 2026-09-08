@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -85,7 +84,7 @@ func dataSourceNsxtPolicyIdpsSignatureVersionRead(d *schema.ResourceData, m inte
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
 
-	client := intrusion_services.NewSignatureVersionsClient(connector)
+	client := cliIdsSignatureVersionsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

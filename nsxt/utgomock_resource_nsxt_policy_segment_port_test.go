@@ -361,7 +361,7 @@ func TestMockResourceNsxtPolicySegmentPortDelete(t *testing.T) {
 	})
 }
 
-func TestMockIsT1Segment(t *testing.T) {
+func TestMockNsxtIsT1Segment(t *testing.T) {
 	tests := []struct {
 		name        string
 		segmentPath string
@@ -400,7 +400,7 @@ func TestMockIsT1Segment(t *testing.T) {
 	}
 }
 
-func TestMockGetT1IdFromSegPath(t *testing.T) {
+func TestMockNsxtGetT1IdFromSegPath(t *testing.T) {
 	tests := []struct {
 		name        string
 		segmentPath string
@@ -434,7 +434,7 @@ func TestMockGetT1IdFromSegPath(t *testing.T) {
 	}
 }
 
-func TestMockSegmentPortImporter(t *testing.T) {
+func TestMockNsxtSegmentPortImporter(t *testing.T) {
 	res := resourceNsxtPolicySegmentPort()
 
 	t.Run("Import with invalid ID (not policy path) returns error without panic", func(t *testing.T) {

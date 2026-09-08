@@ -456,3 +456,39 @@ func TestMockResourceNsxtPolicyBgpNeighborCreate_sourceAttachment920(t *testing.
 	err := resourceNsxtPolicyBgpNeighborCreate(d, m)
 	require.NoError(t, err)
 }
+
+func TestUnitNsxt_resourceNsxtPolicyBgpNeighborImport(t *testing.T) {
+	t.Run("wrong segment count is rejected", func(t *testing.T) {
+		res := resourceNsxtPolicyBgpNeighbor()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("t0-1/default")
+
+		_, err := resourceNsxtPolicyBgpNeighborImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "tier0-id")
+	})
+
+	t.Run("valid path succeeds and sets bgp_path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockNeighborsSDK := bgpMocks.NewMockNeighborsClient(ctrl)
+		nbWrapper := &bgpapi.BgpNeighborConfigClientContext{Client: mockNeighborsSDK, ClientType: utl.Local}
+		originalCli := cliBgpNeighborsClient
+		defer func() { cliBgpNeighborsClient = originalCli }()
+		cliBgpNeighborsClient = func(sessionContext utl.SessionContext, connector client.Connector) *bgpapi.BgpNeighborConfigClientContext {
+			return nbWrapper
+		}
+		parentPath := bgpNbBgpPath
+		mockNeighborsSDK.EXPECT().Get(bgpNbT0ID, bgpNbServiceID, bgpNbID).Return(model.BgpNeighborConfig{ParentPath: &parentPath}, nil)
+
+		res := resourceNsxtPolicyBgpNeighbor()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(bgpNbT0ID + "/" + bgpNbServiceID + "/" + bgpNbID)
+
+		out, err := resourceNsxtPolicyBgpNeighborImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, bgpNbID, d.Id())
+		assert.Equal(t, bgpNbBgpPath, d.Get("bgp_path"))
+	})
+}

@@ -650,4 +650,303 @@ func TestMockResourceNsxtPolicyTransitGatewayDelete(t *testing.T) {
 		err := resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Delete fails when OrgRoot Patch returns error", func(t *testing.T) {
+		m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_getCentralizedConfigFromSchema(t *testing.T) {
+	t.Run("returns nil when centralized_config is absent", func(t *testing.T) {
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+
+		cfg, err := getCentralizedConfigFromSchema(d, nil)
+		require.NoError(t, err)
+		assert.Nil(t, cfg)
+	})
+
+	t.Run("populates ha_mode and edge_cluster_paths", func(t *testing.T) {
+		data := minimalTGWData()
+		data["centralized_config"] = []interface{}{
+			map[string]interface{}{
+				"ha_mode":            "ACTIVE_STANDBY",
+				"edge_cluster_paths": []interface{}{"/infra/edge-clusters/ec1", "/infra/edge-clusters/ec2"},
+			},
+		}
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		cfg, err := getCentralizedConfigFromSchema(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, cfg)
+		require.NotNil(t, cfg.HaMode)
+		assert.Equal(t, "ACTIVE_STANDBY", *cfg.HaMode)
+		assert.Equal(t, []string{"/infra/edge-clusters/ec1", "/infra/edge-clusters/ec2"}, cfg.EdgeClusterPaths)
+	})
+
+	t.Run("accepts failover_mode at or above NSX 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		data := minimalTGWData()
+		data["centralized_config"] = []interface{}{
+			map[string]interface{}{"failover_mode": "PREEMPTIVE"},
+		}
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		cfg, err := getCentralizedConfigFromSchema(d, nil)
+		require.NoError(t, err)
+		require.NotNil(t, cfg.FailoverMode)
+		assert.Equal(t, "PREEMPTIVE", *cfg.FailoverMode)
+	})
+}
+
+func TestUnitNsxt_setCentralizedConfigInSchema(t *testing.T) {
+	t.Run("returns nil for a nil config", func(t *testing.T) {
+		assert.Nil(t, setCentralizedConfigInSchema(nil, nil))
+	})
+
+	t.Run("maps ha_mode and edge_cluster_paths, omitting failover_mode below 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		haMode := "ACTIVE_STANDBY"
+		failoverMode := "PREEMPTIVE"
+		cfg := &nsxModel.CentralizedConfig{
+			HaMode:           &haMode,
+			FailoverMode:     &failoverMode,
+			EdgeClusterPaths: []string{"/infra/edge-clusters/ec1"},
+		}
+
+		out := setCentralizedConfigInSchema(cfg, nil)
+		require.Len(t, out, 1)
+		m := out[0].(map[string]interface{})
+		assert.Equal(t, "ACTIVE_STANDBY", m["ha_mode"])
+		assert.Equal(t, []string{"/infra/edge-clusters/ec1"}, m["edge_cluster_paths"])
+		assert.NotContains(t, m, "failover_mode")
+	})
+
+	t.Run("includes failover_mode at or above 9.2.0", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		failoverMode := "PREEMPTIVE"
+		cfg := &nsxModel.CentralizedConfig{FailoverMode: &failoverMode}
+
+		out := setCentralizedConfigInSchema(cfg, nil)
+		require.Len(t, out, 1)
+		assert.Equal(t, "PREEMPTIVE", out[0].(map[string]interface{})["failover_mode"])
+	})
+}
+
+func TestUnitNsxt_getSpanFromSchema(t *testing.T) {
+	t.Run("returns nil for nil input", func(t *testing.T) {
+		out, err := getSpanFromSchema(nil)
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+
+	t.Run("returns nil for an empty list", func(t *testing.T) {
+		out, err := getSpanFromSchema([]interface{}{})
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+
+	t.Run("returns nil when the input is not a list", func(t *testing.T) {
+		out, err := getSpanFromSchema("not-a-list")
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+
+	t.Run("builds a ClusterBasedSpan struct", func(t *testing.T) {
+		span := []interface{}{
+			map[string]interface{}{
+				"cluster_based_span": []interface{}{
+					map[string]interface{}{"span_path": "/infra/sites/default/enforcement-points/default"},
+				},
+			},
+		}
+
+		structVal, err := getSpanFromSchema(span)
+		require.NoError(t, err)
+		require.NotNil(t, structVal)
+
+		out, err := setSpanFromSchema(structVal)
+		require.NoError(t, err)
+		spanList := out.([]interface{})
+		require.Len(t, spanList, 1)
+		cbs := spanList[0].(map[string]interface{})["cluster_based_span"].([]interface{})
+		require.Len(t, cbs, 1)
+	})
+
+	t.Run("builds a ZoneBasedSpan struct", func(t *testing.T) {
+		span := []interface{}{
+			map[string]interface{}{
+				"zone_based_span": []interface{}{
+					map[string]interface{}{"zone_external_ids": []interface{}{"zone-1", "zone-2"}},
+				},
+			},
+		}
+
+		structVal, err := getSpanFromSchema(span)
+		require.NoError(t, err)
+		require.NotNil(t, structVal)
+
+		out, err := setSpanFromSchema(structVal)
+		require.NoError(t, err)
+		spanList := out.([]interface{})
+		require.Len(t, spanList, 1)
+		zbs := spanList[0].(map[string]interface{})["zone_based_span"].([]interface{})
+		require.Len(t, zbs, 1)
+		ids := zbs[0].(map[string]interface{})["zone_external_ids"].([]string)
+		assert.Equal(t, []string{"zone-1", "zone-2"}, ids)
+	})
+
+	t.Run("returns nil when neither span type is set", func(t *testing.T) {
+		span := []interface{}{map[string]interface{}{}}
+		out, err := getSpanFromSchema(span)
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+	sessionContext := utl.SessionContext{ProjectID: tgwProjectID}
+
+	t.Run("returns true when Get succeeds", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("returns false on NotFound", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, vapiErrors.NotFound{})
+		exists, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("propagates other errors", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, vapiErrors.InternalServerError{})
+		_, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayCentralizedConfigRead(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+
+	t.Run("Read populates centralized_config from a successful API response", func(t *testing.T) {
+		haMode := "ACTIVE_STANDBY"
+		ccResp := nsxModel.CentralizedConfig{HaMode: &haMode}
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(ccResp, nil),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{}),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+
+		ccList := d.Get("centralized_config").([]interface{})
+		require.Len(t, ccList, 1)
+		assert.Equal(t, "ACTIVE_STANDBY", ccList[0].(map[string]interface{})["ha_mode"])
+	})
+
+	t.Run("Read fails when CentralizedConfig API returns a non-NotFound error", func(t *testing.T) {
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.InternalServerError{}),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Read fails when BgpConfig API returns a non-NotFound error", func(t *testing.T) {
+		gomock.InOrder(
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.InternalServerError{}),
+		)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayUpdateCentralizedConfig(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+
+	t.Run("Update attaches a centralized_config child when it changed", func(t *testing.T) {
+		rev := int64(2)
+		gomock.InOrder(
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{Revision: &rev}, nil),
+			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{}),
+		)
+
+		data := minimalTGWData()
+		data["centralized_config"] = []interface{}{
+			map[string]interface{}{"ha_mode": "ACTIVE_STANDBY"},
+		}
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_buildTGWBgpConfigChildren(t *testing.T) {
+	t.Run("markDelete true builds a marked-for-delete child regardless of config", func(t *testing.T) {
+		children, err := buildTGWBgpConfigChildren(nil, true)
+		require.NoError(t, err)
+		require.Len(t, children, 1)
+	})
+
+	t.Run("nil config with markDelete false returns no children", func(t *testing.T) {
+		children, err := buildTGWBgpConfigChildren(nil, false)
+		require.NoError(t, err)
+		assert.Nil(t, children)
+	})
+
+	t.Run("non-nil config with markDelete false builds a config child", func(t *testing.T) {
+		ecmp := true
+		children, err := buildTGWBgpConfigChildren(&nsxModel.TransitGatewayBgpRoutingConfig{Ecmp: &ecmp}, false)
+		require.NoError(t, err)
+		require.Len(t, children, 1)
+	})
 }

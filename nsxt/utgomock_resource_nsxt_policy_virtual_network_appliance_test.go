@@ -59,6 +59,241 @@ func setupVNACRUDClientOverride(mock *epmocks.MockVirtualNetworkAppliancesInClus
 	return func() { cliVNACRUDClient = orig }
 }
 
+func TestUnitNsxt_getVNAClusterPathComponents(t *testing.T) {
+	t.Run("parses a valid cluster path", func(t *testing.T) {
+		site, ep, cluster, err := getVNAClusterPathComponents(vnaClusterPath)
+		require.NoError(t, err)
+		assert.Equal(t, vnaClusterSiteID, site)
+		assert.Equal(t, vnaClusterEPID, ep)
+		assert.Equal(t, vnaClusterID, cluster)
+	})
+
+	t.Run("errors when the site segment is missing", func(t *testing.T) {
+		_, _, _, err := getVNAClusterPathComponents("/enforcement-points/default/virtual-network-appliance-clusters/c1")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "site ID")
+	})
+
+	t.Run("errors when the enforcement-point segment is missing", func(t *testing.T) {
+		_, _, _, err := getVNAClusterPathComponents("/infra/sites/default/virtual-network-appliance-clusters/c1")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "enforcement-point ID")
+	})
+
+	t.Run("errors when the cluster segment is missing", func(t *testing.T) {
+		_, _, _, err := getVNAClusterPathComponents("/infra/sites/default/enforcement-points/default")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "cluster ID")
+	})
+}
+
+func TestUnitNsxt_getVNACredentialsFromSchema(t *testing.T) {
+	t.Run("nil input returns nil", func(t *testing.T) {
+		assert.Nil(t, getVNACredentialsFromSchema(nil))
+	})
+
+	t.Run("empty list returns nil", func(t *testing.T) {
+		assert.Nil(t, getVNACredentialsFromSchema([]interface{}{}))
+	})
+
+	t.Run("parses all password fields", func(t *testing.T) {
+		obj := getVNACredentialsFromSchema([]interface{}{
+			map[string]interface{}{
+				"cli_password":   "cli-pass",
+				"root_password":  "root-pass",
+				"audit_password": "audit-pass",
+			},
+		})
+		require.NotNil(t, obj)
+		assert.Equal(t, "cli-pass", *obj.CliPassword)
+		assert.Equal(t, "root-pass", *obj.RootPassword)
+		assert.Equal(t, "audit-pass", *obj.AuditPassword)
+	})
+
+	t.Run("empty password strings are omitted", func(t *testing.T) {
+		obj := getVNACredentialsFromSchema([]interface{}{
+			map[string]interface{}{
+				"cli_password":   "",
+				"root_password":  "",
+				"audit_password": "",
+			},
+		})
+		require.NotNil(t, obj)
+		assert.Nil(t, obj.CliPassword)
+		assert.Nil(t, obj.RootPassword)
+		assert.Nil(t, obj.AuditPassword)
+	})
+}
+
+func TestUnitNsxt_getVNAManagementInterfaceFromSchema(t *testing.T) {
+	t.Run("nil input returns nil", func(t *testing.T) {
+		obj, err := getVNAManagementInterfaceFromSchema(nil)
+		require.NoError(t, err)
+		assert.Nil(t, obj)
+	})
+
+	t.Run("empty list returns nil", func(t *testing.T) {
+		obj, err := getVNAManagementInterfaceFromSchema([]interface{}{})
+		require.NoError(t, err)
+		assert.Nil(t, obj)
+	})
+
+	t.Run("parses network_id and ip_assignment", func(t *testing.T) {
+		obj, err := getVNAManagementInterfaceFromSchema([]interface{}{
+			map[string]interface{}{
+				"network_id": "dvpg-1",
+				"ip_assignment": []interface{}{
+					map[string]interface{}{
+						"dhcp_v4": true,
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, obj)
+		assert.Equal(t, "dvpg-1", *obj.NetworkId)
+		require.Len(t, obj.IpAssignmentSpecs, 1)
+	})
+}
+
+func TestUnitNsxt_setVNAManagementInterfaceInSchema(t *testing.T) {
+	res := resourceNsxtPolicyVirtualNetworkAppliance()
+
+	t.Run("nil object is a no-op", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"cluster_path": vnaClusterPath})
+		require.NoError(t, setVNAManagementInterfaceInSchema(d, nil))
+		assert.Empty(t, d.Get("management_interface").([]interface{}))
+	})
+
+	t.Run("sets network_id and ip_assignment", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"cluster_path": vnaClusterPath})
+		networkID := "dvpg-2"
+		sv, err := vAPIConversion(model.Dhcpv4{IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_DHCPV4}, model.Dhcpv4BindingType())
+		require.NoError(t, err)
+		err = setVNAManagementInterfaceInSchema(d, &model.VirtualNetworkApplianceManagementInterface{
+			NetworkId:         &networkID,
+			IpAssignmentSpecs: []*vapiData.StructValue{sv},
+		})
+		require.NoError(t, err)
+		list := d.Get("management_interface").([]interface{})
+		require.Len(t, list, 1)
+		assert.Equal(t, networkID, list[0].(map[string]interface{})["network_id"])
+	})
+}
+
+func TestUnitNsxt_getVNADeploymentConfigFromSchema(t *testing.T) {
+	t.Run("nil input returns nil", func(t *testing.T) {
+		assert.Nil(t, getVNADeploymentConfigFromSchema(nil))
+	})
+
+	t.Run("empty list returns nil", func(t *testing.T) {
+		assert.Nil(t, getVNADeploymentConfigFromSchema([]interface{}{}))
+	})
+
+	t.Run("parses fields plus reservation_info", func(t *testing.T) {
+		obj := getVNADeploymentConfigFromSchema([]interface{}{
+			map[string]interface{}{
+				"compute_manager_id":          "cm-1",
+				"cluster_or_resource_pool_id": "crp-1",
+				"datastore_id":                "ds-1",
+				"reservation_info": []interface{}{
+					map[string]interface{}{
+						"cpu_reservation_in_mhz":        1000,
+						"cpu_reservation_in_shares":     model.CPUReservation_RESERVATION_IN_SHARES_HIGH_PRIORITY,
+						"memory_reservation_percentage": 50,
+					},
+				},
+			},
+		})
+		require.NotNil(t, obj)
+		assert.Equal(t, "cm-1", *obj.ComputeManagerId)
+		assert.Equal(t, "crp-1", *obj.ClusterOrResourcePoolId)
+		assert.Equal(t, "ds-1", *obj.DatastoreId)
+		require.NotNil(t, obj.ReservationInfo)
+		assert.Equal(t, int64(1000), *obj.ReservationInfo.CpuReservation.ReservationInMhz)
+		assert.Equal(t, int64(50), *obj.ReservationInfo.MemoryReservation.ReservationPercentage)
+	})
+
+	t.Run("omits fields left empty", func(t *testing.T) {
+		obj := getVNADeploymentConfigFromSchema([]interface{}{map[string]interface{}{
+			"compute_manager_id":          "",
+			"cluster_or_resource_pool_id": "",
+			"datastore_id":                "",
+		}})
+		require.NotNil(t, obj)
+		assert.Nil(t, obj.ComputeManagerId)
+		assert.Nil(t, obj.ClusterOrResourcePoolId)
+		assert.Nil(t, obj.DatastoreId)
+		assert.Nil(t, obj.ReservationInfo)
+	})
+}
+
+func TestUnitNsxt_setVNADeploymentConfigInSchema(t *testing.T) {
+	res := resourceNsxtPolicyVirtualNetworkAppliance()
+
+	t.Run("nil object is a no-op", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"cluster_path": vnaClusterPath})
+		require.NoError(t, setVNADeploymentConfigInSchema(d, nil))
+		assert.Empty(t, d.Get("vm_deployment_config").([]interface{}))
+	})
+
+	t.Run("sets all fields plus reservation_info", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"cluster_path": vnaClusterPath})
+		cm := "cm-2"
+		crp := "crp-2"
+		ds := "ds-2"
+		mhz := int64(2000)
+		shares := model.CPUReservation_RESERVATION_IN_SHARES_LOW_PRIORITY
+		pct := int64(75)
+		err := setVNADeploymentConfigInSchema(d, &model.VirtualNetworkApplianceDeploymentConfig{
+			ComputeManagerId:        &cm,
+			ClusterOrResourcePoolId: &crp,
+			DatastoreId:             &ds,
+			ReservationInfo: &model.ReservationInfo{
+				CpuReservation: &model.CPUReservation{
+					ReservationInMhz:    &mhz,
+					ReservationInShares: &shares,
+				},
+				MemoryReservation: &model.MemoryReservation{
+					ReservationPercentage: &pct,
+				},
+			},
+		})
+		require.NoError(t, err)
+		list := d.Get("vm_deployment_config").([]interface{})
+		require.Len(t, list, 1)
+		elem := list[0].(map[string]interface{})
+		assert.Equal(t, cm, elem["compute_manager_id"])
+		ri := elem["reservation_info"].([]interface{})
+		require.Len(t, ri, 1)
+		assert.Equal(t, 2000, ri[0].(map[string]interface{})["cpu_reservation_in_mhz"])
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyVirtualNetworkApplianceImporter(t *testing.T) {
+	res := resourceNsxtPolicyVirtualNetworkAppliance()
+
+	t.Run("valid import ID sets cluster_path and seeds credentials", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(vnaPath)
+
+		out, err := resourceNsxtPolicyVirtualNetworkApplianceImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, vnaClusterPath, out[0].Get("cluster_path"))
+		creds := out[0].Get("credentials").([]interface{})
+		require.Len(t, creds, 1)
+	})
+
+	t.Run("malformed ID errors", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("not-a-valid-path")
+
+		_, err := resourceNsxtPolicyVirtualNetworkApplianceImporter(d, nil)
+		require.Error(t, err)
+	})
+}
+
 func TestMockResourceNsxtPolicyVirtualNetworkApplianceCreate(t *testing.T) {
 	util.NsxVersion = "9.1.1"
 	defer func() { util.NsxVersion = "" }()

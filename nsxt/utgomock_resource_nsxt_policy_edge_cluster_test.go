@@ -298,3 +298,26 @@ func TestMockResourceNsxtPolicyEdgeClusterDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyEdgeClusterImporter(t *testing.T) {
+	res := resourceNsxtPolicyEdgeCluster()
+
+	t.Run("valid path succeeds and sets enforcement_point and site_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(edgeClusterSitePath + "/enforcement-points/" + edgeClusterEPID + "/edge-clusters/" + edgeClusterID)
+
+		out, err := resourceNsxtPolicyEdgeClusterImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, edgeClusterEPID, d.Get("enforcement_point"))
+		assert.Equal(t, edgeClusterSitePath, d.Get("site_path"))
+	})
+
+	t.Run("invalid path is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("not-a-policy-path")
+
+		_, err := resourceNsxtPolicyEdgeClusterImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}

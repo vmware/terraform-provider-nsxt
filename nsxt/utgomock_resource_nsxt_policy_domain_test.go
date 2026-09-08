@@ -232,6 +232,145 @@ func TestMockResourceNsxtPolicyDomainDelete(t *testing.T) {
 	})
 }
 
+func setupDomainMocks(ctrl *gomock.Controller) (*globalInfraMocks.MockDomainsClient, *globalInfraDomainsMocks.MockDomainDeploymentMapsClient, func()) {
+	mockDomainsSDK := globalInfraMocks.NewMockDomainsClient(ctrl)
+	mockDMSDK := globalInfraDomainsMocks.NewMockDomainDeploymentMapsClient(ctrl)
+
+	domainWrapper := &infraapi.DomainClientContext{Client: mockDomainsSDK, ClientType: utl.Global}
+	dmWrapper := &domainsapi.DomainDeploymentMapClientContext{Client: mockDMSDK, ClientType: utl.Global}
+
+	originalDomains := cliDomainsClient
+	originalDMs := cliDomainDeploymentMapsClient
+	cliDomainsClient = func(sessionContext utl.SessionContext, connector client.Connector) *infraapi.DomainClientContext {
+		return domainWrapper
+	}
+	cliDomainDeploymentMapsClient = func(sessionContext utl.SessionContext, connector client.Connector) *domainsapi.DomainDeploymentMapClientContext {
+		return dmWrapper
+	}
+	return mockDomainsSDK, mockDMSDK, func() {
+		cliDomainsClient = originalDomains
+		cliDomainDeploymentMapsClient = originalDMs
+	}
+}
+
+func TestUnitNsxt_createChildDomainDeploymentMap(t *testing.T) {
+	m := newGoMockProviderClient()
+
+	dataValue, err := createChildDomainDeploymentMap(m, "domain-1", "default")
+	require.NoError(t, err)
+	assert.NotNil(t, dataValue)
+}
+
+func TestUnitNsxt_setDomainStructWithChildrenCreate(t *testing.T) {
+	m := newGoMockProviderClient()
+	id := "domain-1"
+	domain := &model.Domain{Id: &id}
+
+	err := setDomainStructWithChildren(m, domain, []string{"default"}, false)
+	require.NoError(t, err)
+	assert.Len(t, domain.Children, 1)
+}
+
+func TestMockNsxtSetDomainStructWithChildrenUpdate(t *testing.T) {
+	t.Run("no stale locations to remove", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, mockDM, restore := setupDomainMocks(ctrl)
+		defer restore()
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil,
+		)
+
+		m := newGoMockProviderClient()
+		id := domainID
+		domain := &model.Domain{Id: &id}
+		err := setDomainStructWithChildren(m, domain, []string{domainSiteName}, true)
+		require.NoError(t, err)
+		assert.Len(t, domain.Children, 1)
+	})
+
+	t.Run("removes stale locations", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, mockDM, restore := setupDomainMocks(ctrl)
+		defer restore()
+		staleName := "stale-site"
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{
+				{DisplayName: &domainSiteName},
+				{DisplayName: &staleName},
+			}}, nil,
+		)
+
+		m := newGoMockProviderClient()
+		id := domainID
+		domain := &model.Domain{Id: &id}
+		err := setDomainStructWithChildren(m, domain, []string{domainSiteName}, true)
+		require.NoError(t, err)
+		// one child for the new location, one delete-child for the stale location
+		assert.Len(t, domain.Children, 2)
+	})
+
+	t.Run("List error propagates", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, mockDM, restore := setupDomainMocks(ctrl)
+		defer restore()
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			gm_model.DomainDeploymentMapListResult{}, vapiErrors.InternalServerError{},
+		)
+
+		m := newGoMockProviderClient()
+		id := domainID
+		domain := &model.Domain{Id: &id}
+		err := setDomainStructWithChildren(m, domain, []string{domainSiteName}, true)
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxtResourceNsxtPolicyDomainExists(t *testing.T) {
+	t.Run("fails when not global manager", func(t *testing.T) {
+		exists, err := resourceNsxtPolicyDomainExists(domainID, nil, false)
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("returns false on not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockDomainsSDK, _, restore := setupDomainMocks(ctrl)
+		defer restore()
+		mockDomainsSDK.EXPECT().Get(domainID).Return(gm_model.Domain{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyDomainExists(domainID, nil, true)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("propagates other errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockDomainsSDK, _, restore := setupDomainMocks(ctrl)
+		defer restore()
+		mockDomainsSDK.EXPECT().Get(domainID).Return(gm_model.Domain{}, vapiErrors.InternalServerError{})
+
+		exists, err := resourceNsxtPolicyDomainExists(domainID, nil, true)
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func TestMockResourceNsxtPolicyDomainUpdateEmptyID(t *testing.T) {
+	t.Run("Update fails when ID is empty", func(t *testing.T) {
+		res := resourceNsxtPolicyDomain()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+
+		err := resourceNsxtPolicyDomainUpdate(d, newGoMockGlobalProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Domain ID")
+	})
+}
+
 // Verify that the model conversion from gm_model to local model works correctly.
 func TestDomainModelConversion(t *testing.T) {
 	displayName := "test-domain"
