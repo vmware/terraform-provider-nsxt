@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -94,6 +95,26 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 
 	for key, value := range data {
 		d.Set(key, value)
+	}
+
+	// gateway_path and site_path are not part of the BGP config object
+	// itself - they describe the parent Locale Service - and the Importer
+	// never sets site_path at all. Re-derive both from the Locale Service on
+	// every Read so a fresh import doesn't leave site_path empty, which
+	// would force a replace (site_path is ForceNew) on the next apply.
+	lsClient := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	if lsClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	locSvc, err := lsClient.Get(gwID, serviceID)
+	if err != nil {
+		return handleReadError(d, "BGP Config", serviceID, err)
+	}
+	d.Set("gateway_path", getGatewayPathFromLocaleServicesPath(*locSvc.Path))
+	if isPolicyGlobalManager(m) && locSvc.EdgeClusterPath != nil {
+		d.Set("site_path", getSitePathFromEdgePath(*locSvc.EdgeClusterPath))
+	} else {
+		d.Set("site_path", "")
 	}
 
 	return nil
