@@ -138,7 +138,7 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 		domain = d.Get("domain").(string)
 	}
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(domain))
 	if err != nil {
@@ -175,7 +175,7 @@ func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule, isVPC)
 	if err != nil {
