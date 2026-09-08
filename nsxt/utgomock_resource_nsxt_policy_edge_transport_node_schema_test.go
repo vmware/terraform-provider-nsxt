@@ -311,4 +311,142 @@ func TestUnitNsxt_setPolicyIPAssignmentsInSchema(t *testing.T) {
 		elem := out.([]interface{})[0].(map[string]interface{})
 		require.Contains(t, elem, "static_ipv6_list")
 	})
+
+	t.Run("dhcp_v4", func(t *testing.T) {
+		sv := toStructValue(t, model.Dhcpv4{IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_DHCPV4}, model.Dhcpv4BindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, true, elem["dhcp_v4"])
+	})
+
+	t.Run("dhcp_v6", func(t *testing.T) {
+		sv := toStructValue(t, model.Dhcpv6{IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_DHCPV6}, model.Dhcpv6BindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, true, elem["dhcp_v6"])
+	})
+
+	t.Run("no_assignment", func(t *testing.T) {
+		sv := toStructValue(t, model.NoAssignment{IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_NOASSIGNMENT}, model.NoAssignmentBindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, true, elem["no_assignment"])
+	})
+
+	t.Run("static_ipv4_list", func(t *testing.T) {
+		gw := "10.0.0.1"
+		mask := "255.255.255.0"
+		sv := toStructValue(t, model.StaticIpv4List{
+			DefaultGateway:   &gw,
+			IpList:           []string{"10.0.0.2"},
+			SubnetMask:       &mask,
+			IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_STATICIPV4LIST,
+		}, model.StaticIpv4ListBindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		list := elem["static_ipv4_list"].([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, []string{"10.0.0.2"}, list["ip_addresses"])
+		assert.Equal(t, &mask, list["subnet_mask"])
+	})
+
+	t.Run("static_ipv4_mac_list", func(t *testing.T) {
+		gw := "10.0.0.1"
+		ip := "10.0.0.2"
+		mac := "00:11:22:33:44:55"
+		mask := "255.255.255.0"
+		sv := toStructValue(t, model.StaticIpv4MacList{
+			DefaultGateway:   &gw,
+			IpMacList:        []model.IpMacPair{{Ip: &ip, Mac: &mac}},
+			SubnetMask:       &mask,
+			IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_STATICIPV4MACLIST,
+		}, model.StaticIpv4MacListBindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		list := elem["static_ipv4_mac_list"].([]interface{})[0].(map[string]interface{})
+		pairs := list["ip_mac_pair"].([]interface{})
+		require.Len(t, pairs, 1)
+		assert.Equal(t, &ip, pairs[0].(map[string]interface{})["ip_address"])
+	})
+
+	t.Run("static_ipv6", func(t *testing.T) {
+		gw := "fe80::1"
+		sv := toStructValue(t, model.StaticIpv6{
+			DefaultGateway: []string{gw},
+			ManagementPortSubnets: []model.IPv6Subnet{
+				{IpAddresses: []string{"fe80::2"}, PrefixLength: int64Ptr(64)},
+			},
+			IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_STATICIPV6,
+		}, model.StaticIpv6BindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		require.Contains(t, elem, "static_ipv6")
+	})
+
+	t.Run("static_ipv6_mac_list", func(t *testing.T) {
+		gw := "fe80::1"
+		ip := "fe80::2"
+		mac := "00:11:22:33:44:55"
+		prefixLength := "64"
+		sv := toStructValue(t, model.StaticIpv6MacList{
+			DefaultGateway:   &gw,
+			IpMacList:        []model.Ipv6MacPair{{Ipv6: &ip, Mac: &mac}},
+			PrefixLength:     &prefixLength,
+			IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_STATICIPV6MACLIST,
+		}, model.StaticIpv6MacListBindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		list := elem["static_ipv6_mac_list"].([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, 64, list["subnet_mask"])
+		pairs := list["ip_mac_pair"].([]interface{})
+		require.Len(t, pairs, 1)
+		assert.Equal(t, &ip, pairs[0].(map[string]interface{})["ip_address"])
+	})
+
+	t.Run("static_ipv6_pool", func(t *testing.T) {
+		pool := "/infra/ip-pools/pool-1"
+		sv := toStructValue(t, model.StaticIpv6Pool{IpPool: &pool, IpAssignmentType: model.PolicyIpAssignmentSpec_IP_ASSIGNMENT_TYPE_STATICIPV6POOL}, model.StaticIpv6PoolBindingType())
+		out, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{sv})
+		require.NoError(t, err)
+		elem := out.([]interface{})[0].(map[string]interface{})
+		assert.Equal(t, &pool, elem["static_ipv6_pool"])
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyEdgeTransportNodeImporter(t *testing.T) {
+	res := resourceNsxtPolicyEdgeTransportNode()
+
+	t.Run("succeeds with a valid enforcement-point child path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/sites/default/enforcement-points/default/edge-transport-nodes/etn-1")
+
+		out, err := resourceNsxtPolicyEdgeTransportNodeImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "etn-1", out[0].Id())
+		assert.Equal(t, "default", out[0].Get("enforcement_point"))
+		assert.Equal(t, "/infra/sites/default", out[0].Get("site_path"))
+	})
+
+	t.Run("fails with an empty ID", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("")
+
+		_, err := resourceNsxtPolicyEdgeTransportNodeImporter(d, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("fails when the path has no enforcement-points/edge-transport-nodes delimiters", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/sites/default/foo/etn-1")
+
+		_, err := resourceNsxtPolicyEdgeTransportNodeImporter(d, nil)
+		require.Error(t, err)
+	})
 }

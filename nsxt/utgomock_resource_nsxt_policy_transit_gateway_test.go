@@ -787,6 +787,63 @@ func TestUnitNsxt_getSpanFromSchema(t *testing.T) {
 		cbs := spanList[0].(map[string]interface{})["cluster_based_span"].([]interface{})
 		require.Len(t, cbs, 1)
 	})
+
+	t.Run("builds a ZoneBasedSpan struct", func(t *testing.T) {
+		span := []interface{}{
+			map[string]interface{}{
+				"zone_based_span": []interface{}{
+					map[string]interface{}{"zone_external_ids": []interface{}{"zone-1", "zone-2"}},
+				},
+			},
+		}
+
+		structVal, err := getSpanFromSchema(span)
+		require.NoError(t, err)
+		require.NotNil(t, structVal)
+
+		out, err := setSpanFromSchema(structVal)
+		require.NoError(t, err)
+		spanList := out.([]interface{})
+		require.Len(t, spanList, 1)
+		zbs := spanList[0].(map[string]interface{})["zone_based_span"].([]interface{})
+		require.Len(t, zbs, 1)
+		ids := zbs[0].(map[string]interface{})["zone_external_ids"].([]string)
+		assert.Equal(t, []string{"zone-1", "zone-2"}, ids)
+	})
+
+	t.Run("returns nil when neither span type is set", func(t *testing.T) {
+		span := []interface{}{map[string]interface{}{}}
+		out, err := getSpanFromSchema(span)
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+	sessionContext := utl.SessionContext{ProjectID: tgwProjectID}
+
+	t.Run("returns true when Get succeeds", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("returns false on NotFound", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, vapiErrors.NotFound{})
+		exists, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("propagates other errors", func(t *testing.T) {
+		m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGateway{}, vapiErrors.InternalServerError{})
+		_, err := resourceNsxtPolicyTransitGatewayExists(sessionContext, tgwID, nil)
+		require.Error(t, err)
+	})
 }
 
 func TestMockResourceNsxtPolicyTransitGatewayCentralizedConfigRead(t *testing.T) {
@@ -870,5 +927,26 @@ func TestMockResourceNsxtPolicyTransitGatewayUpdateCentralizedConfig(t *testing.
 
 		err := resourceNsxtPolicyTransitGatewayUpdate(d, newGoMockProviderClient())
 		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_buildTGWBgpConfigChildren(t *testing.T) {
+	t.Run("markDelete true builds a marked-for-delete child regardless of config", func(t *testing.T) {
+		children, err := buildTGWBgpConfigChildren(nil, true)
+		require.NoError(t, err)
+		require.Len(t, children, 1)
+	})
+
+	t.Run("nil config with markDelete false returns no children", func(t *testing.T) {
+		children, err := buildTGWBgpConfigChildren(nil, false)
+		require.NoError(t, err)
+		assert.Nil(t, children)
+	})
+
+	t.Run("non-nil config with markDelete false builds a config child", func(t *testing.T) {
+		ecmp := true
+		children, err := buildTGWBgpConfigChildren(&nsxModel.TransitGatewayBgpRoutingConfig{Ecmp: &ecmp}, false)
+		require.NoError(t, err)
+		require.Len(t, children, 1)
 	})
 }

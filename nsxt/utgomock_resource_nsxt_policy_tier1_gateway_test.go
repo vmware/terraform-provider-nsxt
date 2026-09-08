@@ -302,7 +302,7 @@ func TestMockResourceNsxtPolicyTier1GatewayExistsMocked(t *testing.T) {
 	})
 }
 
-func TestMockGetPolicyTier1GatewayLocaleServiceEntry(t *testing.T) {
+func TestMockNsxtGetPolicyTier1GatewayLocaleServiceEntry(t *testing.T) {
 	ctx := utl.SessionContext{ClientType: utl.Local}
 
 	t.Run("returns the default-ID locale service when Get succeeds", func(t *testing.T) {
@@ -389,7 +389,7 @@ func TestMockGetPolicyTier1GatewayLocaleServiceEntry(t *testing.T) {
 	})
 }
 
-func TestMockInitImplicitTier1GatewayLocaleService(t *testing.T) {
+func TestMockNsxtInitImplicitTier1GatewayLocaleService(t *testing.T) {
 	ctx := utl.SessionContext{ClientType: utl.Local}
 
 	t.Run("create flow with edge_cluster_path builds a fresh locale service, no API call", func(t *testing.T) {

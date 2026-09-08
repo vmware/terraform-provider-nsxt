@@ -355,8 +355,171 @@ func TestMockResourceNsxtVpcSubnetDelete(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtVpcSubnetExists(t *testing.T) {
+	ctx := utl.SessionContext{ProjectID: "project1", VPCID: "vpc1"}
+
+	t.Run("Get succeeds means it exists", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSubnetSDK, _, restore := setupSubnetMock(t, ctrl)
+		defer restore()
+		mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(subnetAPIResponse(), nil)
+
+		exists, err := resourceNsxtVpcSubnetExists(ctx, subnetID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("NotFound means it does not exist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSubnetSDK, _, restore := setupSubnetMock(t, ctrl)
+		defer restore()
+		mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(nsxModel.VpcSubnet{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtVpcSubnetExists(ctx, subnetID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("other errors propagate", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSubnetSDK, _, restore := setupSubnetMock(t, ctrl)
+		defer restore()
+		mockSubnetSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), subnetID).Return(nsxModel.VpcSubnet{}, vapiErrors.InternalServerError{})
+
+		_, err := resourceNsxtVpcSubnetExists(ctx, subnetID, nil)
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_isDhcpDeactivated(t *testing.T) {
+	res := resourceNsxtVpcSubnet()
+
+	t.Run("v4: no dhcp_config defaults to deactivated", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		assert.True(t, isDhcpv4Deactivated(d))
+	})
+
+	t.Run("v4: mode SERVER is not deactivated", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpConfig_MODE_SERVER}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		assert.False(t, isDhcpv4Deactivated(d))
+	})
+
+	t.Run("v4: mode DEACTIVATED is deactivated", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		assert.True(t, isDhcpv4Deactivated(d))
+	})
+
+	t.Run("v6: no subnet_dhcpv6_config defaults to deactivated", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		assert.True(t, isDhcpv6Deactivated(d))
+	})
+
+	t.Run("v6: mode SERVER is not deactivated", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpv6Config_MODE_SERVER}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		assert.False(t, isDhcpv6Deactivated(d))
+	})
+
+	t.Run("v6: mode DEACTIVATED is deactivated", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpv6Config_MODE_DEACTIVATED}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		assert.True(t, isDhcpv6Deactivated(d))
+	})
+}
+
+func TestUnitNsxt_filterDeactivatedDhcpServerAddresses(t *testing.T) {
+	res := resourceNsxtVpcSubnet()
+
+	t.Run("nil advancedConfig is a no-op", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		filterDeactivatedDhcpServerAddresses(d, nil)
+	})
+
+	t.Run("empty DhcpServerAddresses is a no-op", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		cfg := &nsxModel.SubnetAdvancedConfig{}
+		filterDeactivatedDhcpServerAddresses(d, cfg)
+		assert.Empty(t, cfg.DhcpServerAddresses)
+	})
+
+	t.Run("filters out addresses for deactivated families and empty placeholders", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpConfig_MODE_SERVER}}
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpv6Config_MODE_DEACTIVATED}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		cfg := &nsxModel.SubnetAdvancedConfig{
+			DhcpServerAddresses: []string{"10.203.240.2/26", "", "fd00:240:2400::2/64"},
+		}
+		filterDeactivatedDhcpServerAddresses(d, cfg)
+		assert.Equal(t, []string{"10.203.240.2/26"}, cfg.DhcpServerAddresses)
+	})
+}
+
+func TestUnitNsxt_validateDhcpConfig(t *testing.T) {
+	res := resourceNsxtVpcSubnet()
+
+	t.Run("no dhcp_config is allowed", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		require.NoError(t, validateDhcpConfig(d))
+	})
+
+	t.Run("RELAY mode without additional config is allowed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpConfig_MODE_RELAY}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, validateDhcpConfig(d))
+	})
+
+	t.Run("RELAY mode with additional config is rejected", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpConfig_MODE_RELAY,
+			"dhcp_server_additional_config": []interface{}{map[string]interface{}{
+				"dns_servers": []interface{}{"8.8.8.8"},
+			}},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.Error(t, validateDhcpConfig(d))
+	})
+
+	t.Run("SERVER mode with additional config is allowed", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["dhcp_config"] = []interface{}{map[string]interface{}{
+			"mode": nsxModel.SubnetDhcpConfig_MODE_SERVER,
+			"dhcp_server_additional_config": []interface{}{map[string]interface{}{
+				"dns_servers": []interface{}{"8.8.8.8"},
+			}},
+		}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, validateDhcpConfig(d))
+	})
+}
+
 func TestValidateSubnetDhcpv6Config(t *testing.T) {
 	res := resourceNsxtVpcSubnet()
+
+	t.Run("no subnet_dhcpv6_config is allowed", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSubnetData())
+		require.NoError(t, validateSubnetDhcpv6Config(d))
+	})
+
+	t.Run("mode outside RELAY/DEACTIVATED skips the additional-config check", func(t *testing.T) {
+		data := minimalSubnetData()
+		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{"mode": nsxModel.SubnetDhcpv6Config_MODE_SERVER_STATELESS}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, validateSubnetDhcpv6Config(d))
+	})
+
 	t.Run("DHCP_RELAY with dhcpv6_server_additional_config is rejected", func(t *testing.T) {
 		data := minimalSubnetData()
 		data["subnet_dhcpv6_config"] = []interface{}{map[string]interface{}{

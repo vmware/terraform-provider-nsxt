@@ -68,6 +68,220 @@ func setupRbMock(t *testing.T, ctrl *gomock.Controller) (*aaamocks.MockRoleBindi
 	return mockSDK, func() { cliRoleBindingsClient = original }
 }
 
+func TestUnitNsxt_rolesPerPath_getAnyRole(t *testing.T) {
+	t.Run("nil map returns nil", func(t *testing.T) {
+		var r rolesPerPath
+		assert.Nil(t, r.getAnyRole())
+	})
+
+	t.Run("no true values returns nil", func(t *testing.T) {
+		r := rolesPerPath{"auditor": false}
+		assert.Nil(t, r.getAnyRole())
+	})
+
+	t.Run("returns the true role", func(t *testing.T) {
+		r := rolesPerPath{"auditor": true}
+		role := r.getAnyRole()
+		require.NotNil(t, role)
+		assert.Equal(t, "auditor", *role)
+	})
+}
+
+func TestUnitNsxt_getRolesForPathFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyUserManagementRoleBinding()
+
+	t.Run("empty when roles_for_path is unset", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		got := getRolesForPathFromSchema(d)
+		assert.Empty(t, got)
+	})
+
+	t.Run("parses a roles_for_path set", func(t *testing.T) {
+		data := minimalRbData()
+		data["roles_for_path"] = []interface{}{
+			map[string]interface{}{
+				"path":  "/",
+				"roles": []interface{}{"auditor"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		got := getRolesForPathFromSchema(d)
+		require.Contains(t, got, "/")
+		assert.True(t, got["/"]["auditor"])
+	})
+}
+
+func TestUnitNsxt_getRolesForPathList(t *testing.T) {
+	res := resourceNsxtPolicyUserManagementRoleBinding()
+
+	t.Run("converts current roles_for_path with no removals", func(t *testing.T) {
+		data := minimalRbData()
+		data["roles_for_path"] = []interface{}{
+			map[string]interface{}{
+				"path":  "/",
+				"roles": []interface{}{"auditor"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		got := getRolesForPathList(d, rolesForPath{})
+		require.Len(t, got, 1)
+		assert.Equal(t, "/", *got[0].Path)
+	})
+
+	t.Run("appends a DeletePath entry for a path being removed", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		toRemove := rolesForPath{"/other-path": rolesPerPath{"auditor": true}}
+		got := getRolesForPathList(d, toRemove)
+		require.Len(t, got, 1)
+		assert.Equal(t, "/other-path", *got[0].Path)
+		require.NotNil(t, got[0].DeletePath)
+		assert.True(t, *got[0].DeletePath)
+	})
+
+	t.Run("skips removal for a path also present in the current definition", func(t *testing.T) {
+		data := minimalRbData()
+		data["roles_for_path"] = []interface{}{
+			map[string]interface{}{
+				"path":  "/",
+				"roles": []interface{}{"auditor"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		toRemove := rolesForPath{"/": rolesPerPath{"auditor": true}}
+		got := getRolesForPathList(d, toRemove)
+		require.Len(t, got, 1)
+		assert.Equal(t, "/", *got[0].Path)
+		assert.Nil(t, got[0].DeletePath)
+	})
+}
+
+func TestUnitNsxt_setRolesForPathInSchema(t *testing.T) {
+	res := resourceNsxtPolicyUserManagementRoleBinding()
+
+	t.Run("sets roles_for_path from the API response", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		path := "/"
+		role := "auditor"
+		setRolesForPathInSchema(d, []nsxModel.RolesForPath{
+			{Path: &path, Roles: []nsxModel.Role{{Role: &role}}},
+		})
+		got := d.Get("roles_for_path").(*schema.Set).List()
+		require.Len(t, got, 1)
+		elem := got[0].(map[string]interface{})
+		assert.Equal(t, "/", elem["path"])
+	})
+
+	t.Run("skips entries with a nil Path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		setRolesForPathInSchema(d, []nsxModel.RolesForPath{{Path: nil}})
+		got := d.Get("roles_for_path").(*schema.Set).List()
+		assert.Empty(t, got)
+	})
+}
+
+func TestMockNsxt_getExistingRoleBinding(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupRbMock(t, ctrl)
+	defer restore()
+	rbClient := &aaaapi.RoleBindingClientContext{Client: mockSDK, ClientType: utl.Local}
+
+	t.Run("finds a matching binding", func(t *testing.T) {
+		mockSDK.EXPECT().List(nil, nil, nil, nil, &rbName, nil, nil, nil, nil, nil, nil, nil).Return(
+			nsxModel.RoleBindingListResult{Results: []nsxModel.RoleBinding{rbAPIResponse()}}, nil,
+		)
+		obj, err := getExistingRoleBinding(rbClient, rbName, rbType)
+		require.NoError(t, err)
+		assert.Equal(t, rbID, *obj.Id)
+	})
+
+	t.Run("List error propagates", func(t *testing.T) {
+		mockSDK.EXPECT().List(nil, nil, nil, nil, &rbName, nil, nil, nil, nil, nil, nil, nil).Return(
+			nsxModel.RoleBindingListResult{}, vapiErrors.InternalServerError{},
+		)
+		_, err := getExistingRoleBinding(rbClient, rbName, rbType)
+		require.Error(t, err)
+	})
+
+	t.Run("no matching name/type returns an error", func(t *testing.T) {
+		other := "someone-else"
+		mockSDK.EXPECT().List(nil, nil, nil, nil, &rbName, nil, nil, nil, nil, nil, nil, nil).Return(
+			nsxModel.RoleBindingListResult{Results: []nsxModel.RoleBinding{{Name: &other, Type_: &rbType}}}, nil,
+		)
+		_, err := getExistingRoleBinding(rbClient, rbName, rbType)
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxt_overwriteRoleBinding(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupRbMock(t, ctrl)
+	defer restore()
+
+	t.Run("success updates then reads", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Update(rbID, gomock.Any()).Return(rbAPIResponse(), nil),
+			mockSDK.EXPECT().Get(rbID, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil).Return(rbAPIResponse(), nil),
+		)
+		res := resourceNsxtPolicyUserManagementRoleBinding()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		d.SetId(rbID)
+
+		localType := "local_user"
+		existing := rbAPIResponse()
+		path := "/"
+		existing.RolesForPaths = []nsxModel.RolesForPath{{Path: &path, Roles: []nsxModel.Role{{Role: &localType}}}}
+
+		err := overwriteRoleBinding(d, newGoMockProviderClient(), &existing)
+		require.NoError(t, err)
+	})
+
+	t.Run("Update error propagates", func(t *testing.T) {
+		mockSDK.EXPECT().Update(rbID, gomock.Any()).Return(nsxModel.RoleBinding{}, vapiErrors.InternalServerError{})
+		res := resourceNsxtPolicyUserManagementRoleBinding()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		d.SetId(rbID)
+
+		err := overwriteRoleBinding(d, newGoMockProviderClient(), &nsxModel.RoleBinding{})
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxt_revertRoleBinding(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupRbMock(t, ctrl)
+	defer restore()
+
+	t.Run("success reverts to auditor role", func(t *testing.T) {
+		mockSDK.EXPECT().Update(rbID, gomock.Any()).Return(rbAPIResponse(), nil)
+		res := resourceNsxtPolicyUserManagementRoleBinding()
+		data := minimalRbData()
+		data["roles_for_path"] = []interface{}{
+			map[string]interface{}{
+				"path":  "/some/other/path",
+				"roles": []interface{}{"auditor"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(rbID)
+
+		err := revertRoleBinding(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update error propagates", func(t *testing.T) {
+		mockSDK.EXPECT().Update(rbID, gomock.Any()).Return(nsxModel.RoleBinding{}, vapiErrors.InternalServerError{})
+		res := resourceNsxtPolicyUserManagementRoleBinding()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalRbData())
+		d.SetId(rbID)
+
+		err := revertRoleBinding(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
 func TestMockResourceNsxtPolicyRoleBindingCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

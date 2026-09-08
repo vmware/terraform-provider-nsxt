@@ -192,3 +192,62 @@ func TestMockResourceNsxtPolicyGatewayPolicyRuleDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockNsxtGatewayPolicyRuleImporter(t *testing.T) {
+	res := resourceNsxtPolicyGatewayRulePolicy()
+
+	t.Run("valid path succeeds and sets policy_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(gwRulePolicyPath + "/rules/rule-1")
+
+		out, err := nsxtGatewayPolicyRuleImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, gwRulePolicyPath, d.Get("policy_path"))
+	})
+
+	t.Run("path without a rule segment is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(gwRulePolicyPath + "/somethingelse/x")
+
+		_, err := nsxtGatewayPolicyRuleImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxtResourceNsxtPolicyGatewayPolicyRuleExists(t *testing.T) {
+	t.Run("Get succeeds means it exists", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupGwRuleMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(gwRuleDomain, gwRulePolicyID, gwRuleID).Return(gwRuleAPIResponse(), nil)
+
+		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(utl.SessionContext{ClientType: utl.Local}, gwRuleID, gwRulePolicyPath, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("NotFound means it does not exist", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupGwRuleMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(gwRuleDomain, gwRulePolicyID, gwRuleID).Return(nsxModel.Rule{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyGatewayPolicyRuleExists(utl.SessionContext{ClientType: utl.Local}, gwRuleID, gwRulePolicyPath, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("other errors propagate", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupGwRuleMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(gwRuleDomain, gwRulePolicyID, gwRuleID).Return(nsxModel.Rule{}, vapiErrors.InternalServerError{})
+
+		_, err := resourceNsxtPolicyGatewayPolicyRuleExists(utl.SessionContext{ClientType: utl.Local}, gwRuleID, gwRulePolicyPath, nil)
+		require.Error(t, err)
+	})
+}

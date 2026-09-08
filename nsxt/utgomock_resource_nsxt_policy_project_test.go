@@ -278,6 +278,41 @@ func TestMockResourceNsxtPolicyProjectRead(t *testing.T) {
 		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Read populates span references when NSX 9.1.0+", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
+		isDefault, isNotDefault := true, false
+		defaultSpan := "/infra/network-spans/default"
+		otherSpan := "/infra/network-spans/other"
+		resp := projectAPIResponse()
+		idSuffix := "suffix1"
+		resp.IdSuffix = &idSuffix
+		resp.VpcDeploymentScope = &nsxModel.VpcDeploymentScope{
+			SpanReferences: []nsxModel.SpanReference{
+				{SpanPath: &defaultSpan, IsDefault: &isDefault},
+				{SpanPath: &otherSpan, IsDefault: &isNotDefault},
+			},
+			ZoneExternalIds: []string{"zone1"},
+		}
+		mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(resp, nil)
+
+		res := resourceNsxtPolicyProject()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, defaultSpan, d.Get("default_span_path"))
+		assert.Equal(t, "suffix1", d.Get("id_suffix"))
+		nonDefault := d.Get("non_default_span_paths").([]interface{})
+		require.Len(t, nonDefault, 1)
+		assert.Equal(t, otherSpan, nonDefault[0])
+	})
 }
 
 func TestMockResourceNsxtPolicyProjectUpdate(t *testing.T) {
@@ -299,6 +334,37 @@ func TestMockResourceNsxtPolicyProjectUpdate(t *testing.T) {
 
 		res := resourceNsxtPolicyProject()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectData())
+		d.SetId(projectID)
+
+		err := resourceNsxtPolicyProjectUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update builds span references and id_suffix when NSX 9.1.0+", func(t *testing.T) {
+		util.NsxVersion = "9.1.0"
+		defer func() { util.NsxVersion = "" }()
+		restoreSec := setupVpcSecurityProfilesStub(t)
+		defer restoreSec()
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(utl.DefaultOrgID, projectID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, obj nsxModel.Project) error {
+					require.NotNil(t, obj.VpcDeploymentScope)
+					require.Len(t, obj.VpcDeploymentScope.SpanReferences, 1)
+					assert.True(t, *obj.VpcDeploymentScope.SpanReferences[0].IsDefault)
+					require.NotNil(t, obj.IdSuffix)
+					assert.Equal(t, "mysuffix", *obj.IdSuffix)
+					return nil
+				},
+			),
+			mockSDK.EXPECT().Get(utl.DefaultOrgID, projectID, gomock.Any()).Return(projectAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyProject()
+		data := minimalProjectData()
+		data["default_span_path"] = "/infra/network-spans/default"
+		data["id_suffix"] = "mysuffix"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
 		d.SetId(projectID)
 
 		err := resourceNsxtPolicyProjectUpdate(d, newGoMockProviderClient())
@@ -340,7 +406,7 @@ func TestMockResourceNsxtPolicyProjectDelete(t *testing.T) {
 	})
 }
 
-func TestMockGetDefaultSpan(t *testing.T) {
+func TestMockNsxtGetDefaultSpan(t *testing.T) {
 	t.Run("returns the default span path", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -404,7 +470,7 @@ func TestMockGetDefaultSpan(t *testing.T) {
 	})
 }
 
-func TestMockPatchVpcSecurityProfile(t *testing.T) {
+func TestMockNsxtPatchVpcSecurityProfile(t *testing.T) {
 	t.Run("patches with enabled true from schema", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -473,7 +539,7 @@ func TestMockPatchVpcSecurityProfile(t *testing.T) {
 	})
 }
 
-func TestMockSetVpcSecurityProfileInSchema(t *testing.T) {
+func TestMockNsxtSetVpcSecurityProfileInSchema(t *testing.T) {
 	t.Run("sets default_security_profile from the API response", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

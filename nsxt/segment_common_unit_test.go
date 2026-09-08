@@ -12,8 +12,70 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"go.uber.org/mock/gomock"
+
+	segmentsapi "github.com/vmware/terraform-provider-nsxt/api/infra"
+	segmentsprofilesapi "github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	tier1sapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	segmentmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
+	segmentprofilemocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/segments"
+	tier1segmentmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
 )
+
+func setupSegmentExistsMocks(t *testing.T) (*segmentmocks.MockSegmentsClient, *tier1segmentmocks.MockSegmentsClient) {
+	t.Helper()
+	ctrl := gomock.NewController(t)
+	t.Cleanup(ctrl.Finish)
+
+	mockSegSDK := segmentmocks.NewMockSegmentsClient(ctrl)
+	origSeg := cliSegmentsClient
+	t.Cleanup(func() { cliSegmentsClient = origSeg })
+	cliSegmentsClient = func(_ utl.SessionContext, _ client.Connector) *segmentsapi.SegmentClientContext {
+		return &segmentsapi.SegmentClientContext{Client: mockSegSDK, ClientType: utl.Local}
+	}
+
+	mockT1SegSDK := tier1segmentmocks.NewMockSegmentsClient(ctrl)
+	origT1Seg := cliTier1SegmentsClient
+	t.Cleanup(func() { cliTier1SegmentsClient = origT1Seg })
+	cliTier1SegmentsClient = func(_ utl.SessionContext, _ client.Connector) *tier1sapi.SegmentClientContext {
+		return &tier1sapi.SegmentClientContext{Client: mockT1SegSDK, ClientType: utl.Local}
+	}
+
+	return mockSegSDK, mockT1SegSDK
+}
+
+func setupSegmentProfileReadMocks(t *testing.T) (*segmentprofilemocks.MockSegmentDiscoveryProfileBindingMapsClient, *segmentprofilemocks.MockSegmentQosProfileBindingMapsClient, *segmentprofilemocks.MockSegmentSecurityProfileBindingMapsClient) {
+	t.Helper()
+	ctrl := gomock.NewController(t)
+	t.Cleanup(ctrl.Finish)
+
+	mockDiscoverySDK := segmentprofilemocks.NewMockSegmentDiscoveryProfileBindingMapsClient(ctrl)
+	origDiscovery := cliSegmentDiscoveryProfileBindingMapsClient
+	t.Cleanup(func() { cliSegmentDiscoveryProfileBindingMapsClient = origDiscovery })
+	cliSegmentDiscoveryProfileBindingMapsClient = func(_ utl.SessionContext, _ client.Connector) *segmentsprofilesapi.SegmentDiscoveryProfileBindingMapClientContext {
+		return &segmentsprofilesapi.SegmentDiscoveryProfileBindingMapClientContext{Client: mockDiscoverySDK, ClientType: utl.Local}
+	}
+
+	mockQosSDK := segmentprofilemocks.NewMockSegmentQosProfileBindingMapsClient(ctrl)
+	origQos := cliSegmentQosProfileBindingMapsClient
+	t.Cleanup(func() { cliSegmentQosProfileBindingMapsClient = origQos })
+	cliSegmentQosProfileBindingMapsClient = func(_ utl.SessionContext, _ client.Connector) *segmentsprofilesapi.SegmentQosProfileBindingMapClientContext {
+		return &segmentsprofilesapi.SegmentQosProfileBindingMapClientContext{Client: mockQosSDK, ClientType: utl.Local}
+	}
+
+	mockSecuritySDK := segmentprofilemocks.NewMockSegmentSecurityProfileBindingMapsClient(ctrl)
+	origSecurity := cliSegmentSecurityProfileBindingMapsClient
+	t.Cleanup(func() { cliSegmentSecurityProfileBindingMapsClient = origSecurity })
+	cliSegmentSecurityProfileBindingMapsClient = func(_ utl.SessionContext, _ client.Connector) *segmentsprofilesapi.SegmentSecurityProfileBindingMapClientContext {
+		return &segmentsprofilesapi.SegmentSecurityProfileBindingMapClientContext{Client: mockSecuritySDK, ClientType: utl.Local}
+	}
+
+	return mockDiscoverySDK, mockQosSDK, mockSecuritySDK
+}
 
 func TestUnitNsxt_parseSegmentPolicyPath(t *testing.T) {
 	tests := []struct {
@@ -209,5 +271,298 @@ func TestUnitNsxt_policySegmentResourceToInfraStruct(t *testing.T) {
 		_, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), "seg-1", d, m, false, false)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "transport_zone_path")
+	})
+
+	t.Run("overlay segment with subnets, advanced_config, l2_extension and profiles builds an Infra struct", func(t *testing.T) {
+		segSchema := getPolicyCommonSegmentSchema(false, false)
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{
+			"display_name":        "seg-1",
+			"description":         "a segment",
+			"domain_name":         "example.com",
+			"transport_zone_path": "/infra/transport-zones/tz-1",
+			"connectivity_path":   "/infra/tier-1s/gw-1",
+			"overlay_id":          100,
+			"replication_mode":    model.Segment_REPLICATION_MODE_MTEP,
+			"subnet": []interface{}{
+				map[string]interface{}{
+					"cidr":        "10.0.0.1/24",
+					"network":     "10.0.0.0/24",
+					"dhcp_ranges": []interface{}{"10.0.0.100-10.0.0.200"},
+					"dhcp_v4_config": []interface{}{
+						map[string]interface{}{
+							"server_address": "10.0.0.2/24",
+							"lease_time":     3600,
+						},
+					},
+				},
+			},
+			"advanced_config": []interface{}{
+				map[string]interface{}{
+					"connectivity":          "ON",
+					"hybrid":                true,
+					"local_egress":          false,
+					"multicast":             true,
+					"address_pool_path":     "/infra/ip-pools/p1",
+					"uplink_teaming_policy": "policy-1",
+					"urpf_mode":             "STRICT",
+				},
+			},
+			"l2_extension": []interface{}{
+				map[string]interface{}{
+					"l2vpn_paths": []interface{}{"/infra/tier-0s/gw-1/l2vpn-services/svc-1"},
+					"tunnel_id":   5,
+				},
+			},
+			"discovery_profile": []interface{}{
+				map[string]interface{}{
+					"ip_discovery_profile_path": "/infra/ip-discovery-profiles/p1",
+				},
+			},
+			"bridge_config": []interface{}{
+				map[string]interface{}{
+					"profile_path": "/infra/bridge-profiles/bp-1",
+				},
+			},
+		})
+		obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), "seg-1", d, m, false, false)
+		require.NoError(t, err)
+		require.NotNil(t, obj.Children)
+		require.Len(t, obj.Children, 1)
+	})
+
+	t.Run("fixed segment builds an Infra struct via the gateway child path", func(t *testing.T) {
+		segSchema := getPolicyCommonSegmentSchema(false, true)
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{
+			"display_name":      "seg-1",
+			"connectivity_path": "/infra/tier-1s/gw-1",
+			"replication_mode":  model.Segment_REPLICATION_MODE_MTEP,
+		})
+		obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), "seg-1", d, m, false, true)
+		require.NoError(t, err)
+		require.Len(t, obj.Children, 1)
+	})
+
+	t.Run("multitenancy segment cannot change transport_zone_path", func(t *testing.T) {
+		segSchema := getPolicyCommonSegmentSchema(false, false)
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{
+			"display_name":        "seg-1",
+			"connectivity_path":   "/infra/tier-1s/gw-1",
+			"transport_zone_path": "/infra/transport-zones/tz-1",
+			"replication_mode":    model.Segment_REPLICATION_MODE_MTEP,
+		})
+		d.Set("transport_zone_path", "/infra/transport-zones/tz-2")
+		mtM := newGoMockProviderClient()
+		ctx := utl.SessionContext{ClientType: utl.Multitenancy, ProjectID: "proj-1"}
+		_, err := policySegmentResourceToInfraStruct(ctx, "seg-1", d, mtM, false, false)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "cannot be specified for project based segments")
+	})
+}
+
+func TestMockNsxt_nsxtPolicySegmentProfileReads(t *testing.T) {
+	segSchema := getPolicyCommonSegmentSchema(false, false)
+
+	t.Run("discovery profile read populates schema when a result is found", func(t *testing.T) {
+		mockDiscoverySDK, _, _ := setupSegmentProfileReadMocks(t)
+		path := "/infra/ip-discovery-profiles/p1"
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(
+			model.SegmentDiscoveryProfileBindingMapListResult{Results: []model.SegmentDiscoveryProfileBindingMap{{IpDiscoveryProfilePath: &path}}}, nil,
+		)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentDiscoveryProfileRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		list := d.Get("discovery_profile").([]interface{})
+		require.Len(t, list, 1)
+	})
+
+	t.Run("discovery profile read propagates List error", func(t *testing.T) {
+		mockDiscoverySDK, _, _ := setupSegmentProfileReadMocks(t)
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(
+			model.SegmentDiscoveryProfileBindingMapListResult{}, vapiErrors.InternalServerError{},
+		)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentDiscoveryProfileRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("qos profile read populates schema only when path is non-empty", func(t *testing.T) {
+		mockDiscoverySDK, mockQosSDK, mockSecuritySDK := setupSegmentProfileReadMocks(t)
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(
+			model.SegmentDiscoveryProfileBindingMapListResult{}, nil,
+		)
+		empty := ""
+		path := "/infra/qos-profiles/p1"
+		mockQosSDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentQosProfileBindingMapListResult{Results: []model.SegmentQosProfileBindingMap{{QosProfilePath: &empty}, {QosProfilePath: &path}}}, nil,
+		)
+		mockSecuritySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentSecurityProfileBindingMapListResult{}, nil,
+		)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentProfilesRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		list := d.Get("qos_profile").([]interface{})
+		require.Len(t, list, 1)
+	})
+
+	t.Run("security profile read populates schema when a result is found", func(t *testing.T) {
+		mockDiscoverySDK, mockQosSDK, mockSecuritySDK := setupSegmentProfileReadMocks(t)
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(
+			model.SegmentDiscoveryProfileBindingMapListResult{}, nil,
+		)
+		mockQosSDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentQosProfileBindingMapListResult{}, nil,
+		)
+		secPath := "/infra/segment-security-profiles/p1"
+		mockSecuritySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentSecurityProfileBindingMapListResult{Results: []model.SegmentSecurityProfileBindingMap{{SegmentSecurityProfilePath: &secPath}}}, nil,
+		)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentProfilesRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		list := d.Get("security_profile").([]interface{})
+		require.Len(t, list, 1)
+	})
+
+	t.Run("security profile read propagates List error", func(t *testing.T) {
+		mockDiscoverySDK, mockQosSDK, mockSecuritySDK := setupSegmentProfileReadMocks(t)
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(
+			model.SegmentDiscoveryProfileBindingMapListResult{}, nil,
+		)
+		mockQosSDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentQosProfileBindingMapListResult{}, nil,
+		)
+		mockSecuritySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(
+			model.SegmentSecurityProfileBindingMapListResult{}, vapiErrors.InternalServerError{},
+		)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentProfilesRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxt_nsxtPolicySegmentRead(t *testing.T) {
+	segSchema := getPolicyCommonSegmentSchema(false, false)
+
+	t.Run("populates advanced_config, l2_extension, subnet and profile blocks", func(t *testing.T) {
+		mockSegSDK, _ := setupSegmentExistsMocks(t)
+		mockDiscoverySDK, mockQosSDK, mockSecuritySDK := setupSegmentProfileReadMocks(t)
+
+		connPath := "/infra/tier-1s/gw-1"
+		revision := int64(1)
+		urpf := "STRICT"
+		egress := false
+		hybrid := true
+		multicast := true
+		gwAddr := "10.0.0.1/24"
+		network := "10.0.0.0/24"
+		mockSegSDK.EXPECT().Get("seg-1").Return(model.Segment{
+			ConnectivityPath: &connPath,
+			Revision:         &revision,
+			AdvancedConfig: &model.SegmentAdvancedConfig{
+				UrpfMode:    &urpf,
+				LocalEgress: &egress,
+				Hybrid:      &hybrid,
+				Multicast:   &multicast,
+			},
+			L2Extension: &model.L2Extension{TunnelId: &revision},
+			Subnets: []model.SegmentSubnet{
+				{GatewayAddress: &gwAddr, Network: &network},
+			},
+		}, nil)
+		mockDiscoverySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil, nil, nil).Return(model.SegmentDiscoveryProfileBindingMapListResult{}, nil)
+		mockQosSDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(model.SegmentQosProfileBindingMapListResult{}, nil)
+		mockSecuritySDK.EXPECT().List("seg-1", nil, nil, nil, nil, nil).Return(model.SegmentSecurityProfileBindingMapListResult{}, nil)
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentRead(d, newGoMockProviderClient(), false, false)
+		require.NoError(t, err)
+		assert.Equal(t, connPath, d.Get("connectivity_path"))
+		advList := d.Get("advanced_config").([]interface{})
+		require.Len(t, advList, 1)
+		l2List := d.Get("l2_extension").([]interface{})
+		require.Len(t, l2List, 1)
+		subnetList := d.Get("subnet").([]interface{})
+		require.Len(t, subnetList, 1)
+	})
+
+	t.Run("empty ID is an error", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		err := nsxtPolicySegmentRead(d, newGoMockProviderClient(), false, false)
+		require.Error(t, err)
+	})
+
+	t.Run("Get error propagates", func(t *testing.T) {
+		mockSegSDK, _ := setupSegmentExistsMocks(t)
+		mockSegSDK.EXPECT().Get("seg-1").Return(model.Segment{}, vapiErrors.InternalServerError{})
+
+		d := schema.TestResourceDataRaw(t, segSchema, map[string]interface{}{})
+		d.SetId("seg-1")
+		err := nsxtPolicySegmentRead(d, newGoMockProviderClient(), false, false)
+		require.Error(t, err)
+	})
+}
+
+func TestMockNsxt_resourceNsxtPolicySegmentExists(t *testing.T) {
+	ctx := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("non-fixed segment: Get succeeds means it exists", func(t *testing.T) {
+		mockSegSDK, _ := setupSegmentExistsMocks(t)
+		mockSegSDK.EXPECT().Get("seg-1").Return(model.Segment{}, nil)
+
+		exists, err := resourceNsxtPolicySegmentExists(ctx, "", false)(ctx, "seg-1", nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("non-fixed segment: NotFound means it does not exist", func(t *testing.T) {
+		mockSegSDK, _ := setupSegmentExistsMocks(t)
+		mockSegSDK.EXPECT().Get("seg-1").Return(model.Segment{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicySegmentExists(ctx, "", false)(ctx, "seg-1", nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("non-fixed segment: other errors propagate", func(t *testing.T) {
+		mockSegSDK, _ := setupSegmentExistsMocks(t)
+		mockSegSDK.EXPECT().Get("seg-1").Return(model.Segment{}, vapiErrors.InternalServerError{})
+
+		_, err := resourceNsxtPolicySegmentExists(ctx, "", false)(ctx, "seg-1", nil)
+		require.Error(t, err)
+	})
+
+	t.Run("fixed tier-1 segment: Get succeeds means it exists", func(t *testing.T) {
+		_, mockT1SegSDK := setupSegmentExistsMocks(t)
+		mockT1SegSDK.EXPECT().Get("gw-1", "seg-1").Return(model.Segment{}, nil)
+
+		exists, err := resourceNsxtPolicySegmentExists(ctx, "/infra/tier-1s/gw-1", true)(ctx, "seg-1", nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("fixed tier-0 segment path is rejected", func(t *testing.T) {
+		setupSegmentExistsMocks(t)
+		_, err := resourceNsxtPolicySegmentExists(ctx, "/infra/tier-0s/gw-1", true)(ctx, "seg-1", nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Tier-0")
+	})
+
+	t.Run("fixed segment with invalid gwPath is rejected", func(t *testing.T) {
+		setupSegmentExistsMocks(t)
+		_, err := resourceNsxtPolicySegmentExists(ctx, "", true)(ctx, "seg-1", nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not a valid gateway path")
 	})
 }

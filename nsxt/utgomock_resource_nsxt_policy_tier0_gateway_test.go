@@ -111,6 +111,77 @@ func TestMockResourceNsxtPolicyTier0GatewayRead(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining Tier0 ID")
 	})
+
+	t.Run("Read populates locale_service blocks when configured via locale_service", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(t0GatewayID).Return(model.Tier0{
+			DisplayName:     &t0DisplayName,
+			Description:     &t0Description,
+			Path:            &t0Path,
+			Revision:        &t0Revision,
+			FailoverMode:    &t0FailoverMode,
+			HaMode:          &t0HaMode,
+			DisableFirewall: &t0DisableFirewall,
+		}, nil)
+		lsID := "ls-1"
+		lsPath := "/infra/tier-0s/t0-gw-1/locale-services/ls-1"
+		lsEdgeCluster := "/infra/sites/default/enforcement-points/default/edge-clusters/ec-1"
+		lsResultCount := int64(1)
+		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{
+				{Id: &lsID, Path: &lsPath, EdgeClusterPath: &lsEdgeCluster},
+			}, ResultCount: &lsResultCount}, nil)
+
+		res := resourceNsxtPolicyTier0Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"locale_service": []interface{}{
+				map[string]interface{}{"nsx_id": "ls-1"},
+			},
+		})
+		d.SetId(t0GatewayID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyTier0GatewayRead(d, m)
+		require.NoError(t, err)
+		services := d.Get("locale_service").(*schema.Set).List()
+		require.Len(t, services, 1)
+		assert.Equal(t, lsPath, services[0].(map[string]interface{})["path"])
+	})
+
+	t.Run("Read populates edge_cluster_path and bgp_config when locale_service is not configured", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(t0GatewayID).Return(model.Tier0{
+			DisplayName:     &t0DisplayName,
+			Description:     &t0Description,
+			Path:            &t0Path,
+			Revision:        &t0Revision,
+			FailoverMode:    &t0FailoverMode,
+			HaMode:          &t0HaMode,
+			DisableFirewall: &t0DisableFirewall,
+		}, nil)
+		lsID := "ls-1"
+		lsEdgeCluster := "/infra/sites/default/enforcement-points/default/edge-clusters/ec-1"
+		lsResultCount := int64(1)
+		mockLocaleServicesSDK.EXPECT().List(t0GatewayID, gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.LocaleServicesListResult{Results: []model.LocaleServices{
+				{Id: &lsID, EdgeClusterPath: &lsEdgeCluster},
+			}, ResultCount: &lsResultCount}, nil)
+
+		mockBgpSDK := bgpmocks.NewMockBgpClient(ctrl)
+		originalBgp := cliBgpClient
+		defer func() { cliBgpClient = originalBgp }()
+		cliBgpClient = func(sessionContext utl.SessionContext, connector client.Connector) *localeservices.BgpRoutingConfigClientContext {
+			return &localeservices.BgpRoutingConfigClientContext{Client: mockBgpSDK, ClientType: utl.Local}
+		}
+		mockBgpSDK.EXPECT().Get(t0GatewayID, lsID).Return(model.BgpRoutingConfig{}, vapiErrors.NotFound{})
+
+		res := resourceNsxtPolicyTier0Gateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(t0GatewayID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyTier0GatewayRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, lsEdgeCluster, d.Get("edge_cluster_path"))
+	})
 }
 
 func TestMockResourceNsxtPolicyTier0GatewayCreate(t *testing.T) {
@@ -528,5 +599,138 @@ func TestMockNsxt_initImplicitTier0GatewayLocaleService(t *testing.T) {
 		result, err := initImplicitTier0GatewayLocaleService(utl.SessionContext{ClientType: utl.Local}, d, nil, nil)
 		require.NoError(t, err)
 		assert.NotNil(t, result)
+	})
+}
+
+func TestUnitNsxt_verifyPolicyTier0GatewayConfig(t *testing.T) {
+	res := resourceNsxtPolicyTier0Gateway()
+
+	t.Run("global manager without locale_service or edge_cluster_path fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		err := verifyPolicyTier0GatewayConfig(d, true)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "mandatory")
+	})
+
+	t.Run("global manager with edge_cluster_path fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"edge_cluster_path": "/infra/sites/default/enforcement-points/default/edge-clusters/ec-1",
+		})
+		err := verifyPolicyTier0GatewayConfig(d, true)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not supported")
+	})
+
+	t.Run("global manager with locale_service succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"locale_service": []interface{}{
+				map[string]interface{}{"edge_cluster_path": "/infra/sites/default/enforcement-points/default/edge-clusters/ec-1"},
+			},
+		})
+		require.NoError(t, verifyPolicyTier0GatewayConfig(d, true))
+	})
+
+	t.Run("local manager with edge_cluster_path and no locale_service succeeds", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"edge_cluster_path": "/infra/sites/default/enforcement-points/default/edge-clusters/ec-1",
+		})
+		require.NoError(t, verifyPolicyTier0GatewayConfig(d, false))
+	})
+}
+
+func TestUnitNsxt_getTier0AdvancedConfigFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyTier0Gateway()
+
+	t.Run("nil when advanced_config is not set", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		assert.Nil(t, getTier0AdvancedConfigFromSchema(d))
+	})
+
+	t.Run("builds config with connectivity set", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"advanced_config": []interface{}{
+				map[string]interface{}{"connectivity": "ALL", "forwarding_up_timer": 5},
+			},
+		})
+		obj := getTier0AdvancedConfigFromSchema(d)
+		require.NotNil(t, obj)
+		require.NotNil(t, obj.Connectivity)
+		assert.Equal(t, "ALL", *obj.Connectivity)
+		assert.Equal(t, int64(5), *obj.ForwardingUpTimer)
+	})
+
+	t.Run("leaves Connectivity nil when empty string", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"advanced_config": []interface{}{
+				map[string]interface{}{"connectivity": "", "forwarding_up_timer": 3},
+			},
+		})
+		obj := getTier0AdvancedConfigFromSchema(d)
+		require.NotNil(t, obj)
+		assert.Nil(t, obj.Connectivity)
+		assert.Equal(t, int64(3), *obj.ForwardingUpTimer)
+	})
+}
+
+func TestUnitNsxt_setTier0AdvancedConfigInSchema(t *testing.T) {
+	res := resourceNsxtPolicyTier0Gateway()
+
+	t.Run("clears the block when obj is nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		setTier0AdvancedConfigInSchema(d, nil)
+		assert.Empty(t, d.Get("advanced_config").([]interface{}))
+	})
+
+	t.Run("sets the block from an advanced config object", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		connectivity := "OFF"
+		timer := int64(10)
+		setTier0AdvancedConfigInSchema(d, &model.Tier0AdvancedConfig{
+			Connectivity:      &connectivity,
+			ForwardingUpTimer: &timer,
+		})
+		list := d.Get("advanced_config").([]interface{})
+		require.Len(t, list, 1)
+		elem := list[0].(map[string]interface{})
+		assert.Equal(t, "OFF", elem["connectivity"])
+		assert.Equal(t, 10, elem["forwarding_up_timer"])
+	})
+}
+
+func TestMockResourceNsxtPolicyTier0GatewayIsVrf(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTier0sSDK := t0mocks.NewMockTier0sClient(ctrl)
+	tier0Wrapper := &cliinfra.Tier0ClientContext{Client: mockTier0sSDK, ClientType: utl.Local}
+	original := cliTier0sClient
+	defer func() { cliTier0sClient = original }()
+	cliTier0sClient = func(sessionContext utl.SessionContext, connector client.Connector) *cliinfra.Tier0ClientContext {
+		return tier0Wrapper
+	}
+
+	res := resourceNsxtPolicyTier0Gateway()
+
+	t.Run("returns true when VrfConfig is set", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(t0GatewayID).Return(model.Tier0{VrfConfig: &model.Tier0VrfConfig{}}, nil)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(d, newGoMockProviderClient(), t0GatewayID, nil, false)
+		require.NoError(t, err)
+		assert.True(t, isVrf)
+	})
+
+	t.Run("returns false when VrfConfig is nil", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(t0GatewayID).Return(model.Tier0{}, nil)
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(d, newGoMockProviderClient(), t0GatewayID, nil, false)
+		require.NoError(t, err)
+		assert.False(t, isVrf)
+	})
+
+	t.Run("propagates a Get error", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(t0GatewayID).Return(model.Tier0{}, vapiErrors.InternalServerError{})
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		_, err := resourceNsxtPolicyTier0GatewayIsVrf(d, newGoMockProviderClient(), t0GatewayID, nil, false)
+		require.Error(t, err)
 	})
 }

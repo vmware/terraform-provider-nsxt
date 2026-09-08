@@ -214,3 +214,27 @@ func TestMockResourceNsxtPolicyTier1GatewayInterfaceDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyTier1GatewayInterfaceImport(t *testing.T) {
+	res := resourceNsxtPolicyTier1GatewayInterface()
+
+	t.Run("full policy path succeeds and sets gateway_path and locale_service_id", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/gw-1/locale-services/default/interfaces/int-1")
+
+		out, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "/infra/tier-1s/gw-1", d.Get("gateway_path"))
+		assert.Equal(t, "default", d.Get("locale_service_id"))
+	})
+
+	t.Run("legacy format with wrong segment count is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("gw-1/ls-1")
+
+		_, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "gateway-id")
+	})
+}

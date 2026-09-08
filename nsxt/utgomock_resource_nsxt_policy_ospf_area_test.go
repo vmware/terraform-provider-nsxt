@@ -184,3 +184,34 @@ func TestMockResourceNsxtPolicyOspfAreaDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyOspfAreaImport(t *testing.T) {
+	res := resourceNsxtPolicyOspfArea()
+
+	t.Run("wrong segment count is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(ospfAreaGwID + "/" + ospfAreaLsID)
+
+		_, err := resourceNsxtPolicyOspfAreaImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "tier0-id")
+	})
+
+	t.Run("valid path succeeds and sets ospf_path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupOSPFAreaMock(t, ctrl)
+		defer restore()
+		parentPath := ospfAreaOspfPath
+		mockSDK.EXPECT().Get(ospfAreaGwID, ospfAreaLsID, ospfAreaID).Return(nsxModel.OspfAreaConfig{ParentPath: &parentPath}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(ospfAreaGwID + "/" + ospfAreaLsID + "/" + ospfAreaID)
+
+		out, err := resourceNsxtPolicyOspfAreaImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, ospfAreaID, d.Id())
+		assert.Equal(t, ospfAreaOspfPath, d.Get("ospf_path"))
+	})
+}

@@ -419,3 +419,27 @@ func minimalNATRuleData() map[string]interface{} {
 		"policy_based_vpn_mode": "",
 	}
 }
+
+func TestUnitNsxt_resourceNsxtPolicyNATRuleImport(t *testing.T) {
+	res := resourceNsxtPolicyNATRule()
+
+	t.Run("full policy path succeeds and sets gateway_path and type", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-0s/gw-1/nat/USER/nat-rules/rule-1")
+
+		out, err := resourceNsxtPolicyNATRuleImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "/infra/tier-0s/gw-1", d.Get("gateway_path"))
+		assert.Equal(t, "USER", d.Get("type"))
+	})
+
+	t.Run("legacy format with too many segments is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("gw-1/rule-1/USER/extra")
+
+		_, err := resourceNsxtPolicyNATRuleImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "gateway-id")
+	})
+}
