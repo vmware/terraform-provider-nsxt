@@ -164,7 +164,8 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 									SchemaType: "string",
 								},
 							},
-							Optional: true,
+							Optional:         true,
+							DiffSuppressFunc: suppressDhcpServerAddresses,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "list",
@@ -535,6 +536,8 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	filterDeactivatedDhcpServerAddresses(d, obj.AdvancedConfig)
+
 	log.Printf("[INFO] Creating VpcSubnet with ID %s", id)
 
 	client := clientLayer.NewSubnetsClient(connector)
@@ -571,6 +574,51 @@ func validateDhcpConfig(d *schema.ResourceData) error {
 	}
 
 	return nil
+}
+
+// isDhcpv4Deactivated returns true when dhcp_config.mode is DEACTIVATED, or
+// when dhcp_config is not set at all (matching the API default).
+func isDhcpv4Deactivated(d *schema.ResourceData) bool {
+	if v4Val, ok := d.GetOk("dhcp_config"); ok {
+		v4List := v4Val.([]interface{})
+		if len(v4List) > 0 {
+			v4Map := v4List[0].(map[string]interface{})
+			if mode, ok := v4Map["mode"].(string); ok && mode != "" {
+				return mode == model.SubnetDhcpConfig_MODE_DEACTIVATED
+			}
+		}
+	}
+	return true
+}
+
+// suppressDhcpServerAddresses avoids perpetual drift on
+// advanced_config.dhcp_server_addresses: NSX does not persist these
+// addresses while DHCP is deactivated, so the server-returned (empty) value
+// would otherwise permanently conflict with whatever is left in config.
+func suppressDhcpServerAddresses(_, _, _ string, d *schema.ResourceData) bool {
+	return isDhcpv4Deactivated(d)
+}
+
+// filterDeactivatedDhcpServerAddresses drops dhcp_server_addresses from the
+// payload sent to NSX when DHCP is deactivated, and drops any empty-string
+// placeholder metadata.SchemaToStruct can populate for elements suppressed
+// by suppressDhcpServerAddresses. Without this, NSX rejects the payload with
+// a dhcp_server_addresses ip-cidr-block format validation error.
+func filterDeactivatedDhcpServerAddresses(d *schema.ResourceData, advancedConfig *model.SubnetAdvancedConfig) {
+	if advancedConfig == nil || len(advancedConfig.DhcpServerAddresses) == 0 {
+		return
+	}
+	if isDhcpv4Deactivated(d) {
+		advancedConfig.DhcpServerAddresses = nil
+		return
+	}
+	var activeAddrs []string
+	for _, addr := range advancedConfig.DhcpServerAddresses {
+		if addr != "" {
+			activeAddrs = append(activeAddrs, addr)
+		}
+	}
+	advancedConfig.DhcpServerAddresses = activeAddrs
 }
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
@@ -640,6 +688,8 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	if (obj.SubnetDhcpConfig != nil) && (obj.SubnetDhcpConfig.Mode != nil && *obj.SubnetDhcpConfig.Mode == model.SubnetDhcpConfig_MODE_RELAY) {
 		obj.SubnetDhcpConfig.DhcpServerAdditionalConfig = nil
 	}
+
+	filterDeactivatedDhcpServerAddresses(d, obj.AdvancedConfig)
 
 	client := clientLayer.NewSubnetsClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
