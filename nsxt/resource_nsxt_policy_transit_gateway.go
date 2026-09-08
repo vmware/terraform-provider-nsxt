@@ -200,9 +200,13 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 
 	// We're limiting to one span of any kind in the schema
 	span := iSpan.([]interface{})[0].(map[string]interface{})
-	if len(span["cluster_based_span"].([]interface{})) > 0 {
-		cbs := span["cluster_based_span"].([]interface{})[0].(map[string]interface{})
-		spanPath := cbs["span_path"].(string)
+	// Presence is determined by list length: when a nested block's contents
+	// stay at their zero value, the SDKv2 diff engine can reconstruct the
+	// single list element as a bare nil even though the block itself is
+	// present, so a direct type assertion on that element would panic.
+	if cbsList := span["cluster_based_span"].([]interface{}); len(cbsList) > 0 {
+		cbs, _ := cbsList[0].(map[string]interface{})
+		spanPath, _ := cbs["span_path"].(string)
 		clusterBasedSpan := model.ClusterBasedSpan{
 			SpanPath: &spanPath,
 			Type_:    model.BaseSpan_TYPE_CLUSTERBASEDSPAN,
@@ -213,9 +217,11 @@ func getSpanFromSchema(iSpan interface{}) (*data.StructValue, error) {
 		}
 		return dataValue.(*data.StructValue), nil
 	}
-	if len(span["zone_based_span"].([]interface{})) > 0 {
-		zbs := span["zone_based_span"].([]interface{})[0].(map[string]interface{})
-		zoneExternalIds := interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
+	if zbsList := span["zone_based_span"].([]interface{}); len(zbsList) > 0 {
+		var zoneExternalIds []string
+		if zbs, ok := zbsList[0].(map[string]interface{}); ok {
+			zoneExternalIds = interfaceListToStringList(zbs["zone_external_ids"].([]interface{}))
+		}
 		zoneBasedSpan := model.ZoneBasedSpan{
 			ZoneExternalIds: zoneExternalIds,
 			Type_:           model.BaseSpan_TYPE_ZONEBASEDSPAN,
