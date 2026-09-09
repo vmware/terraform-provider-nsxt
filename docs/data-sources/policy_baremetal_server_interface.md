@@ -1,6 +1,6 @@
 ---
 subcategory: "Beta"
-page_title: "NSXT: policy_baremetal_server_interface"
+page_title: "NSXT: nsxt_policy_baremetal_server_interface"
 description: A bare metal server interface inventory data source.
 ---
 
@@ -50,6 +50,7 @@ output "interface_ips" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the data source.
+* `display_name` - Display name of the bare metal server interface.
 * `bms_external_id` - External ID of the parent bare metal server.
 * `source_id` - Source ID of the bare metal server interface.
 * `is_mgmt_interface` - Whether this is a management interface.

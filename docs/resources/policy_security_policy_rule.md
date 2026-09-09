@@ -57,7 +57,7 @@ resource "nsxt_policy_parent_security_policy" "bms_parent_policy" {
 resource "nsxt_policy_group" "production_bms" {
   display_name = "Production-BMS-Servers"
   description  = "Production bare metal servers"
-
+  group_type   = "BareMetalServer"
   criteria {
     condition {
       key         = "Tag"
@@ -71,7 +71,7 @@ resource "nsxt_policy_group" "production_bms" {
 resource "nsxt_policy_group" "bms_web_servers" {
   display_name = "BMS-Web-Servers"
   description  = "BMS web servers (static group)"
-
+  group_type   = "BareMetalServer"
   criteria {
     external_id_expression {
       member_type = "BareMetalServer"
@@ -86,7 +86,7 @@ resource "nsxt_policy_group" "bms_web_servers" {
 resource "nsxt_policy_group" "bms_data_interfaces" {
   display_name = "BMS-Data-Interfaces"
   description  = "BMS data plane interfaces"
-
+  group_type   = "BareMetalServer"
   criteria {
     condition {
       key         = "Tag"
@@ -132,72 +132,6 @@ resource "nsxt_policy_security_policy_rule" "block_mgmt_access" {
   action          = "DROP"
   services        = [nsxt_policy_service.ssh.path, nsxt_policy_service.snmp.path, nsxt_policy_service.telnet.path]
   logged          = true
-}
-```
-
-## Example Usage - Mixed BMS and VM Standalone Rules
-
-```hcl
-# Create parent policy
-resource "nsxt_policy_parent_security_policy" "mixed_parent_policy" {
-  display_name = "Mixed-Environment-Policy"
-  description  = "Parent policy for mixed BMS and VM rules"
-  category     = "Application"
-}
-
-# Mixed BMS and VM groups
-resource "nsxt_policy_group" "all_web_servers" {
-  display_name = "All-Web-Servers"
-  description  = "Web servers across BMS and VMs"
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "BareMetalServer"
-      operator    = "EQUALS"
-      value       = "application|web-server"
-    }
-  }
-
-  conjunction {
-    operator = "OR"
-  }
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "VirtualMachine"
-      operator    = "EQUALS"
-      value       = "application|web-server"
-    }
-  }
-}
-
-resource "nsxt_policy_group" "load_balancers" {
-  display_name = "Load-Balancers"
-  description  = "Load balancer VMs"
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "VirtualMachine"
-      operator    = "EQUALS"
-      value       = "application|load-balancer"
-    }
-  }
-}
-
-# Standalone rule allowing load balancer to mixed web servers
-resource "nsxt_policy_security_policy_rule" "lb_to_web_servers" {
-  display_name       = "lb-to-web-servers"
-  description        = "Allow load balancer traffic to all web servers"
-  policy_path        = nsxt_policy_parent_security_policy.mixed_parent_policy.path
-  sequence_number    = 100
-  source_groups      = [nsxt_policy_group.load_balancers.path]
-  destination_groups = [nsxt_policy_group.all_web_servers.path]
-  action             = "ALLOW"
-  services           = [nsxt_policy_service.http.path, nsxt_policy_service.https.path]
-  logged             = true
 }
 ```
 
