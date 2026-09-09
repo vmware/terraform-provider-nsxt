@@ -26,7 +26,7 @@ resource "nsxt_policy_project_centralized_network_attachment" "example" {
 
   advertise_outbound_networks {
     allow_private         = true
-    allow_external_blocks = ["10.0.0.0/8", "172.16.0.0/12"]
+    allow_external_blocks = [nsxt_policy_ip_block.block.path]
   }
 
   tag {
@@ -69,7 +69,7 @@ The following arguments are supported:
 * `subnet_path` - (Required, Immutable) Policy path of the VPC subnet (overlay or VLAN-backed) to which this CNA is connected. Cannot be changed after creation.
 * `advertise_outbound_networks` - (Optional) Outbound route advertisement configuration.
     * `allow_private` - (Optional) When `true`, disables VPC auto-SNAT and EIP translation on the interface, and enables `TGW_PRIVATE` route redistribution on this connection. Default: `false`.
-    * `allow_external_blocks` - (Optional) List of external IP block CIDRs used as an advertisement filter for prefixes redistributed from the transit gateway.
+    * `allow_external_blocks` - (Optional) List of external IP block paths used as an advertisement filter for prefixes redistributed from the transit gateway.
 * `interface_subnet` - (Optional) Manual IP assignment for per-node edge interfaces. Supports 1–2 entries (one IPv4 and/or one IPv6 subnet). CNAs with manual IP assignment cannot be shared to other centralized transit gateways.
     * `interface_ip_address` - (Required) List of IP addresses assigned to each edge node interface. The count must match the number of edge nodes hosting the centralized transit gateway.
     * `prefix_length` - (Required) Prefix length of the subnet. Valid range: 1–32 for IPv4, 1–128 for IPv6.

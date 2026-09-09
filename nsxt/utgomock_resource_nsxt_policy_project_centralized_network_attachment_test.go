@@ -141,7 +141,7 @@ func TestMockResourceNsxtPolicyCNACreate(t *testing.T) {
 		data["advertise_outbound_networks"] = []interface{}{
 			map[string]interface{}{
 				"allow_private":         allowPrivate,
-				"allow_external_blocks": []interface{}{"10.0.0.0/8"},
+				"allow_external_blocks": []interface{}{"/infra/ip-blocks/block-1"},
 			},
 		}
 		data["interface_subnet"] = []interface{}{
@@ -159,7 +159,7 @@ func TestMockResourceNsxtPolicyCNACreate(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, captured.AdvertiseOutboundNetworks)
 		assert.True(t, *captured.AdvertiseOutboundNetworks.AllowPrivate)
-		assert.Equal(t, []string{"10.0.0.0/8"}, captured.AdvertiseOutboundNetworks.AllowExternalBlocks)
+		assert.Equal(t, []string{"/infra/ip-blocks/block-1"}, captured.AdvertiseOutboundNetworks.AllowExternalBlocks)
 		require.Len(t, captured.InterfaceSubnets, 1)
 		assert.Equal(t, int64(24), *captured.InterfaceSubnets[0].PrefixLength)
 		assert.Equal(t, "192.168.1.100", *captured.InterfaceSubnets[0].HaVipIpAddress)
@@ -179,7 +179,7 @@ func TestMockResourceNsxtPolicyCNARead(t *testing.T) {
 		apiResp := cnaAPIResponse()
 		apiResp.AdvertiseOutboundNetworks = &nsxModel.AdvertiseOutboundNetworks{
 			AllowPrivate:        &allowPrivate,
-			AllowExternalBlocks: []string{"10.0.0.0/8"},
+			AllowExternalBlocks: []string{"/infra/ip-blocks/block-1"},
 		}
 		apiResp.InterfaceSubnets = []nsxModel.CentralizedNetworkAttachmentInterfaceSubnet{
 			{
@@ -203,7 +203,7 @@ func TestMockResourceNsxtPolicyCNARead(t *testing.T) {
 		require.Len(t, aon, 1)
 		aonMap := aon[0].(map[string]interface{})
 		assert.True(t, aonMap["allow_private"].(bool))
-		assert.Equal(t, []interface{}{"10.0.0.0/8"}, aonMap["allow_external_blocks"])
+		assert.Equal(t, []interface{}{"/infra/ip-blocks/block-1"}, aonMap["allow_external_blocks"])
 
 		subnets := d.Get("interface_subnet").([]interface{})
 		require.Len(t, subnets, 1)
@@ -253,6 +253,46 @@ func TestMockResourceNsxtPolicyCNAUpdate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("Update with advertise_outbound_networks and interface_subnet", func(t *testing.T) {
+		allowPrivate := true
+		var captured nsxModel.CentralizedNetworkAttachment
+		gomock.InOrder(
+			mockSDK.EXPECT().Update(cnaOrgID, cnaProjectID, cnaID, gomock.Any()).DoAndReturn(
+				func(_, _, _ string, obj nsxModel.CentralizedNetworkAttachment) (nsxModel.CentralizedNetworkAttachment, error) {
+					captured = obj
+					return cnaAPIResponse(), nil
+				}),
+			mockSDK.EXPECT().Get(cnaOrgID, cnaProjectID, cnaID).Return(cnaAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyProjectCentralizedNetworkAttachment()
+		data := minimalCNAData()
+		data["advertise_outbound_networks"] = []interface{}{
+			map[string]interface{}{
+				"allow_private":         allowPrivate,
+				"allow_external_blocks": []interface{}{"/infra/ip-blocks/block-1"},
+			},
+		}
+		data["interface_subnet"] = []interface{}{
+			map[string]interface{}{
+				"interface_ip_address": []interface{}{"192.168.1.10"},
+				"prefix_length":        24,
+				"ha_vip_ip_address":    "192.168.1.100",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(cnaID)
+
+		err := resourceNsxtPolicyProjectCNAUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.NotNil(t, captured.AdvertiseOutboundNetworks)
+		assert.True(t, *captured.AdvertiseOutboundNetworks.AllowPrivate)
+		assert.Equal(t, []string{"/infra/ip-blocks/block-1"}, captured.AdvertiseOutboundNetworks.AllowExternalBlocks)
+		require.Len(t, captured.InterfaceSubnets, 1)
+		assert.Equal(t, int64(24), *captured.InterfaceSubnets[0].PrefixLength)
+		assert.Equal(t, "192.168.1.100", *captured.InterfaceSubnets[0].HaVipIpAddress)
+	})
+
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
 		res := resourceNsxtPolicyProjectCentralizedNetworkAttachment()
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalCNAData())
@@ -286,4 +326,25 @@ func TestMockResourceNsxtPolicyCNADelete(t *testing.T) {
 		err := resourceNsxtPolicyProjectCNADelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_PolicyProjectCNASchemaValidation(t *testing.T) {
+	res := resourceNsxtPolicyProjectCentralizedNetworkAttachment()
+	aonSchema := res.Schema["advertise_outbound_networks"].Elem.(*schema.Resource).Schema
+	extBlocksSchema := aonSchema["allow_external_blocks"].Elem.(*schema.Schema)
+	validate := extBlocksSchema.ValidateFunc
+
+	// Negative cases: CIDRs and invalid paths must fail validation
+	_, errs := validate("10.0.0.0/8", "allow_external_blocks")
+	assert.NotEmpty(t, errs, "CIDR string should be rejected by validatePolicyPath()")
+
+	_, errs = validate("invalid-path", "allow_external_blocks")
+	assert.NotEmpty(t, errs, "Non-path string should be rejected")
+
+	// Positive cases: Valid infra and project paths must pass validation
+	_, errs = validate("/infra/ip-blocks/block-1", "allow_external_blocks")
+	assert.Empty(t, errs, "Infra IP block path should be accepted")
+
+	_, errs = validate("/orgs/default/projects/project1/infra/ip-blocks/block-1", "allow_external_blocks")
+	assert.Empty(t, errs, "Project-scoped IP block path should be accepted")
 }
