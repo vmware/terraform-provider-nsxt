@@ -134,7 +134,10 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 	var blockSubnet *model.IpAddressPoolBlockSubnet
 	var err error
 	if isCacheEnabledForRead(d, m) {
-		key := id
+		key := d.Get("path").(string)
+		if key == "" {
+			key = id
+		}
 		blockSubnet, _, _, err = CacheAwareResourceRead[model.IpAddressPoolBlockSubnet](
 			d,
 			m,

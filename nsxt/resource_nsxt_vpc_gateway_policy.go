@@ -33,7 +33,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 
 func resourceNsxtVPCGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	connector := getPolicyConnector(m)
 
@@ -121,7 +121,7 @@ func resourceNsxtVPCGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("error obtaining VPC Gateway Policy ID")
 	}
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
 	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true, true)
