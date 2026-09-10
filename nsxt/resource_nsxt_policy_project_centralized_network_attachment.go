@@ -60,11 +60,11 @@ func resourceNsxtPolicyProjectCentralizedNetworkAttachment() *schema.Resource {
 						},
 						"allow_external_blocks": {
 							Type:        schema.TypeList,
-							Description: "External IP blocks (CIDRs) used as advertisement filter for prefixes from the transit gateway.",
+							Description: "External IP blocks (policy paths) used as advertisement filter for prefixes from the transit gateway.",
 							Optional:    true,
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
-								ValidateFunc: validateIPCidr(),
+								ValidateFunc: validatePolicyPath(),
 							},
 						},
 					},
