@@ -8,7 +8,7 @@ description: A resource to configure IP Address Allocation under Project.
 
 This resource provides a method for allocating IP Address from IP block associated with VPC.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager. IPv6-related arguments (`ip_address_type`, `ipv6_allocation_prefix_length`) are only available in v9.2.0 and above.
 
 ## Example Usage
 
@@ -22,6 +22,20 @@ resource "nsxt_policy_project_ip_address_allocation" "nat" {
 }
 ```
 
+## Example Usage - IPv6 Allocation (NSX 9.2.0+)
+
+```hcl
+resource "nsxt_policy_project_ip_address_allocation" "ipv6" {
+  context {
+    project_id = data.nsxt_policy_project.dev.id
+  }
+  display_name                  = "ipv6-alloc"
+  ip_address_type               = "IPV6"
+  ipv6_allocation_prefix_length = 64
+  ip_block                      = data.nsxt_policy_project.dev.ipv6_blocks[0]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -30,8 +44,10 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `allocation_size` - (Optional) The system will allocate IP addresses from unused IP addresses based on allocation size. Currently only size `1` is supported.
+* `allocation_size` - (Optional) The system will allocate IP addresses from unused IP addresses based on allocation size. Currently only size `1` is supported. Conflicts with `ipv6_allocation_prefix_length`.
 * `allocation_ips` - (Optional) If specified, IPs have to be within range of respective IP blocks.
+* `ip_address_type` - (Optional) Type of IP address to allocate. Allowed values are `IPV4` and `IPV6`. Defaults to `IPV4`. Immutable after creation (forces new resource). This attribute is only available in v9.2.0 and above.
+* `ipv6_allocation_prefix_length` - (Optional) Prefix length of the allocated IPv6 subnet. Allowed values are between `64` and `128`. Defaults to `64`. Conflicts with `allocation_size`. Immutable after creation (forces new resource). This attribute is only available in v9.2.0 and above.
 * `ip_block` - (Optional) Policy path for IP Block for the allocation.
 
 ## Attributes Reference
