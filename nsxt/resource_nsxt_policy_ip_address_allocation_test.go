@@ -35,11 +35,6 @@ var accTestPolicyIPAddressAllocationExhaustedSubnetName = getAccTestResourceName
 var accTestPolicyIPAddressAllocationExhaustedConsumerName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhaustedName = getAccTestResourceName()
 
-var accTestPolicyIPAddressAllocationExhausted92PoolName = getAccTestResourceName()
-var accTestPolicyIPAddressAllocationExhausted92SubnetName = getAccTestResourceName()
-var accTestPolicyIPAddressAllocationExhausted92ConsumerName = getAccTestResourceName()
-var accTestPolicyIPAddressAllocationExhausted92Name = getAccTestResourceName()
-
 func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIPAddressAllocationBasic(t, false, func() {
 		testAccPreCheck(t)
@@ -204,25 +199,17 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic_multitenancy(t *te
 	})
 }
 
-// TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted verifies that, on NSX
-// versions below 9.2.0, when an IP pool has no free addresses left, a create with
-// allocation_ip unset passes the initial PATCH but then fails once NSX can't
-// asynchronously realize an actual IP, and that the failed allocation is not left
-// behind as an orphaned object on NSX Manager. This exercises the cleanup path fixed
-// in resourceNsxtPolicyIPAddressAllocationCreate for realization failures.
-//
-// On NSX 9.2.0+ pool exhaustion is instead rejected synchronously by the PATCH call
-// itself, so the create never reaches that cleanup path; see the _poolExhausted92
-// sibling test below for that behavior.
+// TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted verifies that when an IP
+// pool has no free addresses left, a create with allocation_ip unset passes the
+// initial PATCH but then fails once NSX can't asynchronously realize an actual IP,
+// and that the failed allocation is not left behind as an orphaned object on NSX
+// Manager. This exercises the cleanup path fixed in
+// resourceNsxtPolicyIPAddressAllocationCreate for realization failures.
 func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.consumer"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccOnlyLocalManager(t)
-			testAccPreCheck(t)
-			testAccNSXVersionLessThan(t, "9.2.0")
-		},
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationExhaustedConsumerName); err != nil {
@@ -244,48 +231,6 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted(t *testing.T) {
 				// must not leave an orphaned allocation behind on NSX Manager.
 				Config:      testAccNsxtPolicyIPAddressAllocationExhaustedTemplate(true),
 				ExpectError: regexp.MustCompile("Failed to get realized IP for path"),
-			},
-		},
-	})
-}
-
-// TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted92 covers the same pool
-// exhaustion scenario as TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted,
-// but for NSX 9.2.0+, where the backend validates IP availability synchronously
-// inside the initial PATCH call and rejects it outright (error code 520054) rather
-// than deferring the failure to async realization. Nothing is created on NSX in this
-// case, so this does not exercise the realization-failure cleanup path (covered by
-// the pre-9.2 sibling test above); it exists so pool exhaustion still has acceptance
-// coverage on 9.2+.
-func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted92(t *testing.T) {
-	testResourceName := "nsxt_policy_ip_address_allocation.consumer"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccOnlyLocalManager(t)
-			testAccPreCheck(t)
-			testAccNSXVersion(t, "9.2.0")
-		},
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationExhausted92ConsumerName); err != nil {
-				return err
-			}
-			return testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state)
-		},
-		Steps: []resource.TestStep{
-			{
-				// Consume the single IP available in the pool.
-				Config: testAccNsxtPolicyIPAddressAllocationExhausted92Template(false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyIPAddressAllocationExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "allocation_ip", "13.13.13.10"),
-				),
-			},
-			{
-				// The pool now has no free IPs left; NSX rejects the PATCH outright.
-				Config:      testAccNsxtPolicyIPAddressAllocationExhausted92Template(true),
-				ExpectError: regexp.MustCompile("is exhausted, no free IPs available for allocation"),
 			},
 		},
 	})
@@ -480,13 +425,13 @@ data "nsxt_policy_realization_info" "subnet_realization" {
 }`, context, accTestPolicyIPAddressAllocationPoolName, context, accTestPolicyIPAddressAllocationSubnetName)
 }
 
-// testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames builds a pool with a
-// single available IP. The "consumer" resource always consumes that IP. When
+// testAccNsxtPolicyIPAddressAllocationExhaustedTemplate builds a pool with a single
+// available IP. The "consumer" resource always consumes that IP. When
 // includeExhausting is true, a second allocation with an auto-generated nsx_id is
 // added; since the pool is already exhausted at that point, its create is expected
 // to fail. Leaving nsx_id auto-generated (rather than fixed) matches the common case
 // and is an exact repro of the reported customer issue.
-func testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames(poolName, subnetName, consumerName, exhaustedName string, includeExhausting bool) string {
+func testAccNsxtPolicyIPAddressAllocationExhaustedTemplate(includeExhausting bool) string {
 	config := fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "exhausted" {
   display_name = "%s"
@@ -510,7 +455,7 @@ resource "nsxt_policy_ip_address_allocation" "consumer" {
   display_name = "%s"
   pool_path    = nsxt_policy_ip_pool.exhausted.path
   depends_on   = [data.nsxt_policy_realization_info.exhausted_subnet_realization]
-}`, poolName, subnetName, consumerName)
+}`, accTestPolicyIPAddressAllocationExhaustedPoolName, accTestPolicyIPAddressAllocationExhaustedSubnetName, accTestPolicyIPAddressAllocationExhaustedConsumerName)
 
 	if !includeExhausting {
 		return config
@@ -522,25 +467,5 @@ resource "nsxt_policy_ip_address_allocation" "exhausted" {
   display_name = "%s"
   pool_path    = nsxt_policy_ip_pool.exhausted.path
   depends_on   = [nsxt_policy_ip_address_allocation.consumer]
-}`, exhaustedName)
-}
-
-func testAccNsxtPolicyIPAddressAllocationExhaustedTemplate(includeExhausting bool) string {
-	return testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames(
-		accTestPolicyIPAddressAllocationExhaustedPoolName,
-		accTestPolicyIPAddressAllocationExhaustedSubnetName,
-		accTestPolicyIPAddressAllocationExhaustedConsumerName,
-		accTestPolicyIPAddressAllocationExhaustedName,
-		includeExhausting,
-	)
-}
-
-func testAccNsxtPolicyIPAddressAllocationExhausted92Template(includeExhausting bool) string {
-	return testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames(
-		accTestPolicyIPAddressAllocationExhausted92PoolName,
-		accTestPolicyIPAddressAllocationExhausted92SubnetName,
-		accTestPolicyIPAddressAllocationExhausted92ConsumerName,
-		accTestPolicyIPAddressAllocationExhausted92Name,
-		includeExhausting,
-	)
+}`, accTestPolicyIPAddressAllocationExhaustedName)
 }
