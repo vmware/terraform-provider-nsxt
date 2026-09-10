@@ -95,6 +95,47 @@ func TestMockResourceNsxtPolicyDnsZoneCreate(t *testing.T) {
 		assert.Equal(t, projectDnsZoneID, d.Id())
 	})
 
+	t.Run("Create success with resolution_scope", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsZoneMock(t, ctrl)
+		defer restore()
+
+		scopeData := minimalProjectDnsZoneData()
+		scopeData["resolution_scope"] = []interface{}{
+			"/orgs/default/projects/project1/vpcs/vpc-1",
+			"/orgs/default/projects/project1/vpcs/vpc-2",
+		}
+
+		notFoundErr := vapiErrors.NotFound{}
+		var capturedObj nsxModel.DnsZone
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID).Return(nsxModel.DnsZone{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, _ string, obj nsxModel.DnsZone) error {
+					capturedObj = obj
+					return nil
+				}),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID).Return(projectDnsZoneAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyDnsZone()
+		assert.Equal(t, schema.TypeSet, res.Schema["resolution_scope"].Type)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, scopeData)
+
+		err := resourceNsxtPolicyDnsZoneCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, projectDnsZoneID, d.Id())
+		assert.ElementsMatch(t, []string{
+			"/orgs/default/projects/project1/vpcs/vpc-1",
+			"/orgs/default/projects/project1/vpcs/vpc-2",
+		}, capturedObj.ResolutionScope)
+	})
+
 	t.Run("Create fails on old NSX version", func(t *testing.T) {
 		util.NsxVersion = "9.1.0"
 		defer func() { util.NsxVersion = "" }()
@@ -124,6 +165,32 @@ func TestMockResourceNsxtPolicyDnsZoneRead(t *testing.T) {
 		err := resourceNsxtPolicyDnsZoneRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, projectDnsZoneDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Read success with resolution_scope", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsZoneMock(t, ctrl)
+		defer restore()
+
+		apiResp := projectDnsZoneAPIResponse()
+		apiResp.ResolutionScope = []string{
+			"/orgs/default/projects/project1/vpcs/vpc-1",
+			"/orgs/default/projects/project1/vpcs/vpc-2",
+		}
+		mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID).Return(apiResp, nil)
+
+		res := resourceNsxtPolicyDnsZone()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalProjectDnsZoneData())
+		d.SetId(projectDnsZoneID)
+
+		err := resourceNsxtPolicyDnsZoneRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, projectDnsZoneDisplayName, d.Get("display_name"))
+		resScopeSet := d.Get("resolution_scope").(*schema.Set)
+		assert.Equal(t, 2, resScopeSet.Len())
+		assert.True(t, resScopeSet.Contains("/orgs/default/projects/project1/vpcs/vpc-1"))
+		assert.True(t, resScopeSet.Contains("/orgs/default/projects/project1/vpcs/vpc-2"))
 	})
 
 	t.Run("Read not found clears ID", func(t *testing.T) {

@@ -48,7 +48,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `parent_path` - (Required, Force New) Policy path of the parent `nsxt_policy_dns_service`.
 * `dns_domain_name` - (Required, Force New) The domain name for this zone (e.g. `example.com`) or reverse-notation (e.g. `12.168.192.in-addr.arpa`). Immutable after creation.
-* `resolution_scope` - (Optional) List of VPC policy paths within this project. When set and non-empty, only workloads in the specified VPCs can resolve this zone (split-horizon DNS). When unset or empty, all VPCs in the project can resolve the zone. A zone shared with other projects must have `resolution_scope` unset or empty.
+* `resolution_scope` - (Optional) Set of VPC policy paths within this project. When set and non-empty, only workloads in the specified VPCs can resolve this zone (split-horizon DNS). When unset or empty, all VPCs in the project can resolve the zone. A zone shared with other projects must have `resolution_scope` unset or empty.
 * `ttl` - (Optional) Default Time-To-Live in seconds for DNS records in this zone (30-86400). Default: `300`.
 * `soa` - (Optional) SOA (Start of Authority) record parameters. All sub-fields are optional and computed; omitted fields use system defaults.
     * `primary_nameserver` - (Optional, Computed) FQDN of the primary nameserver. Must end with a trailing dot.

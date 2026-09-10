@@ -47,13 +47,13 @@ func resourceNsxtPolicyDnsZone() *schema.Resource {
 				Description: "The domain name for this zone (e.g. 'example.com'). Immutable after creation.",
 			},
 			"resolution_scope": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validatePolicyPath(),
 				},
-				Description: "Optional list of VPC policy paths for split-horizon DNS. When set, only workloads in the specified VPCs can resolve this zone. When empty, all VPCs in the project can resolve it.",
+				Description: "Optional set of VPC policy paths for split-horizon DNS. When set, only workloads in the specified VPCs can resolve this zone. When empty, all VPCs in the project can resolve it.",
 			},
 			"ttl": {
 				Type:         schema.TypeInt,
@@ -153,7 +153,7 @@ func policyDnsZoneFromSchema(d *schema.ResourceData) model.DnsZone {
 		Ttl:           &ttl,
 	}
 
-	obj.ResolutionScope = getStringListFromSchemaList(d, "resolution_scope")
+	obj.ResolutionScope = getStringListFromSchemaSet(d, "resolution_scope")
 
 	soaList := d.Get("soa").([]interface{})
 	if len(soaList) > 0 {
