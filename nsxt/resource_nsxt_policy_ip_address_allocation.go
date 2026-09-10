@@ -144,9 +144,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, m, *obj.Path, timeout)
 		entity, err := stateConf.WaitForState()
 		if err != nil {
-			// Clean up NSX allocation
-			resourceNsxtPolicyIPAddressAllocationDelete(d, m)
-			return err
+			return cleanupFailedIPAddressAllocation(d, m, id, err)
 		}
 		realizedResource := entity.(model.GenericPolicyRealizedResource)
 		for _, attr := range realizedResource.ExtendedAttributes {
@@ -158,15 +156,27 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 				return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 			}
 		}
-		// Clean up NSX allocation
-		resourceNsxtPolicyIPAddressAllocationDelete(d, m)
-		return fmt.Errorf("Failed to get realized IP for path %s", d.Get("path"))
+		return cleanupFailedIPAddressAllocation(d, m, id, fmt.Errorf("Failed to get realized IP for path %s", d.Get("path")))
 	}
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	MarkPostWriteAndInvalidateCacheForResourceType(resourceTypeIpAddressAllocation, d.Id(), m)
 	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
+}
+
+// cleanupFailedIPAddressAllocation deletes an IPAddressAllocation that was already
+// created on NSX (via Patch) but whose realization failed, so it isn't leaked.
+// The ID is set temporarily so resourceNsxtPolicyIPAddressAllocationDelete can be
+// reused (including its cache invalidation), then cleared again since Create is
+// failing and no resource should end up in Terraform state.
+func cleanupFailedIPAddressAllocation(d *schema.ResourceData, m interface{}, id string, originalErr error) error {
+	d.SetId(id)
+	if deleteErr := resourceNsxtPolicyIPAddressAllocationDelete(d, m); deleteErr != nil {
+		log.Printf("[WARNING] Failed to clean up IPAddressAllocation with ID %s after create failure: %v", id, deleteErr)
+	}
+	d.SetId("")
+	return originalErr
 }
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
