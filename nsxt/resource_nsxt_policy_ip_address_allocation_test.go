@@ -34,13 +34,11 @@ var accTestPolicyIPAddressAllocationExhaustedPoolName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhaustedSubnetName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhaustedConsumerName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhaustedName = getAccTestResourceName()
-var accTestPolicyIPAddressAllocationExhaustedID = getAccTestResourceName()
 
 var accTestPolicyIPAddressAllocationExhausted92PoolName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhausted92SubnetName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhausted92ConsumerName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationExhausted92Name = getAccTestResourceName()
-var accTestPolicyIPAddressAllocationExhausted92ID = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testAccResourceNsxtPolicyIPAddressAllocationBasic(t, false, func() {
@@ -230,7 +228,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted(t *testing.T) {
 			if err := testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationExhaustedConsumerName); err != nil {
 				return err
 			}
-			return testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state, accTestPolicyIPAddressAllocationExhaustedID)
+			return testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -273,7 +271,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted92(t *testing.T) 
 			if err := testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationExhausted92ConsumerName); err != nil {
 				return err
 			}
-			return testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state, accTestPolicyIPAddressAllocationExhausted92ID)
+			return testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -293,11 +291,14 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_poolExhausted92(t *testing.T) 
 	})
 }
 
-// testAccNsxtPolicyIPAddressAllocationCheckNotLeaked verifies that the IP address
-// allocation identified by exhaustedID does not exist on NSX Manager. It is used to
-// confirm that an allocation whose create failed (e.g. due to pool exhaustion) was
-// properly cleaned up rather than orphaned.
-func testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state *terraform.State, exhaustedID string) error {
+// testAccNsxtPolicyIPAddressAllocationCheckNotLeaked verifies that the only
+// IPAddressAllocation left on NSX Manager under the pool is the "consumer" one. Since
+// the failed "exhausted" allocation gets an auto-generated nsx_id (unknown to the
+// test), it can't be looked up directly; instead this lists everything under the
+// pool and confirms nothing besides the consumer's ID is present, to confirm that an
+// allocation whose create failed (e.g. due to pool exhaustion) was properly cleaned
+// up rather than orphaned.
+func testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state *terraform.State) error {
 	rs, ok := state.RootModule().Resources["nsxt_policy_ip_address_allocation.consumer"]
 	if !ok {
 		return fmt.Errorf("Policy IPAddressAllocation resource %s not found in resources", "nsxt_policy_ip_address_allocation.consumer")
@@ -314,12 +315,14 @@ func testAccNsxtPolicyIPAddressAllocationCheckNotLeaked(state *terraform.State, 
 		return policyResourceNotSupportedError()
 	}
 
-	_, err := nsxClient.Get(poolID, exhaustedID)
-	if err == nil {
-		return fmt.Errorf("Policy IPAddressAllocation with ID %s was left behind on NSX Manager after a failed create caused by pool exhaustion", exhaustedID)
-	}
-	if !isNotFoundError(err) {
+	result, err := nsxClient.List(poolID, nil, nil, nil, nil, nil, nil)
+	if err != nil {
 		return err
+	}
+	for _, alloc := range result.Results {
+		if alloc.Id != nil && *alloc.Id != rs.Primary.ID {
+			return fmt.Errorf("Policy IPAddressAllocation %s was left behind on NSX Manager after a failed create caused by pool exhaustion", *alloc.Id)
+		}
 	}
 	return nil
 }
@@ -482,9 +485,11 @@ data "nsxt_policy_realization_info" "subnet_realization" {
 
 // testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames builds a pool with a
 // single available IP. The "consumer" resource always consumes that IP. When
-// includeExhausting is true, a second allocation with a known, fixed nsx_id is added;
-// since the pool is already exhausted at that point, its create is expected to fail.
-func testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames(poolName, subnetName, consumerName, exhaustedID, exhaustedName string, includeExhausting bool) string {
+// includeExhausting is true, a second allocation with an auto-generated nsx_id is
+// added; since the pool is already exhausted at that point, its create is expected
+// to fail. Leaving nsx_id auto-generated (rather than fixed) matches the common case
+// and is an exact repro of the reported customer issue.
+func testAccNsxtPolicyIPAddressAllocationExhaustedTemplateNames(poolName, subnetName, consumerName, exhaustedName string, includeExhausting bool) string {
 	config := fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "exhausted" {
   display_name = "%s"
@@ -517,11 +522,10 @@ resource "nsxt_policy_ip_address_allocation" "consumer" {
 	return config + fmt.Sprintf(`
 
 resource "nsxt_policy_ip_address_allocation" "exhausted" {
-  nsx_id       = "%s"
   display_name = "%s"
   pool_path    = nsxt_policy_ip_pool.exhausted.path
   depends_on   = [nsxt_policy_ip_address_allocation.consumer]
-}`, exhaustedID, exhaustedName)
+}`, exhaustedName)
 }
 
 func testAccNsxtPolicyIPAddressAllocationExhaustedTemplate(includeExhausting bool) string {
@@ -529,7 +533,6 @@ func testAccNsxtPolicyIPAddressAllocationExhaustedTemplate(includeExhausting boo
 		accTestPolicyIPAddressAllocationExhaustedPoolName,
 		accTestPolicyIPAddressAllocationExhaustedSubnetName,
 		accTestPolicyIPAddressAllocationExhaustedConsumerName,
-		accTestPolicyIPAddressAllocationExhaustedID,
 		accTestPolicyIPAddressAllocationExhaustedName,
 		includeExhausting,
 	)
@@ -540,7 +543,6 @@ func testAccNsxtPolicyIPAddressAllocationExhausted92Template(includeExhausting b
 		accTestPolicyIPAddressAllocationExhausted92PoolName,
 		accTestPolicyIPAddressAllocationExhausted92SubnetName,
 		accTestPolicyIPAddressAllocationExhausted92ConsumerName,
-		accTestPolicyIPAddressAllocationExhausted92ID,
 		accTestPolicyIPAddressAllocationExhausted92Name,
 		includeExhausting,
 	)
