@@ -118,7 +118,7 @@ resource "nsxt_policy_security_policy_rule" "rule1" {
 resource "nsxt_policy_group" "production_bms" {
   display_name = "Production-BMS-Servers"
   description  = "Production bare metal servers"
-
+  group_type   = "BareMetalServer"
   criteria {
     condition {
       key         = "Tag"
@@ -132,7 +132,7 @@ resource "nsxt_policy_group" "production_bms" {
 resource "nsxt_policy_group" "bms_data_interfaces" {
   display_name = "BMS-Data-Interfaces"
   description  = "BMS data plane interfaces"
-
+  group_type   = "BareMetalServer"
   criteria {
     condition {
       key         = "Tag"
@@ -183,93 +183,6 @@ resource "nsxt_policy_security_policy_rule" "block_mgmt_on_data" {
   action          = "DROP"
   services        = [nsxt_policy_service.ssh.path, nsxt_policy_service.snmp.path, nsxt_policy_service.telnet.path]
   logged          = true
-}
-```
-
-## Example Usage - Mixed BMS and VM Parent Policy
-
-```hcl
-# Create mixed BMS and VM groups
-resource "nsxt_policy_group" "all_app_servers" {
-  display_name = "All-Application-Servers"
-  description  = "Application servers across BMS and VMs"
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "BareMetalServer"
-      operator    = "EQUALS"
-      value       = "tier|application"
-    }
-  }
-
-  conjunction {
-    operator = "OR"
-  }
-
-  criteria {
-    condition {
-      key         = "Tag"
-      member_type = "VirtualMachine"
-      operator    = "EQUALS"
-      value       = "tier|application"
-    }
-  }
-}
-
-resource "nsxt_policy_group" "web_tier_bms" {
-  display_name = "Web-Tier-BMS"
-  description  = "BMS servers in web tier (static group)"
-
-  criteria {
-    external_id_expression {
-      member_type = "BareMetalServer"
-      external_ids = [
-        "71be0142-2ed1-1d53-9c60-5564cf4b7e2e",
-        "81be0142-2ed1-1d53-9c60-5564cf4b7e2f"
-      ]
-    }
-  }
-}
-
-# Parent policy with mixed scope
-resource "nsxt_policy_parent_security_policy" "mixed_environment_policy" {
-  display_name = "Mixed-Environment-Policy"
-  description  = "Parent policy for mixed BMS and VM environment"
-  category     = "Application"
-  stateful     = true
-  scope = [
-    nsxt_policy_group.all_app_servers.path,
-    nsxt_policy_group.web_tier_bms.path
-  ]
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-# Rules under the mixed environment policy
-resource "nsxt_policy_security_policy_rule" "allow_web_traffic" {
-  display_name       = "allow-web-traffic"
-  description        = "Allow web traffic to all web servers"
-  policy_path        = nsxt_policy_parent_security_policy.mixed_environment_policy.path
-  sequence_number    = 100
-  destination_groups = [nsxt_policy_group.web_tier_bms.path]
-  action             = "ALLOW"
-  services           = [nsxt_policy_service.http.path, nsxt_policy_service.https.path]
-  logged             = true
-}
-
-resource "nsxt_policy_security_policy_rule" "app_tier_communication" {
-  display_name       = "app-tier-communication"
-  description        = "Allow communication within application tier"
-  policy_path        = nsxt_policy_parent_security_policy.mixed_environment_policy.path
-  sequence_number    = 200
-  source_groups      = [nsxt_policy_group.all_app_servers.path]
-  destination_groups = [nsxt_policy_group.all_app_servers.path]
-  action             = "ALLOW"
-  services           = [nsxt_policy_service.http.path, nsxt_policy_service.https.path, nsxt_policy_service.mysql.path, data.nsxt_policy_service.postgresql.path]
-  logged             = true
 }
 ```
 

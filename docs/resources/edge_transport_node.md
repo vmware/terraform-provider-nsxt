@@ -180,7 +180,6 @@ The following arguments are supported:
     * `search_domains` - (Optional) List of Search domain names.
     * `syslog_server` - (Optional) List of Syslog servers.
         * `log_level` - (Optional) Log level to be redirected. Accepted values - 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR', 'WARNING', 'NOTICE', 'INFO' or 'DEBUG'. The default value is 'INFO'.
-        * `name` - (Optional) Display name of the syslog server.
         * `port` - (Optional) Syslog server port. Defaults to 514.
         * `protocol` - (Optional) Syslog protocol. Accepted values - 'TCP', 'UDP', 'TLS', 'LI', 'LI_TLS'. The default value is 'UDP'.
         * `server` - (Required) Server IP or fqdn.
