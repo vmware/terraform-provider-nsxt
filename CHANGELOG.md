@@ -1,3 +1,54 @@
+## 3.12.1 (September 10, 2026)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_ip_address_allocation`: Fix orphaned NSX allocation left behind when IP realization fails ([#2327](https://github.com/vmware/terraform-provider-nsxt/pull/2327))
+
+IMPROVEMENTS:
+
+* Add support for VMware NSX 9.1.1
+* `resource/nsxt_policy_group`, `resource/nsxt_policy_security_policy`: Add Bare Metal Server (BMS) group support for static/dynamic membership and DFW rules ([#2102](https://github.com/vmware/terraform-provider-nsxt/pull/2102), [#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+
+FEATURES:
+
+Virtual Network Appliance:
+
+* `resource/nsxt_policy_virtual_network_appliance_cluster` ([#2061](https://github.com/vmware/terraform-provider-nsxt/pull/2061))
+* `data/nsxt_policy_virtual_network_appliance_cluster` ([#2061](https://github.com/vmware/terraform-provider-nsxt/pull/2061))
+* `data/nsxt_policy_virtual_network_appliance_cluster_realization` ([#2061](https://github.com/vmware/terraform-provider-nsxt/pull/2061))
+* `resource/nsxt_policy_virtual_network_appliance` ([#2084](https://github.com/vmware/terraform-provider-nsxt/pull/2084))
+* `data/nsxt_policy_virtual_network_appliance` ([#2084](https://github.com/vmware/terraform-provider-nsxt/pull/2084))
+* `data/nsxt_policy_virtual_network_appliance_realization` ([#2084](https://github.com/vmware/terraform-provider-nsxt/pull/2084))
+
+Route Controller:
+
+* `resource/nsxt_policy_route_controller` ([#2074](https://github.com/vmware/terraform-provider-nsxt/pull/2074))
+* `data/nsxt_policy_route_controller` ([#2074](https://github.com/vmware/terraform-provider-nsxt/pull/2074))
+* `resource/nsxt_policy_route_controller_interface` ([#2076](https://github.com/vmware/terraform-provider-nsxt/pull/2076))
+* `data/nsxt_policy_route_controller_interface` ([#2076](https://github.com/vmware/terraform-provider-nsxt/pull/2076))
+* `resource/nsxt_policy_route_controller_bgp_neighbor` ([#2075](https://github.com/vmware/terraform-provider-nsxt/pull/2075))
+* `data/nsxt_policy_route_controller_bgp_neighbor` ([#2075](https://github.com/vmware/terraform-provider-nsxt/pull/2075))
+
+Distributed VxLAN:
+
+* `resource/nsxt_policy_distributed_vxlan_connection` ([#2073](https://github.com/vmware/terraform-provider-nsxt/pull/2073))
+* `data/nsxt_policy_distributed_vxlan_connection` ([#2073](https://github.com/vmware/terraform-provider-nsxt/pull/2073))
+
+Bare Metal Server (BMS):
+
+* `resource/nsxt_policy_baremetal_server_tags` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `resource/nsxt_policy_baremetal_server_interface_tags` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_servers` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_interface` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_interfaces` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_tags` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_interface_tags` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_group_associations` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_baremetal_server_interface_group_associations` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_group_baremetal_server_members` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+* `data/nsxt_policy_group_baremetal_server_interface_members` ([#2127](https://github.com/vmware/terraform-provider-nsxt/pull/2127))
+
 ## 3.12.0 (May 15, 2026)
 
 BUG FIXES:
