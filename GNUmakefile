@@ -9,7 +9,7 @@ default: build
 
 tools:
 	GO111MODULE=on go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45
-	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt
+	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt@v0.5.7
 
 build: fmtcheck
 	go install -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)"
