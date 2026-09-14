@@ -33,7 +33,7 @@ var accTestPolicyDnsRuleUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDnsRule_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_rule.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -83,7 +83,7 @@ func TestAccResourceNsxtPolicyDnsRule_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRule_domainPatternsRequired(t *testing.T) {
 	displayName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -102,7 +102,7 @@ func TestAccResourceNsxtPolicyDnsRule_domainPatternsRequired(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRule_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_rule.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
