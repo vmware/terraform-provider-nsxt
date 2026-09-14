@@ -40,6 +40,7 @@ var accTestVpcSubnetDhcpV6StaticBindingConfigUpdateAttributes = map[string]strin
 
 func TestAccResourceNsxtVpcSubnetDhcpV6StaticBindingConfig920_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_dhcp_v6_static_binding.test"
+	testDataSourceName := "data.nsxt_vpc_dhcp_v6_static_binding.test"
 	subnetResourceName := "nsxt_vpc_subnet.test"
 	// One stable name for the VPC fixture across all steps; NSX rejects changing vpc short_id after create.
 	fixtureBase := getAccTestResourceName()
@@ -80,6 +81,10 @@ func TestAccResourceNsxtVpcSubnetDhcpV6StaticBindingConfig920_basic(t *testing.T
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -292,6 +297,12 @@ resource "nsxt_vpc_dhcp_v6_static_binding" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_vpc_dhcp_v6_static_binding" "test" {
+  parent_path  = nsxt_vpc_subnet.test.path
+  display_name = nsxt_vpc_dhcp_v6_static_binding.test.display_name
+  depends_on   = [nsxt_vpc_dhcp_v6_static_binding.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["mac_address"],
 		attrMap["lease_time"], attrMap["preferred_time"], attrMap["ip_addresses"],
 		attrMap["domain_names"], attrMap["dns_nameservers"], attrMap["ntp_servers"], attrMap["sntp_servers"])

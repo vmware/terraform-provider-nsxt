@@ -399,6 +399,7 @@ func Provider() *schema.Provider {
 			"nsxt_upgrade_prepare_ready":                                dataSourceNsxtUpgradePrepareReady(),
 			"nsxt_vpc":                                                  dataSourceNsxtVPC(),
 			"nsxt_vpc_connectivity_profile":                             dataSourceNsxtVpcConnectivityProfile(),
+			"nsxt_vpc_dhcp_v6_static_binding":                           dataSourceNsxtVpcDhcpV6StaticBinding(),
 			"nsxt_vpc_endpoint":                                         dataSourceNsxtVpcEndpoint(),
 			"nsxt_vpc_group":                                            dataSourceNsxtVpcGroup(),
 			"nsxt_vpc_ip_address_allocation":                            dataSourceNsxtVpcIpAddressAllocation(),
