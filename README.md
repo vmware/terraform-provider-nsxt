@@ -26,6 +26,7 @@ Learn more:
 
   The following table lists the supported product versions for this provider.
 
+  - VMWare NSX 9.1.1
   - VMWare NSX 9.1.0
   - VMWare NSX 9.0.0
 
