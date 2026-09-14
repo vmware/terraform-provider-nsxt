@@ -14,6 +14,7 @@ import (
 
 func TestAccResourceNsxtPolicyTransitGatewayBfdPeer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_bfd_peer.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway_bfd_peer.test"
 	prereqName := getAccTestResourceName()
 	displayName := getAccTestResourceName()
 
@@ -41,6 +42,10 @@ func TestAccResourceNsxtPolicyTransitGatewayBfdPeer_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -211,5 +216,11 @@ resource "nsxt_policy_transit_gateway_bfd_peer" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_transit_gateway_bfd_peer" "test" {
+  parent_path  = nsxt_policy_transit_gateway.test.path
+  display_name = nsxt_policy_transit_gateway_bfd_peer.test.display_name
+  depends_on   = [nsxt_policy_transit_gateway_bfd_peer.test]
 }`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName, prereqName, prereqName, displayName, peerAddress, enabled)
 }
