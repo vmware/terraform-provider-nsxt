@@ -26,6 +26,7 @@ var accTestPolicyDnsRecordAutoConfigUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsRecordAutoConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_record_auto_config.test"
+	testDataSourceName := "data.nsxt_policy_dns_record_auto_config.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -51,6 +52,10 @@ func TestAccResourceNsxtPolicyDnsRecordAutoConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -177,6 +182,12 @@ resource "nsxt_policy_dns_record_auto_config" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_record_auto_config" "test" {
+  %s
+  display_name = nsxt_policy_dns_record_auto_config.test.display_name
+  depends_on    = [nsxt_policy_dns_record_auto_config.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
@@ -187,5 +198,6 @@ resource "nsxt_policy_dns_record_auto_config" "test" {
 		attrMap["display_name"],
 		attrMap["description"],
 		attrMap["ttl"],
+		testAccNsxtMultitenancyContext(false),
 	)
 }
