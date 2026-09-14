@@ -26,6 +26,7 @@ var accTestPolicyTransitGatewayCommunityListUpdateAttributes = map[string]string
 
 func TestAccResourceNsxtPolicyTransitGatewayCommunityList_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_community_list.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway_community_list.test"
 	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -51,6 +52,10 @@ func TestAccResourceNsxtPolicyTransitGatewayCommunityList_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -203,6 +208,12 @@ resource "nsxt_policy_transit_gateway_community_list" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_transit_gateway_community_list" "test" {
+  parent_path  = nsxt_policy_transit_gateway.test.path
+  display_name = nsxt_policy_transit_gateway_community_list.test.display_name
+  depends_on   = [nsxt_policy_transit_gateway_community_list.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["list"])
 }
 
