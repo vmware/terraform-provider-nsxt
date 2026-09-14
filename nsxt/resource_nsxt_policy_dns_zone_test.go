@@ -31,6 +31,7 @@ var accTestPolicyDnsZoneUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsZone_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_zone.test"
+	testDataSourceName := "data.nsxt_policy_dns_zone.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -55,6 +56,10 @@ func TestAccResourceNsxtPolicyDnsZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -234,6 +239,12 @@ resource "nsxt_policy_dns_zone" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_zone" "test" {
+  parent_path  = nsxt_policy_dns_service.parent.path
+  display_name = nsxt_policy_dns_zone.test.display_name
+  depends_on   = [nsxt_policy_dns_zone.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
