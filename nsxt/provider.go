@@ -379,6 +379,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_tier1_gateways":                                dataSourceNsxtPolicyTier1Gateways(),
 			"nsxt_policy_transit_gateway":                               dataSourceNsxtPolicyTransitGateway(),
 			"nsxt_policy_transit_gateway_nat":                           dataSourceNsxtPolicyTransitGatewayNat(),
+			"nsxt_policy_transit_gateway_prefix_list":                   dataSourceNsxtPolicyTransitGatewayPrefixList(),
 			"nsxt_policy_transport_zone":                                dataSourceNsxtPolicyTransportZone(),
 			"nsxt_policy_uplink_host_switch_profile":                    dataSourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_policy_user_management_role_binding":                  dataSourceNsxtPolicyRoleBinding(),
