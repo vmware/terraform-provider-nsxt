@@ -9,6 +9,7 @@ on:
       - '.github/workflows/unit-tests-nsxt.yml'
   push:
     branches:
+      - main
       - master
       - 'branch_*'
       - 'release-*'
