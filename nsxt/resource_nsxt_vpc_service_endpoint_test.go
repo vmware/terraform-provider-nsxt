@@ -32,7 +32,7 @@ func TestAccResourceNsxtVpcServiceEndpoint_basic(t *testing.T) {
 	cidr := "192.168.100.0/24"
 	ip := "192.168.100.10"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -91,7 +91,7 @@ func TestAccResourceNsxtVpcServiceEndpoint_importBasic(t *testing.T) {
 	cidr := "192.168.101.0/24"
 	ip := "192.168.101.10"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

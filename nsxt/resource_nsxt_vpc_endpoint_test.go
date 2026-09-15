@@ -29,7 +29,7 @@ func TestAccResourceNsxtVpcEndpoint_basic(t *testing.T) {
 	updateName := getAccTestResourceName()
 	depsName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -86,7 +86,7 @@ func TestAccResourceNsxtVpcEndpoint_importBasic(t *testing.T) {
 	testAccOnlyVPC(t)
 	testAccNSXVersion(t, "9.2.0")
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
