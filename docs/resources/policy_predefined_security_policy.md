@@ -1,10 +1,12 @@
 ---
-subcategory: "Firewall"
+subcategory: "Deprecated"
 page_title: "NSXT: nsxt_policy_predefined_security_policy"
-description: A resource to update Predefined (Default) Security Security Policies.
+description: A resource to update Predefined (Default) Security Policies.
 ---
 
 # nsxt_policy_predefined_security_policy
+
+~> **NOTE:** This resource is deprecated and will be removed in a future release. The Default Security Policy can be imported and managed like any other Security Policy with [`nsxt_policy_security_policy`](policy_security_policy.md), and its rules (including the default rule itself, once imported) can be managed with [`nsxt_policy_security_policy_rule`](policy_security_policy_rule.md).
 
 This resource provides a method to modify default Security Policy and its rules.
 This can be default layer2 policy or default layer3 policy. Maximum one resource
@@ -12,7 +14,13 @@ for each type should exist in your configuration.
 
 ~> **NOTE:** An absolute path, such as `/infra/domains/default/security-policies/default-layer3-section`, can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared) In the example below a data source is used in order to pull the predefined policy.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+~> **NOTE:** This resource is **not supported on NSX Global Manager**: unlike Gateway Policies, Global Manager does not create category-level Default Security Policies, so there is no default rule for this resource to modify. Create, Read, and Update will fail on a Global Manager provider configuration (`global_manager = true`). Destroying the resource, or removing it from configuration, will instead just clear it from Terraform state with a warning, so that state created before this restriction was added (or under an upgraded provider) can still be cleaned up.
+
+~> **NOTE:** `default_rule` can only be used against the Default Security Policy for a given Category, as those are the only sections with a default rule.
+
+~> **NOTE:** `rule` reads back and reports **every** rule on the policy, not just the ones declared in this resource's configuration. If any other resource (e.g. `nsxt_policy_security_policy_rule`) also manages rules on the same policy, or if the policy already has pre-existing rules, using `rule` here causes a permanent configuration drift and can corrupt or delete rules owned elsewhere. Prefer `nsxt_policy_security_policy_rule` for managing rules on the Default Security Policy.
+
+This resource is applicable to NSX Policy Manager and VMC.
 
 ## Example Usage
 
@@ -113,7 +121,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Security Policy.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
-* `rule` (Optional) A repeatable block to specify rules for the Security Policy. This setting is applicable to non-Default policies only. Each rule includes the following fields:
+* `rule` (Optional) A repeatable block to specify rules for the Security Policy. See the note above about drift/corruption risk when combined with other rule-managing resources; `nsxt_policy_security_policy_rule` is the safer alternative. Each rule includes the following fields:
     * `display_name` - (Required) Display name of the resource.
     * `description` - (Optional) Description of the resource.
     * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
@@ -132,7 +140,7 @@ The following arguments are supported:
     * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
     * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`. Note that `REJECT` action is not applicable for L2 policy.
 
-* `default_rule` (Optional) A repeatable block to modify default rules for the Security Policy in a `DEFAULT` category. Each rule includes the following fields:
+* `default_rule` (Optional) A block allowing a single item to modify the default rule for the Security Policy. Only supported when the policy referenced by `path` already has a rule with `is_default = true`; using this against any other Security Policy will fail. The default rule includes the following fields:
     * `description` - (Optional) Description of the resource.
     * `logged` - (Optional) A boolean flag to enable packet logging.
     * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
