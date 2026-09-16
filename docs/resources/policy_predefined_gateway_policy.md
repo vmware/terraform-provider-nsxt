@@ -9,15 +9,22 @@ description: A resource to update Predefined Gateway Security Policies.
 This resource provides a method to fine-tune a pre-created Gateway Policy and its rules.
 There are two separate use cases for this resource:
 
-* Modify certain settings of default Gateway Policy and its Default Rule.
-* Modify predefined Gateway Policy that is not listed under Default category, and add rules to it.
-  This use case is relevant for VMC.
+* Modify certain settings of the Gateway Policy in the `Default` category and its Default Rule, using `default_rule`.
+* On VMC only: modify the predefined (non-`Default` category) Gateway Policy that VMC pre-creates, and add rules to it using `rule`.
 
-~> **NOTE:** Importing the resource first is recommended if you with to reconfigure the policy from scratch. Terraform state does is not aware of attributes/rules that are already configured on your NSX!
+~> **NOTE:** `default_rule` can only be used with a Gateway Policy whose category is `Default`. NSX ignores the `is_default` flag on rules of policies in any other category, so this resource has no way to create or target a "default rule" there; attempting to set `default_rule` on a non-`Default` category policy will fail.
+
+~> **NOTE:** `rule` is only supported when connected to VMC. This resource's `Read` reports every rule that exists on the policy, not just the ones declared in `rule` here;
+on NSX Local Manager or Global Manager that means the policy's rules are almost always also managed by another resource (e.g. `nsxt_policy_gateway_policy`, `nsxt_policy_parent_gateway_policy` + `nsxt_policy_gateway_policy_rule`), and combining `rule` here with any of those causes a permanent configuration drift and can silently corrupt or delete rules owned by that other resource. Setting `rule` outside of a VMC connection will fail.
+
+~> **NOTE:** Importing the resource first is recommended if you wish to reconfigure the policy from scratch. Terraform state is not aware of attributes/rules that are already configured on your NSX!
 
 ~> **NOTE:** An absolute path can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared). In one of the examples below a data source is used in order to pull the predefined policy, while the other uses absolute path.
 
 ~> **NOTE:** Default gateway policy generation behavior have changed in NSX 3.1.0. Below this version, there is a single default policy, while default rules are created under it per Gateway. Above NSX 3.1.0, a default policy is generated per Gateway. The first example provided here is limited to NSX 3.0.0 and below.
+
+~> **NOTE:** When a single `Default` category policy carries more than one default rule (one per attached Gateway, as on NSX below 3.1.0), the `default_rule` block must enumerate every scope that already has a default rule on that policy, and every scope listed in `default_rule` must already have a default rule on that policy.
+NSX only creates default rules automatically, per attached gateway; this resource cannot create a new one. Omitting an existing scope, or listing a scope that has no existing default rule, will both cause an error, since Terraform state would otherwise never converge with the backend.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
@@ -112,7 +119,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
-* `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
+* `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. Only supported when connected to VMC; setting this on NSX Local Manager or Global Manager will fail. Each rule includes the following fields:
     * `display_name` - (Required) Display name of the resource.
     * `description` - (Optional) Description of the resource.
     * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
@@ -130,7 +137,7 @@ The following arguments are supported:
     * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
     * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
     * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
-* `default_rule` (Optional) A repeatable block to modify default rules for the Gateway Policy in a `DEFAULT` category. Each rule includes the following fields:
+* `default_rule` (Optional) A repeatable block to modify default rules for the Gateway Policy. Only supported when the policy referenced by `path` is in the `Default` category; using this on a policy of any other category will fail. Each rule includes the following fields:
     * `scope` - (Required) Scope for the default rule that should be modified. Only one default rule can be present for each scope.
     * `description` - (Optional) Description of the resource.
     * `logged` - (Optional) A boolean flag to enable packet logging.

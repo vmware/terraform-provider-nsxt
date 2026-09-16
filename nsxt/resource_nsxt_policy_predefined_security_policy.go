@@ -23,12 +23,16 @@ import (
 var cliSecurityPoliciesClient = domains.NewSecurityPoliciesClient
 var cliOrgRootClient = orgroot.NewOrgRootClient
 
+var predefinedSecurityPolicyDeprecationMessage = "This resource is deprecated. Import the Default Security Policy " +
+	"with nsxt_policy_security_policy instead, or manage its rules with nsxt_policy_security_policy_rule."
+
 func resourceNsxtPolicyPredefinedSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyPredefinedSecurityPolicyCreate,
-		Read:   resourceNsxtPolicyPredefinedSecurityPolicyRead,
-		Update: resourceNsxtPolicyPredefinedSecurityPolicyUpdate,
-		Delete: resourceNsxtPolicyPredefinedSecurityPolicyDelete,
+		Create:             resourceNsxtPolicyPredefinedSecurityPolicyCreate,
+		Read:               resourceNsxtPolicyPredefinedSecurityPolicyRead,
+		Update:             resourceNsxtPolicyPredefinedSecurityPolicyUpdate,
+		Delete:             resourceNsxtPolicyPredefinedSecurityPolicyDelete,
+		DeprecationMessage: predefinedSecurityPolicyDeprecationMessage,
 		Importer: &schema.ResourceImporter{
 			State: nsxtPredefinedPolicyImporter,
 		},
@@ -130,6 +134,15 @@ func updateSecurityPolicyDefaultRule(rule model.Rule, d *schema.ResourceData) *m
 	}
 
 	return nil
+}
+
+func securityPolicyHasDefaultRule(policy model.SecurityPolicy) bool {
+	for _, rule := range policy.Rules {
+		if rule.IsDefault != nil && *rule.IsDefault {
+			return true
+		}
+	}
+	return false
 }
 
 func revertPolicyPredefinedSecurityPolicy(predefinedPolicy model.SecurityPolicy, m interface{}) (model.SecurityPolicy, error) {
@@ -274,6 +287,10 @@ func createChildDomainWithSecurityPolicy(domain string, policyID string, policy 
 
 func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m interface{}) error {
 
+	if isPolicyGlobalManager(m) {
+		return fmt.Errorf("nsxt_policy_predefined_security_policy is not supported on NSX Global Manager")
+	}
+
 	connector := getPolicyConnector(m)
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
@@ -285,6 +302,12 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 	predefinedPolicy, err := getSecurityPolicyInDomain(getSessionContext(d, m), id, domain, connector)
 	if err != nil {
 		return err
+	}
+
+	defaultRules := d.Get("default_rule").([]interface{})
+	if len(defaultRules) > 0 && !securityPolicyHasDefaultRule(predefinedPolicy) {
+		return fmt.Errorf("default_rule can only be configured on a Security Policy that already has a rule with is_default=true." +
+			"NSX does not allow user-created default rules. ")
 	}
 
 	if d.HasChange("description") {
@@ -388,6 +411,10 @@ func resourceNsxtPolicyPredefinedSecurityPolicyCreate(d *schema.ResourceData, m 
 }
 
 func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		return fmt.Errorf("nsxt_policy_predefined_security_policy is not supported on NSX Global Manager")
+	}
+
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -448,6 +475,10 @@ func resourceNsxtPolicyPredefinedSecurityPolicyDelete(d *schema.ResourceData, m 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Predefined Security Policy ID")
+	}
+
+	if isPolicyGlobalManager(m) {
+		return fmt.Errorf("nsxt_policy_predefined_security_policy is not supported on NSX Global Manager")
 	}
 
 	path := d.Get("path").(string)
