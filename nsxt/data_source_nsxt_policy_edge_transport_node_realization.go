@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -57,6 +58,47 @@ func getEdgeTransportNodeKeysFromPath(path string) (string, string, string) {
 	return siteID, epID, id
 }
 
+func getEdgeTnRealizationFailureMessage(edgeState *model.EdgeTnState) string {
+	if edgeState == nil {
+		return ""
+	}
+
+	var messages []string
+	addMsg := func(msg *string) {
+		if msg != nil {
+			trimmed := strings.TrimSpace(*msg)
+			if trimmed != "" {
+				for _, m := range messages {
+					if m == trimmed {
+						return
+					}
+				}
+				messages = append(messages, trimmed)
+			}
+		}
+	}
+
+	addDetails := func(details []model.ConfigurationStateElement) {
+		for _, elem := range details {
+			addMsg(elem.FailureMessage)
+		}
+	}
+
+	addConfigState := func(cfgState *model.ConfigurationState) {
+		if cfgState != nil {
+			addMsg(cfgState.FailureMessage)
+			addDetails(cfgState.Details)
+		}
+	}
+
+	addMsg(edgeState.FailureMessage)
+	addDetails(edgeState.Details)
+	addConfigState(edgeState.DeploymentState)
+	addConfigState(edgeState.TransportNodeState)
+
+	return strings.Join(messages, ", ")
+}
+
 func dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
@@ -98,18 +140,11 @@ func dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d *schema.ResourceData
 			} else {
 				log.Printf("[DEBUG] Current realization state for Transport Node %s is %s", id, *state.EdgeTnState.ConsolidatedStatus)
 				if *state.EdgeTnState.ConsolidatedStatus == model.EdgeTnState_CONSOLIDATED_STATUS_ERROR {
-					failureMsg := ""
-					if state.EdgeTnState.FailureMessage != nil && *state.EdgeTnState.FailureMessage != "" {
-						failureMsg = *state.EdgeTnState.FailureMessage
+					failureMsg := getEdgeTnRealizationFailureMessage(state.EdgeTnState)
+					if failureMsg != "" {
+						return state, *state.EdgeTnState.ConsolidatedStatus, fmt.Errorf("transport node %s failed to realize. %s", edgeID, failureMsg)
 					}
-					if state.EdgeTnState.DeploymentState.FailureMessage != nil && *state.EdgeTnState.DeploymentState.FailureMessage != "" {
-						if failureMsg != "" {
-							failureMsg += ", "
-						}
-						failureMsg += *state.EdgeTnState.DeploymentState.FailureMessage
-					}
-
-					return state, *state.EdgeTnState.ConsolidatedStatus, fmt.Errorf("transport node %s failed to realize. %s", edgeID, failureMsg)
+					return state, *state.EdgeTnState.ConsolidatedStatus, fmt.Errorf("transport node %s failed to realize", edgeID)
 				}
 
 				return state, *state.EdgeTnState.ConsolidatedStatus, nil
