@@ -130,6 +130,86 @@ func TestMockResourceNsxtPolicyDnsRuleCreate(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "upstream_servers")
 	})
+
+	t.Run("Create FORWARD rule with shared_zone_path success", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsRuleMock(t, ctrl)
+		defer restore()
+
+		sharedZonePath := "/orgs/default/projects/project1/dns-services/dns-svc-1/zones/zone-1"
+		actionType := nsxModel.DnsRule_ACTION_TYPE_FORWARD
+		resp := nsxModel.DnsRule{
+			Id:             &dnsRuleID,
+			DisplayName:    &dnsRuleDisplayName,
+			Description:    &dnsRuleDescription,
+			Revision:       &dnsRuleRevision,
+			ActionType:     &actionType,
+			SharedZonePath: &sharedZonePath,
+		}
+
+		notFoundErr := vapiErrors.NotFound{}
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), dnsRuleID).Return(nsxModel.DnsRule{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), dnsRuleID, gomock.AssignableToTypeOf(nsxModel.DnsRule{})).Do(
+				func(_ interface{}, _ interface{}, _ interface{}, _ string, rule nsxModel.DnsRule) {
+					assert.Nil(t, rule.DomainPatterns)
+					assert.Nil(t, rule.UpstreamServers)
+					require.NotNil(t, rule.SharedZonePath)
+					assert.Equal(t, sharedZonePath, *rule.SharedZonePath)
+				}).Return(nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), dnsRuleID).Return(resp, nil),
+		)
+
+		res := resourceNsxtPolicyDnsRule()
+		data := map[string]interface{}{
+			"display_name":     dnsRuleDisplayName,
+			"description":      dnsRuleDescription,
+			"nsx_id":           dnsRuleID,
+			"parent_path":      dnsRuleParentPath,
+			"action_type":      "FORWARD",
+			"shared_zone_path": sharedZonePath,
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyDnsRuleCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, dnsRuleID, d.Id())
+		assert.Equal(t, sharedZonePath, d.Get("shared_zone_path"))
+	})
+
+	t.Run("Create FORWARD rule with both shared_zone_path and domain_patterns fails", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsRuleMock(t, ctrl)
+		defer restore()
+
+		sharedZonePath := "/orgs/default/projects/project1/dns-services/dns-svc-1/zones/zone-1"
+		notFoundErr := vapiErrors.NotFound{}
+		mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), dnsRuleID).Return(nsxModel.DnsRule{}, notFoundErr)
+
+		res := resourceNsxtPolicyDnsRule()
+		data := map[string]interface{}{
+			"display_name":     dnsRuleDisplayName,
+			"description":      dnsRuleDescription,
+			"nsx_id":           dnsRuleID,
+			"parent_path":      dnsRuleParentPath,
+			"action_type":      "FORWARD",
+			"shared_zone_path": sharedZonePath,
+			"domain_patterns":  []interface{}{"*.example.com"},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyDnsRuleCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "domain_patterns is not allowed when shared_zone_path is populated")
+	})
 }
 
 func TestMockResourceNsxtPolicyDnsRuleRead(t *testing.T) {
