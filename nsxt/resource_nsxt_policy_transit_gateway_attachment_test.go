@@ -24,6 +24,7 @@ var accTestPolicyTransitGatewayAttachmentUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_attachment.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway_attachment.test"
 	prereqName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -48,6 +49,10 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -203,5 +208,11 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_transit_gateway_attachment" "test" {
+  parent_path  = data.nsxt_policy_transit_gateway.test.path
+  display_name = nsxt_policy_transit_gateway_attachment.test.display_name
+  depends_on   = [nsxt_policy_transit_gateway_attachment.test]
 }`, getEdgeClusterName(), prereqName, prereqName, prereqName, attrMap["display_name"], attrMap["description"])
 }
