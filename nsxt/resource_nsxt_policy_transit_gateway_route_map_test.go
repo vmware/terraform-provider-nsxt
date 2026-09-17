@@ -15,6 +15,7 @@ import (
 
 func TestAccResourceNsxtPolicyTransitGatewayRouteMap_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway_route_map.test"
+	testDataSourceName := "data.nsxt_policy_transit_gateway_route_map.test"
 	prereqName := getAccTestResourceName()
 	displayName := getAccTestResourceName()
 
@@ -43,6 +44,10 @@ func TestAccResourceNsxtPolicyTransitGatewayRouteMap_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "parent_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -244,6 +249,12 @@ resource "nsxt_policy_transit_gateway_route_map" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_transit_gateway_route_map" "test" {
+  parent_path  = nsxt_policy_transit_gateway.test.path
+  display_name = nsxt_policy_transit_gateway_route_map.test.display_name
+  depends_on   = [nsxt_policy_transit_gateway_route_map.test]
 }`, displayName)
 }
 
