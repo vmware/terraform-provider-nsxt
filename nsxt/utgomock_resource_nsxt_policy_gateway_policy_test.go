@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -182,6 +183,50 @@ func TestMockResourceNsxtPolicyGatewayPolicyUpdate(t *testing.T) {
 
 		err := resourceNsxtPolicyGatewayPolicyUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	// TestMockResourceNsxtPolicyGatewayPolicyUpdatePreservesProviderTag is a regression test
+	// for the terraform-cache-brownfield STEP4 investigation: Update seeds d's "tag" attribute
+	// with getPolicyTagsWithProviderManagedDefaults(d, m) so policyGatewayPolicyBuildAndPatch's
+	// getValidatedTagsFromSchema(d) call picks up the provider-managed tag for the outgoing
+	// PATCH payload — but it used to do so via initPolicyTagsSet, which filters the
+	// provider-managed tag straight back out (it exists precisely to keep that tag out of
+	// Terraform state during Read), silently defeating the seed. Every Update — even a plain
+	// description change with no config drift on "tag" — wiped the object's tag, and the
+	// Read that immediately follows detected it missing and re-patched it: exactly the
+	// "Patched provider-managed tags successfully" appearing where STEP4 asserts none should.
+	// Captures both Patch calls Update triggers (its own, then the trailing Read's tag-check
+	// repatch) and asserts the FIRST one already carries the tag, so the second never needs
+	// to fire in a real run.
+	t.Run("Update in config_scope mode must not wipe the provider tag", func(t *testing.T) {
+		var captures []nsxModel.Infra
+		mockInfra.EXPECT().Patch(gomock.Any(), gomock.Any()).DoAndReturn(
+			func(infra nsxModel.Infra, _ *bool) error {
+				captures = append(captures, infra)
+				return nil
+			}).AnyTimes()
+		mockSDK.EXPECT().Get(gwPolicyDomain, gwPolicyID).Return(gwPolicyAPIResponse(), nil).AnyTimes()
+
+		res := resourceNsxtPolicyGatewayPolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGwPolicyData())
+		d.SetId(gwPolicyID)
+
+		m := newGoMockProviderClient()
+		m.CommonConfig.CacheMode = "config_scope"
+		m.CommonConfig.contextID = "localCacheTest"
+
+		err := resourceNsxtPolicyGatewayPolicyUpdate(d, m)
+		require.NoError(t, err)
+		require.NotEmpty(t, captures, "expected at least one Patch call")
+
+		converter := bindings.NewTypeConverter()
+		domainRefVal, errs := converter.ConvertToGolang(captures[0].Children[0], nsxModel.ChildResourceReferenceBindingType())
+		require.Empty(t, errs)
+		domainRef := domainRefVal.(nsxModel.ChildResourceReference)
+		childPolicyVal, errs := converter.ConvertToGolang(domainRef.Children[0], nsxModel.ChildGatewayPolicyBindingType())
+		require.Empty(t, errs)
+		childPolicy := childPolicyVal.(nsxModel.ChildGatewayPolicy)
+		assert.NotEmpty(t, childPolicy.GatewayPolicy.Tags, "the Update's OWN patch call (not any follow-up read-triggered patch) must not wipe the provider-managed tag")
 	})
 }
 

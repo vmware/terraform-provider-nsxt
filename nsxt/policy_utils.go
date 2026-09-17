@@ -143,6 +143,28 @@ func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 	return tagList
 }
 
+// initPolicyTagsSetForOutgoingPatch is initPolicyTagsSet without the provider-managed-tag
+// filter. GatewayPolicy/SecurityPolicy/VpcGroup's Create and Update seed d's "tag" attribute
+// with getPolicyTagsWithProviderManagedDefaults(d, m) immediately before building the NSX
+// PATCH payload from schema (via getValidatedTagsFromSchema, which just reads d.Get("tag")) —
+// the only way those resources' shared build-and-patch helpers pick up the provider-managed
+// tag for the outgoing payload. Using the filtered initPolicyTagsSet here silently strips the
+// tag right back out before that read ever happens, so every Update (e.g. a plain description
+// change) wipes the tag from the object, only for the next Read's cache-aware tag-check to
+// detect it missing and immediately re-patch it. The state actually persisted after Create/
+// Update is still correctly filtered regardless, since the CRUD function's own trailing Read
+// overwrites "tag" again via setPolicyTagsInSchema (which does filter).
+func initPolicyTagsSetForOutgoingPatch(tags []model.Tag) []map[string]interface{} {
+	var tagList []map[string]interface{}
+	for _, tag := range tags {
+		elem := make(map[string]interface{})
+		elem["scope"] = tag.Scope
+		elem["tag"] = tag.Tag
+		tagList = append(tagList, elem)
+	}
+	return tagList
+}
+
 func getIgnoredTagsFromSchema(d *schema.ResourceData) []model.Tag {
 	tags, defined := d.GetOk("ignore_tags")
 	if !defined {
