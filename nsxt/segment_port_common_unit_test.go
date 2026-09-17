@@ -394,3 +394,75 @@ func TestMockNsxt_tier1SegmentPortProfileReads(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_hasSegmentPortProfiles(t *testing.T) {
+	portSchema := segmentPortTestSchema()
+
+	t.Run("returns false when no profiles are present", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, portSchema, map[string]interface{}{})
+		assert.False(t, hasSegmentPortProfiles(d))
+		assert.False(t, hasSegmentPortProfile(d, "discovery_profile"))
+		assert.False(t, hasSegmentPortProfile(d, "qos_profile"))
+		assert.False(t, hasSegmentPortProfile(d, "security_profile"))
+	})
+
+	t.Run("returns false when empty profile lists are present", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, portSchema, map[string]interface{}{
+			"discovery_profile": []interface{}{},
+		})
+		assert.False(t, hasSegmentPortProfiles(d))
+		assert.False(t, hasSegmentPortProfile(d, "discovery_profile"))
+	})
+
+	t.Run("returns true when specific profile is present", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, portSchema, map[string]interface{}{
+			"security_profile": []interface{}{
+				map[string]interface{}{
+					"security_profile_path": "/infra/segment-security-profiles/p1",
+				},
+			},
+		})
+		assert.True(t, hasSegmentPortProfiles(d))
+		assert.False(t, hasSegmentPortProfile(d, "discovery_profile"))
+		assert.False(t, hasSegmentPortProfile(d, "qos_profile"))
+		assert.True(t, hasSegmentPortProfile(d, "security_profile"))
+	})
+}
+
+func TestMockNsxt_segmentPortConfiguredProfilesRead(t *testing.T) {
+	portSchema := segmentPortTestSchema()
+
+	t.Run("returns without API calls when no profiles configured", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, portSchema, map[string]interface{}{
+			"segment_path": "/infra/segments/seg-1",
+		})
+		d.SetId("port-1")
+		err := nsxtPolicySegmentPortConfiguredProfilesRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("only reads security profile when only security profile configured", func(t *testing.T) {
+		_, _, mockSecurity := setupT1PortProfileMocks(t)
+		secPath := "/infra/segment-security-profiles/p1"
+		mockSecurity.EXPECT().List("gw-1", "seg-1", "port-1", nil, nil, nil, nil, nil).Return(
+			model.PortSecurityProfileBindingMapListResult{Results: []model.PortSecurityProfileBindingMap{{SegmentSecurityProfilePath: &secPath}}}, nil,
+		)
+
+		d := schema.TestResourceDataRaw(t, portSchema, map[string]interface{}{
+			"segment_path": "/infra/tier-1s/gw-1/segments/seg-1",
+			"security_profile": []interface{}{
+				map[string]interface{}{
+					"security_profile_path": secPath,
+				},
+			},
+		})
+		d.SetId("port-1")
+		err := nsxtPolicySegmentPortConfiguredProfilesRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		got := d.Get("security_profile").([]interface{})
+		require.Len(t, got, 1)
+		assert.Equal(t, secPath, got[0].(map[string]interface{})["security_profile_path"])
+		assert.Empty(t, d.Get("discovery_profile").([]interface{}))
+		assert.Empty(t, d.Get("qos_profile").([]interface{}))
+	})
+}
