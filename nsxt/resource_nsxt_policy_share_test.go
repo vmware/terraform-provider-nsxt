@@ -72,6 +72,51 @@ func TestAccResourceNsxtPolicyShare_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyShare_externalStrategy(t *testing.T) {
+	testResourceName := "nsxt_policy_share.test"
+
+	createDisplayName := getAccTestResourceName()
+	updateDisplayName := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyShareCheckDestroy(state, updateDisplayName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyShareExternalStrategyTemplate(createDisplayName, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyShareExists(createDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", createDisplayName),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "sharing_strategy", "EXTERNAL"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyShareExternalStrategyTemplate(updateDisplayName, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyShareExists(updateDisplayName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateDisplayName),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "sharing_strategy", "EXTERNAL"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyShare_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_share.test"
@@ -216,6 +261,27 @@ resource "nsxt_policy_share" "test" {
     tag   = "tag1"
   }
 }`, displayName, attrMap["description"]) + ds
+}
+
+func testAccNsxtPolicyShareExternalStrategyTemplate(displayName string, createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyShareCreateAttributes
+	} else {
+		attrMap = accTestPolicyShareUpdateAttributes
+	}
+
+	return testAccNsxtPolicyProjectMinimalistic() + fmt.Sprintf(`
+resource "nsxt_policy_share" "test" {
+  display_name     = "%s"
+  description      = "%s"
+  sharing_strategy = "EXTERNAL"
+  shared_with      = [nsxt_policy_project.test.path]
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, displayName, attrMap["description"])
 }
 
 func testAccNsxtPolicyShareWithMyselfTemplate(displayName string, createFlow bool) string {
