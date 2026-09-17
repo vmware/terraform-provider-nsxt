@@ -105,12 +105,17 @@ func policyDnsRuleFromSchema(d *schema.ResourceData) model.DnsRule {
 	upstreamServers := getStringListFromSchemaList(d, "upstream_servers")
 
 	obj := model.DnsRule{
-		DisplayName:     &displayName,
-		Description:     &description,
-		Tags:            tags,
-		ActionType:      &actionType,
-		DomainPatterns:  domainPatterns,
-		UpstreamServers: upstreamServers,
+		DisplayName: &displayName,
+		Description: &description,
+		Tags:        tags,
+		ActionType:  &actionType,
+	}
+
+	if len(domainPatterns) > 0 {
+		obj.DomainPatterns = domainPatterns
+	}
+	if len(upstreamServers) > 0 {
+		obj.UpstreamServers = upstreamServers
 	}
 
 	if v, ok := d.GetOk("shared_zone_path"); ok {
@@ -135,6 +140,9 @@ func validateDnsRuleActionConstraints(obj model.DnsRule) error {
 			return fmt.Errorf("exactly one of upstream_servers or shared_zone_path must be set for FORWARD rules")
 		}
 		if hasSharedZone {
+			if len(obj.DomainPatterns) > 0 {
+				return fmt.Errorf("domain_patterns is not allowed when shared_zone_path is populated")
+			}
 			return nil
 		}
 	}

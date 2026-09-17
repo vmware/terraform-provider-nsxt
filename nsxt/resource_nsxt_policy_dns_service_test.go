@@ -28,7 +28,7 @@ func TestAccResourceNsxtPolicyDnsService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
 	testDataSourceName := "data.nsxt_policy_dns_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -79,7 +79,7 @@ func TestAccResourceNsxtPolicyDnsService_forwarderConfigPartial(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
 	displayName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -105,7 +105,7 @@ func TestAccResourceNsxtPolicyDnsService_forwarderConfigPartial(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")

@@ -30,8 +30,9 @@ var accTestPolicyDnsRecordUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsRecord_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_record.test"
+	testDataSourceName := "data.nsxt_policy_dns_record.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -57,6 +58,10 @@ func TestAccResourceNsxtPolicyDnsRecord_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -80,7 +85,7 @@ func TestAccResourceNsxtPolicyDnsRecord_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRecord_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_record.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -180,6 +185,13 @@ resource "nsxt_policy_dns_record" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_record" "test" {
+  %s
+  display_name = nsxt_policy_dns_record.test.display_name
+  zone_path    = nsxt_policy_dns_zone.parent_zone.path
+  depends_on   = [nsxt_policy_dns_record.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
@@ -190,5 +202,6 @@ resource "nsxt_policy_dns_record" "test" {
 		attrMap["record_name"],
 		attrMap["record_values"],
 		attrMap["ttl"],
+		testAccNsxtMultitenancyContext(false),
 	)
 }

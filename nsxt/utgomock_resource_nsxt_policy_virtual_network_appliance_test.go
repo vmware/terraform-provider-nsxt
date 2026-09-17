@@ -599,6 +599,7 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceRead(t *testing.T) {
 		assert.Equal(t, auditUser, creds["audit_username"], "audit_username must reflect NSX response")
 		assert.Equal(t, "", creds["cli_password"], "cli_password must remain empty (write-only)")
 		assert.Equal(t, "", creds["root_password"], "root_password must remain empty (write-only)")
+		assert.Equal(t, "", creds["audit_password"], "audit_password must remain empty (write-only)")
 	})
 }
 
@@ -623,14 +624,20 @@ func TestSuppressIfEmptyPriorState(t *testing.T) {
 		"must suppress diff when old (state) is empty and resource exists (import)")
 	assert.True(t, suppressIfEmptyPriorState("root_password", "", "VMware123!", existing),
 		"must suppress diff when old (state) is empty and resource exists (import)")
+	assert.True(t, suppressIfEmptyPriorState("audit_password", "", "VMware123!", existing),
+		"must suppress diff when old (state) is empty and resource exists (import)")
 
 	// New resource (no ID), old state is empty: do not suppress so passwords
 	// are included in the Create diff.
 	assert.False(t, suppressIfEmptyPriorState("cli_password", "", "VMware123!", fresh),
 		"must not suppress diff for a new resource (no ID)")
+	assert.False(t, suppressIfEmptyPriorState("audit_password", "", "VMware123!", fresh),
+		"must not suppress diff for a new resource (no ID)")
 
 	// Non-empty old value: never suppress so password changes are applied.
 	assert.False(t, suppressIfEmptyPriorState("cli_password", "OldPass!", "NewPass!", existing),
+		"must not suppress diff when old (state) is non-empty")
+	assert.False(t, suppressIfEmptyPriorState("audit_password", "OldPass!", "NewPass!", existing),
 		"must not suppress diff when old (state) is non-empty")
 }
 
