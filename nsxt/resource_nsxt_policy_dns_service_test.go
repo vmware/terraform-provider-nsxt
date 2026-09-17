@@ -26,8 +26,9 @@ var accTestPolicyDnsServiceUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
+	testDataSourceName := "data.nsxt_policy_dns_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -49,6 +50,10 @@ func TestAccResourceNsxtPolicyDnsService_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -74,7 +79,7 @@ func TestAccResourceNsxtPolicyDnsService_forwarderConfigPartial(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
 	displayName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -100,7 +105,7 @@ func TestAccResourceNsxtPolicyDnsService_forwarderConfigPartial(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -184,10 +189,17 @@ resource "nsxt_policy_dns_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_service" "test" {
+  %s
+  display_name = nsxt_policy_dns_service.test.display_name
+  depends_on   = [nsxt_policy_dns_service.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
 		attrMap["description"],
+		testAccNsxtMultitenancyContext(false),
 	)
 }
 

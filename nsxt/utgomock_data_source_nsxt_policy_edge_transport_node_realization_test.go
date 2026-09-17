@@ -83,7 +83,77 @@ func TestMockDataSourceNsxtPolicyEdgeTransportNodeRealizationRead(t *testing.T) 
 
 		err := dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d, newGoMockProviderClient())
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to realize")
+		assert.Contains(t, err.Error(), "failed to realize. boom")
+	})
+
+	t.Run("Read failure state with deployment details failure message", func(t *testing.T) {
+		status := nsxModel.EdgeTnState_CONSOLIDATED_STATUS_ERROR
+		detailMsg := "[Fabric] Send Edge path=[/infra/sites/default/enforcement-points/default/edge-transport-nodes/etn-1] configuration failed."
+		emptyMsg := ""
+		mockSDK.EXPECT().Get("default", "default", "etn-1").Return(nsxModel.PolicyEdgeTransportNodeState{
+			EdgeTnState: &nsxModel.EdgeTnState{
+				ConsolidatedStatus: &status,
+				DeploymentState: &nsxModel.ConfigurationState{
+					FailureMessage: &emptyMsg,
+					Details: []nsxModel.ConfigurationStateElement{
+						{
+							FailureMessage: &detailMsg,
+						},
+					},
+				},
+			},
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"path":    etnRealizationPath,
+			"timeout": 5,
+			"delay":   0,
+		})
+
+		err := dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), detailMsg)
+	})
+
+	t.Run("Read failure state with nil deployment state", func(t *testing.T) {
+		status := nsxModel.EdgeTnState_CONSOLIDATED_STATUS_ERROR
+		failureMsg := "generic failure"
+		mockSDK.EXPECT().Get("default", "default", "etn-1").Return(nsxModel.PolicyEdgeTransportNodeState{
+			EdgeTnState: &nsxModel.EdgeTnState{
+				ConsolidatedStatus: &status,
+				FailureMessage:     &failureMsg,
+				DeploymentState:    nil,
+			},
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"path":    etnRealizationPath,
+			"timeout": 5,
+			"delay":   0,
+		})
+
+		err := dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to realize. generic failure")
+	})
+
+	t.Run("Read failure state without messages", func(t *testing.T) {
+		status := nsxModel.EdgeTnState_CONSOLIDATED_STATUS_ERROR
+		mockSDK.EXPECT().Get("default", "default", "etn-1").Return(nsxModel.PolicyEdgeTransportNodeState{
+			EdgeTnState: &nsxModel.EdgeTnState{
+				ConsolidatedStatus: &status,
+			},
+		}, nil)
+
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"path":    etnRealizationPath,
+			"timeout": 5,
+			"delay":   0,
+		})
+
+		err := dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, "transport node etn-1 failed to realize", err.Error())
 	})
 
 	t.Run("Read API error", func(t *testing.T) {
@@ -97,5 +167,49 @@ func TestMockDataSourceNsxtPolicyEdgeTransportNodeRealizationRead(t *testing.T) 
 
 		err := dataSourceNsxtPolicyEdgeTransportNodeRealizationRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestUnitGetEdgeTnRealizationFailureMessage(t *testing.T) {
+	t.Run("nil state returns empty", func(t *testing.T) {
+		assert.Equal(t, "", getEdgeTnRealizationFailureMessage(nil))
+	})
+
+	t.Run("empty state returns empty", func(t *testing.T) {
+		assert.Equal(t, "", getEdgeTnRealizationFailureMessage(&nsxModel.EdgeTnState{}))
+	})
+
+	t.Run("deduplicate identical messages across levels", func(t *testing.T) {
+		msg := "duplicate error"
+		diffMsg := "other error"
+		edgeState := &nsxModel.EdgeTnState{
+			FailureMessage: &msg,
+			DeploymentState: &nsxModel.ConfigurationState{
+				FailureMessage: &msg,
+				Details: []nsxModel.ConfigurationStateElement{
+					{FailureMessage: &msg},
+					{FailureMessage: &diffMsg},
+				},
+			},
+			TransportNodeState: &nsxModel.ConfigurationState{
+				FailureMessage: &diffMsg,
+			},
+		}
+		result := getEdgeTnRealizationFailureMessage(edgeState)
+		assert.Equal(t, "duplicate error, other error", result)
+	})
+
+	t.Run("whitespace-only messages are ignored", func(t *testing.T) {
+		spaces := "   "
+		valid := "real error"
+		edgeState := &nsxModel.EdgeTnState{
+			FailureMessage: &spaces,
+			Details: []nsxModel.ConfigurationStateElement{
+				{FailureMessage: &valid},
+				{FailureMessage: &spaces},
+			},
+		}
+		result := getEdgeTnRealizationFailureMessage(edgeState)
+		assert.Equal(t, "real error", result)
 	})
 }

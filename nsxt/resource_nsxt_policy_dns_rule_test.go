@@ -32,8 +32,9 @@ var accTestPolicyDnsRuleUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsRule_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_rule.test"
+	testDataSourceName := "data.nsxt_policy_dns_rule.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -57,6 +58,10 @@ func TestAccResourceNsxtPolicyDnsRule_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -83,7 +88,7 @@ func TestAccResourceNsxtPolicyDnsRule_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRule_domainPatternsRequired(t *testing.T) {
 	displayName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -102,7 +107,7 @@ func TestAccResourceNsxtPolicyDnsRule_domainPatternsRequired(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRule_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_rule.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -199,6 +204,12 @@ resource "nsxt_policy_dns_rule" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_rule" "test" {
+  parent_path  = nsxt_policy_dns_service.parent.path
+  display_name = nsxt_policy_dns_rule.test.display_name
+  depends_on   = [nsxt_policy_dns_rule.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
