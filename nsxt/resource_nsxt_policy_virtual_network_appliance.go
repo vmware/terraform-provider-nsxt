@@ -64,10 +64,11 @@ func resourceNsxtPolicyVirtualNetworkAppliance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"audit_password": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Sensitive:   true,
-							Description: "Node audit user password",
+							Type:             schema.TypeString,
+							Optional:         true,
+							Sensitive:        true,
+							DiffSuppressFunc: suppressIfEmptyPriorState,
+							Description:      "Node audit user password",
 						},
 						"audit_username": {
 							Type:        schema.TypeString,
