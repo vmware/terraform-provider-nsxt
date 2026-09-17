@@ -26,6 +26,7 @@ var accTestPolicyDnsServiceUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDnsService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_service.test"
+	testDataSourceName := "data.nsxt_policy_dns_service.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -49,6 +50,10 @@ func TestAccResourceNsxtPolicyDnsService_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -184,10 +189,17 @@ resource "nsxt_policy_dns_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_dns_service" "test" {
+  %s
+  display_name = nsxt_policy_dns_service.test.display_name
+  depends_on   = [nsxt_policy_dns_service.test]
 }`,
 		testAccNsxtMultitenancyContext(false),
 		attrMap["display_name"],
 		attrMap["description"],
+		testAccNsxtMultitenancyContext(false),
 	)
 }
 

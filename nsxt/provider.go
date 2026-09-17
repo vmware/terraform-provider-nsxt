@@ -300,6 +300,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_distributed_vxlan_connection":                  dataSourceNsxtPolicyDistributedVxlanConnection(),
 			"nsxt_policy_dns_record":                                    dataSourceNsxtPolicyDnsRecord(),
 			"nsxt_policy_dns_rule":                                      dataSourceNsxtPolicyDnsRule(),
+			"nsxt_policy_dns_service":                                   dataSourceNsxtPolicyDnsService(),
 			"nsxt_policy_dns_zone":                                      dataSourceNsxtPolicyDnsZone(),
 			"nsxt_policy_edge_cluster":                                  dataSourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_high_availability_profile":                dataSourceNsxtPolicyEdgeHighAvailabilityProfile(),
