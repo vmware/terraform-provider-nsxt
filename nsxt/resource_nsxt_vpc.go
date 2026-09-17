@@ -131,6 +131,7 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 				},
 			},
 			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",

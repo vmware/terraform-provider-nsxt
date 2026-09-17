@@ -31,7 +31,7 @@ var accTestPolicyDnsRecordUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDnsRecord_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_record.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicyDnsRecord_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsRecord_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_record.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")

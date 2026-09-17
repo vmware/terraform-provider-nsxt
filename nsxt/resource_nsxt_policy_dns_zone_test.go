@@ -33,7 +33,7 @@ func TestAccResourceNsxtPolicyDnsZone_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_zone.test"
 	testDataSourceName := "data.nsxt_policy_dns_zone.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -82,7 +82,7 @@ func TestAccResourceNsxtPolicyDnsZone_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsZone_withSoa(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_zone.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -117,7 +117,7 @@ func TestAccResourceNsxtPolicyDnsZone_withPartialSoa(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_zone.test"
 	displayName := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
@@ -143,7 +143,7 @@ func TestAccResourceNsxtPolicyDnsZone_withPartialSoa(t *testing.T) {
 func TestAccResourceNsxtPolicyDnsZone_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dns_zone.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
