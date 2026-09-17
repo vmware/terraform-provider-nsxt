@@ -359,6 +359,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_parent_intrusion_service_gateway_policy":       dataSourceNsxtPolicyParentIntrusionServiceGatewayPolicy(),
 			"nsxt_policy_parent_intrusion_service_policy":               dataSourceNsxtPolicyParentIntrusionServicePolicy(),
 			"nsxt_policy_project":                                       dataSourceNsxtPolicyProject(),
+			"nsxt_policy_project_centralized_network_attachment":        dataSourceNsxtPolicyProjectCentralizedNetworkAttachment(),
 			"nsxt_policy_project_ip_address_allocation":                 dataSourceNsxtProjectIpAddressAllocation(),
 			"nsxt_policy_qos_profile":                                   dataSourceNsxtPolicyQosProfile(),
 			"nsxt_policy_realization_info":                              dataSourceNsxtPolicyRealizationInfo(),

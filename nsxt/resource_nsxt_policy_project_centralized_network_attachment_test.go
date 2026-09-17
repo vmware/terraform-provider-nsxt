@@ -14,6 +14,7 @@ import (
 
 func TestAccResourceNsxtPolicyProjectCentralizedNetworkAttachment_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project_centralized_network_attachment.test"
+	testDataSourceName := "data.nsxt_policy_project_centralized_network_attachment.test"
 	prereqName := getAccTestResourceName()
 	createName := getAccTestResourceName()
 	updateName := getAccTestResourceName()
@@ -44,6 +45,10 @@ func TestAccResourceNsxtPolicyProjectCentralizedNetworkAttachment_basic(t *testi
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrPair(testDataSourceName, "id", testResourceName, "id"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "path", testResourceName, "path"),
+					resource.TestCheckResourceAttrPair(testDataSourceName, "description", testResourceName, "description"),
 				),
 			},
 			{
@@ -199,5 +204,13 @@ resource "nsxt_policy_project_centralized_network_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+
+data "nsxt_policy_project_centralized_network_attachment" "test" {
+  context {
+    project_id = nsxt_policy_project.test.id
+  }
+  display_name = nsxt_policy_project_centralized_network_attachment.test.display_name
+  depends_on   = [nsxt_policy_project_centralized_network_attachment.test]
 }`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName, displayName, description, allowPrivate)
 }
