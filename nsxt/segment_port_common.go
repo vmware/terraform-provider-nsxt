@@ -458,8 +458,7 @@ type tier1SegmentPort struct {
 	ids            *segmentPort
 }
 
-func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) error {
-	var config segmentConfig
+func getSegmentPortConfig(d *schema.ResourceData) (segmentConfig, error) {
 	var segmentPath string
 
 	if segmentPathValue, ok := d.GetOk("segment_path"); ok {
@@ -468,10 +467,10 @@ func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) er
 		var err error
 		segmentPath, err = getPolicySegmentPathFromPortPath(segmentPortPathValue.(string))
 		if err != nil {
-			return err
+			return nil, err
 		}
 	} else {
-		return fmt.Errorf("neither segment_path nor segment_port_path found in resource data")
+		return nil, fmt.Errorf("neither segment_path nor segment_port_path found in resource data")
 	}
 
 	s := segmentPort{
@@ -479,15 +478,41 @@ func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) er
 		portId:    d.Id(),
 	}
 
-	config = segmentConfig(s)
 	if isT1Segment(segmentPath) {
-		t := tier1SegmentPort{
+		return tier1SegmentPort{
 			tier1GatewayId: getT1IdFromSegPath(segmentPath),
 			ids:            &s,
-		}
-		config = segmentConfig(t)
+		}, nil
 	}
-	err := config.nsxtPolicySegmentPortDiscoveryProfileRead(d, m)
+
+	return s, nil
+}
+
+func hasSegmentPortProfile(d *schema.ResourceData, key string) bool {
+	if v, ok := d.GetOk(key); ok {
+		if list, ok := v.([]interface{}); ok && len(list) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func hasSegmentPortProfiles(d *schema.ResourceData) bool {
+	for _, key := range []string{"discovery_profile", "qos_profile", "security_profile"} {
+		if hasSegmentPortProfile(d, key) {
+			return true
+		}
+	}
+	return false
+}
+
+func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) error {
+	config, err := getSegmentPortConfig(d)
+	if err != nil {
+		return err
+	}
+
+	err = config.nsxtPolicySegmentPortDiscoveryProfileRead(d, m)
 	if err != nil {
 		return err
 	}
@@ -500,6 +525,36 @@ func nsxtPolicySegmentPortProfilesRead(d *schema.ResourceData, m interface{}) er
 	err = config.nsxtPolicyPortSegmentSecurityProfileRead(d, m)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func nsxtPolicySegmentPortConfiguredProfilesRead(d *schema.ResourceData, m interface{}) error {
+	config, err := getSegmentPortConfig(d)
+	if err != nil {
+		return err
+	}
+
+	if hasSegmentPortProfile(d, "discovery_profile") {
+		err = config.nsxtPolicySegmentPortDiscoveryProfileRead(d, m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if hasSegmentPortProfile(d, "qos_profile") {
+		err = config.nsxtPolicySegmentPortQosProfileRead(d, m)
+		if err != nil {
+			return err
+		}
+	}
+
+	if hasSegmentPortProfile(d, "security_profile") {
+		err = config.nsxtPolicyPortSegmentSecurityProfileRead(d, m)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
