@@ -6,94 +6,44 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+// TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic verifies that `rule`
+// is rejected outside of VMC. Read on this resource reports every rule on the
+// policy, not just the ones declared in `rule` here; on NSX Local Manager or
+// Global Manager the policy's rules are typically also managed by another
+// resource (nsxt_policy_gateway_policy, or nsxt_policy_parent_gateway_policy +
+// nsxt_policy_gateway_policy_rule), so combining `rule` here with any of those
+// causes a permanent configuration drift and can corrupt or delete rules
+// owned elsewhere. There is no legitimate use of `rule` outside VMC.
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
-	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
-	testGatewayResourceName := "nsxt_policy_tier0_gateway.test"
-	description1 := "test 1"
-	description2 := "test 2"
-	tags := `tag {
-            scope = "color"
-            tag   = "orange"
-        }`
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(description1, tags),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
-					resource.TestCheckResourceAttr(testResourceName, "description", description1),
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(description2, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
-					resource.TestCheckResourceAttr(testResourceName, "description", description2),
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0Exists(testGatewayResourceName),
-				),
+				Config:      testAccNsxtPolicyPredefinedGatewayPolicyRule(),
+				ExpectError: regexp.MustCompile("rule is only supported for nsxt_policy_predefined_gateway_policy on VMC"),
 			},
 		},
 	})
 }
 
+// TestAccResourceNsxtPolicyPredefinedGatewayPolicy_multitenancy verifies the
+// same VMC-only restriction on `rule` holds under a multitenancy (Project)
+// context. See TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic.
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_multitenancy(t *testing.T) {
-	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
-	testGatewayResourceName := "nsxt_policy_tier1_gateway.test"
-	description1 := "test 1"
-	description2 := "test 2"
-	tags := `tag {
-            scope = "color"
-            tag   = "orange"
-        }`
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description1, tags),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
-					resource.TestCheckResourceAttr(testResourceName, "description", description1),
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description2, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
-					resource.TestCheckResourceAttr(testResourceName, "description", description2),
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier1Exists(testGatewayResourceName),
-				),
+				Config:      testAccNsxtPolicyPredefinedGatewayPolicyRuleMultitenancy(),
+				ExpectError: regexp.MustCompile("rule is only supported for nsxt_policy_predefined_gateway_policy on VMC"),
 			},
 		},
 	})
@@ -192,25 +142,33 @@ data "nsxt_policy_gateway_policy" "test" {
 }`, context, t1EdgeCluster, context)
 }
 
-func testAccNsxtPolicyPredefinedGatewayPolicyBasic(description string, tags string) string {
-	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedGatewayPolicyRule() string {
+	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + `
 
 resource "nsxt_policy_predefined_gateway_policy" "test" {
-  path        = data.nsxt_policy_gateway_policy.test.path
-  description = "%s"
-  %s
-}`, description, tags)
+  path = data.nsxt_policy_gateway_policy.test.path
+
+  rule {
+    display_name = "rule1"
+    action       = "DROP"
+    scope        = [nsxt_policy_tier0_gateway.test.path]
+  }
+}`
 }
 
-func testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description string, tags string) string {
+func testAccNsxtPolicyPredefinedGatewayPolicyRuleMultitenancy() string {
 	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy() + fmt.Sprintf(`
 
 resource "nsxt_policy_predefined_gateway_policy" "test" {
 %s
-  path        = data.nsxt_policy_gateway_policy.test.path
-  description = "%s"
-  %s
-}`, testAccNsxtPolicyMultitenancyContext(), description, tags)
+  path = data.nsxt_policy_gateway_policy.test.path
+
+  rule {
+    display_name = "rule1"
+    action       = "DROP"
+    scope        = [nsxt_policy_tier1_gateway.test.path]
+  }
+}`, testAccNsxtPolicyMultitenancyContext())
 }
 
 func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description string, action string, label string, tags string) string {

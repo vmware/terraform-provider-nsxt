@@ -76,6 +76,7 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicyGlobalManager    bool
+	PolicyIsVMC            bool
 	DefaultSpanPath        string
 }
 
@@ -939,6 +940,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
+	clients.PolicyIsVMC = isVMC
 
 	if onDemandConn {
 		// version init will happen on demand
@@ -1345,6 +1347,10 @@ func getPolicyEnforcementPoint(clients interface{}) string {
 
 func isPolicyGlobalManager(clients interface{}) bool {
 	return clients.(nsxtClients).PolicyGlobalManager
+}
+
+func isPolicyVMC(clients interface{}) bool {
+	return clients.(nsxtClients).PolicyIsVMC
 }
 
 func getCommonProviderConfig(clients interface{}) commonProviderConfig {
