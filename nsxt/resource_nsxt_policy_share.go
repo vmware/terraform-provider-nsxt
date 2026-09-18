@@ -20,6 +20,7 @@ var cliSharesClient = infra.NewSharesClient
 var sharingStrategyVals = []string{
 	model.Share_SHARING_STRATEGY_ALL_DESCENDANTS,
 	model.Share_SHARING_STRATEGY_NONE_DESCENDANTS,
+	model.Share_SHARING_STRATEGY_EXTERNAL,
 }
 
 var sharePathExample = getMultitenancyPathExample("/infra/shares/[share]")

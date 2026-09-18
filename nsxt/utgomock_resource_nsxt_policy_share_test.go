@@ -77,6 +77,32 @@ func TestMockResourceNsxtPolicyShareCreate(t *testing.T) {
 		assert.Equal(t, d.Id(), d.Get("nsx_id"))
 	})
 
+	t.Run("Create success with EXTERNAL sharing strategy", func(t *testing.T) {
+		extStrategy := model.Share_SHARING_STRATEGY_EXTERNAL
+		mockShareSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), nil).Return(nil)
+		mockShareSDK.EXPECT().Get(gomock.Any()).Return(model.Share{
+			Id:              &shareID,
+			DisplayName:     &shareDisplayName,
+			Description:     &shareDescription,
+			Path:            &sharePath,
+			Revision:        &shareRevision,
+			SharingStrategy: &extStrategy,
+			SharedWith:      shareSharedWith,
+		}, nil)
+
+		res := resourceNsxtPolicyShare()
+		data := minimalShareData()
+		data["sharing_strategy"] = model.Share_SHARING_STRATEGY_EXTERNAL
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyShareCreate(d, m)
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+		assert.Equal(t, d.Id(), d.Get("nsx_id"))
+		assert.Equal(t, model.Share_SHARING_STRATEGY_EXTERNAL, d.Get("sharing_strategy"))
+	})
+
 	t.Run("Create fails when resource already exists", func(t *testing.T) {
 		mockShareSDK.EXPECT().Get("existing-id").Return(model.Share{Id: &shareID}, nil)
 
@@ -185,6 +211,31 @@ func TestMockResourceNsxtPolicyShareUpdate(t *testing.T) {
 		m := newGoMockProviderClient()
 		err := resourceNsxtPolicyShareUpdate(d, m)
 		require.NoError(t, err)
+	})
+
+	t.Run("Update success with EXTERNAL sharing strategy", func(t *testing.T) {
+		extStrategy := model.Share_SHARING_STRATEGY_EXTERNAL
+		mockShareSDK.EXPECT().Patch(shareID, gomock.Any(), nil).Return(nil)
+		mockShareSDK.EXPECT().Get(shareID).Return(model.Share{
+			Id:              &shareID,
+			DisplayName:     &shareDisplayName,
+			Description:     &shareDescription,
+			Path:            &sharePath,
+			Revision:        &shareRevision,
+			SharingStrategy: &extStrategy,
+			SharedWith:      shareSharedWith,
+		}, nil)
+
+		res := resourceNsxtPolicyShare()
+		data := minimalShareData()
+		data["sharing_strategy"] = model.Share_SHARING_STRATEGY_EXTERNAL
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(shareID)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyShareUpdate(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, model.Share_SHARING_STRATEGY_EXTERNAL, d.Get("sharing_strategy"))
 	})
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {

@@ -35,7 +35,7 @@ The following arguments are supported:
 * `context` - (Optional) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
 * `shared_with` - (Required) Path of the context
-* `sharing_strategy` - (Optional) Sharing Strategy. Accepted values: 'NONE_DESCENDANTS', 'ALL_DESCENDANTS'. Default: 'NONE_DESCENDANTS'.
+* `sharing_strategy` - (Optional) Sharing Strategy. Accepted values: 'NONE_DESCENDANTS', 'ALL_DESCENDANTS', 'EXTERNAL' ('EXTERNAL' is supported with NSX 9.2.0 onwards). Default: 'NONE_DESCENDANTS'.
 
 ## Attributes Reference
 
