@@ -5,6 +5,7 @@
 package nsxt
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -16,6 +17,11 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var rcBgpNeighborRouteFilteringAddressFamilyValues = []string{
+	model.RouteControllerBgpRouteFiltering_ADDRESS_FAMILY_IPV4,
+	model.RouteControllerBgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN,
+}
 
 var cliRCBgpNeighborClient = infra.NewRouteControllerBgpNeighborClient
 
@@ -32,6 +38,7 @@ func resourceNsxtPolicyRouteControllerBgpNeighbor() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
+		CustomizeDiff: validateRCBgpNeighborRouteFiltering,
 
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
@@ -162,8 +169,8 @@ func resourceNsxtPolicyRouteControllerBgpNeighbor() *schema.Resource {
 						"address_family": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Description:  "Address family type",
-							ValidateFunc: validation.StringInSlice(bgpNeighborConfigRouteFilteringAddressFamilyValues, false),
+							Description:  "Address family type (IPV4 or L2VPN_EVPN)",
+							ValidateFunc: validation.StringInSlice(rcBgpNeighborRouteFilteringAddressFamilyValues, false),
 						},
 						"enabled": {
 							Type:        schema.TypeBool,
@@ -174,19 +181,19 @@ func resourceNsxtPolicyRouteControllerBgpNeighbor() *schema.Resource {
 						"in_route_filter": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Description:  "Prefix-list or route map path for IN direction",
+							Description:  "Prefix-list or route map path for IN direction (supported for L2VPN_EVPN only)",
 							ValidateFunc: validatePolicyPath(),
 						},
 						"maximum_routes": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							ValidateFunc: validation.IntBetween(1, 1000000),
-							Description:  "Maximum number of routes for the address family",
+							Description:  "Maximum number of routes for the address family (supported for L2VPN_EVPN only)",
 						},
 						"out_route_filter": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							Description:  "Prefix-list or route map path for OUT direction",
+							Description:  "Prefix-list or route map path for OUT direction (supported for L2VPN_EVPN only)",
 							ValidateFunc: validatePolicyPath(),
 						},
 					},
@@ -215,8 +222,52 @@ func resourceNsxtPolicyRouteControllerBgpNeighborExists(sessionContext utl.Sessi
 	return false, logAPIError("Error retrieving RouteControllerBgpNeighbor", err)
 }
 
+func validateRCBgpNeighborRouteFilteringData(d resourceGetter) error {
+	filters, ok := d.Get("route_filtering").([]interface{})
+	if !ok || len(filters) == 0 {
+		return nil
+	}
+	seenFamilies := make(map[string]bool)
+	for _, f := range filters {
+		data, ok := f.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		addrFamily, _ := data["address_family"].(string)
+		if seenFamilies[addrFamily] {
+			return fmt.Errorf("duplicate address_family '%s' found in route_filtering", addrFamily)
+		}
+		seenFamilies[addrFamily] = true
+
+		if addrFamily == model.RouteControllerBgpRouteFiltering_ADDRESS_FAMILY_IPV4 {
+			if maxRoutes, ok := data["maximum_routes"].(int); ok && maxRoutes > 0 {
+				return fmt.Errorf("the property 'maximum_routes' is not supported for route_filtering configured with address family IPV4 on Route Controller BGP neighbor")
+			}
+			if inFilter, ok := data["in_route_filter"].(string); ok && inFilter != "" {
+				return fmt.Errorf("the property 'in_route_filter' is not supported for route_filtering configured with address family IPV4 on Route Controller BGP neighbor")
+			}
+			if outFilter, ok := data["out_route_filter"].(string); ok && outFilter != "" {
+				return fmt.Errorf("the property 'out_route_filter' is not supported for route_filtering configured with address family IPV4 on Route Controller BGP neighbor")
+			}
+		}
+	}
+	return nil
+}
+
+type resourceGetter interface {
+	Get(key string) interface{}
+}
+
+func validateRCBgpNeighborRouteFiltering(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	return validateRCBgpNeighborRouteFilteringData(diff)
+}
+
 func rcBgpNeighborToStruct(d *schema.ResourceData, id string) (model.RouteControllerBgpNeighborConfig, error) {
 	var obj model.RouteControllerBgpNeighborConfig
+
+	if err := validateRCBgpNeighborRouteFilteringData(d); err != nil {
+		return obj, err
+	}
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
