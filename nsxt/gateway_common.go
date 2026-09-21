@@ -17,12 +17,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var cliGlobalInfraClient = global_policy.NewGlobalInfraClient
+var cliGlobalInfraClient = nsx_policy.NewGlobalInfraClient
 var cliInfraClient = nsx_policy.NewInfraClient
 
 var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{
@@ -455,13 +453,11 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector client.Connector, enforceRevision bool) error {
 	switch context.ClientType {
 	case utl.Global:
-		infraClient := cliGlobalInfraClient(connector)
-		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
-		if err != nil {
-			return err
+		infraClient := cliGlobalInfraClient(context, connector)
+		if infraClient == nil {
+			return policyResourceNotSupportedError()
 		}
-
-		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
+		return infraClient.Patch(obj, &enforceRevision)
 	case utl.VPC:
 		context = utl.SessionContext{
 			ClientType: utl.Multitenancy,

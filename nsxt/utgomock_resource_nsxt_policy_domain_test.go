@@ -18,11 +18,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	apiRoot "github.com/vmware/terraform-provider-nsxt/api"
 	infraapi "github.com/vmware/terraform-provider-nsxt/api/infra"
 	domainsapi "github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	globalInfraMocks "github.com/vmware/terraform-provider-nsxt/mocks/global_infra"
 	globalInfraDomainsMocks "github.com/vmware/terraform-provider-nsxt/mocks/global_infra/domains"
+	gmInfraMocks "github.com/vmware/terraform-provider-nsxt/mocks/nsxt_gm"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
@@ -178,6 +180,49 @@ func TestMockResourceNsxtPolicyDomainCreate(t *testing.T) {
 		err := resourceNsxtPolicyDomainCreate(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "already exists")
+	})
+
+	t.Run("Create_success", func(t *testing.T) {
+		mockDMSDK := globalInfraDomainsMocks.NewMockDomainDeploymentMapsClient(ctrl)
+		dmWrapper := &domainsapi.DomainDeploymentMapClientContext{Client: mockDMSDK, ClientType: utl.Global}
+		originalDM := cliDomainDeploymentMapsClient
+		defer func() { cliDomainDeploymentMapsClient = originalDM }()
+		cliDomainDeploymentMapsClient = func(sessionContext utl.SessionContext, connector client.Connector) *domainsapi.DomainDeploymentMapClientContext {
+			return dmWrapper
+		}
+
+		mockGlobalInfraSDK := gmInfraMocks.NewMockGlobalInfraClient(ctrl)
+		globalInfraWrapper := &apiRoot.GlobalInfraClientContext{Client: mockGlobalInfraSDK, ClientType: utl.Global}
+		originalGlobalInfra := cliGlobalInfraClient
+		defer func() { cliGlobalInfraClient = originalGlobalInfra }()
+		cliGlobalInfraClient = func(sessionContext utl.SessionContext, connector client.Connector) *apiRoot.GlobalInfraClientContext {
+			return globalInfraWrapper
+		}
+
+		gomock.InOrder(
+			mockDomainsSDK.EXPECT().Get(domainID).Return(gm_model.Domain{}, vapiErrors.NotFound{}),
+			mockGlobalInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			mockDomainsSDK.EXPECT().Get(domainID).Return(gm_model.Domain{
+				DisplayName: &domainName,
+				Path:        &domainPath,
+				Revision:    &domainRevision,
+			}, nil),
+		)
+		mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			gm_model.DomainDeploymentMapListResult{
+				Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}},
+			}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"nsx_id":       domainID,
+			"display_name": domainName,
+			"sites":        []interface{}{domainSiteName},
+		})
+		m := newGoMockGlobalProviderClient()
+		err := resourceNsxtPolicyDomainCreate(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, domainID, d.Id())
+		assert.Equal(t, domainName, d.Get("display_name"))
 	})
 }
 
@@ -368,6 +413,49 @@ func TestMockResourceNsxtPolicyDomainUpdateEmptyID(t *testing.T) {
 		err := resourceNsxtPolicyDomainUpdate(d, newGoMockGlobalProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Domain ID")
+	})
+}
+
+func TestMockResourceNsxtPolicyDomainUpdateSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDomainsSDK, mockDMSDK, restore := setupDomainMocks(ctrl)
+	defer restore()
+
+	mockGlobalInfraSDK := gmInfraMocks.NewMockGlobalInfraClient(ctrl)
+	globalInfraWrapper := &apiRoot.GlobalInfraClientContext{Client: mockGlobalInfraSDK, ClientType: utl.Global}
+	originalGlobalInfra := cliGlobalInfraClient
+	defer func() { cliGlobalInfraClient = originalGlobalInfra }()
+	cliGlobalInfraClient = func(sessionContext utl.SessionContext, connector client.Connector) *apiRoot.GlobalInfraClientContext {
+		return globalInfraWrapper
+	}
+
+	t.Run("Update success", func(t *testing.T) {
+		gomock.InOrder(
+			// setDomainStructWithChildren's stale-location lookup.
+			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+				gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil),
+			mockGlobalInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			// resourceNsxtPolicyDomainRead's Get + deployment map list.
+			mockDomainsSDK.EXPECT().Get(domainID).Return(gm_model.Domain{
+				DisplayName: &domainName,
+				Path:        &domainPath,
+				Revision:    &domainRevision,
+			}, nil),
+			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+				gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil),
+		)
+
+		res := resourceNsxtPolicyDomain()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name": domainName,
+			"sites":        []interface{}{domainSiteName},
+		})
+		d.SetId(domainID)
+
+		err := resourceNsxtPolicyDomainUpdate(d, newGoMockGlobalProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, domainName, d.Get("display_name"))
 	})
 }
 

@@ -17,9 +17,15 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	t0l2vpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/l2vpn_services"
+	t0nestedl2vpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/l2vpn_services"
 	l2vpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/l2vpn_services"
+	t1nestedl2vpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/l2vpn_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	t0l2vpnMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/l2vpn_services"
+	t0nestedl2vpnMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/locale_services/l2vpn_services"
 	l2vpnMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/l2vpn_services"
+	t1nestedl2vpnMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/locale_services/l2vpn_services"
 )
 
 var (
@@ -453,5 +459,231 @@ func TestUnitNsxt_nsxtL2VpnSessionImporter(t *testing.T) {
 		require.Len(t, out, 1)
 		assert.Equal(t, "ccc", d.Id())
 		assert.Equal(t, "/infra/tier-1s/aaa/locale-services/default/l2vpn-services/bbb", d.Get("service_path"))
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyL2VpnSessionExists(t *testing.T) {
+	ctx := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("tier0 flat: found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0l2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0l2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnSessionsClient
+		defer func() { cliT0L2vpnSessionsClient = original }()
+		cliT0L2vpnSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0l2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get(l2SessionGwID, l2SessionSvcID, l2SessionID).Return(l2SessionAPIResponse(), nil)
+
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(true, l2SessionGwID, "", l2SessionSvcID, l2SessionID, nil, ctx)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("tier0 nested: not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnNestedSessionsClient
+		defer func() { cliT0L2vpnNestedSessionsClient = original }()
+		cliT0L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get(l2SessionGwID, "ls-1", l2SessionSvcID, l2SessionID).Return(nsxModel.L2VPNSession{}, vapiErrors.NotFound{})
+
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(true, l2SessionGwID, "ls-1", l2SessionSvcID, l2SessionID, nil, ctx)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("tier1 nested: found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t1nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t1nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT1L2vpnNestedSessionsClient
+		defer func() { cliT1L2vpnNestedSessionsClient = original }()
+		cliT1L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get(l2SessionGwID, "ls-1", l2SessionSvcID, l2SessionID).Return(l2SessionAPIResponse(), nil)
+
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(false, l2SessionGwID, "ls-1", l2SessionSvcID, l2SessionID, nil, ctx)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("tier1 flat: invalid request with no data is propagated as an error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupL2SessionMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(l2SessionGwID, l2SessionSvcID, l2SessionID).Return(nsxModel.L2VPNSession{}, vapiErrors.InvalidRequest{})
+
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(false, l2SessionGwID, "", l2SessionSvcID, l2SessionID, nil, ctx)
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("tier1 flat: unexpected error is propagated", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupL2SessionMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(l2SessionGwID, l2SessionSvcID, l2SessionID).Return(nsxModel.L2VPNSession{}, vapiErrors.InternalServerError{})
+
+		exists, err := resourceNsxtPolicyL2VpnSessionExists(false, l2SessionGwID, "", l2SessionSvcID, l2SessionID, nil, ctx)
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyL2VPNSessionDeleteAllClientPaths(t *testing.T) {
+	res := resourceNsxtPolicyL2VPNSession()
+
+	t.Run("tier0 flat", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0l2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0l2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnSessionsClient
+		defer func() { cliT0L2vpnSessionsClient = original }()
+		cliT0L2vpnSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0l2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Delete("t0-gw-1", "svc-1", "sess-1").Return(nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-0s/t0-gw-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("tier0 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnNestedSessionsClient
+		defer func() { cliT0L2vpnNestedSessionsClient = original }()
+		cliT0L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Delete("t0-gw-1", "ls-1", "svc-1", "sess-1").Return(nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-0s/t0-gw-1/locale-services/ls-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("tier1 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t1nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t1nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT1L2vpnNestedSessionsClient
+		defer func() { cliT1L2vpnNestedSessionsClient = original }()
+		cliT1L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Delete("t1-gw-1", "ls-1", "svc-1", "sess-1").Return(nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-1s/t1-gw-1/locale-services/ls-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("invalid service_path is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-1s/t1-gw-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyL2VPNSessionReadAllClientPaths(t *testing.T) {
+	res := resourceNsxtPolicyL2VPNSession()
+
+	t.Run("tier0 flat", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0l2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0l2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnSessionsClient
+		defer func() { cliT0L2vpnSessionsClient = original }()
+		cliT0L2vpnSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0l2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get("t0-gw-1", "svc-1", "sess-1").Return(l2SessionAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-0s/t0-gw-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, l2SessionDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("tier0 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t0nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT0L2vpnNestedSessionsClient
+		defer func() { cliT0L2vpnNestedSessionsClient = original }()
+		cliT0L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get("t0-gw-1", "ls-1", "svc-1", "sess-1").Return(l2SessionAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-0s/t0-gw-1/locale-services/ls-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, l2SessionDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("tier1 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t1nestedl2vpnMocks.NewMockSessionsClient(ctrl)
+		wrapper := &t1nestedl2vpnapi.L2VPNSessionClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliT1L2vpnNestedSessionsClient
+		defer func() { cliT1L2vpnNestedSessionsClient = original }()
+		cliT1L2vpnNestedSessionsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1nestedl2vpnapi.L2VPNSessionClientContext {
+			return wrapper
+		}
+		mockSDK.EXPECT().Get("t1-gw-1", "ls-1", "svc-1", "sess-1").Return(l2SessionAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"service_path": "/infra/tier-1s/t1-gw-1/locale-services/ls-1/l2vpn-services/svc-1",
+		})
+		d.SetId("sess-1")
+
+		err := resourceNsxtPolicyL2VPNSessionRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, l2SessionDisplayName, d.Get("display_name"))
 	})
 }

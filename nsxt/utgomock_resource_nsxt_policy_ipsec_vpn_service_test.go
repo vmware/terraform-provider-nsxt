@@ -18,10 +18,12 @@ import (
 	"go.uber.org/mock/gomock"
 
 	tier0ipsecvpnsvcapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	t0localeservicesapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	ipsecvpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
 	t1localeservicesapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	t0Mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
+	t0LocaleServiceMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/locale_services"
 	t1Mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
 	t1LocaleServiceMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/locale_services"
 )
@@ -260,6 +262,73 @@ func TestMockResourceNsxtPolicyIPSecVpnServiceT0GatewayPath(t *testing.T) {
 		err := resourceNsxtPolicyIPSecVpnServiceDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Update success against a T0 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Update("t0-gw-1", ipsecSvcID, gomock.Any()).Return(ipsecSvcAPIResponse(), nil),
+			mockSDK.EXPECT().Get("t0-gw-1", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ipsecSvcID)
+
+		err := resourceNsxtPolicyIPSecVpnServiceUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyIPSecVpnServiceT0LocaleServicePath(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK := t0LocaleServiceMocks.NewMockIpsecVpnServicesClient(ctrl)
+	wrapper := &t0localeservicesapi.IPSecVpnServiceClientContext{Client: mockSDK, ClientType: utl.Local}
+	original := cliTier0IpsecVpnLocaleServicesClient
+	defer func() { cliTier0IpsecVpnLocaleServicesClient = original }()
+	cliTier0IpsecVpnLocaleServicesClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0localeservicesapi.IPSecVpnServiceClientContext {
+		return wrapper
+	}
+
+	data := minimalIPSecSvcData()
+	delete(data, "gateway_path")
+	data["locale_service_path"] = "/infra/tier-0s/t0-gw-1/locale-services/default"
+
+	t.Run("Read success against a locale-service-scoped T0 gateway", func(t *testing.T) {
+		mockSDK.EXPECT().Get("t0-gw-1", "default", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ipsecSvcID)
+
+		err := resourceNsxtPolicyIPSecVpnServiceRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, ipsecSvcDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Update success against a locale-service-scoped T0 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Update("t0-gw-1", "default", ipsecSvcID, gomock.Any()).Return(ipsecSvcAPIResponse(), nil),
+			mockSDK.EXPECT().Get("t0-gw-1", "default", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ipsecSvcID)
+
+		err := resourceNsxtPolicyIPSecVpnServiceUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Delete success against a locale-service-scoped T0 gateway", func(t *testing.T) {
+		mockSDK.EXPECT().Delete("t0-gw-1", "default", ipsecSvcID).Return(nil)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ipsecSvcID)
+
+		err := resourceNsxtPolicyIPSecVpnServiceDelete(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
 }
 
 func TestMockResourceNsxtPolicyIPSecVpnServiceLocaleServicePath(t *testing.T) {
@@ -282,6 +351,20 @@ func TestMockResourceNsxtPolicyIPSecVpnServiceLocaleServicePath(t *testing.T) {
 		err := resourceNsxtPolicyIPSecVpnServiceRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, ipsecSvcDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Update success against a locale-service-scoped T1 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Update("t1-gw-1", "default", ipsecSvcID, gomock.Any()).Return(ipsecSvcAPIResponse(), nil),
+			mockSDK.EXPECT().Get("t1-gw-1", "default", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ipsecSvcID)
+
+		err := resourceNsxtPolicyIPSecVpnServiceUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
 	})
 
 	t.Run("Delete success against a locale-service-scoped T1 gateway", func(t *testing.T) {
@@ -400,5 +483,84 @@ func TestUnitNsxt_resourceNsxtPolicyIPSecVpnServiceImport(t *testing.T) {
 
 		_, err := resourceNsxtPolicyIPSecVpnServiceImport(d, nil)
 		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_getIPSecVPNBypassRulesFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnService()
+
+	t.Run("no bypass_rule returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		rules := getIPSecVPNBypassRulesFromSchema(d)
+		assert.Nil(t, rules)
+	})
+
+	t.Run("converts sources and destinations, generating an id when absent", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bypass_rule": []interface{}{
+				map[string]interface{}{
+					"sources":      []interface{}{"10.0.0.0/24"},
+					"destinations": []interface{}{"10.0.1.0/24"},
+				},
+			},
+		})
+		rules := getIPSecVPNBypassRulesFromSchema(d)
+		require.Len(t, rules, 1)
+		require.Len(t, rules[0].Sources, 1)
+		assert.Equal(t, "10.0.0.0/24", *rules[0].Sources[0].Subnet)
+		require.Len(t, rules[0].Destinations, 1)
+		assert.Equal(t, "10.0.1.0/24", *rules[0].Destinations[0].Subnet)
+		require.NotNil(t, rules[0].Id)
+		assert.NotEmpty(t, *rules[0].Id)
+	})
+
+	t.Run("preserves an existing nsx_id", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"bypass_rule": []interface{}{
+				map[string]interface{}{
+					"nsx_id":       "rule-1",
+					"sources":      []interface{}{},
+					"destinations": []interface{}{},
+				},
+			},
+		})
+		rules := getIPSecVPNBypassRulesFromSchema(d)
+		require.Len(t, rules, 1)
+		require.NotNil(t, rules[0].Id)
+		assert.Equal(t, "rule-1", *rules[0].Id)
+		assert.Empty(t, rules[0].Sources)
+		assert.Empty(t, rules[0].Destinations)
+	})
+}
+
+func TestUnitNsxt_setBypassRuleInSchema(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnService()
+
+	t.Run("populates schema from bypass rules", func(t *testing.T) {
+		srcSubnet := "10.0.0.0/24"
+		dstSubnet := "10.0.1.0/24"
+		action := nsxModel.IPSecVpnRule_ACTION_BYPASS
+
+		d := res.TestResourceData()
+		setBypassRuleInSchema(d, []nsxModel.IPSecVpnRule{
+			{
+				Sources:      []nsxModel.IPSecVpnSubnet{{Subnet: &srcSubnet}},
+				Destinations: []nsxModel.IPSecVpnSubnet{{Subnet: &dstSubnet}},
+				Action:       &action,
+			},
+		})
+
+		rules := d.Get("bypass_rule").([]interface{})
+		require.Len(t, rules, 1)
+		elem := rules[0].(map[string]interface{})
+		assert.Equal(t, []interface{}{srcSubnet}, elem["sources"].(*schema.Set).List())
+		assert.Equal(t, []interface{}{dstSubnet}, elem["destinations"].(*schema.Set).List())
+		assert.Equal(t, nsxModel.IPSecVpnRule_ACTION_BYPASS, elem["action"])
+	})
+
+	t.Run("empty list clears the schema", func(t *testing.T) {
+		d := res.TestResourceData()
+		setBypassRuleInSchema(d, nil)
+		assert.Empty(t, d.Get("bypass_rule").([]interface{}))
 	})
 }

@@ -449,3 +449,78 @@ func TestMockNsxtInitImplicitTier1GatewayLocaleService(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_validateTier1(t *testing.T) {
+	res := resourceNsxtPolicyTier1Gateway()
+
+	t.Run("routed gateway without tier0_path is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"type": nsxModel.Tier1_TYPE_ROUTED,
+		})
+		err := validateTier1(d)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "tier0_path needs to be specified")
+	})
+
+	t.Run("natted gateway without tier0_path is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"type": nsxModel.Tier1_TYPE_NATTED,
+		})
+		err := validateTier1(d)
+		require.Error(t, err)
+	})
+
+	t.Run("routed gateway with tier0_path and non-NONE ha_mode is valid", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"type":       nsxModel.Tier1_TYPE_ROUTED,
+			"tier0_path": "/infra/tier-0s/t0-1",
+			"ha_mode":    "ACTIVE_STANDBY",
+		})
+		require.NoError(t, validateTier1(d))
+	})
+
+	t.Run("ha_mode NONE with edge_cluster_path set is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"type":              nsxModel.Tier1_TYPE_ROUTED,
+			"tier0_path":        "/infra/tier-0s/t0-1",
+			"ha_mode":           "NONE",
+			"edge_cluster_path": "/infra/sites/default/enforcement-points/default/edge-clusters/ec1",
+		})
+		err := validateTier1(d)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "ha_mode can not be set to")
+	})
+
+	t.Run("ha_mode NONE without edge_cluster_path is valid", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"type":       nsxModel.Tier1_TYPE_ROUTED,
+			"tier0_path": "/infra/tier-0s/t0-1",
+			"ha_mode":    "NONE",
+		})
+		require.NoError(t, validateTier1(d))
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyTier1GatewaySetQos(t *testing.T) {
+	res := resourceNsxtPolicyTier1Gateway()
+
+	t.Run("sets QosProfile when either path is provided", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"ingress_qos_profile_path": "/infra/gateway-qos-profiles/ingress1",
+		})
+		obj := &nsxModel.Tier1{}
+		resourceNsxtPolicyTier1GatewaySetQos(d, obj)
+		require.NotNil(t, obj.QosProfile)
+		require.NotNil(t, obj.QosProfile.IngressQosProfilePath)
+		assert.Equal(t, "/infra/gateway-qos-profiles/ingress1", *obj.QosProfile.IngressQosProfilePath)
+		require.NotNil(t, obj.QosProfile.EgressQosProfilePath)
+		assert.Empty(t, *obj.QosProfile.EgressQosProfilePath)
+	})
+
+	t.Run("leaves QosProfile nil when neither path is provided", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		obj := &nsxModel.Tier1{}
+		resourceNsxtPolicyTier1GatewaySetQos(d, obj)
+		assert.Nil(t, obj.QosProfile)
+	})
+}
