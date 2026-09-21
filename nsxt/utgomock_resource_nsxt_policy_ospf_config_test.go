@@ -17,8 +17,10 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	tier0api "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	ospfConfigapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	tier0LocaleServicesMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
 	lsMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/locale_services"
 )
 
@@ -90,6 +92,58 @@ func TestMockResourceNsxtPolicyOspfConfigRead(t *testing.T) {
 
 		err := resourceNsxtPolicyOspfConfigRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyOspfConfigCreate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockOspfSDK, restoreOspf := setupOSPFConfigMock(t, ctrl)
+	defer restoreOspf()
+
+	mockLocaleServicesSDK := tier0LocaleServicesMocks.NewMockLocaleServicesClient(ctrl)
+	localeServicesWrapper := &tier0api.LocaleServicesClientContext{
+		Client:     mockLocaleServicesSDK,
+		ClientType: utl.Local,
+	}
+	originalLocSvc := cliTier0LocaleServicesClient
+	defer func() { cliTier0LocaleServicesClient = originalLocSvc }()
+	cliTier0LocaleServicesClient = func(sessionContext utl.SessionContext, connector vapiProtocolClient.Connector) *tier0api.LocaleServicesClientContext {
+		return localeServicesWrapper
+	}
+
+	res := resourceNsxtPolicyOspfConfig()
+
+	t.Run("Create success", func(t *testing.T) {
+		mockLocaleServicesSDK.EXPECT().Get(ospfCfgGwID, defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{
+			Id: &ospfCfgLsID,
+		}, nil)
+		mockOspfSDK.EXPECT().Patch(ospfCfgGwID, ospfCfgLsID, gomock.Any()).Return(ospfConfigAPIResponse(), nil)
+		mockOspfSDK.EXPECT().Get(ospfCfgGwID, ospfCfgLsID).Return(ospfConfigAPIResponse(), nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalOSPFConfigData())
+		err := resourceNsxtPolicyOspfConfigCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+		assert.Equal(t, ospfCfgLsID, d.Get("locale_service_id"))
+		assert.Equal(t, ospfCfgGwID, d.Get("gateway_id"))
+	})
+
+	t.Run("Create fails when gateway path is not tier0", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"gateway_path":          "/infra/tier-1s/t1-id",
+			"graceful_restart_mode": nsxModel.OspfRoutingConfig_GRACEFUL_RESTART_MODE_HELPER_ONLY,
+		})
+		err := resourceNsxtPolicyOspfConfigCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Tier0 Gateway path expected")
+	})
+
+	t.Run("Create fails when global manager", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalOSPFConfigData())
+		err := resourceNsxtPolicyOspfConfigCreate(d, newGoMockGlobalProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Global Manager")
 	})
 }
 

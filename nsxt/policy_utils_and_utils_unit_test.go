@@ -384,3 +384,41 @@ func TestUnitNsxt_ptr(t *testing.T) {
 	require.NotNil(t, p)
 	assert.Equal(t, "value", *p)
 }
+
+func TestUnitNsxt_getAllocationRangeListFromSchema(t *testing.T) {
+	t.Run("converts schema list to IpPoolRange list", func(t *testing.T) {
+		ranges := getAllocationRangeListFromSchema([]interface{}{
+			map[string]interface{}{"start": "10.0.0.1", "end": "10.0.0.10"},
+			map[string]interface{}{"start": "10.0.0.20", "end": "10.0.0.30"},
+		})
+		require.Len(t, ranges, 2)
+		assert.Equal(t, "10.0.0.1", *ranges[0].Start)
+		assert.Equal(t, "10.0.0.10", *ranges[0].End)
+		assert.Equal(t, "10.0.0.20", *ranges[1].Start)
+		assert.Equal(t, "10.0.0.30", *ranges[1].End)
+	})
+
+	t.Run("empty input returns empty list", func(t *testing.T) {
+		assert.Empty(t, getAllocationRangeListFromSchema(nil))
+	})
+}
+
+func TestUnitNsxt_setAllocationRangeListInSchema(t *testing.T) {
+	t.Run("converts IpPoolRange list to schema list", func(t *testing.T) {
+		start1, end1 := "10.0.0.1", "10.0.0.10"
+		start2, end2 := "10.0.0.20", "10.0.0.30"
+		result := setAllocationRangeListInSchema([]model.IpPoolRange{
+			{Start: &start1, End: &end1},
+			{Start: &start2, End: &end2},
+		})
+		require.Len(t, result, 2)
+		assert.Equal(t, &start1, result[0]["start"])
+		assert.Equal(t, &end1, result[0]["end"])
+		assert.Equal(t, &start2, result[1]["start"])
+		assert.Equal(t, &end2, result[1]["end"])
+	})
+
+	t.Run("empty input returns empty list", func(t *testing.T) {
+		assert.Empty(t, setAllocationRangeListInSchema(nil))
+	})
+}

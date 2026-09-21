@@ -518,6 +518,51 @@ func TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
 	assert.Equal(t, []string{"PUBLIC", "TGW_STATIC_ROUTE"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
 }
 
+func TestUnitNsxt_getTGWBgpConfigFromSchemaTagsAggregationAndRouteMapPath(t *testing.T) {
+	data := minimalTGWData()
+	bgpConfigData := minimalBgpConfigData()
+	bgpConfigMap := bgpConfigData[0].(map[string]interface{})
+	bgpConfigMap["tag"] = []interface{}{
+		map[string]interface{}{"scope": "scope1", "tag": "tag1"},
+	}
+	bgpConfigMap["route_aggregation"] = []interface{}{
+		map[string]interface{}{"prefix": "10.0.0.0/8", "summary_only": true},
+	}
+	data["bgp_config"] = bgpConfigData
+	data["redistribution_config"] = []interface{}{
+		map[string]interface{}{
+			"rule": []interface{}{
+				map[string]interface{}{
+					"types":          []interface{}{"PUBLIC"},
+					"route_map_path": "/orgs/default/projects/project1/transit-gateways/tgw-test-id/routing/route-maps/rm1",
+				},
+			},
+		},
+	}
+
+	res := resourceNsxtPolicyTransitGateway()
+	d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+	cfg := getTGWBgpConfigFromSchema(d, true, false, true)
+	require.NotNil(t, cfg)
+
+	require.Len(t, cfg.Tags, 1)
+	assert.Equal(t, "scope1", *cfg.Tags[0].Scope)
+	assert.Equal(t, "tag1", *cfg.Tags[0].Tag)
+
+	require.Len(t, cfg.RouteAggregations, 1)
+	assert.Equal(t, "10.0.0.0/8", *cfg.RouteAggregations[0].Prefix)
+	assert.True(t, *cfg.RouteAggregations[0].SummaryOnly)
+
+	require.NotNil(t, cfg.InterSrIbgp)
+	assert.False(t, *cfg.InterSrIbgp)
+
+	require.NotNil(t, cfg.RouteRedistributionConfig)
+	require.Len(t, cfg.RouteRedistributionConfig.Rules, 1)
+	require.NotNil(t, cfg.RouteRedistributionConfig.Rules[0].RouteMapPath)
+	assert.Equal(t, "/orgs/default/projects/project1/transit-gateways/tgw-test-id/routing/route-maps/rm1", *cfg.RouteRedistributionConfig.Rules[0].RouteMapPath)
+}
+
 // TestGetTGWBgpConfigFromSchemaOnlyIncludesChangedBlocks guards against
 // BZ#3742235's underlying cause: resourceNsxtPolicyTransitGatewayUpdate used to
 // always resend all three of bgp_config/advanced_config/redistribution_config

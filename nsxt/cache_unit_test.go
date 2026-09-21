@@ -411,11 +411,34 @@ func TestUnitNsxt_mergeGatewayPolicyCacheSearchResults(t *testing.T) {
 }
 
 func TestUnitNsxt_converListToMapByType(t *testing.T) {
-	sv := groupStructValue(t, "g1", "my-group", "/infra/domains/default/groups/g1")
-	ret := converListToMapByType([]*data.StructValue{sv}, resourceTypeGroup)
-	require.NotNil(t, ret)
-	assert.Same(t, sv, ret["g1"])
-	assert.Same(t, sv, ret["my-group"])
+	t.Run("indexes by id and display_name, not path, when type is not path-indexed", func(t *testing.T) {
+		sv := groupStructValue(t, "g1", "my-group", "/infra/domains/default/groups/g1")
+		ret := converListToMapByType([]*data.StructValue{sv}, resourceTypeGroup)
+		require.NotNil(t, ret)
+		assert.Same(t, sv, ret["g1"])
+		assert.Same(t, sv, ret["my-group"])
+		assert.NotContains(t, ret, "/infra/domains/default/groups/g1")
+	})
+
+	t.Run("also indexes by path when type is path-indexed", func(t *testing.T) {
+		sv := groupStructValue(t, "s1", "my-subnet", "/infra/vpcs/vpc1/subnets/s1")
+		ret := converListToMapByType([]*data.StructValue{sv}, resourceTypeVpcSubnet)
+		assert.Same(t, sv, ret["s1"])
+		assert.Same(t, sv, ret["my-subnet"])
+		assert.Same(t, sv, ret["/infra/vpcs/vpc1/subnets/s1"])
+	})
+
+	t.Run("id containing a path is also indexed by its trailing segment", func(t *testing.T) {
+		sv := groupStructValue(t, "/infra/domains/default/groups/g2", "my-group-2", "/infra/domains/default/groups/g2")
+		ret := converListToMapByType([]*data.StructValue{sv}, resourceTypeGroup)
+		assert.Same(t, sv, ret["/infra/domains/default/groups/g2"])
+		assert.Same(t, sv, ret["g2"])
+	})
+
+	t.Run("empty list returns empty map", func(t *testing.T) {
+		ret := converListToMapByType(nil, resourceTypeGroup)
+		assert.Empty(t, ret)
+	})
 }
 
 func TestUnitNsxt_tryCacheRead(t *testing.T) {

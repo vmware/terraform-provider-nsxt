@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 )
 
@@ -43,6 +44,26 @@ func TestMockResourceNsxtPolicyLBGenericPersistenceProfileCreate(t *testing.T) {
 		err := resourceNsxtPolicyLBGenericPersistenceProfileCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "already exists")
+	})
+
+	t.Run("Create succeeds and re-reads the profile", func(t *testing.T) {
+		displayName := lbGenericPersistDisplayName
+		sv := lbPersistenceProfileStructValue(t, model.LBGenericPersistenceProfile{
+			DisplayName:  &displayName,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBGENERICPERSISTENCEPROFILE,
+		}, model.LBGenericPersistenceProfileBindingType())
+
+		mockSDK.EXPECT().Get(lbGenericPersistID).Return(nil, vapiErrors.NotFound{})
+		mockSDK.EXPECT().Patch(lbGenericPersistID, gomock.Any()).Return(nil)
+		mockSDK.EXPECT().Get(lbGenericPersistID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBGenericPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBGenericPersistData())
+
+		err := resourceNsxtPolicyLBGenericPersistenceProfileCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, lbGenericPersistID, d.Id())
+		assert.Equal(t, lbGenericPersistDisplayName, d.Get("display_name"))
 	})
 }
 
@@ -82,12 +103,33 @@ func TestMockResourceNsxtPolicyLBGenericPersistenceProfileRead(t *testing.T) {
 		err := resourceNsxtPolicyLBGenericPersistenceProfileRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Read success populates schema fields", func(t *testing.T) {
+		displayName := lbGenericPersistDisplayName
+		description := "a generic profile"
+		sv := lbPersistenceProfileStructValue(t, model.LBGenericPersistenceProfile{
+			DisplayName:  &displayName,
+			Description:  &description,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBGENERICPERSISTENCEPROFILE,
+			Timeout:      int64Ptr(300),
+		}, model.LBGenericPersistenceProfileBindingType())
+		mockSDK.EXPECT().Get(lbGenericPersistID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBGenericPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBGenericPersistData())
+		d.SetId(lbGenericPersistID)
+
+		err := resourceNsxtPolicyLBGenericPersistenceProfileRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, lbGenericPersistDisplayName, d.Get("display_name"))
+		assert.Equal(t, description, d.Get("description"))
+	})
 }
 
 func TestMockResourceNsxtPolicyLBGenericPersistenceProfileUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	_, restore := setupLBPersistenceProfileMock(t, ctrl)
+	mockSDK, restore := setupLBPersistenceProfileMock(t, ctrl)
 	defer restore()
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
@@ -96,6 +138,24 @@ func TestMockResourceNsxtPolicyLBGenericPersistenceProfileUpdate(t *testing.T) {
 
 		err := resourceNsxtPolicyLBGenericPersistenceProfileUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Update succeeds and re-reads the profile", func(t *testing.T) {
+		displayName := lbGenericPersistDisplayName
+		sv := lbPersistenceProfileStructValue(t, model.LBGenericPersistenceProfile{
+			DisplayName:  &displayName,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBGENERICPERSISTENCEPROFILE,
+		}, model.LBGenericPersistenceProfileBindingType())
+
+		mockSDK.EXPECT().Update(lbGenericPersistID, gomock.Any()).Return(nil, nil)
+		mockSDK.EXPECT().Get(lbGenericPersistID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBGenericPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBGenericPersistData())
+		d.SetId(lbGenericPersistID)
+
+		err := resourceNsxtPolicyLBGenericPersistenceProfileUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
 	})
 }
 
