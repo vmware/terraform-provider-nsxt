@@ -142,6 +142,134 @@ func TestMockResourceNsxtPolicyRouteControllerBgpNeighborCreate(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "API error")
 	})
+
+	t.Run("Create with valid route_filtering succeeds", func(t *testing.T) {
+		resp := rcBgpNeighborAPIResponse()
+		gomock.InOrder(
+			mockNbrSDK.EXPECT().Patch(routeControllerID, gomock.Any(), gomock.Any()).DoAndReturn(
+				func(_ string, _ string, nbr model.RouteControllerBgpNeighborConfig) error {
+					require.Len(t, nbr.RouteFiltering, 2)
+					assert.Equal(t, "IPV4", *nbr.RouteFiltering[0].AddressFamily)
+					assert.Nil(t, nbr.RouteFiltering[0].MaximumRoutes)
+					assert.Equal(t, "L2VPN_EVPN", *nbr.RouteFiltering[1].AddressFamily)
+					assert.NotNil(t, nbr.RouteFiltering[1].MaximumRoutes)
+					assert.Equal(t, int64(500), *nbr.RouteFiltering[1].MaximumRoutes)
+					return nil
+				}),
+			mockNbrSDK.EXPECT().Get(routeControllerID, gomock.Any()).Return(resp, nil),
+		)
+
+		res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+		data := minimalRCBgpNeighborData()
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"enabled":        true,
+			},
+			map[string]interface{}{
+				"address_family": "L2VPN_EVPN",
+				"enabled":        true,
+				"maximum_routes": 500,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyRouteControllerBgpNeighborCreate(d, m)
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+	})
+
+	t.Run("Create fails when IPV4 route_filtering has maximum_routes", func(t *testing.T) {
+		res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+		data := minimalRCBgpNeighborData()
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"enabled":        true,
+				"maximum_routes": 500,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyRouteControllerBgpNeighborCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "the property 'maximum_routes' is not supported for route_filtering configured with address family IPV4")
+	})
+
+	t.Run("Create fails when IPV4 route_filtering has in_route_filter", func(t *testing.T) {
+		res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+		data := minimalRCBgpNeighborData()
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family":  "IPV4",
+				"enabled":         true,
+				"in_route_filter": "/infra/prefix-lists/test",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyRouteControllerBgpNeighborCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "the property 'in_route_filter' is not supported for route_filtering configured with address family IPV4")
+	})
+
+	t.Run("Create fails when IPV4 route_filtering has out_route_filter", func(t *testing.T) {
+		res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+		data := minimalRCBgpNeighborData()
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family":   "IPV4",
+				"enabled":          true,
+				"out_route_filter": "/infra/prefix-lists/test",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyRouteControllerBgpNeighborCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "the property 'out_route_filter' is not supported for route_filtering configured with address family IPV4")
+	})
+
+	t.Run("Create fails when duplicate address_family configured", func(t *testing.T) {
+		res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+		data := minimalRCBgpNeighborData()
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"enabled":        true,
+			},
+			map[string]interface{}{
+				"address_family": "IPV4",
+				"enabled":        true,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		m := newGoMockProviderClient()
+		err := resourceNsxtPolicyRouteControllerBgpNeighborCreate(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "duplicate address_family 'IPV4' found in route_filtering")
+	})
+}
+
+func TestMockResourceNsxtPolicyRouteControllerBgpNeighborRouteFilteringAddressFamilyValidation(t *testing.T) {
+	res := resourceNsxtPolicyRouteControllerBgpNeighbor()
+	elemSchema := res.Schema["route_filtering"].Elem.(*schema.Resource).Schema
+	afSchema := elemSchema["address_family"]
+
+	for _, validFamily := range []string{"IPV4", "L2VPN_EVPN"} {
+		_, errs := afSchema.ValidateFunc(validFamily, "address_family")
+		assert.Empty(t, errs, "expected %s to be valid", validFamily)
+	}
+
+	for _, invalidFamily := range []string{"IPV6", "INVALID_FAMILY"} {
+		_, errs := afSchema.ValidateFunc(invalidFamily, "address_family")
+		assert.NotEmpty(t, errs, "expected %s to be invalid", invalidFamily)
+	}
 }
 
 func TestMockResourceNsxtPolicyRouteControllerBgpNeighborRead(t *testing.T) {

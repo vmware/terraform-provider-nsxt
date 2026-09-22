@@ -28,6 +28,12 @@ resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
     enabled        = true
   }
 
+  route_filtering {
+    address_family = "L2VPN_EVPN"
+    enabled        = true
+    maximum_routes = 500
+  }
+
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -60,11 +66,11 @@ The following arguments are supported:
     * `interval` - (Optional) Time interval between heartbeat packets in milliseconds. Must be between 50 and 60000. Defaults to `500`.
     * `multiple` - (Optional) Number of times heartbeat packet is missed before BFD declares the neighbor is down. Must be between 2 and 16. Defaults to `3`.
 * `route_filtering` - (Optional) List of address families and route filtering configuration. Maximum 2 entries. The following arguments are supported:
-    * `address_family` - (Required) Address family type. One of `IPV4`, `IPV6`, `L2VPN_EVPN`.
+    * `address_family` - (Required) Address family type. One of `IPV4`, `L2VPN_EVPN`.
     * `enabled` - (Optional) Flag to enable/disable address family. Defaults to `true`.
-    * `in_route_filter` - (Optional) Policy path of prefix-list or route map for IN direction.
-    * `out_route_filter` - (Optional) Policy path of prefix-list or route map for OUT direction.
-    * `maximum_routes` - (Optional) Maximum number of routes for the address family. Must be between 1 and 1000000.
+    * `in_route_filter` - (Optional) Policy path of prefix-list or route map for IN direction. Supported only when `address_family` is `L2VPN_EVPN`.
+    * `out_route_filter` - (Optional) Policy path of prefix-list or route map for OUT direction. Supported only when `address_family` is `L2VPN_EVPN`.
+    * `maximum_routes` - (Optional) Maximum number of routes for the address family. Must be between 1 and 1000000. Supported only when `address_family` is `L2VPN_EVPN`.
 
 ## Attributes Reference
 
