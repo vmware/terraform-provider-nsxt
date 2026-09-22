@@ -224,7 +224,11 @@ func resourceNsxtPolicySegmentPortRead(d *schema.ResourceData, m interface{}) er
 		d.Set("attachment", []map[string]interface{}{})
 	}
 
-	err = nsxtPolicySegmentPortProfilesRead(d, m)
+	if !hasSegmentPortProfiles(d) {
+		return nil
+	}
+
+	err = nsxtPolicySegmentPortConfiguredProfilesRead(d, m)
 	if err != nil {
 		return err
 	}
@@ -291,5 +295,11 @@ func getSegmentPortPathOrIDResourceImporter(d *schema.ResourceData, m interface{
 	}
 
 	d.Set("segment_path", segmentPath)
+	if m != nil {
+		err = nsxtPolicySegmentPortProfilesRead(d, m)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return rd, nil
 }
