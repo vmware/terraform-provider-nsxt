@@ -565,7 +565,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withMultiVRF(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0WithVRFTearDown(),
+				Config: testAccNsxtPolicyTier0WithMultiVRFTearDown(name),
 			},
 		},
 	})
@@ -980,7 +980,6 @@ resource "nsxt_policy_bgp_config" "test" {
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
-  nsx_id            = "vrf-parent"
   display_name      = "parent"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
@@ -1064,7 +1063,6 @@ data "nsxt_policy_edge_node" "EN" {
 }
 
 resource "nsxt_policy_tier0_gateway" "parent" {
-  nsx_id            = "vrf-parent"
   display_name      = "parent"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
@@ -1076,6 +1074,19 @@ resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
   edge_node_path = data.nsxt_policy_edge_node.EN.path
   subnets        = ["4.4.4.12/24"]
 }`
+}
+
+func testAccNsxtPolicyTier0WithMultiVRFTearDown(name string) string {
+	// Keep the parent config identical to the earlier steps: ha_mode and
+	// multi_vrf_inter_sr can't be changed once the gateway is created, and
+	// multi_vrf_inter_sr specifically can't be disabled once enabled.
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "parent" {
+  display_name       = "parent-%s"
+  ha_mode            = "ACTIVE_ACTIVE"
+  edge_cluster_path  = data.nsxt_policy_edge_cluster.EC.path
+  multi_vrf_inter_sr = true
+}`, name)
 }
 
 func testAccNsxtPolicyTier0CreateWithRedistribution(name string) string {
