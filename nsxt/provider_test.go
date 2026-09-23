@@ -17,6 +17,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -43,6 +45,126 @@ func TestProvider(t *testing.T) {
 
 func TestProvider_impl(t *testing.T) {
 	var _ = Provider()
+}
+
+func TestUnitNsxt_configurePolicyConnectorData(t *testing.T) {
+	t.Run("fails when host is missing", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, Provider().Schema, map[string]interface{}{})
+		clients := &nsxtClients{}
+		err := configurePolicyConnectorData(d, clients)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "host must be provided")
+	})
+
+	t.Run("fails when on-demand connection is combined with VMC credentials", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, Provider().Schema, map[string]interface{}{
+			"host":                 "nsx.example.com",
+			"on_demand_connection": true,
+			"vmc_token":            "some-token",
+		})
+		clients := &nsxtClients{}
+		err := configurePolicyConnectorData(d, clients)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "on demand connection")
+	})
+
+	t.Run("fails when username is missing", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, Provider().Schema, map[string]interface{}{
+			"host":                 "nsx.example.com",
+			"on_demand_connection": true,
+		})
+		clients := &nsxtClients{}
+		err := configurePolicyConnectorData(d, clients)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "username must be provided")
+	})
+
+	t.Run("on-demand connection succeeds without contacting NSX", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, Provider().Schema, map[string]interface{}{
+			"host":                 "nsx.example.com",
+			"username":             "admin",
+			"password":             "secret",
+			"on_demand_connection": true,
+			"enforcement_point":    "default",
+		})
+		clients := &nsxtClients{}
+		err := configurePolicyConnectorData(d, clients)
+		require.NoError(t, err)
+		assert.Equal(t, "https://nsx.example.com", clients.Host)
+		assert.Equal(t, "default", clients.PolicyEnforcementPoint)
+		assert.NotNil(t, clients.PolicySecurityContext)
+		assert.NotNil(t, clients.PolicyHTTPClient)
+	})
+
+	t.Run("host prefix is normalized when https:// is missing", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, Provider().Schema, map[string]interface{}{
+			"host":                 "https://nsx.example.com",
+			"username":             "admin",
+			"password":             "secret",
+			"on_demand_connection": true,
+		})
+		clients := &nsxtClients{}
+		err := configurePolicyConnectorData(d, clients)
+		require.NoError(t, err)
+		assert.Equal(t, "https://nsx.example.com", clients.Host)
+	})
+}
+
+func TestUnitNsxt_getPolicyConnectorWithHeaders(t *testing.T) {
+	baseClients := func() nsxtClients {
+		return nsxtClients{
+			Host:             "https://nsx.example.com",
+			PolicyHTTPClient: &http.Client{},
+		}
+	}
+
+	t.Run("standalone flow builds a connector without contacting NSX", func(t *testing.T) {
+		connector := getPolicyConnectorWithHeaders(baseClients(), nil, true, false)
+		require.NotNil(t, connector)
+		assert.Equal(t, "https://nsx.example.com", connector.Address())
+	})
+
+	t.Run("with retry enabled", func(t *testing.T) {
+		c := baseClients()
+		c.CommonConfig.MaxRetries = 3
+		c.CommonConfig.RetryStatusCodes = []int{429, 503}
+		connector := getPolicyConnectorWithHeaders(c, nil, true, true)
+		require.NotNil(t, connector)
+	})
+
+	t.Run("with remote auth and bearer token processors", func(t *testing.T) {
+		c := baseClients()
+		c.CommonConfig.RemoteAuth = true
+		c.CommonConfig.BearerToken = "token123"
+		connector := getPolicyConnectorWithHeaders(c, nil, true, false)
+		require.NotNil(t, connector)
+	})
+
+	t.Run("with custom headers", func(t *testing.T) {
+		c := baseClients()
+		headers := map[string]string{"X-Custom": "value"}
+		connector := getPolicyConnectorWithHeaders(c, &headers, true, false)
+		require.NotNil(t, connector)
+	})
+
+	t.Run("with session cookie headers from NsxtClientConfig", func(t *testing.T) {
+		c := baseClients()
+		c.NsxtClientConfig = &api.Configuration{
+			DefaultHeader: map[string]string{
+				"Cookie":       "session=abc",
+				"X-XSRF-TOKEN": "xsrf-token",
+			},
+		}
+		connector := getPolicyConnectorWithHeaders(c, nil, true, false)
+		require.NotNil(t, connector)
+	})
+
+	t.Run("with security context set", func(t *testing.T) {
+		c := baseClients()
+		c.PolicySecurityContext = core.NewSecurityContextImpl()
+		connector := getPolicyConnectorWithHeaders(c, nil, true, false)
+		require.NotNil(t, connector)
+	})
 }
 
 func testAccPreCheck(t *testing.T) {

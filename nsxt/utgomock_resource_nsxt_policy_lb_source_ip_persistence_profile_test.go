@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 )
 
@@ -43,6 +44,26 @@ func TestMockResourceNsxtPolicyLBSourceIpPersistenceProfileCreate(t *testing.T) 
 		err := resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "already exists")
+	})
+
+	t.Run("Create succeeds and re-reads the profile", func(t *testing.T) {
+		displayName := lbSourceIpDisplayName
+		sv := lbPersistenceProfileStructValue(t, model.LBSourceIpPersistenceProfile{
+			DisplayName:  &displayName,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBSOURCEIPPERSISTENCEPROFILE,
+		}, model.LBSourceIpPersistenceProfileBindingType())
+
+		mockSDK.EXPECT().Get(lbSourceIpID).Return(nil, vapiErrors.NotFound{})
+		mockSDK.EXPECT().Patch(lbSourceIpID, gomock.Any()).Return(nil)
+		mockSDK.EXPECT().Get(lbSourceIpID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBSourceIpPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBSourceIpData())
+
+		err := resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, lbSourceIpID, d.Id())
+		assert.Equal(t, lbSourceIpDisplayName, d.Get("display_name"))
 	})
 }
 
@@ -82,12 +103,34 @@ func TestMockResourceNsxtPolicyLBSourceIpPersistenceProfileRead(t *testing.T) {
 		err := resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Read success populates schema fields", func(t *testing.T) {
+		displayName := lbSourceIpDisplayName
+		description := "a source-ip profile"
+		sv := lbPersistenceProfileStructValue(t, model.LBSourceIpPersistenceProfile{
+			DisplayName:  &displayName,
+			Description:  &description,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBSOURCEIPPERSISTENCEPROFILE,
+			Purge:        strPtr(model.LBSourceIpPersistenceProfile_PURGE_FULL),
+			Timeout:      int64Ptr(300),
+		}, model.LBSourceIpPersistenceProfileBindingType())
+		mockSDK.EXPECT().Get(lbSourceIpID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBSourceIpPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBSourceIpData())
+		d.SetId(lbSourceIpID)
+
+		err := resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, lbSourceIpDisplayName, d.Get("display_name"))
+		assert.Equal(t, description, d.Get("description"))
+	})
 }
 
 func TestMockResourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	_, restore := setupLBPersistenceProfileMock(t, ctrl)
+	mockSDK, restore := setupLBPersistenceProfileMock(t, ctrl)
 	defer restore()
 
 	t.Run("Update fails when ID is empty", func(t *testing.T) {
@@ -96,6 +139,24 @@ func TestMockResourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(t *testing.T) 
 
 		err := resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Update succeeds and re-reads the profile", func(t *testing.T) {
+		displayName := lbSourceIpDisplayName
+		sv := lbPersistenceProfileStructValue(t, model.LBSourceIpPersistenceProfile{
+			DisplayName:  &displayName,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBSOURCEIPPERSISTENCEPROFILE,
+		}, model.LBSourceIpPersistenceProfileBindingType())
+
+		mockSDK.EXPECT().Update(lbSourceIpID, gomock.Any()).Return(nil, nil)
+		mockSDK.EXPECT().Get(lbSourceIpID).Return(sv, nil)
+
+		res := resourceNsxtPolicyLBSourceIpPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBSourceIpData())
+		d.SetId(lbSourceIpID)
+
+		err := resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
 	})
 }
 
