@@ -95,6 +95,18 @@ func TestUnitNsxt_validateGroupConjunctions(t *testing.T) {
 		err := validateGroupConjunctions(conjunctions, sameCriteria)
 		require.NoError(t, err)
 	})
+
+	t.Run("conjunction with insufficient criteria returns error instead of panic", func(t *testing.T) {
+		singleCriteria := []criteriaMeta{
+			{ExpressionType: "condition"},
+		}
+		conjunctions := []interface{}{
+			map[string]interface{}{"operator": model.ConjunctionOperator_CONJUNCTION_OPERATOR_AND},
+		}
+		err := validateGroupConjunctions(conjunctions, singleCriteria)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Missing criteria for conjunction")
+	})
 }
 
 func TestUnitNsxt_validateGroupCriteriaAndConjunctions(t *testing.T) {
@@ -137,6 +149,48 @@ func TestUnitNsxt_validateGroupCriteriaAndConjunctions(t *testing.T) {
 		meta, err := validateGroupCriteriaAndConjunctions(criteriaSets, conjunctions)
 		require.NoError(t, err)
 		require.Len(t, meta, 2)
+	})
+
+	t.Run("too many conjunctions with odd total reports missing trailing criteria", func(t *testing.T) {
+		criteriaSets := []interface{}{
+			map[string]interface{}{
+				"condition": []interface{}{
+					map[string]interface{}{
+						"key":         model.Condition_KEY_TAG,
+						"member_type": model.Condition_MEMBER_TYPE_VIRTUALMACHINE,
+						"operator":    model.Condition_OPERATOR_EQUALS,
+						"value":       "prod",
+					},
+				},
+			},
+		}
+		conjunctions := []interface{}{
+			map[string]interface{}{"operator": model.ConjunctionOperator_CONJUNCTION_OPERATOR_AND},
+			map[string]interface{}{"operator": model.ConjunctionOperator_CONJUNCTION_OPERATOR_AND},
+		}
+		_, err := validateGroupCriteriaAndConjunctions(criteriaSets, conjunctions)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Missing criteria for last conjunction")
+	})
+
+	t.Run("too few conjunctions with odd total reports missing conjunction", func(t *testing.T) {
+		criteriaSets := []interface{}{
+			map[string]interface{}{"condition": []interface{}{map[string]interface{}{"key": "Tag"}}},
+			map[string]interface{}{"condition": []interface{}{map[string]interface{}{"key": "Name"}}},
+			map[string]interface{}{"condition": []interface{}{map[string]interface{}{"key": "OS"}}},
+		}
+		_, err := validateGroupCriteriaAndConjunctions(criteriaSets, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Missing conjunction for criteria")
+	})
+
+	t.Run("conjunctions without criteria reports missing criteria", func(t *testing.T) {
+		conjunctions := []interface{}{
+			map[string]interface{}{"operator": model.ConjunctionOperator_CONJUNCTION_OPERATOR_OR},
+		}
+		_, err := validateGroupCriteriaAndConjunctions(nil, conjunctions)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Missing criteria for last conjunction")
 	})
 }
 
