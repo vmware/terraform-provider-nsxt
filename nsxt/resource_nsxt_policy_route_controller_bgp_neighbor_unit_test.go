@@ -42,7 +42,7 @@ func TestUnitNsxt_rcBgpNeighborToStruct(t *testing.T) {
 		}
 		data["route_filtering"] = []interface{}{
 			map[string]interface{}{
-				"address_family":   "IPV4",
+				"address_family":   "L2VPN_EVPN",
 				"enabled":          true,
 				"in_route_filter":  "/infra/tier-0s/t0/prefix-lists/pl1",
 				"out_route_filter": "/infra/tier-0s/t0/prefix-lists/pl2",
@@ -60,7 +60,7 @@ func TestUnitNsxt_rcBgpNeighborToStruct(t *testing.T) {
 		assert.EqualValues(t, 1000, *obj.Bfd.Interval)
 
 		require.Len(t, obj.RouteFiltering, 1)
-		assert.Equal(t, "IPV4", *obj.RouteFiltering[0].AddressFamily)
+		assert.Equal(t, "L2VPN_EVPN", *obj.RouteFiltering[0].AddressFamily)
 		assert.Equal(t, []string{"/infra/tier-0s/t0/prefix-lists/pl1"}, obj.RouteFiltering[0].InRouteFilters)
 		require.NotNil(t, obj.RouteFiltering[0].MaximumRoutes)
 		assert.EqualValues(t, 100, *obj.RouteFiltering[0].MaximumRoutes)
