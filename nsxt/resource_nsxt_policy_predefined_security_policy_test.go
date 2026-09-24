@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -70,10 +71,27 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic(t *testing.T)
 	})
 }
 
-func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_importBasic_globalManager(t *testing.T) {
-	testAccResourceNsxtPolicyPredefinedSecurityPolicyImportBasic(t, func() {
-		testAccPreCheck(t)
-		testAccOnlyGlobalManager(t)
+// TestAccResourceNsxtPolicyPredefinedSecurityPolicy_globalManagerNotSupported
+// verifies that nsxt_policy_predefined_security_policy is rejected outright
+// on NSX Global Manager. GM does not create category-level Default Security
+// Policies (unlike Gateway Policies, which do have a Default policy per
+// gateway on GM), so this resource has no Default-category policy to attach
+// to and serves no purpose there.
+func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_globalManagerNotSupported(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNsxtPolicyPredefinedSecurityPolicyImportBasicConfig(name),
+				ExpectError: regexp.MustCompile("Global Manager"),
+			},
+		},
 	})
 }
 
