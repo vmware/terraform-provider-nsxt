@@ -198,7 +198,7 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 func resourceNsxtPolicyGatewayPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
 	connector := getPolicyConnector(m)
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
@@ -291,7 +291,7 @@ func resourceNsxtPolicyGatewayPolicyGeneralUpdate(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 
 	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false, withRule)

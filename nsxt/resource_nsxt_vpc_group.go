@@ -29,7 +29,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 
 func resourceNsxtVPCGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	// resourceNsxtPolicyGroupGeneralCreate already marks/invalidates resourceTypeVPCGroup
 	// internally via groupCacheResourceType(false) — no separate call needed here.
@@ -114,7 +114,7 @@ func resourceNsxtVPCGroupRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtVPCGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if isConfigScopedCacheMode(m) {
-		_ = d.Set("tag", initPolicyTagsSet(getPolicyTagsWithProviderManagedDefaults(d, m)))
+		_ = d.Set("tag", initPolicyTagsSetForOutgoingPatch(getPolicyTagsWithProviderManagedDefaults(d, m)))
 	}
 	// resourceNsxtPolicyGroupGeneralUpdate already marks/invalidates resourceTypeVPCGroup
 	// internally via groupCacheResourceType(false) — no separate call needed here.
