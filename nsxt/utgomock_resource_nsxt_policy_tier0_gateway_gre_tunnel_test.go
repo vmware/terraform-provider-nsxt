@@ -261,4 +261,65 @@ func TestMockResourceNsxtPolicyTier0GatewayGRETunnelFromSchema(t *testing.T) {
 		require.NotNil(t, gt.Revision)
 		assert.Equal(t, int64(0), *gt.Revision)
 	})
+
+	t.Run("tunnel_keepalive is converted", func(t *testing.T) {
+		data := minimalGreTunnelData()
+		data["tunnel_keepalive"] = []interface{}{
+			map[string]interface{}{
+				"dead_time_multiplier": 3,
+				"enable_keepalive_ack": true,
+				"enabled":              true,
+				"keepalive_interval":   1000,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		sv, err := tier0GatewayGRETunnelFromSchema(d, nil)
+		require.NoError(t, err)
+
+		gt := structValueToGreTunnel(t, sv)
+		require.NotNil(t, gt.TunnelKeepalive)
+		assert.True(t, *gt.TunnelKeepalive.Enabled)
+		assert.True(t, *gt.TunnelKeepalive.EnableKeepaliveAck)
+		assert.EqualValues(t, 3, *gt.TunnelKeepalive.DeadTimeMultiplier)
+		assert.EqualValues(t, 1000, *gt.TunnelKeepalive.KeepaliveInterval)
+
+		require.Len(t, gt.TunnelAddress, 1)
+		assert.Equal(t, "10.0.0.1", *gt.TunnelAddress[0].SourceAddress)
+		require.Len(t, gt.TunnelAddress[0].TunnelInterfaceSubnet, 1)
+		assert.Equal(t, []string{"10.1.1.1"}, gt.TunnelAddress[0].TunnelInterfaceSubnet[0].IpAddresses)
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyTier0GatewayGRETunnelImport(t *testing.T) {
+	res := resourceNsxtPolicyTier0GatewayGRETunnel()
+
+	t.Run("valid path sets locale_service_path and the tunnel id", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-0s/t0-1/locale-services/default/tunnels/tunnel-1")
+
+		out, err := resourceNsxtPolicyTier0GatewayGRETunnelImport(d, nil)
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "/infra/tier-0s/t0-1/locale-services/default", d.Get("locale_service_path"))
+		assert.Equal(t, "tunnel-1", d.Id())
+	})
+
+	t.Run("path with too few segments is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-0s/t0-1")
+
+		_, err := resourceNsxtPolicyTier0GatewayGRETunnelImport(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "expected GRE Tunnel path")
+	})
+
+	t.Run("path without a tunnels segment is rejected", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-0s/t0-1/locale-services/default/foo/bar")
+
+		_, err := resourceNsxtPolicyTier0GatewayGRETunnelImport(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "expected GRE Tunnel path")
+	})
 }

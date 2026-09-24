@@ -734,3 +734,38 @@ func TestMockResourceNsxtPolicyTier0GatewayIsVrf(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_policyTier0GatewayResourceToInfraStruct(t *testing.T) {
+	res := resourceNsxtPolicyTier0Gateway()
+
+	t.Run("global manager sets IntersiteConfig from schema", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name":  "t0-gw",
+			"failover_mode": "NON_PREEMPTIVE",
+			"ha_mode":       "ACTIVE_STANDBY",
+			"intersite_config": []interface{}{
+				map[string]interface{}{
+					"transit_subnet":      "169.254.32.0/20",
+					"primary_site_path":   "/infra/sites/site1",
+					"fallback_site_paths": []interface{}{"/infra/sites/site2"},
+				},
+			},
+		})
+
+		infra, err := policyTier0GatewayResourceToInfraStruct(utl.SessionContext{ClientType: utl.Global}, d, nil, "t0-1")
+		require.NoError(t, err)
+		require.Len(t, infra.Children, 1)
+	})
+
+	t.Run("local manager leaves locale service handling to the LM branch", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name":  "t0-gw",
+			"failover_mode": "NON_PREEMPTIVE",
+			"ha_mode":       "ACTIVE_STANDBY",
+		})
+
+		infra, err := policyTier0GatewayResourceToInfraStruct(utl.SessionContext{ClientType: utl.Local}, d, nil, "t0-1")
+		require.NoError(t, err)
+		require.Len(t, infra.Children, 1)
+	})
+}

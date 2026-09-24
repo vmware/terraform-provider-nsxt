@@ -17,9 +17,15 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	t0ipsecvpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	t0nestedipsecvpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ipsec_vpn_services"
 	ipsecvpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
+	t1nestedipsecvpnapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/ipsec_vpn_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	t0IpsecMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/ipsec_vpn_services"
+	t0nestedIpsecMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/locale_services/ipsec_vpn_services"
 	t1IpsecMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/ipsec_vpn_services"
+	t1nestedIpsecMocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/locale_services/ipsec_vpn_services"
 )
 
 var (
@@ -178,5 +184,117 @@ func TestMockResourceNsxtPolicyIPSecVpnLocalEndpointDelete(t *testing.T) {
 
 		err := resourceNsxtPolicyIPSecVpnLocalEndpointDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_localEndpointClientAllDispatchPaths(t *testing.T) {
+	t.Run("tier0 flat", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0IpsecMocks.NewMockLocalEndpointsClient(ctrl)
+		wrapper := &t0ipsecvpnapi.IPSecVpnLocalEndpointClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliTier0IpsecVpnLocalEndpointsClient
+		defer func() { cliTier0IpsecVpnLocalEndpointsClient = original }()
+		cliTier0IpsecVpnLocalEndpointsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0ipsecvpnapi.IPSecVpnLocalEndpointClientContext {
+			return wrapper
+		}
+		c := &localEndpointClient{isT0: true, gwID: "t0-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Get("t0-1", "svc-1", "ep-1").Return(ipsecEPAPIResponse(), nil)
+		_, err := c.Get(nil, "ep-1")
+		require.NoError(t, err)
+
+		mockSDK.EXPECT().Patch("t0-1", "svc-1", "ep-1", gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, "ep-1", ipsecEPAPIResponse()))
+
+		mockSDK.EXPECT().Delete("t0-1", "svc-1", "ep-1").Return(nil)
+		require.NoError(t, c.Delete(nil, "ep-1"))
+	})
+
+	t.Run("tier0 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t0nestedIpsecMocks.NewMockLocalEndpointsClient(ctrl)
+		wrapper := &t0nestedipsecvpnapi.IPSecVpnLocalEndpointClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient
+		defer func() { cliTier0LocaleServiceIpsecVpnLocalEndpointsClient = original }()
+		cliTier0LocaleServiceIpsecVpnLocalEndpointsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0nestedipsecvpnapi.IPSecVpnLocalEndpointClientContext {
+			return wrapper
+		}
+		c := &localEndpointClient{isT0: true, gwID: "t0-1", localeServiceID: "ls-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Get("t0-1", "ls-1", "svc-1", "ep-1").Return(ipsecEPAPIResponse(), nil)
+		_, err := c.Get(nil, "ep-1")
+		require.NoError(t, err)
+
+		mockSDK.EXPECT().Patch("t0-1", "ls-1", "svc-1", "ep-1", gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, "ep-1", ipsecEPAPIResponse()))
+
+		mockSDK.EXPECT().Delete("t0-1", "ls-1", "svc-1", "ep-1").Return(nil)
+		require.NoError(t, c.Delete(nil, "ep-1"))
+	})
+
+	t.Run("tier1 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK := t1nestedIpsecMocks.NewMockLocalEndpointsClient(ctrl)
+		wrapper := &t1nestedipsecvpnapi.IPSecVpnLocalEndpointClientContext{Client: mockSDK, ClientType: utl.Local}
+		original := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient
+		defer func() { cliTier1LocaleServiceIpsecVpnLocalEndpointsClient = original }()
+		cliTier1LocaleServiceIpsecVpnLocalEndpointsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1nestedipsecvpnapi.IPSecVpnLocalEndpointClientContext {
+			return wrapper
+		}
+		c := &localEndpointClient{isT0: false, gwID: "t1-1", localeServiceID: "ls-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Get("t1-1", "ls-1", "svc-1", "ep-1").Return(ipsecEPAPIResponse(), nil)
+		_, err := c.Get(nil, "ep-1")
+		require.NoError(t, err)
+
+		mockSDK.EXPECT().Patch("t1-1", "ls-1", "svc-1", "ep-1", gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, "ep-1", ipsecEPAPIResponse()))
+
+		mockSDK.EXPECT().Delete("t1-1", "ls-1", "svc-1", "ep-1").Return(nil)
+		require.NoError(t, c.Delete(nil, "ep-1"))
+	})
+
+	t.Run("tier1 nested locale service with project context is rejected", func(t *testing.T) {
+		c := &localEndpointClient{
+			isT0:            false,
+			gwID:            "t1-1",
+			localeServiceID: "ls-1",
+			serviceID:       "svc-1",
+			sessionContext:  utl.SessionContext{ClientType: utl.Multitenancy, ProjectID: "proj-1"},
+		}
+
+		_, err := c.Get(nil, "ep-1")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+
+		err = c.Patch(nil, "ep-1", ipsecEPAPIResponse())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+
+		err = c.Delete(nil, "ep-1")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+	})
+}
+
+func TestUnitNsxt_getIPSecVpnLocalEndpointSessionContext(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnLocalEndpoint()
+
+	t.Run("non-project path leaves ClientType unchanged", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIPSecEPData())
+		ctx := getIPSecVpnLocalEndpointSessionContext(d, newGoMockProviderClient(), ipsecEPServicePath)
+		assert.EqualValues(t, utl.Local, ctx.ClientType)
+	})
+
+	t.Run("project-scoped path sets Multitenancy client type", func(t *testing.T) {
+		data := minimalIPSecEPData()
+		data["service_path"] = "/orgs/default/projects/proj-1/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		ctx := getIPSecVpnLocalEndpointSessionContext(d, newGoMockProviderClient(), "/orgs/default/projects/proj-1/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1")
+		assert.EqualValues(t, utl.Multitenancy, ctx.ClientType)
+		assert.Equal(t, "proj-1", ctx.ProjectID)
 	})
 }

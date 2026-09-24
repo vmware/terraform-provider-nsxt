@@ -17,8 +17,10 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	cliinfra "github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier0sapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	t0staticmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
 )
 
@@ -225,5 +227,107 @@ func TestUnitNsxt_resourceNsxtPolicyStaticRouteImport(t *testing.T) {
 		_, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "gateway-id")
+	})
+
+	t.Run("legacy gatewayID/routeID format resolves a tier0 gateway", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT0SDK := inframocks.NewMockTier0sClient(ctrl)
+		t0Wrapper := &cliinfra.Tier0ClientContext{Client: mockT0SDK, ClientType: utl.Local}
+		originalT0 := cliTier0sClient
+		defer func() { cliTier0sClient = originalT0 }()
+		cliTier0sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier0ClientContext {
+			return t0Wrapper
+		}
+		mockT0SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier0{Path: &staticRouteGwPath}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(staticRouteGwID + "/" + staticRouteID)
+
+		out, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, staticRouteGwPath, d.Get("gateway_path"))
+		assert.Equal(t, staticRouteID, d.Id())
+	})
+
+	t.Run("legacy gatewayID/routeID format falls back to a tier1 gateway when tier0 is not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT0SDK := inframocks.NewMockTier0sClient(ctrl)
+		mockT1SDK := inframocks.NewMockTier1sClient(ctrl)
+		t0Wrapper := &cliinfra.Tier0ClientContext{Client: mockT0SDK, ClientType: utl.Local}
+		t1Wrapper := &cliinfra.Tier1ClientContext{Client: mockT1SDK, ClientType: utl.Local}
+		originalT0 := cliTier0sClient
+		originalT1 := cliTier1sClient
+		defer func() {
+			cliTier0sClient = originalT0
+			cliTier1sClient = originalT1
+		}()
+		cliTier0sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier0ClientContext {
+			return t0Wrapper
+		}
+		cliTier1sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier1ClientContext {
+			return t1Wrapper
+		}
+		t1Path := "/infra/tier-1s/t1-gw-1"
+		mockT0SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier0{}, vapiErrors.NotFound{})
+		mockT1SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier1{Path: &t1Path}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(staticRouteGwID + "/" + staticRouteID)
+
+		out, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, t1Path, d.Get("gateway_path"))
+	})
+
+	t.Run("legacy gatewayID/routeID format fails when neither tier0 nor tier1 gateway is found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT0SDK := inframocks.NewMockTier0sClient(ctrl)
+		mockT1SDK := inframocks.NewMockTier1sClient(ctrl)
+		t0Wrapper := &cliinfra.Tier0ClientContext{Client: mockT0SDK, ClientType: utl.Local}
+		t1Wrapper := &cliinfra.Tier1ClientContext{Client: mockT1SDK, ClientType: utl.Local}
+		originalT0 := cliTier0sClient
+		originalT1 := cliTier1sClient
+		defer func() {
+			cliTier0sClient = originalT0
+			cliTier1sClient = originalT1
+		}()
+		cliTier0sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier0ClientContext {
+			return t0Wrapper
+		}
+		cliTier1sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier1ClientContext {
+			return t1Wrapper
+		}
+		mockT0SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier0{}, vapiErrors.NotFound{})
+		mockT1SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier1{}, vapiErrors.NotFound{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(staticRouteGwID + "/" + staticRouteID)
+
+		_, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("legacy gatewayID/routeID format propagates a non-not-found tier0 error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockT0SDK := inframocks.NewMockTier0sClient(ctrl)
+		t0Wrapper := &cliinfra.Tier0ClientContext{Client: mockT0SDK, ClientType: utl.Local}
+		originalT0 := cliTier0sClient
+		defer func() { cliTier0sClient = originalT0 }()
+		cliTier0sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier0ClientContext {
+			return t0Wrapper
+		}
+		mockT0SDK.EXPECT().Get(staticRouteGwID).Return(nsxModel.Tier0{}, vapiErrors.InternalServerError{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(staticRouteGwID + "/" + staticRouteID)
+
+		_, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }

@@ -490,6 +490,119 @@ func TestMockResourceNsxtPolicyIPSecVpnSessionTier1Locale(t *testing.T) {
 	})
 }
 
+func TestUnitNsxt_ipsecSessionClientAllDispatchPaths(t *testing.T) {
+	sv := ipsecRouteBasedStructValue(t, ipsecSessionID, "Session")
+
+	t.Run("tier0 flat", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTier0IPSecSessionMock(t, ctrl)
+		defer restore()
+		c := &ipsecSessionClient{isT0: true, gwID: "t0-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Patch("t0-1", "svc-1", ipsecSessionID, gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, ipsecSessionID, sv))
+
+		mockSDK.EXPECT().Delete("t0-1", "svc-1", ipsecSessionID).Return(nil)
+		require.NoError(t, c.Delete(nil, ipsecSessionID))
+	})
+
+	t.Run("tier0 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTier0LocaleIPSecSessionMock(t, ctrl)
+		defer restore()
+		c := &ipsecSessionClient{isT0: true, gwID: "t0-1", localeServiceID: "ls-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Patch("t0-1", "ls-1", "svc-1", ipsecSessionID, gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, ipsecSessionID, sv))
+
+		mockSDK.EXPECT().Delete("t0-1", "ls-1", "svc-1", ipsecSessionID).Return(nil)
+		require.NoError(t, c.Delete(nil, ipsecSessionID))
+	})
+
+	t.Run("tier1 nested locale service", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTier1LocaleIPSecSessionMock(t, ctrl)
+		defer restore()
+		c := &ipsecSessionClient{isT0: false, gwID: "t1-1", localeServiceID: "ls-1", serviceID: "svc-1", sessionContext: utl.SessionContext{ClientType: utl.Local}}
+
+		mockSDK.EXPECT().Patch("t1-1", "ls-1", "svc-1", ipsecSessionID, gomock.Any()).Return(nil)
+		require.NoError(t, c.Patch(nil, ipsecSessionID, sv))
+
+		mockSDK.EXPECT().Delete("t1-1", "ls-1", "svc-1", ipsecSessionID).Return(nil)
+		require.NoError(t, c.Delete(nil, ipsecSessionID))
+	})
+
+	t.Run("tier1 nested locale service with project context is rejected", func(t *testing.T) {
+		c := &ipsecSessionClient{
+			isT0:            false,
+			gwID:            "t1-1",
+			localeServiceID: "ls-1",
+			serviceID:       "svc-1",
+			sessionContext:  utl.SessionContext{ClientType: utl.Multitenancy, ProjectID: "proj-1"},
+		}
+
+		_, err := c.Get(nil, ipsecSessionID)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+
+		err = c.Patch(nil, ipsecSessionID, sv)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+
+		err = c.Delete(nil, ipsecSessionID)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context")
+	})
+}
+
+func TestUnitNsxt_getIPSecVPNRulesFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyIPSecVpnSession()
+
+	t.Run("no rule returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIPSecSessionData())
+		rules := getIPSecVPNRulesFromSchema(d)
+		assert.Nil(t, rules)
+	})
+
+	t.Run("converts sources and destinations, generating an id when absent", func(t *testing.T) {
+		data := minimalIPSecSessionData()
+		data["rule"] = []interface{}{
+			map[string]interface{}{
+				"sources":      []interface{}{"10.0.0.0/24"},
+				"destinations": []interface{}{"10.0.1.0/24"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		rules := getIPSecVPNRulesFromSchema(d)
+		require.Len(t, rules, 1)
+		require.Len(t, rules[0].Sources, 1)
+		assert.Equal(t, "10.0.0.0/24", *rules[0].Sources[0].Subnet)
+		require.Len(t, rules[0].Destinations, 1)
+		assert.Equal(t, "10.0.1.0/24", *rules[0].Destinations[0].Subnet)
+		require.NotNil(t, rules[0].Id)
+		assert.NotEmpty(t, *rules[0].Id)
+	})
+
+	t.Run("preserves an existing nsx_id", func(t *testing.T) {
+		data := minimalIPSecSessionData()
+		data["rule"] = []interface{}{
+			map[string]interface{}{
+				"nsx_id":       "rule-1",
+				"sources":      []interface{}{},
+				"destinations": []interface{}{},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		rules := getIPSecVPNRulesFromSchema(d)
+		require.Len(t, rules, 1)
+		require.NotNil(t, rules[0].Id)
+		assert.Equal(t, "rule-1", *rules[0].Id)
+	})
+}
+
 func TestUnitNsxt_nsxtVpnSessionImporter(t *testing.T) {
 	res := resourceNsxtPolicyIPSecVpnSession()
 
