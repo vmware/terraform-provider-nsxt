@@ -460,7 +460,7 @@ func TestMockResourceNsxtPolicyDomainUpdateSuccess(t *testing.T) {
 }
 
 // Verify that the model conversion from gm_model to local model works correctly.
-func TestDomainModelConversion(t *testing.T) {
+func TestUnitNsxt_domainModelConversion(t *testing.T) {
 	displayName := "test-domain"
 	path := "/infra/domains/test-domain"
 	revision := int64(2)

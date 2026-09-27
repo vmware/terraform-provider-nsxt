@@ -7,13 +7,33 @@
 package nsxt
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+// bareMetalServerStructValue builds the *data.StructValue a policy search result for a
+// BareMetalServer would decode to.
+func bareMetalServerStructValue(t *testing.T, externalID, displayName string) *data.StructValue {
+	t.Helper()
+	resourceType := "BareMetalServer"
+	converter := bindings.NewTypeConverter()
+	val, errs := converter.ConvertToVapi(model.BareMetalServer{
+		ExternalId:   &externalID,
+		DisplayName:  &displayName,
+		ResourceType: &resourceType,
+	}, model.BareMetalServerBindingType())
+	require.Empty(t, errs)
+	return val.(*data.StructValue)
+}
 
 func TestMockDataSourceNsxtPolicyBareMetalServerSchema(t *testing.T) {
 	dataSource := dataSourceNsxtPolicyBareMetalServer()
@@ -90,5 +110,114 @@ func TestMockDataSourceNsxtPolicyBareMetalServerRead(t *testing.T) {
 			// Should not be a version error
 			assert.NotContains(t, err.Error(), "requires NSX version")
 		}
+	})
+
+	t.Run("Read by external_id succeeds", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results:     []*data.StructValue{bareMetalServerStructValue(t, "bms-1", "server-1")},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "bms-1",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "bms-1", d.Id())
+		assert.Equal(t, "server-1", d.Get("display_name"))
+	})
+
+	t.Run("Read by external_id fails when not found", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results: []*data.StructValue{}, ResultCount: i64(0),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "nonexistent",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("Read by display_name single match succeeds", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results:     []*data.StructValue{bareMetalServerStructValue(t, "bms-1", "server-1")},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"display_name": "server-1",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "bms-1", d.Id())
+	})
+
+	t.Run("Read by display_name with multiple matches fails", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results: []*data.StructValue{
+				bareMetalServerStructValue(t, "bms-1", "dup"),
+				bareMetalServerStructValue(t, "bms-2", "dup"),
+			},
+			ResultCount: i64(2),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"display_name": "dup",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Multiple")
+	})
+
+	t.Run("Read by display_name with no matches fails", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results:     []*data.StructValue{bareMetalServerStructValue(t, "bms-1", "server-1")},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"display_name": "nonexistent",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "No bare metal server found")
+	})
+
+	t.Run("Read fails when neither external_id nor display_name is set", func(t *testing.T) {
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "must be specified")
+	})
+
+	t.Run("Read propagates a search error", func(t *testing.T) {
+		stub := &seqQueryListClient{errs: []error{errors.New("boom")}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServer()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "bms-1",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerRead(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }

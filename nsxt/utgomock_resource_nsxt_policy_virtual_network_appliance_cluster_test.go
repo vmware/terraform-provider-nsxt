@@ -338,7 +338,7 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceClusterDelete(t *testing.T
 	})
 }
 
-func TestUnitNsxtPolicyVirtualNetworkApplianceCluster_getVNAClusterAdvancedConfigFromSchema(t *testing.T) {
+func TestUnitNsxt_getVNAClusterAdvancedConfigFromSchema(t *testing.T) {
 	t.Run("nil_returns_nil", func(t *testing.T) {
 		res := resourceNsxtPolicyVirtualNetworkApplianceCluster()
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})

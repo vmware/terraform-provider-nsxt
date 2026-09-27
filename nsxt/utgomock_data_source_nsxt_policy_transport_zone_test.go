@@ -13,7 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gmModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
@@ -21,6 +24,33 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	epmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/sites/enforcement_points"
 )
+
+// newGoMockGlobalManagerProviderClient returns a provider client whose isPolicyGlobalManager(m)
+// reports true, for exercising this (and other) data sources' Global Manager branch.
+func newGoMockGlobalManagerProviderClient() nsxtClients {
+	m := newGoMockProviderClient()
+	m.PolicyGlobalManager = true
+	return m
+}
+
+// gmTransportZoneStructValue builds the *data.StructValue a policy search result for a
+// PolicyTransportZone would decode to, in the shape dataSourceNsxtPolicyTransportZoneRead's
+// Global Manager branch expects (gm_model.PolicyTransportZoneBindingType()).
+func gmTransportZoneStructValue(t *testing.T, id, displayName, parentPath string, isDefault bool, tzType string) *data.StructValue {
+	t.Helper()
+	resourceType := "PolicyTransportZone"
+	converter := bindings.NewTypeConverter()
+	val, errs := converter.ConvertToVapi(gmModel.PolicyTransportZone{
+		Id:           &id,
+		DisplayName:  &displayName,
+		ResourceType: &resourceType,
+		ParentPath:   &parentPath,
+		IsDefault:    &isDefault,
+		TzType:       &tzType,
+	}, gmModel.PolicyTransportZoneBindingType())
+	require.Empty(t, errs)
+	return val.(*data.StructValue)
+}
 
 func setupTransportZoneDataSourceMock(t *testing.T, ctrl *gomock.Controller) (*epmocks.MockTransportZonesClient, func()) {
 	t.Helper()
@@ -142,5 +172,81 @@ func TestMockDataSourceNsxtPolicyTransportZoneRead(t *testing.T) {
 		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "multiple")
+	})
+
+	t.Run("prefix match from list", func(t *testing.T) {
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
+			Results: []nsxModel.PolicyTransportZone{tzAPIResponse()},
+		}, nil)
+
+		ds := dataSourceNsxtPolicyTransportZone()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"display_name": "test-transport",
+		})
+
+		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, tzID, d.Id())
+	})
+
+	t.Run("no match found by name", func(t *testing.T) {
+		mockSDK.EXPECT().List(defaultSite, getPolicyEnforcementPoint(m), nil, nil, &includeFalse, nil, nil, &includeFalse, nil).Return(nsxModel.PolicyTransportZoneListResult{
+			Results: []nsxModel.PolicyTransportZone{tzAPIResponse()},
+		}, nil)
+
+		ds := dataSourceNsxtPolicyTransportZone()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"display_name": "nonexistent",
+		})
+
+		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "was not found")
+	})
+
+	t.Run("site_path set on a local manager is rejected", func(t *testing.T) {
+		ds := dataSourceNsxtPolicyTransportZone()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"site_path": "/infra/sites/site1",
+		})
+
+		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Global Manager")
+	})
+}
+
+func TestMockDataSourceNsxtPolicyTransportZoneReadGlobalManager(t *testing.T) {
+	m := newGoMockGlobalManagerProviderClient()
+
+	t.Run("site_path is required on a global manager", func(t *testing.T) {
+		ds := dataSourceNsxtPolicyTransportZone()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{})
+
+		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "requires site_path")
+	})
+
+	t.Run("Read succeeds via policy search", func(t *testing.T) {
+		sitePath := "/global-infra/sites/site1"
+		stub := &seqQueryListClient{responses: []nsxModel.SearchResponse{{
+			Results:     []*data.StructValue{gmTransportZoneStructValue(t, tzID, tzDisplayName, sitePath+"/enforcement-points/default", true, tzType)},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		ds := dataSourceNsxtPolicyTransportZone()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
+			"site_path":      sitePath,
+			"display_name":   tzDisplayName,
+			"transport_type": tzType,
+		})
+
+		err := dataSourceNsxtPolicyTransportZoneRead(d, m)
+		require.NoError(t, err)
+		assert.Equal(t, tzID, d.Id())
+		assert.True(t, d.Get("is_default").(bool))
+		assert.Equal(t, tzType, d.Get("transport_type"))
 	})
 }

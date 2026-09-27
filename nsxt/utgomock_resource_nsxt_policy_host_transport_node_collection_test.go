@@ -205,3 +205,28 @@ func TestMockResourceNsxtPolicyHostTransportNodeCollectionDelete(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyHostTransportNodeCollectionImporter(t *testing.T) {
+	res := resourceNsxtPolicyHostTransportNodeCollection()
+
+	t.Run("valid path extracts enforcement point, site path, and defaults remove_nsx_on_destroy", func(t *testing.T) {
+		d := res.TestResourceData()
+		d.SetId("/global-infra/sites/site1/enforcement-points/ep1/transport-node-collections/tnc1")
+
+		rd, err := resourceNsxtPolicyHostTransportNodeCollectionImporter(d, nil)
+		require.NoError(t, err)
+		require.Len(t, rd, 1)
+		assert.Equal(t, "ep1", rd[0].Get("enforcement_point"))
+		assert.Equal(t, "/global-infra/sites/site1", rd[0].Get("site_path"))
+		assert.Equal(t, removeOnDestroyDefault, rd[0].Get("remove_nsx_on_destroy"))
+		assert.Equal(t, "tnc1", rd[0].Id())
+	})
+
+	t.Run("path without the transport-node-collections segment fails", func(t *testing.T) {
+		d := res.TestResourceData()
+		d.SetId("/global-infra/sites/site1/enforcement-points/ep1")
+
+		_, err := resourceNsxtPolicyHostTransportNodeCollectionImporter(d, nil)
+		require.Error(t, err)
+	})
+}

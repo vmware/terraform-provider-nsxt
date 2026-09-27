@@ -432,12 +432,6 @@ func TestUnitNsxt_updatePolicyPredefinedSecurityPolicyEmptyDomain(t *testing.T) 
 	})
 }
 
-func newGoMockGlobalManagerProviderClient() nsxtClients {
-	client := newGoMockProviderClient()
-	client.PolicyGlobalManager = true
-	return client
-}
-
 func TestUnitNsxt_predefinedSecurityPolicyDisabledOnGlobalManager(t *testing.T) {
 	res := resourceNsxtPolicyPredefinedSecurityPolicy()
 

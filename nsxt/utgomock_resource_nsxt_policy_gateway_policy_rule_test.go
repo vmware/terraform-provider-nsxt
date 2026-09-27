@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -133,6 +135,48 @@ func TestMockResourceNsxtPolicyGatewayPolicyRuleRead(t *testing.T) {
 
 		err := resourceNsxtPolicyGatewayPolicyRuleRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache hit on the parent policy finds the rule and skips the backend Get", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyGatewayRulePolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGwRuleData())
+		d.SetId(gwRuleID)
+
+		converter := bindings.NewTypeConverter()
+		val, errs := converter.ConvertToVapi(nsxModel.GatewayPolicy{
+			Id:    &gwRulePolicyID,
+			Rules: []nsxModel.Rule{gwRuleAPIResponse()},
+		}, nsxModel.GatewayPolicyBindingType())
+		require.Empty(t, errs)
+
+		query := getCacheQueryKey(resourceTypeGatewayPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeGatewayPolicy)
+		tc.data[query] = map[string]*data.StructValue{gwRulePolicyPath: val.(*data.StructValue)}
+		defer delete(gcache.byTyp, resourceTypeGatewayPolicy)
+
+		// No mockSDK.EXPECT().Get(...): the cache hit must short-circuit before the backend call.
+		err := resourceNsxtPolicyGatewayPolicyRuleRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, gwRuleDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to the backend Get", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyGatewayRulePolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGwRuleData())
+		d.SetId(gwRuleID)
+
+		query := getCacheQueryKey(resourceTypeGatewayPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeGatewayPolicy)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeGatewayPolicy)
+
+		mockSDK.EXPECT().Get(gwRuleDomain, gwRulePolicyID, gwRuleID).Return(gwRuleAPIResponse(), nil)
+
+		err := resourceNsxtPolicyGatewayPolicyRuleRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, gwRuleDisplayName, d.Get("display_name"))
 	})
 }
 

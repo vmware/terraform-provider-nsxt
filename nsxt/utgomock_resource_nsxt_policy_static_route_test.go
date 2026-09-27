@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -149,6 +150,32 @@ func TestMockResourceNsxtPolicyStaticRouteRead(t *testing.T) {
 
 		err := resourceNsxtPolicyStaticRouteRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyStaticRoute()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticRouteData())
+		d.SetId(staticRouteID)
+
+		query := getCacheQueryKey(resourceTypeStaticRoutes, d, mc)
+		tc := gcache.getTypeCache(resourceTypeStaticRoutes)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeStaticRoutes)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(staticRouteGwID, staticRouteID).Return(staticRouteAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(staticRouteGwID, staticRouteID, gomock.Any()).
+				DoAndReturn(func(_, _ string, patched nsxModel.StaticRoutes) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyStaticRouteRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, staticRouteDisplayName, d.Get("display_name"))
 	})
 }
 

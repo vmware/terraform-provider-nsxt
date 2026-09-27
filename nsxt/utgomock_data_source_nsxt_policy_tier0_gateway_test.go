@@ -92,3 +92,80 @@ func TestUnitNsxt_dataSourceNsxtPolicyTier0GatewayRead(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_getPolicyTier0GatewayLocaleServiceEntry(t *testing.T) {
+
+	t.Run("falls back to List and returns the entry with an edge cluster path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier0DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		edgeClusterPath := "/infra/sites/default/enforcement-points/default/edge-clusters/cl1"
+		count := int64(2)
+		mockLS.EXPECT().Get("t0-1", defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, errors.New("not found"))
+		mockLS.EXPECT().List("t0-1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nsxModel.LocaleServicesListResult{
+				ResultCount: &count,
+				Results: []nsxModel.LocaleServices{
+					{},
+					{EdgeClusterPath: &edgeClusterPath},
+				},
+			}, nil)
+
+		entry, err := getPolicyTier0GatewayLocaleServiceEntry(utl.SessionContext{ClientType: utl.Local}, "t0-1", nil)
+		require.NoError(t, err)
+		require.NotNil(t, entry)
+		assert.Equal(t, edgeClusterPath, *entry.EdgeClusterPath)
+	})
+
+	t.Run("falls back to List and returns any entry when none has an edge cluster path", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier0DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		count := int64(1)
+		mockLS.EXPECT().Get("t0-1", defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, errors.New("not found"))
+		mockLS.EXPECT().List("t0-1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nsxModel.LocaleServicesListResult{
+				ResultCount: &count,
+				Results:     []nsxModel.LocaleServices{{}},
+			}, nil)
+
+		entry, err := getPolicyTier0GatewayLocaleServiceEntry(utl.SessionContext{ClientType: utl.Local}, "t0-1", nil)
+		require.NoError(t, err)
+		require.NotNil(t, entry)
+		assert.Nil(t, entry.EdgeClusterPath)
+	})
+
+	t.Run("returns nil when there are no locale services at all", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier0DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		count := int64(0)
+		mockLS.EXPECT().Get("t0-1", defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, errors.New("not found"))
+		mockLS.EXPECT().List("t0-1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nsxModel.LocaleServicesListResult{ResultCount: &count}, nil)
+
+		entry, err := getPolicyTier0GatewayLocaleServiceEntry(utl.SessionContext{ClientType: utl.Local}, "t0-1", nil)
+		require.NoError(t, err)
+		assert.Nil(t, entry)
+	})
+
+	t.Run("propagates a List error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier0DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		mockLS.EXPECT().Get("t0-1", defaultPolicyLocaleServiceID).Return(nsxModel.LocaleServices{}, errors.New("not found"))
+		mockLS.EXPECT().List("t0-1", (*string)(nil), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(nsxModel.LocaleServicesListResult{}, errors.New("list boom"))
+
+		_, err := getPolicyTier0GatewayLocaleServiceEntry(utl.SessionContext{ClientType: utl.Local}, "t0-1", nil)
+		require.Error(t, err)
+	})
+}

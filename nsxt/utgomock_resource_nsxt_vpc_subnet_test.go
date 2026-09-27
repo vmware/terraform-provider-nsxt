@@ -149,7 +149,7 @@ func TestMockResourceNsxtVpcSubnetRead(t *testing.T) {
 	})
 }
 
-func TestSuppressDhcpServerAddresses(t *testing.T) {
+func TestUnitNsxt_suppressDhcpServerAddresses(t *testing.T) {
 	res := resourceNsxtVpcSubnet()
 
 	t.Run("IPv4 address with DHCP deactivated is suppressed", func(t *testing.T) {
@@ -505,7 +505,7 @@ func TestUnitNsxt_validateDhcpConfig(t *testing.T) {
 	})
 }
 
-func TestValidateSubnetDhcpv6Config(t *testing.T) {
+func TestUnitNsxt_validateSubnetDhcpv6Config(t *testing.T) {
 	res := resourceNsxtVpcSubnet()
 
 	t.Run("no subnet_dhcpv6_config is allowed", func(t *testing.T) {

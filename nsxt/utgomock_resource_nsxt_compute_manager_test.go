@@ -297,3 +297,105 @@ func TestMockResourceNsxtComputeManagerDelete(t *testing.T) {
 		assert.Contains(t, err.Error(), "delete API error")
 	})
 }
+
+func TestUnitNsxt_getCredentialData(t *testing.T) {
+	t.Run("returns the populated credential block", func(t *testing.T) {
+		data := map[string]interface{}{
+			"username_password_login": []interface{}{
+				map[string]interface{}{"username": cmUsername, "password": cmPassword, "thumbprint": cmThumbprint},
+			},
+		}
+		credType, cred := getCredentialData(data)
+		assert.Equal(t, "username_password_login", credType)
+		assert.Equal(t, cmUsername, cred["username"])
+	})
+
+	t.Run("returns empty when no credential block is set", func(t *testing.T) {
+		credType, cred := getCredentialData(map[string]interface{}{})
+		assert.Equal(t, "", credType)
+		assert.Nil(t, cred)
+	})
+}
+
+func TestUnitNsxt_getCredentialValues(t *testing.T) {
+	res := resourceNsxtComputeManager()
+
+	t.Run("username_password_login is converted", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalComputeManagerData())
+
+		sv, err := getCredentialValues(d)
+		require.NoError(t, err)
+		require.NotNil(t, sv)
+
+		converter := bindings.NewTypeConverter()
+		golang, errs := converter.ConvertToGolang(sv, nsxModel.UsernamePasswordLoginCredentialBindingType())
+		require.Empty(t, errs)
+		cred := golang.(nsxModel.UsernamePasswordLoginCredential)
+		assert.Equal(t, cmUsername, *cred.Username)
+		assert.Equal(t, cmPassword, *cred.Password)
+	})
+
+	t.Run("saml_login is converted", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"credential": []interface{}{
+				map[string]interface{}{
+					"saml_login": []interface{}{
+						map[string]interface{}{"token": "tok-1", "thumbprint": cmThumbprint},
+					},
+				},
+			},
+		})
+
+		sv, err := getCredentialValues(d)
+		require.NoError(t, err)
+
+		converter := bindings.NewTypeConverter()
+		golang, errs := converter.ConvertToGolang(sv, nsxModel.SamlTokenLoginCredentialBindingType())
+		require.Empty(t, errs)
+		cred := golang.(nsxModel.SamlTokenLoginCredential)
+		assert.Equal(t, "tok-1", *cred.Token)
+	})
+
+	t.Run("no credential entries returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		sv, err := getCredentialValues(d)
+		require.NoError(t, err)
+		assert.Nil(t, sv)
+	})
+}
+
+func TestUnitNsxt_setCredentialValuesInSchema(t *testing.T) {
+	res := resourceNsxtComputeManager()
+
+	t.Run("username_password_login round-trips into schema", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		require.NoError(t, setCredentialValuesInSchema(d, usernamePasswordCredentialStructValue()))
+
+		cred := d.Get("credential").([]interface{})
+		require.Len(t, cred, 1)
+		upl := cred[0].(map[string]interface{})["username_password_login"].([]interface{})
+		require.Len(t, upl, 1)
+		assert.Equal(t, cmUsername, upl[0].(map[string]interface{})["username"])
+	})
+}
+
+func TestUnitNsxt_getExtensionCertificate(t *testing.T) {
+	res := resourceNsxtComputeManager()
+
+	t.Run("returns the configured certificate", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"extension_certificate": []interface{}{
+				map[string]interface{}{"pem_encoded": "pem-data", "private_key": "key-data"},
+			},
+		})
+		cert := getExtensionCertificate(d)
+		require.NotNil(t, cert)
+		assert.Equal(t, "pem-data", *cert.PemEncoded)
+		assert.Equal(t, "key-data", *cert.PrivateKey)
+	})
+
+	t.Run("nil when not configured", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		assert.Nil(t, getExtensionCertificate(d))
+	})
+}

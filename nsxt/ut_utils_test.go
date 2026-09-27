@@ -42,3 +42,27 @@ func constructMockProviderClient() nsxtClients {
 
 	return nsxtClient
 }
+
+// newGoMockProviderClientCacheEnabled returns a provider client with config_scope caching
+// turned on and a non-empty contextID (so getProviderManagedDefaultTags returns a tag to
+// reconcile), for exercising a resource Read's isCacheEnabledForRead/CacheAwareResourceRead
+// branch - in particular its patchFunc closure, which config_scope mode only invokes when
+// the object read back is missing the provider-managed tag for this contextID.
+//
+// Pair this with a cache-miss: precompute the resource's own cache bucket key via
+// getCacheQueryKey(resourceType, d, m) after building d, then before calling the resource's
+// Read function do:
+//
+//	tc := gcache.getTypeCache(resourceType)
+//	tc.data[query] = map[string]*data.StructValue{}   // present bucket, no entry: forces a miss without a live search
+//	defer delete(gcache.byTyp, resourceType)
+//
+// (See TestUnitNsxt_cacheAwareResourceRead / TestUnitNsxt_invalidateCacheForResourceType in
+// utgomock_cache_test.go for the same pattern used against the generic cache functions
+// directly.)
+func newGoMockProviderClientCacheEnabled() nsxtClients {
+	m := newGoMockProviderClient()
+	m.CommonConfig.CacheMode = "config_scope"
+	m.CommonConfig.contextID = "ut-run-1"
+	return m
+}

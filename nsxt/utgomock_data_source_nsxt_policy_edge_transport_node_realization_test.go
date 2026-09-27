@@ -170,7 +170,7 @@ func TestMockDataSourceNsxtPolicyEdgeTransportNodeRealizationRead(t *testing.T) 
 	})
 }
 
-func TestUnitGetEdgeTnRealizationFailureMessage(t *testing.T) {
+func TestUnitNsxt_getEdgeTnRealizationFailureMessage(t *testing.T) {
 	t.Run("nil state returns empty", func(t *testing.T) {
 		assert.Equal(t, "", getEdgeTnRealizationFailureMessage(nil))
 	})
