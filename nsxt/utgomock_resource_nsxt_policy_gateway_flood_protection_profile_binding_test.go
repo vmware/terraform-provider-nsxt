@@ -18,8 +18,14 @@ import (
 	"go.uber.org/mock/gomock"
 
 	t0fpapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
+	t0lsfpapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services"
+	t1fpapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	t1lsfpapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	t0fpmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
+	t0lsfpmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s/locale_services"
+	t1fpmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
+	t1lsfpmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/locale_services"
 )
 
 var (
@@ -191,6 +197,81 @@ func TestMockResourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(t *tes
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalFppBindingData())
 
 		err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyGatewayFloodProtectionProfileBindingOtherParents(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockT0LS := t0lsfpmocks.NewMockFloodProtectionProfileBindingsClient(ctrl)
+	mockT1 := t1fpmocks.NewMockFloodProtectionProfileBindingsClient(ctrl)
+	mockT1LS := t1lsfpmocks.NewMockFloodProtectionProfileBindingsClient(ctrl)
+
+	origT0LS := cliT0LocaleServicesFloodProtectionProfileBindingsClient
+	origT1 := cliTier1FloodProtectionProfileBindingsClient
+	origT1LS := cliT1LocaleServicesFloodProtectionProfileBindingsClient
+	defer func() {
+		cliT0LocaleServicesFloodProtectionProfileBindingsClient = origT0LS
+		cliTier1FloodProtectionProfileBindingsClient = origT1
+		cliT1LocaleServicesFloodProtectionProfileBindingsClient = origT1LS
+	}()
+	cliT0LocaleServicesFloodProtectionProfileBindingsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t0lsfpapi.FloodProtectionProfileBindingMapClientContext {
+		return &t0lsfpapi.FloodProtectionProfileBindingMapClientContext{Client: mockT0LS, ClientType: utl.Local}
+	}
+	cliTier1FloodProtectionProfileBindingsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1fpapi.FloodProtectionProfileBindingMapClientContext {
+		return &t1fpapi.FloodProtectionProfileBindingMapClientContext{Client: mockT1, ClientType: utl.Local}
+	}
+	cliT1LocaleServicesFloodProtectionProfileBindingsClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *t1lsfpapi.FloodProtectionProfileBindingMapClientContext {
+		return &t1lsfpapi.FloodProtectionProfileBindingMapClientContext{Client: mockT1LS, ClientType: utl.Local}
+	}
+
+	res := resourceNsxtPolicyGatewayFloodProtectionProfileBinding()
+	notFound := vapiErrors.NotFound{}
+
+	run := func(t *testing.T, parentPath string) {
+		data := minimalFppBindingData()
+		data["parent_path"] = parentPath
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		require.NoError(t, resourceNsxtPolicyGatewayFloodProtectionProfileBindingCreate(d, newGoMockProviderClient()))
+		assert.Equal(t, fppBindingID, d.Id())
+		require.NoError(t, resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d, newGoMockProviderClient()))
+	}
+
+	t.Run("Tier0 locale service parent", func(t *testing.T) {
+		gomock.InOrder(
+			mockT0LS.EXPECT().Get("t0", "ls", fppBindingID).Return(nsxModel.FloodProtectionProfileBindingMap{}, notFound),
+			mockT0LS.EXPECT().Patch("t0", "ls", fppBindingID, gomock.Any()).Return(nil),
+			mockT0LS.EXPECT().Get("t0", "ls", fppBindingID).Return(fppBindingAPIResponse(), nil),
+			mockT0LS.EXPECT().Delete("t0", "ls", fppBindingID).Return(nil),
+		)
+		run(t, "/infra/tier-0s/t0/locale-services/ls")
+	})
+
+	t.Run("Tier1 parent", func(t *testing.T) {
+		gomock.InOrder(
+			mockT1.EXPECT().Get("t1", fppBindingID).Return(nsxModel.FloodProtectionProfileBindingMap{}, notFound),
+			mockT1.EXPECT().Patch("t1", fppBindingID, gomock.Any()).Return(nil),
+			mockT1.EXPECT().Get("t1", fppBindingID).Return(fppBindingAPIResponse(), nil),
+			mockT1.EXPECT().Delete("t1", fppBindingID).Return(nil),
+		)
+		run(t, "/infra/tier-1s/t1")
+	})
+
+	t.Run("Tier1 locale service parent", func(t *testing.T) {
+		gomock.InOrder(
+			mockT1LS.EXPECT().Get("t1", "ls", fppBindingID).Return(nsxModel.FloodProtectionProfileBindingMap{}, notFound),
+			mockT1LS.EXPECT().Patch("t1", "ls", fppBindingID, gomock.Any()).Return(nil),
+			mockT1LS.EXPECT().Get("t1", "ls", fppBindingID).Return(fppBindingAPIResponse(), nil),
+			mockT1LS.EXPECT().Delete("t1", "ls", fppBindingID).Return(nil),
+		)
+		run(t, "/infra/tier-1s/t1/locale-services/ls")
+	})
+
+	t.Run("invalid parent path fails", func(t *testing.T) {
+		_, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(utl.SessionContext{ClientType: utl.Local}, nil, "/infra/segments/s1", fppBindingID)
 		require.Error(t, err)
 	})
 }

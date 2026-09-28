@@ -414,3 +414,55 @@ func TestMockResourceNsxtPolicySegmentPortProfileBindingsDeleteSuccess(t *testin
 		assert.Contains(t, err.Error(), "Error deleting the security profile")
 	})
 }
+
+func TestMockResourceNsxtPolicySegmentPortProfileBindingsImporter(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupSegmentPortProfileBindingsMocks(t, ctrl)
+
+	res := resourceNsxtPolicySegmentPortProfileBindings()
+
+	t.Run("valid segment port path imports and reads bindings", func(t *testing.T) {
+		m.ports.EXPECT().Get(segPortBindingsSegmentID, segPortBindingsPortID).Return(model.SegmentPort{}, nil).AnyTimes()
+		expectEmptyProfileBindingLists(m)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(segPortBindingsPortPath)
+
+		out, err := resourceNsxtPolicySegmentPortProfileBindingsImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, segPortBindingsPortID, d.Id())
+		assert.Equal(t, segPortBindingsPortPath, d.Get("segment_port_path"))
+	})
+
+	t.Run("segment port lookup failure is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		m := setupSegmentPortProfileBindingsMocks(t, ctrl)
+		m.ports.EXPECT().Get(segPortBindingsSegmentID, segPortBindingsPortID).Return(model.SegmentPort{}, vapiErrors.NotFound{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(segPortBindingsPortPath)
+
+		_, err := resourceNsxtPolicySegmentPortProfileBindingsImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to retrieve segment port")
+	})
+
+	t.Run("path without a ports segment fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(segPortBindingsSegmentPath)
+
+		_, err := resourceNsxtPolicySegmentPortProfileBindingsImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("trailing slash leaves no port ID", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(segPortBindingsPortPath + "/")
+
+		_, err := resourceNsxtPolicySegmentPortProfileBindingsImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
