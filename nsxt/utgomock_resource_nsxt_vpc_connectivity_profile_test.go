@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -164,6 +165,37 @@ func TestMockResourceNsxtVpcConnectivityProfileRead(t *testing.T) {
 		err := resourceNsxtVpcConnectivityProfileRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupCpMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVpcConnectivityProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalCpData())
+		d.SetId(cpID)
+
+		query := getCacheQueryKey(resourceTypeVpcConnectivityProfile, d, mc)
+		tc := gcache.getTypeCache(resourceTypeVpcConnectivityProfile)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeVpcConnectivityProfile)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), cpID).Return(cpAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), cpID, gomock.Any()).
+				DoAndReturn(func(_, _, _ string, patched nsxModel.VpcConnectivityProfile) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtVpcConnectivityProfileRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, cpDisplayName, d.Get("display_name"))
 	})
 }
 

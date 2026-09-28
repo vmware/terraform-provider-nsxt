@@ -24,8 +24,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	infraapi "github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	sitemocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	nsxmocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx"
 )
 
@@ -364,5 +368,43 @@ func TestMockResourceNsxtManagerClusterUpdate(t *testing.T) {
 
 		err := resourceNsxtManagerClusterUpdate(d, m)
 		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_getNodeConnectivityStateConf(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSitesSDK := sitemocks.NewMockSitesClient(ctrl)
+	siteWrapper := &infraapi.SiteClientContext{
+		Client:     mockSitesSDK,
+		ClientType: utl.Local,
+	}
+	original := cliSitesClient
+	defer func() { cliSitesClient = original }()
+	cliSitesClient = func(_ utl.SessionContext, _ client.Connector) *infraapi.SiteClientContext {
+		return siteWrapper
+	}
+
+	t.Run("Refresh reports success once the site endpoint responds", func(t *testing.T) {
+		mockSitesSDK.EXPECT().Get("default").Return(policyModel.Site{}, nil)
+
+		conf := getNodeConnectivityStateConf(nil, 0, 0, 0)
+		require.NotNil(t, conf)
+
+		_, state, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "success", state)
+	})
+
+	t.Run("Refresh reports not-yet while the endpoint is unreachable", func(t *testing.T) {
+		mockSitesSDK.EXPECT().Get("default").Return(policyModel.Site{}, errors.New("connection refused"))
+
+		conf := getNodeConnectivityStateConf(nil, 0, 0, 0)
+		require.NotNil(t, conf)
+
+		_, state, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "notyet", state)
 	})
 }

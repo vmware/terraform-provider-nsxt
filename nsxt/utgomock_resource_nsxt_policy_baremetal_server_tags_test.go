@@ -242,6 +242,42 @@ func TestMockResourceNsxtPolicyBareMetalServerTagsRead(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtPolicyBareMetalServerTagsUpdate(t *testing.T) {
+	util.NsxVersion = "9.0.0"
+	defer func() { util.NsxVersion = "" }()
+
+	externalID := "71be0142-2ed1-1d53-9c60-5564cf4b7e2e"
+	res := resourceNsxtPolicyBareMetalServerTags()
+
+	t.Run("Update delegates to Create", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restoreCli := setupBareMetalServerTagsMock(ctrl)
+		defer restoreCli()
+
+		serverSV := bareMetalServerToStructValue(t, nsxModel.BareMetalServer{ExternalId: &externalID})
+		stub := &seqQueryListClient{responses: []nsxModel.SearchResponse{
+			{Results: []*data.StructValue{serverSV}, ResultCount: i64(1)},
+			{Results: []*data.StructValue{serverSV}, ResultCount: i64(1)},
+		}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		mockSDK.EXPECT().Create(gomock.Any()).Return(nsxModel.BareMetalServerTagList{}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"external_id": externalID,
+			"tag": []interface{}{map[string]interface{}{
+				"scope": "env",
+				"tag":   "prod",
+			}},
+		})
+		d.SetId(externalID)
+
+		err := resourceNsxtPolicyBareMetalServerTagsUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
 func TestMockResourceNsxtPolicyBareMetalServerTagsDelete(t *testing.T) {
 	util.NsxVersion = "9.0.0"
 	defer func() { util.NsxVersion = "" }()

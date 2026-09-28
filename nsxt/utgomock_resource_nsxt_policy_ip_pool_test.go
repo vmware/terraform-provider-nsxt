@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -131,6 +132,32 @@ func TestMockResourceNsxtPolicyIPPoolRead(t *testing.T) {
 
 		err := resourceNsxtPolicyIPPoolRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyIPPool()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalIPPoolData())
+		d.SetId(ipPoolID)
+
+		query := getCacheQueryKey(resourceTypeIpAddressPool, d, mc)
+		tc := gcache.getTypeCache(resourceTypeIpAddressPool)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeIpAddressPool)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(ipPoolID).Return(ipPoolAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(ipPoolID, gomock.Any()).
+				DoAndReturn(func(_ string, patched nsxModel.IpAddressPool) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyIPPoolRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, ipPoolDisplayName, d.Get("display_name"))
 	})
 }
 

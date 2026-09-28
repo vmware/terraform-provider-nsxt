@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -129,6 +130,32 @@ func TestMockResourceNsxtPolicyLBPoolRead(t *testing.T) {
 		err := resourceNsxtPolicyLBPoolRead(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining LBPool ID")
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBPool()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(lbPoolID)
+
+		query := getCacheQueryKey(resourceTypeLBPool, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBPool)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBPool)
+
+		gomock.InOrder(
+			mockPoolSDK.EXPECT().Get(lbPoolID).Return(minimalLBPoolModel(), nil),
+			mockPoolSDK.EXPECT().Patch(lbPoolID, gomock.Any()).
+				DoAndReturn(func(_ string, patched model.LBPool) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBPoolRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, lbPoolDisplayName, d.Get("display_name"))
 	})
 }
 

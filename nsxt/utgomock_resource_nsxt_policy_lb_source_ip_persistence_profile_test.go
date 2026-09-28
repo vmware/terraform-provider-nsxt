@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 )
@@ -124,6 +126,43 @@ func TestMockResourceNsxtPolicyLBSourceIpPersistenceProfileRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, lbSourceIpDisplayName, d.Get("display_name"))
 		assert.Equal(t, description, d.Get("description"))
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBSourceIpPersistenceProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBSourceIpData())
+		d.SetId(lbSourceIpID)
+
+		query := getCacheQueryKey(resourceTypeLBSourceIpPersistenceProfile, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBSourceIpPersistenceProfile)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBSourceIpPersistenceProfile)
+
+		sv := lbPersistenceProfileStructValue(t, model.LBSourceIpPersistenceProfile{
+			DisplayName:  &lbSourceIpDisplayName,
+			ResourceType: model.LBPersistenceProfile_RESOURCE_TYPE_LBSOURCEIPPERSISTENCEPROFILE,
+			Purge:        strPtr(model.LBSourceIpPersistenceProfile_PURGE_FULL),
+			Timeout:      int64Ptr(300),
+		}, model.LBSourceIpPersistenceProfileBindingType())
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(lbSourceIpID).Return(sv, nil),
+			mockSDK.EXPECT().Patch(lbSourceIpID, gomock.Any()).
+				DoAndReturn(func(_ string, patchedSv *data.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(patchedSv, model.LBSourceIpPersistenceProfileBindingType())
+					require.Empty(t, errs)
+					patched := dv.(model.LBSourceIpPersistenceProfile)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, lbSourceIpDisplayName, d.Get("display_name"))
 	})
 }
 

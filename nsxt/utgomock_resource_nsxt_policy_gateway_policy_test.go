@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -120,7 +121,7 @@ func TestMockResourceNsxtPolicyGatewayPolicyCreate(t *testing.T) {
 func TestMockResourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockSDK, _, restore := setupGwPolicyMock(t, ctrl)
+	mockSDK, mockInfra, restore := setupGwPolicyMock(t, ctrl)
 	defer restore()
 
 	t.Run("Read success", func(t *testing.T) {
@@ -154,6 +155,27 @@ func TestMockResourceNsxtPolicyGatewayPolicyRead(t *testing.T) {
 
 		err := resourceNsxtPolicyGatewayPolicyRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyGatewayPolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGwPolicyData())
+		d.SetId(gwPolicyID)
+
+		query := getCacheQueryKey(resourceTypeGatewayPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeGatewayPolicy)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeGatewayPolicy)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gwPolicyDomain, gwPolicyID).Return(gwPolicyAPIResponse(), nil),
+			mockInfra.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+		)
+
+		err := resourceNsxtPolicyGatewayPolicyRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, gwPolicyDisplayName, d.Get("display_name"))
 	})
 }
 

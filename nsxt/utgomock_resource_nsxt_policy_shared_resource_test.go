@@ -179,3 +179,26 @@ func TestMockResourceNsxtPolicySharedResourceDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicySharedResourceImporter(t *testing.T) {
+	res := resourceNsxtPolicySharedResource()
+
+	t.Run("valid path sets share_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(sharedResPath)
+
+		out, err := resourceNsxtPolicySharedResourceImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, sharedResID, d.Id())
+		assert.Equal(t, sharedResSharePath, d.Get("share_path"))
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := resourceNsxtPolicySharedResourceImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}

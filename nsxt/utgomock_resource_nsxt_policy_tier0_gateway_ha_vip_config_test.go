@@ -209,3 +209,46 @@ func TestMockResourceNsxtPolicyTier0GatewayHAVipConfigDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockResourceNsxtPolicyTier0GatewayHAVipConfigImport(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupHAVipMock(t, ctrl)
+	defer restore()
+
+	res := resourceNsxtPolicyTier0GatewayHAVipConfig()
+
+	t.Run("valid <gateway-id>/<locale-service-id> sets ids", func(t *testing.T) {
+		obj := nsxModel.LocaleServices{HaVipConfigs: []nsxModel.Tier0HaVipConfig{{}}}
+		mockSDK.EXPECT().Get(haVipTier0ID, haVipLocaleServiceID).Return(obj, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(haVipTier0ID + "/" + haVipLocaleServiceID)
+
+		out, err := resourceNsxtPolicyTier0GatewayHAVipConfigImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, haVipTier0ID, d.Get("tier0_id"))
+		assert.Equal(t, haVipLocaleServiceID, d.Get("locale_service_id"))
+		assert.NotEmpty(t, d.Id())
+	})
+
+	t.Run("malformed id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("no-slash-here")
+
+		_, err := resourceNsxtPolicyTier0GatewayHAVipConfigImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("locale service with no HA VIP config returns no resources and no error", func(t *testing.T) {
+		mockSDK.EXPECT().Get(haVipTier0ID, haVipLocaleServiceID).Return(nsxModel.LocaleServices{}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(haVipTier0ID + "/" + haVipLocaleServiceID)
+
+		out, err := resourceNsxtPolicyTier0GatewayHAVipConfigImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Nil(t, out)
+	})
+}

@@ -365,6 +365,88 @@ func TestUnitNsxt_buildGroupExpressionData(t *testing.T) {
 	assert.Len(t, parsedConjunctions, 1)
 }
 
+func TestUnitNsxt_buildGroupExpressionData_nested(t *testing.T) {
+	criteria := []criteriaMeta{
+		{
+			ExpressionType: "condition",
+			IsNested:       true,
+			criteriaBlocks: []interface{}{
+				map[string]interface{}{
+					"key": model.Condition_KEY_TAG, "member_type": model.Condition_MEMBER_TYPE_VIRTUALMACHINE,
+					"operator": model.Condition_OPERATOR_EQUALS, "value": "v1",
+				},
+				map[string]interface{}{
+					"key": model.Condition_KEY_TAG, "member_type": model.Condition_MEMBER_TYPE_VIRTUALMACHINE,
+					"operator": model.Condition_OPERATOR_EQUALS, "value": "v2",
+				},
+			},
+		},
+	}
+
+	expressionData, err := buildGroupExpressionData(criteria, nil)
+	require.NoError(t, err)
+	// a single NestedExpression struct value wrapping both conditions
+	require.Len(t, expressionData, 1)
+
+	parsedCriteria, _, err := fromGroupExpressionData(expressionData)
+	require.NoError(t, err)
+	assert.Len(t, parsedCriteria, 1)
+}
+
+func TestUnitNsxt_buildGroupExtendedExpressionListData(t *testing.T) {
+	res := resourceNsxtPolicyGroup()
+
+	t.Run("empty extended_criteria returns no expressions", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		list, err := buildGroupExtendedExpressionListData(d.Get("extended_criteria").([]interface{}))
+		require.NoError(t, err)
+		assert.Empty(t, list)
+	})
+
+	t.Run("identity_group extended_criteria builds one expression", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"extended_criteria": []interface{}{
+				map[string]interface{}{
+					"identity_group": []interface{}{
+						map[string]interface{}{
+							"distinguished_name":             "CN=group1",
+							"domain_base_distinguished_name": "DC=example,DC=com",
+							"sid":                            "S-1-5-21",
+						},
+					},
+				},
+			},
+		})
+		list, err := buildGroupExtendedExpressionListData(d.Get("extended_criteria").([]interface{}))
+		require.NoError(t, err)
+		require.Len(t, list, 1)
+
+		parsed, err := getIdentityGroupsData(list)
+		require.NoError(t, err)
+		require.Len(t, parsed, 1)
+		assert.Equal(t, "CN=group1", *(parsed[0]["distinguished_name"].(*string)))
+	})
+}
+
+func TestUnitNsxt_validateExtendedCriteriaLocalManager(t *testing.T) {
+	t.Run("empty extended_criteria is always fine", func(t *testing.T) {
+		require.NoError(t, validateExtendedCriteriaLocalManager(nil, newGoMockProviderClient()))
+	})
+
+	t.Run("non-empty extended_criteria is rejected on Global Manager", func(t *testing.T) {
+		m := newGoMockProviderClient()
+		m.PolicyGlobalManager = true
+		err := validateExtendedCriteriaLocalManager([]interface{}{map[string]interface{}{}}, m)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not supported for Global Manager")
+	})
+
+	t.Run("non-empty extended_criteria is fine on Local Manager", func(t *testing.T) {
+		err := validateExtendedCriteriaLocalManager([]interface{}{map[string]interface{}{}}, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
 func TestUnitNsxt_fromGroupExpressionData_unsupportedType(t *testing.T) {
 	tag := model.Tag{Tag: str("t"), Scope: str("s")}
 	converter := bindings.NewTypeConverter()

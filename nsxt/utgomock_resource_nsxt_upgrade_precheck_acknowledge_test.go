@@ -284,6 +284,70 @@ func TestMockResourceNsxtUpgradePrecheckAcknowledgeRead(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtUpgradePrecheckAcknowledgeUpdate(t *testing.T) {
+	util.NsxVersion = "3.0.0"
+	defer func() { util.NsxVersion = "" }()
+
+	t.Run("Update success re-validates and re-acknowledges", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockChecksInfo, mockPreChecks, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restore()
+
+		warningType := nsxModel.UpgradeCheckFailure_TYPE_WARNING
+		acked := false
+		gomock.InOrder(
+			// validatePrecheckIDs (HasChange("precheck_ids") is true)
+			mockChecksInfo.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(checksInfoResult(precheckID), nil),
+			// acknowledgePrecheckWarnings -> getPrecheckErrors (WARNING type)
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), &warningType, gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{precheckWarningItem(precheckID, acked)},
+				}, nil,
+			),
+			mockPreChecks.EXPECT().Acknowledge(precheckID).Return(nil),
+			// Read -> getPrecheckErrors
+			mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+				nsxModel.UpgradeCheckFailureListResult{
+					Results: []nsxModel.UpgradeCheckFailure{},
+				}, nil,
+			),
+		)
+
+		res := resourceNsxtUpgradePrecheckAcknowledge()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPrecheckAcknowledgeData())
+		d.SetId("some-id")
+
+		err := resourceNsxtUpgradePrecheckAcknowledgeUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_getAcknowledgedPrecheckIDs(t *testing.T) {
+	util.NsxVersion = "3.0.0"
+	defer func() { util.NsxVersion = "" }()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	_, _, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+	defer restore()
+
+	acked := true
+	notAcked := false
+	mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		nsxModel.UpgradeCheckFailureListResult{
+			Results: []nsxModel.UpgradeCheckFailure{
+				precheckWarningItem(precheckID, acked),
+				precheckWarningItem("other-check", notAcked),
+			},
+		}, nil,
+	)
+
+	ids, err := getAcknowledgedPrecheckIDs(newGoMockProviderClient())
+	require.NoError(t, err)
+	assert.Equal(t, []string{precheckID}, ids)
+}
+
 func TestMockResourceNsxtUpgradePrecheckAcknowledgeDelete(t *testing.T) {
 	util.NsxVersion = "3.0.0"
 	defer func() { util.NsxVersion = "" }()

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -179,6 +180,39 @@ func TestMockResourceNsxtPolicyConnectivityPolicyRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"parent_path": connPolicyParentPath,
+		})
+		d.SetId(connPolicyID)
+
+		query := getCacheQueryKey(resourceTypeConnectivityPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeConnectivityPolicy)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeConnectivityPolicy)
+
+		gomock.InOrder(
+			mockConnSDK.EXPECT().Get(connPolicyOrgID, connPolicyProjectID, connPolicyTGWID, connPolicyID).Return(model.ConnectivityPolicy{
+				DisplayName:       &connPolicyName,
+				Path:              &connPolicyPath,
+				Revision:          &connPolicyRevision,
+				ConnectivityScope: &connPolicyScope,
+				Group:             &connPolicyGroupPath,
+			}, nil),
+			mockConnSDK.EXPECT().Patch(connPolicyOrgID, connPolicyProjectID, connPolicyTGWID, connPolicyID, gomock.Any()).
+				DoAndReturn(func(_, _, _, _ string, patched model.ConnectivityPolicy) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyConnectivityPolicyRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, connPolicyName, d.Get("display_name"))
+	})
 }
 
 func TestMockResourceNsxtPolicyConnectivityPolicyUpdate(t *testing.T) {
@@ -297,6 +331,43 @@ func TestMockResourceNsxtPolicyConnectivityPolicyDelete(t *testing.T) {
 		d.SetId(connPolicyID)
 		m := newGoMockProviderClient()
 		err := resourceNsxtPolicyConnectivityPolicyDelete(d, m)
+		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_resourceNsxtPolicyConnectivityPolicyExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConnSDK := connmocks.NewMockConnectivityPoliciesClient(ctrl)
+	connWrapper := &transitgateways.ConnectivityPolicyClientContext{
+		Client:     mockConnSDK,
+		ClientType: utl.Multitenancy,
+	}
+	originalCli := cliConnectivityPoliciesClient
+	defer func() { cliConnectivityPoliciesClient = originalCli }()
+	cliConnectivityPoliciesClient = func(sessionContext utl.SessionContext, connector client.Connector) *transitgateways.ConnectivityPolicyClientContext {
+		return connWrapper
+	}
+
+	sessionContext := utl.SessionContext{ClientType: utl.Multitenancy}
+
+	t.Run("exists returns true", func(t *testing.T) {
+		mockConnSDK.EXPECT().Get(connPolicyOrgID, connPolicyProjectID, connPolicyTGWID, connPolicyID).Return(model.ConnectivityPolicy{}, nil)
+		exists, err := resourceNsxtPolicyConnectivityPolicyExists(sessionContext, connPolicyParentPath, connPolicyID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("not found returns false", func(t *testing.T) {
+		mockConnSDK.EXPECT().Get(connPolicyOrgID, connPolicyProjectID, connPolicyTGWID, connPolicyID).Return(model.ConnectivityPolicy{}, vapiErrors.NotFound{})
+		exists, err := resourceNsxtPolicyConnectivityPolicyExists(sessionContext, connPolicyParentPath, connPolicyID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("invalid parent path fails", func(t *testing.T) {
+		_, err := resourceNsxtPolicyConnectivityPolicyExists(sessionContext, "/orgs/default", connPolicyID, nil)
 		require.Error(t, err)
 	})
 }

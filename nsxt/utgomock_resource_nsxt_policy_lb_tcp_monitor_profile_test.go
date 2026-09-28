@@ -151,6 +151,36 @@ func TestMockResourceNsxtPolicyLBTcpMonitorProfileRead(t *testing.T) {
 		require.NoError(t, err)
 		assertLBTcpMonitorFields(t, d)
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBTcpMonitorProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBTcpMonitorData())
+		d.SetId(lbTcpMonitorID)
+
+		query := getCacheQueryKey(resourceTypeLBTcpMonitorProfile, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBTcpMonitorProfile)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBTcpMonitorProfile)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(lbTcpMonitorID).Return(lbTcpMonitorStructValue(t), nil),
+			mockSDK.EXPECT().Patch(lbTcpMonitorID, gomock.Any()).
+				DoAndReturn(func(_ string, sv *data.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(sv, model.LBTcpMonitorProfileBindingType())
+					require.Empty(t, errs)
+					patched := dv.(model.LBTcpMonitorProfile)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBTcpMonitorProfileRead(d, mc)
+		require.NoError(t, err)
+		assertLBTcpMonitorFields(t, d)
+	})
 }
 
 func TestMockResourceNsxtPolicyLBTcpMonitorProfileUpdate(t *testing.T) {

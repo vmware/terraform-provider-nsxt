@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -242,6 +243,62 @@ func TestMockResourceNsxtPolicySegmentPortRead(t *testing.T) {
 		require.Len(t, discovery, 1)
 		security := d.Get("security_profile").([]interface{})
 		require.Len(t, security, 1)
+	})
+}
+
+func TestMockResourceNsxtPolicySegmentPortReadCacheEnabled(t *testing.T) {
+	util.NsxVersion = "9.1.0"
+	defer func() { util.NsxVersion = "" }()
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPortsSDK := portmocks.NewMockPortsClient(ctrl)
+	mockInfraSDK := inframocks.NewMockInfraClient(ctrl)
+	portsWrapper := &segments.SegmentPortClientContext{
+		Client:     mockPortsSDK,
+		ClientType: utl.Local,
+	}
+
+	originalPorts := cliPortsClient
+	originalInfra := cliInfraClient
+	defer func() {
+		cliPortsClient = originalPorts
+		cliInfraClient = originalInfra
+	}()
+	cliPortsClient = func(sessionContext utl.SessionContext, connector client.Connector) *segments.SegmentPortClientContext {
+		return portsWrapper
+	}
+	cliInfraClient = func(sessionContext utl.SessionContext, connector client.Connector) *apipkg.InfraClientContext {
+		return &apipkg.InfraClientContext{Client: mockInfraSDK, ClientType: utl.Local}
+	}
+
+	t.Run("cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicySegmentPort()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"segment_path": segPortSegmentPath,
+		})
+		d.SetId(segPortPortID)
+
+		query := getCacheQueryKey(resourceTypeSegmentPort, d, mc)
+		tc := gcache.getTypeCache(resourceTypeSegmentPort)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeSegmentPort)
+
+		gomock.InOrder(
+			mockPortsSDK.EXPECT().Get(segPortSegmentID, segPortPortID).Return(model.SegmentPort{
+				DisplayName: &segPortDisplayName,
+				Description: &segPortDescription,
+				Path:        &segPortPath,
+				Revision:    &segPortRevision,
+			}, nil),
+			mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+		)
+
+		err := resourceNsxtPolicySegmentPortRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, segPortDisplayName, d.Get("display_name"))
 	})
 }
 

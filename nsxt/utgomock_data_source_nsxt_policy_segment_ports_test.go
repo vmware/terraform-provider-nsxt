@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -116,4 +117,24 @@ func TestMockDataSourceNsxtPolicySegmentPortsRead(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "search boom")
 	})
+}
+
+func TestUnitNsxt_filterSegmentPortsByDisplayName(t *testing.T) {
+	converter := bindings.NewTypeConverter()
+
+	nameA := "port-a"
+	nameB := "port-b"
+	svA := segmentPortToStructValue(t, model.SegmentPort{DisplayName: &nameA})
+	svB := segmentPortToStructValue(t, model.SegmentPort{DisplayName: &nameB})
+
+	filtered := filterSegmentPortsByDisplayName([]*data.StructValue{svA, svB}, nameB, converter)
+	require.Len(t, filtered, 1)
+
+	var port model.SegmentPort
+	dataValue, errs := converter.ConvertToGolang(filtered[0], model.SegmentPortBindingType())
+	require.Empty(t, errs)
+	port = dataValue.(model.SegmentPort)
+	assert.Equal(t, nameB, *port.DisplayName)
+
+	assert.Empty(t, filterSegmentPortsByDisplayName([]*data.StructValue{svA, svB}, "no-match", converter))
 }

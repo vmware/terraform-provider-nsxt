@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -130,6 +131,37 @@ func TestMockResourceNsxtVpcAttachmentRead(t *testing.T) {
 		err := resourceNsxtVpcAttachmentRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcAttachmentMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVpcAttachment()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcAttachmentData())
+		d.SetId(vpcAttachmentID)
+
+		query := getCacheQueryKey(resourceTypeVpcAttachment, d, mc)
+		tc := gcache.getTypeCache(resourceTypeVpcAttachment)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeVpcAttachment)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcAttachmentID).Return(vpcAttachmentAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), vpcAttachmentID, gomock.Any()).
+				DoAndReturn(func(_, _, _, _ string, patched nsxModel.VpcAttachment) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtVpcAttachmentRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, vpcAttachmentDisplayName, d.Get("display_name"))
 	})
 }
 

@@ -139,6 +139,36 @@ func TestMockResourceNsxtPolicyIPPoolBlockSubnetRead(t *testing.T) {
 		err := resourceNsxtPolicyIPPoolBlockSubnetRead(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyIPPoolBlockSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalBlockSubnetData())
+		d.SetId(blockSubnetID)
+
+		query := getCacheQueryKey(resourceTypeIpAddressPoolBlockSubnet, d, mc)
+		tc := gcache.getTypeCache(resourceTypeIpAddressPoolBlockSubnet)
+		tc.data[query] = map[string]*vapiData.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeIpAddressPoolBlockSubnet)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(blockSubnetPoolID, blockSubnetID).Return(blockSubnetStructValue(t, "Test Block Subnet", "Test block subnet", 16, false), nil),
+			mockSDK.EXPECT().Patch(blockSubnetPoolID, blockSubnetID, gomock.Any()).
+				DoAndReturn(func(_, _ string, sv *vapiData.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(sv, nsxModel.IpAddressPoolBlockSubnetBindingType())
+					require.Empty(t, errs)
+					patched := dv.(nsxModel.IpAddressPoolBlockSubnet)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyIPPoolBlockSubnetRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, "Test Block Subnet", d.Get("display_name"))
+	})
 }
 
 func TestMockResourceNsxtPolicyIPPoolBlockSubnetUpdate(t *testing.T) {

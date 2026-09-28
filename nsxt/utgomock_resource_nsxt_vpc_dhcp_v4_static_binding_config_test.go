@@ -146,6 +146,41 @@ func TestMockResourceNsxtVpcDhcpV4StaticBindingRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDhcpBindingMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVpcSubnetDhcpV4StaticBindingConfig()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalDhcpBindingData())
+		d.SetId(dhcpBindingID)
+
+		query := getCacheQueryKey(resourceTypeDhcpV4StaticBindingConfig, d, mc)
+		tc := gcache.getTypeCache(resourceTypeDhcpV4StaticBindingConfig)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeDhcpV4StaticBindingConfig)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), dhcpBindingID).Return(dhcpV4BindingStructValue(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), dhcpBindingID, gomock.Any()).
+				DoAndReturn(func(_, _, _, _, _ string, sv *data.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(sv, nsxModel.DhcpV4StaticBindingConfigBindingType())
+					require.Empty(t, errs)
+					patched := dv.(nsxModel.DhcpV4StaticBindingConfig)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, dhcpBindingDisplayName, d.Get("display_name"))
+	})
 }
 
 func TestMockResourceNsxtVpcDhcpV4StaticBindingUpdate(t *testing.T) {

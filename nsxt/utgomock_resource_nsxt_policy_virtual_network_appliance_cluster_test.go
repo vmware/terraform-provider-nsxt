@@ -387,3 +387,27 @@ func TestUnitNsxt_getVNAClusterAdvancedConfigFromSchema(t *testing.T) {
 		assert.Contains(t, err.Error(), "9.2.0")
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyVirtualNetworkApplianceClusterImporter(t *testing.T) {
+	res := resourceNsxtPolicyVirtualNetworkApplianceCluster()
+
+	t.Run("valid path sets enforcement_point and site_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(vnaClusterPath)
+
+		out, err := resourceNsxtPolicyVirtualNetworkApplianceClusterImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, vnaClusterID, d.Id())
+		assert.Equal(t, vnaClusterEPID, d.Get("enforcement_point"))
+		assert.Equal(t, vnaClusterSitePath, d.Get("site_path"))
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := resourceNsxtPolicyVirtualNetworkApplianceClusterImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
