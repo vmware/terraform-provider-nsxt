@@ -21,7 +21,9 @@ import (
 )
 
 var cliTransportNodeCollectionsClient = enforcement_points.NewTransportNodeCollectionsClient
-var cliComputeCollectionMemberStatusClient = compute_collections.NewMemberStatusClient
+var cliComputeCollectionMemberStatusClient = func(connector client.Connector) compute_collections.MemberStatusClient {
+	return compute_collections.NewMemberStatusClient(connector)
+}
 
 const removeOnDestroyDefault = true
 

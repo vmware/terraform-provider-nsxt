@@ -15,11 +15,14 @@ import (
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
+	mpModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
 	enforcement_points "github.com/vmware/terraform-provider-nsxt/api/infra/sites/enforcement_points"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	ccmocks "github.com/vmware/terraform-provider-nsxt/mocks/fabric/compute_collections"
 	epmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/sites/enforcement_points"
 )
 
@@ -228,5 +231,41 @@ func TestUnitNsxt_resourceNsxtPolicyHostTransportNodeCollectionImporter(t *testi
 
 		_, err := resourceNsxtPolicyHostTransportNodeCollectionImporter(d, nil)
 		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_getComputeCollectionMemberStateConf(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockStatus := ccmocks.NewMockMemberStatusClient(ctrl)
+	original := cliComputeCollectionMemberStatusClient
+	defer func() { cliComputeCollectionMemberStatusClient = original }()
+	cliComputeCollectionMemberStatusClient = func(_ vapiProtocolClient.Connector) compute_collections.MemberStatusClient {
+		return mockStatus
+	}
+
+	conf := getComputeCollectionMemberStateConf(nil, "cc-1")
+	require.NotNil(t, conf)
+
+	t.Run("pending member statuses keep polling", func(t *testing.T) {
+		mockStatus.EXPECT().List("cc-1").Return(mpModel.HostNodeStatusListResult{Results: []mpModel.HostNodeStatus{{}}}, nil)
+		_, state, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "notyet", state)
+	})
+
+	t.Run("no remaining member statuses is success", func(t *testing.T) {
+		mockStatus.EXPECT().List("cc-1").Return(mpModel.HostNodeStatusListResult{}, nil)
+		_, state, err := conf.Refresh()
+		require.NoError(t, err)
+		assert.Equal(t, "success", state)
+	})
+
+	t.Run("List error reports failed", func(t *testing.T) {
+		mockStatus.EXPECT().List("cc-1").Return(mpModel.HostNodeStatusListResult{}, vapiErrors.ServiceUnavailable{})
+		_, state, err := conf.Refresh()
+		require.Error(t, err)
+		assert.Equal(t, "failed", state)
 	})
 }

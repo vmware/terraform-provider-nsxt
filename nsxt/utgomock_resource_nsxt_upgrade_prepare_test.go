@@ -461,3 +461,396 @@ func TestMockNsxtExecutePreupgradeChecks(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestMockNsxtUploadUpgradeBundle(t *testing.T) {
+	res := resourceNsxtUpgradePrepare()
+	upgradeType := nsxModel.UpgradeBundleFetchRequest_BUNDLE_TYPE_UPGRADE
+	precheckType := nsxModel.UpgradeBundleFetchRequest_BUNDLE_TYPE_PRE_UPGRADE
+
+	newData := func(t *testing.T, extra map[string]interface{}) *schema.ResourceData {
+		data := minimalUpgradePrepareData()
+		data["bundle_upload_timeout"] = 5
+		for k, v := range extra {
+			data[k] = v
+		}
+		return schema.TestResourceDataRaw(t, res.Schema, data)
+	}
+
+	t.Run("upgrade bundle is fetched and waited on", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, mockBundles, _, mockUploadStatus, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		bundleID := "bundle-1"
+		success := nsxModel.UpgradeBundleUploadStatus_STATUS_SUCCESS
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		mockBundles.EXPECT().Create(gomock.Any(), nil).
+			DoAndReturn(func(req nsxModel.UpgradeBundleFetchRequest, _ *bool) (nsxModel.UpgradeBundleId, error) {
+				assert.Equal(t, "https://bundles.example.com/upgrade.mub", *req.Url)
+				assert.Equal(t, upgradeType, *req.BundleType)
+				return nsxModel.UpgradeBundleId{BundleId: &bundleID}, nil
+			})
+		mockUploadStatus.EXPECT().Get(bundleID).Return(nsxModel.UpgradeBundleUploadStatus{Status: &success}, nil)
+
+		d := newData(t, map[string]interface{}{"upgrade_bundle_url": "https://bundles.example.com/upgrade.mub"})
+		require.NoError(t, uploadUpgradeBundle(d, newGoMockProviderClient(), upgradeType))
+	})
+
+	t.Run("bundle Create error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, mockBundles, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		mockBundles.EXPECT().Create(gomock.Any(), nil).Return(nsxModel.UpgradeBundleId{}, errors.New("fetch refused"))
+
+		d := newData(t, map[string]interface{}{"upgrade_bundle_url": "https://bundles.example.com/upgrade.mub"})
+		err := uploadUpgradeBundle(d, newGoMockProviderClient(), upgradeType)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "fetch refused")
+	})
+
+	t.Run("missing bundle ID is reported as invalid bundle", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, mockBundles, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		mockBundles.EXPECT().Create(gomock.Any(), nil).Return(nsxModel.UpgradeBundleId{}, nil)
+
+		d := newData(t, map[string]interface{}{"upgrade_bundle_url": "https://bundles.example.com/upgrade.mub"})
+		err := uploadUpgradeBundle(d, newGoMockProviderClient(), upgradeType)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "apparently invalid")
+	})
+
+	t.Run("summary Get error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		d := newData(t, nil)
+		require.Error(t, uploadUpgradeBundle(d, newGoMockProviderClient(), upgradeType))
+	})
+
+	t.Run("precheck bundle already uploaded for the same version is skipped", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		summary := upgradeSummaryNotStarted()
+		existing := "4.2.0.0.0.12345"
+		summary.PreUpgradeBundleVersion = &existing
+		mockSummary.EXPECT().Get().Return(summary, nil)
+
+		d := newData(t, map[string]interface{}{"version": "4.2.0", "precheck_bundle_url": "https://bundles.example.com/pre.pub"})
+		require.NoError(t, uploadUpgradeBundle(d, newGoMockProviderClient(), precheckType))
+	})
+
+	t.Run("precheck bundle with unparsable version is still uploaded", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, mockBundles, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		summary := upgradeSummaryNotStarted()
+		existing := "4.2.0.0.0.12345"
+		summary.PreUpgradeBundleVersion = &existing
+		mockSummary.EXPECT().Get().Return(summary, nil)
+		mockBundles.EXPECT().Create(gomock.Any(), nil).
+			DoAndReturn(func(req nsxModel.UpgradeBundleFetchRequest, _ *bool) (nsxModel.UpgradeBundleId, error) {
+				assert.Equal(t, precheckType, *req.BundleType)
+				assert.Equal(t, "https://bundles.example.com/pre.pub", *req.Url)
+				return nsxModel.UpgradeBundleId{}, errors.New("stop here")
+			})
+
+		d := newData(t, map[string]interface{}{"version": "4.2", "precheck_bundle_url": "https://bundles.example.com/pre.pub"})
+		require.Error(t, uploadUpgradeBundle(d, newGoMockProviderClient(), precheckType))
+	})
+}
+
+func TestMockNsxtUploadPrecheckAndUpgradeBundle(t *testing.T) {
+	res := resourceNsxtUpgradePrepare()
+
+	t.Run("precheck bundle upload failure is wrapped", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, mockBundles, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		mockBundles.EXPECT().Create(gomock.Any(), nil).Return(nsxModel.UpgradeBundleId{}, errors.New("unreachable"))
+
+		data := minimalUpgradePrepareData()
+		data["precheck_bundle_url"] = "https://bundles.example.com/pre.pub"
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := uploadPrecheckAndUpgradeBundle(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "precheck bundle")
+	})
+
+	t.Run("upgrade bundle upload failure is wrapped", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradePrepareData())
+
+		err := uploadPrecheckAndUpgradeBundle(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "upgrade bundle")
+	})
+}
+
+func TestMockNsxtUpgradeUc(t *testing.T) {
+	res := resourceNsxtUpgradePrepare()
+	newData := func(t *testing.T) *schema.ResourceData {
+		data := minimalUpgradePrepareData()
+		data["uc_upgrade_timeout"] = 5
+		return schema.TestResourceDataRaw(t, res.Schema, data)
+	}
+
+	t.Run("triggers UC upgrade and waits for it", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, mockUcStatus, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, _, mockUpgrade, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+
+		success := nsxModel.UcUpgradeStatus_STATE_SUCCESS
+		gomock.InOrder(
+			mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil),
+			mockUpgrade.EXPECT().Upgradeuc().Return(nil),
+			mockUcStatus.EXPECT().Get().Return(nsxModel.UcUpgradeStatus{State: &success}, nil),
+		)
+
+		require.NoError(t, upgradeUc(newData(t), newGoMockProviderClient()))
+	})
+
+	t.Run("Upgradeuc error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, _, mockUpgrade, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		mockUpgrade.EXPECT().Upgradeuc().Return(errors.New("uc upgrade rejected"))
+
+		require.Error(t, upgradeUc(newData(t), newGoMockProviderClient()))
+	})
+
+	t.Run("summary Get error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		require.Error(t, upgradeUc(newData(t), newGoMockProviderClient()))
+	})
+}
+
+func TestMockNsxtGetSummaryInfo(t *testing.T) {
+	ucUpdated := true
+
+	t.Run("UC upgraded and upgrade not started needs precheck", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryUCUpdated(), nil)
+
+		version, needed, err := getSummaryInfo(newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "4.1.0", version)
+		assert.True(t, needed)
+	})
+
+	t.Run("upgrade in progress below 9.0 skips precheck", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		inProgress := nsxModel.UpgradeSummary_UPGRADE_STATUS_IN_PROGRESS
+		target := "4.1.0"
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{
+			UpgradeCoordinatorUpdated: &ucUpdated,
+			UpgradeStatus:             &inProgress,
+			TargetVersion:             &target,
+		}, nil)
+
+		_, needed, err := getSummaryInfo(newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.False(t, needed)
+	})
+
+	t.Run("VCF9 host pre-upgrade still needs precheck", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, mockStatus, _, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+
+		paused := nsxModel.UpgradeSummary_UPGRADE_STATUS_PAUSED
+		target := "9.0.0"
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{
+			UpgradeCoordinatorUpdated: &ucUpdated,
+			UpgradeStatus:             &paused,
+			TargetVersion:             &target,
+		}, nil)
+		overallPaused := nsxModel.UpgradeStatus_OVERALL_UPGRADE_STATUS_PAUSED
+		mockStatus.EXPECT().Get(nil, nil, nil).Return(nsxModel.UpgradeStatus{OverallUpgradeStatus: &overallPaused}, nil)
+
+		_, needed, err := getSummaryInfo(newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.True(t, needed)
+	})
+
+	t.Run("VCF9 status lookup error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, mockStatus, _, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+
+		target := "9.0.0"
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{UpgradeCoordinatorUpdated: &ucUpdated, TargetVersion: &target}, nil)
+		mockStatus.EXPECT().Get(nil, nil, nil).Return(nsxModel.UpgradeStatus{}, errors.New("status unavailable"))
+
+		_, _, err := getSummaryInfo(newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("summary Get error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		_, _, err := getSummaryInfo(newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtUpgradePrepareReadWithPrecheck(t *testing.T) {
+	util.NsxVersion = "3.0.0"
+	defer func() { util.NsxVersion = "" }()
+	res := resourceNsxtUpgradePrepare()
+	anyFailuresList := func(m *preupgchecks.MockFailuresClient) *gomock.Call {
+		return m.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any())
+	}
+
+	t.Run("runs prechecks and records the failures", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, mockStatus, mockUpgrade, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+		// Registered last so its FailuresClient mock is the one wired in.
+		_, _, mockFailures, restoreAck := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restoreAck()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryUCUpdated(), nil)
+		// An already-acknowledged warning: remembered before the precheck run, and needs no re-ack.
+		anyFailuresList(mockFailures).Return(nsxModel.UpgradeCheckFailureListResult{
+			Results: []nsxModel.UpgradeCheckFailure{precheckWarningItem(precheckID, true)},
+		}, nil).AnyTimes()
+		mockUpgrade.EXPECT().Executepreupgradechecks(nil, nil, nil, nil, nil, nil).Return(nil)
+		completed := nsxModel.UpgradeChecksExecutionStatus_STATUS_COMPLETED
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).Return(nsxModel.UpgradeStatus{
+			ComponentStatus: []nsxModel.ComponentUpgradeStatus{
+				{PreUpgradeStatus: &nsxModel.UpgradeChecksExecutionStatus{Status: &completed}},
+			},
+		}, nil).Times(len(precheckComponentTypes))
+
+		data := minimalUpgradePrepareData()
+		data["precheck_timeout"] = 5
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId("some-id")
+
+		require.NoError(t, resourceNsxtUpgradePrepareRead(d, newGoMockProviderClient()))
+		failed := d.Get("failed_prechecks").([]interface{})
+		require.Len(t, failed, 1)
+		assert.Equal(t, precheckID, failed[0].(map[string]interface{})["id"])
+	})
+
+	t.Run("previous-ack lookup error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, mockFailures, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryUCUpdated(), nil)
+		anyFailuresList(mockFailures).Return(nsxModel.UpgradeCheckFailureListResult{}, errors.New("list failed"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradePrepareData())
+		d.SetId("some-id")
+		require.Error(t, resourceNsxtUpgradePrepareRead(d, newGoMockProviderClient()))
+	})
+
+	t.Run("precheck execution error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, mockFailures, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+		_, _, _, _, mockUpgrade, _, restoreRun := setupUpgradeRunMocks(ctrl)
+		defer restoreRun()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryUCUpdated(), nil)
+		anyFailuresList(mockFailures).Return(nsxModel.UpgradeCheckFailureListResult{}, nil)
+		mockUpgrade.EXPECT().Executepreupgradechecks(nil, nil, nil, nil, nil, nil).Return(errors.New("precheck rejected"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradePrepareData())
+		d.SetId("some-id")
+		require.Error(t, resourceNsxtUpgradePrepareRead(d, newGoMockProviderClient()))
+	})
+
+	t.Run("summary error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, _, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradePrepareData())
+		d.SetId("some-id")
+		require.Error(t, resourceNsxtUpgradePrepareRead(d, newGoMockProviderClient()))
+	})
+
+	t.Run("failure listing error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSummary, _, _, _, _, mockFailures, restore := setupUpgradePrepareMocks(ctrl)
+		defer restore()
+
+		mockSummary.EXPECT().Get().Return(upgradeSummaryNotStarted(), nil)
+		anyFailuresList(mockFailures).Return(nsxModel.UpgradeCheckFailureListResult{}, errors.New("list failed"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradePrepareData())
+		d.SetId("some-id")
+		require.Error(t, resourceNsxtUpgradePrepareRead(d, newGoMockProviderClient()))
+	})
+}

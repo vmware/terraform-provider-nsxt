@@ -399,3 +399,43 @@ func TestUnitNsxt_getExtensionCertificate(t *testing.T) {
 		assert.Nil(t, getExtensionCertificate(d))
 	})
 }
+
+func TestUnitNsxt_credentialValuesRoundTrip(t *testing.T) {
+	res := resourceNsxtComputeManager()
+
+	cases := []struct {
+		credType string
+		fields   map[string]interface{}
+		checkKey string
+	}{
+		{"saml_login", map[string]interface{}{"token": "tok-1", "thumbprint": cmThumbprint}, "token"},
+		{"session_login", map[string]interface{}{"session_id": "sess-1", "thumbprint": cmThumbprint}, "session_id"},
+		{"verifiable_asymmetric_login", map[string]interface{}{
+			"asymmetric_credential": "asym-1",
+			"credential_key":        "key-1",
+			"credential_verifier":   "verifier-1",
+		}, "asymmetric_credential"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.credType, func(t *testing.T) {
+			src := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"credential": []interface{}{
+					map[string]interface{}{tc.credType: []interface{}{tc.fields}},
+				},
+			})
+			sv, err := getCredentialValues(src)
+			require.NoError(t, err)
+			require.NotNil(t, sv)
+
+			dst := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			require.NoError(t, setCredentialValuesInSchema(dst, sv))
+
+			cred := dst.Get("credential").([]interface{})
+			require.Len(t, cred, 1)
+			block := cred[0].(map[string]interface{})[tc.credType].([]interface{})
+			require.Len(t, block, 1)
+			assert.Equal(t, tc.fields[tc.checkKey], block[0].(map[string]interface{})[tc.checkKey])
+		})
+	}
+}
