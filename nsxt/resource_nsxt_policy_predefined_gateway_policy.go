@@ -93,7 +93,7 @@ func getGatewayPolicyDefaultRulesSchema() *schema.Schema {
 	}
 }
 
-func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceData, connector client.Connector, isGlobalManager bool) *model.Rule {
+func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceData, connector client.Connector, isGlobalManager bool) (*model.Rule, error) {
 	defaultRules := d.Get("default_rule").(*schema.Set).List()
 
 	for _, obj := range defaultRules {
@@ -115,7 +115,7 @@ func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceDa
 			}
 
 			log.Printf("[DEBUG] Updating Default Rule with ID %s", *rule.Id)
-			return &rule
+			return &rule, nil
 		}
 	}
 
@@ -133,12 +133,24 @@ func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceDa
 				rule := revertGatewayPolicyDefaultRule(rule)
 
 				log.Printf("[DEBUG] Reverting Default Rule with ID %s", *rule.Id)
-				return &rule
+				return &rule, nil
 			}
 		}
 	}
 
-	return nil
+	// This existing default rule is neither represented in the new config nor
+	// was it just removed from the old config. Read always reports every
+	// default rule NSX has for this policy, regardless of what default_rule
+	// contains, so silently leaving it untouched here would cause a permadiff
+	// on the next plan. default_rule has no MaxItems, since a single Default
+	// category policy can carry one default rule per attached gateway/scope,
+	// so the config must enumerate every such scope explicitly.
+	scope := "unknown"
+	if len(rule.Scope) == 1 {
+		scope = rule.Scope[0]
+	}
+	return nil, fmt.Errorf("Default rule for scope %s exists on NSX but is not present in default_rule configuration; "+
+		"default_rule must enumerate every scope that has a default rule on this Gateway Policy", scope)
 }
 
 func setPolicyDefaultRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
@@ -328,6 +340,20 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return fmt.Errorf("System policy can not be modified")
 	}
 
+	defaultRules := d.Get("default_rule").(*schema.Set).List()
+	if len(defaultRules) > 0 && (predefinedPolicy.Category == nil || *predefinedPolicy.Category != "Default") {
+		category := "unknown"
+		if predefinedPolicy.Category != nil {
+			category = *predefinedPolicy.Category
+		}
+		return fmt.Errorf("default_rule can only be configured on a Gateway Policy with category Default, got category %s", category)
+	}
+
+	rulesConfigured := d.Get("rule").([]interface{})
+	if len(rulesConfigured) > 0 && !isPolicyVMC(m) {
+		return fmt.Errorf("rule is only supported for nsxt_policy_predefined_gateway_policy on VMC")
+	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		predefinedPolicy.Description = &description
@@ -382,9 +408,48 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		}
 	} else if d.HasChange("default_rule") {
 		log.Printf("[DEBUG]: Default rule configuration has changed")
+
+		configuredScopes := make(map[string]bool)
+		for _, obj := range defaultRules {
+			defaultRule := obj.(map[string]interface{})
+			configuredScopes[defaultRule["scope"].(string)] = true
+		}
+
+		existingDefaultScopes := make(map[string]bool)
+		for _, existingDefaultRule := range predefinedPolicy.Rules {
+			if existingDefaultRule.IsDefault != nil && *existingDefaultRule.IsDefault && len(existingDefaultRule.Scope) == 1 {
+				existingDefaultScopes[existingDefaultRule.Scope[0]] = true
+			}
+		}
+
+		// default_rule must enumerate exactly the scopes that already have a
+		// default rule on NSX: Read always reports every existing default
+		// rule regardless of config, and NSX has no way to create a new
+		// default rule via this resource, so a mismatch in either direction
+		// can never converge. Validate this up front, before mutating
+		// anything - in particular before updateGatewayPolicyDefaultRuleByScope
+		// runs, since its own fallback silently reverts (rather than errors)
+		// any existing rule whose scope was already known from a prior state,
+		// which would otherwise let an omitted scope slip through here.
+		for scope := range configuredScopes {
+			if !existingDefaultScopes[scope] {
+				return fmt.Errorf("default_rule for scope %s does not correspond to any existing default rule on this "+
+					"Gateway Policy; default_rule can only modify a scope that NSX already has a default rule for", scope)
+			}
+		}
+		for scope := range existingDefaultScopes {
+			if !configuredScopes[scope] {
+				return fmt.Errorf("Default rule for scope %s exists on NSX but is not present in default_rule configuration; "+
+					"default_rule must enumerate every scope that has a default rule on this Gateway Policy", scope)
+			}
+		}
+
 		for _, existingDefaultRule := range predefinedPolicy.Rules {
 			if existingDefaultRule.IsDefault != nil && *existingDefaultRule.IsDefault {
-				updatedDefaultRule := updateGatewayPolicyDefaultRuleByScope(existingDefaultRule, d, connector, isGlobalManager)
+				updatedDefaultRule, err := updateGatewayPolicyDefaultRuleByScope(existingDefaultRule, d, connector, isGlobalManager)
+				if err != nil {
+					return err
+				}
 				if updatedDefaultRule != nil {
 					childRule, err := createPolicyChildRule(*updatedDefaultRule.Id, *updatedDefaultRule, false)
 					if err != nil {

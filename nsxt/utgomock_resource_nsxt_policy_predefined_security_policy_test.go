@@ -370,6 +370,55 @@ func TestMockResourceNsxtPolicyPredefinedSecurityPolicyUpdateDefaultRuleChange(t
 	})
 }
 
+func TestMockResourceNsxtPolicyPredefinedSecurityPolicyDefaultRuleNoExistingDefault(t *testing.T) {
+	t.Run("Update fails when default_rule is set but the policy has no is_default rule", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, _, restore := setupPredefinedSecPolicyMock(t, ctrl)
+		defer restore()
+
+		respWithoutDefaultRule := predefinedSecPolicyAPIResponse()
+		notDefault := false
+		regularRuleID := "regular-rule"
+		respWithoutDefaultRule.Rules = []nsxModel.Rule{
+			{Id: &regularRuleID, IsDefault: &notDefault},
+		}
+		mockSDK.EXPECT().Get(predefinedSecPolicyDomain, predefinedSecPolicyID).Return(respWithoutDefaultRule, nil)
+
+		res := resourceNsxtPolicyPredefinedSecurityPolicy()
+		data := minimalPredefinedSecPolicyData()
+		data["default_rule"] = []interface{}{
+			map[string]interface{}{
+				"action": "DROP",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(predefinedSecPolicyID)
+
+		err := resourceNsxtPolicyPredefinedSecurityPolicyUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "is_default")
+	})
+}
+
+func TestUnitNsxt_securityPolicyHasDefaultRule(t *testing.T) {
+	t.Run("true when a rule has is_default=true", func(t *testing.T) {
+		isDefault := true
+		policy := nsxModel.SecurityPolicy{Rules: []nsxModel.Rule{{IsDefault: &isDefault}}}
+		assert.True(t, securityPolicyHasDefaultRule(policy))
+	})
+
+	t.Run("false when no rule has is_default=true", func(t *testing.T) {
+		notDefault := false
+		policy := nsxModel.SecurityPolicy{Rules: []nsxModel.Rule{{IsDefault: &notDefault}, {IsDefault: nil}}}
+		assert.False(t, securityPolicyHasDefaultRule(policy))
+	})
+
+	t.Run("false when there are no rules", func(t *testing.T) {
+		assert.False(t, securityPolicyHasDefaultRule(nsxModel.SecurityPolicy{}))
+	})
+}
+
 func TestUnitNsxt_updatePolicyPredefinedSecurityPolicyEmptyDomain(t *testing.T) {
 	t.Run("fails when domain cannot be extracted from path", func(t *testing.T) {
 		res := resourceNsxtPolicyPredefinedSecurityPolicy()
@@ -380,5 +429,50 @@ func TestUnitNsxt_updatePolicyPredefinedSecurityPolicyEmptyDomain(t *testing.T) 
 		err := updatePolicyPredefinedSecurityPolicy("some-id", d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "domain")
+	})
+}
+
+func newGoMockGlobalManagerProviderClient() nsxtClients {
+	client := newGoMockProviderClient()
+	client.PolicyGlobalManager = true
+	return client
+}
+
+func TestUnitNsxt_predefinedSecurityPolicyDisabledOnGlobalManager(t *testing.T) {
+	res := resourceNsxtPolicyPredefinedSecurityPolicy()
+
+	t.Run("Create fails on Global Manager", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedSecPolicyData())
+
+		err := resourceNsxtPolicyPredefinedSecurityPolicyCreate(d, newGoMockGlobalManagerProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Global Manager")
+	})
+
+	t.Run("Update fails on Global Manager", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedSecPolicyData())
+		d.SetId(predefinedSecPolicyID)
+
+		err := resourceNsxtPolicyPredefinedSecurityPolicyUpdate(d, newGoMockGlobalManagerProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Global Manager")
+	})
+
+	t.Run("Read fails on Global Manager", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedSecPolicyData())
+		d.SetId(predefinedSecPolicyID)
+
+		err := resourceNsxtPolicyPredefinedSecurityPolicyRead(d, newGoMockGlobalManagerProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Global Manager")
+	})
+
+	t.Run("Delete on Global Manager clears state instead of erroring", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalPredefinedSecPolicyData())
+		d.SetId(predefinedSecPolicyID)
+
+		err := resourceNsxtPolicyPredefinedSecurityPolicyDelete(d, newGoMockGlobalManagerProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "", d.Id())
 	})
 }
