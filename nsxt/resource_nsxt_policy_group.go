@@ -401,6 +401,9 @@ func validateGroupConjunctions(conjunctions []interface{}, criteriaMeta []criter
 	for index, conjunctionIFace := range conjunctions {
 		conjunction := conjunctionIFace.(map[string]interface{})
 		if conjunction["operator"] == model.ConjunctionOperator_CONJUNCTION_OPERATOR_AND {
+			if index+1 >= len(criteriaMeta) {
+				return fmt.Errorf("Missing criteria for conjunction at index %d", index)
+			}
 			metaA := criteriaMeta[index]
 			metaB := criteriaMeta[index+1]
 			if metaA.ExpressionType != metaB.ExpressionType {
@@ -810,10 +813,10 @@ func validateGroupCriteriaAndConjunctions(criteriaSets []interface{}, conjunctio
 	if len(criteriaSets)+len(conjunctions) == 0 {
 		return nil, nil
 	}
-	if (len(criteriaSets)+len(conjunctions))%2 == 0 {
-		if len(conjunctions) < len(criteriaSets)-1 {
-			return nil, fmt.Errorf("Missing conjunction for criteria")
-		}
+	if len(conjunctions) < len(criteriaSets)-1 {
+		return nil, fmt.Errorf("Missing conjunction for criteria")
+	}
+	if len(conjunctions) > len(criteriaSets)-1 {
 		return nil, fmt.Errorf("Missing criteria for last conjunction")
 	}
 	criteriaMeta, err := validateGroupCriteriaSets(criteriaSets)
