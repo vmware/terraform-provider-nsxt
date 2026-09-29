@@ -246,7 +246,7 @@ func TestMockResourceNsxtPolicySiteDelete(t *testing.T) {
 	})
 }
 
-func TestSiteConnectionInfoPasswordDiffSuppress(t *testing.T) {
+func TestUnitNsxt_suppressIfEmptyPriorStateSite(t *testing.T) {
 	res := resourceNsxtPolicySite()
 
 	// Build a ResourceData that simulates an existing (imported) resource: ID is set.

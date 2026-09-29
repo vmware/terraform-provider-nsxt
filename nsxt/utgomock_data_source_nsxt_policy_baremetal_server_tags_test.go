@@ -11,9 +11,28 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+// bareMetalServerTaggedStructValue builds a BareMetalServer *data.StructValue carrying tags,
+// for the tags data source's findBareMetalServerByExternalID call.
+func bareMetalServerTaggedStructValue(t *testing.T, externalID string, tags []model.Tag) *data.StructValue {
+	t.Helper()
+	resourceType := "BareMetalServer"
+	converter := bindings.NewTypeConverter()
+	val, errs := converter.ConvertToVapi(model.BareMetalServer{
+		ExternalId:   &externalID,
+		ResourceType: &resourceType,
+		Tags:         tags,
+	}, model.BareMetalServerBindingType())
+	require.Empty(t, errs)
+	return val.(*data.StructValue)
+}
 
 func TestMockDataSourceNsxtPolicyBareMetalServerTagsSchema(t *testing.T) {
 	dataSource := dataSourceNsxtPolicyBareMetalServerTags()
@@ -147,5 +166,51 @@ func TestMockDataSourceNsxtPolicyBareMetalServerTagsRead(t *testing.T) {
 			// Should not be a version error
 			assert.NotContains(t, err.Error(), "requires NSX version")
 		}
+	})
+
+	t.Run("Read succeeds and sets tags", func(t *testing.T) {
+		scope := "environment"
+		tag := "production"
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results:     []*data.StructValue{bareMetalServerTaggedStructValue(t, "bms-1", []model.Tag{{Scope: &scope, Tag: &tag}})},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServerTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "bms-1",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerTagsRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "bms-1", d.Id())
+	})
+
+	t.Run("Read fails when external_id is empty", func(t *testing.T) {
+		dataSource := dataSourceNsxtPolicyBareMetalServerTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerTagsRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "external_id is required")
+	})
+
+	t.Run("Read fails when server is not found", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results: []*data.StructValue{}, ResultCount: i64(0),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServerTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "nonexistent",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerTagsRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Failed to find Bare Metal Server")
 	})
 }

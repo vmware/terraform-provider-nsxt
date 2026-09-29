@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -134,6 +136,48 @@ func TestMockResourceNsxtPolicySecurityPolicyRuleRead(t *testing.T) {
 
 		err := resourceNsxtPolicySecurityPolicyRuleRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache hit on the parent policy finds the rule and skips the backend Get", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicySecurityPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSPRuleData())
+		d.SetId(spRuleID)
+
+		converter := bindings.NewTypeConverter()
+		val, errs := converter.ConvertToVapi(nsxModel.SecurityPolicy{
+			Id:    &spRulePolicyID,
+			Rules: []nsxModel.Rule{spRuleAPIResponse()},
+		}, nsxModel.SecurityPolicyBindingType())
+		require.Empty(t, errs)
+
+		query := getCacheQueryKey(resourceTypeSecurityPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeSecurityPolicy)
+		tc.data[query] = map[string]*data.StructValue{spRulePolicyID: val.(*data.StructValue)}
+		defer delete(gcache.byTyp, resourceTypeSecurityPolicy)
+
+		// No mockSDK.EXPECT().Get(...): the cache hit must short-circuit before the backend call.
+		err := resourceNsxtPolicySecurityPolicyRuleRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, spRuleDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to the backend Get", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicySecurityPolicyRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalSPRuleData())
+		d.SetId(spRuleID)
+
+		query := getCacheQueryKey(resourceTypeSecurityPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeSecurityPolicy)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeSecurityPolicy)
+
+		mockSDK.EXPECT().Get(spRuleDomain, spRulePolicyID, spRuleID).Return(spRuleAPIResponse(), nil)
+
+		err := resourceNsxtPolicySecurityPolicyRuleRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, spRuleDisplayName, d.Get("display_name"))
 	})
 }
 

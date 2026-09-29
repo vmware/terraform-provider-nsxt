@@ -13,7 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	mpmodel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
@@ -378,4 +381,59 @@ func TestMockNsxt_getHostSwitchProfileResourceType(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "not found")
 	})
+
+	t.Run("resource type not found for unknown policy resource type", func(t *testing.T) {
+		mockSDK := setupHostSwitchProfilesMock(t)
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PolicyHostSwitchProfilesListResult{Results: []*data.StructValue{policyHostSwitchProfileStructValue("profile-1", "unknown-type")}}, nil)
+
+		_, err := getHostSwitchProfileResourceType(newGoMockProviderClient(), "profile-1")
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "MP resource type not found")
+	})
+
+	t.Run("matches by id and returns the MP resource type", func(t *testing.T) {
+		mockSDK := setupHostSwitchProfilesMock(t)
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PolicyHostSwitchProfilesListResult{Results: []*data.StructValue{
+				policyHostSwitchProfileStructValue("other-profile", model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYLLDPHOSTSWITCHPROFILE),
+				policyHostSwitchProfileStructValue("profile-1", model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE),
+			}}, nil)
+
+		resourceType, err := getHostSwitchProfileResourceType(newGoMockProviderClient(), "profile-1")
+		require.NoError(t, err)
+		assert.Equal(t, mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE, resourceType)
+	})
+
+	t.Run("matches by realization id and returns the MP resource type", func(t *testing.T) {
+		mockSDK := setupHostSwitchProfilesMock(t)
+		mockSDK.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(model.PolicyHostSwitchProfilesListResult{Results: []*data.StructValue{
+				policyHostSwitchProfileStructValue("policy-id-1", model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYVTEPHAHOSTSWITCHPROFILE),
+			}}, nil)
+
+		resourceType, err := getHostSwitchProfileResourceType(newGoMockProviderClient(), "realization-id-of-policy-id-1")
+		require.NoError(t, err)
+		assert.Equal(t, mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_VTEPHAHOSTSWITCHPROFILE, resourceType)
+	})
+}
+
+// policyHostSwitchProfileStructValue builds the *data.StructValue getHostSwitchProfileResourceType
+// expects in a PolicyHostSwitchProfilesListResult.Results entry. Its RealizationId is derived from
+// id so both the "matched by id" and "matched by realization id" branches can be exercised.
+func policyHostSwitchProfileStructValue(id, resourceType string) *data.StructValue {
+	displayName := "profile-" + id
+	realizationID := "realization-id-of-" + id
+	profile := model.PolicyUplinkHostSwitchProfile{
+		Id:            &id,
+		DisplayName:   &displayName,
+		RealizationId: &realizationID,
+		ResourceType:  resourceType,
+	}
+	converter := bindings.NewTypeConverter()
+	dataValue, errs := converter.ConvertToVapi(profile, model.PolicyUplinkHostSwitchProfileBindingType())
+	if errs != nil {
+		panic(errs[0])
+	}
+	return dataValue.(*data.StructValue)
 }

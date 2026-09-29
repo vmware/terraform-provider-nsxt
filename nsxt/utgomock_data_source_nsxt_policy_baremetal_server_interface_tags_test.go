@@ -11,9 +11,28 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
+
+// bareMetalServerInterfaceTaggedStructValue builds a BareMetalServerInterface *data.StructValue
+// carrying tags, for the tags data source's findBareMetalServerInterfaceByExternalID call.
+func bareMetalServerInterfaceTaggedStructValue(t *testing.T, externalID string, tags []model.Tag) *data.StructValue {
+	t.Helper()
+	resourceType := "BareMetalServerInterface"
+	converter := bindings.NewTypeConverter()
+	val, errs := converter.ConvertToVapi(model.BareMetalServerInterface{
+		ExternalId:   &externalID,
+		ResourceType: &resourceType,
+		Tags:         tags,
+	}, model.BareMetalServerInterfaceBindingType())
+	require.Empty(t, errs)
+	return val.(*data.StructValue)
+}
 
 func TestMockDataSourceNsxtPolicyBareMetalServerInterfaceTagsSchema(t *testing.T) {
 	dataSource := dataSourceNsxtPolicyBareMetalServerInterfaceTags()
@@ -183,5 +202,51 @@ func TestMockDataSourceNsxtPolicyBareMetalServerInterfaceTagsRead(t *testing.T) 
 			// Should not be a version error
 			assert.NotContains(t, err.Error(), "requires NSX version")
 		}
+	})
+
+	t.Run("Read succeeds and sets tags", func(t *testing.T) {
+		scope := "network-type"
+		tag := "data-plane"
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results:     []*data.StructValue{bareMetalServerInterfaceTaggedStructValue(t, "bmsi-1", []model.Tag{{Scope: &scope, Tag: &tag}})},
+			ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServerInterfaceTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "bmsi-1",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerInterfaceTagsRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "bmsi-1", d.Id())
+	})
+
+	t.Run("Read fails when external_id is empty", func(t *testing.T) {
+		dataSource := dataSourceNsxtPolicyBareMetalServerInterfaceTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerInterfaceTagsRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "external_id is required")
+	})
+
+	t.Run("Read fails when interface is not found", func(t *testing.T) {
+		stub := &seqQueryListClient{responses: []model.SearchResponse{{
+			Results: []*data.StructValue{}, ResultCount: i64(0),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		dataSource := dataSourceNsxtPolicyBareMetalServerInterfaceTags()
+		d := schema.TestResourceDataRaw(t, dataSource.Schema, map[string]interface{}{
+			"external_id": "nonexistent",
+		})
+
+		err := dataSourceNsxtPolicyBareMetalServerInterfaceTagsRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "Failed to find Bare Metal Server Interface")
 	})
 }

@@ -331,3 +331,28 @@ func TestMockResourceNsxtPolicyTier0InterVRFRoutingGetFromSchema(t *testing.T) {
 		assert.Equal(t, []string{plPath}, obj.StaticRouteAdvertisement.InFilterPrefixList)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyTier0InterVRFRoutingImport(t *testing.T) {
+	res := resourceNsxtPolicyTier0InterVRFRouting()
+
+	t.Run("valid policy path sets gateway_path and nsx_id", func(t *testing.T) {
+		d := res.TestResourceData()
+		d.SetId("/infra/tier-0s/t0-1/inter-vrf-routing/default")
+
+		rd, err := resourceNsxtPolicyTier0InterVRFRoutingImport(d, nil)
+		require.NoError(t, err)
+		require.Len(t, rd, 1)
+		assert.Equal(t, "/infra/tier-0s/t0-1", rd[0].Get("gateway_path"))
+		assert.Equal(t, "default", rd[0].Get("nsx_id"))
+		assert.Equal(t, "default", rd[0].Id())
+	})
+
+	t.Run("non-policy-path id is rejected", func(t *testing.T) {
+		d := res.TestResourceData()
+		d.SetId("not-a-policy-path")
+
+		_, err := resourceNsxtPolicyTier0InterVRFRoutingImport(d, nil)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "not a policy path")
+	})
+}

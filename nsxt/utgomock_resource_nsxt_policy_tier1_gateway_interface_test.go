@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -156,6 +157,32 @@ func TestMockResourceNsxtPolicyTier1GatewayInterfaceRead(t *testing.T) {
 
 		err := resourceNsxtPolicyTier1GatewayInterfaceRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyTier1GatewayInterface()
+		d := schema.TestResourceDataRaw(t, res.Schema, t1InterfaceDataWithLocaleService())
+		d.SetId(t1IntID)
+
+		query := getCacheQueryKey(resourceTypeTier1Interface, d, mc)
+		tc := gcache.getTypeCache(resourceTypeTier1Interface)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeTier1Interface)
+
+		gomock.InOrder(
+			mockIntfSDK.EXPECT().Get(t1IntGwID, t1IntLocaleServiceID, t1IntID).Return(t1InterfaceAPIResponse(), nil),
+			mockIntfSDK.EXPECT().Patch(t1IntGwID, t1IntLocaleServiceID, t1IntID, gomock.Any()).
+				DoAndReturn(func(_, _, _ string, patched nsxModel.Tier1Interface) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyTier1GatewayInterfaceRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, t1IntDisplayName, d.Get("display_name"))
 	})
 }
 

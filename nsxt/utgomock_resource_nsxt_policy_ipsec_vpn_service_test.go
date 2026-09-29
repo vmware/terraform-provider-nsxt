@@ -276,6 +276,21 @@ func TestMockResourceNsxtPolicyIPSecVpnServiceT0GatewayPath(t *testing.T) {
 		err := resourceNsxtPolicyIPSecVpnServiceUpdate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Create success against a T0 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Get("t0-gw-1", ipsecSvcID).Return(nsxModel.IPSecVpnService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch("t0-gw-1", ipsecSvcID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get("t0-gw-1", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIPSecVpnServiceCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, ipsecSvcID, d.Id())
+	})
 }
 
 func TestMockResourceNsxtPolicyIPSecVpnServiceT0LocaleServicePath(t *testing.T) {
@@ -329,6 +344,21 @@ func TestMockResourceNsxtPolicyIPSecVpnServiceT0LocaleServicePath(t *testing.T) 
 		err := resourceNsxtPolicyIPSecVpnServiceDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Create success against a locale-service-scoped T0 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Get("t0-gw-1", "default", ipsecSvcID).Return(nsxModel.IPSecVpnService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch("t0-gw-1", "default", ipsecSvcID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get("t0-gw-1", "default", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIPSecVpnServiceCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, ipsecSvcID, d.Id())
+	})
 }
 
 func TestMockResourceNsxtPolicyIPSecVpnServiceLocaleServicePath(t *testing.T) {
@@ -377,6 +407,21 @@ func TestMockResourceNsxtPolicyIPSecVpnServiceLocaleServicePath(t *testing.T) {
 		err := resourceNsxtPolicyIPSecVpnServiceDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Create success against a locale-service-scoped T1 gateway", func(t *testing.T) {
+		gomock.InOrder(
+			mockSDK.EXPECT().Get("t1-gw-1", "default", ipsecSvcID).Return(nsxModel.IPSecVpnService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch("t1-gw-1", "default", ipsecSvcID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get("t1-gw-1", "default", ipsecSvcID).Return(ipsecSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIPSecVpnServiceCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, ipsecSvcID, d.Id())
+	})
 }
 
 func TestUnitNsxt_ipsecVpnServiceMultitenancyLocaleServiceError(t *testing.T) {
@@ -390,6 +435,23 @@ func TestUnitNsxt_ipsecVpnServiceMultitenancyLocaleServiceError(t *testing.T) {
 		d.SetId(ipsecSvcID)
 
 		err := resourceNsxtPolicyIPSecVpnServiceRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "project context is not supported")
+	})
+
+	t.Run("locale-service-scoped VPN under a project path is rejected by patchNsxtPolicyIPSecVpnService on Create", func(t *testing.T) {
+		// Omit nsx_id so Create skips the pre-existence getNsxtPolicyIPSecVpnServiceByID
+		// check (whose own, identical multitenancy guard would otherwise trip first) and
+		// goes straight to patchNsxtPolicyIPSecVpnService, exercising its own guard.
+		data := minimalIPSecSvcData()
+		delete(data, "gateway_path")
+		delete(data, "nsx_id")
+		data["locale_service_path"] = "/orgs/default/projects/proj-1/infra/tier-1s/t1-gw-1/locale-services/default"
+
+		res := resourceNsxtPolicyIPSecVpnService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtPolicyIPSecVpnServiceCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "project context is not supported")
 	})

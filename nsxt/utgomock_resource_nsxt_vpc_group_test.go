@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -159,6 +160,45 @@ func TestMockResourceNsxtVpcGroupRead(t *testing.T) {
 
 		err := resourceNsxtVPCGroupRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read fails when ID is empty (cache enabled)", func(t *testing.T) {
+		res := resourceNsxtVPCGroup()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcGroupData())
+
+		err := resourceNsxtVPCGroupRead(d, newGoMockProviderClientCacheEnabled())
+		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcGroupMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVPCGroup()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcGroupData())
+		d.SetId(vpcGroupID)
+
+		query := getCacheQueryKey(resourceTypeVPCGroup, d, mc)
+		tc := gcache.getTypeCache(resourceTypeVPCGroup)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeVPCGroup)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcGroupID).Return(vpcGroupAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), vpcGroupID, gomock.Any()).
+				DoAndReturn(func(_, _, _, _ string, patched nsxModel.Group) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtVPCGroupRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, vpcGroupDisplayName, d.Get("display_name"))
 	})
 }
 

@@ -10,7 +10,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	t0nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/nat"
 	t1nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/nat"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -640,7 +639,7 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	t0Client := cliTier0sClient(getSessionContext(d, m), connector)
 	if t0Client == nil {
 		return nil, policyResourceNotSupportedError()
 	}
@@ -649,7 +648,7 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1Client := cliTier1sClient(getSessionContext(d, m), connector)
 		if t1Client == nil {
 			return nil, policyResourceNotSupportedError()
 		}

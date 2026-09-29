@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -459,7 +460,7 @@ func TestMockResourceNsxtPolicyTransitGatewayBgpConfig(t *testing.T) {
 // the list length) and produce a ZoneBasedSpan rather than silently
 // returning nil, which previously caused NSX to fall back to its own
 // default ClusterBasedSpan and produced perpetual drift.
-func TestGetSpanFromSchemaZoneBasedEmptyZones(t *testing.T) {
+func TestUnitNsxt_getSpanFromSchemaZoneBasedEmptyZones(t *testing.T) {
 	span := []interface{}{
 		map[string]interface{}{
 			"cluster_based_span": []interface{}{},
@@ -488,7 +489,7 @@ func TestGetSpanFromSchemaZoneBasedEmptyZones(t *testing.T) {
 // fields of that same struct (ForwardingUpTimer, RouteRedistributionConfig)
 // rather than separate API objects, so they must be read alongside
 // bgp_config, not ignored.
-func TestGetTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
+func TestUnitNsxt_getTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
 	data := minimalTGWData()
 	data["bgp_config"] = minimalBgpConfigData()
 	data["advanced_config"] = []interface{}{
@@ -574,7 +575,7 @@ func TestUnitNsxt_getTGWBgpConfigFromSchemaTagsAggregationAndRouteMapPath(t *tes
 // d.HasChange, and getTGWBgpConfigFromSchema must leave the excluded blocks'
 // fields nil (letting the VAPI binding omit them from the request) even when
 // they're present in ResourceData.
-func TestGetTGWBgpConfigFromSchemaOnlyIncludesChangedBlocks(t *testing.T) {
+func TestUnitNsxt_getTGWBgpConfigFromSchemaOnlyIncludesChangedBlocks(t *testing.T) {
 	data := minimalTGWData()
 	data["bgp_config"] = minimalBgpConfigData()
 	data["advanced_config"] = []interface{}{
@@ -944,6 +945,115 @@ func TestMockResourceNsxtPolicyTransitGatewayCentralizedConfigRead(t *testing.T)
 
 		err := resourceNsxtPolicyTransitGatewayRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayUpdateBgpConfig(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+
+	t.Run("Update patches BGP config via direct API when bgp_config changed", func(t *testing.T) {
+		gomock.InOrder(
+			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwBgpAPIResponse(), nil),
+			m.bgp.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).Return(nil),
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwBgpAPIResponse(), nil),
+		)
+
+		data := minimalTGWData()
+		data["bgp_config"] = minimalBgpConfigData()
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update preserves existing bgp_config when only advanced_config changed", func(t *testing.T) {
+		gomock.InOrder(
+			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwBgpAPIResponse(), nil),
+			m.bgp.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).
+				DoAndReturn(func(_, _, _ string, newBgp nsxModel.TransitGatewayBgpRoutingConfig) error {
+					// bgp_config itself didn't change, so its fields must come from the
+					// fresh GET (tgwBgpAPIResponse), not be left nil.
+					require.NotNil(t, newBgp.Ecmp)
+					assert.Equal(t, tgwBgpLocalAsNum, *newBgp.LocalAsNum)
+					require.NotNil(t, newBgp.ForwardingUpTimer)
+					assert.EqualValues(t, 15, *newBgp.ForwardingUpTimer)
+					return nil
+				}),
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwBgpAPIResponse(), nil),
+		)
+
+		data := minimalTGWData()
+		data["advanced_config"] = []interface{}{
+			map[string]interface{}{"forwarding_up_timer": 15},
+		}
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update fails when BGP Patch returns an error", func(t *testing.T) {
+		gomock.InOrder(
+			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).Return(vapiErrors.InternalServerError{}),
+		)
+
+		data := minimalTGWData()
+		data["bgp_config"] = minimalBgpConfigData()
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(tgwID)
+
+		err := resourceNsxtPolicyTransitGatewayUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTransitGatewayReadCacheEnabled(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	m := setupTransitGatewayMockFull(t, ctrl)
+
+	t.Run("cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		// Force a cache miss (bucket present, entry absent) without a live search call.
+		query := getCacheQueryKey(resourceTypeTransitGateway, d, mc)
+		tc := gcache.getTypeCache(resourceTypeTransitGateway)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeTransitGateway)
+
+		gomock.InOrder(
+			// backendRead: the gateway as NSX has it, with no provider-managed tag yet.
+			m.tgw.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(tgwAPIResponse(), nil),
+			// patchFunc (config_scope mode, tag missing): rebuilds the OrgRoot H-API child
+			// and patches via cliOrgRootClient.
+			m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+			// The rest of Read, after the cache-aware block, always runs regardless of cache mode.
+			m.cc.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID, centralizedConfigID).Return(nsxModel.CentralizedConfig{}, vapiErrors.NotFound{}),
+			m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{}),
+		)
+
+		err := resourceNsxtPolicyTransitGatewayRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, tgwDisplayName, d.Get("display_name"))
 	})
 }
 

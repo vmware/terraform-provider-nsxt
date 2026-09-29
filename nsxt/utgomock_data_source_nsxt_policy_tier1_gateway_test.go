@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gmModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
@@ -61,6 +62,60 @@ func TestUnitNsxt_dataSourceNsxtPolicyTier1GatewayRead(t *testing.T) {
 		err := dataSourceNsxtPolicyTier1GatewayRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, "t1-ds-1", d.Id())
+		assert.Equal(t, edgeClusterPath, d.Get("edge_cluster_path"))
+	})
+
+	t.Run("cache hit skips the search and populates from the cached object", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier1DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		edgeClusterPath := "/infra/sites/default/enforcement-points/default/edge-clusters/cl1"
+		mockLS.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nsxModel.LocaleServices{EdgeClusterPath: &edgeClusterPath}, nil)
+
+		mc := newGoMockProviderClientCacheEnabled()
+		ds := dataSourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{"id": "t1-cached-1"})
+
+		converter := bindings.NewTypeConverter()
+		val, errs := converter.ConvertToVapi(nsxModel.Tier1{
+			Id: str("t1-cached-1"), DisplayName: str("cached-t1"), Path: str("/infra/tier-1s/t1-cached-1"),
+		}, nsxModel.Tier1BindingType())
+		require.Empty(t, errs)
+
+		query := getCacheQueryKey(resourceTypeTier1, d, mc)
+		tc := gcache.getTypeCache(resourceTypeTier1)
+		tc.data[query] = map[string]*data.StructValue{"t1-cached-1": val.(*data.StructValue)}
+		defer delete(gcache.byTyp, resourceTypeTier1)
+
+		err := dataSourceNsxtPolicyTier1GatewayRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, "t1-cached-1", d.Id())
+		assert.Equal(t, "cached-t1", d.Get("display_name"))
+		assert.Equal(t, edgeClusterPath, d.Get("edge_cluster_path"))
+	})
+
+	t.Run("path is resolved to an id and read succeeds", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockLS, restore := setupTier1DsLocaleServicesMock(t, ctrl)
+		defer restore()
+
+		edgeClusterPath := "/infra/sites/default/enforcement-points/default/edge-clusters/cl1"
+		mockLS.EXPECT().Get(gomock.Any(), gomock.Any()).Return(nsxModel.LocaleServices{EdgeClusterPath: &edgeClusterPath}, nil)
+
+		stub := &seqQueryListClient{responses: []nsxModel.SearchResponse{{
+			Results: []*data.StructValue{sv}, ResultCount: i64(1),
+		}}}
+		defer setupCliQueryClientStub(t, stub)()
+
+		ds := dataSourceNsxtPolicyTier1Gateway()
+		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{"path": "/infra/tier-1s/t1-ds-1"})
+
+		err := dataSourceNsxtPolicyTier1GatewayRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, "t1-ds-1", d.Get("id"))
 		assert.Equal(t, edgeClusterPath, d.Get("edge_cluster_path"))
 	})
 

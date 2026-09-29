@@ -603,7 +603,7 @@ func TestMockResourceNsxtPolicyVirtualNetworkApplianceRead(t *testing.T) {
 	})
 }
 
-func TestSuppressIfEmptyPriorState(t *testing.T) {
+func TestUnitNsxt_suppressIfEmptyPriorStateVNA(t *testing.T) {
 	res := resourceNsxtPolicyVirtualNetworkAppliance()
 
 	// Build a ResourceData that simulates an existing (imported) resource:

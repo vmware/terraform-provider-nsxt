@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/security"
 )
 
 func dataSourceNsxtPolicyClusterSecurityConfig() *schema.Resource {
@@ -55,7 +54,7 @@ func dataSourceNsxtPolicyClusterSecurityConfigRead(d *schema.ResourceData, m int
 	}
 
 	connector := getPolicyConnector(m)
-	client := security.NewClusterConfigsClient(connector)
+	client := cliClusterSecurityConfigsClient(connector)
 
 	clusterID := d.Get("cluster_id").(string)
 	if clusterID == "" {

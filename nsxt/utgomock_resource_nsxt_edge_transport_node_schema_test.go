@@ -375,3 +375,51 @@ func TestUnitNsxt_setHostSwitchSpecInSchema(t *testing.T) {
 		require.Len(t, elem["vmk_install_migration"].([]interface{}), 1)
 	})
 }
+
+func TestUnitNsxt_getEdgeNodeSettingsFromSchema(t *testing.T) {
+	t.Run("nil input returns nil", func(t *testing.T) {
+		settings, err := getEdgeNodeSettingsFromSchema(nil)
+		require.NoError(t, err)
+		assert.Nil(t, settings)
+	})
+
+	t.Run("empty list returns nil", func(t *testing.T) {
+		settings, err := getEdgeNodeSettingsFromSchema([]interface{}{})
+		require.NoError(t, err)
+		assert.Nil(t, settings)
+	})
+
+	t.Run("builds settings including syslog servers", func(t *testing.T) {
+		settings, err := getEdgeNodeSettingsFromSchema([]interface{}{
+			map[string]interface{}{
+				"advanced_configuration": []interface{}{
+					map[string]interface{}{"key": "adv-key", "value": "adv-value"},
+				},
+				"allow_ssh_root_login": true,
+				"dns_servers":          []interface{}{"10.0.0.1"},
+				"enable_ssh":           true,
+				"enable_upt_mode":      false,
+				"hostname":             "edge-1",
+				"ntp_servers":          []interface{}{"10.0.0.2"},
+				"search_domains":       []interface{}{"example.com"},
+				"syslog_server": []interface{}{
+					map[string]interface{}{
+						"log_level": "INFO",
+						"port":      "514",
+						"protocol":  "UDP",
+						"server":    "10.0.0.3",
+					},
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, settings)
+		assert.Equal(t, "edge-1", *settings.Hostname)
+		assert.True(t, *settings.AllowSshRootLogin)
+		assert.True(t, *settings.EnableSsh)
+		assert.False(t, *settings.EnableUptMode)
+		require.Len(t, settings.SyslogServers, 1)
+		assert.Equal(t, "10.0.0.3", *settings.SyslogServers[0].Server)
+		assert.Equal(t, "514", *settings.SyslogServers[0].Port)
+	})
+}

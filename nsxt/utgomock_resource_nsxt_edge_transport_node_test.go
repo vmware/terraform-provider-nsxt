@@ -145,6 +145,56 @@ func TestMockResourceNsxtEdgeTransportNodeCreate(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "get API error")
 	})
+
+	t.Run("Create new VM deployment success (no node_id)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTransportNodeMock(t, ctrl)
+		defer restore()
+
+		resp := transportNodeAPIResponse()
+		mockSDK.EXPECT().Create(gomock.Any()).DoAndReturn(func(obj mpmodel.TransportNode) (mpmodel.TransportNode, error) {
+			assert.Equal(t, tnDisplayName, *obj.DisplayName)
+			require.NotNil(t, obj.NodeDeploymentInfo)
+			return resp, nil
+		})
+		mockSDK.EXPECT().Get(tnID).Return(resp, nil)
+
+		res := resourceNsxtEdgeTransportNode()
+		data := map[string]interface{}{
+			"display_name": tnDisplayName,
+			"description":  tnDescription,
+			"external_id":  tnExternalID,
+			"fqdn":         tnFQDN,
+			"ip_addresses": []interface{}{"10.0.0.5"},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtEdgeTransportNodeCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, tnID, d.Id())
+	})
+
+	t.Run("Create new VM deployment fails when Create API returns error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupTransportNodeMock(t, ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Create(gomock.Any()).Return(mpmodel.TransportNode{}, errors.New("create API error"))
+
+		res := resourceNsxtEdgeTransportNode()
+		data := map[string]interface{}{
+			"display_name": tnDisplayName,
+			"external_id":  tnExternalID,
+			"fqdn":         tnFQDN,
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		err := resourceNsxtEdgeTransportNodeCreate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "create API error")
+	})
 }
 
 func TestMockResourceNsxtEdgeTransportNodeRead(t *testing.T) {
