@@ -566,3 +566,41 @@ func TestUnitNsxt_fillSubAttributesInSchema(t *testing.T) {
 		assert.ElementsMatch(t, []string{"SMB_V1"}, elem["cifs_smb_version"])
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyContextProfileExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockContextProfilesSDK := inframocks.NewMockContextProfilesClient(ctrl)
+	ctxProfileWrapper := &cliinfra.PolicyContextProfileClientContext{
+		Client:     mockContextProfilesSDK,
+		ClientType: utl.Local,
+	}
+	originalCli := cliContextProfilesClient
+	defer func() { cliContextProfilesClient = originalCli }()
+	cliContextProfilesClient = func(sessionContext utl.SessionContext, connector client.Connector) *cliinfra.PolicyContextProfileClientContext {
+		return ctxProfileWrapper
+	}
+
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("exists returns true", func(t *testing.T) {
+		mockContextProfilesSDK.EXPECT().Get(ctxProfileID).Return(model.PolicyContextProfile{}, nil)
+		exists, err := resourceNsxtPolicyContextProfileExists(sessionContext, ctxProfileID, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("not found returns false", func(t *testing.T) {
+		mockContextProfilesSDK.EXPECT().Get(ctxProfileID).Return(model.PolicyContextProfile{}, vapiErrors.NotFound{})
+		exists, err := resourceNsxtPolicyContextProfileExists(sessionContext, ctxProfileID, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("API error is propagated", func(t *testing.T) {
+		mockContextProfilesSDK.EXPECT().Get(ctxProfileID).Return(model.PolicyContextProfile{}, vapiErrors.InternalServerError{})
+		_, err := resourceNsxtPolicyContextProfileExists(sessionContext, ctxProfileID, nil)
+		require.Error(t, err)
+	})
+}

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -190,6 +191,40 @@ func TestMockResourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(t *t
 		err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, m)
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"group_path": ffppbGroupPath,
+		})
+		d.SetId(ffppbID)
+
+		query := getCacheQueryKey(resourceTypePolicyFirewallFloodProtectionProfileBindingMap, d, mc)
+		tc := gcache.getTypeCache(resourceTypePolicyFirewallFloodProtectionProfileBindingMap)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypePolicyFirewallFloodProtectionProfileBindingMap)
+
+		gomock.InOrder(
+			mockBindingSDK.EXPECT().Get(ffppbDomainID, ffppbGroupID, ffppbID).Return(model.PolicyFirewallFloodProtectionProfileBindingMap{
+				DisplayName:    &ffppbName,
+				Path:           &ffppbPath,
+				Revision:       &ffppbRevision,
+				ProfilePath:    &ffppbProfilePath,
+				SequenceNumber: &ffppbSeqNum,
+				Description:    strPtr(""),
+			}, nil),
+			mockBindingSDK.EXPECT().Patch(ffppbDomainID, ffppbGroupID, ffppbID, gomock.Any()).
+				DoAndReturn(func(_, _, _ string, patched model.PolicyFirewallFloodProtectionProfileBindingMap) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, ffppbName, d.Get("display_name"))
 	})
 }
 

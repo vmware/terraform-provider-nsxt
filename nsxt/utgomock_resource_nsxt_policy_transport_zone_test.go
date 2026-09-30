@@ -330,3 +330,27 @@ func TestMockResourceNsxtPolicyTransportZoneDelete(t *testing.T) {
 		assert.Contains(t, err.Error(), "API error")
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyTransportZoneImporter(t *testing.T) {
+	res := resourceNsxtPolicyTransportZone()
+
+	t.Run("valid path sets enforcement_point and site_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(tzPath)
+
+		out, err := resourceNsxtPolicyTransportZoneImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, tzID, d.Id())
+		assert.Equal(t, tzEpID, d.Get("enforcement_point"))
+		assert.Equal(t, "/infra/sites/default", d.Get("site_path"))
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := resourceNsxtPolicyTransportZoneImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}

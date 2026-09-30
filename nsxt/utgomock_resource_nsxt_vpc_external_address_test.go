@@ -159,6 +159,60 @@ func TestMockResourceNsxtVpcExternalAddressRead(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtVpcExternalAddressUpdate(t *testing.T) {
+	t.Run("Update success", func(t *testing.T) {
+		util.NsxVersion = "9.0.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockPortsSDK, restore := setupExtAddrMock(t, ctrl)
+		defer restore()
+
+		portWithNoAddr := portWithNoExternalAddress()
+		gomock.InOrder(
+			// updatePort: Get then Update
+			mockPortsSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(portWithNoAddr, nil),
+			mockPortsSDK.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(extAddrPortAPIResponse(), nil),
+			// Read after update
+			mockPortsSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(extAddrPortAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcExternalAddress()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"parent_path":                extAddrPortPath,
+			"allocated_external_ip_path": extAddrAllocPath,
+		})
+		d.SetId("some-uuid")
+
+		err := resourceNsxtVpcExternalAddressUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, extAddrAllocPath, d.Get("allocated_external_ip_path"))
+	})
+
+	t.Run("Update fails when port Get returns error", func(t *testing.T) {
+		util.NsxVersion = "9.0.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockPortsSDK, restore := setupExtAddrMock(t, ctrl)
+		defer restore()
+
+		mockPortsSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nsxModel.VpcSubnetPort{}, errors.New("get failed"))
+
+		res := resourceNsxtVpcExternalAddress()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"parent_path":                extAddrPortPath,
+			"allocated_external_ip_path": extAddrAllocPath,
+		})
+		d.SetId("some-uuid")
+
+		err := resourceNsxtVpcExternalAddressUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
 func TestMockResourceNsxtVpcExternalAddressDelete(t *testing.T) {
 	t.Run("Delete success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -181,5 +235,38 @@ func TestMockResourceNsxtVpcExternalAddressDelete(t *testing.T) {
 
 		err := resourceNsxtVpcExternalAddressDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_nsxtVpcExternalAddressImporter(t *testing.T) {
+	res := resourceNsxtVpcExternalAddress()
+
+	t.Run("policy path id sets parent_path and a new id", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(extAddrPortPath)
+
+		out, err := nsxtVpcExternalAddressImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, extAddrPortPath, d.Get("parent_path"))
+		assert.NotEqual(t, extAddrPortPath, d.Id())
+	})
+
+	t.Run("empty id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(" ")
+
+		_, err := nsxtVpcExternalAddressImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, ErrEmptyImportID, err)
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := nsxtVpcExternalAddressImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, ErrNotAPolicyPath, err)
 	})
 }

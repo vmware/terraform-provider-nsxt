@@ -207,6 +207,43 @@ func TestMockResourceNsxtProxyConfigUpdate(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtProxyConfigImporter(t *testing.T) {
+	util.NsxVersion = "3.0.0"
+	defer func() { util.NsxVersion = "" }()
+	t.Run("Importer sets the singleton ID and reads the config", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupProxyConfigMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get().Return(proxyConfigAPIResponse(), nil)
+
+		res := resourceNsxtProxyConfig()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("whatever-id-is-passed")
+
+		out, err := resourceNsxtProxyConfigImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, proxyID, d.Id())
+	})
+
+	t.Run("Importer fails when Read fails", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupProxyConfigMock(ctrl)
+		defer restore()
+
+		mockSDK.EXPECT().Get().Return(mpModel.Proxy{}, errors.New("API error"))
+
+		res := resourceNsxtProxyConfig()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+
+		_, err := resourceNsxtProxyConfigImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
 func TestMockResourceNsxtProxyConfigDelete(t *testing.T) {
 	util.NsxVersion = "3.0.0"
 	defer func() { util.NsxVersion = "" }()

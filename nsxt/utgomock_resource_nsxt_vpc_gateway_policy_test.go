@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -183,6 +184,32 @@ func TestMockResourceNsxtVpcGatewayPolicyRead(t *testing.T) {
 
 		err := resourceNsxtVPCGatewayPolicyRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag via the VPC OrgRoot H-API", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, mockOrgRoot, restore := setupVpcGwPolicyMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVPCGatewayPolicy()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcGwPolicyData())
+		d.SetId(vpcGwPolicyID)
+
+		query := getCacheQueryKey(resourceTypeGatewayPolicy, d, mc)
+		tc := gcache.getTypeCache(resourceTypeGatewayPolicy)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeGatewayPolicy)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcGwPolicyID).Return(vpcGwPolicyAPIResponse(), nil),
+			mockOrgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
+		)
+
+		err := resourceNsxtVPCGatewayPolicyRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, vpcGwPolicyDisplayName, d.Get("display_name"))
 	})
 }
 

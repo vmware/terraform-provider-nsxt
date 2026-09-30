@@ -190,6 +190,59 @@ func TestMockResourceNsxtPolicyIntrusionServicePolicyUpdate(t *testing.T) {
 	})
 }
 
+func TestMockResourceNsxtPolicyIntrusionServicePolicyUpdateRule(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, mockInfra, restore := setupIspMock(t, ctrl)
+	defer restore()
+
+	t.Run("Update patches a changed rule block", func(t *testing.T) {
+		gomock.InOrder(
+			mockInfra.EXPECT().Patch(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(infraObj nsxModel.Infra, _ *bool) error {
+					require.Len(t, infraObj.Children, 1)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(ispDomain, ispID).Return(ispAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyIntrusionServicePolicy()
+		data := minimalIspDataUpdate()
+		data["rule"] = []interface{}{
+			map[string]interface{}{
+				"nsx_id":       "rule-new",
+				"display_name": "new rule",
+				"action":       "DETECT",
+				"ids_profiles": []interface{}{"/infra/settings/ids-profiles/p1"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ispID)
+
+		err := resourceNsxtPolicyIntrusionServicePolicyUpdate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+	})
+
+	t.Run("Update fails when EXEMPT rule action requires a higher NSX version", func(t *testing.T) {
+		res := resourceNsxtPolicyIntrusionServicePolicy()
+		data := minimalIspDataUpdate()
+		data["rule"] = []interface{}{
+			map[string]interface{}{
+				"nsx_id":       "rule-exempt",
+				"display_name": "exempt rule",
+				"action":       "EXEMPT",
+				"ids_profiles": []interface{}{"/infra/settings/ids-profiles/p1"},
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(ispID)
+
+		err := resourceNsxtPolicyIntrusionServicePolicyUpdate(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "EXEMPT action requires NSX version")
+	})
+}
+
 func TestMockResourceNsxtPolicyIntrusionServicePolicyDelete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

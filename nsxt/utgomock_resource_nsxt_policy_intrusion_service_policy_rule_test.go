@@ -374,3 +374,32 @@ func TestMockResourceNsxtPolicyIntrusionServicePolicyRuleDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyIntrusionServicePolicyRuleExists(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockSDK, restore := setupIdsRuleMock(t, ctrl)
+	defer restore()
+
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+
+	t.Run("exists returns true", func(t *testing.T) {
+		mockSDK.EXPECT().Get(idsRuleDomain, idsRulePolicyID, idsRuleID).Return(nsxModel.IdsRule{}, nil)
+		exists, err := resourceNsxtPolicyIntrusionServicePolicyRuleExists(sessionContext, idsRuleID, idsRulePolicyPath, nil)
+		require.NoError(t, err)
+		assert.True(t, exists)
+	})
+
+	t.Run("not found returns false", func(t *testing.T) {
+		mockSDK.EXPECT().Get(idsRuleDomain, idsRulePolicyID, idsRuleID).Return(nsxModel.IdsRule{}, vapiErrors.NotFound{})
+		exists, err := resourceNsxtPolicyIntrusionServicePolicyRuleExists(sessionContext, idsRuleID, idsRulePolicyPath, nil)
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("API error is propagated", func(t *testing.T) {
+		mockSDK.EXPECT().Get(idsRuleDomain, idsRulePolicyID, idsRuleID).Return(nsxModel.IdsRule{}, vapiErrors.InternalServerError{})
+		_, err := resourceNsxtPolicyIntrusionServicePolicyRuleExists(sessionContext, idsRuleID, idsRulePolicyPath, nil)
+		require.Error(t, err)
+	})
+}

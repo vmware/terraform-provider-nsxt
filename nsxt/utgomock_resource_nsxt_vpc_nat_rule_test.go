@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -129,6 +130,37 @@ func TestMockResourceNsxtVpcNatRuleRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupNatRuleMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyVpcNatRule()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcNatRuleData())
+		d.SetId(vpcNatRuleID)
+
+		query := getCacheQueryKey(resourceTypePolicyVpcNatRule, d, mc)
+		tc := gcache.getTypeCache(resourceTypePolicyVpcNatRule)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypePolicyVpcNatRule)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), vpcNatRuleID).Return(vpcNatRuleAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), vpcNatRuleID, gomock.Any()).
+				DoAndReturn(func(_, _, _, _, _ string, patched nsxModel.PolicyVpcNatRule) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyVpcNatRuleRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, vpcNatRuleDisplayName, d.Get("display_name"))
+	})
 }
 
 func TestMockResourceNsxtVpcNatRuleUpdate(t *testing.T) {
@@ -167,5 +199,28 @@ func TestMockResourceNsxtVpcNatRuleDelete(t *testing.T) {
 
 		err := resourceNsxtPolicyVpcNatRuleDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
+	})
+}
+
+func TestUnitNsxt_nsxtVpcNatRuleImporter(t *testing.T) {
+	res := resourceNsxtPolicyVpcNatRule()
+
+	t.Run("valid policy path sets id and parent_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(vpcNatRuleParentPath + "/" + vpcNatRuleID)
+
+		out, err := nsxtVpcNatRuleImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, vpcNatRuleID, d.Id())
+		assert.Equal(t, "/orgs/default/projects/project1/vpcs/vpc1/nat", d.Get("parent_path"))
+	})
+
+	t.Run("invalid path fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("not-a-valid-path")
+
+		_, err := nsxtVpcNatRuleImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }

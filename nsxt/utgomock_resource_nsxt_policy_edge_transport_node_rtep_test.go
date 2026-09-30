@@ -370,3 +370,35 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeRTEPDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyEdgeTransportNodeRTEPImporter(t *testing.T) {
+	res := resourceNsxtPolicyEdgeTransportNodeRTEP()
+
+	t.Run("valid <tn-path>:<switch-name> sets fields", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(rtepPolicyETNPath + ":" + rtepPolicySwitchName)
+
+		out, err := resourceNsxtPolicyEdgeTransportNodeRTEPImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, rtepPolicyETNPath, d.Get("edge_transport_node_path"))
+		assert.Equal(t, rtepPolicySwitchName, d.Get("host_switch_name"))
+		assert.Equal(t, rtepPolicyETNPath+":"+rtepPolicySwitchName, d.Id())
+	})
+
+	t.Run("missing colon separator fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("no-colon-here")
+
+		_, err := resourceNsxtPolicyEdgeTransportNodeRTEPImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("non-policy-path prefix fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id:" + rtepPolicySwitchName)
+
+		_, err := resourceNsxtPolicyEdgeTransportNodeRTEPImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}

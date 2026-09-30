@@ -357,3 +357,28 @@ func TestMockResourceNsxtPolicyHostTransportNodeDeleteWithNsxRemoval(t *testing.
 		require.NoError(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyHostTransportNodeImporter(t *testing.T) {
+	res := resourceNsxtPolicyHostTransportNode()
+	htnPath := "/infra/sites/default/enforcement-points/default/host-transport-nodes/" + htnID
+
+	t.Run("valid path sets enforcement_point and site_path", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(htnPath)
+
+		out, err := resourceNsxtPolicyHostTransportNodeImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, htnID, d.Id())
+		assert.Equal(t, htnEPID, d.Get("enforcement_point"))
+		assert.Equal(t, htnSitePath, d.Get("site_path"))
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := resourceNsxtPolicyHostTransportNodeImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -144,6 +145,40 @@ func TestMockResourceNsxtPolicyLBServiceRead(t *testing.T) {
 		err := resourceNsxtPolicyLBServiceRead(d, m)
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error obtaining LBService ID")
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(lbServiceID)
+
+		query := getCacheQueryKey(resourceTypeLBService, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBService)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBService)
+
+		gomock.InOrder(
+			mockLbSDK.EXPECT().Get(lbServiceID).Return(model.LBService{
+				Id:               &lbServiceID,
+				DisplayName:      &lbServiceDisplayName,
+				Description:      &lbServiceDescription,
+				Path:             &lbServicePath,
+				Revision:         &lbServiceRevision,
+				ConnectivityPath: &lbServiceConnectivity,
+				Size:             &lbServiceSize,
+			}, nil),
+			mockLbSDK.EXPECT().Patch(lbServiceID, gomock.Any()).
+				DoAndReturn(func(_ string, patched model.LBService) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBServiceRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, lbServiceDisplayName, d.Get("display_name"))
 	})
 }
 

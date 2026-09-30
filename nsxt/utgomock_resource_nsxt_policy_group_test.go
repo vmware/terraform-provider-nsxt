@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -136,6 +137,33 @@ func TestMockResourceNsxtPolicyGroupRead(t *testing.T) {
 
 		err := resourceNsxtPolicyGroupRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyGroup()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGroupData())
+		d.SetId(groupID)
+
+		resourceType := groupCacheResourceType(true)
+		query := getCacheQueryKey(resourceType, d, mc)
+		tc := gcache.getTypeCache(resourceType)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceType)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(groupDomain, groupID).Return(groupAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(groupDomain, groupID, gomock.Any()).
+				DoAndReturn(func(_, _ string, patched nsxModel.Group) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyGroupRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, groupDisplayName, d.Get("display_name"))
 	})
 }
 

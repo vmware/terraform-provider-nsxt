@@ -184,6 +184,36 @@ func TestMockResourceNsxtPolicyIPPoolStaticSubnetRead(t *testing.T) {
 		err := resourceNsxtPolicyIPPoolStaticSubnetRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyIPPoolStaticSubnet()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalStaticSubnetData())
+		d.SetId(staticSubnetID)
+
+		query := getCacheQueryKey(resourceTypeIpAddressPoolStaticSubnet, d, mc)
+		tc := gcache.getTypeCache(resourceTypeIpAddressPoolStaticSubnet)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeIpAddressPoolStaticSubnet)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(staticSubnetPoolID, staticSubnetID).Return(staticSubnetAPIStructValue(t), nil),
+			mockSDK.EXPECT().Patch(staticSubnetPoolID, staticSubnetID, gomock.Any()).
+				DoAndReturn(func(_, _ string, sv *data.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(sv, model.IpAddressPoolStaticSubnetBindingType())
+					require.Empty(t, errs)
+					patched := dv.(model.IpAddressPoolStaticSubnet)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyIPPoolStaticSubnetRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, staticSubnetCIDR, d.Get("cidr"))
+	})
 }
 
 // TestMockResourceNsxtPolicyIPPoolStaticSubnetReadUsesPathAsCacheKeyWhenAvailable is a

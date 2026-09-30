@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -131,6 +132,32 @@ func TestMockResourceNsxtPolicyLBVirtualServerRead(t *testing.T) {
 
 		err := resourceNsxtPolicyLBVirtualServerRead(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBVirtualServer()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBVsData())
+		d.SetId(lbVsID)
+
+		query := getCacheQueryKey(resourceTypeLBVirtualServer, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBVirtualServer)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBVirtualServer)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(lbVsID).Return(lbVsAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(lbVsID, gomock.Any()).
+				DoAndReturn(func(_ string, patched nsxModel.LBVirtualServer) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBVirtualServerRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, lbVsDisplayName, d.Get("display_name"))
 	})
 }
 

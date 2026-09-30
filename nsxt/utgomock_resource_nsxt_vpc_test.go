@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -175,6 +176,37 @@ func TestMockResourceNsxtVpcRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Empty(t, d.Id())
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcMock(t, ctrl)
+		defer restore()
+
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtVpc()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcData())
+		d.SetId(vpcID)
+
+		query := getCacheQueryKey(resourceTypeVpc, d, mc)
+		tc := gcache.getTypeCache(resourceTypeVpc)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeVpc)
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), vpcID).Return(vpcAPIResponse(), nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), vpcID, gomock.Any()).
+				DoAndReturn(func(_, _, _ string, patched nsxModel.Vpc) error {
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtVpcRead(d, mc)
+		require.NoError(t, err)
+		assert.Equal(t, vpcDisplayName, d.Get("display_name"))
+	})
 }
 
 func TestMockResourceNsxtVpcUpdate(t *testing.T) {
@@ -248,5 +280,36 @@ func TestMockResourceNsxtVpcDelete(t *testing.T) {
 
 		err := resourceNsxtVpcDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestUnitNsxt_nsxtVpcImporter(t *testing.T) {
+	res := resourceNsxtVpc()
+
+	t.Run("valid VPC path sets context and id", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/orgs/default/projects/project1/vpcs/vpc1")
+
+		out, err := nsxtVpcImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "vpc1", d.Id())
+	})
+
+	t.Run("malformed VPC path fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/orgs/default/projects/project1/not-vpcs/vpc1")
+
+		_, err := nsxtVpcImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("non-policy-path id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("plain-id")
+
+		_, err := nsxtVpcImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Equal(t, ErrNotAPolicyPath, err)
 	})
 }

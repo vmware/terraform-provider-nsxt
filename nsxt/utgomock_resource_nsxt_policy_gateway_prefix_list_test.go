@@ -17,8 +17,10 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	cliinfra "github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier0sapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	tier0Mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	t0mocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_0s"
 )
 
@@ -205,6 +207,56 @@ func TestMockResourceNsxtPolicyGatewayPrefixListDelete(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalPrefixListData())
 
 		err := resourceNsxtPolicyGatewayPrefixListDelete(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+}
+
+func TestMockResourceNsxtPolicyTier0GatewayImporter(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTier0sSDK := tier0Mocks.NewMockTier0sClient(ctrl)
+	tier0Wrapper := &cliinfra.Tier0ClientContext{
+		Client:     mockTier0sSDK,
+		ClientType: utl.Local,
+	}
+	original := cliTier0sClient
+	defer func() { cliTier0sClient = original }()
+	cliTier0sClient = func(sessionContext utl.SessionContext, connector vapiProtocolClient.Connector) *cliinfra.Tier0ClientContext {
+		return tier0Wrapper
+	}
+
+	res := resourceNsxtPolicyGatewayPrefixList()
+
+	t.Run("valid <gateway-id>/<id> sets gateway_path and id", func(t *testing.T) {
+		gw := nsxModel.Tier0{Path: &prefixListGwPath}
+		mockTier0sSDK.EXPECT().Get(prefixListGwID).Return(gw, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(prefixListGwID + "/" + prefixListID)
+
+		out, err := resourceNsxtPolicyTier0GatewayImporter(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, prefixListID, d.Id())
+		assert.Equal(t, prefixListGwPath, d.Get("gateway_path"))
+	})
+
+	t.Run("malformed id fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("no-slash-here")
+
+		_, err := resourceNsxtPolicyTier0GatewayImporter(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("gateway lookup failure is propagated", func(t *testing.T) {
+		mockTier0sSDK.EXPECT().Get(prefixListGwID).Return(nsxModel.Tier0{}, vapiErrors.NotFound{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(prefixListGwID + "/" + prefixListID)
+
+		_, err := resourceNsxtPolicyTier0GatewayImporter(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
 }

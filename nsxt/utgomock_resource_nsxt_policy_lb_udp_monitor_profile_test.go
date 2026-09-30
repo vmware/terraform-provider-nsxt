@@ -151,6 +151,39 @@ func TestMockResourceNsxtPolicyLBUdpMonitorProfileRead(t *testing.T) {
 		require.NoError(t, err)
 		assertLBUdpMonitorFields(t, d)
 	})
+
+	t.Run("Read (cache enabled): cache miss falls through to backend read and config_scope mode patches the missing provider-managed tag", func(t *testing.T) {
+		mc := newGoMockProviderClientCacheEnabled()
+		res := resourceNsxtPolicyLBUdpMonitorProfile()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBUdpMonitorData())
+		d.SetId(lbUdpMonitorID)
+
+		query := getCacheQueryKey(resourceTypeLBUdpMonitorProfile, d, mc)
+		tc := gcache.getTypeCache(resourceTypeLBUdpMonitorProfile)
+		tc.data[query] = map[string]*data.StructValue{}
+		defer delete(gcache.byTyp, resourceTypeLBUdpMonitorProfile)
+
+		// resourceNsxtPolicyLBUdpMonitorProfilePatch rebuilds the object from schema (d)
+		// rather than from the cache-injected patchObj, so its own
+		// getPolicyTagsWithProviderManagedDefaults call is what supplies the tag here.
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(lbUdpMonitorID).Return(lbUdpMonitorStructValue(t), nil),
+			mockSDK.EXPECT().Patch(lbUdpMonitorID, gomock.Any()).
+				DoAndReturn(func(_ string, sv *data.StructValue) error {
+					converter := bindings.NewTypeConverter()
+					dv, errs := converter.ConvertToGolang(sv, model.LBUdpMonitorProfileBindingType())
+					require.Empty(t, errs)
+					patched := dv.(model.LBUdpMonitorProfile)
+					require.Len(t, patched.Tags, 1)
+					assert.Equal(t, "ut-run-1", *patched.Tags[0].Tag)
+					return nil
+				}),
+		)
+
+		err := resourceNsxtPolicyLBUdpMonitorProfileRead(d, mc)
+		require.NoError(t, err)
+		assertLBUdpMonitorFields(t, d)
+	})
 }
 
 func TestMockResourceNsxtPolicyLBUdpMonitorProfileUpdate(t *testing.T) {
