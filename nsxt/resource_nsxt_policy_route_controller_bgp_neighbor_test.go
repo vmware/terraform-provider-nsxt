@@ -110,9 +110,12 @@ func TestAccResourceNsxtPolicyRouteControllerBgpNeighbor_withRouteFiltering(t *t
 					testAccNsxtPolicyRCBgpNeighborExists(accTestPolicyRCBgpNeighborCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "neighbor_address", accTestPolicyRCBgpNeighborCreateAttributes["neighbor_address"]),
 					resource.TestCheckResourceAttr(testResourceName, "remote_as_num", accTestPolicyRCBgpNeighborCreateAttributes["remote_as_num"]),
-					resource.TestCheckResourceAttr(testResourceName, "route_filtering.#", "1"),
+					// NSX always returns both address families, so both are configured explicitly
+					resource.TestCheckResourceAttr(testResourceName, "route_filtering.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_filtering.0.address_family", "IPV4"),
 					resource.TestCheckResourceAttr(testResourceName, "route_filtering.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "route_filtering.1.address_family", "L2VPN_EVPN"),
+					resource.TestCheckResourceAttr(testResourceName, "route_filtering.1.enabled", "true"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -298,6 +301,11 @@ resource "nsxt_policy_route_controller_bgp_neighbor" "test" {
 
   route_filtering {
     address_family = "IPV4"
+    enabled        = true
+  }
+
+  route_filtering {
+    address_family = "L2VPN_EVPN"
     enabled        = true
   }
 
