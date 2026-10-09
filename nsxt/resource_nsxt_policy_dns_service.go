@@ -40,14 +40,14 @@ func resourceNsxtPolicyDnsService() *schema.Resource {
 			"tag":          getTagsSchema(),
 			"context":      getContextSchemaExtended(true, false, false, true),
 			"allocated_listener_ips": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 2,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validatePolicyPath(),
 				},
-				Description: "Policy paths to IpAddressAllocation objects providing the listener IP addresses for this DNS service. VPC workloads send DNS queries to these IPs. Maximum of two entries are allowed; if two are provided, one must be IPv4 and one must be IPv6.",
+				Description: "Set of policy paths to IpAddressAllocation objects providing the listener IP addresses for this DNS service. VPC workloads send DNS queries to these IPs. Maximum of two entries are allowed; if two are provided, one must be IPv4 and one must be IPv6.",
 			},
 			"transit_gateway": {
 				Type:         schema.TypeString,
@@ -123,7 +123,7 @@ func policyDnsServiceFromSchema(d *schema.ResourceData) model.DnsService {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-	listenerIPs := getStringListFromSchemaList(d, "allocated_listener_ips")
+	listenerIPs := getStringListFromSchemaSet(d, "allocated_listener_ips")
 
 	obj := model.DnsService{
 		DisplayName:          &displayName,
