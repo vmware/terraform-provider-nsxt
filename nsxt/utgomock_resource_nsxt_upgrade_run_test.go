@@ -965,3 +965,311 @@ func TestMockNsxtRunUpgrade(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+// fakeUpgradeStatus serves StatusSummaryClient.Get from a mutable per-component
+// status map, so tests can flip a component's status from inside other mock calls.
+type fakeUpgradeStatus struct {
+	overall    string
+	components map[string]string
+	order      []string
+}
+
+func (f *fakeUpgradeStatus) get(component *string, _, _ interface{}) (nsxModel.UpgradeStatus, error) {
+	overall := f.overall
+	var statuses []nsxModel.ComponentUpgradeStatus
+	for _, c := range f.order {
+		if component != nil && *component != c {
+			continue
+		}
+		ct := c
+		st := f.components[c]
+		statuses = append(statuses, nsxModel.ComponentUpgradeStatus{ComponentType: &ct, Status: &st})
+	}
+	return nsxModel.UpgradeStatus{OverallUpgradeStatus: &overall, ComponentStatus: statuses}, nil
+}
+
+func newFakeUpgradeStatus(overall string, pairs ...string) *fakeUpgradeStatus {
+	f := &fakeUpgradeStatus{overall: overall, components: map[string]string{}}
+	for i := 0; i+1 < len(pairs); i += 2 {
+		f.order = append(f.order, pairs[i])
+		f.components[pairs[i]] = pairs[i+1]
+	}
+	return f
+}
+
+func TestMockNsxtRunUpgradeBranches(t *testing.T) {
+	notStarted := nsxModel.ComponentUpgradeStatus_STATUS_NOT_STARTED
+	success := nsxModel.ComponentUpgradeStatus_STATUS_SUCCESS
+	paused := nsxModel.ComponentUpgradeStatus_STATUS_PAUSED
+	failed := nsxModel.ComponentUpgradeStatus_STATUS_FAILED
+	newSet := func(status upgrade.StatusSummaryClient, plan upgradePlanOps) *upgradeClientSet {
+		return &upgradeClientSet{StatusClient: status, PlanClient: plan, Timeout: 2, Interval: 1, MaxRetries: 1}
+	}
+
+	t.Run("partial upgrade that pauses skips the following components", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(notStarted, edgeUpgradeGroup, notStarted, hostUpgradeGroup, notStarted, mpUpgradeGroup, notStarted)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+		mockPlan.EXPECT().Upgrade(&edgeUpgradeGroup).DoAndReturn(func(_ *string) error {
+			fake.components[edgeUpgradeGroup] = paused
+			return nil
+		})
+
+		partial := map[string]bool{edgeUpgradeGroup: true}
+		require.NoError(t, runUpgrade(newSet(mockStatus, mockPlan), partial, "4.1.0", false, true))
+	})
+
+	t.Run("partial upgrade that fully succeeds stops early", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(notStarted, edgeUpgradeGroup, notStarted, hostUpgradeGroup, notStarted, mpUpgradeGroup, notStarted)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+		mockPlan.EXPECT().Upgrade(&edgeUpgradeGroup).DoAndReturn(func(_ *string) error {
+			fake.components[edgeUpgradeGroup] = success
+			return nil
+		})
+
+		partial := map[string]bool{edgeUpgradeGroup: true}
+		require.NoError(t, runUpgrade(newSet(mockStatus, mockPlan), partial, "4.1.0", false, true))
+	})
+
+	t.Run("vLCM host upgrade is staged before upgrading", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(notStarted, edgeUpgradeGroup, success, hostUpgradeGroup, notStarted, mpUpgradeGroup, success)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+		gomock.InOrder(
+			mockPlan.EXPECT().Stageupgrade(&hostUpgradeGroup).Return(nil),
+			mockPlan.EXPECT().Upgrade(&hostUpgradeGroup).DoAndReturn(func(_ *string) error {
+				fake.components[hostUpgradeGroup] = success
+				return nil
+			}),
+		)
+
+		require.NoError(t, runUpgrade(newSet(mockStatus, mockPlan), map[string]bool{}, "4.1.0", true, true))
+	})
+
+	t.Run("Stageupgrade error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(notStarted, edgeUpgradeGroup, success, hostUpgradeGroup, notStarted, mpUpgradeGroup, success)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+		mockPlan.EXPECT().Stageupgrade(&hostUpgradeGroup).Return(errors.New("staging failed"))
+
+		require.Error(t, runUpgrade(newSet(mockStatus, mockPlan), map[string]bool{}, "4.1.0", true, true))
+	})
+
+	t.Run("component turning SUCCESS mid-run is treated as a concurrent upgrade", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(notStarted, edgeUpgradeGroup, notStarted)
+		// Once the overall-status wait (component == nil) has run, report edge as already succeeded.
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(func(component *string, a, b interface{}) (nsxModel.UpgradeStatus, error) {
+			if component == nil {
+				fake.components[edgeUpgradeGroup] = success
+			}
+			return fake.get(component, a, b)
+		}).AnyTimes()
+
+		err := runUpgrade(newSet(mockStatus, mockPlan), map[string]bool{}, "4.1.0", false, true)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "concurrent upgrade")
+	})
+
+	t.Run("overall upgrade FAILED while waiting is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		fake := newFakeUpgradeStatus(failed, edgeUpgradeGroup, notStarted)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+
+		require.Error(t, runUpgrade(newSet(mockStatus, mockPlan), map[string]bool{}, "4.1.0", false, true))
+	})
+
+	t.Run("status Get error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockPlan, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).Return(nsxModel.UpgradeStatus{}, errors.New("status unavailable"))
+
+		require.Error(t, runUpgrade(newSet(mockStatus, mockPlan), map[string]bool{}, "4.1.0", false, true))
+	})
+}
+
+func TestMockResourceNsxtUpgradeRunCreateFlow(t *testing.T) {
+	util.NsxVersion = "3.0.0"
+	defer func() { util.NsxVersion = "" }()
+	success := nsxModel.ComponentUpgradeStatus_STATUS_SUCCESS
+	res := resourceNsxtUpgradeRun()
+
+	setupSummary := func(t *testing.T, ctrl *gomock.Controller, summary nsxModel.UpgradeSummary, err error) {
+		mockSummary := upgrademocks.NewMockSummaryClient(ctrl)
+		orig := cliUpgradeSummaryClient
+		cliUpgradeSummaryClient = func(_ vapiProtocolClient.Connector) upgrade.SummaryClient { return mockSummary }
+		t.Cleanup(func() { cliUpgradeSummaryClient = orig })
+		mockSummary.EXPECT().Get().Return(summary, err)
+	}
+	target := "4.1.0"
+
+	t.Run("already-upgraded components run postchecks and populate state", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockGroups, _, _, mockStatus, mockUpgrade, mockGroupStatus, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		setupSummary(t, ctrl, nsxModel.UpgradeSummary{TargetVersion: &target}, nil)
+
+		fake := newFakeUpgradeStatus(success, edgeUpgradeGroup, success, hostUpgradeGroup, success, mpUpgradeGroup, success)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).DoAndReturn(fake.get).AnyTimes()
+		mockUpgrade.EXPECT().Executepostupgradechecks(edgeUpgradeGroup).Return(nil)
+
+		groupID, groupType, key, value := "edge-group-1", "EDGE", "upgrade_mode", "in_place"
+		enabled, parallel := true, false
+		mockGroups.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil).Return(nsxModel.UpgradeUnitGroupListResult{
+			Results: []nsxModel.UpgradeUnitGroup{{
+				Id: &groupID, Type_: &groupType, Enabled: &enabled, Parallel: &parallel,
+				ExtendedConfiguration: []nsxModel.KeyValuePair{{Key: &key, Value: &value}},
+			}},
+		}, nil)
+		gsID, gsName, gsStatus := "edge-group-1", "Edge group", success
+		mockGroupStatus.EXPECT().Getall(gomock.Any(), nil, nil, nil, nil, nil).Return(nsxModel.UpgradeUnitGroupStatusListResult{
+			Results: []nsxModel.UpgradeUnitGroupStatus{{GroupId: &gsID, GroupName: &gsName, Status: &gsStatus}},
+		}, nil).Times(3)
+
+		data := minimalUpgradeRunData()
+		data["edge_upgrade_setting"] = []interface{}{map[string]interface{}{"post_upgrade_check": true}}
+		data["finalize_upgrade_setting"] = []interface{}{map[string]interface{}{"enabled": false}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		require.NoError(t, resourceNsxtUpgradeRunCreate(d, newGoMockProviderClient()))
+		assert.NotEmpty(t, d.Id())
+		plans := d.Get("upgrade_group_plan").([]interface{})
+		require.Len(t, plans, 1)
+		assert.Equal(t, value, plans[0].(map[string]interface{})["extended_config"].(map[string]interface{})[key])
+		states := d.Get("state").([]interface{})
+		require.Len(t, states, 3)
+	})
+
+	t.Run("prepare error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, _, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		setupSummary(t, ctrl, nsxModel.UpgradeSummary{TargetVersion: &target}, nil)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).Return(nsxModel.UpgradeStatus{}, errors.New("status unavailable"))
+
+		data := minimalUpgradeRunData()
+		data["edge_upgrade_setting"] = []interface{}{map[string]interface{}{"post_upgrade_check": true}}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		require.Error(t, resourceNsxtUpgradeRunCreate(d, newGoMockProviderClient()))
+	})
+
+	t.Run("run error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, _, mockStatus, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		setupSummary(t, ctrl, nsxModel.UpgradeSummary{TargetVersion: &target}, nil)
+		mockStatus.EXPECT().Get(gomock.Any(), nil, nil).Return(nsxModel.UpgradeStatus{}, errors.New("status unavailable"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+
+		require.Error(t, resourceNsxtUpgradeRunCreate(d, newGoMockProviderClient()))
+	})
+
+	t.Run("summary error is returned", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, _, _, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		setupSummary(t, ctrl, nsxModel.UpgradeSummary{}, errors.New("summary unavailable"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+
+		require.Error(t, resourceNsxtUpgradeRunCreate(d, newGoMockProviderClient()))
+	})
+}
+
+func TestMockNsxtSetUpgradeRunOutputErrors(t *testing.T) {
+	res := resourceNsxtUpgradeRun()
+	edgeType := edgeUpgradeGroup
+	success := nsxModel.ComponentUpgradeStatus_STATUS_SUCCESS
+	anyGroupsList := func(m *upgrademocks.MockUpgradeUnitGroupsClient) *gomock.Call {
+		return m.EXPECT().List(nil, nil, nil, nil, nil, nil, nil, nil)
+	}
+
+	t.Run("group List error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockGroups, _, _, mockStatus, _, mockGroupStatus, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		anyGroupsList(mockGroups).Return(nsxModel.UpgradeUnitGroupListResult{}, errors.New("list failed"))
+
+		ucs := &upgradeClientSet{GroupClient: mockGroups, StatusClient: mockStatus, GroupStatusClient: mockGroupStatus}
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+		require.Error(t, setUpgradeRunOutput(ucs, d))
+	})
+
+	t.Run("status Get error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockGroups, _, _, mockStatus, _, mockGroupStatus, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		anyGroupsList(mockGroups).Return(nsxModel.UpgradeUnitGroupListResult{}, nil)
+		mockStatus.EXPECT().Get(nil, nil, nil).Return(nsxModel.UpgradeStatus{}, errors.New("status unavailable"))
+
+		ucs := &upgradeClientSet{GroupClient: mockGroups, StatusClient: mockStatus, GroupStatusClient: mockGroupStatus}
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+		require.Error(t, setUpgradeRunOutput(ucs, d))
+	})
+
+	t.Run("group status Getall error; nil entries skipped; details kept", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockGroups, _, _, mockStatus, _, mockGroupStatus, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		anyGroupsList(mockGroups).Return(nsxModel.UpgradeUnitGroupListResult{}, nil)
+		details, version := "all good", "4.2.0"
+		mockStatus.EXPECT().Get(nil, nil, nil).Return(nsxModel.UpgradeStatus{ComponentStatus: []nsxModel.ComponentUpgradeStatus{
+			{ComponentType: nil, Status: &success},
+			{ComponentType: &edgeType, Status: &success, Details: &details, TargetComponentVersion: &version},
+		}}, nil)
+		mockGroupStatus.EXPECT().Getall(&edgeType, nil, nil, nil, nil, nil).Return(nsxModel.UpgradeUnitGroupStatusListResult{}, errors.New("getall failed"))
+
+		ucs := &upgradeClientSet{GroupClient: mockGroups, StatusClient: mockStatus, GroupStatusClient: mockGroupStatus}
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+		require.Error(t, setUpgradeRunOutput(ucs, d))
+	})
+
+	t.Run("Read surfaces output errors", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockGroups, _, _, _, _, _, restore := setupUpgradeRunMocks(ctrl)
+		defer restore()
+		anyGroupsList(mockGroups).Return(nsxModel.UpgradeUnitGroupListResult{}, errors.New("list failed"))
+
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalUpgradeRunData())
+		d.SetId("some-id")
+		require.Error(t, resourceNsxtUpgradeRunRead(d, newGoMockProviderClient()))
+	})
+}
