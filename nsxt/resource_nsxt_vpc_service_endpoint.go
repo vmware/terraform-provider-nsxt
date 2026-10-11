@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,6 +23,18 @@ import (
 )
 
 var cliVpcServiceEndpointsClient = vpcs.NewVpcServiceEndpointsClient
+
+// NSX creates the system "_services" subnet along with the first service endpoint in a VPC, and
+// deletes it with the last one. Re-creating an endpoint right after the previous one was deleted
+// fails until the purge cycle (every 5 minutes) removes the old subnet, so creation is retried.
+var (
+	vpcServiceEndpointPurgeWait     = 6 * time.Minute
+	vpcServiceEndpointPurgeInterval = 15 * time.Second
+)
+
+func isVpcServiceEndpointMarkedForDeletionError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "is marked for deletion")
+}
 
 var vpcServiceEndpointIpTypeValues = []string{
 	model.VpcServiceEndpoint_SERVICE_ENDPOINT_IP_TYPE_WORKLOAD,
@@ -122,7 +136,15 @@ func resourceNsxtVpcServiceEndpointCreate(d *schema.ResourceData, m interface{})
 	log.Printf("[INFO] Creating VpcServiceEndpoint with ID %s", id)
 
 	c := cliVpcServiceEndpointsClient(sessionContext, connector)
-	err = c.Patch(parents[0], parents[1], parents[2], id, obj)
+	deadline := time.Now().Add(vpcServiceEndpointPurgeWait)
+	for {
+		err = c.Patch(parents[0], parents[1], parents[2], id, obj)
+		if !isVpcServiceEndpointMarkedForDeletionError(err) || time.Now().After(deadline) {
+			break
+		}
+		log.Printf("[INFO] VpcServiceEndpoint %s: parent object is pending purge, retrying in %s", id, vpcServiceEndpointPurgeInterval)
+		time.Sleep(vpcServiceEndpointPurgeInterval)
+	}
 	if err != nil {
 		return handleCreateError("VpcServiceEndpoint", id, err)
 	}

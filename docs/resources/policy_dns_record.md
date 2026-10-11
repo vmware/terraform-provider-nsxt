@@ -41,7 +41,7 @@ resource "nsxt_policy_dns_record" "example_cname" {
   display_name  = "alias-record"
   record_name   = "alias"
   record_type   = "CNAME"
-  record_values = ["canonical.example.com."]
+  record_values = ["canonical.example.com"]
   zone_path     = nsxt_policy_dns_zone.example.path
   ttl           = 300
 }
@@ -59,7 +59,7 @@ The following arguments are supported:
     * `project_id` - (Required) The ID of the project which the object belongs to.
 * `record_name` - (Required) DNS record name or, for PTR records, the host-octet label within the reverse zone.
 * `record_type` - (Required, Force New) DNS record type. One of `A`, `AAAA`, `CNAME`, `PTR`, `NS`. Immutable after creation.
-* `record_values` - (Required) DNS record data values consistent with `record_type`. At least one value is required.
+* `record_values` - (Required) DNS record data values consistent with `record_type`. At least one value is required. Domain values for `CNAME`, `PTR` and `NS` records must not end with a trailing dot.
 * `zone_path` - (Required, Force New) Policy path to the `ProjectDnsZone` for this record. Immutable after creation.
 * `ttl` - (Optional) Time-To-Live in seconds (30-86400). Overrides the zone's default TTL. Default: `300`.
 * `ip_address` - (Optional) IPv4 address mapped by a PTR record. Only applicable when `record_type` is `PTR`.

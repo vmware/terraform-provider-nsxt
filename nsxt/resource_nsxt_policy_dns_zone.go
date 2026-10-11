@@ -73,13 +73,13 @@ func resourceNsxtPolicyDnsZone() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "FQDN of the primary nameserver (must end with a trailing dot).",
+							Description: "FQDN of the primary nameserver (must not end with a trailing dot).",
 						},
 						"responsible_party": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "Zone administrator email in DNS format (must end with a trailing dot).",
+							Description: "Zone administrator email in DNS format (must not end with a trailing dot).",
 						},
 						"serial_number": {
 							Type:        schema.TypeInt,

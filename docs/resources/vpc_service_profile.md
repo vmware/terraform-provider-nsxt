@@ -80,6 +80,18 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
+# NSX requires a DNS service in the project before dns_config can be set on the profile.
+# The listener IP allocation and transit gateway are defined as in the nsxt_policy_dns_service docs.
+resource "nsxt_policy_dns_service" "project_dns" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
+  display_name           = "project-dns-service"
+  allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.listener.path]
+  transit_gateway        = nsxt_policy_transit_gateway.tgw.path
+}
+
 resource "nsxt_vpc_service_profile" "vpc_dns_service_profile" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
@@ -96,6 +108,8 @@ resource "nsxt_vpc_service_profile" "vpc_dns_service_profile" {
     ipv6_resolver_ip = "fd00:bc::1"
     enable_proxy     = true
   }
+
+  depends_on = [nsxt_policy_dns_service.project_dns]
 }
 ```
 
@@ -137,7 +151,7 @@ The following arguments are supported:
         * `sntp_servers` - (Optional) SNTP server IPv6 addresses
         * `advanced_config` - (Optional) Same semantics as IPv4 `dhcp_config.dhcp_server_config.advanced_config`
             * `is_distributed_dhcp` - (Optional / Computed) Distributed DHCP mode for DHCPv6
-* `dns_config` - (Optional) DNS configuration for this profile. Requires NSX 9.2.0 or higher.
+* `dns_config` - (Optional) DNS configuration for this profile. Requires NSX 9.2.0 or higher. NSX requires a DNS service (`nsxt_policy_dns_service`) to exist in the project before DNS profile settings can be configured.
     * `ipv4_resolver_ip` - (Optional) IPv4 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
     * `ipv6_resolver_ip` - (Optional / Computed) IPv6 listener IP from the project's PolicyDnsService. At least one of `ipv4_resolver_ip` or `ipv6_resolver_ip` must be set when `dns_config` is configured.
     * `enable_proxy` - (Optional) When `true`, DNS requests are proxied through the aDNS service. Defaults to `false`.
