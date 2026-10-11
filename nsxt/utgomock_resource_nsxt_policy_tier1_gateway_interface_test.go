@@ -18,9 +18,11 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
+	infraapi "github.com/vmware/terraform-provider-nsxt/api/infra"
 	tier1sapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
 	t1lsapi "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 	t1lsmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s"
 	t1intmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/tier_1s/locale_services"
 )
@@ -263,5 +265,52 @@ func TestUnitNsxt_resourceNsxtPolicyTier1GatewayInterfaceImport(t *testing.T) {
 		_, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "gateway-id")
+	})
+}
+
+func TestMockResourceNsxtPolicyTier1GatewayInterfaceImportLegacy(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockTier1s := inframocks.NewMockTier1sClient(ctrl)
+	original := cliTier1sClient
+	defer func() { cliTier1sClient = original }()
+	cliTier1sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *infraapi.Tier1ClientContext {
+		return &infraapi.Tier1ClientContext{Client: mockTier1s, ClientType: utl.Local}
+	}
+
+	res := resourceNsxtPolicyTier1GatewayInterface()
+
+	t.Run("<gateway-id>/<locale-service-id>/<interface-id> resolves the gateway path", func(t *testing.T) {
+		gwPath := "/infra/tier-1s/gw-1"
+		mockTier1s.EXPECT().Get("gw-1").Return(nsxModel.Tier1{Path: &gwPath}, nil)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("gw-1/ls-1/int-1")
+
+		out, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, out, 1)
+		assert.Equal(t, "int-1", d.Id())
+		assert.Equal(t, gwPath, d.Get("gateway_path"))
+		assert.Equal(t, "ls-1", d.Get("locale_service_id"))
+	})
+
+	t.Run("gateway lookup failure is returned", func(t *testing.T) {
+		mockTier1s.EXPECT().Get("gw-1").Return(nsxModel.Tier1{}, vapiErrors.NotFound{})
+
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("gw-1/ls-1/int-1")
+
+		_, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
+		require.Error(t, err)
+	})
+
+	t.Run("policy path without locale-services fails", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId("/infra/tier-1s/gw-1/interfaces/int-1")
+
+		_, err := resourceNsxtPolicyTier1GatewayInterfaceImport(d, newGoMockProviderClient())
+		require.Error(t, err)
 	})
 }

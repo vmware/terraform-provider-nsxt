@@ -277,3 +277,36 @@ func TestMockResourceNsxtPolicyGatewayPolicyDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_getUpdatedRuleChildren(t *testing.T) {
+	res := resourceNsxtPolicyGatewayPolicy()
+
+	t.Run("no rule change returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalGwPolicyData())
+
+		children, err := getUpdatedRuleChildren(d)
+		require.NoError(t, err)
+		assert.Nil(t, children)
+	})
+
+	t.Run("new and updated rules each produce a child", func(t *testing.T) {
+		data := minimalGwPolicyData()
+		data["rule"] = []interface{}{
+			map[string]interface{}{
+				"nsx_id":       "rule-existing",
+				"display_name": "existing rule",
+				"scope":        []interface{}{"/infra/tier-0s/t0"},
+			},
+			map[string]interface{}{
+				"display_name":    "new rule",
+				"scope":           []interface{}{"/infra/tier-0s/t0"},
+				"sequence_number": 5,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		children, err := getUpdatedRuleChildren(d)
+		require.NoError(t, err)
+		assert.Len(t, children, 2)
+	})
+}
