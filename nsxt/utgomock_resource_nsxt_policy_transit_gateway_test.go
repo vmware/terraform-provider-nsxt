@@ -1086,21 +1086,15 @@ func TestMockResourceNsxtPolicyTransitGatewayUpdateCentralizedConfig(t *testing.
 }
 
 func TestUnitNsxt_buildTGWBgpConfigChildren(t *testing.T) {
-	t.Run("markDelete true builds a marked-for-delete child regardless of config", func(t *testing.T) {
-		children, err := buildTGWBgpConfigChildren(nil, true)
-		require.NoError(t, err)
-		require.Len(t, children, 1)
-	})
-
-	t.Run("nil config with markDelete false returns no children", func(t *testing.T) {
-		children, err := buildTGWBgpConfigChildren(nil, false)
+	t.Run("nil config returns no children", func(t *testing.T) {
+		children, err := buildTGWBgpConfigChildren(nil)
 		require.NoError(t, err)
 		assert.Nil(t, children)
 	})
 
-	t.Run("non-nil config with markDelete false builds a config child", func(t *testing.T) {
+	t.Run("non-nil config builds a config child", func(t *testing.T) {
 		ecmp := true
-		children, err := buildTGWBgpConfigChildren(&nsxModel.TransitGatewayBgpRoutingConfig{Ecmp: &ecmp}, false)
+		children, err := buildTGWBgpConfigChildren(&nsxModel.TransitGatewayBgpRoutingConfig{Ecmp: &ecmp})
 		require.NoError(t, err)
 		require.Len(t, children, 1)
 	})
