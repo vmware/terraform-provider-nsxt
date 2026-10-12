@@ -86,11 +86,53 @@ func TestMockResourceNsxtPolicyDnsServiceCreate(t *testing.T) {
 		)
 
 		res := resourceNsxtPolicyDnsService()
+		assert.Equal(t, schema.TypeSet, res.Schema["allocated_listener_ips"].Type)
 		d := schema.TestResourceDataRaw(t, res.Schema, minimalDnsSvcData())
 
 		err := resourceNsxtPolicyDnsServiceCreate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, dnsSvcID, d.Id())
+	})
+
+	t.Run("Create success with dual stack allocated_listener_ips", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsSvcMock(t, ctrl)
+		defer restore()
+
+		dualData := minimalDnsSvcData()
+		dualData["allocated_listener_ips"] = []interface{}{
+			"/orgs/default/projects/p1/ip-address-allocations/v4",
+			"/orgs/default/projects/p1/ip-address-allocations/v6",
+		}
+
+		notFoundErr := vapiErrors.NotFound{}
+		var capturedObj nsxModel.DnsService
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), dnsSvcID).Return(nsxModel.DnsService{}, notFoundErr),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), dnsSvcID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, obj nsxModel.DnsService) error {
+					capturedObj = obj
+					return nil
+				}),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), dnsSvcID).Return(dnsSvcAPIResponse(), nil),
+		)
+
+		res := resourceNsxtPolicyDnsService()
+		assert.Equal(t, schema.TypeSet, res.Schema["allocated_listener_ips"].Type)
+
+		d := schema.TestResourceDataRaw(t, res.Schema, dualData)
+
+		err := resourceNsxtPolicyDnsServiceCreate(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, dnsSvcID, d.Id())
+		assert.ElementsMatch(t, []string{
+			"/orgs/default/projects/p1/ip-address-allocations/v4",
+			"/orgs/default/projects/p1/ip-address-allocations/v6",
+		}, capturedObj.AllocatedListenerIps)
 	})
 
 	t.Run("Create fails on old NSX version", func(t *testing.T) {
@@ -122,6 +164,32 @@ func TestMockResourceNsxtPolicyDnsServiceRead(t *testing.T) {
 		err := resourceNsxtPolicyDnsServiceRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, dnsSvcDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Read success with dual stack allocated_listener_ips", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupDnsSvcMock(t, ctrl)
+		defer restore()
+
+		apiResp := dnsSvcAPIResponse()
+		apiResp.AllocatedListenerIps = []string{
+			"/orgs/default/projects/p1/ip-address-allocations/v4",
+			"/orgs/default/projects/p1/ip-address-allocations/v6",
+		}
+		mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), dnsSvcID).Return(apiResp, nil)
+
+		res := resourceNsxtPolicyDnsService()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalDnsSvcData())
+		d.SetId(dnsSvcID)
+
+		err := resourceNsxtPolicyDnsServiceRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.Equal(t, dnsSvcDisplayName, d.Get("display_name"))
+		listenerSet := d.Get("allocated_listener_ips").(*schema.Set)
+		assert.Equal(t, 2, listenerSet.Len())
+		assert.True(t, listenerSet.Contains("/orgs/default/projects/p1/ip-address-allocations/v4"))
+		assert.True(t, listenerSet.Contains("/orgs/default/projects/p1/ip-address-allocations/v6"))
 	})
 
 	t.Run("Read not found clears ID", func(t *testing.T) {

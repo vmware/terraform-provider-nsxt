@@ -51,7 +51,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Required) The context which the object belongs to.
     * `project_id` - (Required) The ID of the project which the object belongs to.
-* `allocated_listener_ips` - (Required) Policy paths to `IpAddressAllocation` objects providing listener IP addresses for this DNS service. At least one entry is required. Maximum of two entries are allowed; if two are provided, one must be IPv4 and one must be IPv6.
+* `allocated_listener_ips` - (Required) Set of policy paths to `IpAddressAllocation` objects providing listener IP addresses for this DNS service. At least one entry is required. Maximum of two entries are allowed; if two are provided, one must be IPv4 and one must be IPv6.
 * `transit_gateway` - (Required) Policy path to the transit gateway providing north-south connectivity. The DNS service listener IPs are reachable by VPC workloads through this transit gateway.
 * `forwarder_config` - (Optional) Forwarder and cache settings. When present, enables recursive resolution by forwarding unmatched queries to the configured upstream servers.
     * `cache_size` - (Optional, Computed) Number of DNS cache entries (100-100000).
