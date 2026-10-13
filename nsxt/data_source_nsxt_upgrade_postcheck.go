@@ -11,13 +11,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/upgrade_unit_groups"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
-var cliUpgradeUnitGroupsAggregateInfoClient = upgrade_unit_groups.NewAggregateInfoClient
+var cliUpgradeUnitGroupsAggregateInfoClient = func(connector client.Connector) upgrade_unit_groups.AggregateInfoClient {
+	return upgrade_unit_groups.NewAggregateInfoClient(connector)
+}
 
 var (
 	// Default waiting setup in seconds
