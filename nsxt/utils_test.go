@@ -293,12 +293,23 @@ func testAccNsxtDnsProjectID() string {
 	return os.Getenv("NSXT_PROJECT_ID")
 }
 
-// testAccNsxtDnsTransitGatewayTemplate returns HCL that creates an inline
-// transit gateway required by DnsService.
+// DNS services require a VNS cluster with default project service allocation.
+func testAccPreCheckDnsVNSCluster(t *testing.T) {
+	testAccOnlyLocalManager(t)
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_MANAGER")
+	testAccEnvDefined(t, "NSXT_TEST_COMPUTE_COLLECTION")
+}
+
+func testAccNsxtDnsVNSClusterTemplate(displayName string) string {
+	return testAccNsxtPolicyVirtualNetworkServiceClusterTemplate(displayName+"-vns", "MEDIUM", 2, true)
+}
+
+// testAccNsxtDnsTransitGatewayTemplate returns HCL that creates the VNS cluster
+// and inline transit gateway required by DnsService.
 // Exposed reference:
 //   - nsxt_policy_transit_gateway.dns_tgw.path
 func testAccNsxtDnsTransitGatewayTemplate(displayName string) string {
-	return fmt.Sprintf(`
+	return testAccNsxtDnsVNSClusterTemplate(displayName) + fmt.Sprintf(`
 resource "nsxt_policy_transit_gateway" "dns_tgw" {
   %s
   display_name    = "%s-tgw"
