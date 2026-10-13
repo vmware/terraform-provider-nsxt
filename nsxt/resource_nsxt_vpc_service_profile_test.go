@@ -262,7 +262,9 @@ func TestAccResourceNsxtVpcServiceProfile_dnsConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcServiceProfileMinimalistic(name),
+				// Keep the project DNS service in the config so it is not destroyed
+				// concurrently with the profile update.
+				Config: testAccNsxtVpcServiceProfileDnsConfigRemoved(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "dns_config.#", "0"),
@@ -702,7 +704,7 @@ func testAccNsxtVpcServiceProfileDnsConfig(displayName, ipv4ResolverIP, ipv6Reso
 	if ipv6ResolverIP != "" {
 		ipv6Line = fmt.Sprintf(`ipv6_resolver_ip = "%s"`, ipv6ResolverIP)
 	}
-	return fmt.Sprintf(`
+	return testAccNsxtVpcServiceProfileProjectDnsService(displayName) + fmt.Sprintf(`
 resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
@@ -714,5 +716,30 @@ resource "nsxt_vpc_service_profile" "test" {
     %s
     enable_proxy = %t
   }
+
+  depends_on = [nsxt_policy_dns_service.project]
 }`, testAccNsxtProjectContext(), displayName, ipv4Line, ipv6Line, enableProxy)
+}
+
+// testAccNsxtVpcServiceProfileProjectDnsService creates a DNS service in the project,
+// which NSX requires before dns_config can be set on a VPC service profile.
+func testAccNsxtVpcServiceProfileProjectDnsService(displayName string) string {
+	return testAccNsxtDnsTransitGatewayTemplate(displayName) + testAccNsxtDnsListenerIPTemplate(displayName) + fmt.Sprintf(`
+resource "nsxt_policy_dns_service" "project" {
+  %s
+  display_name           = "%s-svc"
+  allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.dns_listener.path]
+  transit_gateway        = nsxt_policy_transit_gateway.dns_tgw.path
+}
+`, testAccNsxtMultitenancyContext(false), displayName)
+}
+
+func testAccNsxtVpcServiceProfileDnsConfigRemoved(displayName string) string {
+	return testAccNsxtVpcServiceProfileProjectDnsService(displayName) + fmt.Sprintf(`
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+  dhcp_config {
+  }
+}`, testAccNsxtProjectContext(), displayName)
 }

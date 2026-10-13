@@ -23,8 +23,8 @@ resource "nsxt_policy_dns_zone" "example" {
   ttl             = 300
 
   soa {
-    primary_nameserver = "ns1.example.com."
-    responsible_party  = "admin.example.com."
+    primary_nameserver = "ns1.example.com"
+    responsible_party  = "admin.example.com"
     refresh_interval   = 3600
     retry_interval     = 900
     expire_time        = 604800
@@ -51,8 +51,8 @@ The following arguments are supported:
 * `resolution_scope` - (Optional) Set of VPC policy paths within this project. When set and non-empty, only workloads in the specified VPCs can resolve this zone (split-horizon DNS). When unset or empty, all VPCs in the project can resolve the zone. A zone shared with other projects must have `resolution_scope` unset or empty.
 * `ttl` - (Optional) Default Time-To-Live in seconds for DNS records in this zone (30-86400). Default: `300`.
 * `soa` - (Optional) SOA (Start of Authority) record parameters. All sub-fields are optional and computed; omitted fields use system defaults.
-    * `primary_nameserver` - (Optional, Computed) FQDN of the primary nameserver. Must end with a trailing dot.
-    * `responsible_party` - (Optional, Computed) Zone administrator email in DNS format. Must end with a trailing dot.
+    * `primary_nameserver` - (Optional, Computed) FQDN of the primary nameserver. Must not end with a trailing dot.
+    * `responsible_party` - (Optional, Computed) Zone administrator email in DNS format. Must not end with a trailing dot.
     * `serial_number` - (Optional, Computed) Zone serial number.
     * `refresh_interval` - (Optional, Computed) Refresh interval in seconds.
     * `retry_interval` - (Optional, Computed) Retry interval in seconds.

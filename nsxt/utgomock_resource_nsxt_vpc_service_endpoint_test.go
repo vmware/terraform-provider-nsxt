@@ -7,7 +7,9 @@
 package nsxt
 
 import (
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
@@ -93,6 +95,55 @@ func TestMockResourceNsxtVpcServiceEndpointCreate(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, vpcSvcEpID, d.Id())
 		assert.Equal(t, vpcSvcEpDisplayName, d.Get("display_name"))
+	})
+
+	t.Run("Create retries while parent is marked for deletion", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		origWait, origInterval := vpcServiceEndpointPurgeWait, vpcServiceEndpointPurgeInterval
+		vpcServiceEndpointPurgeWait, vpcServiceEndpointPurgeInterval = time.Minute, time.Millisecond
+		defer func() {
+			util.NsxVersion = ""
+			vpcServiceEndpointPurgeWait, vpcServiceEndpointPurgeInterval = origWait, origInterval
+		}()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSvcEpMock(t, ctrl)
+		defer restore()
+
+		markedErr := errors.New("An object with the same path is marked for deletion")
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID).Return(nsxModel.VpcServiceEndpoint{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID, gomock.Any()).Return(markedErr).Times(2),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID).Return(vpcSvcEpAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcServiceEndpoint()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcSvcEpData())
+
+		require.NoError(t, resourceNsxtVpcServiceEndpointCreate(d, newGoMockProviderClient()))
+		assert.Equal(t, vpcSvcEpID, d.Id())
+	})
+
+	t.Run("Create does not retry other errors", func(t *testing.T) {
+		util.NsxVersion = "9.2.0"
+		defer func() { util.NsxVersion = "" }()
+
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcSvcEpMock(t, ctrl)
+		defer restore()
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID).Return(nsxModel.VpcServiceEndpoint{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), vpcSvcEpID, gomock.Any()).Return(errors.New("boom")).Times(1),
+		)
+
+		res := resourceNsxtVpcServiceEndpoint()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalVpcSvcEpData())
+
+		require.Error(t, resourceNsxtVpcServiceEndpointCreate(d, newGoMockProviderClient()))
 	})
 
 	t.Run("Create fails on old NSX version", func(t *testing.T) {

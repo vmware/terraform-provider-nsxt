@@ -98,8 +98,8 @@ func TestAccResourceNsxtPolicyDnsZone_withSoa(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDnsZoneExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "soa.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "soa.0.primary_nameserver", "ns1.example.com."),
-					resource.TestCheckResourceAttr(testResourceName, "soa.0.responsible_party", "admin.example.com."),
+					resource.TestCheckResourceAttr(testResourceName, "soa.0.primary_nameserver", "ns1.example.com"),
+					resource.TestCheckResourceAttr(testResourceName, "soa.0.responsible_party", "admin.example.com"),
 					resource.TestCheckResourceAttr(testResourceName, "soa.0.refresh_interval", "3600"),
 					resource.TestCheckResourceAttr(testResourceName, "soa.0.retry_interval", "900"),
 					resource.TestCheckResourceAttr(testResourceName, "soa.0.expire_time", "604800"),
@@ -133,7 +133,7 @@ func TestAccResourceNsxtPolicyDnsZone_withPartialSoa(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDnsZoneExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "soa.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "soa.0.primary_nameserver", "ns1.partial.example.com."),
+					resource.TestCheckResourceAttr(testResourceName, "soa.0.primary_nameserver", "ns1.partial.example.com"),
 				),
 			},
 		}),
@@ -271,8 +271,8 @@ resource "nsxt_policy_dns_zone" "test" {
   ttl             = 600
 
   soa {
-    primary_nameserver = "ns1.example.com."
-    responsible_party  = "admin.example.com."
+    primary_nameserver = "ns1.example.com"
+    responsible_party  = "admin.example.com"
     refresh_interval   = 3600
     retry_interval     = 900
     expire_time        = 604800
@@ -301,7 +301,7 @@ resource "nsxt_policy_dns_zone" "test" {
   ttl             = 600
 
   soa {
-    primary_nameserver = "ns1.partial.example.com."
+    primary_nameserver = "ns1.partial.example.com"
   }
 }`,
 		testAccNsxtMultitenancyContext(false),

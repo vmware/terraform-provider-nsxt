@@ -276,8 +276,8 @@ func TestUnitNsxt_policyDnsZoneFromSchema(t *testing.T) {
 			"dns_domain_name": "example.com",
 			"soa": []interface{}{
 				map[string]interface{}{
-					"primary_nameserver": "ns1.example.com.",
-					"responsible_party":  "admin.example.com.",
+					"primary_nameserver": "ns1.example.com",
+					"responsible_party":  "admin.example.com",
 					"serial_number":      5,
 					"refresh_interval":   3600,
 					"retry_interval":     600,
@@ -288,8 +288,8 @@ func TestUnitNsxt_policyDnsZoneFromSchema(t *testing.T) {
 		})
 		obj := policyDnsZoneFromSchema(d)
 		require.NotNil(t, obj.Soa)
-		assert.Equal(t, "ns1.example.com.", *obj.Soa.PrimaryNameserver)
-		assert.Equal(t, "admin.example.com.", *obj.Soa.ResponsibleParty)
+		assert.Equal(t, "ns1.example.com", *obj.Soa.PrimaryNameserver)
+		assert.Equal(t, "admin.example.com", *obj.Soa.ResponsibleParty)
 		assert.EqualValues(t, 5, *obj.Soa.SerialNumber)
 		assert.EqualValues(t, 3600, *obj.Soa.RefreshInterval)
 		assert.EqualValues(t, 600, *obj.Soa.RetryInterval)
@@ -303,13 +303,13 @@ func TestUnitNsxt_policyDnsZoneFromSchema(t *testing.T) {
 			"dns_domain_name": "example.com",
 			"soa": []interface{}{
 				map[string]interface{}{
-					"primary_nameserver": "ns1.example.com.",
+					"primary_nameserver": "ns1.example.com",
 				},
 			},
 		})
 		obj := policyDnsZoneFromSchema(d)
 		require.NotNil(t, obj.Soa)
-		assert.Equal(t, "ns1.example.com.", *obj.Soa.PrimaryNameserver)
+		assert.Equal(t, "ns1.example.com", *obj.Soa.PrimaryNameserver)
 	})
 }
 
@@ -321,7 +321,7 @@ func TestUnitNsxt_policyDnsZoneToSchema(t *testing.T) {
 		description := "a zone"
 		dnsDomain := "example.com"
 		ttl := int64(600)
-		primaryNS := "ns1.example.com."
+		primaryNS := "ns1.example.com"
 		serial := int64(5)
 
 		obj := nsxModel.DnsZone{
