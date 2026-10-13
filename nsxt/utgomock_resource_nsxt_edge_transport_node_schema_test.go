@@ -423,3 +423,61 @@ func TestUnitNsxt_getEdgeNodeSettingsFromSchema(t *testing.T) {
 		assert.Equal(t, "514", *settings.SyslogServers[0].Port)
 	})
 }
+
+func TestUnitNsxt_getHostSwitchSpecFromSchema_edge(t *testing.T) {
+	res := resourceNsxtEdgeTransportNode()
+
+	t.Run("round-trips an edge host switch", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		require.NoError(t, setHostSwitchSpecInSchema(d, hostSwitchSpecStructValue(t, nodeTypeEdge), nodeTypeEdge))
+
+		sv, err := getHostSwitchSpecFromSchema(d, newGoMockProviderClient(), nodeTypeEdge)
+		require.NoError(t, err)
+		require.NotNil(t, sv)
+
+		golang, errs := bindings.NewTypeConverter().ConvertToGolang(sv, mpmodel.StandardHostSwitchSpecBindingType())
+		require.Empty(t, errs)
+		spec := golang.(mpmodel.StandardHostSwitchSpec)
+		require.Len(t, spec.HostSwitches, 1)
+		sw := spec.HostSwitches[0]
+		assert.Equal(t, "hs-1", *sw.HostSwitchId)
+		assert.Equal(t, "hs-name", *sw.HostSwitchName)
+		assert.Equal(t, mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD, *sw.HostSwitchMode)
+		assert.Equal(t, mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_NVDS, *sw.HostSwitchType)
+		require.Len(t, sw.Pnics, 1)
+		assert.Equal(t, "vmnic0", *sw.Pnics[0].DeviceName)
+		assert.Equal(t, "uplink-1", *sw.Pnics[0].UplinkName)
+		// Host-only attributes are not sent for edge nodes.
+		assert.Nil(t, sw.IsMigratePnics)
+		assert.Empty(t, sw.CpuConfig)
+	})
+
+	invalidAssignments := []struct {
+		name  string
+		field string
+		value []interface{}
+	}{
+		{"invalid ip_assignment", "ip_assignment", []interface{}{
+			map[string]interface{}{"assigned_by_dhcp": true, "static_ip_pool": "pool-1"},
+		}},
+		{"invalid ipv6_assignment", "ipv6_assignment", []interface{}{
+			map[string]interface{}{"assigned_by_dhcpv6": true, "no_ipv6": true},
+		}},
+	}
+	for _, tc := range invalidAssignments {
+		t.Run(tc.name, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"standard_host_switch": []interface{}{
+					map[string]interface{}{
+						"host_switch_id": "hs-1",
+						tc.field:         tc.value,
+					},
+				},
+			})
+
+			_, err := getHostSwitchSpecFromSchema(d, newGoMockProviderClient(), nodeTypeEdge)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "error parsing HostSwitchSpec schema")
+		})
+	}
+}

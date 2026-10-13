@@ -715,6 +715,55 @@ func TestUnitNsxt_getIPSecVPNSessionFromSchemaValidation(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotNil(t, sv)
 	})
+
+	withOptionalFields := func(data map[string]interface{}) map[string]interface{} {
+		data["ike_profile_path"] = "/infra/ipsec-vpn-ike-profiles/ike-1"
+		data["local_endpoint_path"] = "/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1/local-endpoints/le-1"
+		data["tunnel_profile_path"] = "/infra/ipsec-vpn-tunnel-profiles/tun-1"
+		data["dpd_profile_path"] = "/infra/ipsec-vpn-dpd-profiles/dpd-1"
+		data["direction"] = nsxModel.TcpMaximumSegmentSizeClamping_DIRECTION_BOTH
+		data["max_segment_size"] = 1400
+		return data
+	}
+	converter := bindings.NewTypeConverter()
+
+	t.Run("route-based session sets optional paths and MSS clamping", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, withOptionalFields(minimalIPSecSessionData()))
+
+		sv, err := getIPSecVPNSessionFromSchema(d)
+		require.NoError(t, err)
+		golang, errs := converter.ConvertToGolang(sv, nsxModel.RouteBasedIPSecVpnSessionBindingType())
+		require.Empty(t, errs)
+		obj := golang.(nsxModel.RouteBasedIPSecVpnSession)
+		assert.Equal(t, "/infra/ipsec-vpn-ike-profiles/ike-1", *obj.IkeProfilePath)
+		assert.Equal(t, "/infra/tier-1s/t1-gw-1/ipsec-vpn-services/svc-1/local-endpoints/le-1", *obj.LocalEndpointPath)
+		assert.Equal(t, "/infra/ipsec-vpn-tunnel-profiles/tun-1", *obj.TunnelProfilePath)
+		assert.Equal(t, "/infra/ipsec-vpn-dpd-profiles/dpd-1", *obj.DpdProfilePath)
+		require.NotNil(t, obj.TcpMssClamping)
+		assert.Equal(t, nsxModel.TcpMaximumSegmentSizeClamping_DIRECTION_BOTH, *obj.TcpMssClamping.Direction)
+		assert.Equal(t, int64(1400), *obj.TcpMssClamping.MaxSegmentSize)
+	})
+
+	t.Run("policy-based session sets optional paths and MSS clamping without size", func(t *testing.T) {
+		data := withOptionalFields(minimalIPSecSessionData())
+		data["vpn_type"] = policyBasedIPSecVpnSession
+		data["max_segment_size"] = 0
+		delete(data, "ip_addresses")
+		delete(data, "prefix_length")
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		sv, err := getIPSecVPNSessionFromSchema(d)
+		require.NoError(t, err)
+		golang, errs := converter.ConvertToGolang(sv, nsxModel.PolicyBasedIPSecVpnSessionBindingType())
+		require.Empty(t, errs)
+		obj := golang.(nsxModel.PolicyBasedIPSecVpnSession)
+		assert.Equal(t, "/infra/ipsec-vpn-ike-profiles/ike-1", *obj.IkeProfilePath)
+		assert.Equal(t, "/infra/ipsec-vpn-tunnel-profiles/tun-1", *obj.TunnelProfilePath)
+		assert.Equal(t, "/infra/ipsec-vpn-dpd-profiles/dpd-1", *obj.DpdProfilePath)
+		require.NotNil(t, obj.TcpMssClamping)
+		assert.Equal(t, nsxModel.TcpMaximumSegmentSizeClamping_DIRECTION_BOTH, *obj.TcpMssClamping.Direction)
+		assert.Nil(t, obj.TcpMssClamping.MaxSegmentSize)
+	})
 }
 
 func TestMockResourceNsxtPolicyIPSecVpnSessionExists(t *testing.T) {
