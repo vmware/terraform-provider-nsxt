@@ -38,6 +38,7 @@ func TestAccResourceNsxtPolicyDnsZone_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
 			testAccOnlyVPC(t)
+			testAccPreCheckDnsVNSCluster(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -87,6 +88,7 @@ func TestAccResourceNsxtPolicyDnsZone_withSoa(t *testing.T) {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
 			testAccOnlyVPC(t)
+			testAccPreCheckDnsVNSCluster(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -122,6 +124,7 @@ func TestAccResourceNsxtPolicyDnsZone_withPartialSoa(t *testing.T) {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
 			testAccOnlyVPC(t)
+			testAccPreCheckDnsVNSCluster(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -148,6 +151,7 @@ func TestAccResourceNsxtPolicyDnsZone_importBasic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "9.2.0")
 			testAccOnlyVPC(t)
+			testAccPreCheckDnsVNSCluster(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -226,6 +230,7 @@ resource "nsxt_policy_dns_service" "parent" {
   display_name           = "%s-svc"
   allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.dns_listener.path]
   transit_gateway        = nsxt_policy_transit_gateway.dns_tgw.path
+  depends_on             = [nsxt_policy_virtual_network_service_cluster.test]
 }
 
 resource "nsxt_policy_dns_zone" "test" {
@@ -262,6 +267,7 @@ resource "nsxt_policy_dns_service" "parent" {
   display_name           = "%s-svc"
   allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.dns_listener.path]
   transit_gateway        = nsxt_policy_transit_gateway.dns_tgw.path
+  depends_on             = [nsxt_policy_virtual_network_service_cluster.test]
 }
 
 resource "nsxt_policy_dns_zone" "test" {
@@ -292,6 +298,7 @@ resource "nsxt_policy_dns_service" "parent" {
   display_name           = "%s-svc"
   allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.dns_listener.path]
   transit_gateway        = nsxt_policy_transit_gateway.dns_tgw.path
+  depends_on             = [nsxt_policy_virtual_network_service_cluster.test]
 }
 
 resource "nsxt_policy_dns_zone" "test" {
