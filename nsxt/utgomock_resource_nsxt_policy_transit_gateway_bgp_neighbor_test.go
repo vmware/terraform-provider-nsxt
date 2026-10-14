@@ -288,3 +288,64 @@ func TestMockResourceNsxtPolicyTransitGatewayBgpNeighborWithRouteFiltering(t *te
 		assert.Equal(t, tgwBgpNbrID, d.Id())
 	})
 }
+
+func TestUnitNsxt_tgwBgpNeighborToStruct(t *testing.T) {
+	res := resourceNsxtPolicyTransitGatewayBgpNeighbor()
+
+	t.Run("minimal config leaves optional blocks unset", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWBgpNeighborData())
+
+		obj, err := tgwBgpNeighborToStruct(d, tgwBgpNbrID)
+		require.NoError(t, err)
+		assert.Nil(t, obj.Bfd)
+		assert.Nil(t, obj.NeighborLocalAsConfig)
+		assert.Nil(t, obj.Password)
+		assert.Empty(t, obj.RouteFiltering)
+	})
+
+	t.Run("all optional blocks are converted", func(t *testing.T) {
+		data := minimalTGWBgpNeighborData()
+		data["password"] = "secret"
+		data["bfd_config"] = []interface{}{
+			map[string]interface{}{"enabled": true, "interval": 500, "multiple": 4},
+		}
+		data["route_filtering"] = []interface{}{
+			map[string]interface{}{
+				"address_family":   nsxModel.BgpRouteFiltering_ADDRESS_FAMILY_IPV4,
+				"enabled":          true,
+				"in_route_filter":  "/infra/prefix-lists/in",
+				"out_route_filter": "/infra/prefix-lists/out",
+				"maximum_routes":   100,
+			},
+		}
+		data["neighbor_local_as_config"] = []interface{}{
+			map[string]interface{}{
+				"local_as_num":          "65001",
+				"as_path_modifier_type": nsxModel.BgpNeighborLocalAsConfig_AS_PATH_MODIFIER_TYPE_PREPEND,
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		obj, err := tgwBgpNeighborToStruct(d, tgwBgpNbrID)
+		require.NoError(t, err)
+		assert.Equal(t, tgwBgpNbrID, *obj.Id)
+		require.NotNil(t, obj.Password)
+		assert.Equal(t, "secret", *obj.Password)
+
+		require.NotNil(t, obj.Bfd)
+		assert.True(t, *obj.Bfd.Enabled)
+		assert.Equal(t, int64(500), *obj.Bfd.Interval)
+		assert.Equal(t, int64(4), *obj.Bfd.Multiple)
+
+		require.Len(t, obj.RouteFiltering, 1)
+		filter := obj.RouteFiltering[0]
+		assert.Equal(t, []string{"/infra/prefix-lists/in"}, filter.InRouteFilters)
+		assert.Equal(t, []string{"/infra/prefix-lists/out"}, filter.OutRouteFilters)
+		require.NotNil(t, filter.MaximumRoutes)
+		assert.Equal(t, int64(100), *filter.MaximumRoutes)
+
+		require.NotNil(t, obj.NeighborLocalAsConfig)
+		assert.Equal(t, "65001", *obj.NeighborLocalAsConfig.LocalAsNum)
+		assert.Equal(t, nsxModel.BgpNeighborLocalAsConfig_AS_PATH_MODIFIER_TYPE_PREPEND, *obj.NeighborLocalAsConfig.AsPathModifierType)
+	})
+}

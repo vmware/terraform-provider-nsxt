@@ -247,3 +247,36 @@ func TestMockResourceNsxtPolicyLBHttpsMonitorProfileDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_getLbServerSslFromSchema(t *testing.T) {
+	res := resourceNsxtPolicyLBHttpsMonitorProfile()
+
+	t.Run("no server_ssl returns nil", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBHttpsMonitorData())
+		assert.Nil(t, getLbServerSslFromSchema(d))
+	})
+
+	t.Run("server_ssl is converted", func(t *testing.T) {
+		data := minimalLBHttpsMonitorData()
+		data["server_ssl"] = []interface{}{
+			map[string]interface{}{
+				"certificate_chain_depth": 5,
+				"client_certificate_path": "/infra/certificates/client",
+				"server_auth":             model.LBServerSslProfileBinding_SERVER_AUTH_REQUIRED,
+				"server_auth_ca_paths":    []interface{}{"/infra/certificates/ca1", "/infra/certificates/ca2"},
+				"server_auth_crl_paths":   []interface{}{"/infra/crls/crl1"},
+				"ssl_profile_path":        "/infra/lb-server-ssl-profiles/default",
+			},
+		}
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+		obj := getLbServerSslFromSchema(d)
+		require.NotNil(t, obj)
+		assert.Equal(t, int64(5), *obj.CertificateChainDepth)
+		assert.Equal(t, "/infra/certificates/client", *obj.ClientCertificatePath)
+		assert.Equal(t, model.LBServerSslProfileBinding_SERVER_AUTH_REQUIRED, *obj.ServerAuth)
+		assert.Equal(t, []string{"/infra/certificates/ca1", "/infra/certificates/ca2"}, obj.ServerAuthCaPaths)
+		assert.Equal(t, []string{"/infra/crls/crl1"}, obj.ServerAuthCrlPaths)
+		assert.Equal(t, "/infra/lb-server-ssl-profiles/default", *obj.SslProfilePath)
+	})
+}
