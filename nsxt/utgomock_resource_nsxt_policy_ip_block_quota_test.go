@@ -15,6 +15,7 @@ import (
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsxinfra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
@@ -22,6 +23,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
 )
+
+var _ nsxinfra.LimitsClient = (*inframocks.MockLimitsClient)(nil)
 
 var (
 	ipbqID          = "ipbq-1"
