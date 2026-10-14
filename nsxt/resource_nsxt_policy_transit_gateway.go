@@ -383,23 +383,7 @@ func setCentralizedConfigInSchema(cfg *model.CentralizedConfig, _ interface{}) [
 	return []interface{}{m}
 }
 
-func buildTGWBgpConfigChildren(config *model.TransitGatewayBgpRoutingConfig, markDelete bool) ([]*data.StructValue, error) {
-	if markDelete {
-		converter := bindings.NewTypeConverter()
-		id := "bgp"
-		boolTrue := true
-		child := model.ChildTransitGatewayBgpRoutingConfig{
-			Id:                             &id,
-			ResourceType:                   "ChildTransitGatewayBgpRoutingConfig",
-			MarkedForDelete:                &boolTrue,
-			TransitGatewayBgpRoutingConfig: &model.TransitGatewayBgpRoutingConfig{Id: &id},
-		}
-		dataValue, errs := converter.ConvertToVapi(child, model.ChildTransitGatewayBgpRoutingConfigBindingType())
-		if len(errs) > 0 {
-			return nil, errs[0]
-		}
-		return []*data.StructValue{dataValue.(*data.StructValue)}, nil
-	}
+func buildTGWBgpConfigChildren(config *model.TransitGatewayBgpRoutingConfig) ([]*data.StructValue, error) {
 	if config == nil {
 		return nil, nil
 	}
@@ -757,7 +741,7 @@ func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{
 		childStructs = append(childStructs, ch...)
 	}
 	if bgpCfg := getTGWBgpConfigFromSchema(d, true, true, true); bgpCfg != nil {
-		ch, err := buildTGWBgpConfigChildren(bgpCfg, false)
+		ch, err := buildTGWBgpConfigChildren(bgpCfg)
 		if err != nil {
 			return handleCreateError("TransitGateway BgpConfig", id, err)
 		}
