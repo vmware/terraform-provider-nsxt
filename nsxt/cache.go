@@ -26,10 +26,20 @@ import (
 // keyed by whatever CacheKeyForResourceID/data-source id was used to look objects up
 // (see converListToMapByType for how an object ends up under multiple keys).
 type resourceTypeCache struct {
-	mu       sync.RWMutex
-	data     map[string]map[string]*data.StructValue // key: query, key: resource ID
-	cacheHit atomic.Int64
-	cacheMis atomic.Int64
+	mu        sync.RWMutex
+	data      map[string]map[string]*data.StructValue     // key: query, key: resource ID
+	ruleIndex map[string]map[string]map[string]model.Rule // key: query, key: policyKey, key: ruleID -> model.Rule
+	// Builds share ownership across aliases of the same parent snapshot. mu protects
+	// both build ownership and generation, which prevents publication after invalidation.
+	ruleBuilds map[ruleIndexBuildKey]chan struct{}
+	generation uint64
+	cacheHit   atomic.Int64
+	cacheMis   atomic.Int64
+}
+
+type ruleIndexBuildKey struct {
+	query  string
+	parent *data.StructValue
 }
 
 // typeScopedCache is the process-wide root: one resourceTypeCache per NSX resource type
@@ -413,7 +423,10 @@ func (c *typeScopedCache) getTypeCache(resourceType string) *resourceTypeCache {
 	if tc, ok := c.byTyp[resourceType]; ok {
 		return tc
 	}
-	tc := &resourceTypeCache{data: make(map[string]map[string]*data.StructValue)}
+	tc := &resourceTypeCache{
+		data:      make(map[string]map[string]*data.StructValue),
+		ruleIndex: make(map[string]map[string]map[string]model.Rule),
+	}
 	c.byTyp[resourceType] = tc
 	return tc
 }
@@ -526,6 +539,9 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 			return events, fmt.Errorf("error converting resources to cache map for resource type %s", resourceType)
 		}
 		c.data[query] = tmp
+		if c.ruleIndex != nil {
+			delete(c.ruleIndex, query)
+		}
 		return events, nil
 	}
 
@@ -562,6 +578,9 @@ func (c *resourceTypeCache) getListOfPolicyResources(query string, d *schema.Res
 		return events, fmt.Errorf("error converting merged resources to cache map for resource type %s", resourceType)
 	}
 	c.data[query] = tmp
+	if c.ruleIndex != nil {
+		delete(c.ruleIndex, query)
+	}
 	return events, nil
 }
 
@@ -678,6 +697,191 @@ func TryCacheRead[T any](d *schema.ResourceData, m interface{}, connector client
 		}
 	}
 	return nil, cacheUsed, cacheAttempted, nil
+}
+
+func (c *resourceTypeCache) getRuleFromIndex(query string, policyKey string, ruleID string) (model.Rule, bool, bool) {
+	if c.ruleIndex == nil {
+		return model.Rule{}, false, false
+	}
+	queryMap, ok := c.ruleIndex[query]
+	if !ok {
+		return model.Rule{}, false, false
+	}
+	policyMap, ok := queryMap[policyKey]
+	if !ok {
+		return model.Rule{}, false, false
+	}
+	rule, found := policyMap[ruleID]
+	return rule, found, true
+}
+
+// TryCacheReadRule reads a single rule from a cached parent policy using an in-memory rule index.
+// On the first lookup for a parent policy, it converts the parent model and builds an O(1) rule index;
+// subsequent lookups for any rule in that policy hit the index directly, eliminating repeated
+// O(N) parent conversions and linear rule slice scans.
+func TryCacheReadRule[T any](
+	d *schema.ResourceData,
+	m interface{},
+	connector client.Connector,
+	policyKey string,
+	ruleID string,
+	resourceType string,
+	bindingType bindings.BindingType,
+	extract func(*T) (string, string, []model.Rule),
+) (*model.Rule, bool, bool, error) {
+	cacheUsed := false
+	cacheAttempted := false
+
+	shortIDBypass := shouldIndexByPath(resourceType) && !strings.Contains(policyKey, "/")
+	if !isRefreshPhase(d) || !IsCacheEnabled(m) || shortIDBypass {
+		return nil, cacheUsed, cacheAttempted, nil
+	}
+
+	tc := gcache.getTypeCache(resourceType)
+	query := getCacheQueryKey(resourceType, d, m)
+	// Consume only policy markers: rule IDs can equal another policy's key.
+	if _, marked := postWriteByKey.Load(postWriteKey(resourceType, policyKey)); marked {
+		tc.mu.Lock()
+		_, postWriteBypassed := postWriteByKey.LoadAndDelete(postWriteKey(resourceType, policyKey))
+		if postWriteBypassed {
+			// Clear every alias and its source so a later read cannot rebuild stale rules.
+			delete(tc.ruleIndex, query)
+			delete(tc.data, query)
+			tc.generation++
+		}
+		tc.mu.Unlock()
+		if postWriteBypassed {
+			return nil, cacheUsed, true, nil
+		}
+	}
+
+	// 1. Fast path: check rule index with RLock.
+	tc.mu.RLock()
+	rule, found, policyIndexed := tc.getRuleFromIndex(query, policyKey, ruleID)
+	tc.mu.RUnlock()
+
+	if policyIndexed {
+		if found {
+			hit := tc.cacheHit.Add(1)
+			log.Printf("[DEBUG] Cache hit: resourceType=%s ruleId=%s under policyKey=%s query=%q (hit=%d miss=%d)", resourceType, ruleID, policyKey, query, hit, tc.cacheMis.Load()) //nolint:gosec
+			return &rule, true, true, nil
+		}
+		tc.cacheMis.Add(1)
+		log.Printf("[DEBUG] Rule %s not found in cached %s %s, falling back to direct GET", ruleID, resourceType, policyKey) //nolint:gosec
+		return nil, false, true, nil
+	}
+
+	// 2. Slow path: read parent from cache.
+	cacheAttempted = true
+	val, err := gcache.readCache(policyKey, resourceType, d, m, connector)
+	if err != nil || val == nil {
+		return nil, false, cacheAttempted, nil
+	}
+
+	parent, ok := val.(*data.StructValue)
+	if !ok {
+		return nil, false, cacheAttempted, nil
+	}
+	buildKey := ruleIndexBuildKey{query: query, parent: parent}
+	snapshotPath, _ := getStructValueStringField(parent, "path")
+	var generation uint64
+	// Coordinate by snapshot so ID/path aliases also share one conversion. Waiters
+	// recheck both the source and the index after the owner finishes.
+	for {
+		tc.mu.Lock()
+		if tc.data[query][policyKey] != parent {
+			tc.mu.Unlock()
+			return nil, false, cacheAttempted, nil
+		}
+		rule, found, policyIndexed = tc.getRuleFromIndex(query, policyKey, ruleID)
+		if !policyIndexed && snapshotPath != "" {
+			// An owner reading via the path may have completed before an ID/alias
+			// reader. Reuse its index only after validating this reader's snapshot.
+			rule, found, policyIndexed = tc.getRuleFromIndex(query, snapshotPath, ruleID)
+			if policyIndexed {
+				tc.ruleIndex[query][policyKey] = tc.ruleIndex[query][snapshotPath]
+			}
+		}
+		if policyIndexed {
+			tc.mu.Unlock()
+			if found {
+				tc.cacheHit.Add(1)
+				return &rule, true, true, nil
+			}
+			tc.cacheMis.Add(1)
+			return nil, false, true, nil
+		}
+		if done, building := tc.ruleBuilds[buildKey]; building {
+			tc.mu.Unlock()
+			<-done
+			continue
+		}
+		if tc.ruleBuilds == nil {
+			tc.ruleBuilds = make(map[ruleIndexBuildKey]chan struct{})
+		}
+		tc.ruleBuilds[buildKey] = make(chan struct{})
+		generation = tc.generation
+		tc.mu.Unlock()
+		break
+	}
+	defer func() {
+		tc.mu.Lock()
+		close(tc.ruleBuilds[buildKey])
+		delete(tc.ruleBuilds, buildKey)
+		tc.mu.Unlock()
+	}()
+
+	// 4. Convert parent policy once and index all child rules.
+	typedParent, ok := convertCachedValue[T](val, resourceType, policyKey, bindingType, m)
+	if !ok || typedParent == nil {
+		return nil, false, cacheAttempted, nil
+	}
+
+	_, parentPath, rules := extract(typedParent)
+	ruleMap := make(map[string]model.Rule, len(rules))
+	for _, r := range rules {
+		if !isGlobalSearchCacheMode(m) {
+			stripProviderManagedTagsFromAny(&r)
+		}
+		if r.Id != nil && *r.Id != "" {
+			ruleMap[*r.Id] = r
+		}
+		if r.Path != nil && *r.Path != "" {
+			ruleMap[*r.Path] = r
+		}
+	}
+
+	// 5. Publish only if the source is still current. Short parent IDs are not
+	// aliases: they can collide across domains/VPCs in a shared query bucket.
+	tc.mu.Lock()
+	if tc.generation != generation || tc.data[query][policyKey] != parent {
+		tc.mu.Unlock()
+		return nil, false, cacheAttempted, nil
+	}
+	if tc.ruleIndex == nil {
+		tc.ruleIndex = make(map[string]map[string]map[string]model.Rule)
+	}
+	if tc.ruleIndex[query] == nil {
+		tc.ruleIndex[query] = make(map[string]map[string]model.Rule)
+	}
+	if policyKey != "" {
+		tc.ruleIndex[query][policyKey] = ruleMap
+	}
+	if parentPath != "" {
+		tc.ruleIndex[query][parentPath] = ruleMap
+	}
+	tc.mu.Unlock()
+
+	// 6. Look up ruleID in ruleMap.
+	if r, exists := ruleMap[ruleID]; exists {
+		hit := tc.cacheHit.Add(1)
+		log.Printf("[DEBUG] Cache hit: resourceType=%s ruleId=%s under policyKey=%s query=%q (hit=%d miss=%d)", resourceType, ruleID, policyKey, query, hit, tc.cacheMis.Load()) //nolint:gosec
+		return &r, true, true, nil
+	}
+
+	tc.cacheMis.Add(1)
+	log.Printf("[DEBUG] Rule %s not found in cached %s %s, falling back to direct GET", ruleID, resourceType, policyKey) //nolint:gosec
+	return nil, false, true, nil
 }
 
 func structValuesToModels[T any](list []*data.StructValue, bt bindings.BindingType) ([]T, error) {
@@ -970,7 +1174,9 @@ func InvalidateCacheForResourceType(resourceType string, m interface{}) {
 	tc := gcache.getTypeCache(resourceType)
 	tc.mu.Lock()
 	defer tc.mu.Unlock()
+	tc.generation++
 	tc.data = make(map[string]map[string]*data.StructValue)
+	tc.ruleIndex = make(map[string]map[string]map[string]model.Rule)
 	log.Printf("[DEBUG] Cache invalidated for resourceType=%s", resourceType) //nolint:gosec
 }
 
