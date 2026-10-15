@@ -31,16 +31,20 @@ func TestAccResourceNsxtPolicyProjectCentralizedNetworkAttachment_basic(t *testi
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: testAccNsxtPolicyProjectCNATemplate(prereqName, createName, "terraform created"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectCentralizedNetworkAttachmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "private_network_attachment", "true"),
+				),
+			},
+			{
 				Config: testAccNsxtPolicyProjectCNATemplate(prereqName, createName, "terraform created", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyProjectCentralizedNetworkAttachmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "terraform created"),
 					resource.TestCheckResourceAttrPair(testResourceName, "subnet_path", "nsxt_vpc_subnet.test", "path"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.#", "1"),
-					resource.TestCheckResourceAttrPair(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", "nsxt_policy_ip_block.test", "path"),
+					resource.TestCheckResourceAttr(testResourceName, "private_network_attachment", "false"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -58,14 +62,20 @@ func TestAccResourceNsxtPolicyProjectCentralizedNetworkAttachment_basic(t *testi
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "terraform updated"),
 					resource.TestCheckResourceAttrPair(testResourceName, "subnet_path", "nsxt_vpc_subnet.test", "path"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_private", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.#", "1"),
-					resource.TestCheckResourceAttrPair(testResourceName, "advertise_outbound_networks.0.allow_external_blocks.0", "nsxt_policy_ip_block.test", "path"),
+					resource.TestCheckResourceAttr(testResourceName, "private_network_attachment", "true"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyProjectCNATemplate(prereqName, updateName, "terraform updated", false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectCentralizedNetworkAttachmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "terraform updated"),
+					resource.TestCheckResourceAttr(testResourceName, "private_network_attachment", "false"),
 				),
 			},
 		},
@@ -149,7 +159,14 @@ func testAccNsxtPolicyProjectCentralizedNetworkAttachmentCheckDestroy(state *ter
 	return nil
 }
 
-func testAccNsxtPolicyProjectCNATemplate(prereqName string, displayName string, description string, allowPrivate bool) string {
+func testAccNsxtPolicyProjectCNATemplate(
+	prereqName, displayName, description string,
+	privateNetworkAttachment ...bool,
+) string {
+	privateNetworkAttachmentConfig := ""
+	if len(privateNetworkAttachment) > 0 {
+		privateNetworkAttachmentConfig = fmt.Sprintf("private_network_attachment = %t", privateNetworkAttachment[0])
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
@@ -194,11 +211,7 @@ resource "nsxt_policy_project_centralized_network_attachment" "test" {
   display_name = "%s"
   description  = "%s"
   subnet_path  = nsxt_vpc_subnet.test.path
-
-  advertise_outbound_networks {
-    allow_private         = %t
-    allow_external_blocks = [nsxt_policy_ip_block.test.path]
-  }
+  %s
 
   tag {
     scope = "scope1"
@@ -212,5 +225,5 @@ data "nsxt_policy_project_centralized_network_attachment" "test" {
   }
   display_name = nsxt_policy_project_centralized_network_attachment.test.display_name
   depends_on   = [nsxt_policy_project_centralized_network_attachment.test]
-}`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName, displayName, description, allowPrivate)
+}`, getEdgeClusterName(), prereqName, prereqName, prereqName, prereqName, displayName, description, privateNetworkAttachmentConfig)
 }
