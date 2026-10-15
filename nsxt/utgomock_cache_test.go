@@ -8,7 +8,12 @@ package nsxt
 
 import (
 	"errors"
+	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
@@ -723,5 +728,382 @@ func TestUnitNsxt_cacheAwareResourceRead(t *testing.T) {
 		assert.False(t, used)
 		assert.True(t, attempted)
 		assert.Nil(t, obj)
+	})
+}
+
+func TestUnitNsxt_tryCacheReadRule(t *testing.T) {
+	d := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+	enabled := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "config_scope"}}
+	disabled := nsxtClients{CommonConfig: commonProviderConfig{CacheMode: "disabled"}}
+	extractSP := func(sp *nsxModel.SecurityPolicy) (string, string, []nsxModel.Rule) {
+		pid, ppath := "", ""
+		if sp.Id != nil {
+			pid = *sp.Id
+		}
+		if sp.Path != nil {
+			ppath = *sp.Path
+		}
+		return pid, ppath, sp.Rules
+	}
+	const policyPath = "/infra/domains/default/security-policies/sp1"
+	setup := func(t *testing.T) (*schema.ResourceData, string, *resourceTypeCache, string) {
+		t.Helper()
+		resourceType := t.Name()
+		resourceData := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+		resourceData.SetId("r1")
+		values, err := modelsToStructValues([]nsxModel.SecurityPolicy{{
+			Id: strPtr("sp1"), Path: strPtr(policyPath),
+			Rules: []nsxModel.Rule{{Id: strPtr("r1"), DisplayName: strPtr("old")}},
+		}}, nsxModel.SecurityPolicyBindingType())
+		require.NoError(t, err)
+		query := getCacheQueryKey(resourceType, resourceData, enabled)
+		tc := gcache.getTypeCache(resourceType)
+		tc.data[query] = map[string]*data.StructValue{"sp1": values[0], policyPath: values[0]}
+		t.Cleanup(func() {
+			gcache.mu.Lock()
+			delete(gcache.byTyp, resourceType)
+			gcache.mu.Unlock()
+		})
+		return resourceData, resourceType, tc, query
+	}
+
+	t.Run("concurrent readers and aliases convert one parent once", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			resourceData, resourceType, _, _ := setup(t)
+			var conversions atomic.Int64
+			release := make(chan struct{})
+			extract := func(sp *nsxModel.SecurityPolicy) (string, string, []nsxModel.Rule) {
+				conversions.Add(1)
+				<-release
+				return extractSP(sp)
+			}
+			var readers sync.WaitGroup
+			for reader := 0; reader < 10; reader++ {
+				policyKey := "sp1"
+				if reader%2 == 0 {
+					policyKey = policyPath
+				}
+				readers.Go(func() {
+					rule, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+						resourceData, enabled, nil, policyKey, "r1", resourceType,
+						nsxModel.SecurityPolicyBindingType(), extract,
+					)
+					assert.NoError(t, err)
+					assert.True(t, used)
+					assert.True(t, attempted)
+					if assert.NotNil(t, rule) {
+						assert.Equal(t, "old", *rule.DisplayName)
+					}
+				})
+				if reader == 0 {
+					// Make the path reader the owner to exercise ID alias reuse.
+					synctest.Wait()
+				}
+			}
+			// Every reader is now blocked, either in extraction or waiting for its owner.
+			synctest.Wait()
+			assert.Equal(t, int64(1), conversions.Load())
+			close(release)
+			readers.Wait()
+			assert.Equal(t, int64(1), conversions.Load())
+		})
+	})
+
+	for _, scenario := range []string{"invalidate", "invalidate and restore snapshot", "post-write bypass", "replace snapshot"} {
+		t.Run("discard in-flight build after "+scenario, func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				resourceData, resourceType, tc, query := setup(t)
+				original := tc.data[query]
+				release := make(chan struct{})
+				finished := make(chan bool, 1)
+				go func() {
+					rule, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+						resourceData, enabled, nil, "sp1", "r1", resourceType,
+						nsxModel.SecurityPolicyBindingType(),
+						func(sp *nsxModel.SecurityPolicy) (string, string, []nsxModel.Rule) {
+							<-release
+							return extractSP(sp)
+						},
+					)
+					finished <- rule == nil && !used && attempted && err == nil
+				}()
+				synctest.Wait()
+				switch scenario {
+				case "invalidate", "invalidate and restore snapshot":
+					InvalidateCacheForResourceType(resourceType, enabled)
+					if scenario == "invalidate and restore snapshot" {
+						tc.mu.Lock()
+						tc.data[query] = original
+						tc.mu.Unlock()
+					}
+				case "post-write bypass":
+					MarkPostWriteForResourceTypeKey(resourceType, "sp1", enabled)
+					_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+						resourceData, enabled, nil, "sp1", "r1", resourceType,
+						nsxModel.SecurityPolicyBindingType(), extractSP,
+					)
+					assert.NoError(t, err)
+					assert.False(t, used)
+					assert.True(t, attempted)
+				case "replace snapshot":
+					values, err := modelsToStructValues([]nsxModel.SecurityPolicy{{
+						Id: strPtr("sp1"), Path: strPtr(policyPath),
+					}}, nsxModel.SecurityPolicyBindingType())
+					require.NoError(t, err)
+					tc.mu.Lock()
+					tc.data[query] = map[string]*data.StructValue{"sp1": values[0]}
+					tc.mu.Unlock()
+				}
+				close(release)
+				assert.True(t, <-finished, "invalidated build must fall back to GET")
+				assert.Empty(t, tc.ruleIndex[query], "invalidated build must not restore any alias")
+				assert.Empty(t, tc.ruleBuilds, "completed build must release waiters")
+			})
+		})
+	}
+
+	t.Run("post-write bypass removes all aliases and stale source", func(t *testing.T) {
+		resourceData, resourceType, tc, query := setup(t)
+		_, used, _, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			resourceData, enabled, nil, "sp1", "r1", resourceType,
+			nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		require.True(t, used)
+		require.Contains(t, tc.ruleIndex[query], policyPath)
+		MarkPostWriteForResourceTypeKey(resourceType, "sp1", enabled)
+		_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			resourceData, enabled, nil, "sp1", "r1", resourceType,
+			nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.False(t, used)
+		assert.True(t, attempted)
+		assert.Empty(t, tc.ruleIndex[query])
+		assert.Empty(t, tc.data[query])
+
+		values, err := modelsToStructValues([]nsxModel.SecurityPolicy{{
+			Id: strPtr("sp1"), Path: strPtr(policyPath),
+			Rules: []nsxModel.Rule{{Id: strPtr("r1"), DisplayName: strPtr("updated")}},
+		}}, nsxModel.SecurityPolicyBindingType())
+		require.NoError(t, err)
+		tc.data[query] = map[string]*data.StructValue{policyPath: values[0]}
+		rule, used, _, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			resourceData, enabled, nil, policyPath, "r1", resourceType,
+			nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		require.True(t, used)
+		require.NotNil(t, rule)
+		assert.Equal(t, "updated", *rule.DisplayName)
+	})
+
+	t.Run("short parent ID does not overwrite another scope", func(t *testing.T) {
+		resourceData, resourceType, tc, query := setup(t)
+		otherPath := "/infra/domains/other/security-policies/sp1"
+		values, err := modelsToStructValues([]nsxModel.SecurityPolicy{{
+			Id: strPtr("sp1"), Path: strPtr(otherPath),
+			Rules: []nsxModel.Rule{{Id: strPtr("r1"), DisplayName: strPtr("other")}},
+		}}, nsxModel.SecurityPolicyBindingType())
+		require.NoError(t, err)
+		tc.data[query][otherPath] = values[0]
+		for _, policyKey := range []string{policyPath, otherPath, "sp1"} {
+			rule, used, _, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+				resourceData, enabled, nil, policyKey, "r1", resourceType,
+				nsxModel.SecurityPolicyBindingType(), extractSP,
+			)
+			require.NoError(t, err)
+			require.True(t, used)
+			require.NotNil(t, rule)
+			want := "old"
+			if policyKey == otherPath {
+				want = "other"
+			}
+			assert.Equal(t, want, *rule.DisplayName, "policy key %s", policyKey)
+		}
+	})
+
+	t.Run("rule ID does not consume another policy marker", func(t *testing.T) {
+		resourceData, resourceType, _, _ := setup(t)
+		MarkPostWriteForResourceTypeKey(resourceType, "r1", enabled)
+		t.Cleanup(func() { postWriteByKey.Delete(postWriteKey(resourceType, "r1")) })
+		_, used, _, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			resourceData, enabled, nil, "sp1", "r1", resourceType,
+			nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.True(t, used)
+		_, marked := postWriteByKey.Load(postWriteKey(resourceType, "r1"))
+		assert.True(t, marked)
+		_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			resourceData, enabled, nil, "r1", "child", resourceType,
+			nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.False(t, used)
+		assert.True(t, attempted)
+		_, marked = postWriteByKey.Load(postWriteKey(resourceType, "r1"))
+		assert.False(t, marked)
+	})
+
+	t.Run("missing rule counts a miss during build and on indexed lookup", func(t *testing.T) {
+		resourceData, resourceType, tc, _ := setup(t)
+		for attempt := 1; attempt <= 2; attempt++ {
+			rule, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+				resourceData, enabled, nil, "sp1", "missing", resourceType,
+				nsxModel.SecurityPolicyBindingType(), extractSP,
+			)
+			require.NoError(t, err)
+			assert.Nil(t, rule)
+			assert.False(t, used)
+			assert.True(t, attempted)
+			assert.Equal(t, int64(attempt), tc.cacheMis.Load())
+		}
+	})
+
+	t.Run("not refresh phase: no attempt", func(t *testing.T) {
+		_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d, enabled, nil, "sp1", "r1", resourceTypeSecurityPolicy, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.False(t, used)
+		assert.False(t, attempted)
+	})
+
+	t.Run("cache disabled: no attempt", func(t *testing.T) {
+		d.SetId("r1")
+		_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d, disabled, nil, "sp1", "r1", resourceTypeSecurityPolicy, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.False(t, used)
+		assert.False(t, attempted)
+	})
+
+	t.Run("post-write bypass consumes marker and bypasses cache", func(t *testing.T) {
+		d.SetId("r1")
+		postWriteByKey.Store(postWriteKey(resourceTypeSecurityPolicy, "sp1"), struct{}{})
+
+		_, used, attempted, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d, enabled, nil, "sp1", "r1", resourceTypeSecurityPolicy, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err)
+		assert.False(t, used)
+		assert.True(t, attempted)
+
+		_, stillMarked := postWriteByKey.Load(postWriteKey(resourceTypeSecurityPolicy, "sp1"))
+		assert.False(t, stillMarked, "post-write marker must be consumed on first read")
+	})
+
+	t.Run("cache hit on multiple rules under one policy uses index", func(t *testing.T) {
+		d1 := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+		d1.SetId("r1")
+		d2 := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+		d2.SetId("r2")
+
+		resourceType := "TestOnlySPForTryCacheReadRule"
+		converter := bindings.NewTypeConverter()
+		spVal, errs := converter.ConvertToVapi(nsxModel.SecurityPolicy{
+			Id:   strPtr("sp1"),
+			Path: strPtr("/infra/domains/default/security-policies/sp1"),
+			Rules: []nsxModel.Rule{
+				{Id: strPtr("r1"), DisplayName: strPtr("rule-one"), Action: strPtr("ALLOW")},
+				{Id: strPtr("r2"), DisplayName: strPtr("rule-two"), Action: strPtr("DROP")},
+			},
+		}, nsxModel.SecurityPolicyBindingType())
+		require.Empty(t, errs)
+
+		query := getCacheQueryKey(resourceType, d1, enabled)
+		tc := gcache.getTypeCache(resourceType)
+		tc.data[query] = map[string]*data.StructValue{"sp1": spVal.(*data.StructValue)}
+		defer func() { delete(gcache.byTyp, resourceType) }()
+
+		// First rule read: populates rule index.
+		rule1, used1, attempted1, err1 := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d1, enabled, nil, "sp1", "r1", resourceType, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err1)
+		assert.True(t, used1)
+		assert.True(t, attempted1)
+		require.NotNil(t, rule1)
+		assert.Equal(t, "rule-one", *rule1.DisplayName)
+
+		// Second rule read: hits rule index fast path directly.
+		rule2, used2, attempted2, err2 := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d2, enabled, nil, "sp1", "r2", resourceType, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err2)
+		assert.True(t, used2)
+		assert.True(t, attempted2)
+		require.NotNil(t, rule2)
+		assert.Equal(t, "rule-two", *rule2.DisplayName)
+
+		// Lookup by parent path also hits rule index.
+		rule1ByPath, usedPath, attemptedPath, errPath := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d1, enabled, nil, "/infra/domains/default/security-policies/sp1", "r1", resourceType, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, errPath)
+		assert.True(t, usedPath)
+		assert.True(t, attemptedPath)
+		require.NotNil(t, rule1ByPath)
+		assert.Equal(t, "rule-one", *rule1ByPath.DisplayName)
+
+		// Non-existent rule in cached policy falls back cleanly.
+		d3 := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+		d3.SetId("r999")
+		rule3, used3, attempted3, err3 := TryCacheReadRule[nsxModel.SecurityPolicy](
+			d3, enabled, nil, "sp1", "r999", resourceType, nsxModel.SecurityPolicyBindingType(), extractSP,
+		)
+		require.NoError(t, err3)
+		assert.False(t, used3)
+		assert.True(t, attempted3)
+		assert.Nil(t, rule3)
+	})
+
+	t.Run("scale test with 1000 rules", func(t *testing.T) {
+		const ruleCount = 1000
+		rules := make([]nsxModel.Rule, ruleCount)
+		for i := 0; i < ruleCount; i++ {
+			id := fmt.Sprintf("rule-%d", i)
+			rules[i] = nsxModel.Rule{
+				Id:          strPtr(id),
+				DisplayName: strPtr(fmt.Sprintf("Rule %d", i)),
+				Action:      strPtr("ALLOW"),
+			}
+		}
+
+		converter := bindings.NewTypeConverter()
+		spVal, errs := converter.ConvertToVapi(nsxModel.SecurityPolicy{
+			Id:    strPtr("sp-scale"),
+			Path:  strPtr("/infra/domains/default/security-policies/sp-scale"),
+			Rules: rules,
+		}, nsxModel.SecurityPolicyBindingType())
+		require.Empty(t, errs)
+
+		resourceType := "TestOnlySPScale"
+		dScale := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+		dScale.SetId("rule-0")
+		query := getCacheQueryKey(resourceType, dScale, enabled)
+		tc := gcache.getTypeCache(resourceType)
+		tc.data[query] = map[string]*data.StructValue{"sp-scale": spVal.(*data.StructValue)}
+		defer func() { delete(gcache.byTyp, resourceType) }()
+
+		start := time.Now()
+		for i := 0; i < ruleCount; i++ {
+			id := fmt.Sprintf("rule-%d", i)
+			dItem := schema.TestResourceDataRaw(t, cacheTestSchema(), map[string]interface{}{})
+			dItem.SetId(id)
+
+			r, used, _, err := TryCacheReadRule[nsxModel.SecurityPolicy](
+				dItem, enabled, nil, "sp-scale", id, resourceType, nsxModel.SecurityPolicyBindingType(), extractSP,
+			)
+			require.NoError(t, err)
+			require.True(t, used)
+			require.NotNil(t, r)
+			assert.Equal(t, id, *r.Id)
+		}
+		elapsed := time.Since(start)
+		// All 1000 rule reads with O(1) index must complete in well under 200ms.
+		assert.Less(t, elapsed, 200*time.Millisecond, "reading 1000 cached rules should be near instantaneous")
 	})
 }

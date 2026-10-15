@@ -120,24 +120,31 @@ func resourceNsxtPolicyGatewayPolicyRuleRead(d *schema.ResourceData, m interface
 	}
 
 	if isCacheEnabledForRead(d, m) {
-		gp, cacheUsed, _, cacheErr := TryCacheRead[model.GatewayPolicy](
+		rule, cacheUsed, _, cacheErr := TryCacheReadRule[model.GatewayPolicy](
 			d,
 			m,
 			connector,
 			policyPath,
+			id,
 			resourceTypeGatewayPolicy,
 			model.GatewayPolicyBindingType(),
+			func(gp *model.GatewayPolicy) (string, string, []model.Rule) {
+				var pid, ppath string
+				if gp.Id != nil {
+					pid = *gp.Id
+				}
+				if gp.Path != nil {
+					ppath = *gp.Path
+				}
+				return pid, ppath, gp.Rules
+			},
 		)
 		if cacheErr != nil {
 			return handleReadError(d, "GatewayPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), cacheErr)
 		}
-		if cacheUsed && gp != nil && len(gp.Rules) > 0 {
-			for _, r := range gp.Rules {
-				if r.Id != nil && *r.Id == id {
-					securityAndGatewayPolicyRuleModelToSchema(d, r)
-					return nil
-				}
-			}
+		if cacheUsed && rule != nil {
+			securityAndGatewayPolicyRuleModelToSchema(d, *rule)
+			return nil
 		}
 	}
 	rule, err := client.Get(domain, policyID, id)
