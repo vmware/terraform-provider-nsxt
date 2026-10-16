@@ -153,14 +153,14 @@ func resourceNsxtPolicyLBHttpApplicationProfilePatch(d *schema.ResourceData, m i
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbAppProfilesClient(sessionContext, connector)
+	client := getLbAppProfileAPI(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
 func resourceNsxtPolicyLBHttpApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBAppProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBAppProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func resourceNsxtPolicyLBHttpApplicationProfileRead(d *schema.ResourceData, m in
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbAppProfilesClient(sessionContext, connector)
+	client := getLbAppProfileAPI(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpProfile", id, err)

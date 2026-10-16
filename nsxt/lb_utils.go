@@ -168,8 +168,11 @@ func getLbHTTPHeaderSchema(description string) *schema.Schema {
 }
 
 func resourceNsxtPolicyLBAppProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbAppProfilesClient(sessionContext, connector)
+	return resourceNsxtPolicyLBAppProfileExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBAppProfileExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := getLbAppProfileAPI(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -191,7 +194,7 @@ func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{})
 	connector := getPolicyConnector(m)
 	forceParam := true
 	sessionContext := getSessionContext(d, m)
-	client := cliLbAppProfilesClient(sessionContext, connector)
+	client := getLbAppProfileAPI(sessionContext, connector)
 	err := client.Delete(id, &forceParam)
 	if err != nil {
 		return handleDeleteError("LBAppProfile", id, err)
@@ -200,8 +203,11 @@ func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtPolicyLBMonitorProfileExistsWrapper(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	return resourceNsxtPolicyLBMonitorProfileExistsWrapperCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBMonitorProfileExistsWrapperCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -222,7 +228,7 @@ func resourceNsxtPolicyLBMonitorProfileDelete(d *schema.ResourceData, m interfac
 	connector := getPolicyConnector(m)
 	forceParam := true
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	err := client.Delete(id, &forceParam)
 	if err != nil {
 		return handleDeleteError("LBMonitorProfile", id, err)

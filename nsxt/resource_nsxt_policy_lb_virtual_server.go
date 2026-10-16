@@ -1532,8 +1532,11 @@ func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model
 
 func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	// For exists check, we use Local client type as default
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbVirtualServersClient(sessionContext, connector)
+	return resourceNsxtPolicyLBVirtualServerExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBVirtualServerExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := getLbVirtualServerAPI(sessionContext, connector)
 	if client == nil {
 		return false, fmt.Errorf("unsupported client type")
 	}
@@ -1553,13 +1556,13 @@ func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connect
 func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbVirtualServersClient(sessionContext, connector)
+	client := getLbVirtualServerAPI(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBVirtualServerExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBVirtualServerExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -1629,7 +1632,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbVirtualServersClient(sessionContext, connector)
+	client := getLbVirtualServerAPI(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -1641,7 +1644,7 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 
 	var obj *model.LBVirtualServer
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBVirtualServer](
 			d,
 			m,
@@ -1726,7 +1729,7 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbVirtualServersClient(sessionContext, connector)
+	client := getLbVirtualServerAPI(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}
@@ -1833,7 +1836,7 @@ func resourceNsxtPolicyLBVirtualServerDelete(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbVirtualServersClient(sessionContext, connector)
+	client := getLbVirtualServerAPI(sessionContext, connector)
 	if client == nil {
 		return fmt.Errorf("unsupported client type")
 	}

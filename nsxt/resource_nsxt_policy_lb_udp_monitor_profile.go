@@ -88,14 +88,14 @@ func resourceNsxtPolicyLBUdpMonitorProfilePatch(d *schema.ResourceData, m interf
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
 func resourceNsxtPolicyLBUdpMonitorProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBMonitorProfileExistsWrapper)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBMonitorProfileExistsWrapperCtx)
 	if err != nil {
 		return err
 	}
@@ -121,10 +121,10 @@ func resourceNsxtPolicyLBUdpMonitorProfileRead(d *schema.ResourceData, m interfa
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	var lbUDPMonitor *model.LBUdpMonitorProfile
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		lbUDPMonitor, _, _, err = CacheAwareResourceRead[model.LBUdpMonitorProfile](
 			d,
 			m,

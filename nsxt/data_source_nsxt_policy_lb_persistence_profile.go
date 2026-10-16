@@ -55,7 +55,7 @@ func dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(profile model.LBPersist
 func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	converter := bindings.NewTypeConverter()
 
 	objID := d.Get("id").(string)

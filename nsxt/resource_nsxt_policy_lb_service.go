@@ -80,8 +80,11 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbServicesClient(sessionContext, connector)
+	return resourceNsxtPolicyLBServiceExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBServiceExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := getLbServiceAPI(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -98,14 +101,14 @@ func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, is
 func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServicesClient(sessionContext, connector)
+	client := getLbServiceAPI(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBServiceExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBServiceExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -144,7 +147,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServicesClient(sessionContext, connector)
+	client := getLbServiceAPI(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -156,7 +159,7 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 	}
 	var obj *model.LBService
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBService](
 			d,
 			m,
@@ -205,7 +208,7 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServicesClient(sessionContext, connector)
+	client := getLbServiceAPI(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -252,7 +255,7 @@ func resourceNsxtPolicyLBServiceDelete(d *schema.ResourceData, m interface{}) er
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServicesClient(sessionContext, connector)
+	client := getLbServiceAPI(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

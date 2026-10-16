@@ -220,9 +220,13 @@ func resourceNsxtPolicyLBCookiePersistenceProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBPersistenceProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	// For exists check, we use Local client type as default
+	return resourceNsxtPolicyLBPersistenceProfileExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBPersistenceProfileExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -239,7 +243,7 @@ func resourceNsxtPolicyLBCookiePersistenceProfileCreate(d *schema.ResourceData, 
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPersistenceProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBPersistenceProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -268,7 +272,7 @@ func resourceNsxtPolicyLBCookiePersistenceProfileCreate(d *schema.ResourceData, 
 	log.Printf("[INFO] Creating LBCookiePersistenceProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("LBCookiePersistenceProfile", id, err)
@@ -289,7 +293,7 @@ func resourceNsxtPolicyLBCookiePersistenceProfileRead(d *schema.ResourceData, m 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 
 	genObj, err := client.Get(id)
 	if err != nil {
@@ -348,7 +352,7 @@ func resourceNsxtPolicyLBCookiePersistenceProfileUpdate(d *schema.ResourceData, 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	_, err := client.Update(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleUpdateError("LBCookiePersistenceProfile", id, err)
@@ -366,7 +370,7 @@ func resourceNsxtPolicyLBPersistenceProfileDelete(d *schema.ResourceData, m inte
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 	forceParam := (*bool)(nil)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err := client.Delete(id, forceParam)
 
 	if err != nil {

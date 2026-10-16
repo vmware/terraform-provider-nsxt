@@ -28,7 +28,7 @@ func dataSourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 func dataSourceNsxtPolicyLBClientSslProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbClientSslProfilesClient(sessionContext, connector)
+	client := getLbClientSslProfileAPI(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
