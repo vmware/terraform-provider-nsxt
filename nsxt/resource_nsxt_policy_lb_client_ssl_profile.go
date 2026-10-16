@@ -80,9 +80,13 @@ func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBClientSslProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	// For exists check, we use Local client type as default
+	return resourceNsxtPolicyLBClientSslProfileExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBClientSslProfileExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbClientSslProfilesClient(sessionContext, connector)
+	client := getLbClientSslProfileAPI(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -123,14 +127,14 @@ func resourceNsxtPolicyLBClientSslProfilePatch(d *schema.ResourceData, m interfa
 	log.Printf("[INFO] Patching LBClientSslProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbClientSslProfilesClient(sessionContext, connector)
+	client := getLbClientSslProfileAPI(sessionContext, connector)
 	return client.Patch(id, obj)
 }
 
 func resourceNsxtPolicyLBClientSslProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBClientSslProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBClientSslProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -156,7 +160,7 @@ func resourceNsxtPolicyLBClientSslProfileRead(d *schema.ResourceData, m interfac
 
 	var obj model.LBClientSslProfile
 	sessionContext := getSessionContext(d, m)
-	client := cliLbClientSslProfilesClient(sessionContext, connector)
+	client := getLbClientSslProfileAPI(sessionContext, connector)
 	var err error
 	obj, err = client.Get(id)
 	if err != nil {
@@ -207,7 +211,7 @@ func resourceNsxtPolicyLBClientSslProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 	var err error
-	client := cliLbClientSslProfilesClient(sessionContext, connector)
+	client := getLbClientSslProfileAPI(sessionContext, connector)
 	err = client.Delete(id, &forceParam)
 
 	if err != nil {

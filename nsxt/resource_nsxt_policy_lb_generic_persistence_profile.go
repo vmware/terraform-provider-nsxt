@@ -75,7 +75,7 @@ func resourceNsxtPolicyLBGenericPersistenceProfileCreate(d *schema.ResourceData,
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPersistenceProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBPersistenceProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func resourceNsxtPolicyLBGenericPersistenceProfileCreate(d *schema.ResourceData,
 	log.Printf("[INFO] Creating LBGenericPersistenceProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("LBGenericPersistenceProfile", id, err)
@@ -125,7 +125,7 @@ func resourceNsxtPolicyLBGenericPersistenceProfileRead(d *schema.ResourceData, m
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 
 	genObj, err := client.Get(id)
 	if err != nil {
@@ -183,7 +183,7 @@ func resourceNsxtPolicyLBGenericPersistenceProfileUpdate(d *schema.ResourceData,
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	_, err := client.Update(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleUpdateError("LBGenericPersistenceProfile", id, err)
@@ -200,7 +200,7 @@ func resourceNsxtPolicyLBGenericPersistenceProfileDelete(d *schema.ResourceData,
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

@@ -92,7 +92,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d *schema.ResourceData
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPersistenceProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBPersistenceProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileCreate(d *schema.ResourceData
 	log.Printf("[INFO] Creating LBSourceIpPersistenceProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("LBSourceIpPersistenceProfile", id, err)
@@ -143,10 +143,10 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileRead(d *schema.ResourceData, 
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	var obj *model.LBSourceIpPersistenceProfile
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBSourceIpPersistenceProfile](
 			d,
 			m,
@@ -237,7 +237,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileUpdate(d *schema.ResourceData
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	_, err := client.Update(id, dataValue.(*data.StructValue))
 	if err != nil {
 		return handleUpdateError("LBSourceIpPersistenceProfile", id, err)
@@ -255,7 +255,7 @@ func resourceNsxtPolicyLBSourceIpPersistenceProfileDelete(d *schema.ResourceData
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPersistenceProfilesClient(sessionContext, connector)
+	client := getLbPersistenceProfileAPI(sessionContext, connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {

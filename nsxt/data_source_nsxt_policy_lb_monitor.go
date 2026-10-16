@@ -67,7 +67,7 @@ func policyLbMonitorConvert(obj *data.StructValue, requestedType string) (*model
 func dataSourceNsxtPolicyLBMonitorRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 
 	objID := d.Get("id").(string)
 	objTypeValue, typeSet := d.GetOk("type")

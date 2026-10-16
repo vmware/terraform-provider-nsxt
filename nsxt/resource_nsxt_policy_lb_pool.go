@@ -473,8 +473,11 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 }
 
 func resourceNsxtPolicyLBPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbPoolsClient(sessionContext, connector)
+	return resourceNsxtPolicyLBPoolExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBPoolExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := getLbPoolAPI(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -491,14 +494,14 @@ func resourceNsxtPolicyLBPoolExists(id string, connector client.Connector, isGlo
 func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPoolsClient(sessionContext, connector)
+	client := getLbPoolAPI(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPoolExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBPoolExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -553,7 +556,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPoolsClient(sessionContext, connector)
+	client := getLbPoolAPI(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -566,7 +569,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 
 	var obj *model.LBPool
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBPool](
 			d,
 			m,
@@ -647,7 +650,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPoolsClient(sessionContext, connector)
+	client := getLbPoolAPI(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -713,7 +716,7 @@ func resourceNsxtPolicyLBPoolDelete(d *schema.ResourceData, m interface{}) error
 
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
-	client := cliLbPoolsClient(sessionContext, connector)
+	client := getLbPoolAPI(sessionContext, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

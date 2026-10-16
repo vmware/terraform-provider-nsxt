@@ -104,14 +104,14 @@ func resourceNsxtPolicyLBHttpsMonitorProfilePatch(d *schema.ResourceData, m inte
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	return client.Patch(id, dataValue.(*data.StructValue))
 }
 
 func resourceNsxtPolicyLBHttpsMonitorProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBMonitorProfileExistsWrapper)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBMonitorProfileExistsWrapperCtx)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func resourceNsxtPolicyLBHttpsMonitorProfileRead(d *schema.ResourceData, m inter
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbMonitorProfilesClient(sessionContext, connector)
+	client := getLbMonitorProfileAPI(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "LBHttpsMonitorProfile", id, err)

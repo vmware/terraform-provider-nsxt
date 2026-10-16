@@ -142,9 +142,13 @@ func resourceNsxtPolicyLBServerSslProfile() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBServerSslProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	// For exists check, we use Local client type as default
+	return resourceNsxtPolicyLBServerSslProfileExistsCtx(utl.SessionContext{ClientType: utl.Local}, id, connector)
+}
+
+func resourceNsxtPolicyLBServerSslProfileExistsCtx(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	sessionContext := utl.SessionContext{ClientType: utl.Local}
-	client := cliLbServerSslProfilesClient(sessionContext, connector)
+	client := getLbServerSslProfileAPI(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -160,7 +164,7 @@ func resourceNsxtPolicyLBServerSslProfileExists(id string, connector client.Conn
 func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBServerSslProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyLBServerSslProfileExistsCtx)
 	if err != nil {
 		return err
 	}
@@ -183,7 +187,7 @@ func resourceNsxtPolicyLBServerSslProfileCreate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Creating LBServerSslProfile with ID %s", id)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServerSslProfilesClient(sessionContext, connector)
+	client := getLbServerSslProfileAPI(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("LBServerSslProfile", id, err)
@@ -204,11 +208,11 @@ func resourceNsxtPolicyLBServerSslProfileRead(d *schema.ResourceData, m interfac
 	}
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServerSslProfilesClient(sessionContext, connector)
+	client := getLbServerSslProfileAPI(sessionContext, connector)
 
 	var obj *model.LBServerSslProfile
 	var err error
-	if isCacheEnabledForRead(d, m) {
+	if isLbCacheEnabledForRead(d, m) {
 		obj, _, _, err = CacheAwareResourceRead[model.LBServerSslProfile](
 			d,
 			m,
@@ -277,7 +281,7 @@ func resourceNsxtPolicyLBServerSslProfileUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServerSslProfilesClient(sessionContext, connector)
+	client := getLbServerSslProfileAPI(sessionContext, connector)
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("LBServerSslProfile", id, err)
@@ -296,7 +300,7 @@ func resourceNsxtPolicyLBServerSslProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 
 	sessionContext := getSessionContext(d, m)
-	client := cliLbServerSslProfilesClient(sessionContext, connector)
+	client := getLbServerSslProfileAPI(sessionContext, connector)
 	err := client.Delete(id, nil)
 
 	if err != nil {
