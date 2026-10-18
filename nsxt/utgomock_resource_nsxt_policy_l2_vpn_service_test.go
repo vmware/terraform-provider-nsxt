@@ -7,6 +7,10 @@
 package nsxt
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -191,4 +195,39 @@ func TestMockResourceNsxtPolicyL2VpnServiceDelete(t *testing.T) {
 		err := resourceNsxtPolicyL2VpnServiceDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_L2VPNServiceGatewayAndLocaleRouting(t *testing.T) {
+	for _, tier0 := range []bool{false, true} {
+		for _, locale := range []string{"", "locale"} {
+			t.Run(fmt.Sprintf("tier0_%v_locale_%s", tier0, locale), func(t *testing.T) {
+				tier := "tier-1s"
+				if tier0 {
+					tier = "tier-0s"
+				}
+				expectedPath := "/policy/api/v1/infra/" + tier + "/gateway"
+				if locale != "" {
+					expectedPath += "/locale-services/" + locale
+				}
+				expectedPath += "/l2vpn-services/service"
+				m := newIsolatedMockProviderClient(t)
+				m.Host = "https://nsx.invalid"
+				requests := []string{}
+				m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+					requests = append(requests, r.Method)
+					assert.Equal(t, expectedPath, r.URL.Path)
+					return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(`{"id":"service","display_name":"VPN"}`)), Request: r}, nil
+				})}
+				connector := getPolicyConnector(m)
+				ctx := utl.SessionContext{ClientType: utl.Local}
+				obj, err := getNsxtPolicyL2VpnServiceByID(connector, "gateway", tier0, locale, "service", false, ctx)
+				require.NoError(t, err)
+				require.NotNil(t, obj.Id)
+				assert.Equal(t, "service", *obj.Id)
+				require.NoError(t, patchNsxtPolicyL2VpnService(connector, "gateway", locale, obj, tier0, ctx))
+				require.NoError(t, deleteNsxtPolicyL2VpnService(connector, "gateway", locale, tier0, "service", ctx))
+				assert.Equal(t, []string{"GET", "PATCH", "DELETE"}, requests)
+			})
+		}
+	}
 }

@@ -370,3 +370,40 @@ func TestMockResourceNsxtEdgeTransportNodeDelete(t *testing.T) {
 		assert.Contains(t, err.Error(), "delete API error")
 	})
 }
+
+func TestUnitNsxt_MalformedManagementIPAssignments(t *testing.T) {
+	for _, tc := range []struct{ kind, field string }{
+		{"StaticIpListSpec", "ip_list"}, {"StaticIpPoolSpec", "ip_pool_id"}, {"StaticIpMacListSpec", "ip_mac_list"},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			_, err := setIPAssignmentInSchema(malformedAPIModel("resource_type", tc.kind, tc.field))
+			require.Error(t, err)
+		})
+	}
+	for _, tc := range []struct{ kind, field string }{
+		{"StaticIpv6ListSpec", "ipv6_list"}, {"StaticIpv6PoolSpec", "ipv6_pool_id"}, {"StaticIpv6MacListSpec", "ipv6_mac_list"},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			_, err := setIPv6AssignmentInSchema(malformedAPIModel("resource_type", tc.kind, tc.field))
+			require.Error(t, err)
+		})
+	}
+	_, err := setIPAssignmentInSchema(data.NewStructValue("test", nil))
+	require.Error(t, err)
+	_, err = setIPv6AssignmentInSchema(data.NewStructValue("test", nil))
+	require.Error(t, err)
+}
+
+func TestUnitNsxt_MalformedHostSwitchAndDeployment(t *testing.T) {
+	for _, kind := range []string{"StandardHostSwitchSpec", "PreconfiguredHostSwitchSpec"} {
+		t.Run(kind, func(t *testing.T) {
+			require.Error(t, setHostSwitchSpecInSchema(resourceNsxtPolicyHostTransportNodeProfile().TestResourceData(), malformedAPIModel("resource_type", kind, "host_switches"), nodeTypeHost))
+		})
+	}
+	_, err := setVMDeploymentConfigInSchema(data.NewStructValue("test", nil))
+	require.Error(t, err)
+	_, err = setVMDeploymentConfigInSchema(malformedAPIModel("placement_type", "Unsupported", ""))
+	require.Error(t, err)
+	_, err = setVMDeploymentConfigInSchema(malformedAPIModel("placement_type", "VsphereDeploymentConfig", "compute_id"))
+	require.Error(t, err)
+}

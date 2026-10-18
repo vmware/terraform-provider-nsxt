@@ -243,3 +243,23 @@ func TestMockResourceNsxtPolicyGatewayRouteMapDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_RouteMapCommunityMatching(t *testing.T) {
+	res := resourceNsxtPolicyGatewayRouteMap()
+	raw := map[string]interface{}{"entry": []interface{}{map[string]interface{}{
+		"action": "PERMIT", "community_list_match": []interface{}{map[string]interface{}{"criteria": "/infra/community-lists/list", "match_operator": "MATCH_ANY"}},
+		"set": []interface{}{map[string]interface{}{"local_preference": 100, "med": 20, "weight": 50}},
+	}}}
+	d := schema.TestResourceDataRaw(t, res.Schema, raw)
+	entry := d.Get("entry").([]interface{})[0].(map[string]interface{})
+	obj, err := policyGatewayRouteMapBuildEntry(d, 0, entry)
+	require.NoError(t, err)
+	require.Len(t, obj.CommunityListMatches, 1)
+	assert.Equal(t, "/infra/community-lists/list", *obj.CommunityListMatches[0].Criteria)
+	assert.Equal(t, "MATCH_ANY", *obj.CommunityListMatches[0].MatchOperator)
+	assert.Equal(t, int64(100), *obj.Set.LocalPreference)
+	assert.Equal(t, int64(20), *obj.Set.Med)
+	entry["prefix_list_matches"] = schema.NewSet(schema.HashString, []interface{}{"/infra/prefix-lists/list"})
+	_, err = policyGatewayRouteMapBuildEntry(d, 0, entry)
+	require.ErrorContains(t, err, "mutually exclusive")
+}

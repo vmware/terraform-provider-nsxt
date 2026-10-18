@@ -335,3 +335,7 @@ func TestMockResourceNsxtPolicyIPPoolBlockSubnetDeleteSuccess(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockResourceNsxtPolicyIPPoolBlockSubnetLegacyImport(t *testing.T) {
+	testLegacyPoolImport(t, resourceNsxtPolicyIPPoolBlockSubnet(), resourceNsxtPolicyIPPoolSubnetImport)
+}

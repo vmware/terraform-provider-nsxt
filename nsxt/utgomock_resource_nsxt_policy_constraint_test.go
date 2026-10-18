@@ -256,3 +256,18 @@ func TestMockResourceNsxtPolicyConstraintDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_ConstraintTargetPrefixNormalization(t *testing.T) {
+	constraint := model.Constraint{Targets: []model.ConstraintTarget{
+		{PathPrefix: strPtr("/infra/domains/default")},
+		{PathPrefix: strPtr("/infra/tier-0s/")},
+		{},
+	}}
+	polishConstraintTargets(&constraint)
+	assert.Equal(t, "/infra/domains/default/", *constraint.Targets[0].PathPrefix)
+	assert.Equal(t, "/infra/tier-0s/", *constraint.Targets[1].PathPrefix)
+	assert.Nil(t, constraint.Targets[2].PathPrefix)
+	// Normalization is idempotent, including already normalized prefixes.
+	polishConstraintTargets(&constraint)
+	assert.Equal(t, "/infra/domains/default/", *constraint.Targets[0].PathPrefix)
+}

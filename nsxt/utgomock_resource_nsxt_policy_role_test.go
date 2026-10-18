@@ -195,3 +195,16 @@ func TestMockResourceNsxtPolicyRoleDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_RoleFeatureFiltering(t *testing.T) {
+	d := resourceNsxtPolicyUserManagementRole().TestResourceData()
+	setFeaturePermissionInSchema(d, []nsxModel.FeaturePermission{
+		{Feature: strPtr("internal"), Permission: strPtr("FULL_ACCESS"), IsInternal: boolPtr(true)},
+		{Feature: strPtr("none"), Permission: strPtr(nsxModel.FeaturePermission_PERMISSION_NONE)},
+		{Feature: strPtr("visible"), Permission: strPtr("READ_ONLY"), FeatureName: strPtr("Visible"), FeatureDescription: strPtr("description")},
+	})
+	features := d.Get("feature").([]interface{})
+	require.Len(t, features, 1)
+	assert.Equal(t, "visible", features[0].(map[string]interface{})["feature"])
+	assert.Equal(t, "READ_ONLY", features[0].(map[string]interface{})["permission"])
+}

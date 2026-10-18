@@ -7,8 +7,14 @@
 package nsxt
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -273,4 +279,93 @@ func TestUnitNsxt_setSegmentSubnetDhcpConfigInSchema(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Unrecognized DHCP Config Resource Type")
 	})
+}
+
+func testDHCPBindingSegmentVariants(t *testing.T, v6 bool) {
+	t.Helper()
+
+	res := resourceNsxtPolicyDhcpV4StaticBinding()
+	kind := "DhcpV4StaticBindingConfig"
+	if v6 {
+		res = resourceNsxtPolicyDhcpV6StaticBinding()
+		kind = "DhcpV6StaticBindingConfig"
+	}
+	for _, fixed := range []bool{false, true} {
+		t.Run(fmt.Sprintf("ipv6_%v_fixed_%v", v6, fixed), func(t *testing.T) {
+			segmentPath := "/infra/segments/segment"
+			if fixed {
+				segmentPath = "/infra/tier-1s/gateway/segments/segment"
+			}
+			raw := map[string]interface{}{"segment_path": segmentPath, "mac_address": "00:11:22:33:44:55", "lease_time": 3600}
+			if v6 {
+				raw["ip_addresses"] = []interface{}{"2001:db8::10"}
+				raw["domain_names"] = []interface{}{"example.com"}
+				raw["dns_nameservers"] = []interface{}{"2001:db8::53"}
+				raw["sntp_servers"] = []interface{}{"2001:db8::123"}
+				raw["preferred_time"] = 1800
+			} else {
+				raw["ip_address"] = "192.0.2.10"
+				raw["gateway_address"] = "192.0.2.1"
+			}
+			d := schema.TestResourceDataRaw(t, res.Schema, raw)
+			d.SetId("binding")
+			m := newIsolatedMockProviderClientCacheEnabled(t)
+			m.Host = "https://nsx.invalid"
+			methods := []string{}
+			m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+				methods = append(methods, r.Method)
+				assert.Contains(t, r.URL.Path, segmentPath+"/dhcp-static-binding-configs/binding")
+				if r.Method == http.MethodPatch {
+					var payload map[string]interface{}
+					require.NoError(t, json.NewDecoder(r.Body).Decode(&payload))
+					assert.Equal(t, kind, payload["resource_type"])
+					assert.Equal(t, "00:11:22:33:44:55", payload["mac_address"])
+				}
+				body := `{"resource_type":"` + kind + `","id":"binding","mac_address":"00:11:22:33:44:55","ip_address":"192.0.2.10","ip_addresses":["2001:db8::10"],"lease_time":3600,"preferred_time":1800,"domain_names":["example.com"],"dns_nameservers":["2001:db8::53"],"sntp_servers":["2001:db8::123"]}`
+				return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+			})}
+			var err error
+			if v6 {
+				err = policyDhcpV6StaticBindingConvertAndPatch(d, segmentPath, "binding", m)
+			} else {
+				err = policyDhcpV4StaticBindingConvertAndPatch(d, segmentPath, "binding", m)
+			}
+			require.NoError(t, err)
+			typ := resourceTypeDhcpV4StaticBindingConfig
+			key := CacheKeyForResourceID(typ, d)
+			if v6 {
+				typ = resourceTypeDhcpV6StaticBindingConfig
+				key = d.Id()
+			}
+			MarkPostWriteForResourceTypeKey(typ, key, m)
+			t.Cleanup(func() { postWriteByKey.Delete(postWriteKey(typ, key)) })
+			require.NoError(t, res.Read(d, m))
+			assert.Equal(t, []string{"PATCH", "GET", "PATCH"}, methods)
+			assert.Equal(t, "00:11:22:33:44:55", d.Get("mac_address"))
+			if v6 {
+				assert.Equal(t, []interface{}{"example.com"}, d.Get("domain_names"))
+				assert.Equal(t, 1800, d.Get("preferred_time"))
+			} else {
+				assert.Equal(t, "192.0.2.10", d.Get("ip_address"))
+			}
+		})
+	}
+	for _, global := range []bool{false, true} {
+		t.Run(fmt.Sprintf("ipv6_%v_rejected_global_%v", v6, global), func(t *testing.T) {
+			path := "/infra/tier-0s/gateway/segments/segment"
+			if global {
+				path = "/infra/tier-1s/gateway/segments/segment"
+			}
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"segment_path": path})
+			m := newIsolatedMockProviderClient(t)
+			m.PolicyGlobalManager = global
+			var err error
+			if v6 {
+				err = policyDhcpV6StaticBindingConvertAndPatch(d, path, "binding", m)
+			} else {
+				err = policyDhcpV4StaticBindingConvertAndPatch(d, path, "binding", m)
+			}
+			require.ErrorContains(t, err, "not applicable")
+		})
+	}
 }

@@ -606,3 +606,11 @@ func TestUnitNsxt_policyTier0GatewayInterfaceOspfSet(t *testing.T) {
 		assert.Nil(t, obj.Ospf.BfdPath)
 	})
 }
+
+func TestUnitNsxt_Tier0GatewayInterfaceOptionalReadFields(t *testing.T) {
+	testGatewayOptionalReadFields(t, resourceNsxtPolicyTier0GatewayInterface(), "tier-0s", true)
+}
+
+func TestUnitNsxt_Tier0GatewayInterfaceGlobalCreation(t *testing.T) {
+	testGlobalGatewayInterfaceCreation(t, true)
+}

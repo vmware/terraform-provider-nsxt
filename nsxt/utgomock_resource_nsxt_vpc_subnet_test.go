@@ -111,7 +111,6 @@ func TestMockResourceNsxtVpcSubnetCreate(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, subnetID, d.Id())
 	})
-
 }
 
 func TestMockResourceNsxtVpcSubnetRead(t *testing.T) {
@@ -588,4 +587,33 @@ func TestUnitNsxt_validateSubnetDhcpv6Config(t *testing.T) {
 		err := validateSubnetDhcpv6Config(d)
 		require.NoError(t, err)
 	})
+}
+
+func TestUnitNsxt_DHCPAddressListChanges(t *testing.T) {
+	// Build unsuppressed diffs so the suppressor receives actual old and new lists.
+	res := &schema.Resource{Schema: map[string]*schema.Schema{
+		"dhcp_config":          {Type: schema.TypeList, Optional: true, Elem: &schema.Resource{Schema: map[string]*schema.Schema{"mode": {Type: schema.TypeString, Optional: true}}}},
+		"subnet_dhcpv6_config": {Type: schema.TypeList, Optional: true, Elem: &schema.Resource{Schema: map[string]*schema.Schema{"mode": {Type: schema.TypeString, Optional: true}}}},
+		"advanced_config":      {Type: schema.TypeList, Optional: true, Elem: &schema.Resource{Schema: map[string]*schema.Schema{"dhcp_server_addresses": {Type: schema.TypeList, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}}}}},
+	}}
+	for _, tc := range []struct {
+		name     string
+		old, new []interface{}
+		v4, v6   string
+		want     bool
+	}{
+		{"ipv4_added_active", nil, []interface{}{"192.0.2.1/24"}, "DHCP_SERVER", nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED, false},
+		{"ipv6_added_active", nil, []interface{}{"2001:db8::1/64"}, nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED, "DHCP_SERVER", false},
+		{"inactive_removed", []interface{}{"192.0.2.1/24"}, nil, nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED, nsxModel.SubnetDhcpConfig_MODE_DEACTIVATED, true},
+		{"same_addresses_reordered", []interface{}{"192.0.2.1/24", "2001:db8::1/64"}, []interface{}{"2001:db8::1/64", "192.0.2.1/24"}, "DHCP_SERVER", "DHCP_SERVER", true},
+		{"blank_placeholder", []interface{}{""}, nil, "DHCP_SERVER", "DHCP_SERVER", true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			raw := func(addresses []interface{}) map[string]interface{} {
+				return map[string]interface{}{"dhcp_config": []interface{}{map[string]interface{}{"mode": tc.v4}}, "subnet_dhcpv6_config": []interface{}{map[string]interface{}{"mode": tc.v6}}, "advanced_config": []interface{}{map[string]interface{}{"dhcp_server_addresses": addresses}}}
+			}
+			d := configurationChangeData(t, res, raw(tc.old), raw(tc.new))
+			assert.Equal(t, tc.want, suppressDhcpServerAddresses("advanced_config.0.dhcp_server_addresses.#", "1", "2", d))
+		})
+	}
 }

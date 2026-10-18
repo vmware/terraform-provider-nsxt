@@ -7,6 +7,9 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -24,6 +27,7 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	ccmocks "github.com/vmware/terraform-provider-nsxt/mocks/fabric/compute_collections"
 	epmocks "github.com/vmware/terraform-provider-nsxt/mocks/infra/sites/enforcement_points"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -268,4 +272,30 @@ func TestUnitNsxt_getComputeCollectionMemberStateConf(t *testing.T) {
 		require.Error(t, err)
 		assert.Equal(t, "failed", state)
 	})
+}
+
+func TestUnitNsxt_HostTransportCollectionSubClusters(t *testing.T) {
+	oldVersion := util.NsxVersion
+	t.Cleanup(func() { util.NsxVersion = oldVersion })
+	util.NsxVersion = "9.2.0"
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	m.PolicyEnforcementPoint = "default"
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		body := `{"id":"collection","display_name":"Collection","compute_collection_id":"compute","network_span_paths":["/infra/network-spans/span"],"sub_cluster_config":[{"sub_cluster_id":"subcluster","host_switch_config_sources":[{"host_switch_id":"switch","transport_node_profile_sub_config_name":"config"}]}]}`
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	d := schema.TestResourceDataRaw(t, resourceNsxtPolicyHostTransportNodeCollection().Schema, map[string]interface{}{"site_path": "/infra/sites/default", "enforcement_point": "default"})
+	d.SetId("collection")
+	require.NoError(t, resourceNsxtPolicyHostTransportNodeCollectionRead(d, m))
+	assert.Equal(t, "Collection", d.Get("display_name"))
+	clusters := d.Get("sub_cluster_config").([]interface{})
+	require.Len(t, clusters, 1)
+	cluster := clusters[0].(map[string]interface{})
+	assert.Equal(t, "subcluster", cluster["sub_cluster_id"])
+	sources := cluster["host_switch_config_source"].([]interface{})
+	require.Len(t, sources, 1)
+	assert.Equal(t, "switch", sources[0].(map[string]interface{})["host_switch_id"])
+	assert.Equal(t, "config", sources[0].(map[string]interface{})["transport_node_profile_sub_config_name"])
+	assert.Equal(t, []interface{}{"/infra/network-spans/span"}, d.Get("network_span_paths"))
 }

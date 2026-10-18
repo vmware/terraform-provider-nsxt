@@ -7,6 +7,10 @@
 package nsxt
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -320,4 +324,37 @@ func TestUnitNsxt_resourceNsxtPolicyEdgeClusterImporter(t *testing.T) {
 		_, err := resourceNsxtPolicyEdgeClusterImporter(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_EdgeClusterFailureDomainAllocation(t *testing.T) {
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	patched := false
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		status := 200
+		body := `{"id":"cluster","display_name":"Cluster","allocation_rules":[{"action":{"action_type":"AllocationBasedOnFailureDomain","enabled":true}}]}`
+		if strings.HasSuffix(r.URL.Path, "/sites/default") {
+			body = `{}`
+		} else if r.Method == http.MethodGet && !patched {
+			status = 404
+			body = `{"error_code":404,"error_message":"not found","module_name":"test"}`
+		} else if r.Method == http.MethodPatch {
+			patched = true
+			var payload map[string]interface{}
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&payload))
+			rules := payload["allocation_rules"].([]interface{})
+			require.Len(t, rules, 1)
+			action := rules[0].(map[string]interface{})["action"].(map[string]interface{})
+			assert.Equal(t, "AllocationBasedOnFailureDomain", action["action_type"])
+			assert.Equal(t, true, action["enabled"])
+		}
+		return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	res := resourceNsxtPolicyEdgeCluster()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"nsx_id": "cluster", "edge_cluster_profile_path": "/infra/host-switch-profiles/profile", "allocation_rule": []interface{}{map[string]interface{}{"action_based_on_failure_domain_enabled": true}}})
+	require.NoError(t, res.Create(d, m))
+	assert.Equal(t, "cluster", d.Id())
+	rules := d.Get("allocation_rule").([]interface{})
+	require.Len(t, rules, 1)
+	assert.Equal(t, true, rules[0].(map[string]interface{})["action_based_on_failure_domain_enabled"])
 }

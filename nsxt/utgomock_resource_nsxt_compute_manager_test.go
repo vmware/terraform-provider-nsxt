@@ -439,3 +439,17 @@ func TestUnitNsxt_credentialValuesRoundTrip(t *testing.T) {
 		})
 	}
 }
+
+func TestUnitNsxt_MalformedComputeCredentials(t *testing.T) {
+	for _, tc := range []struct{ kind, field string }{
+		{"SamlTokenLoginCredential", "token"}, {"SessionLoginCredential", "session_id"},
+		{"UsernamePasswordLoginCredential", "username"}, {"VerifiableAsymmetricLoginCredential", "credential_key"},
+		{"UnknownCredential", ""},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			d := resourceNsxtComputeManager().TestResourceData()
+			require.Error(t, setCredentialValuesInSchema(d, malformedAPIModel("credential_type", tc.kind, tc.field)))
+		})
+	}
+	require.Error(t, setCredentialValuesInSchema(resourceNsxtComputeManager().TestResourceData(), data.NewStructValue("test", nil)))
+}

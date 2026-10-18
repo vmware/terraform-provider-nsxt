@@ -268,3 +268,15 @@ func TestUnitNsxt_suppressIfEmptyPriorStateSite(t *testing.T) {
 	assert.False(t, suppressIfEmptyPriorState("site_connection_info.0.password", "old-password", "new-password", existing),
 		"must not suppress diff when old (state) is non-empty")
 }
+
+func TestUnitNsxt_SiteConnectionInfoRoundTrip(t *testing.T) {
+	res := resourceNsxtPolicySite()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"site_connection_info": []interface{}{map[string]interface{}{"fqdn": "nsx.example.com", "username": "admin", "password": "test-secret", "thumbprint": "AA:BB", "site_uuid": "site"}}})
+	infos := getConnectionInfosFromSchema(d, "site_connection_info")
+	require.Len(t, infos, 1)
+	assert.Equal(t, "nsx.example.com", *infos[0].Fqdn)
+	assert.Equal(t, "test-secret", *infos[0].Password)
+	dest := res.TestResourceData()
+	setConnectionInfosInSchema(dest, infos, "site_connection_info")
+	assert.Equal(t, d.Get("site_connection_info"), dest.Get("site_connection_info"))
+}

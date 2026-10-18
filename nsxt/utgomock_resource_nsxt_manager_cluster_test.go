@@ -408,3 +408,57 @@ func TestUnitNsxt_getNodeConnectivityStateConf(t *testing.T) {
 		assert.Equal(t, "notyet", state)
 	})
 }
+
+func TestMockResourceNsxtManagerClusterHostInfoValidation(t *testing.T) {
+	for _, tc := range []struct {
+		name          string
+		config        nsxModel.ClusterConfig
+		apiErr        error
+		expectedError string
+	}{
+		{name: "API_error", apiErr: errors.New("cluster unavailable"), expectedError: "cluster unavailable"},
+		{name: "missing_cluster_ID", config: nsxModel.ClusterConfig{}, expectedError: "nil ClusterId"},
+		{name: "no_nodes_retry_exhausted", config: nsxModel.ClusterConfig{ClusterId: strPtr("cluster")}, expectedError: "after 2 attempts"},
+		{name: "missing_listen_address_retry_exhausted", config: nsxModel.ClusterConfig{ClusterId: strPtr("cluster"), Nodes: []nsxModel.ClusterNodeInfo{{}}}, expectedError: "after 2 attempts"},
+		{name: "missing_thumbprint", config: nsxModel.ClusterConfig{ClusterId: strPtr("cluster"), Nodes: []nsxModel.ClusterNodeInfo{{ApiListenAddr: &nsxModel.ServiceEndpoint{}}}}, expectedError: "nil CertificateSha256Thumbprint"},
+		{name: "success", config: nsxModel.ClusterConfig{ClusterId: strPtr("cluster"), Nodes: []nsxModel.ClusterNodeInfo{{ApiListenAddr: &nsxModel.ServiceEndpoint{CertificateSha256Thumbprint: strPtr("AA:BB")}}}}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			sdk, restore := setupClusterMock(t, ctrl)
+			t.Cleanup(restore)
+			calls := 1
+			if tc.name == "no_nodes_retry_exhausted" || tc.name == "missing_listen_address_retry_exhausted" {
+				calls = 2
+			}
+			sdk.EXPECT().Get().Return(tc.config, tc.apiErr).Times(calls)
+			m := newIsolatedMockProviderClient(t)
+			m.Host = "https://127.0.0.1"
+			m.CommonConfig.MaxRetries = 2
+			cluster, thumbprint, ips, err := getClusterInfoFromHostNode(resourceNsxtManagerCluster().TestResourceData(), m)
+			if tc.expectedError != "" {
+				require.ErrorContains(t, err, tc.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, "cluster", cluster)
+			assert.Equal(t, "AA:BB", thumbprint)
+			assert.Equal(t, []string{"127.0.0.1"}, ips)
+		})
+	}
+}
+
+func TestMockResourceNsxtManagerClusterProbesJoiningNodes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	sdk := sitemocks.NewMockSitesClient(ctrl)
+	original := cliSitesClient
+	t.Cleanup(func() { cliSitesClient = original })
+	cliSitesClient = func(_ utl.SessionContext, _ client.Connector) *infraapi.SiteClientContext {
+		return &infraapi.SiteClientContext{Client: sdk, ClientType: utl.Local}
+	}
+	// Probe the main endpoint and each joining node using the same mocked readiness API.
+	sdk.EXPECT().Get("default").Return(policyModel.Site{}, nil).Times(3)
+	d := schema.TestResourceDataRaw(t, resourceNsxtManagerCluster().Schema, map[string]interface{}{"api_probing": []interface{}{map[string]interface{}{"enabled": true, "delay": 0, "interval": 0, "timeout": 1}}})
+	nodes := []NsxClusterNode{{IPAddress: "192.0.2.1", UserName: "admin", Password: "test-password"}, {IPAddress: "192.0.2.2", UserName: "admin", Password: "test-password"}}
+	require.NoError(t, waitForNodeStatus(d, newIsolatedMockProviderClient(t), nodes))
+}

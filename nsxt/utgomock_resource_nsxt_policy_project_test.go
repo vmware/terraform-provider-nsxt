@@ -7,9 +7,12 @@
 package nsxt
 
 import (
+	"context"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -626,4 +629,41 @@ func TestMockResourceNsxtPolicyProjectExistsMocked(t *testing.T) {
 		_, err := resourceNsxtPolicyProjectExists(projectID, nil, false)
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_ProjectDiffDefaultsAndDuplicateGateways(t *testing.T) {
+	oldVersion := util.NsxVersion
+	t.Cleanup(func() { util.NsxVersion = oldVersion })
+	util.NsxVersion = "9.1.0"
+	m := newIsolatedMockProviderClient(t)
+	m.DefaultSpanPath = "/infra/sites/default/enforcement-points/default"
+	for _, tc := range []struct {
+		name      string
+		raw       map[string]interface{}
+		wantError bool
+		wantSpan  string
+	}{
+		{"default_span", map[string]interface{}{}, false, m.DefaultSpanPath},
+		{"explicit_span", map[string]interface{}{"default_span_path": "/infra/sites/site-1"}, false, "/infra/sites/site-1"},
+		{"unique_gateways", map[string]interface{}{"tier0_gateway_paths": []interface{}{"/infra/tier-0s/one", "/infra/tier-0s/two"}}, false, m.DefaultSpanPath},
+		{"duplicate_gateways", map[string]interface{}{"tier0_gateway_paths": []interface{}{"/infra/tier-0s/one", "/infra/tier-0s/one"}}, true, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			res := resourceNsxtPolicyProject()
+			span := cty.NullVal(cty.String)
+			if v, ok := tc.raw["default_span_path"].(string); ok {
+				span = cty.StringVal(v)
+			}
+			state := &terraform.InstanceState{RawConfig: cty.ObjectVal(map[string]cty.Value{"default_span_path": span})}
+			diff, err := res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(tc.raw), m)
+			if tc.wantError {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, diff)
+			require.Contains(t, diff.Attributes, "default_span_path")
+			assert.Equal(t, tc.wantSpan, diff.Attributes["default_span_path"].New)
+		})
+	}
 }

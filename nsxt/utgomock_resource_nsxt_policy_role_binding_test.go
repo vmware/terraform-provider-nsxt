@@ -433,3 +433,26 @@ func TestMockResourceNsxtPolicyRoleBindingDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_RoleBindingRemovesOldPathsOnce(t *testing.T) {
+	res := resourceNsxtPolicyUserManagementRoleBinding()
+	d := configurationChangeData(t, res, map[string]interface{}{"roles_for_path": []interface{}{
+		map[string]interface{}{"path": "/infra/keep", "roles": []interface{}{"admin"}},
+		map[string]interface{}{"path": "/infra/remove", "roles": []interface{}{"auditor"}},
+		map[string]interface{}{"path": "/infra/already-removed", "roles": []interface{}{"auditor"}},
+	}}, map[string]interface{}{"roles_for_path": []interface{}{map[string]interface{}{"path": "/infra/keep", "roles": []interface{}{"auditor"}}}})
+	roles := getRolesForPathList(d, rolesForPath{"/infra/already-removed": {"auditor": true}, "/infra/keep": {"admin": true}})
+	require.Len(t, roles, 3)
+	deleted := map[string]int{}
+	for _, role := range roles {
+		if role.DeletePath != nil && *role.DeletePath {
+			deleted[*role.Path]++
+			require.NotEmpty(t, role.Roles)
+		} else {
+			assert.Equal(t, "/infra/keep", *role.Path)
+			require.Len(t, role.Roles, 1)
+			assert.Equal(t, "auditor", *role.Roles[0].Role)
+		}
+	}
+	assert.Equal(t, map[string]int{"/infra/remove": 1, "/infra/already-removed": 1}, deleted)
+}

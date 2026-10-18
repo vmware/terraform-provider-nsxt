@@ -7,6 +7,9 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -322,4 +325,23 @@ func TestUnitNsxt_resourceNsxtPolicyTier0GatewayGRETunnelImport(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "expected GRE Tunnel path")
 	})
+}
+
+func TestUnitNsxt_GRETunnelSubnetRead(t *testing.T) {
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		body := `{"id":"tunnel","resource_type":"GreTunnel","tunnel_keepalive":{"enabled":false,"dead_time_multiplier":3,"enable_keepalive_ack":true,"keepalive_interval":10},"tunnel_address":[{"edge_path":"/infra/edge-nodes/edge","source_address":"192.0.2.1","tunnel_interface_subnet":[{"ip_addresses":["198.51.100.1"],"prefix_len":30}]}]}`
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	d := schema.TestResourceDataRaw(t, resourceNsxtPolicyTier0GatewayGRETunnel().Schema, map[string]interface{}{"locale_service_path": "/infra/tier-0s/gateway/locale-services/locale"})
+	d.SetId("tunnel")
+	require.NoError(t, resourceNsxtPolicyTier0GatewayGRETunnelRead(d, m))
+	addresses := d.Get("tunnel_address").([]interface{})
+	require.Len(t, addresses, 1)
+	address := addresses[0].(map[string]interface{})
+	assert.Equal(t, "192.0.2.1", address["source_address"])
+	subnets := address["tunnel_interface_subnet"].([]interface{})
+	require.Len(t, subnets, 1)
+	assert.Equal(t, 30, subnets[0].(map[string]interface{})["prefix_len"])
 }

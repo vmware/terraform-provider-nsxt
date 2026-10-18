@@ -10,6 +10,10 @@
 package nsxt
 
 import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -768,4 +772,53 @@ func TestUnitNsxt_policyTier0GatewayResourceToInfraStruct(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, infra.Children, 1)
 	})
+}
+
+func TestUnitNsxt_Tier0BGPOptionalConfiguration(t *testing.T) {
+	restart, stale := int64(120), int64(600)
+	cfg := model.BgpRoutingConfig{GracefulRestartConfig: &model.BgpGracefulRestartConfig{Mode: strPtr("GR_AND_HELPER"), Timer: &model.BgpGracefulRestartTimer{RestartTimer: &restart, StaleRouteTimer: &stale}}, Tags: []model.Tag{{Scope: strPtr("env"), Tag: strPtr("prod")}, {}}, RouteAggregations: []model.RouteAggregationEntry{{Prefix: strPtr("10.0.0.0/8"), SummaryOnly: boolPtr(true)}, {Prefix: strPtr("192.168.0.0/16")}}}
+	result := initPolicyTier0BGPConfigMap(&cfg)
+	assert.Equal(t, 120, result["graceful_restart_timer"])
+	assert.Equal(t, 600, result["graceful_restart_stale_route_timer"])
+	assert.Equal(t, cfg.GracefulRestartConfig.Mode, result["graceful_restart_mode"])
+	assert.Equal(t, []map[string]string{{"scope": "env", "tag": "prod"}, {}}, result["tag"])
+	aggs := result["route_aggregation"].([]map[string]interface{})
+	require.Len(t, aggs, 2)
+	assert.Equal(t, true, aggs[0]["summary_only"])
+	assert.NotContains(t, aggs[1], "summary_only")
+}
+
+func TestUnitNsxt_GlobalTier0LocaleServiceList(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(fmt.Sprintf("error_%v", fail), func(t *testing.T) {
+			m := newIsolatedMockProviderClient(t)
+			m.Host = "https://nsx.invalid"
+			m.CommonConfig.MaxRetries = 0
+			m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+				status := 200
+				body := `{"results":[{"id":"locale"}],"result_count":1}`
+				if fail {
+					status = 503
+					body = `{"error_code":503,"error_message":"unavailable","module_name":"test"}`
+				}
+				return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+			})}
+			result, err := listGlobalManagerTier0GatewayLocaleServices(utl.SessionContext{ClientType: utl.Global}, getPolicyConnector(m), "gateway", nil)
+			if fail {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, result.Results, 1)
+			assert.Equal(t, "locale", *result.Results[0].Id)
+		})
+	}
+}
+
+func TestUnitNsxt_Tier0GatewayOptionalReadFields(t *testing.T) {
+	testGatewayOptionalReadFields(t, resourceNsxtPolicyTier0Gateway(), "tier-0s", false)
+}
+
+func TestUnitNsxt_Tier0GatewayBuilderChangedConfiguration(t *testing.T) {
+	testGatewayBuilderChangedConfiguration(t, true)
 }

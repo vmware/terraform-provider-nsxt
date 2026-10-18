@@ -794,3 +794,17 @@ func TestMockResourceNsxtPolicyIPSecVpnSessionExists(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_MalformedVPNSessions(t *testing.T) {
+	d := resourceNsxtPolicyIPSecVpnSession().TestResourceData()
+	require.Error(t, setIPSecVpnSessionResourceData(d, vapiData.NewStructValue("test", nil)))
+	for _, kind := range []string{"RouteBasedIPSecVpnSession", "PolicyBasedIPSecVpnSession"} {
+		t.Run(kind, func(t *testing.T) {
+			require.Error(t, setIPSecVpnSessionResourceData(d, malformedAPIModel("resource_type", kind, "authentication_mode")))
+		})
+	}
+}
+
+func TestUnitNsxt_IPSecVpnSessionIPv6LocaleServiceDiff(t *testing.T) {
+	testVPNIPv6LocaleServiceDiff(t, resourceNsxtPolicyIPSecVpnSession(), "peer_address")
+}

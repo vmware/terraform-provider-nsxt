@@ -10,6 +10,9 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,7 +24,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	apipkg "github.com/vmware/terraform-provider-nsxt/api"
-	segments "github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	portprofiles "github.com/vmware/terraform-provider-nsxt/api/infra/segments/ports"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	inframocks "github.com/vmware/terraform-provider-nsxt/mocks/infra"
@@ -801,4 +804,22 @@ func TestMockNsxtSegmentPortImporter(t *testing.T) {
 		discoveryMap := discovery[0].(map[string]interface{})
 		assert.Equal(t, ipPath, discoveryMap["ip_discovery_profile_path"])
 	})
+}
+
+func TestUnitNsxt_SegmentPortAttachmentRead(t *testing.T) {
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		body := `{"id":"port","attachment":{"id":"vif","type":"VIF","app_id":"application","context_id":"context","allocate_addresses":"BOTH","traffic_tag":123,"evpn_vlans":["10","20"],"hyperbus_mode":"ENABLE"}}`
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	d := schema.TestResourceDataRaw(t, resourceNsxtPolicySegmentPort().Schema, map[string]interface{}{"segment_path": "/infra/segments/segment"})
+	d.SetId("port")
+	require.NoError(t, resourceNsxtPolicySegmentPortRead(d, m))
+	attachments := d.Get("attachment").([]interface{})
+	require.Len(t, attachments, 1)
+	attachment := attachments[0].(map[string]interface{})
+	assert.Equal(t, "vif", attachment["id"])
+	assert.Equal(t, "application", attachment["app_id"])
+	assert.Equal(t, 123, attachment["traffic_tag"])
 }

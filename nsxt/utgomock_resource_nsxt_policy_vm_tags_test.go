@@ -12,6 +12,8 @@
 package nsxt
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -505,4 +507,60 @@ func TestUnitNsxt_listAllPolicySegmentPortsInvalidPath(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid segment path")
 	})
+}
+
+func TestUnitNsxt_VMInventoryAlternateIdentifiers(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		vm        model.VirtualMachine
+		malformed bool
+		apiErr    error
+		wantError bool
+	}{
+		{name: "external_id", vm: model.VirtualMachine{ExternalId: strPtr("target")}},
+		{name: "bios_uuid", vm: model.VirtualMachine{ExternalId: strPtr("other"), ComputeIds: []string{nsxtPolicyBiosUUIDKey + ":target"}}},
+		{name: "instance_uuid", vm: model.VirtualMachine{ExternalId: strPtr("other"), ComputeIds: []string{nsxtPolicyInstanceUUIDKey + ":target"}}},
+		{name: "not_found", vm: model.VirtualMachine{ExternalId: strPtr("other")}, wantError: true},
+		{name: "malformed_result", malformed: true, wantError: true},
+		{name: "search_error", apiErr: errors.New("search unavailable"), wantError: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			value := vmToStructValue(t, tc.vm)
+			if tc.malformed {
+				value = data.NewStructValue("bad", map[string]data.DataValue{"external_id": data.NewIntegerValue(42)})
+			}
+			stub := &seqQueryListClient{responses: []model.SearchResponse{{Results: []*data.StructValue{value}, ResultCount: i64(1)}}, errs: []error{tc.apiErr}}
+			t.Cleanup(setupCliQueryClientStub(t, stub))
+			vm, err := findNsxtPolicyVMByID(utl.SessionContext{ClientType: utl.Local}, nil, "target", newIsolatedMockProviderClient(t))
+			if tc.wantError {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tc.vm, vm)
+		})
+	}
+}
+
+func TestUnitNsxt_VIFInventoryFallback(t *testing.T) {
+	for _, contextType := range []utl.ClientType{utl.Multitenancy, utl.VPC, utl.ClientType(99)} {
+		for _, fail := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%v_error_%v", contextType, fail), func(t *testing.T) {
+				stub := &seqQueryListClient{responses: []model.SearchResponse{{Results: []*data.StructValue{data.NewStructValue("vif", map[string]data.DataValue{"owner_vm_id": data.NewStringValue("vm"), "lport_attachment_id": data.NewStringValue("port")})}, ResultCount: i64(1)}}}
+				if fail {
+					stub.errs = []error{errors.New("inventory unavailable")}
+				}
+				t.Cleanup(setupCliQueryClientStub(t, stub))
+				vifs, err := listAllPolicyVifs(newIsolatedMockProviderClient(t), utl.SessionContext{ClientType: contextType, ProjectID: "project", VPCID: "vpc"})
+				if fail {
+					require.Error(t, err)
+					return
+				}
+				require.NoError(t, err)
+				require.Len(t, vifs, 1)
+				assert.Equal(t, "vm", *vifs[0].OwnerVmId)
+				assert.Equal(t, "port", *vifs[0].LportAttachmentId)
+			})
+		}
+	}
 }

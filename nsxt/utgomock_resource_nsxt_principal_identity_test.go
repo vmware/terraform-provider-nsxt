@@ -18,11 +18,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	mpModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
 	tmWrapper "github.com/vmware/terraform-provider-nsxt/api/nsx/trust_management"
@@ -30,6 +30,7 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	certsmocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx/trust_management"
 	pimocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx/trust_management/principal_identities"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var (
@@ -297,4 +298,20 @@ func TestMockResourceNsxtPrincipalIdentityDelete(t *testing.T) {
 		err := resourceNsxtPrincipalIdentityDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_PrincipalIdentityRoleConversion(t *testing.T) {
+	original := []model.RolesForPath{{Path: strPtr("/infra"), DeletePath: boolPtr(true), Roles: []model.Role{{Role: strPtr("admin"), RoleDisplayName: strPtr("Administrator")}, {Role: strPtr("auditor")}}}, {Path: strPtr("/infra/domains/default"), Roles: []model.Role{}}}
+	mp := convertToMPRolesForPath(original)
+	require.Len(t, mp, 2)
+	require.Len(t, mp[0].Roles, 2)
+	assert.Equal(t, "admin", *mp[0].Roles[0].Role)
+	assert.Equal(t, "/infra", *mp[0].Path)
+	assert.Equal(t, original, convertToPolicyRolesForPath(mp))
+	assert.Empty(t, convertToPolicyRolesForPath(nil))
+	assert.Empty(t, convertToMPRolesForPath(nil))
+}
+
+func TestUnitNsxt_PrincipalIdentityValidationBoundaries(t *testing.T) {
+	testIdentityValidationBoundaries(t, validatePINameOrNodeID(), 255, "node-1.example", "node..example")
 }

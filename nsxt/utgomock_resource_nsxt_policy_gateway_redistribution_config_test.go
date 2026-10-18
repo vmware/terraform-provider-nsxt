@@ -7,10 +7,15 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	vapiProtocolClient "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
@@ -192,4 +197,82 @@ func TestMockResourceNsxtPolicyGatewayRedistributionConfigDelete(t *testing.T) {
 		err := resourceNsxtPolicyGatewayRedistributionConfigDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+}
+
+func TestUnitNsxt_GlobalGatewayRedistributionCreation(t *testing.T) {
+	for _, scenario := range []string{"success", "site_missing", "site_not_matched", "list_error"} {
+		t.Run(scenario, func(t *testing.T) {
+			raw := map[string]interface{}{"gateway_path": "/infra/tier-0s/gateway", "site_path": "/infra/sites/site"}
+			if scenario == "site_missing" {
+				delete(raw, "site_path")
+			}
+			if scenario == "site_not_matched" {
+				raw["site_path"] = "/infra/sites/other"
+			}
+			d := schema.TestResourceDataRaw(t, resourceNsxtPolicyGatewayRedistributionConfig().Schema, raw)
+			m := newIsolatedMockProviderClient(t)
+			m.Host = "https://nsx.invalid"
+			m.PolicyGlobalManager = true
+			m.CommonConfig.MaxRetries = 0
+			m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+				if scenario == "site_missing" {
+					t.Fatal("missing site must fail before API access")
+				}
+				service := `{"id":"locale","path":"/infra/tier-0s/gateway/locale-services/locale","edge_cluster_path":"/infra/sites/site/enforcement-points/default/edge-clusters/cluster","route_redistribution_config":{"bgp_enabled":true}}`
+				body := service
+				status := 200
+				if strings.HasSuffix(r.URL.Path, "/locale-services") {
+					body = `{"results":[` + service + `],"result_count":1}`
+					if scenario == "list_error" {
+						status = 503
+						body = `{"error_code":503,"error_message":"unavailable","module_name":"test"}`
+					}
+				}
+				return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+			})}
+			err := resourceNsxtPolicyGatewayRedistributionConfigCreate(d, m)
+			if scenario != "success" {
+				require.Error(t, err)
+				assert.Empty(t, d.Id())
+				return
+			}
+			require.NoError(t, err)
+			assert.NotEmpty(t, d.Id())
+			assert.Equal(t, "gateway", d.Get("gateway_id"))
+			assert.Equal(t, "locale", d.Get("locale_service_id"))
+		})
+	}
+}
+
+func TestMockResourceNsxtPolicyRedistributionImport(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		config    *nsxModel.Tier0RouteRedistributionConfig
+		apiErr    error
+		wantError bool
+	}{
+		{"success", &nsxModel.Tier0RouteRedistributionConfig{}, nil, false},
+		{"missing_config", nil, nil, true},
+		{"API_error", nil, vapiErrors.ServiceUnavailable{}, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			sdk, restore := setupRedistT0LSMock(t, ctrl)
+			t.Cleanup(restore)
+			sdk.EXPECT().Get("gateway", "locale").Return(nsxModel.LocaleServices{RouteRedistributionConfig: tc.config}, tc.apiErr)
+			d := resourceNsxtPolicyGatewayRedistributionConfig().TestResourceData()
+			d.SetId("gateway/locale")
+			result, err := resourceNsxtPolicyGatewayRedistributionConfigImport(d, newIsolatedMockProviderClient(t))
+			if tc.wantError {
+				require.ErrorContains(t, err, "Failed to retrieve redistribution config")
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, result, 1)
+			assert.NotEmpty(t, d.Id())
+			assert.NotEqual(t, "gateway/locale", d.Id())
+			assert.Equal(t, "gateway", d.Get("gateway_id"))
+			assert.Equal(t, "locale", d.Get("locale_service_id"))
+		})
+	}
 }
