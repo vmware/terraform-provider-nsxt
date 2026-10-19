@@ -298,3 +298,7 @@ func TestUnitNsxt_getIPSecVpnLocalEndpointSessionContext(t *testing.T) {
 		assert.Equal(t, "proj-1", ctx.ProjectID)
 	})
 }
+
+func TestUnitNsxt_IPSecVpnLocalEndpointIPv6LocaleServiceDiff(t *testing.T) {
+	testVPNIPv6LocaleServiceDiff(t, resourceNsxtPolicyIPSecVpnLocalEndpoint(), "local_address")
+}

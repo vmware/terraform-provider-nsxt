@@ -306,3 +306,7 @@ func TestMockResourceNsxtPolicyIPAddressAllocationDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestMockResourceNsxtPolicyIPAddressAllocationLegacyImport(t *testing.T) {
+	testLegacyPoolImport(t, resourceNsxtPolicyIPAddressAllocation(), resourceNsxtPolicyIPAddressAllocationImport)
+}

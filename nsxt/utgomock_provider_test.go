@@ -17,25 +17,30 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"io"
 	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
 	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	nsxmocks "github.com/vmware/terraform-provider-nsxt/mocks/nsx"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 func providerTestData(overrides map[string]interface{}) map[string]interface{} {
@@ -665,4 +670,93 @@ func TestUnitNsxt_logResponseAcceptorFilter(t *testing.T) {
 		resp := &http.Response{StatusCode: 200, Body: http.NoBody, Request: nil}
 		a.Accept(resp)
 	})
+}
+
+func TestUnitNsxt_ProviderConfigureOnDemand(t *testing.T) {
+	oldVersion := util.NsxVersion
+	t.Cleanup(func() { util.NsxVersion = oldVersion })
+	for _, tc := range []struct {
+		name, version string
+		raw           map[string]interface{}
+		spans         bool
+		apiErr        error
+		wantError     string
+	}{
+		{name: "success_legacy", version: "9.0.0", raw: map[string]interface{}{"on_demand_connection": true}},
+		{name: "success_global", version: "9.2.0", raw: map[string]interface{}{"on_demand_connection": true, "global_manager": true}},
+		{name: "success_default_span", version: "9.2.0", raw: map[string]interface{}{"on_demand_connection": true}, spans: true},
+		{name: "default_span_API_error", version: "9.2.0", raw: map[string]interface{}{"on_demand_connection": true}, spans: true, apiErr: vapiErrors.ServiceUnavailable{}, wantError: "service_unavailable"},
+		{name: "missing_host", version: "9.0.0", raw: map[string]interface{}{"on_demand_connection": true, "host": ""}, wantError: "host must be provided"},
+		{name: "missing_key", version: "9.0.0", raw: map[string]interface{}{"client_auth_cert": "certificate"}, wantError: "provide key"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			util.NsxVersion = tc.version
+			if tc.spans {
+				ctrl := gomock.NewController(t)
+				sdk, restore := setupNetworkSpansMock(ctrl)
+				t.Cleanup(restore)
+				sdk.EXPECT().List(nil, nil, nil, nil, nil, nil, nil).Return(model.NetworkSpanListResult{Results: []model.NetworkSpan{{Path: strPtr("/infra/network-spans/default"), IsDefault: boolPtr(true)}}}, tc.apiErr)
+			}
+			d := schema.TestResourceDataRaw(t, Provider().Schema, providerTestData(tc.raw))
+			result, err := providerConfigure(d)
+			if tc.wantError != "" {
+				require.ErrorContains(t, err, tc.wantError)
+				assert.Nil(t, result)
+				return
+			}
+			require.NoError(t, err)
+			clients, ok := result.(nsxtClients)
+			require.True(t, ok)
+			assert.Equal(t, "https://nsxmanager.example.com", clients.Host)
+			require.NotNil(t, clients.PolicyHTTPClient)
+			if tc.spans {
+				assert.Equal(t, "/infra/network-spans/default", clients.DefaultSpanPath)
+			}
+		})
+	}
+}
+
+func TestUnitNsxt_ConnectorRetryAndHeaders(t *testing.T) {
+	oldVersion := util.NsxVersion
+	t.Cleanup(func() { util.NsxVersion = oldVersion })
+	util.NsxVersion = "9.0.0"
+	t.Setenv("TF_LOG_PROVIDER_NSX_HTTP", "1")
+	for _, tc := range []struct {
+		name                                     string
+		transportFailure                         bool
+		status, minDelay, maxDelay, wantRequests int
+	}{
+		{"transport_failure", true, 0, 0, 0, 3},
+		{"retry_jitter", false, 503, 1, 2, 3},
+		{"retry_fixed_delay", false, 503, 1, 1, 3},
+		{"non_retry_status", false, 400, 0, 0, 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			m := newIsolatedMockProviderClient(t)
+			m.Host = "https://nsx.invalid"
+			m.CommonConfig.MaxRetries = 2
+			m.CommonConfig.RetryStatusCodes = []int{503}
+			m.CommonConfig.MinRetryInterval = tc.minDelay
+			m.CommonConfig.MaxRetryInterval = tc.maxDelay
+			m.CommonConfig.BearerToken = "test-token"
+			m.NsxtClientConfig.DefaultHeader = map[string]string{"Cookie": "session-cookie", "X-XSRF-TOKEN": "xsrf-token"}
+			calls := 0
+			m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+				calls++
+				assert.Equal(t, "session-cookie", r.Header.Get("Cookie"))
+				assert.Equal(t, "xsrf-token", r.Header.Get("X-XSRF-TOKEN"))
+				assert.Equal(t, "custom-value", r.Header.Get("X-Test"))
+				assert.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
+				if tc.transportFailure {
+					return nil, errors.New("connection interrupted")
+				}
+				return &http.Response{StatusCode: tc.status, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(`{"error_code":503,"error_message":"unavailable","module_name":"test"}`)), Request: r}, nil
+			})}
+			headers := map[string]string{"X-Test": "custom-value"}
+			connector := getPolicyConnectorWithHeaders(m, &headers, false, true)
+			_, err := listPolicyResources(connector, tf_api.SessionContext{ClientType: tf_api.Local}, "Group", nil)
+			require.Error(t, err)
+			assert.Equal(t, tc.wantRequests, calls)
+		})
+	}
 }

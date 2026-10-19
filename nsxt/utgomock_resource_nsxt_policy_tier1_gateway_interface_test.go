@@ -314,3 +314,11 @@ func TestMockResourceNsxtPolicyTier1GatewayInterfaceImportLegacy(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_Tier1GatewayInterfaceOptionalReadFields(t *testing.T) {
+	testGatewayOptionalReadFields(t, resourceNsxtPolicyTier1GatewayInterface(), "tier-1s", true)
+}
+
+func TestUnitNsxt_Tier1GatewayInterfaceGlobalCreation(t *testing.T) {
+	testGlobalGatewayInterfaceCreation(t, false)
+}

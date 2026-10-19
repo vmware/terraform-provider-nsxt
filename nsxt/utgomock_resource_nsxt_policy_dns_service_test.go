@@ -248,3 +248,19 @@ func TestMockResourceNsxtPolicyDnsServiceDelete(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestUnitNsxt_DnsForwarderSchemaRoundTrip(t *testing.T) {
+	raw := map[string]interface{}{"display_name": "dns", "transit_gateway": "/orgs/default/projects/p/transit-gateways/t", "forwarder_config": []interface{}{map[string]interface{}{"cache_size": 2048, "upstream_servers": []interface{}{"192.0.2.1", "192.0.2.2"}, "shared_zone_forwarding_mode": "FORWARD_ONLY"}}}
+	res := resourceNsxtPolicyDnsService()
+	d := schema.TestResourceDataRaw(t, res.Schema, raw)
+	obj := policyDnsServiceFromSchema(d)
+	require.NotNil(t, obj.ForwarderConfig)
+	assert.Equal(t, int64(2048), *obj.ForwarderConfig.CacheSize)
+	assert.Equal(t, []string{"192.0.2.1", "192.0.2.2"}, obj.ForwarderConfig.UpstreamServers)
+	assert.Equal(t, "FORWARD_ONLY", *obj.ForwarderConfig.SharedZoneForwardingMode)
+	dest := schema.TestResourceDataRaw(t, res.Schema, nil)
+	policyDnsServiceToSchema(dest, obj)
+	assert.Equal(t, d.Get("forwarder_config"), dest.Get("forwarder_config"))
+	policyDnsServiceToSchema(dest, nsxModel.DnsService{})
+	assert.Empty(t, dest.Get("forwarder_config"))
+}

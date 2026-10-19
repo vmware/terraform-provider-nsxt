@@ -215,3 +215,32 @@ func TestMockResourceNsxtPolicyIPPoolDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func testLegacyPoolImport(t *testing.T, resource *schema.Resource, importState schema.StateFunc) {
+	t.Helper()
+
+	ctrl := gomock.NewController(t)
+	sdk, restore := setupIPPoolMock(t, ctrl)
+	t.Cleanup(restore)
+	for _, fail := range []bool{false, true} {
+		t.Run(map[bool]string{false: "success", true: "API_error"}[fail], func(t *testing.T) {
+			d := resource.TestResourceData()
+			d.SetId("pool/child")
+			pool := nsxModel.IpAddressPool{Path: strPtr("/infra/ip-pools/pool")}
+			var apiErr error
+			if fail {
+				apiErr = vapiErrors.ServiceUnavailable{}
+			}
+			sdk.EXPECT().Get("pool").Return(pool, apiErr)
+			result, err := importState(d, newIsolatedMockProviderClient(t))
+			if fail {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, result, 1)
+			assert.Equal(t, "child", result[0].Id())
+			assert.Equal(t, "/infra/ip-pools/pool", result[0].Get("pool_path"))
+		})
+	}
+}

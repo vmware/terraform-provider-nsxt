@@ -7,6 +7,9 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -357,4 +360,38 @@ func TestUnitNsxt_resourceNsxtPolicyStaticRouteImport(t *testing.T) {
 		_, err := resourceNsxtPolicyStaticRouteImport(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestUnitNsxt_StaticRouteTier1Operations(t *testing.T) {
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	methods := []string{}
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		methods = append(methods, r.Method)
+		assert.Equal(t, "/policy/api/v1/infra/tier-1s/gateway/static-routes/route", r.URL.Path)
+		body := `{"id":"route","display_name":"Route","network":"192.0.2.0/24","next_hops":[{"ip_address":"192.0.2.1","admin_distance":5,"scope":["/infra/tier-1s/gateway/locale-services/default/interfaces/interface"]}]}`
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	res := resourceNsxtPolicyStaticRoute()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"gateway_path": "/infra/tier-1s/gateway"})
+	d.SetId("route")
+	require.NoError(t, res.Read(d, m))
+	hops := d.Get("next_hop").([]interface{})
+	require.Len(t, hops, 1)
+	hop := hops[0].(map[string]interface{})
+	assert.Equal(t, "192.0.2.1", hop["ip_address"])
+	assert.Equal(t, 5, hop["admin_distance"])
+	assert.Equal(t, "/infra/tier-1s/gateway/locale-services/default/interfaces/interface", hop["interface"])
+	ctx := utl.SessionContext{ClientType: utl.Local}
+	connector := getPolicyConnector(m)
+	require.NoError(t, patchNsxtPolicyStaticRoute(ctx, connector, "gateway", nsxModel.StaticRoutes{Id: strPtr("route")}, false))
+	require.NoError(t, deleteNsxtPolicyStaticRoute(ctx, connector, "gateway", false, "route"))
+	assert.Equal(t, []string{"GET", "PATCH", "DELETE"}, methods)
+	for _, tier0 := range []bool{false, true} {
+		unsupported := utl.SessionContext{ClientType: utl.ClientType(99)}
+		_, err := getNsxtPolicyStaticRouteByID(unsupported, connector, "gateway", tier0, "route")
+		require.ErrorContains(t, err, "not supported")
+		require.ErrorContains(t, patchNsxtPolicyStaticRoute(unsupported, connector, "gateway", nsxModel.StaticRoutes{Id: strPtr("route")}, tier0), "not supported")
+		require.ErrorContains(t, deleteNsxtPolicyStaticRoute(unsupported, connector, "gateway", tier0, "route"), "not supported")
+	}
 }

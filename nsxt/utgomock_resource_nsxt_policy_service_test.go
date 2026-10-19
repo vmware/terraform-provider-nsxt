@@ -502,3 +502,17 @@ func TestMockResourceNsxtPolicyServiceCreateEntryConversionError(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "Service entries conversion")
 }
+
+func TestUnitNsxt_MalformedServiceEntries(t *testing.T) {
+	for _, tc := range []struct{ kind, field string }{
+		{"ICMPTypeServiceEntry", "protocol"}, {"L4PortSetServiceEntry", "l4_protocol"},
+		{"EtherTypeServiceEntry", "ether_type"}, {"IPProtocolServiceEntry", "protocol_number"},
+		{"ALGTypeServiceEntry", "alg"},
+		{"NestedServiceServiceEntry", "nested_service_path"}, {"UnknownServiceEntry", ""},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			err := setServiceEntriesInSchema(map[string]interface{}{}, []*data.StructValue{malformedAPIModel("resource_type", tc.kind, tc.field)}, true)
+			require.Error(t, err)
+		})
+	}
+}

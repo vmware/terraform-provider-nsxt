@@ -264,3 +264,16 @@ func minimalDistributedVxlanConnectionData() map[string]interface{} {
 		"l3_vni":       int(distributedVxlanConnL3Vni),
 	}
 }
+
+func TestUnitNsxt_DistributedVxlanRouteTargetsRoundTrip(t *testing.T) {
+	res := resourceNsxtPolicyDistributedVxlanConnection()
+	raw := map[string]interface{}{"route_target": []interface{}{map[string]interface{}{"address_family": "IPV4", "import_targets": []interface{}{"65000:1"}, "export_targets": []interface{}{"65000:2"}}}}
+	d := schema.TestResourceDataRaw(t, res.Schema, raw)
+	targets := distributedVxlanConnectionRouteTargetsFromSchema(d)
+	require.Len(t, targets, 1)
+	assert.Equal(t, []string{"65000:1"}, targets[0].ImportRouteTargets)
+	assert.Equal(t, []string{"65000:2"}, targets[0].ExportRouteTargets)
+	dest := schema.TestResourceDataRaw(t, res.Schema, nil)
+	distributedVxlanConnectionRouteTargetsToSchema(dest, targets)
+	assert.Equal(t, d.Get("route_target"), dest.Get("route_target"))
+}

@@ -7,6 +7,9 @@
 package nsxt
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -355,4 +358,26 @@ func TestUnitNsxt_resourceNsxtPolicyTier0InterVRFRoutingImport(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "not a policy path")
 	})
+}
+
+func TestUnitNsxt_InterVRFReadRouteAdvertisements(t *testing.T) {
+	m := newIsolatedMockProviderClient(t)
+	m.Host = "https://nsx.invalid"
+	m.PolicyHTTPClient = &http.Client{Transport: unitPolicyTransport(func(r *http.Request) (*http.Response, error) {
+		body := `{"id":"routing","display_name":"Routing","target_path":"/infra/tier-0s/target","bgp_route_leaking":[{"address_family":"IPV4","in_filter":["/infra/prefix-lists/in"],"out_filter":["/infra/prefix-lists/out"]}],"static_route_advertisement":{"in_filter_prefix_list":["/infra/prefix-lists/in"],"advertisement_rules":[{"name":"connected","action":"PERMIT","prefix_operator":"GE","route_advertisement_types":["TIER0_CONNECTED"],"subnets":["192.0.2.0/24"]}]}}`
+		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+	})}
+	res := resourceNsxtPolicyTier0InterVRFRouting()
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"gateway_path": "/infra/tier-0s/gateway", "nsx_id": "routing"})
+	d.SetId("routing")
+	require.NoError(t, res.Read(d, m))
+	assert.Equal(t, "Routing", d.Get("display_name"))
+	leaking := d.Get("bgp_route_leaking").([]interface{})
+	require.Len(t, leaking, 1)
+	assert.Equal(t, "IPV4", leaking[0].(map[string]interface{})["address_family"])
+	advertisement := d.Get("static_route_advertisement").([]interface{})
+	require.Len(t, advertisement, 1)
+	rules := advertisement[0].(map[string]interface{})["advertisement_rule"].([]interface{})
+	require.Len(t, rules, 1)
+	assert.Equal(t, "connected", rules[0].(map[string]interface{})["name"])
 }

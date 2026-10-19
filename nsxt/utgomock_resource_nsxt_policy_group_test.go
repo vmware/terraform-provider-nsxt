@@ -385,7 +385,6 @@ func TestMockResourceNsxtPolicyGroupBMSRead(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "", d.Get("group_type"))
 	})
-
 }
 
 // ─── BMS Update tests ─────────────────────────────────────────────────────────
@@ -413,4 +412,22 @@ func TestMockResourceNsxtPolicyGroupBMSUpdate(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, nsxModel.Group_GROUP_TYPE_BAREMETALSERVER, d.Get("group_type"))
 	})
+}
+
+func TestUnitNsxt_MalformedGroupExpressions(t *testing.T) {
+	for _, tc := range []struct{ kind, field string }{
+		{"ConjunctionOperator", "conjunction_operator"}, {"IPAddressExpression", "ip_addresses"},
+		{"PathExpression", "paths"}, {"MACAddressExpression", "mac_addresses"},
+		{"ExternalIDExpression", "external_ids"}, {"Condition", "value"}, {"NestedExpression", "expressions"},
+		{"UnknownExpression", ""},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			_, _, err := fromGroupExpressionData([]*data.StructValue{malformedAPIModel("resource_type", tc.kind, tc.field)})
+			require.Error(t, err)
+		})
+	}
+	_, _, err := fromGroupExpressionData([]*data.StructValue{data.NewStructValue("test", nil)})
+	require.Error(t, err)
+	_, err = getIdentityGroupsData([]*data.StructValue{malformedAPIModel("resource_type", "IdentityGroupExpression", "identity_groups")})
+	require.Error(t, err)
 }

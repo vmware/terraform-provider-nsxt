@@ -554,3 +554,11 @@ func TestUnitNsxt_resourceNsxtPolicyTier1GatewaySetQos(t *testing.T) {
 		assert.Nil(t, obj.QosProfile)
 	})
 }
+
+func TestUnitNsxt_Tier1GatewayOptionalReadFields(t *testing.T) {
+	testGatewayOptionalReadFields(t, resourceNsxtPolicyTier1Gateway(), "tier-1s", false)
+}
+
+func TestUnitNsxt_Tier1GatewayBuilderChangedConfiguration(t *testing.T) {
+	testGatewayBuilderChangedConfiguration(t, false)
+}

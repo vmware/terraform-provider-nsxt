@@ -422,3 +422,14 @@ func TestUnitNsxt_setAllocationRangeListInSchema(t *testing.T) {
 		assert.Empty(t, setAllocationRangeListInSchema(nil))
 	})
 }
+
+func TestUnitNsxt_PathListDiffSuppression(t *testing.T) {
+	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{"paths": {Type: schema.TypeList, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}}}, nil)
+	suppress := diffSuppressStringListOfPathsOrder("paths")
+	assert.False(t, suppress("other.0", "a", "b", d))
+	assert.False(t, suppress("paths.#", "1", "2", d))
+	assert.True(t, suppress("paths.0", "", "", d))
+	res := &schema.Resource{Schema: map[string]*schema.Schema{"paths": {Type: schema.TypeList, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}}}}
+	changed := resourceDataWithChange(t, res, map[string]interface{}{"paths": []interface{}{"/infra/a"}}, map[string]interface{}{"paths": []interface{}{"/infra/b"}}, "id")
+	assert.False(t, suppress("paths.0", "/infra/a", "/infra/b", changed))
+}

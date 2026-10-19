@@ -491,3 +491,18 @@ func TestMockResourceNsxtPolicyEdgeTransportNodeDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_MalformedPolicyIPAssignments(t *testing.T) {
+	for _, tc := range []struct{ kind, field string }{
+		{"StaticIpv4", "management_port_subnets"}, {"StaticIpv4List", "ip_list"}, {"StaticIpv4MacList", "ip_mac_list"},
+		{"StaticIpv4Pool", "ip_pool"}, {"StaticIpv6", "management_port_subnets"}, {"StaticIpv6List", "ip_list"},
+		{"StaticIpv6MacList", "ip_mac_list"}, {"StaticIpv6Pool", "ip_pool"},
+	} {
+		t.Run(tc.kind, func(t *testing.T) {
+			_, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{malformedAPIModel("ip_assignment_type", tc.kind, tc.field)})
+			require.Error(t, err)
+		})
+	}
+	_, err := setPolicyIPAssignmentsInSchema([]*data.StructValue{data.NewStructValue("test", nil)})
+	require.Error(t, err)
+}

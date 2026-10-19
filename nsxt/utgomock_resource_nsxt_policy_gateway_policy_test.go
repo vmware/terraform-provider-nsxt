@@ -310,3 +310,36 @@ func TestUnitNsxt_getUpdatedRuleChildren(t *testing.T) {
 		assert.Len(t, children, 2)
 	})
 }
+
+func TestUnitNsxt_GatewayRuleRemovalAndGeneratedIDs(t *testing.T) {
+	res := resourceNsxtPolicyGatewayPolicy()
+	d := configurationChangeData(t, res, map[string]interface{}{"rule": []interface{}{
+		map[string]interface{}{"nsx_id": "keep", "action": "ALLOW", "sequence_number": 1}, map[string]interface{}{"nsx_id": "remove", "action": "DROP", "sequence_number": 2},
+	}}, map[string]interface{}{"rule": []interface{}{map[string]interface{}{"nsx_id": "keep", "action": "REJECT", "sequence_number": 1}}})
+	children, err := getUpdatedRuleChildren(d)
+	require.NoError(t, err)
+	require.Len(t, children, 2)
+	converter := bindings.NewTypeConverter()
+	deleted := 0
+	for _, child := range children {
+		val, errs := converter.ConvertToGolang(child, nsxModel.ChildRuleBindingType())
+		require.Empty(t, errs)
+		rule := val.(nsxModel.ChildRule)
+		if rule.MarkedForDelete != nil && *rule.MarkedForDelete {
+			deleted++
+			assert.Equal(t, "remove", *rule.Rule.Id)
+		} else {
+			assert.Equal(t, "keep", *rule.Rule.Id)
+			assert.Equal(t, "REJECT", *rule.Rule.Action)
+		}
+	}
+	assert.Equal(t, 1, deleted)
+	d = configurationChangeData(t, res, nil, map[string]interface{}{"rule": []interface{}{map[string]interface{}{"action": "ALLOW"}}})
+	children, err = getUpdatedRuleChildren(d)
+	require.NoError(t, err)
+	require.Len(t, children, 1)
+	val, errs := converter.ConvertToGolang(children[0], nsxModel.ChildRuleBindingType())
+	require.Empty(t, errs)
+	require.NotNil(t, val.(nsxModel.ChildRule).Rule.Id)
+	assert.NotEmpty(t, *val.(nsxModel.ChildRule).Rule.Id)
+}

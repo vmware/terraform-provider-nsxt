@@ -468,3 +468,7 @@ func TestMockResourceNsxtPolicyDhcpV4StaticBindingDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 }
+
+func TestUnitNsxt_DhcpV4StaticBindingSegmentVariants(t *testing.T) {
+	testDHCPBindingSegmentVariants(t, false)
+}

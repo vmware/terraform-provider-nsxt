@@ -398,3 +398,7 @@ func TestMockResourceNsxtNodeUserDelete(t *testing.T) {
 		assert.Less(t, time.Since(start), 500*time.Millisecond)
 	})
 }
+
+func TestUnitNsxt_UsernameValidationBoundaries(t *testing.T) {
+	testIdentityValidationBoundaries(t, validateUsername(), 32, "Admin_1@example.com", "1admin")
+}

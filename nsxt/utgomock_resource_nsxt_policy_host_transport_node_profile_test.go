@@ -51,8 +51,7 @@ func setupHtnpMock(t *testing.T, ctrl *gomock.Controller) (*inframocks.MockHostT
 }
 
 // TestMockResourceNsxtPolicyHostTransportNodeProfileCreate tests the Create function.
-// The full success path (including Read) is not testable because setHostSwitchSpecInSchema
-// requires a non-nil, properly serialized HostSwitchSpec StructValue.
+// The lifecycle test below also covers success with a serialized HostSwitchSpec.
 func TestMockResourceNsxtPolicyHostTransportNodeProfileCreate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -76,9 +75,7 @@ func TestMockResourceNsxtPolicyHostTransportNodeProfileCreate(t *testing.T) {
 }
 
 // TestMockResourceNsxtPolicyHostTransportNodeProfileRead tests the Read function.
-// The success path is not testable because setHostSwitchSpecInSchema requires
-// a non-nil, properly serialized HostSwitchSpec StructValue that is complex
-// to construct in unit tests.
+// The lifecycle test below covers the success path.
 func TestMockResourceNsxtPolicyHostTransportNodeProfileRead(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -118,8 +115,7 @@ func TestMockResourceNsxtPolicyHostTransportNodeProfileRead(t *testing.T) {
 }
 
 // TestMockResourceNsxtPolicyHostTransportNodeProfileUpdate tests the Update function.
-// The success path calls Read after Update, which is not fully testable due to
-// the same HostSwitchSpec serialization constraint.
+// The lifecycle test below covers Update followed by Read.
 func TestMockResourceNsxtPolicyHostTransportNodeProfileUpdate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -170,4 +166,31 @@ func TestMockResourceNsxtPolicyHostTransportNodeProfileDelete(t *testing.T) {
 		err := resourceNsxtPolicyHostTransportNodeProfileDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestMockResourceNsxtPolicyHostTransportNodeProfileLifecycleSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	sdk, restore := setupHtnpMock(t, ctrl)
+	t.Cleanup(restore)
+	m := newIsolatedMockProviderClient(t)
+	res := resourceNsxtPolicyHostTransportNodeProfile()
+	d := schema.TestResourceDataRaw(t, res.Schema, minimalHtnpData())
+	spec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeHost)
+	require.NoError(t, err)
+	obj := nsxModel.PolicyHostTransportNodeProfile{Id: &htnpID, DisplayName: &htnpDisplayName, Description: &htnpDescription, HostSwitchSpec: spec, IgnoreOverriddenHosts: boolPtr(true)}
+	gomock.InOrder(
+		sdk.EXPECT().Get(htnpID).Return(nsxModel.PolicyHostTransportNodeProfile{}, vapiErrors.NotFound{}),
+		sdk.EXPECT().Update(htnpID, gomock.Any(), nil, nil).DoAndReturn(func(_ string, got nsxModel.PolicyHostTransportNodeProfile, _ *bool, _ *bool) (nsxModel.PolicyHostTransportNodeProfile, error) {
+			require.Equal(t, htnpDisplayName, *got.DisplayName)
+			require.NotNil(t, got.HostSwitchSpec)
+			return obj, nil
+		}),
+		sdk.EXPECT().Get(htnpID).Return(obj, nil),
+	)
+	require.NoError(t, resourceNsxtPolicyHostTransportNodeProfileCreate(d, m))
+	assert.Equal(t, htnpID, d.Id())
+	assert.Equal(t, htnpDisplayName, d.Get("display_name"))
+	sdk.EXPECT().Update(htnpID, gomock.Any(), nil, nil).Return(obj, nil)
+	sdk.EXPECT().Get(htnpID).Return(obj, nil)
+	require.NoError(t, resourceNsxtPolicyHostTransportNodeProfileUpdate(d, m))
 }

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -606,5 +607,50 @@ func TestUnitNsxt_ValidateStringListNoDuplicateValues(t *testing.T) {
 				require.NoError(t, err)
 			}
 		})
+	}
+}
+
+func TestUnitNsxt_ValidatorTypeAndNumericBoundaries(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		validate schema.SchemaValidateFunc
+	}{
+		{"host_prefix", validateCidrOrIPOrRangeAllowHostPrefix()}, {"hostname", validateSingleIPOrHostName()},
+		{"cidr", validateCidr()}, {"ip_cidr", validateIPCidr()}, {"groups", validatePolicySourceDestinationGroups()},
+		{"path", validatePolicyPath()}, {"ID", validateID()}, {"ID_or_path", validateIDOrPolicyPath()},
+		{"project", validateProjectID(false)}, {"IP_or_ASN", validateIPorASNPair},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, value := range []interface{}{nil, 42, []string{"value"}} {
+				_, errs := tc.validate(value, "attribute")
+				require.NotEmpty(t, errs)
+			}
+		})
+	}
+	for _, v := range []interface{}{-1, 65537, uint64(65537)} {
+		assert.False(t, isSinglePort(v))
+	}
+	for _, v := range []interface{}{0, 65535, uint64(65535)} {
+		assert.True(t, isSinglePort(v))
+	}
+	assert.False(t, isCidr("192.0.2.0/24", false, true))
+	assert.False(t, isCidr("192.0.2.1/24", true, false))
+	for _, v := range []string{"65536:1", "1:4294967296", "192.0.2.1:4294967296", "bad:1"} {
+		_, errs := validateIPorASNPair(v, "rd")
+		require.NotEmpty(t, errs)
+	}
+	_, errs := validateIPCidr()("not-a-cidr", "cidr")
+	require.NotEmpty(t, errs)
+	_, errs = validatePowerOf2(false, 16)(32, "size")
+	require.NotEmpty(t, errs)
+	for _, v := range []interface{}{true, "not-a-number"} {
+		_, errs = validateVLANId(v, "vlan")
+		require.NotEmpty(t, errs)
+	}
+	_, errs = validateVLANIdOrRange(4094, "vlan")
+	require.Empty(t, errs)
+	for _, v := range []string{"", "invalid/id"} {
+		_, errs = validateProjectID(true)(v, "project")
+		require.NotEmpty(t, errs)
 	}
 }

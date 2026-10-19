@@ -361,3 +361,23 @@ func TestMockResourceNsxtPolicyGatewaySecurityConfigImporter(t *testing.T) {
 		assert.Equal(t, tier1GatewayID, d.Get("tier1_id"))
 	})
 }
+
+func TestUnitNsxt_GatewaySecurityConfigImportFormats(t *testing.T) {
+	for _, tc := range []struct{ id, field, want string }{
+		{"tier0/gw", "tier0_id", "gw"}, {"tier1/gw", "tier1_id", "gw"}, {"tier0/", "", ""}, {"tier2/gw", "", ""}, {"gw", "", ""},
+	} {
+		t.Run(tc.id, func(t *testing.T) {
+			d := resourceNsxtPolicyGatewaySecurityConfig().TestResourceData()
+			d.SetId(tc.id)
+			result, err := gatewaySecurityConfigImporter(nil, d, nil)
+			if tc.field == "" {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, result, 1)
+			assert.Equal(t, tc.want, d.Get(tc.field))
+			assert.Equal(t, tc.id, d.Id())
+		})
+	}
+}
