@@ -235,7 +235,12 @@ func TestAccResourceNsxtVpcServiceProfile_dnsConfig(t *testing.T) {
 	name := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t); testAccNSXVersion(t, "9.2.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.2.0")
+			testAccPreCheckDnsVNSCluster(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcServiceProfileCheckDestroy(state, name)
@@ -730,6 +735,7 @@ resource "nsxt_policy_dns_service" "project" {
   display_name           = "%s-svc"
   allocated_listener_ips = [nsxt_policy_project_ip_address_allocation.dns_listener.path]
   transit_gateway        = nsxt_policy_transit_gateway.dns_tgw.path
+  depends_on             = [nsxt_policy_virtual_network_service_cluster.test]
 }
 `, testAccNsxtMultitenancyContext(false), displayName)
 }
@@ -739,6 +745,7 @@ func testAccNsxtVpcServiceProfileDnsConfigRemoved(displayName string) string {
 resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
+  depends_on   = [nsxt_policy_dns_service.project]
   dhcp_config {
   }
 }`, testAccNsxtProjectContext(), displayName)
