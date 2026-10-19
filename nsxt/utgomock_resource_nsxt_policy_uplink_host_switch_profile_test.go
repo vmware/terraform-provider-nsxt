@@ -301,3 +301,70 @@ func TestMockResourceNsxtPolicyUplinkHostSwitchProfileDelete(t *testing.T) {
 		assert.Contains(t, err.Error(), "API error")
 	})
 }
+
+func TestUnitNsxt_uplinkHostSwitchProfileLagsAndNamedTeamings(t *testing.T) {
+	res := resourceNsxtUplinkHostSwitchProfile()
+
+	data := minimalUplinkProfileData()
+	data["mtu"] = 1600
+	data["lag"] = []interface{}{
+		map[string]interface{}{
+			"name":                   "lag1",
+			"load_balance_algorithm": model.Lag_LOAD_BALANCE_ALGORITHM_SRCDESTMAC,
+			"mode":                   model.Lag_MODE_ACTIVE,
+			"number_of_uplinks":      2,
+			"timeout_type":           model.Lag_TIMEOUT_TYPE_SLOW,
+		},
+	}
+	data["named_teaming"] = []interface{}{
+		map[string]interface{}{
+			"name":   "named1",
+			"policy": model.NamedTeamingPolicy_POLICY_FAILOVER_ORDER,
+			"active": []interface{}{
+				map[string]interface{}{"uplink_name": "uplink1", "uplink_type": model.Uplink_UPLINK_TYPE_PNIC},
+			},
+			"standby": []interface{}{
+				map[string]interface{}{"uplink_name": "uplink2", "uplink_type": model.Uplink_UPLINK_TYPE_PNIC},
+			},
+		},
+	}
+	d := schema.TestResourceDataRaw(t, res.Schema, data)
+
+	profile := uplinkHostSwitchProfileSchemaToModel(d)
+	require.NotNil(t, profile.Mtu)
+	assert.Equal(t, int64(1600), *profile.Mtu)
+	require.Len(t, profile.Lags, 1)
+	assert.Equal(t, "lag1", *profile.Lags[0].Name)
+	assert.Equal(t, model.Lag_MODE_ACTIVE, *profile.Lags[0].Mode)
+	assert.Equal(t, int64(2), *profile.Lags[0].NumberOfUplinks)
+	require.Len(t, profile.NamedTeamings, 1)
+	assert.Equal(t, "named1", *profile.NamedTeamings[0].Name)
+	require.Len(t, profile.NamedTeamings[0].ActiveList, 1)
+	require.Len(t, profile.NamedTeamings[0].StandbyList, 1)
+	assert.Equal(t, "uplink2", *profile.NamedTeamings[0].StandbyList[0].UplinkName)
+
+	// Round-trip into a fresh ResourceData, as Read does with the NSX response.
+	lagID := "lag-id-1"
+	lagUplinkName := "lag1-0"
+	lagUplinkType := model.Uplink_UPLINK_TYPE_PNIC
+	profile.Lags[0].Id = &lagID
+	profile.Lags[0].Uplinks = []model.Uplink{{UplinkName: &lagUplinkName, UplinkType: &lagUplinkType}}
+	readD := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+	setUplinkHostSwitchProfileSchema(readD, profile)
+
+	assert.Equal(t, 1600, readD.Get("mtu"))
+	lags := readD.Get("lag").([]interface{})
+	require.Len(t, lags, 1)
+	lag := lags[0].(map[string]interface{})
+	assert.Equal(t, lagID, lag["id"])
+	assert.Equal(t, "lag1", lag["name"])
+	assert.Equal(t, model.Lag_TIMEOUT_TYPE_SLOW, lag["timeout_type"])
+	assert.Equal(t, 2, lag["number_of_uplinks"])
+	require.Len(t, lag["uplink"].([]interface{}), 1)
+	namedTeamings := readD.Get("named_teaming").([]interface{})
+	require.Len(t, namedTeamings, 1)
+	namedTeaming := namedTeamings[0].(map[string]interface{})
+	assert.Equal(t, "named1", namedTeaming["name"])
+	assert.Len(t, namedTeaming["active"].([]interface{}), 1)
+	assert.Len(t, namedTeaming["standby"].([]interface{}), 1)
+}

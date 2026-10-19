@@ -279,6 +279,34 @@ func TestUnitNsxt_getIdsProfileCriteriaFromSchema(t *testing.T) {
 		require.Empty(t, errs)
 		assert.Equal(t, nsxModel.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TARGET, *golang2.(nsxModel.IdsProfileFilterCriteria).FilterName)
 	})
+
+	t.Run("all criteria fields are emitted in order", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"criteria": []interface{}{
+				map[string]interface{}{
+					"attack_types":      []interface{}{"malware"},
+					"attack_targets":    []interface{}{"server"},
+					"cvss":              []interface{}{"HIGH"},
+					"products_affected": []interface{}{"linux"},
+				},
+			},
+		})
+		result, err := getIdsProfileCriteriaFromSchema(d)
+		require.NoError(t, err)
+		require.Len(t, result, 7)
+
+		expected := []string{
+			nsxModel.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TYPE,
+			nsxModel.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TARGET,
+			nsxModel.IdsProfileFilterCriteria_FILTER_NAME_CVSS,
+			nsxModel.IdsProfileFilterCriteria_FILTER_NAME_PRODUCT_AFFECTED,
+		}
+		for i, name := range expected {
+			golang, errs := converter.ConvertToGolang(result[2*i], nsxModel.IdsProfileFilterCriteriaBindingType())
+			require.Empty(t, errs)
+			assert.Equal(t, name, *golang.(nsxModel.IdsProfileFilterCriteria).FilterName)
+		}
+	})
 }
 
 func TestUnitNsxt_setIdsProfileCriteriaInSchema(t *testing.T) {

@@ -462,3 +462,77 @@ func TestMockResourceNsxtPolicyBgpConfigDelete(t *testing.T) {
 		require.NoError(t, err)
 	})
 }
+
+func TestUnitNsxt_resourceNsxtPolicyBgpConfigToStruct(t *testing.T) {
+	res := resourceNsxtPolicyBgpConfig()
+
+	t.Run("non-VRF config sets graceful restart and aggregations", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"gateway_path":           bgpCfgGwPath,
+			"local_as_num":           "65000",
+			"graceful_restart_timer": 200,
+			"route_aggregation": []interface{}{
+				map[string]interface{}{"prefix": "10.0.0.0/8", "summary_only": true},
+				map[string]interface{}{"prefix": "20.0.0.0/8", "summary_only": false},
+			},
+		})
+
+		obj, err := resourceNsxtPolicyBgpConfigToStruct(d, false)
+		require.NoError(t, err)
+		assert.Equal(t, "65000", *obj.LocalAsNum)
+		require.Len(t, obj.RouteAggregations, 2)
+		assert.Equal(t, "10.0.0.0/8", *obj.RouteAggregations[0].Prefix)
+		assert.True(t, *obj.RouteAggregations[0].SummaryOnly)
+		assert.False(t, *obj.RouteAggregations[1].SummaryOnly)
+		require.NotNil(t, obj.GracefulRestartConfig)
+		assert.Equal(t, int64(200), *obj.GracefulRestartConfig.Timer.RestartTimer)
+		assert.NotNil(t, obj.InterSrIbgp)
+		assert.NotNil(t, obj.MultipathRelax)
+	})
+
+	t.Run("VRF config with defaults omits graceful restart", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"gateway_path": bgpCfgGwPath,
+		})
+
+		obj, err := resourceNsxtPolicyBgpConfigToStruct(d, true)
+		require.NoError(t, err)
+		assert.Nil(t, obj.LocalAsNum)
+		assert.Nil(t, obj.GracefulRestartConfig)
+		assert.Nil(t, obj.MultipathRelax)
+		assert.Nil(t, obj.InterSrIbgp)
+	})
+
+	t.Run("VRF config sends inter_sr_ibgp only when changed", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"gateway_path":  bgpCfgGwPath,
+			"inter_sr_ibgp": true,
+		})
+
+		obj, err := resourceNsxtPolicyBgpConfigToStruct(d, true)
+		require.NoError(t, err)
+		require.NotNil(t, obj.InterSrIbgp)
+		assert.True(t, *obj.InterSrIbgp)
+	})
+
+	vrfErrors := []struct {
+		field string
+		value interface{}
+	}{
+		{"graceful_restart_timer", 100},
+		{"graceful_restart_stale_route_timer", 100},
+		{"graceful_restart_mode", model.BgpGracefulRestartConfig_MODE_DISABLE},
+	}
+	for _, tc := range vrfErrors {
+		t.Run("VRF config rejects "+tc.field, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"gateway_path": bgpCfgGwPath,
+				tc.field:       tc.value,
+			})
+
+			_, err := resourceNsxtPolicyBgpConfigToStruct(d, true)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tc.field+" can not be specified on VRF Gateway")
+		})
+	}
+}
