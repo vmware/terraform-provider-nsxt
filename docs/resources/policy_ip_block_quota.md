@@ -32,6 +32,12 @@ resource "nsxt_policy_ip_block_quota" "small" {
 
 ## Example Usage - Multi-Tenancy
 
+For project-scoped quotas, each referenced block must belong to the project
+or be shared with it. For an infrastructure EXTERNAL IPv4 block, configure the
+project's `external_ipv4_blocks` or use an association-only shared resource.
+When using a shared resource, add an explicit dependency on it to the quota.
+PRIVATE blocks must be created in the project's context.
+
 ```hcl
 resource "nsxt_policy_ip_block_quota" "small" {
   context {

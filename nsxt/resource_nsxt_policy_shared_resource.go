@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/shares"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -31,6 +32,17 @@ func resourceNsxtPolicySharedResource() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"with_permission": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Access granted to the target of the share; defaults to the backend permission when omitted",
+				ValidateFunc: validation.StringInSlice([]string{
+					model.SharedResource_WITH_PERMISSION_READ_ONLY,
+					model.SharedResource_WITH_PERMISSION_ASSOCIATION_ONLY,
+					model.SharedResource_WITH_PERMISSION_READ_AND_ASSOCIATION,
+				}, false),
+			},
 			"share_path": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -91,6 +103,11 @@ func resourceNsxtPolicySharedResourceCreate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
+	permission, ok := d.Get("with_permission").(string)
+	if !ok {
+		return fmt.Errorf("with_permission must be a string")
+	}
+	obj.WithPermission = nullIfEmpty(permission)
 	client := cliSharedResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
@@ -136,7 +153,7 @@ func resourceNsxtPolicySharedResourceRead(d *schema.ResourceData, m interface{})
 	}
 	d.Set("resource_object", resourceObjects)
 
-	return nil
+	return d.Set("with_permission", obj.WithPermission)
 }
 
 func resourceNsxtPolicySharedResourceUpdate(d *schema.ResourceData, m interface{}) error {
@@ -166,6 +183,11 @@ func resourceNsxtPolicySharedResourceUpdate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
+	permission, ok := d.Get("with_permission").(string)
+	if !ok {
+		return fmt.Errorf("with_permission must be a string")
+	}
+	obj.WithPermission = nullIfEmpty(permission)
 	client := cliSharedResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
