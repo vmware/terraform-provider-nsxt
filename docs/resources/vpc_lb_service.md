@@ -51,6 +51,7 @@ The following arguments are supported:
     * `vpc_id` - (Required) The ID of the VPC which the object belongs to.
 * `size` - (Optional) Load Balancer Service size, one of `SMALL`, `MEDIUM`, `LARGE`, `XLARGE`, `DLB`. Default is `SMALL`.
 * `enabled` - (Optional) Flag to enable the service.
+* `relax_scale_validation` - (Optional) Whether the scale validations of virtual servers, pools, pool members and rules are relaxed for the service. If not set, NSX applies its default of `true` on creation, and the value configured on NSX is preserved on later updates.
 * `error_log_level` - (Optional) Log level for the service, one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, `ALERT`, `EMERGENCY`. Default is `INFO`.
 
 ## Attributes Reference

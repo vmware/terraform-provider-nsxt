@@ -11,6 +11,7 @@ package nsxt
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -294,4 +295,156 @@ func minimalLBServiceData() map[string]interface{} {
 		"description":       lbServiceDescription,
 		"connectivity_path": lbServiceConnectivity,
 	}
+}
+
+func TestMockResourceNsxtPolicyLBServiceRelaxScaleValidation(t *testing.T) {
+	util.NsxVersion = "9.1.0"
+	defer func() { util.NsxVersion = "" }()
+
+	boolPtr := func(b bool) *bool { return &b }
+	apiResponse := func(relax *bool) model.LBService {
+		return model.LBService{
+			Id:                   &lbServiceID,
+			DisplayName:          &lbServiceDisplayName,
+			Description:          &lbServiceDescription,
+			Path:                 &lbServicePath,
+			Revision:             &lbServiceRevision,
+			ConnectivityPath:     &lbServiceConnectivity,
+			Size:                 &lbServiceSize,
+			RelaxScaleValidation: relax,
+		}
+	}
+	setup := func(t *testing.T) *lbSvcMocks.MockLbServicesClient {
+		ctrl := gomock.NewController(t)
+		t.Cleanup(ctrl.Finish)
+		mockLbSDK := lbSvcMocks.NewMockLbServicesClient(ctrl)
+		mockWrapper := &cliinfra.LBServiceClientContext{
+			Client:     mockLbSDK,
+			ClientType: utl.Local,
+		}
+		originalCli := cliLbServicesClient
+		t.Cleanup(func() { cliLbServicesClient = originalCli })
+		cliLbServicesClient = func(sessionContext utl.SessionContext, connector client.Connector) *cliinfra.LBServiceClientContext {
+			return mockWrapper
+		}
+		return mockLbSDK
+	}
+
+	t.Run("create without value does not send it", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		gomock.InOrder(
+			mockLbSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).DoAndReturn(func(_ string, obj model.LBService) error {
+				assert.Nil(t, obj.RelaxScaleValidation)
+				return nil
+			}),
+			mockLbSDK.EXPECT().Get(gomock.Any()).Return(apiResponse(boolPtr(false)), nil),
+		)
+
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBServiceData())
+		require.NoError(t, resourceNsxtPolicyLBServiceCreate(d, newGoMockProviderClient()))
+		assert.Equal(t, false, d.Get("relax_scale_validation"))
+	})
+
+	t.Run("create with explicit true sends true", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		gomock.InOrder(
+			mockLbSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).DoAndReturn(func(_ string, obj model.LBService) error {
+				require.NotNil(t, obj.RelaxScaleValidation)
+				assert.True(t, *obj.RelaxScaleValidation)
+				return nil
+			}),
+			mockLbSDK.EXPECT().Get(gomock.Any()).Return(apiResponse(boolPtr(true)), nil),
+		)
+
+		data := minimalLBServiceData()
+		data["relax_scale_validation"] = true
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, resourceNsxtPolicyLBServiceCreate(d, newGoMockProviderClient()))
+		assert.Equal(t, true, d.Get("relax_scale_validation"))
+	})
+
+	t.Run("create with explicit false sends false", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		gomock.InOrder(
+			mockLbSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).DoAndReturn(func(_ string, obj model.LBService) error {
+				require.NotNil(t, obj.RelaxScaleValidation)
+				assert.False(t, *obj.RelaxScaleValidation)
+				return nil
+			}),
+			mockLbSDK.EXPECT().Get(gomock.Any()).Return(apiResponse(boolPtr(false)), nil),
+		)
+
+		data := minimalLBServiceData()
+		data["relax_scale_validation"] = false
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, resourceNsxtPolicyLBServiceCreate(d, newGoMockProviderClient()))
+		assert.Equal(t, false, d.Get("relax_scale_validation"))
+	})
+
+	for _, relax := range []bool{false, true} {
+		t.Run(fmt.Sprintf("update preserves value read from NSX (%t)", relax), func(t *testing.T) {
+			mockLbSDK := setup(t)
+			gomock.InOrder(
+				mockLbSDK.EXPECT().Patch(lbServiceID, gomock.Any()).DoAndReturn(func(_ string, obj model.LBService) error {
+					require.NotNil(t, obj.RelaxScaleValidation)
+					assert.Equal(t, relax, *obj.RelaxScaleValidation)
+					return nil
+				}),
+				mockLbSDK.EXPECT().Get(lbServiceID).Return(apiResponse(boolPtr(relax)), nil),
+			)
+
+			res := resourceNsxtPolicyLBService()
+			// The value is not configured, it is known from the refresh preceding the update
+			d := schema.TestResourceDataRaw(t, res.Schema, minimalLBServiceData())
+			d.SetId(lbServiceID)
+			require.NoError(t, d.Set("relax_scale_validation", relax))
+			require.NoError(t, resourceNsxtPolicyLBServiceUpdate(d, newGoMockProviderClient()))
+			assert.Equal(t, relax, d.Get("relax_scale_validation"))
+		})
+	}
+
+	t.Run("update without a known value does not send it", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		gomock.InOrder(
+			mockLbSDK.EXPECT().Patch(lbServiceID, gomock.Any()).DoAndReturn(func(_ string, obj model.LBService) error {
+				assert.Nil(t, obj.RelaxScaleValidation)
+				return nil
+			}),
+			mockLbSDK.EXPECT().Get(lbServiceID).Return(apiResponse(nil), nil),
+		)
+
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalLBServiceData())
+		d.SetId(lbServiceID)
+		require.NoError(t, resourceNsxtPolicyLBServiceUpdate(d, newGoMockProviderClient()))
+	})
+
+	t.Run("read sets the value returned by NSX", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		mockLbSDK.EXPECT().Get(lbServiceID).Return(apiResponse(boolPtr(true)), nil)
+
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(lbServiceID)
+		require.NoError(t, resourceNsxtPolicyLBServiceRead(d, newGoMockProviderClient()))
+		assert.Equal(t, true, d.Get("relax_scale_validation"))
+	})
+
+	t.Run("read keeps previous value if NSX does not return it", func(t *testing.T) {
+		mockLbSDK := setup(t)
+		mockLbSDK.EXPECT().Get(lbServiceID).Return(apiResponse(nil), nil)
+
+		res := resourceNsxtPolicyLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(lbServiceID)
+		// Seed a previous value, as if it was set by an earlier read
+		require.NoError(t, d.Set("relax_scale_validation", true))
+		require.NoError(t, resourceNsxtPolicyLBServiceRead(d, newGoMockProviderClient()))
+		v, exists := d.GetOkExists("relax_scale_validation")
+		assert.True(t, exists)
+		assert.Equal(t, true, v)
+	})
 }
