@@ -54,6 +54,8 @@ func TestMockDataSourceNsxtVpcLBService(t *testing.T) {
 		assert.Equal(t, vpcLbServiceID, d.Id())
 		assert.Equal(t, vpcLbServiceDisplayName, d.Get("display_name"))
 		assert.Equal(t, vpcLbServicePath, d.Get("path"))
+		require.Len(t, stub.queries, 1)
+		assert.Contains(t, stub.queries[0], ` AND path:\/orgs\/default\/projects\/proj1\/vpcs\/vpc1\/*`)
 	})
 
 	t.Run("by name perfect match", func(t *testing.T) {
@@ -66,6 +68,8 @@ func TestMockDataSourceNsxtVpcLBService(t *testing.T) {
 		d, err := vpcLbDsServiceRead(t, newGoMockProviderClient(), map[string]interface{}{"display_name": vpcLbServiceDisplayName})
 		require.NoError(t, err)
 		assert.Equal(t, vpcLbServiceID, d.Id())
+		require.Len(t, stub.queries, 1)
+		assert.Contains(t, stub.queries[0], ` AND path:\/orgs\/default\/projects\/proj1\/vpcs\/vpc1\/*`)
 	})
 
 	t.Run("by name prefix match", func(t *testing.T) {
@@ -76,6 +80,8 @@ func TestMockDataSourceNsxtVpcLBService(t *testing.T) {
 		d, err := vpcLbDsServiceRead(t, newGoMockProviderClient(), map[string]interface{}{"display_name": "Test VPC"})
 		require.NoError(t, err)
 		assert.Equal(t, vpcLbServiceID, d.Id())
+		require.Len(t, stub.queries, 1)
+		assert.Contains(t, stub.queries[0], ` AND path:\/orgs\/default\/projects\/proj1\/vpcs\/vpc1\/*`)
 	})
 
 	t.Run("multiple perfect matches", func(t *testing.T) {

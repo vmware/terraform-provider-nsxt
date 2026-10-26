@@ -39,9 +39,11 @@ type seqQueryListClient struct {
 	responses []nsxModel.SearchResponse
 	errs      []error
 	call      int
+	queries   []string
 }
 
 func (s *seqQueryListClient) List(queryParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsxModel.SearchResponse, error) {
+	s.queries = append(s.queries, queryParam)
 	i := s.call
 	s.call++
 	if s.errs != nil && i < len(s.errs) && s.errs[i] != nil {
@@ -119,6 +121,7 @@ func TestUnitNsxt_searchMultitenancyVPCPathSuffix(t *testing.T) {
 	ctx := utl.SessionContext{ClientType: utl.VPC, ProjectID: "p1", VPCID: "vpc1"}
 	_, err := searchMultitenancyResources(nil, ctx, "resource_type:Z AND marked_for_delete:false")
 	require.NoError(t, err)
+	assert.Equal(t, []string{`resource_type:Z AND marked_for_delete:false AND path:\/orgs\/default\/projects\/p1\/vpcs\/vpc1\/*`}, stub.queries)
 }
 
 func TestUnitNsxt_listPolicyResourcesByNsxID(t *testing.T) {
@@ -209,6 +212,7 @@ func TestUnitNsxt_searchMultitenancyResourcesAppendsProjectPath(t *testing.T) {
 	ctx := utl.SessionContext{ClientType: utl.Multitenancy, ProjectID: "proj1"}
 	_, err := searchMultitenancyResources(nil, ctx, "resource_type:Z AND marked_for_delete:false")
 	require.NoError(t, err)
+	assert.Equal(t, []string{`resource_type:Z AND marked_for_delete:false AND path:\/orgs\/default\/projects\/proj1\/*`}, stub.queries)
 }
 
 func TestUnitNsxt_searchLMPagination(t *testing.T) {
