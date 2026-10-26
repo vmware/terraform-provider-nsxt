@@ -76,6 +76,9 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 			return errs[0]
 		}
 		obj = profile.(model.LBPersistenceProfile)
+		if !dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(obj, objType) {
+			return fmt.Errorf("LbPersistenceProfile with ID '%s' and type '%s' was not found", objID, objType)
+		}
 	} else if objName == "" && !typeSet {
 		return fmt.Errorf("Error obtaining LbPersistenceProfile name or type during read")
 	} else {
@@ -94,10 +97,10 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 			}
 			lbProfile := profile.(model.LBPersistenceProfile)
 
-			if objName != "" && strings.HasPrefix(*lbProfile.DisplayName, objName) && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
+			if objName != "" && lbProfile.DisplayName != nil && strings.HasPrefix(*lbProfile.DisplayName, objName) && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
 				prefixMatch = append(prefixMatch, lbProfile)
 			}
-			if *lbProfile.DisplayName == objName {
+			if lbProfile.DisplayName != nil && *lbProfile.DisplayName == objName && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
 				perfectMatch = append(perfectMatch, lbProfile)
 			}
 			if objName == "" && typeSet && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
