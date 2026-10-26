@@ -171,6 +171,8 @@ func resourceNsxtVpcLBHttpsMonitorProfileRead(d *schema.ResourceData, m interfac
 	d.Set("response_status_codes", int64List2Interface(lbHTTPSMonitor.ResponseStatusCodes))
 	if lbHTTPSMonitor.ServerSslProfileBinding != nil {
 		setLbServerSslInSchema(d, *lbHTTPSMonitor.ServerSslProfileBinding)
+	} else if err := d.Set("server_ssl", nil); err != nil {
+		return err
 	}
 	return nil
 }

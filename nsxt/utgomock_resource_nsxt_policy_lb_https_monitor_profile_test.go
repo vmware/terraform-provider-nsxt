@@ -190,6 +190,19 @@ func TestMockResourceNsxtPolicyLBHttpsMonitorProfileRead(t *testing.T) {
 		err := resourceNsxtPolicyLBHttpsMonitorProfileRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assertLBHttpsMonitorFields(t, d)
+
+		removed := model.LBHttpsMonitorProfile{
+			ResourceType: model.LBMonitorProfile_RESOURCE_TYPE_LBHTTPSMONITORPROFILE,
+		}
+		value, errs := bindings.NewTypeConverter().ConvertToVapi(removed, model.LBHttpsMonitorProfileBindingType())
+		require.Empty(t, errs)
+		response, ok := value.(*data.StructValue)
+		require.True(t, ok)
+		mockSDK.EXPECT().Get(lbHttpsMonitorID).Return(response, nil)
+
+		require.NoError(t, res.Read(d, newGoMockProviderClient()))
+		assert.Empty(t, d.Get("server_ssl"))
+		assert.Equal(t, lbHttpsMonitorID, d.Id())
 	})
 }
 

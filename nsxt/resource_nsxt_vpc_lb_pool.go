@@ -170,8 +170,10 @@ func resourceNsxtVpcLBPoolRead(d *schema.ResourceData, m interface{}) error {
 
 	if _, ok := d.GetOk("active_monitor_path"); ok {
 		// deprecated value was set
-		if obj.ActiveMonitorPaths != nil {
+		if len(obj.ActiveMonitorPaths) > 0 {
 			d.Set("active_monitor_path", obj.ActiveMonitorPaths[0])
+		} else if err := d.Set("active_monitor_path", ""); err != nil {
+			return err
 		}
 	} else {
 		// resource uses lists attribute (non-deprecated) or attribute
