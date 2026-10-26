@@ -56,7 +56,7 @@ The following arguments are supported:
 * `number_of_nodes` - (Optional, Computed) Number of Virtual Network Service nodes to deploy in the cluster. Must be at least 1.
 * `bfd_profile_path` - (Optional, Computed) Policy path of the BFD profile applied to all Service Hosts in this cluster. If not set, NSX applies a default profile.
 * `default_project_service_allocation` - (Optional, Computed) When set to `true`, the cluster is available for default project service allocation.
-* `vsphere_deployment_config` - (Optional, Computed) vSphere deployment configurations for the cluster. Each block supports:
+* `vsphere_deployment_config` - (Required) Exactly one vSphere deployment configuration must be supplied, matching the NSX API requirement. Keep this block in configuration for existing and imported clusters. Each block supports:
     * `compute_manager_id` - (Required) The NSX assigned identifier of the vCenter server registered with NSX (for example `id` of the `nsxt_compute_manager` data source).
     * `cluster_ids` - (Required) Set of vCenter clusters on which the Virtual Network Service nodes are deployed. All hosts in the specified clusters must have NSX fabric prepared.
     * `fault_domain_ids` - (Optional) Set of infrastructure fault domains or fault domain groups restricting the deployment within the clusters.
