@@ -52,6 +52,7 @@ The following arguments are supported:
 * `size` - (Optional) Load Balancer Service size, one of `SMALL`, `MEDIUM`, `LARGE`, `XLARGE`, `DLB`. Default is `SMALL`.
 * `enabled` - (Optional) Flag to enable the service.
 * `relax_scale_validation` - (Optional) Whether the scale validations of virtual servers, pools, pool members and rules are relaxed for the service. If not set, NSX applies its default of `true` on creation, and the value configured on NSX is preserved on later updates.
+* `snat_ip_allocation_paths` - (Optional) Set of policy paths of VPC IP address allocations used for SNAT, at most 2. The order of the paths is not significant. Each allocation must have `EXTERNAL` visibility and contain a single IP address, at most one IPv4 and one IPv6. Requires NSX 9.2.0 or later.
 * `error_log_level` - (Optional) Log level for the service, one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, `ALERT`, `EMERGENCY`. Default is `INFO`.
 
 ## Attributes Reference
@@ -62,6 +63,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `connectivity_path` - Policy path of the VPC which the service is connected to. It is assigned by NSX.
+* `network_appliance_load_balancer` - Whether the service is deployed on Edge or VNA nodes (`true`) or on VNS nodes (`false`). Requires NSX 9.2.0 or later.
 
 ## Importing
 

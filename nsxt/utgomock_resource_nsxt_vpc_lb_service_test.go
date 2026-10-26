@@ -412,3 +412,150 @@ func TestMockResourceNsxtVpcLBServiceRelaxScaleValidation(t *testing.T) {
 		assert.Equal(t, true, v)
 	})
 }
+
+func TestMockResourceNsxtVpcLBServiceVersionedFields(t *testing.T) {
+	snatPaths := []string{
+		"/orgs/default/projects/proj1/vpcs/vpc1/ip-address-allocations/ipv4",
+		"/orgs/default/projects/proj1/vpcs/vpc1/ip-address-allocations/ipv6",
+	}
+	boolPtr := func(b bool) *bool { return &b }
+
+	t.Run("create sends snat paths on 9.2.0", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.2.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		response := vpcLbServiceAPIResponse()
+		response.SnatIpAllocationPaths = snatPaths
+		response.NetworkApplianceLoadBalancer = boolPtr(true)
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(nsxModel.LBService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					assert.ElementsMatch(t, snatPaths, obj.SnatIpAllocationPaths)
+					assert.Nil(t, obj.NetworkApplianceLoadBalancer)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(response, nil),
+		)
+
+		data := vpcLbServiceData()
+		data["snat_ip_allocation_paths"] = []interface{}{snatPaths[0], snatPaths[1]}
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, res.Create(d, newGoMockProviderClient()))
+		assert.Equal(t, true, d.Get("network_appliance_load_balancer"))
+		assert.Equal(t, 2, d.Get("snat_ip_allocation_paths").(*schema.Set).Len())
+	})
+
+	t.Run("read ignores the order of snat paths", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.2.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		response := vpcLbServiceAPIResponse()
+		// NSX returns the paths in a different order than they are configured
+		response.SnatIpAllocationPaths = []string{snatPaths[1], snatPaths[0]}
+		mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(response, nil)
+
+		data := vpcLbServiceData()
+		data["snat_ip_allocation_paths"] = []interface{}{snatPaths[0], snatPaths[1]}
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(vpcLbServiceID)
+		configured := d.Get("snat_ip_allocation_paths").(*schema.Set)
+		require.NoError(t, res.Read(d, newGoMockProviderClient()))
+		assert.True(t, configured.Equal(d.Get("snat_ip_allocation_paths")))
+	})
+
+	t.Run("read leaves snat paths unset if NSX returns none", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.2.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		response := vpcLbServiceAPIResponse()
+		response.SnatIpAllocationPaths = []string{}
+		mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(response, nil)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		d.SetId(vpcLbServiceID)
+		require.NoError(t, res.Read(d, newGoMockProviderClient()))
+		assert.Equal(t, 0, d.Get("snat_ip_allocation_paths").(*schema.Set).Len())
+	})
+
+	t.Run("create with snat paths fails before 9.2.0", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.0.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(nsxModel.LBService{}, vapiErrors.NotFound{})
+
+		data := vpcLbServiceData()
+		data["snat_ip_allocation_paths"] = []interface{}{snatPaths[0]}
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		err := res.Create(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "9.2.0")
+	})
+
+	t.Run("update on 9.2.0 sends network appliance value and clears snat paths", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.2.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					require.NotNil(t, obj.NetworkApplianceLoadBalancer)
+					assert.False(t, *obj.NetworkApplianceLoadBalancer)
+					assert.NotNil(t, obj.SnatIpAllocationPaths)
+					assert.Empty(t, obj.SnatIpAllocationPaths)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(vpcLbServiceAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		d.SetId(vpcLbServiceID)
+		require.NoError(t, d.Set("network_appliance_load_balancer", false))
+		require.NoError(t, res.Update(d, newGoMockProviderClient()))
+	})
+
+	t.Run("update before 9.2.0 does not send the fields", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.0.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					assert.Nil(t, obj.NetworkApplianceLoadBalancer)
+					assert.Nil(t, obj.SnatIpAllocationPaths)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(vpcLbServiceAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		d.SetId(vpcLbServiceID)
+		require.NoError(t, res.Update(d, newGoMockProviderClient()))
+	})
+
+	t.Run("schema defines snat paths as a set limited to two", func(t *testing.T) {
+		res := resourceNsxtVpcLBService()
+		assert.Equal(t, schema.TypeSet, res.Schema["snat_ip_allocation_paths"].Type)
+		assert.Equal(t, 2, res.Schema["snat_ip_allocation_paths"].MaxItems)
+		assert.True(t, res.Schema["network_appliance_load_balancer"].Computed)
+		assert.False(t, res.Schema["network_appliance_load_balancer"].Optional)
+	})
+}

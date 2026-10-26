@@ -71,8 +71,45 @@ func resourceNsxtVpcLBService() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"network_appliance_load_balancer": {
+				Type:        schema.TypeBool,
+				Description: "Whether the Load Balancer is deployed on Edge or VNA nodes (true) or on VNS nodes (false). Requires NSX 9.2.0 or later",
+				Computed:    true,
+			},
+			"snat_ip_allocation_paths": {
+				Type:        schema.TypeSet,
+				Description: "Policy paths of VPC IP address allocations used for SNAT. Each allocation must have EXTERNAL visibility and a single IP address, at most one IPv4 and one IPv6. Requires NSX 9.2.0 or later",
+				Optional:    true,
+				MaxItems:    2,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+			},
 		},
 	}
+}
+
+// setVpcLBServiceVersionedFields sets the attributes which are supported by NSX 9.2.0 and above.
+// Omitting them on update would make NSX reset them, therefore they are always sent when supported.
+func setVpcLBServiceVersionedFields(d *schema.ResourceData, obj *model.LBService) error {
+	paths := getStringListFromSchemaSet(d, "snat_ip_allocation_paths")
+	if !util.NsxVersionHigherOrEqual("9.2.0") {
+		if len(paths) > 0 {
+			return fmt.Errorf("snat_ip_allocation_paths requires NSX version 9.2.0 or higher")
+		}
+		return nil
+	}
+	if paths == nil {
+		paths = []string{}
+	}
+	obj.SnatIpAllocationPaths = paths
+	// Read only, sent back as read from NSX
+	if v, ok := d.GetOkExists("network_appliance_load_balancer"); ok {
+		networkAppliance := v.(bool)
+		obj.NetworkApplianceLoadBalancer = &networkAppliance
+	}
+	return nil
 }
 
 func resourceNsxtVpcLBServiceExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
@@ -122,6 +159,10 @@ func resourceNsxtVpcLBServiceCreate(d *schema.ResourceData, m interface{}) error
 		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
 	}
 
+	if err := setVpcLBServiceVersionedFields(d, &obj); err != nil {
+		return err
+	}
+
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating VPC LBService with ID %s", id)
 	err = c.Patch(parents[0], parents[1], parents[2], id, obj, nil)
@@ -164,6 +205,15 @@ func resourceNsxtVpcLBServiceRead(d *schema.ResourceData, m interface{}) error {
 	if obj.RelaxScaleValidation != nil {
 		d.Set("relax_scale_validation", obj.RelaxScaleValidation)
 	}
+	if util.NsxVersionHigherOrEqual("9.2.0") {
+		d.Set("network_appliance_load_balancer", obj.NetworkApplianceLoadBalancer)
+		// An empty list is stored as unset, so that it does not differ from an omitted attribute
+		if len(obj.SnatIpAllocationPaths) > 0 {
+			d.Set("snat_ip_allocation_paths", obj.SnatIpAllocationPaths)
+		} else {
+			d.Set("snat_ip_allocation_paths", nil)
+		}
+	}
 
 	return nil
 }
@@ -195,6 +245,10 @@ func resourceNsxtVpcLBServiceUpdate(d *schema.ResourceData, m interface{}) error
 		ErrorLogLevel:        &errorLogLevel,
 		Size:                 &size,
 		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
+	}
+
+	if err := setVpcLBServiceVersionedFields(d, &obj); err != nil {
+		return err
 	}
 
 	// Update the resource using PATCH
