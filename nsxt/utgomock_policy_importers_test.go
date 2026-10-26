@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -184,13 +185,13 @@ func TestUnitNsxt_resourceNsxtPolicyVMTagsImporter(t *testing.T) {
 
 func TestUnitNsxt_getVpcPathResourceImporter(t *testing.T) {
 	m := newGoMockProviderClient()
-	imp := getVpcPathResourceImporter("/orgs/o/projects/p/vpcs/v/infra/example")
+	imp := getVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/tier-1s/[tier1]")
 
 	t.Run("valid vpc path sets context", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
 			"context": getContextSchema(false, false, true),
 		}, map[string]interface{}{})
-		d.SetId("/orgs/myorg/projects/myproj/vpcs/myvpc/infra/tier-1s/t1")
+		d.SetId("/orgs/myorg/projects/myproj/vpcs/myvpc/tier-1s/t1")
 
 		rd, err := imp(d, m)
 		require.NoError(t, err)
@@ -205,6 +206,96 @@ func TestUnitNsxt_getVpcPathResourceImporter(t *testing.T) {
 
 		_, err := imp(d, m)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "project_id and vpc_id")
+		assert.Contains(t, err.Error(), "Invalid policy path")
 	})
+
+	t.Run("invalid paths are rejected without changing the resource", func(t *testing.T) {
+		base := "/orgs/myorg/projects/myproj/vpcs/myvpc"
+		for name, path := range map[string]string{
+			"wrong collection":         base + "/lb-pools/t1",
+			"similar collection":       base + "/tier-1s-x/t1",
+			"missing ID":               base + "/tier-1s/",
+			"missing collection":       base + "/t1",
+			"extra segment":            base + "/tier-1s/t1/extra",
+			"missing VPC":              "/orgs/myorg/projects/myproj/tier-1s/t1",
+			"empty project":            "/orgs/myorg/projects//vpcs/myvpc/tier-1s/t1",
+			"wrong parent collections": "/orgs/myorg/projects/myproj/vpc-x/myvpc/tier-1s/t1",
+			"plain ID":                 "t1",
+		} {
+			t.Run(name, func(t *testing.T) {
+				d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+					"context": getContextSchema(false, false, true),
+				}, map[string]interface{}{})
+				d.SetId(path)
+
+				_, err := imp(d, m)
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "Invalid policy path")
+				assert.Equal(t, path, d.Id())
+				assert.Empty(t, d.Get("context"))
+			})
+		}
+	})
+
+	t.Run("empty ID", func(t *testing.T) {
+		d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+			"context": getContextSchema(false, false, true),
+		}, map[string]interface{}{})
+		d.SetId(" ")
+
+		_, err := imp(d, m)
+		require.ErrorIs(t, err, ErrEmptyImportID)
+	})
+}
+
+// Every resource importing with getVpcPathResourceImporter should accept a path built from its own
+// example, and reject the same path with a different collection
+func TestUnitNsxt_getVpcPathResourceImporterExamples(t *testing.T) {
+	m := newGoMockProviderClient()
+	examples := map[string]string{
+		"vpc endpoint":           vpcEndpointPathExample,
+		"vpc gateway policy":     vpcGatewayPolicyPathExample,
+		"vpc group":              vpcGroupPathExample,
+		"vpc ip address alloc":   vpcIpAddressAllocationPathExample,
+		"vpc lb app profile":     vpcLbAppProfilePathExample,
+		"vpc lb client ssl":      vpcLbClientSslProfilePathExample,
+		"vpc lb monitor profile": vpcLbMonitorProfilePathExample,
+		"vpc lb persistence":     vpcLbPersistenceProfilePathExample,
+		"vpc lb pool":            vpcLbPoolPathExample,
+		"vpc lb server ssl":      vpcLbServerSslProfilePathExample,
+		"vpc lb service":         vpcLbServicePathExample,
+		"vpc lb virtual server":  vpcLbVirtualServerPathExample,
+		"vpc security policy":    vpcSecurityPolicyPathExample,
+		"vpc service endpoint":   vpcServiceEndpointPathExample,
+		"vpc static routes":      vpcStaticRoutesPathExample,
+		"vpc subnet":             vpcSubnetPathExample,
+	}
+	for name, example := range examples {
+		t.Run(name, func(t *testing.T) {
+			imp := getVpcPathResourceImporter(example)
+			validPath := strings.NewReplacer("[org]", "default", "[project]", "proj", "[vpc]", "vpc1").Replace(example)
+			segs := strings.Split(validPath, "/")
+			segs[len(segs)-1] = "id1"
+			validPath = strings.Join(segs, "/")
+
+			d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+				"context": getContextSchema(false, false, true),
+			}, map[string]interface{}{})
+			d.SetId(validPath)
+			rd, err := imp(d, m)
+			require.NoError(t, err, validPath)
+			require.Len(t, rd, 1)
+			assert.Equal(t, "id1", rd[0].Id())
+
+			// Replace the collection which precedes the object ID
+			segs[len(segs)-2] = "wrong-collection"
+			d = schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+				"context": getContextSchema(false, false, true),
+			}, map[string]interface{}{})
+			d.SetId(strings.Join(segs, "/"))
+			_, err = imp(d, m)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "Invalid policy path")
+		})
+	}
 }
