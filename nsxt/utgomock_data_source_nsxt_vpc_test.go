@@ -56,6 +56,8 @@ func TestUnitNsxt_dataSourceNsxtVPCRead(t *testing.T) {
 		err := dataSourceNsxtVPCRead(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, "vpc-ds-1", d.Id())
+		require.Len(t, stub.queries, 1)
+		assert.Contains(t, stub.queries[0], ` AND path:\/orgs\/default\/projects\/proj-1\/*`)
 	})
 
 	t.Run("search error", func(t *testing.T) {
