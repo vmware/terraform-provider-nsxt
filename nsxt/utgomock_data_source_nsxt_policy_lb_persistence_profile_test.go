@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -96,6 +97,70 @@ func TestMockDataSourceNsxtPolicyLbPersistenceProfileSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	mockSDK, restore := setupLBPersistenceProfileMock(t, ctrl)
 	defer restore()
+
+	for resourceType, actualType := range lbPersistenceTypeMap {
+		for _, requestedType := range []string{"COOKIE", "SOURCE_IP", "GENERIC", "ANY", ""} {
+			for _, lookup := range []string{"ID", "exact name", "prefix", "type only"} {
+				t.Run(fmt.Sprintf("%s/%s/requested %s", lookup, actualType, requestedType), func(t *testing.T) {
+					input := map[string]interface{}{}
+					if requestedType != "" {
+						input["type"] = requestedType
+					}
+					value := genericLBPersistenceProfileValue(t, lbCookieID, lbCookieDisplayName, resourceType)
+					switch lookup {
+					case "ID":
+						input["id"] = lbCookieID
+						mockSDK.EXPECT().Get(lbCookieID).Return(value, nil)
+					case "exact name":
+						input["display_name"] = lbCookieDisplayName
+					case "prefix":
+						input["display_name"] = "Test LB Cookie"
+					}
+					if lookup != "ID" {
+						mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+							Return(nsxModel.LBPersistenceProfileListResult{Results: []*data.StructValue{value}}, nil)
+					}
+					ds := dataSourceNsxtPolicyLbPersistenceProfile()
+					d := schema.TestResourceDataRaw(t, ds.Schema, input)
+					err := ds.Read(d, newGoMockProviderClient())
+					if requestedType != "" && requestedType != "ANY" && requestedType != actualType {
+						require.Error(t, err)
+						assert.Contains(t, err.Error(), "was not found")
+						assert.Contains(t, err.Error(), requestedType)
+						if lookup == "ID" {
+							assert.Contains(t, err.Error(), lbCookieID)
+						} else if name, ok := input["display_name"]; ok {
+							assert.Contains(t, err.Error(), name)
+						}
+						assert.Equal(t, requestedType, d.Get("type"))
+						return
+					}
+					require.NoError(t, err)
+					assert.Equal(t, lbCookieID, d.Id())
+					assert.Equal(t, actualType, d.Get("type"))
+				})
+			}
+		}
+	}
+
+	for _, name := range []string{lbCookieDisplayName, "Test LB Cookie", ""} {
+		t.Run("missing display name/"+name, func(t *testing.T) {
+			value := genericLBPersistenceProfileValue(t, lbCookieID, lbCookieDisplayName, nsxModel.LBPersistenceProfile_RESOURCE_TYPE_LBCOOKIEPERSISTENCEPROFILE)
+			value.SetField("display_name", data.NewOptionalValue(nil))
+			mockSDK.EXPECT().List(gomock.Any(), nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+				Return(nsxModel.LBPersistenceProfileListResult{Results: []*data.StructValue{value}}, nil)
+			ds := dataSourceNsxtPolicyLbPersistenceProfile()
+			d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{"display_name": name, "type": "COOKIE"})
+			err := ds.Read(d, newGoMockProviderClient())
+			if name != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "was not found")
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, lbCookieID, d.Id())
+		})
+	}
 
 	t.Run("Read by ID succeeds", func(t *testing.T) {
 		mockSDK.EXPECT().Get(lbCookieID).Return(genericLBPersistenceProfileValue(t, lbCookieID, lbCookieDisplayName, nsxModel.LBPersistenceProfile_RESOURCE_TYPE_LBCOOKIEPERSISTENCEPROFILE), nil)
