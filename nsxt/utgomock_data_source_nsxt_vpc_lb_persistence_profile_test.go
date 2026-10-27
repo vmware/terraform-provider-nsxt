@@ -69,6 +69,30 @@ func TestMockDataSourceNsxtVpcLBPersistenceProfile(t *testing.T) {
 	}
 	cases := []testCase{
 		{
+			name: "exact name excludes mismatched type", input: map[string]interface{}{"display_name": vpcLbDsPersistName, "type": "COOKIE"},
+			setup: func(t *testing.T, m *vpcsmocks.MockVpcLbPersistenceProfilesClient) {
+				vpcLbDsPersistList(m, []*data.StructValue{vpcLbDsPersistValue(t, "wrong-type", vpcLbDsPersistName, sourceIP)}, nil)
+			},
+			errMsg: "not found",
+		},
+		{
+			name: "exact name selects matching type across pages", input: map[string]interface{}{"display_name": vpcLbDsPersistName, "type": "COOKIE"},
+			setup: func(t *testing.T, m *vpcsmocks.MockVpcLbPersistenceProfilesClient) {
+				next := "next-page"
+				gomock.InOrder(
+					m.EXPECT().List(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, nil, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+						Return(nsxModel.LBPersistenceProfileListResult{
+							Results: []*data.StructValue{vpcLbDsPersistValue(t, "wrong-type", vpcLbDsPersistName, sourceIP)}, Cursor: &next,
+						}, nil),
+					m.EXPECT().List(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, &next, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+						Return(nsxModel.LBPersistenceProfileListResult{
+							Results: []*data.StructValue{vpcLbDsPersistValue(t, vpcLbDsPersistID, vpcLbDsPersistName, cookie)},
+						}, nil),
+				)
+			},
+			wantID: vpcLbDsPersistID, wantTyp: "COOKIE",
+		},
+		{
 			name: "by ID", input: map[string]interface{}{"id": vpcLbDsPersistID},
 			setup: func(t *testing.T, m *vpcsmocks.MockVpcLbPersistenceProfilesClient) {
 				m.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbDsPersistID).

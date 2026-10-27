@@ -206,6 +206,7 @@ func runVpcLbProfileDataSourceTests(t *testing.T, spec vpcLbProfileDataSourceSpe
 		_, err := read(t, map[string]interface{}{"display_name": name})
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "Error while converting")
+		assert.Contains(t, err.Error(), name)
 	})
 
 	t.Run("Read by name list error", func(t *testing.T) {
