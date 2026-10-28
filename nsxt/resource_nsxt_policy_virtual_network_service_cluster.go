@@ -88,9 +88,10 @@ func resourceNsxtPolicyVirtualNetworkServiceCluster() *schema.Resource {
 			},
 			"vsphere_deployment_config": {
 				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				Description: "vSphere deployment configurations for the Virtual Network Service cluster",
+				Required:    true,
+				MinItems:    1,
+				MaxItems:    1,
+				Description: "vSphere deployment configuration for the Virtual Network Service cluster",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"compute_manager_id": {
@@ -104,13 +105,13 @@ func resourceNsxtPolicyVirtualNetworkServiceCluster() *schema.Resource {
 							Required:    true,
 							MinItems:    1,
 							Description: "vCenter clusters on which the Virtual Network Service nodes are deployed",
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validation.StringIsNotEmpty},
 						},
 						"fault_domain_ids": {
 							Type:        schema.TypeSet,
 							Optional:    true,
 							Description: "Infrastructure fault domains or fault domain groups restricting the deployment within the clusters",
-							Elem:        &schema.Schema{Type: schema.TypeString},
+							Elem:        &schema.Schema{Type: schema.TypeString, ValidateFunc: validation.StringIsNotEmpty},
 						},
 					},
 				},

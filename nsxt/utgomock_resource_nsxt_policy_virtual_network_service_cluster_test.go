@@ -7,10 +7,12 @@
 package nsxt
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -113,6 +115,10 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 	defer cleanup()
 
 	res := resourceNsxtPolicyVirtualNetworkServiceCluster()
+	placement := []interface{}{map[string]interface{}{
+		"compute_manager_id": vnsComputeManager,
+		"cluster_ids":        []interface{}{"domain-c1"},
+	}}
 
 	t.Run("Create_success", func(t *testing.T) {
 		mockSites.EXPECT().Get(vnsClusterSiteID).Return(model.Site{}, nil)
@@ -169,20 +175,22 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 				assert.Nil(t, obj.NumberOfNodes)
 				assert.Nil(t, obj.BfdProfilePath)
 				assert.Nil(t, obj.AllocationConfig)
-				assert.Empty(t, obj.VsphereDeploymentConfig)
+				assert.Len(t, obj.VsphereDeploymentConfig, 1)
 				return nil
 			})
 		mockVNS.EXPECT().Get(vnsClusterSiteID, vnsClusterEPID, gomock.Any()).Return(model.VirtualNetworkServiceCluster{
-			DisplayName: &vnsClusterName,
+			DisplayName:             &vnsClusterName,
+			VsphereDeploymentConfig: vnsClusterFullModel().VsphereDeploymentConfig,
 		}, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"display_name":      vnsClusterName,
-			"site_path":         vnsClusterSitePath,
-			"enforcement_point": vnsClusterEPID,
+			"vsphere_deployment_config": placement,
+			"display_name":              vnsClusterName,
+			"site_path":                 vnsClusterSitePath,
+			"enforcement_point":         vnsClusterEPID,
 		})
 		require.NoError(t, resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient()))
-		assert.Empty(t, d.Get("vsphere_deployment_config"))
+		assert.Len(t, d.Get("vsphere_deployment_config"), 1)
 	})
 
 	t.Run("Create_falls_back_to_provider_enforcement_point_when_empty", func(t *testing.T) {
@@ -192,7 +200,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		mockVNS.EXPECT().Get(vnsClusterSiteID, gomock.Any(), gomock.Any()).Return(model.VirtualNetworkServiceCluster{}, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": vnsClusterSitePath,
+			"vsphere_deployment_config": placement,
+			"site_path":                 vnsClusterSitePath,
 		})
 		d.Set("enforcement_point", "")
 		require.NoError(t, resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient()))
@@ -203,9 +212,10 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		mockVNS.EXPECT().Get(vnsClusterSiteID, vnsClusterEPID, vnsClusterID).Return(model.VirtualNetworkServiceCluster{}, nil)
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"nsx_id":            vnsClusterID,
-			"site_path":         vnsClusterSitePath,
-			"enforcement_point": vnsClusterEPID,
+			"vsphere_deployment_config": placement,
+			"nsx_id":                    vnsClusterID,
+			"site_path":                 vnsClusterSitePath,
+			"enforcement_point":         vnsClusterEPID,
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -214,7 +224,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 
 	t.Run("Create_fails_when_site_path_invalid", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": "/infra/no-sites/default",
+			"vsphere_deployment_config": placement,
+			"site_path":                 "/infra/no-sites/default",
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -225,7 +236,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		mockSites.EXPECT().Get(vnsClusterSiteID).Return(model.Site{}, vapiErrors.ServiceUnavailable{})
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": vnsClusterSitePath,
+			"vsphere_deployment_config": placement,
+			"site_path":                 vnsClusterSitePath,
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -236,7 +248,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		mockVNS.EXPECT().Get(vnsClusterSiteID, vnsClusterEPID, gomock.Any()).Return(model.VirtualNetworkServiceCluster{}, vapiErrors.ServiceUnavailable{})
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": vnsClusterSitePath,
+			"vsphere_deployment_config": placement,
+			"site_path":                 vnsClusterSitePath,
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -248,7 +261,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		mockVNS.EXPECT().Patch(vnsClusterSiteID, vnsClusterEPID, gomock.Any(), gomock.Any()).Return(errors.New("patch failed"))
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": vnsClusterSitePath,
+			"vsphere_deployment_config": placement,
+			"site_path":                 vnsClusterSitePath,
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -260,7 +274,8 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterCreate(t *testing.T) 
 		defer func() { util.NsxVersion = "9.2.0" }()
 
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"site_path": vnsClusterSitePath,
+			"vsphere_deployment_config": placement,
+			"site_path":                 vnsClusterSitePath,
 		})
 		err := resourceNsxtPolicyVirtualNetworkServiceClusterCreate(d, newGoMockProviderClient())
 		require.Error(t, err)
@@ -346,12 +361,18 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterUpdate(t *testing.T) 
 	defer cleanup()
 
 	res := resourceNsxtPolicyVirtualNetworkServiceCluster()
+	placement := []interface{}{map[string]interface{}{
+		"compute_manager_id": vnsComputeManager,
+		"cluster_ids":        []interface{}{"domain-c1", "domain-c2"},
+		"fault_domain_ids":   []interface{}{"fd-1"},
+	}}
 	newData := func(t *testing.T) *schema.ResourceData {
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"display_name":      "vns-cluster-updated",
-			"site_path":         vnsClusterSitePath,
-			"enforcement_point": vnsClusterEPID,
-			"node_form_factor":  model.VirtualNetworkServiceCluster_NODE_FORM_FACTOR_LARGE,
+			"display_name":              "vns-cluster-updated",
+			"site_path":                 vnsClusterSitePath,
+			"enforcement_point":         vnsClusterEPID,
+			"node_form_factor":          model.VirtualNetworkServiceCluster_NODE_FORM_FACTOR_LARGE,
+			"vsphere_deployment_config": placement,
 		})
 		d.SetId(vnsClusterID)
 		d.Set("revision", 7)
@@ -366,11 +387,18 @@ func TestMockResourceNsxtPolicyVirtualNetworkServiceClusterUpdate(t *testing.T) 
 				require.NotNil(t, obj.Revision)
 				assert.Equal(t, int64(7), *obj.Revision)
 				assert.Equal(t, large, *obj.NodeFormFactor)
+				require.Len(t, obj.VsphereDeploymentConfig, 1)
+				deployment := obj.VsphereDeploymentConfig[0]
+				require.NotNil(t, deployment.ComputeManagerId)
+				assert.Equal(t, vnsComputeManager, *deployment.ComputeManagerId)
+				assert.ElementsMatch(t, []string{"domain-c1", "domain-c2"}, deployment.ClusterIds)
+				assert.ElementsMatch(t, []string{"fd-1"}, deployment.FaultDomainIds)
 				return model.VirtualNetworkServiceCluster{}, nil
 			})
 		mockVNS.EXPECT().Get(vnsClusterSiteID, vnsClusterEPID, vnsClusterID).Return(model.VirtualNetworkServiceCluster{
-			DisplayName:    &updatedName,
-			NodeFormFactor: &large,
+			DisplayName:             &updatedName,
+			NodeFormFactor:          &large,
+			VsphereDeploymentConfig: vnsClusterFullModel().VsphereDeploymentConfig,
 		}, nil)
 
 		d := newData(t)
@@ -493,5 +521,74 @@ func TestUnitNsxt_resourceNsxtPolicyVirtualNetworkServiceClusterImporter(t *test
 
 		_, err := resourceNsxtPolicyVirtualNetworkServiceClusterImporter(d, newGoMockProviderClient())
 		require.Error(t, err)
+	})
+}
+
+func TestVNSClusterPlacementValidation(t *testing.T) {
+	placement := []interface{}{map[string]interface{}{
+		"compute_manager_id": "cm-1",
+		"cluster_ids":        []interface{}{"domain-c1"},
+	}}
+	for _, tc := range []struct {
+		name      string
+		placement interface{}
+		include   bool
+		wantError bool
+	}{
+		{"missing", nil, false, true},
+		{"empty", []interface{}{}, true, true},
+		{"valid", placement, true, false},
+		{"empty fault domains", []interface{}{map[string]interface{}{
+			"compute_manager_id": "cm-1", "cluster_ids": []interface{}{"domain-c1"},
+			"fault_domain_ids": []interface{}{},
+		}}, true, false},
+		{"valid fault domain", []interface{}{map[string]interface{}{
+			"compute_manager_id": "cm-1", "cluster_ids": []interface{}{"domain-c1"},
+			"fault_domain_ids": []interface{}{"fd-1"},
+		}}, true, false},
+		{"empty fault domain ID", []interface{}{map[string]interface{}{
+			"compute_manager_id": "cm-1", "cluster_ids": []interface{}{"domain-c1"},
+			"fault_domain_ids": []interface{}{""},
+		}}, true, true},
+		{"mixed valid and empty fault domain IDs", []interface{}{map[string]interface{}{
+			"compute_manager_id": "cm-1", "cluster_ids": []interface{}{"domain-c1"},
+			"fault_domain_ids": []interface{}{"fd-1", ""},
+		}}, true, true},
+		{"missing manager", []interface{}{map[string]interface{}{"cluster_ids": []interface{}{"domain-c1"}}}, true, true},
+		{"empty manager", []interface{}{map[string]interface{}{"compute_manager_id": "", "cluster_ids": []interface{}{"domain-c1"}}}, true, true},
+		{"empty clusters", []interface{}{map[string]interface{}{"compute_manager_id": "cm-1", "cluster_ids": []interface{}{}}}, true, true},
+		{"empty cluster ID", []interface{}{map[string]interface{}{"compute_manager_id": "cm-1", "cluster_ids": []interface{}{""}}}, true, true},
+		{"multiple", append(append([]interface{}{}, placement...), placement...), true, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			res := resourceNsxtPolicyVirtualNetworkServiceCluster()
+			raw := map[string]interface{}{"display_name": "placement-test"}
+			if tc.include {
+				raw["vsphere_deployment_config"] = tc.placement
+			}
+			config := terraform.NewResourceConfigRaw(raw)
+			diagnostics := schema.InternalMap(res.Schema).Validate(config)
+			assert.Equal(t, tc.wantError, diagnostics.HasError(), "%v", diagnostics)
+			if !tc.wantError {
+				_, err := res.Diff(context.Background(), nil, config, nil)
+				require.NoError(t, err)
+			}
+		})
+	}
+	t.Run("existing placement remains required in configuration", func(t *testing.T) {
+		res := resourceNsxtPolicyVirtualNetworkServiceCluster()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"display_name": "placement-test", "vsphere_deployment_config": placement,
+		})
+		d.SetId("existing")
+		omitted := terraform.NewResourceConfigRaw(map[string]interface{}{"display_name": "placement-test"})
+		require.True(t, schema.InternalMap(res.Schema).Validate(omitted).HasError())
+		configured := terraform.NewResourceConfigRaw(map[string]interface{}{
+			"display_name": "placement-test", "vsphere_deployment_config": placement,
+		})
+		require.False(t, schema.InternalMap(res.Schema).Validate(configured).HasError())
+		diff, err := res.Diff(context.Background(), d.State(), configured, nil)
+		require.NoError(t, err)
+		assert.True(t, diff == nil || diff.Empty(), "matching placement must not change existing state")
 	})
 }
