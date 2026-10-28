@@ -65,7 +65,7 @@ func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}
 		if errType == nsxModel.UpgradeCheckFailure_TYPE_FAILURE {
 			precheckFailureIDs = append(precheckFailureIDs, *precheckError.Id)
 		} else {
-			if !(*precheckError.Acked) {
+			if warningNeedsAcknowledgement(precheckError) {
 				unacknowledgedWarningIDs = append(unacknowledgedWarningIDs, *precheckError.Id)
 			}
 		}

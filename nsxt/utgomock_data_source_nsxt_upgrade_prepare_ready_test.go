@@ -108,6 +108,48 @@ func TestUnitNsxt_DataSourceNsxtUpgradePrepareReadyRead(t *testing.T) {
 		assert.NotEmpty(t, d.Id())
 	})
 
+	t.Run("unacknowledged warning that needs no ack does not block", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		_, _, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restore()
+
+		needsAck := false
+		warning := precheckWarningItem(precheckID, false)
+		warning.NeedsAck = &needsAck
+		mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any()).
+			Return(nsxModel.UpgradeCheckFailureListResult{Results: []nsxModel.UpgradeCheckFailure{warning}}, nil)
+
+		ds := dataSourceNsxtUpgradePrepareReady()
+		d := schema.TestResourceDataRaw(t, ds.Schema, upgradePrepareReadyData(validPrepareID))
+
+		err := dataSourceNsxtUpgradePrepareReadyRead(d, newGoMockProviderClient())
+		require.NoError(t, err)
+		assert.NotEmpty(t, d.Id())
+	})
+
+	t.Run("unacknowledged warning that needs ack blocks", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockChecksInfo, _, mockFailures, restore := setupPrecheckAcknowledgeMocks(ctrl)
+		defer restore()
+
+		needsAck := true
+		warning := precheckWarningItem(precheckID, false)
+		warning.NeedsAck = &needsAck
+		mockFailures.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), nil, gomock.Any(), gomock.Any()).
+			Return(nsxModel.UpgradeCheckFailureListResult{Results: []nsxModel.UpgradeCheckFailure{warning}}, nil)
+		mockChecksInfo.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			Return(checksInfoResultWithDetails(precheckID), nil)
+
+		ds := dataSourceNsxtUpgradePrepareReady()
+		d := schema.TestResourceDataRaw(t, ds.Schema, upgradePrepareReadyData(validPrepareID))
+
+		err := dataSourceNsxtUpgradePrepareReadyRead(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "unacknowledged warnings")
+	})
+
 	t.Run("unacknowledged warning blocks", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
