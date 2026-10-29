@@ -123,6 +123,13 @@ func resourceNsxtUpgradePrecheckAcknowledgeCreate(d *schema.ResourceData, m inte
 	return resourceNsxtUpgradePrecheckAcknowledgeRead(d, m)
 }
 
+// warningNeedsAcknowledgement returns true for warnings that require acknowledgment and
+// are not yet acknowledged. If NeedsAck is nil (e.g. for backward compatibility or in tests),
+// we default to true.
+func warningNeedsAcknowledgement(warn nsxModel.UpgradeCheckFailure) bool {
+	return (warn.NeedsAck == nil || *warn.NeedsAck) && (warn.Acked == nil || !*warn.Acked)
+}
+
 func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 	connector := getPolicyConnector(m)
 
@@ -134,8 +141,7 @@ func acknowledgePrecheckWarnings(m interface{}, precheckIDs []string) error {
 	var warns []string
 	for _, warn := range precheckWarnings {
 		// Only append warnings that actually need acknowledgment and are not already acknowledged.
-		// If NeedsAck is nil (e.g. for backward compatibility or in tests), we default to true.
-		if (warn.NeedsAck == nil || *warn.NeedsAck) && (warn.Acked == nil || !*warn.Acked) {
+		if warningNeedsAcknowledgement(warn) {
 			warns = append(warns, *warn.Id)
 		}
 	}
