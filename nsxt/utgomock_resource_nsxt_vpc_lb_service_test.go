@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -290,4 +291,124 @@ func TestMockResourceNsxtVpcLBServiceSchemaAndImporter(t *testing.T) {
 	require.NotNil(t, res.Importer)
 
 	runVpcLbImporterSuite(t, res, "vpc-lbs")
+}
+
+func TestMockResourceNsxtVpcLBServiceRelaxScaleValidation(t *testing.T) {
+	boolPtr := func(b bool) *bool { return &b }
+	apiResponseWithRelax := func(relax *bool) nsxModel.LBService {
+		obj := vpcLbServiceAPIResponse()
+		obj.RelaxScaleValidation = relax
+		return obj
+	}
+
+	t.Run("create without value does not send it", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.0.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(nsxModel.LBService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					assert.Nil(t, obj.RelaxScaleValidation)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(apiResponseWithRelax(boolPtr(true)), nil),
+		)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		require.NoError(t, res.Create(d, newGoMockProviderClient()))
+		assert.Equal(t, true, d.Get("relax_scale_validation"))
+	})
+
+	t.Run("create with explicit false sends false", func(t *testing.T) {
+		vpcLbPrfSetNsxVersion(t, "9.0.0")
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		gomock.InOrder(
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(nsxModel.LBService{}, vapiErrors.NotFound{}),
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					require.NotNil(t, obj.RelaxScaleValidation)
+					assert.False(t, *obj.RelaxScaleValidation)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(apiResponseWithRelax(boolPtr(false)), nil),
+		)
+
+		data := vpcLbServiceData()
+		data["relax_scale_validation"] = false
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		require.NoError(t, res.Create(d, newGoMockProviderClient()))
+		assert.Equal(t, false, d.Get("relax_scale_validation"))
+	})
+
+	for _, relax := range []bool{false, true} {
+		t.Run(fmt.Sprintf("update preserves value read from NSX (%t)", relax), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+			defer restore()
+			gomock.InOrder(
+				mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+					func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+						require.NotNil(t, obj.RelaxScaleValidation)
+						assert.Equal(t, relax, *obj.RelaxScaleValidation)
+						return nil
+					}),
+				mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(apiResponseWithRelax(boolPtr(relax)), nil),
+			)
+
+			res := resourceNsxtVpcLBService()
+			// The value is not configured, it is known from the refresh preceding the update
+			d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+			d.SetId(vpcLbServiceID)
+			require.NoError(t, d.Set("relax_scale_validation", relax))
+			require.NoError(t, res.Update(d, newGoMockProviderClient()))
+			assert.Equal(t, relax, d.Get("relax_scale_validation"))
+		})
+	}
+
+	t.Run("update without a known value does not send it", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID, gomock.Any(), nil).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.LBService, _ *string) error {
+					assert.Nil(t, obj.RelaxScaleValidation)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(vpcLbServiceAPIResponse(), nil),
+		)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		d.SetId(vpcLbServiceID)
+		require.NoError(t, res.Update(d, newGoMockProviderClient()))
+	})
+
+	t.Run("read keeps previous value if NSX does not return it", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		mockSDK, restore := setupVpcLbServiceMock(t, ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get(vpcLbPrfOrg, vpcLbPrfProject, vpcLbPrfVpc, vpcLbServiceID).Return(vpcLbServiceAPIResponse(), nil)
+
+		res := resourceNsxtVpcLBService()
+		d := schema.TestResourceDataRaw(t, res.Schema, vpcLbServiceData())
+		d.SetId(vpcLbServiceID)
+		// Seed a previous value, as if it was set by an earlier read
+		require.NoError(t, d.Set("relax_scale_validation", true))
+		require.NoError(t, res.Read(d, newGoMockProviderClient()))
+		v, exists := d.GetOkExists("relax_scale_validation")
+		assert.True(t, exists)
+		assert.Equal(t, true, v)
+	})
 }

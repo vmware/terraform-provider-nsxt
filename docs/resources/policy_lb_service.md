@@ -43,6 +43,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `connectivity_path` - (Optional) Tier1 Gateway where this service is instantiated. In future, other objects will be supported.
 * `enabled` - (Optional) Flag to enable the service.
+* `relax_scale_validation` - (Optional) Whether the scale validations of virtual servers, pools, pool members and rules are relaxed for the service. If not set, NSX applies its default of `false` on creation, and the value configured on NSX is preserved on later updates.
 * `error_log_level` - (Optional) Log level for the service, one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`, `ALERT`, `EMERGENCY`. Default is `INFO`.
 
 ## Attributes Reference
