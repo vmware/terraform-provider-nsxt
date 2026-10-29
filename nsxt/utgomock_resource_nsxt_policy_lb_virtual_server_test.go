@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -216,4 +217,50 @@ func TestMockResourceNsxtPolicyLBVirtualServerDelete(t *testing.T) {
 		err := resourceNsxtPolicyLBVirtualServerDelete(d, newGoMockProviderClient())
 		require.Error(t, err)
 	})
+}
+
+func TestMockResourceNsxtPolicyLBVirtualServerImport(t *testing.T) {
+	for _, scenario := range []string{"existing rules", "no rules", "API error"} {
+		t.Run(scenario, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockSDK, restore := setupLBVsMock(t, ctrl)
+			defer restore()
+			res := resourceNsxtPolicyLBVirtualServer()
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			d.SetId(lbVsID)
+			live := lbVsAPIResponse()
+			if scenario == "existing rules" {
+				ruleData := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+					"rule": lbVirtualServerRules("/infra/lb-pools/pool1"),
+				})
+				live.Rules = getPolicyLbRulesFromSchema(ruleData)
+			}
+			var apiErr error
+			if scenario == "API error" {
+				apiErr = errors.New("get failed")
+			}
+			mockSDK.EXPECT().Get(lbVsID).Return(live, apiErr)
+			imported, err := res.Importer.State(d, newGoMockProviderClient())
+			if apiErr != nil {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "get failed")
+				assert.Nil(t, imported)
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, imported, 1)
+			assert.Equal(t, lbVsID, imported[0].Id())
+			assert.Len(t, imported[0].Get("rule"), len(live.Rules))
+			mockSDK.EXPECT().Get(lbVsID).Return(live, nil)
+			require.NoError(t, res.Read(imported[0], newGoMockProviderClient()))
+			assert.Len(t, imported[0].Get("rule"), len(live.Rules))
+			if len(live.Rules) > 0 {
+				assert.Equal(t, live.Rules, getPolicyLbRulesFromSchema(imported[0]))
+				live.Rules = nil
+				mockSDK.EXPECT().Get(lbVsID).Return(live, nil)
+				require.NoError(t, res.Read(imported[0], newGoMockProviderClient()))
+				assert.Empty(t, imported[0].Get("rule"))
+			}
+		})
+	}
 }

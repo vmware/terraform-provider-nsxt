@@ -7,10 +7,13 @@
 package nsxt
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -64,11 +67,15 @@ func minimalVpcLbVsData() map[string]interface{} {
 }
 
 func vpcLbVsRules() []interface{} {
+	return lbVirtualServerRules(vpcLbVsPoolPath)
+}
+
+func lbVirtualServerRules(poolPath string) []interface{} {
 	return []interface{}{map[string]interface{}{
 		"display_name": "rule-1",
 		"phase":        "HTTP_FORWARDING",
 		"action": []interface{}{map[string]interface{}{
-			"select_pool": []interface{}{map[string]interface{}{"pool_id": vpcLbVsPoolPath}},
+			"select_pool": []interface{}{map[string]interface{}{"pool_id": poolPath}},
 		}},
 	}}
 }
@@ -203,7 +210,7 @@ func TestMockResourceNsxtVpcLBVirtualServerRead(t *testing.T) {
 		assert.Equal(t, vpcLbVsPersistencePath, d.Get("persistence_profile_path"))
 	})
 
-	t.Run("Read imports existing rules into empty state", func(t *testing.T) {
+	t.Run("Import adopts existing rules into empty state", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 		mockSDK, restore := setupVpcLbVsMock(ctrl)
@@ -222,7 +229,7 @@ func TestMockResourceNsxtVpcLBVirtualServerRead(t *testing.T) {
 				resp := vpcLbVsAPIResponse()
 				resp.Rules = rules
 				return resp, nil
-			}).Times(2)
+			}).Times(3)
 
 		util.NsxVersion = "9.0.0"
 		defer func() { util.NsxVersion = "" }()
@@ -234,7 +241,11 @@ func TestMockResourceNsxtVpcLBVirtualServerRead(t *testing.T) {
 		require.Len(t, d.Get("rule").([]interface{}), 1)
 
 		d2 := schema.TestResourceDataRaw(t, res.Schema, ctxData)
-		d2.SetId(vpcLbVsID)
+		d2.SetId(vpcLbVsPath)
+		imported, err := res.Importer.State(d2, newGoMockProviderClient())
+		require.NoError(t, err)
+		require.Len(t, imported, 1)
+		assert.Len(t, imported[0].Get("rule"), 1)
 		require.NoError(t, res.Read(d2, newGoMockProviderClient()))
 		assert.Len(t, d2.Get("rule").([]interface{}), 1)
 	})
@@ -255,6 +266,21 @@ func TestMockResourceNsxtVpcLBVirtualServerRead(t *testing.T) {
 		assert.Empty(t, d.Id())
 	})
 
+	t.Run("Read clears managed rules removed externally", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockSDK, restore := setupVpcLbVsMock(ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get("default", "proj1", "vpc1", vpcLbVsID).Return(vpcLbVsAPIResponse(), nil)
+		res := resourceNsxtVpcLBVirtualServer()
+		data := minimalVpcLbVsData()
+		data["rule"] = vpcLbVsRules()
+		d := schema.TestResourceDataRaw(t, res.Schema, data)
+		d.SetId(vpcLbVsID)
+
+		require.NoError(t, res.Read(d, newGoMockProviderClient()))
+		assert.Empty(t, d.Get("rule"))
+	})
+
 	t.Run("Read fails on API error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -269,6 +295,163 @@ func TestMockResourceNsxtVpcLBVirtualServerRead(t *testing.T) {
 
 		require.Error(t, res.Read(d, newGoMockProviderClient()))
 	})
+}
+
+func TestMockResourceNsxtLBVirtualServerUnmanagedRules(t *testing.T) {
+	for _, vpc := range []bool{false, true} {
+		name := "Policy"
+		if vpc {
+			name = "VPC"
+		}
+		t.Run(name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			util.NsxVersion = "9.0.0"
+			defer func() { util.NsxVersion = "" }()
+			res := resourceNsxtPolicyLBVirtualServer()
+			raw := minimalLBVsData()
+			id := lbVsID
+			poolPath := "/infra/lb-pools/pool1"
+			raw["application_profile_path"] = "/infra/lb-app-profiles/app1"
+			var live nsxModel.LBVirtualServer
+			var externalRules []nsxModel.LBRule
+			patches := 0
+			get := func() (nsxModel.LBVirtualServer, error) {
+				if live.Id == nil {
+					return live, vapiErrors.NotFound{}
+				}
+				return live, nil
+			}
+			patch := func(obj nsxModel.LBVirtualServer) error {
+				if patches > 0 {
+					assert.Equal(t, externalRules, obj.Rules)
+				}
+				patches++
+				live = obj
+				live.Id = &id
+				return nil
+			}
+			if vpc {
+				res = resourceNsxtVpcLBVirtualServer()
+				raw = minimalVpcLbVsData()
+				id = vpcLbVsID
+				poolPath = vpcLbVsPoolPath
+				raw["application_profile_path"] = vpcLbVsProfilePath
+				mockSDK, restore := setupVpcLbVsMock(ctrl)
+				defer restore()
+				mockSDK.EXPECT().Get("default", "proj1", "vpc1", id).
+					DoAndReturn(func(_, _, _, _ string) (nsxModel.LBVirtualServer, error) { return get() }).AnyTimes()
+				mockSDK.EXPECT().Patch("default", "proj1", "vpc1", id, gomock.Any()).
+					DoAndReturn(func(_, _, _, _ string, obj nsxModel.LBVirtualServer) error { return patch(obj) }).Times(2)
+			} else {
+				mockSDK, restore := setupLBVsMock(t, ctrl)
+				defer restore()
+				mockSDK.EXPECT().Get(id).
+					DoAndReturn(func(_ string) (nsxModel.LBVirtualServer, error) { return get() }).AnyTimes()
+				mockSDK.EXPECT().Patch(id, gomock.Any()).
+					DoAndReturn(func(_ string, obj nsxModel.LBVirtualServer) error { return patch(obj) }).Times(2)
+			}
+			m := newGoMockProviderClient()
+
+			diff, err := res.Diff(context.Background(), nil, terraform.NewResourceConfigRaw(raw), m)
+			require.NoError(t, err)
+			state, diags := res.Apply(context.Background(), nil, diff, m)
+			require.False(t, diags.HasError(), "%v", diags)
+			diff, err = res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(raw), m)
+			require.NoError(t, err)
+			require.True(t, diff.Empty(), "%v", diff)
+
+			ruleData := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{"rule": lbVirtualServerRules(poolPath)})
+			externalRules = getPolicyLbRulesFromSchema(ruleData)
+			live.Rules = externalRules
+			for range 2 {
+				state, diags = res.RefreshWithoutUpgrade(context.Background(), state, m)
+				require.False(t, diags.HasError(), "%v", diags)
+				assert.Contains(t, []string{"", "0"}, state.Attributes["rule.#"])
+				assert.Equal(t, id, state.ID)
+				diff, err = res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(raw), m)
+				require.NoError(t, err)
+				require.True(t, diff.Empty(), "%v", diff)
+			}
+			assert.Equal(t, 1, patches, "unchanged configuration must not update the virtual server")
+
+			raw["description"] = "After unrelated update"
+			diff, err = res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(raw), m)
+			require.NoError(t, err)
+			require.False(t, diff.Empty())
+			state, diags = res.Apply(context.Background(), state, diff, m)
+			require.False(t, diags.HasError(), "%v", diags)
+			assert.Equal(t, raw["description"], *live.Description)
+			assert.Equal(t, externalRules, live.Rules)
+			assert.Equal(t, id, state.ID)
+			assert.Contains(t, []string{"", "0"}, state.Attributes["rule.#"])
+			diff, err = res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(raw), m)
+			require.NoError(t, err)
+			assert.True(t, diff.Empty(), "%v", diff)
+		})
+	}
+}
+
+func TestMockResourceNsxtLBVirtualServerManagedRules(t *testing.T) {
+	for _, vpc := range []bool{false, true} {
+		for _, remove := range []bool{false, true} {
+			name := fmt.Sprintf("VPC=%t/Remove=%t", vpc, remove)
+			t.Run(name, func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				res := resourceNsxtPolicyLBVirtualServer()
+				oldRaw, newRaw := minimalLBVsData(), minimalLBVsData()
+				id := lbVsID
+				poolPath := "/infra/lb-pools/pool1"
+				if vpc {
+					res = resourceNsxtVpcLBVirtualServer()
+					oldRaw, newRaw = minimalVpcLbVsData(), minimalVpcLbVsData()
+					id = vpcLbVsID
+					poolPath = vpcLbVsPoolPath
+				}
+				oldRaw["rule"] = lbVirtualServerRules(poolPath)
+				if !remove {
+					rules := lbVirtualServerRules(poolPath)
+					rule, ok := rules[0].(map[string]interface{})
+					require.True(t, ok)
+					rule["display_name"] = "updated-rule"
+					newRaw["rule"] = rules
+				}
+				d := resourceDataWithChange(t, res, oldRaw, newRaw, id)
+				require.True(t, d.HasChange("rule"))
+				live := lbVsAPIResponse()
+				patch := func(obj nsxModel.LBVirtualServer) error {
+					if remove {
+						assert.Empty(t, obj.Rules)
+					} else {
+						require.Len(t, obj.Rules, 1)
+						assert.Equal(t, "updated-rule", *obj.Rules[0].DisplayName)
+					}
+					live.Rules = obj.Rules
+					return nil
+				}
+				if vpc {
+					mockSDK, restore := setupVpcLbVsMock(ctrl)
+					defer restore()
+					gomock.InOrder(
+						mockSDK.EXPECT().Patch("default", "proj1", "vpc1", id, gomock.Any()).
+							DoAndReturn(func(_, _, _, _ string, obj nsxModel.LBVirtualServer) error { return patch(obj) }),
+						mockSDK.EXPECT().Get("default", "proj1", "vpc1", id).
+							DoAndReturn(func(_, _, _, _ string) (nsxModel.LBVirtualServer, error) { return live, nil }),
+					)
+				} else {
+					mockSDK, restore := setupLBVsMock(t, ctrl)
+					defer restore()
+					gomock.InOrder(
+						mockSDK.EXPECT().Patch(id, gomock.Any()).
+							DoAndReturn(func(_ string, obj nsxModel.LBVirtualServer) error { return patch(obj) }),
+						mockSDK.EXPECT().Get(id).
+							DoAndReturn(func(_ string) (nsxModel.LBVirtualServer, error) { return live, nil }),
+					)
+				}
+				require.NoError(t, res.Update(d, newGoMockProviderClient()))
+				assert.Len(t, d.Get("rule"), len(live.Rules))
+			})
+		}
+	}
 }
 
 func TestMockResourceNsxtVpcLBVirtualServerUpdate(t *testing.T) {
@@ -399,6 +582,10 @@ func TestUnitNsxt_vpcLBVirtualServerImporter(t *testing.T) {
 	res := resourceNsxtVpcLBVirtualServer()
 
 	t.Run("valid VPC path sets context and ID", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockSDK, restore := setupVpcLbVsMock(ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get("default", "proj1", "vpc1", vpcLbVsID).Return(vpcLbVsAPIResponse(), nil)
 		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
 		d.SetId(vpcLbVsPath)
 		out, err := res.Importer.State(d, newGoMockProviderClient())
@@ -416,6 +603,21 @@ func TestUnitNsxt_vpcLBVirtualServerImporter(t *testing.T) {
 		_, err := res.Importer.State(d, newGoMockProviderClient())
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "/vpc-lb-virtual-servers/[virtual server]")
+	})
+
+	t.Run("API error aborts import", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockSDK, restore := setupVpcLbVsMock(ctrl)
+		defer restore()
+		mockSDK.EXPECT().Get("default", "proj1", "vpc1", vpcLbVsID).
+			Return(nsxModel.LBVirtualServer{}, errors.New("get failed"))
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		d.SetId(vpcLbVsPath)
+
+		out, err := res.Importer.State(d, newGoMockProviderClient())
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "get failed")
+		assert.Nil(t, out)
 	})
 
 	t.Run("project path without VPC is rejected", func(t *testing.T) {
