@@ -614,9 +614,40 @@ func getPolicyPathOrIDResourceImporter(pathExample string) func(d *schema.Resour
 	}
 }
 
+// policyPathMatchesExample returns true if the policy path has the same structure as the example.
+// Segments of the example in square brackets are placeholders, which should be non-empty in the path.
+// All other segments, such as the resource collection, must be identical.
+func policyPathMatchesExample(path, example string) bool {
+	pathSegs := strings.Split(path, "/")
+	exampleSegs := strings.Split(example, "/")
+	if len(pathSegs) != len(exampleSegs) {
+		return false
+	}
+	for i, exampleSeg := range exampleSegs {
+		if strings.HasPrefix(exampleSeg, "[") && strings.HasSuffix(exampleSeg, "]") {
+			if isSpaceString(pathSegs[i]) {
+				return false
+			}
+			continue
+		}
+		if pathSegs[i] != exampleSeg {
+			return false
+		}
+	}
+	return true
+}
+
 // This importer function accepts VPC path only
 func getVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		// Verify the path structure and collection before the importer helper changes the resource data
+		if !policyPathMatchesExample(d.Id(), pathExample) {
+			if err := validateImportPolicyPath(d.Id()); errors.Is(err, ErrEmptyImportID) {
+				return []*schema.ResourceData{d}, err
+			}
+			return []*schema.ResourceData{d}, fmt.Errorf("Invalid policy path %s; expected format: %s", d.Id(), pathExample)
+		}
+
 		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 		if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
 			return rd, fmt.Errorf("Invalid policy path %s; expected format: %s", d.Id(), pathExample)
