@@ -166,6 +166,48 @@ func TestMockResourceNsxtVpcLBPoolCreate(t *testing.T) {
 }
 
 func TestMockResourceNsxtVpcLBPoolRead(t *testing.T) {
+	for _, attribute := range []string{"active_monitor_path", "active_monitor_paths"} {
+		for _, monitors := range []struct {
+			name  string
+			paths []string
+		}{
+			{name: "nil"},
+			{name: "empty", paths: []string{}},
+		} {
+			t.Run(attribute+" removed with "+monitors.name+" API list", func(t *testing.T) {
+				ctrl := gomock.NewController(t)
+				mockSDK, restore := setupVpcLbPoolMock(ctrl)
+				defer restore()
+
+				present := vpcLbPoolAPIResponse()
+				present.ActiveMonitorPaths = []string{vpcLbPoolMonitorPath}
+				removed := vpcLbPoolAPIResponse()
+				removed.ActiveMonitorPaths = monitors.paths
+				gomock.InOrder(
+					mockSDK.EXPECT().Get("default", "proj1", "vpc1", vpcLbPoolID).Return(present, nil),
+					mockSDK.EXPECT().Get("default", "proj1", "vpc1", vpcLbPoolID).Return(removed, nil),
+				)
+
+				res := resourceNsxtVpcLBPool()
+				config := minimalVpcLbPoolData()
+				if attribute == "active_monitor_path" {
+					config[attribute] = vpcLbPoolMonitorPath
+				} else {
+					config[attribute] = []interface{}{vpcLbPoolMonitorPath}
+				}
+				d := schema.TestResourceDataRaw(t, res.Schema, config)
+				d.SetId(vpcLbPoolID)
+				client := newGoMockProviderClient()
+				require.NoError(t, res.Read(d, client))
+				require.NotEmpty(t, d.Get(attribute))
+				require.NoError(t, res.Read(d, client))
+				assert.Empty(t, d.Get("active_monitor_path"))
+				assert.Empty(t, d.Get("active_monitor_paths"))
+				assert.Equal(t, vpcLbPoolID, d.Id())
+			})
+		}
+	}
+
 	t.Run("Read success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

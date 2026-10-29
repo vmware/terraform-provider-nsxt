@@ -105,6 +105,38 @@ func TestMockResourceNsxtPolicyLBPoolRead(t *testing.T) {
 		return mockWrapper
 	}
 
+	for _, attribute := range []string{"active_monitor_path", "active_monitor_paths"} {
+		for _, monitors := range []struct {
+			name  string
+			paths []string
+		}{
+			{name: "nil"},
+			{name: "empty", paths: []string{}},
+		} {
+			t.Run(attribute+" removed with "+monitors.name+" API list", func(t *testing.T) {
+				resp := minimalLBPoolModel()
+				resp.ActiveMonitorPaths = monitors.paths
+				mockPoolSDK.EXPECT().Get(lbPoolID).Return(resp, nil)
+
+				monitorPath := "/infra/lb-monitor-profiles/monitor-1"
+				config := minimalLBPoolData()
+				if attribute == "active_monitor_path" {
+					config[attribute] = monitorPath
+				} else {
+					config[attribute] = []interface{}{monitorPath}
+				}
+				res := resourceNsxtPolicyLBPool()
+				d := schema.TestResourceDataRaw(t, res.Schema, config)
+				d.SetId(lbPoolID)
+				require.NotEmpty(t, d.Get(attribute))
+				require.NoError(t, res.Read(d, newGoMockProviderClient()))
+				assert.Empty(t, d.Get("active_monitor_path"))
+				assert.Empty(t, d.Get("active_monitor_paths"))
+				assert.Equal(t, lbPoolID, d.Id())
+			})
+		}
+	}
+
 	t.Run("Read success", func(t *testing.T) {
 		mockPoolSDK.EXPECT().Get(lbPoolID).Return(minimalLBPoolModel(), nil)
 
