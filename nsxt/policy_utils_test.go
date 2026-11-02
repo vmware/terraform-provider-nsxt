@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"go.uber.org/mock/gomock"
 
@@ -24,6 +25,86 @@ import (
 type policyPathTest struct {
 	path    string
 	parents []string
+}
+
+func TestPolicyLBMonitorPortRequest(t *testing.T) {
+	profiles := []struct {
+		name     string
+		resource func() *schema.Resource
+		patch    func(*schema.ResourceData, interface{}, string) error
+		vpc      bool
+	}{
+		{"policy HTTP", resourceNsxtPolicyLBHttpMonitorProfile, resourceNsxtPolicyLBHttpMonitorProfilePatch, false},
+		{"policy HTTPS", resourceNsxtPolicyLBHttpsMonitorProfile, resourceNsxtPolicyLBHttpsMonitorProfilePatch, false},
+		{"policy TCP", resourceNsxtPolicyLBTcpMonitorProfile, resourceNsxtPolicyLBTcpMonitorProfilePatch, false},
+		{"policy UDP", resourceNsxtPolicyLBUdpMonitorProfile, resourceNsxtPolicyLBUdpMonitorProfilePatch, false},
+		{"VPC HTTP", resourceNsxtVpcLBHttpMonitorProfile, resourceNsxtVpcLBHttpMonitorProfilePatch, true},
+		{"VPC HTTPS", resourceNsxtVpcLBHttpsMonitorProfile, resourceNsxtVpcLBHttpsMonitorProfilePatch, true},
+		{"VPC TCP", resourceNsxtVpcLBTcpMonitorProfile, resourceNsxtVpcLBTcpMonitorProfilePatch, true},
+		{"VPC UDP", resourceNsxtVpcLBUdpMonitorProfile, resourceNsxtVpcLBUdpMonitorProfilePatch, true},
+	}
+	cases := []struct {
+		name       string
+		port       int
+		configured bool
+		refreshed  bool
+	}{
+		{name: "omitted"},
+		{name: "omitted after refresh", refreshed: true},
+		{name: "configured", port: 8080, configured: true},
+	}
+	for _, profile := range profiles {
+		t.Run(profile.name, func(t *testing.T) {
+			for _, tc := range cases {
+				t.Run(tc.name, func(t *testing.T) {
+					ctrl := gomock.NewController(t)
+					raw := map[string]interface{}{"display_name": "monitor-test"}
+					if tc.configured {
+						raw["monitor_port"] = tc.port
+					}
+					if profile.vpc {
+						raw = vpcLbWithContext(raw)
+					}
+					resource := profile.resource()
+					d := schema.TestResourceDataRaw(t, resource.Schema, raw)
+					if tc.refreshed {
+						require.NoError(t, d.Set("monitor_port", nil))
+					}
+					checkRequest := func(request *data.StructValue) {
+						port, err := request.Optional("monitor_port")
+						require.NoError(t, err)
+						assert.Equal(t, tc.configured, port.IsSet())
+						if port.IsSet() {
+							integer, ok := port.Value().(*data.IntegerValue)
+							require.True(t, ok)
+							assert.Equal(t, int64(tc.port), integer.Value())
+						}
+					}
+					if profile.vpc {
+						mock := setupVpcLbMonitorProfileMock(ctrl)
+						defer mock.restore()
+						mock.patch("monitor-test", nil).DoAndReturn(func(_, _, _, _ string, request *data.StructValue) error {
+							checkRequest(request)
+							return nil
+						})
+					} else {
+						mock, restore := setupLBMonitorProfileMock(t, ctrl)
+						defer restore()
+						mock.EXPECT().Patch("monitor-test", gomock.Any()).DoAndReturn(func(_ string, request *data.StructValue) error {
+							checkRequest(request)
+							return nil
+						})
+					}
+					err := profile.patch(d, newGoMockProviderClient(), "monitor-test")
+					require.NoError(t, err)
+				})
+			}
+		})
+	}
+	for _, port := range []int{0, -1, 65536} {
+		_, errors := getPolicyLbMonitorPortSchema().ValidateFunc(port, "monitor_port")
+		require.NotEmpty(t, errors, "port %d must fail schema validation", port)
+	}
 }
 
 func TestUnitNsxt_ParseStandardPolicyPath(t *testing.T) {
