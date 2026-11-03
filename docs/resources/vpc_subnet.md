@@ -99,7 +99,6 @@ The following arguments are supported:
          This is a list of IP ranges or IP addresses.
 * `subnet_dhcpv6_config` - (Optional) DHCPv6 configuration for the subnet. Base settings may be inherited from the VPC service profile; values set here are applied on top. This attribute is supported with NSX v9.2.0 and above.
     * `mode` - (Optional) Operational mode of DHCPv6 within the subnet. One of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`, or `DHCP_SERVER_STATELESS`. When omitted, the effective mode is inherited from the VPC service profile `dhcpv6_config`.
-    * `dns_server_preference` - (Optional) DNS server IP preference for DHCPv6, same semantics as `dhcp_config.dns_server_preference`. One of `PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER` or `DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS`. Supported with NSX v9.2.0 and above.
     * `dhcpv6_server_additional_config` - (Optional) Additional DHCPv6 server settings. Must not be set when `mode` is `DHCP_RELAY` or `DHCP_DEACTIVATED`.
         * `domain_names` - (Optional) Domain names assigned to DHCPv6 clients.
         * `reserved_ip_ranges` - (Optional) IPv6 addresses or ranges excluded from DHCPv6 assignment (for example `2001:db8::10` or `2001:db8::10-2001:db8::20`).

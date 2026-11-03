@@ -576,7 +576,6 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Create["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
-					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -590,7 +589,6 @@ func TestAccResourceNsxtVpcSubnet920_subnetDhcpv6Config(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcSubnet920SubnetDhcpv6Update["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.mode", model.SubnetDhcpv6Config_MODE_DEACTIVATED),
-					resource.TestCheckResourceAttr(testResourceName, "subnet_dhcpv6_config.0.dns_server_preference", model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -1003,15 +1001,11 @@ func testAccNsxtVpcSubnetIpv6VpcContext() string {
 
 func testAccNsxtVpcSubnetSubnetDhcpv6Template(createFlow bool, fixtureBase string) string {
 	var attrMap map[string]string
-	var mode, dnsPref string
+	mode := model.SubnetDhcpv6Config_MODE_DEACTIVATED
 	if createFlow {
 		attrMap = accTestVpcSubnet920SubnetDhcpv6Create
-		mode = model.SubnetDhcpv6Config_MODE_DEACTIVATED
-		dnsPref = model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_PROFILE_DNS_SERVERS_PREFERRED_OVER_DNS_FORWARDER
 	} else {
 		attrMap = accTestVpcSubnet920SubnetDhcpv6Update
-		mode = model.SubnetDhcpv6Config_MODE_DEACTIVATED
-		dnsPref = model.SubnetDhcpv6Config_DNS_SERVER_PREFERENCE_DNS_FORWARDER_PREFERRED_OVER_PROFILE_DNS_SERVERS
 	}
 	return testAccNsxtVpcSubnetIpv6VpcTemplate(fixtureBase, "", "2001:db8:f100::/56", "", "") + fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "test" {
@@ -1022,8 +1016,7 @@ resource "nsxt_vpc_subnet" "test" {
   access_mode  = "Private"
 
   subnet_dhcpv6_config {
-    mode                  = "%s"
-    dns_server_preference = "%s"
+    mode = "%s"
   }
 
   advanced_config {
@@ -1032,7 +1025,7 @@ resource "nsxt_vpc_subnet" "test" {
     dhcp_server_addresses = ["2001:db8:f100::11/64"]
   }
 }
-`, testAccNsxtVpcSubnetIpv6VpcContext(), attrMap["display_name"], mode, dnsPref)
+`, testAccNsxtVpcSubnetIpv6VpcContext(), attrMap["display_name"], mode)
 }
 
 func testAccNsxtVpcSubnetSubnetDhcpv4Template(createFlow bool, dhcpMode string) string {

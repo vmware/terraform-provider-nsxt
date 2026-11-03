@@ -517,19 +517,6 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			Computed: true,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
-					"dns_server_preference": {
-						Schema: schema.Schema{
-							Type:         schema.TypeString,
-							ValidateFunc: validation.StringInSlice(dnsServerPreferenceValues, false),
-							Optional:     true,
-						},
-						Metadata: metadata.Metadata{
-							IntroducedInVersion: "9.2.0",
-							SchemaType:          "string",
-							SdkFieldName:        "DnsServerPreference",
-							OmitIfEmpty:         true,
-						},
-					},
 					"mode": {
 						Schema: schema.Schema{
 							Type:         schema.TypeString,
