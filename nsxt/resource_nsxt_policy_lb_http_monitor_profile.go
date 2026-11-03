@@ -67,7 +67,7 @@ func resourceNsxtPolicyLBHttpMonitorProfilePatch(d *schema.ResourceData, m inter
 	interval := int64(d.Get("interval").(int))
 	riseCount := int64(d.Get("rise_count").(int))
 	timeout := int64(d.Get("timeout").(int))
-	monitorPort := int64(d.Get("monitor_port").(int))
+	monitorPort := getPolicyLbMonitorPortFromSchema(d)
 
 	resourceType := model.LBMonitorProfile_RESOURCE_TYPE_LBHTTPMONITORPROFILE
 
@@ -84,7 +84,7 @@ func resourceNsxtPolicyLBHttpMonitorProfilePatch(d *schema.ResourceData, m inter
 		ResponseStatusCodes: responseStatusCodes,
 		FallCount:           &fallCount,
 		Interval:            &interval,
-		MonitorPort:         &monitorPort,
+		MonitorPort:         monitorPort,
 		RiseCount:           &riseCount,
 		Timeout:             &timeout,
 		ResourceType:        resourceType,

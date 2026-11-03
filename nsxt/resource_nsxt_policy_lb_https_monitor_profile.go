@@ -71,7 +71,7 @@ func resourceNsxtPolicyLBHttpsMonitorProfilePatch(d *schema.ResourceData, m inte
 	serverSsl := getLbServerSslFromSchema(d)
 	fallCount := int64(d.Get("fall_count").(int))
 	interval := int64(d.Get("interval").(int))
-	monitorPort := int64(d.Get("monitor_port").(int))
+	monitorPort := getPolicyLbMonitorPortFromSchema(d)
 	riseCount := int64(d.Get("rise_count").(int))
 	timeout := int64(d.Get("timeout").(int))
 
@@ -91,7 +91,7 @@ func resourceNsxtPolicyLBHttpsMonitorProfilePatch(d *schema.ResourceData, m inte
 		ServerSslProfileBinding: serverSsl,
 		FallCount:               &fallCount,
 		Interval:                &interval,
-		MonitorPort:             &monitorPort,
+		MonitorPort:             monitorPort,
 		RiseCount:               &riseCount,
 		Timeout:                 &timeout,
 		ResourceType:            resourceType,

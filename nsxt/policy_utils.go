@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -1008,10 +1009,20 @@ func getPolicyLbHTTPHeaderFromSchema(d *schema.ResourceData, attrName string) []
 
 func getPolicyLbMonitorPortSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeInt,
-		Description: "If the monitor port is specified, it would override pool member port setting for healthcheck. A port range is not supported",
-		Optional:    true,
+		Type:         schema.TypeInt,
+		Description:  "If the monitor port is specified, it would override pool member port setting for healthcheck. A port range is not supported",
+		Optional:     true,
+		ValidateFunc: validation.IntBetween(1, 65535),
 	}
+}
+
+func getPolicyLbMonitorPortFromSchema(d *schema.ResourceData) *int64 {
+	value, set := d.GetOk("monitor_port")
+	if !set {
+		return nil
+	}
+	monitorPort := int64(value.(int))
+	return &monitorPort
 }
 
 func getVpcParentsFromContext(context utl.SessionContext) []string {
