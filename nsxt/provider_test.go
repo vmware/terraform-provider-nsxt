@@ -253,6 +253,30 @@ func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 	}
 }
 
+// testAccGatewayDHCPConfig returns a DHCP resource block named "test" and its path reference,
+// suitable for the dhcp_config_path of Tier0/Tier1 gateways. NSX 9.2.0 and above accept only
+// DHCP server configuration there, while earlier versions accept only DHCP relay configuration.
+func testAccGatewayDHCPConfig() (string, string) {
+	if util.NsxVersion == "" {
+		if connector, err := testAccGetPolicyConnector(); err == nil {
+			_ = initNSXVersion(connector)
+		}
+	}
+	if util.NsxVersion != "" && util.NsxVersionLower("9.2.0") {
+		return `
+resource "nsxt_policy_dhcp_relay" "test" {
+  display_name     = "terraform-dhcp-relay"
+  server_addresses = ["88.9.9.2"]
+}
+`, "nsxt_policy_dhcp_relay.test.path"
+	}
+	return `
+resource "nsxt_policy_dhcp_server" "test" {
+  display_name = "terraform-dhcp-server"
+}
+`, "nsxt_policy_dhcp_server.test.path"
+}
+
 func testAccGetPolicyConnector() (client.Connector, error) {
 	if testAccConnector != nil {
 		return testAccConnector, nil

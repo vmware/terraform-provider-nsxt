@@ -121,7 +121,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 			"route_advertisement_rule": getAdvRulesSchema(),
 			"ipv6_ndra_profile_path":   getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":    getIPv6DadPathSchema(),
-			"dhcp_config_path":         getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier1"),
+			"dhcp_config_path":         getPolicyPathSchema(false, false, "Policy path to DHCP configuration to use for this Tier1. Starting with NSX 9.2.0 only DHCP server configuration is supported"),
 			"pool_allocation": {
 				Type:         schema.TypeString,
 				ForceNew:     true,

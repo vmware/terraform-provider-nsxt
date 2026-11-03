@@ -718,38 +718,32 @@ data "nsxt_policy_realization_info" "bgp_realization_info" {
 }
 
 func testAccNsxtPolicyTier0CreateWithDHCPTemplate(name string) string {
+	dhcpConfig, dhcpPath := testAccGatewayDHCPConfig()
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
 }
 
-resource "nsxt_policy_dhcp_relay" "test" {
-  display_name     = "terraform-dhcp-relay"
-  server_addresses = ["88.9.9.2"]
-}
-
+%s
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  dhcp_config_path  = nsxt_policy_dhcp_relay.test.path
+  dhcp_config_path  = %s
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, getEdgeClusterName(), name)
+}`, getEdgeClusterName(), dhcpConfig, name, dhcpPath)
 }
 
 func testAccNsxtPolicyTier0CreateWithDHCPRemovedTemplate(name string) string {
+	dhcpConfig, _ := testAccGatewayDHCPConfig()
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
 }
 
-resource "nsxt_policy_dhcp_relay" "test" {
-  display_name     = "terraform-dhcp-relay"
-  server_addresses = ["88.9.9.2"]
-}
-
+%s
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -757,7 +751,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, getEdgeClusterName(), name)
+}`, getEdgeClusterName(), dhcpConfig, name)
 }
 
 func testAccNsxtPolicyTier0CreateTemplate(name string, failoverMode string) string {
