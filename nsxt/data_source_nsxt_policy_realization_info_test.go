@@ -140,20 +140,23 @@ func testAccDataSourceNsxtPolicyRealizationInfoTier1Resource(t *testing.T, withC
 }
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_errorState(t *testing.T) {
-	testAccDataSourceNsxtPolicyRealizationInfoErrorState(t, false, func() {
+	testAccDataSourceNsxtPolicyRealizationInfoErrorState(t, false, 71234, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
 	})
 }
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_errorState_multitenancy(t *testing.T) {
-	testAccDataSourceNsxtPolicyRealizationInfoErrorState(t, true, func() {
+	testAccDataSourceNsxtPolicyRealizationInfoErrorState(t, true, 71235, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
 	})
 }
 
-func testAccDataSourceNsxtPolicyRealizationInfoErrorState(t *testing.T, withContext bool, preCheck func()) {
+// The ERROR realization state is provoked by creating two segments with the same overlay_id (VNI):
+// NSX accepts both, but the second one fails to realize. The overlay_id differs per test, as the
+// tests run in parallel against the same NSX Manager.
+func testAccDataSourceNsxtPolicyRealizationInfoErrorState(t *testing.T, withContext bool, overlayID int, preCheck func()) {
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -161,7 +164,7 @@ func testAccDataSourceNsxtPolicyRealizationInfoErrorState(t *testing.T, withCont
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate(withContext),
+				Config: testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate(withContext, overlayID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "state", "ERROR"),
 					resource.TestCheckResourceAttrSet(testResourceName, "entity_type"),
@@ -219,41 +222,46 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, resourceDataType, resourceName, site, resourceDataType, entityType)
 }
 
-func testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate(withContext bool) string {
+func testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate(withContext bool, overlayID int) string {
 	context := ""
+	transportZone := ""
+	tzSetting := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+	} else {
+		transportZone = testAccNSXPolicyTransportZoneReadTemplate(getOverlayTransportZoneName(), false, true)
+		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	}
-	return fmt.Sprintf(`
-resource "nsxt_policy_ip_pool" "test" {
-%s
-  display_name = "tfippool1"
+	return transportZone + fmt.Sprintf(`
+resource "nsxt_policy_segment" "first" {
+%[1]s
+  display_name = "tfrealizationfirst"
+  overlay_id   = %[3]d
+  %[2]s
 }
 
-resource "nsxt_policy_ip_pool_static_subnet" "test" {
-%s
-  display_name = "tfssnet1"
-  pool_path    = nsxt_policy_ip_pool.test.path
-  cidr         = "12.12.12.0/24"
-  allocation_range {
-    start = "12.12.12.10"
-    end   = "12.12.12.20"
-  }
+// Wait for the first segment to be realized, so that it is the one owning the overlay_id and the
+// duplicate is the one that fails to realize
+data "nsxt_policy_realization_info" "first" {
+%[1]s
+  path        = nsxt_policy_segment.first.path
+  entity_type = "RealizedLogicalSwitch"
 }
 
-resource "nsxt_policy_ip_address_allocation" "test" {
-%s
-  display_name  = "tfipallocationerror"
-  pool_path     = nsxt_policy_ip_pool.test.path
-  allocation_ip = "12.12.12.21"
-  depends_on    = [nsxt_policy_ip_pool_static_subnet.test]
+resource "nsxt_policy_segment" "duplicate" {
+%[1]s
+  display_name = "tfrealizationduplicate"
+  overlay_id   = %[3]d
+  %[2]s
+  depends_on   = [data.nsxt_policy_realization_info.first]
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-%s
-  path = nsxt_policy_ip_address_allocation.test.path
+%[1]s
+  path        = nsxt_policy_segment.duplicate.path
+  entity_type = "RealizedLogicalSwitch"
 }
-`, context, context, context, context)
+`, context, tzSetting, overlayID)
 }
 
 func testAccNsxtPolicyRealizationInfoReadDataSourceTemplate(resourceDataType string, resourceName string, entityType string, withContext bool) string {
