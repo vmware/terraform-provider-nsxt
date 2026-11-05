@@ -1055,6 +1055,52 @@ func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{
 	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
+// disableTGWBgp disables BGP on the transit gateway through the direct BGP API. It is a
+// no-op when the BGP config is missing or already disabled, which keeps repeated destroys
+// idempotent. NSX rejects deletion of the CentralizedConfig while TGW BGP is enabled
+// (error 660613), so this must run before the parent TGW delete. BGP neighbors are
+// separate resources removed by their own lifecycle and are left untouched.
+func disableTGWBgp(sessionContext utl.SessionContext, connector client.Connector, org, project, id string) error {
+	bgpClient := cliTransitGatewayBgpClient(sessionContext, connector)
+	if bgpClient == nil {
+		return nil
+	}
+	existing, err := bgpClient.Get(org, project, id)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return err
+	}
+	if existing.Enabled == nil || !*existing.Enabled {
+		return nil
+	}
+	disabled := false
+	log.Printf("[INFO] Disabling TransitGateway %s BGP before delete", id)
+	// bgp_config, advanced_config and redistribution_config all live in this one object, and
+	// NSX does not reliably retain omitted fields on PATCH. Carry over every field from the
+	// fetched config so that only Enabled changes, in case the gateway delete subsequently fails.
+	return bgpClient.Patch(org, project, id, model.TransitGatewayBgpRoutingConfig{
+		ResourceType:              existing.ResourceType,
+		Id:                        existing.Id,
+		Revision:                  existing.Revision,
+		DisplayName:               existing.DisplayName,
+		Description:               existing.Description,
+		Enabled:                   &disabled,
+		Ecmp:                      existing.Ecmp,
+		EbgpAdminDistance:         existing.EbgpAdminDistance,
+		IbgpAdminDistance:         existing.IbgpAdminDistance,
+		LocalAsNum:                existing.LocalAsNum,
+		MultipathRelax:            existing.MultipathRelax,
+		InterSrIbgp:               existing.InterSrIbgp,
+		GracefulRestartConfig:     existing.GracefulRestartConfig,
+		RouteAggregations:         existing.RouteAggregations,
+		Tags:                      existing.Tags,
+		ForwardingUpTimer:         existing.ForwardingUpTimer,
+		RouteRedistributionConfig: existing.RouteRedistributionConfig,
+	})
+}
+
 func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
@@ -1068,6 +1114,10 @@ func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{
 	orgRootClient := cliOrgRootClient(sessionContext, connector)
 	if orgRootClient == nil {
 		return policyResourceNotSupportedError()
+	}
+
+	if err := disableTGWBgp(sessionContext, connector, parents[0], parents[1], id); err != nil {
+		return handleDeleteError("TransitGateway BgpConfig", id, err)
 	}
 	childOrg, err := createChildOrgWithTransitGateway(parents[0], parents[1], id, nil, true)
 	if err != nil {

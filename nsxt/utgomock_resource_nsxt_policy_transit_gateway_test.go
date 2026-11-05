@@ -679,6 +679,7 @@ func TestMockResourceNsxtPolicyTransitGatewayDelete(t *testing.T) {
 	m := setupTransitGatewayMockFull(t, ctrl)
 
 	t.Run("Delete success", func(t *testing.T) {
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{})
 		m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
 
 		res := resourceNsxtPolicyTransitGateway()
@@ -697,7 +698,84 @@ func TestMockResourceNsxtPolicyTransitGatewayDelete(t *testing.T) {
 		require.Error(t, err)
 	})
 
+	t.Run("Delete disables enabled BGP before the H-API delete", func(t *testing.T) {
+		enabled := true
+		revision := int64(3)
+		localAs := "65001"
+		ecmp := true
+		fwdTimer := int64(900)
+		existing := nsxModel.TransitGatewayBgpRoutingConfig{
+			Enabled:           &enabled,
+			Revision:          &revision,
+			LocalAsNum:        &localAs,
+			Ecmp:              &ecmp,
+			ForwardingUpTimer: &fwdTimer,
+			RouteRedistributionConfig: &nsxModel.TransitGatewayRouteRedistributionConfig{
+				Rules: []nsxModel.TransitGatewayBgpRedistributionRule{{Name: strPtr("rule1")}},
+			},
+			RouteAggregations: []nsxModel.RouteAggregationEntry{{Prefix: strPtr("10.0.0.0/8")}},
+			Tags:              []nsxModel.Tag{{Scope: strPtr("s"), Tag: strPtr("t")}},
+		}
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(existing, nil)
+		patchBgp := m.bgp.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).DoAndReturn(
+			func(_, _, _ string, cfg nsxModel.TransitGatewayBgpRoutingConfig) error {
+				require.NotNil(t, cfg.Enabled)
+				assert.False(t, *cfg.Enabled)
+				assert.Equal(t, existing.Revision, cfg.Revision)
+				// everything except Enabled must be preserved
+				assert.Equal(t, existing.LocalAsNum, cfg.LocalAsNum)
+				assert.Equal(t, existing.Ecmp, cfg.Ecmp)
+				assert.Equal(t, existing.ForwardingUpTimer, cfg.ForwardingUpTimer)
+				assert.Equal(t, existing.RouteRedistributionConfig, cfg.RouteRedistributionConfig)
+				assert.Equal(t, existing.RouteAggregations, cfg.RouteAggregations)
+				assert.Equal(t, existing.Tags, cfg.Tags)
+				return nil
+			})
+		m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil).After(patchBgp)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		require.NoError(t, resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient()))
+	})
+
+	t.Run("Delete fails when disabling BGP fails", func(t *testing.T) {
+		enabled := true
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{Enabled: &enabled}, nil)
+		m.bgp.EXPECT().Patch(tgwOrgID, tgwProjectID, tgwID, gomock.Any()).Return(vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		require.Error(t, resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient()))
+	})
+
+	t.Run("Delete skips BGP disable when already disabled", func(t *testing.T) {
+		disabled := false
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{Enabled: &disabled}, nil)
+		m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		require.NoError(t, resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient()))
+	})
+
+	t.Run("Delete fails when reading BGP config fails", func(t *testing.T) {
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.InternalServerError{})
+
+		res := resourceNsxtPolicyTransitGateway()
+		d := schema.TestResourceDataRaw(t, res.Schema, minimalTGWData())
+		d.SetId(tgwID)
+
+		require.Error(t, resourceNsxtPolicyTransitGatewayDelete(d, newGoMockProviderClient()))
+	})
+
 	t.Run("Delete fails when OrgRoot Patch returns error", func(t *testing.T) {
+		m.bgp.EXPECT().Get(tgwOrgID, tgwProjectID, tgwID).Return(nsxModel.TransitGatewayBgpRoutingConfig{}, vapiErrors.NotFound{})
 		m.orgRoot.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(vapiErrors.InternalServerError{})
 
 		res := resourceNsxtPolicyTransitGateway()
