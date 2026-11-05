@@ -524,16 +524,13 @@ func testAccNsxtPolicyTier1CheckDestroy(state *terraform.State, displayName stri
 }
 
 func testAccNsxtPolicyTier1CreateDHCPTemplate() string {
-	return `
-resource "nsxt_policy_dhcp_relay" "test" {
-  display_name     = "terraform-dhcp-relay"
-  server_addresses = ["88.9.9.2"]
-}
-`
+	config, _ := testAccGatewayDHCPConfig()
+	return config
 }
 
 func testAccNsxtPolicyTier1CreateWithDHCPTemplate(name string) string {
-	return testAccNsxtPolicyTier1CreateDHCPTemplate() + fmt.Sprintf(`
+	dhcpConfig, dhcpPath := testAccGatewayDHCPConfig()
+	return dhcpConfig + fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
 }
@@ -541,12 +538,12 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-  dhcp_config_path  = nsxt_policy_dhcp_relay.test.path
+  dhcp_config_path  = %s
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier1_gateway.test.path
-}`, getEdgeClusterName(), name)
+}`, getEdgeClusterName(), name, dhcpPath)
 }
 
 func testAccNsxtPolicyTier1CreateWithDHCPRemovedTemplate(name string) string {

@@ -133,7 +133,7 @@ The following arguments are supported:
 * `route_advertisement_types` - (Optional) Enable different types of route advertisements: TIER1_STATIC_ROUTES, TIER1_CONNECTED, TIER1_NAT, TIER1_LB_VIP, TIER1_LB_SNAT, TIER1_DNS_FORWARDER_IP, TIER1_IPSEC_LOCAL_ENDPOINT.
 * `ipv6_ndra_profile_path` - (Optional) Policy path to IPv6 NDRA profile.
 * `ipv6_dad_profile_path` - (Optional) Policy path to IPv6 DAD profile.
-* `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
+* `dhcp_config_path` - (Optional) Policy path to DHCP configuration for segments connected to this gateway. Starting with NSX 9.2.0 only DHCP server configuration is supported, and DHCP relay configuration should be set directly on the segment. Earlier NSX versions support DHCP relay configuration.
 * `pool_allocation` - (Optional) Size of edge node allocation at for routing and load balancer service to meet performance and scalability requirements, one of `ROUTING`, `LB_SMALL`, `LB_MEDIUM`, `LB_LARGE`, `LB_XLARGE`. Default is `ROUTING`. Changing this attribute would force new resource.
 * `route_advertisement_rule` - (Optional) List of rules for routes advertisement:
     * `name` - (Required) The name of the rule.

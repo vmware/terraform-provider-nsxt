@@ -135,7 +135,7 @@ The following arguments are supported:
 * `internal_transit_subnets` - (Optional) Internal transit subnets in CIDR format. At most 1 CIDR.
 * `transit_subnets` - (Optional) Transit subnets in CIDR format.
 * `vrf_transit_subnets` - (Optional) VRF transit subnets in CIDR format. Maximum 1 item allowed in the list.
-* `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
+* `dhcp_config_path` - (Optional) Policy path to DHCP configuration for segments connected to this gateway. Starting with NSX 9.2.0 only DHCP server configuration is supported, and DHCP relay configuration should be set directly on the segment. Earlier NSX versions support DHCP relay configuration.
 * `rd_admin_address` - (Optional) Route distinguisher administrator address. If using EVPN service, then this attribute should be defined if auto generation of route distinguisher on VRF configuration is needed.
 * `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable for Global Manager - use `nsxt_policy_bgp_config` resource instead.
     * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.

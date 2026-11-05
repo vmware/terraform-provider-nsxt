@@ -144,7 +144,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"locale_service":         getPolicyLocaleServiceSchema(false),
 			"bgp_config":             getPolicyTier0BGPConfigSchema(),
 			"vrf_config":             getPolicyVRFConfigSchema(),
-			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
+			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP configuration to use for this Tier0. Starting with NSX 9.2.0 only DHCP server configuration is supported"),
 			"intersite_config":       getGatewayIntersiteConfigSchema(),
 			"redistribution_config":  getRedistributionConfigSchema(),
 			"rd_admin_address": {
