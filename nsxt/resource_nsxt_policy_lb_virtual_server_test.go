@@ -862,13 +862,14 @@ func testAccNsxtPolicyLBVirtualServerSSLTemplate(createFlow bool, certDisplayNam
 	} else {
 		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
 	}
+	// SSL requires an HTTP (L7) application profile, and L7 virtual servers support a single port only
 	return fmt.Sprintf(`
 data "nsxt_policy_certificate" "test" {
   display_name = "%s"
 }
-data "nsxt_policy_lb_app_profile" "default_tcp" {
-  type         = "TCP"
-  display_name = "default-tcp-lb-app-profile"
+data "nsxt_policy_lb_app_profile" "default_http" {
+  type         = "HTTP"
+  display_name = "default-http-lb-app-profile"
 }
 
 data "nsxt_policy_lb_client_ssl_profile" "default" {
@@ -881,9 +882,9 @@ data "nsxt_policy_lb_server_ssl_profile" "default" {
 
 resource "nsxt_policy_lb_virtual_server" "test" {
   display_name             = "%s"
-  application_profile_path = data.nsxt_policy_lb_app_profile.default_tcp.path
+  application_profile_path = data.nsxt_policy_lb_app_profile.default_http.path
   ip_address               = "%s"
-  ports                    = ["%s"]
+  ports                    = ["443"]
   client_ssl {
     client_auth              = "IGNORE"
     certificate_chain_depth  = %s
@@ -896,7 +897,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
     certificate_chain_depth = %s
     ssl_profile_path        = data.nsxt_policy_lb_server_ssl_profile.default.path
   }
-}`, certDisplayName, attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["certificate_chain_depth"], attrMap["certificate_chain_depth"])
+}`, certDisplayName, attrMap["display_name"], attrMap["ip_address"], attrMap["certificate_chain_depth"], attrMap["certificate_chain_depth"])
 }
 
 func testAccNsxtPolicyLBVirtualServerWithAccessList(createFlow bool) string {
