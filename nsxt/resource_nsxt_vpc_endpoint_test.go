@@ -210,7 +210,7 @@ resource "nsxt_vpc_subnet" "svc_dep" {
   }
   display_name = "%s-svc-subnet"
   ip_addresses = ["192.168.200.0/24"]
-  access_mode  = "Isolated"
+  access_mode  = "Private"
   depends_on   = [nsxt_vpc_attachment.svc_dep]
 }
 
