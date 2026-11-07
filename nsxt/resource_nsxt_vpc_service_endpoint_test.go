@@ -29,8 +29,6 @@ func TestAccResourceNsxtVpcServiceEndpoint_basic(t *testing.T) {
 	createName := getAccTestResourceName()
 	updateName := getAccTestResourceName()
 	subnetName := getAccTestResourceName()
-	cidr := "192.168.100.0/24"
-	ip := "192.168.100.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
@@ -40,12 +38,12 @@ func TestAccResourceNsxtVpcServiceEndpoint_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcServiceEndpointTemplate(true, createName, subnetName, cidr, ip),
+				Config: testAccNsxtVpcServiceEndpointTemplate(true, createName, subnetName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceEndpointExists(createName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", createName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcServiceEndpointCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "service_endpoint_ip", ip),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_endpoint_ip"),
 					resource.TestCheckResourceAttr(testResourceName, "service_endpoint_ip_type", accTestVpcServiceEndpointCreateAttributes["service_endpoint_ip_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -54,12 +52,12 @@ func TestAccResourceNsxtVpcServiceEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcServiceEndpointTemplate(false, updateName, subnetName, cidr, ip),
+				Config: testAccNsxtVpcServiceEndpointTemplate(false, updateName, subnetName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceEndpointExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcServiceEndpointUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "service_endpoint_ip", ip),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_endpoint_ip"),
 					resource.TestCheckResourceAttr(testResourceName, "service_endpoint_ip_type", accTestVpcServiceEndpointUpdateAttributes["service_endpoint_ip_type"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -68,7 +66,7 @@ func TestAccResourceNsxtVpcServiceEndpoint_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVpcServiceEndpointMinimalistic(updateName, subnetName, cidr, ip),
+				Config: testAccNsxtVpcServiceEndpointMinimalistic(updateName, subnetName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceEndpointExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -88,8 +86,6 @@ func TestAccResourceNsxtVpcServiceEndpoint_importBasic(t *testing.T) {
 	testAccOnlyVPC(t)
 	testAccNSXVersion(t, "9.2.0")
 	subnetName := getAccTestResourceName()
-	cidr := "192.168.101.0/24"
-	ip := "192.168.101.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
@@ -99,7 +95,7 @@ func TestAccResourceNsxtVpcServiceEndpoint_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVpcServiceEndpointMinimalistic(name, subnetName, cidr, ip),
+				Config: testAccNsxtVpcServiceEndpointMinimalistic(name, subnetName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -157,33 +153,33 @@ func testAccNsxtVpcServiceEndpointCheckDestroy(state *terraform.State, displayNa
 	return nil
 }
 
-// testAccNsxtVpcServiceEndpointSubnetDeps creates a subnet in the test VPC so
-// that the service_endpoint_ip used by the dependent nsxt_vpc_service_endpoint
-// falls within a subnet that actually exists in the VPC.
-func testAccNsxtVpcServiceEndpointSubnetDeps(subnetName, cidr string) string {
+// testAccNsxtVpcServiceEndpointSubnetDeps creates a private subnet in the test VPC
+// so that the service_endpoint_ip used by the dependent nsxt_vpc_service_endpoint
+// falls within a connected subnet of the VPC (isolated subnets are not accepted by NSX).
+func testAccNsxtVpcServiceEndpointSubnetDeps(subnetName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vpc_subnet" "dep" {
   %s
-  display_name = "%s-subnet"
-  ip_addresses = ["%s"]
-  access_mode  = "Isolated"
+  display_name     = "%s-subnet"
+  ipv4_subnet_size = 32
+  access_mode      = "Private"
 }
-`, testAccNsxtPolicyMultitenancyContext(), subnetName, cidr)
+`, testAccNsxtPolicyMultitenancyContext(), subnetName)
 }
 
-func testAccNsxtVpcServiceEndpointTemplate(createFlow bool, displayName, subnetName, cidr, ip string) string {
+func testAccNsxtVpcServiceEndpointTemplate(createFlow bool, displayName, subnetName string) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestVpcServiceEndpointCreateAttributes
 	} else {
 		attrMap = accTestVpcServiceEndpointUpdateAttributes
 	}
-	return testAccNsxtVpcServiceEndpointSubnetDeps(subnetName, cidr) + fmt.Sprintf(`
+	return testAccNsxtVpcServiceEndpointSubnetDeps(subnetName) + fmt.Sprintf(`
 resource "nsxt_vpc_service_endpoint" "test" {
   %s
   display_name             = "%s"
   description              = "%s"
-  service_endpoint_ip      = "%s"
+  service_endpoint_ip      = cidrhost(nsxt_vpc_subnet.dep.ip_addresses[0], 10)
   service_endpoint_ip_type = "%s"
   depends_on               = [nsxt_vpc_subnet.dep]
   tag {
@@ -191,15 +187,15 @@ resource "nsxt_vpc_service_endpoint" "test" {
     tag   = "tag1"
   }
 }`, testAccNsxtPolicyMultitenancyContext(), displayName, attrMap["description"],
-		ip, attrMap["service_endpoint_ip_type"])
+		attrMap["service_endpoint_ip_type"])
 }
 
-func testAccNsxtVpcServiceEndpointMinimalistic(displayName, subnetName, cidr, ip string) string {
-	return testAccNsxtVpcServiceEndpointSubnetDeps(subnetName, cidr) + fmt.Sprintf(`
+func testAccNsxtVpcServiceEndpointMinimalistic(displayName, subnetName string) string {
+	return testAccNsxtVpcServiceEndpointSubnetDeps(subnetName) + fmt.Sprintf(`
 resource "nsxt_vpc_service_endpoint" "test" {
   %s
   display_name        = "%s"
-  service_endpoint_ip = "%s"
+  service_endpoint_ip = cidrhost(nsxt_vpc_subnet.dep.ip_addresses[0], 10)
   depends_on          = [nsxt_vpc_subnet.dep]
-}`, testAccNsxtPolicyMultitenancyContext(), displayName, ip)
+}`, testAccNsxtPolicyMultitenancyContext(), displayName)
 }
