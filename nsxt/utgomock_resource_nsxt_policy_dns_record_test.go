@@ -7,9 +7,11 @@
 package nsxt
 
 import (
+	"context"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	vapiErrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -190,4 +192,80 @@ func TestMockResourceNsxtPolicyDnsRecordDelete(t *testing.T) {
 		err := resourceNsxtPolicyDnsRecordDelete(d, newGoMockProviderClient())
 		require.NoError(t, err)
 	})
+}
+
+func TestDnsRecordValueOrderDiff(t *testing.T) {
+	for _, recordType := range []string{"A", "AAAA", "NS"} {
+		t.Run(recordType, func(t *testing.T) {
+			values := []interface{}{"192.168.1.10", "192.168.1.20", "192.168.1.30"}
+			extra := "192.168.1.40"
+			if recordType == "AAAA" {
+				values = []interface{}{"2001:db8::10", "2001:db8::20", "2001:db8::30"}
+				extra = "2001:db8::40"
+			} else if recordType == "NS" {
+				values = []interface{}{"ns1.example.com", "ns2.example.com", "ns3.example.com"}
+				extra = "ns4.example.com"
+			}
+			for _, tc := range []struct {
+				name       string
+				values     []interface{}
+				wantChange bool
+			}{
+				{"unchanged", values, false},
+				{"reversed", []interface{}{values[2], values[1], values[0]}, false},
+				{"rotated", []interface{}{values[1], values[2], values[0]}, false},
+				{"added", append(append([]interface{}{}, values...), extra), true},
+				{"duplicate added", append(append([]interface{}{}, values...), values[0]), false},
+				{"removed", values[:2], true},
+				{"replaced", []interface{}{values[0], values[1], values[1]}, true},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					res := resourceNsxtPolicyDnsRecord()
+					stored := minimalDnsRecordData()
+					stored["record_type"] = recordType
+					stored["record_values"] = values
+					d := schema.TestResourceDataRaw(t, res.Schema, stored)
+					d.SetId(dnsRecordID)
+					configured := minimalDnsRecordData()
+					configured["record_type"] = recordType
+					configured["record_values"] = tc.values
+					diff, err := res.Diff(context.Background(), d.State(), terraform.NewResourceConfigRaw(configured), nil)
+					require.NoError(t, err)
+					assert.Equal(t, tc.wantChange, diff != nil && !diff.Empty())
+					actualSet, ok := d.Get("record_values").(*schema.Set)
+					require.True(t, ok)
+					assert.ElementsMatch(t, values, actualSet.List(), "comparison must not mutate existing state")
+					assert.ElementsMatch(t, getStringListFromSchemaSet(d, "record_values"), policyDnsRecordFromSchema(d).RecordValues)
+				})
+			}
+		})
+	}
+}
+
+func TestDnsRecordRefreshLegacyListState(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockSDK, restore := setupDnsRecordMock(t, ctrl)
+	t.Cleanup(restore)
+	legacy := resourceNsxtPolicyDnsRecord()
+	legacyValues := *legacy.Schema["record_values"]
+	legacyValues.Type = schema.TypeList
+	legacy.Schema["record_values"] = &legacyValues
+	configured := minimalDnsRecordData()
+	configured["record_values"] = []interface{}{"192.168.1.10", "192.168.1.20"}
+	old := schema.TestResourceDataRaw(t, legacy.Schema, configured)
+	old.SetId(dnsRecordID)
+	res := resourceNsxtPolicyDnsRecord()
+	d := res.Data(old.State())
+	response := dnsRecordAPIResponse()
+	response.RecordValues = []string{"192.168.1.20", "192.168.1.10"}
+	mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), dnsRecordID).Return(response, nil)
+	require.NoError(t, res.Read(d, newGoMockProviderClient()))
+	assert.Equal(t, dnsRecordID, d.Id())
+	values, ok := d.Get("record_values").(*schema.Set)
+	require.True(t, ok)
+	assert.ElementsMatch(t, configured["record_values"], values.List())
+	assert.ElementsMatch(t, response.RecordValues, policyDnsRecordFromSchema(d).RecordValues)
+	diff, err := res.Diff(context.Background(), d.State(), terraform.NewResourceConfigRaw(configured), nil)
+	require.NoError(t, err)
+	assert.True(t, diff == nil || diff.Empty(), "refreshed legacy state must have a clean plan")
 }

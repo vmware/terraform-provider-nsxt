@@ -60,7 +60,7 @@ func resourceNsxtPolicyDnsRecord() *schema.Resource {
 				Description:  "DNS record type. Immutable after creation.",
 			},
 			"record_values": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
 				Elem: &schema.Schema{
@@ -118,7 +118,7 @@ func policyDnsRecordFromSchema(d *schema.ResourceData) model.DnsRecord {
 	tags := getPolicyTagsFromSchema(d)
 	recordName := d.Get("record_name").(string)
 	recordType := d.Get("record_type").(string)
-	recordValues := getStringListFromSchemaList(d, "record_values")
+	recordValues := getStringListFromSchemaSet(d, "record_values")
 	zonePath := d.Get("zone_path").(string)
 	ttl := int64(d.Get("ttl").(int))
 
