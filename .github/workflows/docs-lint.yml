@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: Setup Go
-        uses: ./.github/actions/setup-go
+        uses: $/.github/actions/setup-go
       - name: Install Tools
         run: make tools
       - name: Docs HCL Lint
         run: make docs-lint
       - name: Docs Lint
-        uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
+        uses: DavidAnson/markdownlint-cli2-action@v25.0.0
         with:
           config: '.markdownlint.jsonc'
           globs: |
