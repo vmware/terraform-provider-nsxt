@@ -67,7 +67,7 @@ func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 				Description:  "Maximum request header size in bytes. Requests with larger header size will be processed as best effort whereas a request with header below this specified size is guaranteed to be processed",
 				Optional:     true,
 				Default:      1024,
-				ValidateFunc: validation.IntBetween(1, 65536),
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"response_buffering": {
 				Type:        schema.TypeBool,
