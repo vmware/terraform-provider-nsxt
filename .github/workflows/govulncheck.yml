@@ -27,13 +27,13 @@ jobs:
 
       # Step 2: Pass that dynamic version into setup-go
       - name: Setup Go
-        uses: actions/setup-go@v7
+        uses: actions/setup-go@v7.0.0
         with:
           go-version: ${{ steps.go-version.outputs.version }}
           cache: true
 
       - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
+        uses: golang/govulncheck-action@v1.1.0
         with:
           go-package: ./...
           repo-checkout: false
