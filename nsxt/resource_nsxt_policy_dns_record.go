@@ -28,6 +28,7 @@ var dnsRecordTypeValues = []string{
 	model.DnsRecord_RECORD_TYPE_CNAME,
 	model.DnsRecord_RECORD_TYPE_PTR,
 	model.DnsRecord_RECORD_TYPE_NS,
+	model.DnsRecord_RECORD_TYPE_TXT,
 }
 
 func resourceNsxtPolicyDnsRecord() *schema.Resource {
