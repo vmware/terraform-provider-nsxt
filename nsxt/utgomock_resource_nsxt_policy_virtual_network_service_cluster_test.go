@@ -592,3 +592,53 @@ func TestVNSClusterPlacementValidation(t *testing.T) {
 		assert.True(t, diff == nil || diff.Empty(), "matching placement must not change existing state")
 	})
 }
+
+func TestVNSClusterImportPathValidation(t *testing.T) {
+	previous := util.NsxVersion
+	util.NsxVersion = "9.2.0"
+	t.Cleanup(func() { util.NsxVersion = previous })
+	for _, tc := range []struct {
+		name     string
+		path     string
+		id       string
+		sitePath string
+		ep       string
+	}{
+		{"canonical", vnsClusterPath, vnsClusterID, vnsClusterSitePath, vnsClusterEPID},
+		{"custom site and enforcement point", "/infra/sites/site-2/enforcement-points/ep-2/virtual-network-service-clusters/cluster-2", "cluster-2", "/infra/sites/site-2", "ep-2"},
+		{"child with cluster ID", vnsClusterPath + "/service-hosts/" + vnsClusterID, "", "", ""},
+		{"global root", "/global-infra/sites/default/enforcement-points/default/virtual-network-service-clusters/cluster", "", "", ""},
+		{"wrong collection", "/infra/sites/default/enforcement-points/default/virtual-network-appliance-clusters/cluster", "", "", ""},
+		{"missing site", "/infra/sites//enforcement-points/default/virtual-network-service-clusters/cluster", "", "", ""},
+		{"missing enforcement point", "/infra/sites/default/enforcement-points//virtual-network-service-clusters/cluster", "", "", ""},
+		{"missing cluster ID", "/infra/sites/default/enforcement-points/default/virtual-network-service-clusters/", "", "", ""},
+		{"trailing slash", vnsClusterPath + "/", "", "", ""},
+		{"query", vnsClusterPath + "?other=value", "", "", ""},
+		{"fragment", vnsClusterPath + "#fragment", "", "", ""},
+		{"plain ID", vnsClusterID, "", "", ""},
+		{"empty", "", "", "", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			res := resourceNsxtPolicyVirtualNetworkServiceCluster()
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"site_path": "/infra/sites/unchanged", "enforcement_point": "unchanged",
+			})
+			d.SetId(tc.path)
+			out, err := res.Importer.State(d, nil)
+			if tc.id == "" {
+				require.ErrorContains(t, err, "policy path")
+				assert.Nil(t, out)
+				assert.Equal(t, tc.path, d.Id())
+				assert.Equal(t, "/infra/sites/unchanged", d.Get("site_path"))
+				assert.Equal(t, "unchanged", d.Get("enforcement_point"))
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, out, 1)
+			assert.Same(t, d, out[0])
+			assert.Equal(t, tc.id, d.Id())
+			assert.Equal(t, tc.sitePath, d.Get("site_path"))
+			assert.Equal(t, tc.ep, d.Get("enforcement_point"))
+		})
+	}
+}

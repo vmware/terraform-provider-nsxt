@@ -82,3 +82,5 @@ terraform import nsxt_policy_virtual_network_service_cluster.example POLICY_PATH
 The above command imports the Virtual Network Service Cluster named `example` with the NSX policy path `POLICY_PATH`.
 
 Note: The policy path format is `/infra/sites/<site-id>/enforcement-points/<ep-id>/virtual-network-service-clusters/<cluster-id>`.
+
+Only the exact local cluster path is accepted. Child-resource paths and paths rooted at `/global-infra` are rejected.

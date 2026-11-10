@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -20,6 +21,8 @@ import (
 var cliVNSClustersClient = enforcement_points.NewVirtualNetworkServiceClustersClient
 
 const vnsClusterMinNsxVersion = "9.2.0"
+
+const vnsClusterPathExample = "/infra/sites/[site]/enforcement-points/[ep]/virtual-network-service-clusters/[cluster]"
 
 var vnsClusterNodeFormFactorValues = []string{
 	model.VirtualNetworkServiceCluster_NODE_FORM_FACTOR_SMALL,
@@ -342,6 +345,9 @@ func resourceNsxtPolicyVirtualNetworkServiceClusterDelete(d *schema.ResourceData
 
 func resourceNsxtPolicyVirtualNetworkServiceClusterImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
+	if !policyPathMatchesExample(importID, vnsClusterPathExample) || strings.ContainsAny(importID, "?#") {
+		return nil, fmt.Errorf("invalid policy path %q; expected format: %s", importID, vnsClusterPathExample)
+	}
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err != nil {
 		return rd, err
