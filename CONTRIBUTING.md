@@ -22,19 +22,19 @@ Example:
 
 ``` shell
 git remote add upstream https://github.com/vmware/terraform-provider-nsxt.git
-git checkout -b my-new-feature master
+git checkout -b my-new-feature main
 git commit -a
 git push origin my-new-feature
 ```
 
 ### Staying In Sync With Upstream
 
-When your branch gets out of sync with the vmware/master branch, use the following to update:
+When your branch gets out of sync with the vmware/main branch, use the following to update:
 
 ``` shell
 git checkout my-new-feature
 git fetch -a
-git pull --rebase upstream master
+git pull --rebase upstream main
 git push --force-with-lease origin my-new-feature
 ```
 
@@ -57,7 +57,7 @@ If you need to squash changes into an earlier commit, you can use:
 ``` shell
 git add .
 git commit --fixup <commit>
-git rebase -i --autosquash master
+git rebase -i --autosquash main
 git push --force-with-lease origin my-new-feature
 ```
 
