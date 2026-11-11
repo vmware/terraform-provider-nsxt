@@ -80,6 +80,34 @@ func setupDnsRecordMock(t *testing.T, ctrl *gomock.Controller) (*projectmocks.Mo
 	return mockSDK, func() { cliProjectDnsRecordsClient = original }
 }
 
+func TestUnitNsxt_PolicyDnsRecordTypeValidation(t *testing.T) {
+	validate := resourceNsxtPolicyDnsRecord().Schema["record_type"].ValidateFunc
+	for _, tc := range []struct {
+		name  string
+		value string
+		valid bool
+	}{
+		{name: "A", value: "A", valid: true},
+		{name: "AAAA", value: "AAAA", valid: true},
+		{name: "CNAME", value: "CNAME", valid: true},
+		{name: "PTR", value: "PTR", valid: true},
+		{name: "NS", value: "NS", valid: true},
+		{name: "TXT", value: "TXT", valid: true},
+		{name: "unsupported", value: "INVALID"},
+		{name: "lowercase", value: "txt"},
+		{name: "empty"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, errs := validate(tc.value, "record_type")
+			if tc.valid {
+				require.Empty(t, errs)
+			} else {
+				require.NotEmpty(t, errs)
+			}
+		})
+	}
+}
+
 func TestMockResourceNsxtPolicyDnsRecordCreate(t *testing.T) {
 	t.Run("Create success", func(t *testing.T) {
 		util.NsxVersion = "9.2.0"
