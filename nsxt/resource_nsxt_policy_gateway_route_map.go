@@ -41,7 +41,7 @@ func resourceNsxtPolicyGatewayRouteMap() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of Route Map entries",
 				Required:    true,
-				Elem:        getPolicyRouteMapEntrySchema(),
+				Elem:        getPolicyRouteMapEntrySchema(true),
 			},
 		},
 	}
@@ -60,7 +60,48 @@ var gatewayRouteMapMatchCriteriaValues = []string{
 	model.CommunityMatchCriteria_MATCH_OPERATOR_LARGE_COMMUNITY_REGEX,
 }
 
-func getPolicyRouteMapEntrySchema() *schema.Resource {
+// getPolicyRouteMapEntrySchema includes prefer_global_v6_next_hop only when
+// includeGlobalV6NextHop is true. TGW does not support this field.
+func getPolicyRouteMapEntrySchema(includeGlobalV6NextHop bool) *schema.Resource {
+	setSchema := map[string]*schema.Schema{
+		"as_path_prepend": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validateASPath,
+			Description:  "Autonomous System (AS) path prepend to influence route selection",
+		},
+		"community": {
+			Type:         schema.TypeString,
+			Optional:     true,
+			Description:  "Set BGP regular or large community for matching routes",
+			ValidateFunc: validatePolicyBGPCommunity,
+		},
+		"local_preference": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Computed:    true,
+			Description: "Local preference indicates the degree of preference for one BGP route over other BGP routes",
+		},
+		"med": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Computed:    true,
+			Description: "A lower Multi exit discriminator (MED) is preferred over a higher value",
+		},
+		"weight": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Description: "Weight is used to select a route when multiple routes are available to the same network",
+		},
+	}
+	if includeGlobalV6NextHop {
+		setSchema["prefer_global_v6_next_hop"] = &schema.Schema{
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "Indicator whether to prefer global address over link-local as the next hop",
+		}
+	}
+
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"action": {
@@ -102,42 +143,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 				Description: "Set criteria for route map entry",
 				MaxItems:    1,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"as_path_prepend": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validateASPath,
-							Description:  "Autonomous System (AS) path prepend to influence route selection",
-						},
-						"community": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Description:  "Set BGP regular or large community for matching routes",
-							ValidateFunc: validatePolicyBGPCommunity,
-						},
-						"local_preference": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Computed:    true,
-							Description: "Local preference indicates the degree of preference for one BGP route over other BGP routes",
-						},
-						"med": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Computed:    true,
-							Description: "A lower Multi exit discriminator (MED) is preferred over a higher value",
-						},
-						"prefer_global_v6_next_hop": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "Indicator whether to prefer global address over link-local as the next hop",
-						},
-						"weight": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: "Weight is used to select a route when multiple routes are available to the same network",
-						},
-					},
+					Schema: setSchema,
 				},
 			},
 		},
@@ -146,7 +152,8 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 
 // setRouteMapEntriesInSchema populates the "entry" attribute from a slice of RouteMapEntry.
 // Shared between nsxt_policy_gateway_route_map (T0) and nsxt_policy_transit_gateway_route_map.
-func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMapEntry) {
+// includeGlobalV6NextHop must be false for TGW, whose schema omits the field.
+func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMapEntry, includeGlobalV6NextHop bool) error {
 	var entryList []interface{}
 	for _, entry := range entries {
 		schemaEntry := make(map[string]interface{})
@@ -169,7 +176,9 @@ func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMap
 			setData["community"] = entry.Set.Community
 			setData["med"] = entry.Set.Med
 			setData["local_preference"] = entry.Set.LocalPreference
-			setData["prefer_global_v6_next_hop"] = entry.Set.PreferGlobalV6NextHop
+			if includeGlobalV6NextHop {
+				setData["prefer_global_v6_next_hop"] = entry.Set.PreferGlobalV6NextHop
+			}
 			setData["weight"] = entry.Set.Weight
 			setList = append(setList, setData)
 		}
@@ -177,10 +186,12 @@ func setRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMap
 
 		entryList = append(entryList, schemaEntry)
 	}
-	d.Set("entry", entryList)
+	return d.Set("entry", entryList)
 }
 
-func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}) (model.RouteMapEntry, error) {
+// policyGatewayRouteMapBuildEntry builds a route-map entry. includeGlobalV6NextHop
+// must be false for TGW because Local Manager rejects the field even when false.
+func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}, includeGlobalV6NextHop bool) (model.RouteMapEntry, error) {
 
 	action := schemaEntry["action"].(string)
 	obj := model.RouteMapEntry{
@@ -218,12 +229,17 @@ func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schema
 		community := data["community"].(string)
 		localPreferenceValue, lpSet := d.GetOk(fmt.Sprintf("entry.%d.set.0.local_preference", entryNo))
 		medValue, medSet := d.GetOk(fmt.Sprintf("entry.%d.set.0.med", entryNo))
-		globalIPv6 := data["prefer_global_v6_next_hop"].(bool)
 		weight := int64(data["weight"].(int))
 
 		entrySet := model.RouteMapEntrySet{
-			PreferGlobalV6NextHop: &globalIPv6,
-			Weight:                &weight,
+			Weight: &weight,
+		}
+		if includeGlobalV6NextHop {
+			globalIPv6, ok := data["prefer_global_v6_next_hop"].(bool)
+			if !ok {
+				return obj, fmt.Errorf("entry %d prefer_global_v6_next_hop must be a boolean", entryNo)
+			}
+			entrySet.PreferGlobalV6NextHop = &globalIPv6
 		}
 
 		if len(asPathPrepend) > 0 {
@@ -254,7 +270,12 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
 	for entryNo, entry := range schemaEntries {
-		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{}))
+		entryObj, err := policyGatewayRouteMapBuildEntry(
+			d,
+			entryNo,
+			entry.(map[string]interface{}),
+			true,
+		)
 		if err != nil {
 			return err
 		}
@@ -356,9 +377,7 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	setRouteMapEntriesInSchema(d, obj.Entries)
-
-	return nil
+	return setRouteMapEntriesInSchema(d, obj.Entries, true)
 }
 
 func resourceNsxtPolicyGatewayRouteMapUpdate(d *schema.ResourceData, m interface{}) error {

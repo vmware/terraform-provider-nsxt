@@ -39,7 +39,7 @@ func resourceNsxtPolicyTransitGatewayRouteMap() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of Route Map entries",
 				Required:    true,
-				Elem:        getPolicyRouteMapEntrySchema(),
+				Elem:        getPolicyRouteMapEntrySchema(false),
 			},
 		},
 	}
@@ -72,7 +72,16 @@ func tgwRouteMapBuildObj(d *schema.ResourceData, id string) (model.TransitGatewa
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
 	for entryNo, entry := range schemaEntries {
-		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{}))
+		entryData, ok := entry.(map[string]interface{})
+		if !ok {
+			return model.TransitGatewayRouteMap{}, fmt.Errorf("entry %d must be an object", entryNo)
+		}
+		entryObj, err := policyGatewayRouteMapBuildEntry(
+			d,
+			entryNo,
+			entryData,
+			false,
+		)
 		if err != nil {
 			return model.TransitGatewayRouteMap{}, err
 		}
@@ -151,9 +160,7 @@ func resourceNsxtPolicyTransitGatewayRouteMapRead(d *schema.ResourceData, m inte
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	setRouteMapEntriesInSchema(d, obj.Entries)
-
-	return nil
+	return setRouteMapEntriesInSchema(d, obj.Entries, false)
 }
 
 func resourceNsxtPolicyTransitGatewayRouteMapUpdate(d *schema.ResourceData, m interface{}) error {
