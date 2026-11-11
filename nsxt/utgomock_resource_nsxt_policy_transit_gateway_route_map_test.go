@@ -252,11 +252,10 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapWithSet(t *testing.T) {
 	mockSDK, restore := setupTGWRouteMapMock(t, ctrl)
 	defer restore()
 
-	t.Run("Create with set clause succeeds", func(t *testing.T) {
+	t.Run("Create and update with set clause succeed", func(t *testing.T) {
 		localPref := int64(200)
 		med := int64(100)
 		weight := int64(10)
-		globalV6 := false
 
 		response := nsxModel.TransitGatewayRouteMap{
 			Id:          &tgwRMID,
@@ -269,10 +268,9 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapWithSet(t *testing.T) {
 					Action:            &tgwRMAction,
 					PrefixListMatches: []string{tgwRMPrefixPath},
 					Set: &nsxModel.RouteMapEntrySet{
-						LocalPreference:       &localPref,
-						Med:                   &med,
-						Weight:                &weight,
-						PreferGlobalV6NextHop: &globalV6,
+						LocalPreference: &localPref,
+						Med:             &med,
+						Weight:          &weight,
 					},
 				},
 			},
@@ -290,12 +288,11 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapWithSet(t *testing.T) {
 					"community_list_match": []interface{}{},
 					"set": []interface{}{
 						map[string]interface{}{
-							"local_preference":          200,
-							"med":                       100,
-							"weight":                    10,
-							"prefer_global_v6_next_hop": false,
-							"as_path_prepend":           "",
-							"community":                 "",
+							"local_preference": 200,
+							"med":              100,
+							"weight":           10,
+							"as_path_prepend":  "",
+							"community":        "",
 						},
 					},
 				},
@@ -305,7 +302,16 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapWithSet(t *testing.T) {
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
 			mockSDK.EXPECT().Get(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID).Return(nsxModel.TransitGatewayRouteMap{}, notFoundErr),
-			mockSDK.EXPECT().Patch(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Patch(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID, gomock.Any()).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.TransitGatewayRouteMap) error {
+					require.Len(t, obj.Entries, 1)
+					require.NotNil(t, obj.Entries[0].Set)
+					assert.Nil(t, obj.Entries[0].Set.PreferGlobalV6NextHop)
+					assert.Equal(t, &localPref, obj.Entries[0].Set.LocalPreference)
+					assert.Equal(t, &med, obj.Entries[0].Set.Med)
+					assert.Equal(t, &weight, obj.Entries[0].Set.Weight)
+					return nil
+				}),
 			mockSDK.EXPECT().Get(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID).Return(response, nil),
 		)
 
@@ -315,5 +321,87 @@ func TestMockResourceNsxtPolicyTransitGatewayRouteMapWithSet(t *testing.T) {
 		err := resourceNsxtPolicyTransitGatewayRouteMapCreate(d, newGoMockProviderClient())
 		require.NoError(t, err)
 		assert.Equal(t, tgwRMID, d.Id())
+
+		gomock.InOrder(
+			mockSDK.EXPECT().Patch(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID, gomock.Any()).DoAndReturn(
+				func(_, _, _, _ string, obj nsxModel.TransitGatewayRouteMap) error {
+					require.Len(t, obj.Entries, 1)
+					require.NotNil(t, obj.Entries[0].Set)
+					assert.Nil(t, obj.Entries[0].Set.PreferGlobalV6NextHop)
+					assert.Equal(t, &localPref, obj.Entries[0].Set.LocalPreference)
+					assert.Equal(t, &med, obj.Entries[0].Set.Med)
+					assert.Equal(t, &weight, obj.Entries[0].Set.Weight)
+					return nil
+				}),
+			mockSDK.EXPECT().Get(tgwRMOrgID, tgwRMProjectID, tgwRMTGWID, tgwRMID).Return(response, nil),
+		)
+		require.NoError(t, resourceNsxtPolicyTransitGatewayRouteMapUpdate(d, newGoMockProviderClient()))
 	})
+}
+
+func TestTGWRouteMapSchemaOmitsGlobalV6NextHop(t *testing.T) {
+	tgw := resourceNsxtPolicyTransitGatewayRouteMap()
+	tgwEntrySchema, ok := tgw.Schema["entry"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	tgwSetSchema, ok := tgwEntrySchema.Schema["set"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	assert.NotContains(t, tgwSetSchema.Schema, "prefer_global_v6_next_hop")
+
+	gateway := resourceNsxtPolicyGatewayRouteMap()
+	gatewayEntrySchema, ok := gateway.Schema["entry"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	gatewaySetSchema, ok := gatewayEntrySchema.Schema["set"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	assert.Contains(t, gatewaySetSchema.Schema, "prefer_global_v6_next_hop")
+
+	data := minimalTGWRouteMapData()
+	data["entry"] = []interface{}{map[string]interface{}{
+		"action": "PERMIT",
+		"set": []interface{}{map[string]interface{}{
+			"local_preference": 200,
+		}},
+	}}
+	d := schema.TestResourceDataRaw(t, tgw.Schema, data)
+	obj, err := tgwRouteMapBuildObj(d, tgwRMID)
+	require.NoError(t, err)
+	require.Len(t, obj.Entries, 1)
+	require.NotNil(t, obj.Entries[0].Set)
+	assert.Nil(t, obj.Entries[0].Set.PreferGlobalV6NextHop)
+}
+
+func TestTGWRouteMapRefreshIgnoresGlobalV6NextHop(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		value bool
+	}{
+		{name: "false"},
+		{name: "true", value: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			// Start with empty state, as on import, before the API populates entries.
+			res := resourceNsxtPolicyTransitGatewayRouteMap()
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			localPreference := int64(200)
+			entries := []nsxModel.RouteMapEntry{{
+				Action: &tgwRMAction,
+				Set: &nsxModel.RouteMapEntrySet{
+					LocalPreference:       &localPreference,
+					PreferGlobalV6NextHop: &tc.value,
+				},
+			}}
+			require.NoError(t, setTGWRouteMapEntriesInSchema(d, entries))
+			assert.Equal(t, 200, d.Get("entry.0.set.0.local_preference"))
+			assert.Nil(t, d.Get("entry.0.set.0.prefer_global_v6_next_hop"))
+			payload, err := tgwRouteMapBuildObj(d, tgwRMID)
+			require.NoError(t, err)
+			require.Len(t, payload.Entries, 1)
+			require.NotNil(t, payload.Entries[0].Set)
+			assert.Nil(t, payload.Entries[0].Set.PreferGlobalV6NextHop)
+			assert.Equal(t, &localPreference, payload.Entries[0].Set.LocalPreference)
+
+			entries[0].Set = nil
+			require.NoError(t, setTGWRouteMapEntriesInSchema(d, entries))
+			assert.Equal(t, 0, d.Get("entry.0.set.#"))
+		})
+	}
 }

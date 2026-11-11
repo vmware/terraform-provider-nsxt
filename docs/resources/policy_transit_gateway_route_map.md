@@ -67,7 +67,6 @@ The following arguments are supported:
         * `community` - (Optional) BGP regular or large community value to set on matching routes.
         * `local_preference` - (Optional, Computed) Local preference value.
         * `med` - (Optional, Computed) Multi-Exit Discriminator value; lower is preferred.
-        * `prefer_global_v6_next_hop` - (Optional) When `true`, prefer global IPv6 address over link-local as the next hop.
         * `weight` - (Optional) Weight used to prefer one route over another to the same destination.
 
 ## Attributes Reference
