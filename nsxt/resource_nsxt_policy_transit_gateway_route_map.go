@@ -7,6 +7,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"maps"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -19,6 +20,13 @@ import (
 var cliTGWRouteMapsClient = tgwrouting.NewRouteMapsClient
 
 func resourceNsxtPolicyTransitGatewayRouteMap() *schema.Resource {
+	entrySchema := getPolicyRouteMapEntrySchema()
+	// Local Manager rejects this GM-only field, even when false. Remove it
+	// from the fresh TGW schema without changing the gateway route-map schema.
+	if setSchema, ok := entrySchema.Schema["set"].Elem.(*schema.Resource); ok {
+		delete(setSchema.Schema, "prefer_global_v6_next_hop")
+	}
+
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTransitGatewayRouteMapCreate,
 		Read:   resourceNsxtPolicyTransitGatewayRouteMapRead,
@@ -39,7 +47,7 @@ func resourceNsxtPolicyTransitGatewayRouteMap() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "List of Route Map entries",
 				Required:    true,
-				Elem:        getPolicyRouteMapEntrySchema(),
+				Elem:        entrySchema,
 			},
 		},
 	}
@@ -72,9 +80,46 @@ func tgwRouteMapBuildObj(d *schema.ResourceData, id string) (model.TransitGatewa
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
 	for entryNo, entry := range schemaEntries {
-		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{}))
+		entryData, ok := entry.(map[string]interface{})
+		if !ok {
+			return model.TransitGatewayRouteMap{}, fmt.Errorf("entry %d must be an object", entryNo)
+		}
+		// Reuse match validation without invoking the gateway-specific set builder.
+		matchData := maps.Clone(entryData)
+		delete(matchData, "set")
+		entryObj, err := policyGatewayRouteMapBuildEntry(d, entryNo, matchData)
 		if err != nil {
 			return model.TransitGatewayRouteMap{}, err
+		}
+		if data := getElemOrEmptyMapFromMap(entryData, "set"); len(data) > 0 {
+			asPathPrepend, _ := data["as_path_prepend"].(string)
+			community, _ := data["community"].(string)
+			weightValue, _ := data["weight"].(int)
+			weight := int64(weightValue)
+			entrySet := &model.RouteMapEntrySet{Weight: &weight}
+			if asPathPrepend != "" {
+				entrySet.AsPathPrepend = &asPathPrepend
+			}
+			if community != "" {
+				entrySet.Community = &community
+			}
+			if value, ok := d.GetOk(fmt.Sprintf("entry.%d.set.0.local_preference", entryNo)); ok {
+				localPreference, ok := value.(int)
+				if !ok {
+					return model.TransitGatewayRouteMap{}, fmt.Errorf("entry %d local_preference must be an integer", entryNo)
+				}
+				localPreferenceValue := int64(localPreference)
+				entrySet.LocalPreference = &localPreferenceValue
+			}
+			if value, ok := d.GetOk(fmt.Sprintf("entry.%d.set.0.med", entryNo)); ok {
+				med, ok := value.(int)
+				if !ok {
+					return model.TransitGatewayRouteMap{}, fmt.Errorf("entry %d med must be an integer", entryNo)
+				}
+				medValue := int64(med)
+				entrySet.Med = &medValue
+			}
+			entryObj.Set = entrySet
 		}
 		entries = append(entries, entryObj)
 	}
@@ -86,6 +131,37 @@ func tgwRouteMapBuildObj(d *schema.ResourceData, id string) (model.TransitGatewa
 		Tags:        tags,
 		Entries:     entries,
 	}, nil
+}
+
+func setTGWRouteMapEntriesInSchema(d *schema.ResourceData, entries []model.RouteMapEntry) error {
+	var entryList []interface{}
+	for _, entry := range entries {
+		schemaEntry := map[string]interface{}{
+			"action":              entry.Action,
+			"prefix_list_matches": entry.PrefixListMatches,
+		}
+		var commList []map[string]interface{}
+		for _, comm := range entry.CommunityListMatches {
+			commList = append(commList, map[string]interface{}{
+				"criteria":       comm.Criteria,
+				"match_operator": comm.MatchOperator,
+			})
+		}
+		schemaEntry["community_list_match"] = commList
+		var setList []map[string]interface{}
+		if entry.Set != nil {
+			setList = append(setList, map[string]interface{}{
+				"as_path_prepend":  entry.Set.AsPathPrepend,
+				"community":        entry.Set.Community,
+				"med":              entry.Set.Med,
+				"local_preference": entry.Set.LocalPreference,
+				"weight":           entry.Set.Weight,
+			})
+		}
+		schemaEntry["set"] = setList
+		entryList = append(entryList, schemaEntry)
+	}
+	return d.Set("entry", entryList)
 }
 
 func resourceNsxtPolicyTransitGatewayRouteMapCreate(d *schema.ResourceData, m interface{}) error {
@@ -151,9 +227,7 @@ func resourceNsxtPolicyTransitGatewayRouteMapRead(d *schema.ResourceData, m inte
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	setRouteMapEntriesInSchema(d, obj.Entries)
-
-	return nil
+	return setTGWRouteMapEntriesInSchema(d, obj.Entries)
 }
 
 func resourceNsxtPolicyTransitGatewayRouteMapUpdate(d *schema.ResourceData, m interface{}) error {
