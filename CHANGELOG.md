@@ -1,3 +1,51 @@
+## 3.12.2 (November 13, 2026)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_edge_transport_node`, `resource/nsxt_edge_transport_node`: Fix perpetual drift, and drift and update failures for adopted edge transport nodes ([#2235](https://github.com/vmware/terraform-provider-nsxt/pull/2235), [#2241](https://github.com/vmware/terraform-provider-nsxt/pull/2241))
+* `resource/nsxt_edge_transport_node_rtep`: Fix three bugs in the resource ([#2244](https://github.com/vmware/terraform-provider-nsxt/pull/2244))
+* `resource/nsxt_policy_edge_transport_node_rtep`: Fix nil pointer dereference ([#2242](https://github.com/vmware/terraform-provider-nsxt/pull/2242))
+* `resource/nsxt_policy_edge_transport_node`: Only set edge VM `host_id` when non-empty ([#2240](https://github.com/vmware/terraform-provider-nsxt/pull/2240))
+* `resource/nsxt_policy_tier0_gateway_gre_tunnel`: Fix create check and `Exists` error handling ([#2239](https://github.com/vmware/terraform-provider-nsxt/pull/2239))
+* `resource/nsxt_policy_host_transport_node_profile`: `ip_assignment` is optional; mark `ip_assignment` and `cpu_config` as Computed to fix diff issue ([#2299](https://github.com/vmware/terraform-provider-nsxt/pull/2299), [#2245](https://github.com/vmware/terraform-provider-nsxt/pull/2245))
+* `resource/nsxt_policy_site`: Suppress site connection info password drift ([#2265](https://github.com/vmware/terraform-provider-nsxt/pull/2265))
+* `resource/nsxt_policy_predefined_security_policy`: Support import ([#2325](https://github.com/vmware/terraform-provider-nsxt/pull/2325))
+* `resource/nsxt_policy_predefined_security_policy`: Fix drift on parent policy when a predefined sibling shares its path ([#2272](https://github.com/vmware/terraform-provider-nsxt/pull/2272))
+* `resource/nsxt_policy_ip_address_allocation`: Fix orphaned NSX allocation left behind when IP realization fails ([#2328](https://github.com/vmware/terraform-provider-nsxt/pull/2328))
+* `resource/nsxt_proxy_config`: Fix host state drift ([#2281](https://github.com/vmware/terraform-provider-nsxt/pull/2281))
+* Fix panic in `getSpanFromSchema` on nil span list element, and zone-based span empty-list drop/panic; mark `span.zone_based_span` as Computed ([#2252](https://github.com/vmware/terraform-provider-nsxt/pull/2252), [#2250](https://github.com/vmware/terraform-provider-nsxt/pull/2250), [#2251](https://github.com/vmware/terraform-provider-nsxt/pull/2251))
+* `data/nsxt_policy_gateway_interface_realization`: Fix data source on Global Manager ([#2263](https://github.com/vmware/terraform-provider-nsxt/pull/2263))
+* `resource/nsxt_policy_tier0_gateway`: Mark `advanced_config.connectivity` as Computed to prevent drift on re-apply ([#2260](https://github.com/vmware/terraform-provider-nsxt/pull/2260))
+* `data/nsxt_policy_security_policy`: Fix Global Manager support gap in data source ([#2264](https://github.com/vmware/terraform-provider-nsxt/pull/2264))
+* `resource/nsxt_policy_dhcp_server`: Fix `dhcp_server_addresses` drift and create/update validation errors ([#2266](https://github.com/vmware/terraform-provider-nsxt/pull/2266))
+* `resource/nsxt_policy_project`: Ignore list order for `tier0_gateway_paths`; add duplicate value validation ([#2269](https://github.com/vmware/terraform-provider-nsxt/pull/2269), [#2270](https://github.com/vmware/terraform-provider-nsxt/pull/2270))
+* `data/nsxt_policy_project`: Fix nil pointer panic on display name lookup ([#2267](https://github.com/vmware/terraform-provider-nsxt/pull/2267))
+* `provider`: Probe LDAP provider only when enabled ([#2280](https://github.com/vmware/terraform-provider-nsxt/pull/2280))
+* `resource/nsxt_policy_segment`: Fix `advanced_config` not surviving `terraform import` ([#2258](https://github.com/vmware/terraform-provider-nsxt/pull/2258))
+* `resource/nsxt_policy_segment`: Fail when `transport_zone_path` is specified for a project-based segment ([#2259](https://github.com/vmware/terraform-provider-nsxt/pull/2259))
+* `resource/nsxt_policy_tier0_gateway`: Preserve redistribution config on update if unset; skip empty `bgp_route_leaking` and `static_route_advertisement` blocks ([#2249](https://github.com/vmware/terraform-provider-nsxt/pull/2249), [#2248](https://github.com/vmware/terraform-provider-nsxt/pull/2248))
+* `resource/nsxt_policy_bgp_config`: Fix `site_path` drift after import on Global Manager, and stale revision on concurrent update ([#2247](https://github.com/vmware/terraform-provider-nsxt/pull/2247), [#2246](https://github.com/vmware/terraform-provider-nsxt/pull/2246))
+* `resource/nsxt_policy_role_binding`: Mark `identity_source_id` as Computed ([#2302](https://github.com/vmware/terraform-provider-nsxt/pull/2302))
+* `data/nsxt_upgrade_postcheck`: Validate `upgrade_run_id` and fix documentation ([#2279](https://github.com/vmware/terraform-provider-nsxt/pull/2279))
+* `resource/nsxt_upgrade_precheck_acknowledge`: Fix acknowledgment of non-ackable upgrade precheck warnings ([#2278](https://github.com/vmware/terraform-provider-nsxt/pull/2278))
+* `resource/nsxt_policy_constraint`: Change `instance_count` from TypeList to TypeSet ([#2277](https://github.com/vmware/terraform-provider-nsxt/pull/2277))
+* Fix panic in `floodProtectionProfileBindingModelToSchema` ([#2276](https://github.com/vmware/terraform-provider-nsxt/pull/2276))
+* Prevent index panic in policy path importer, and index out of range panic for short segment paths ([#2275](https://github.com/vmware/terraform-provider-nsxt/pull/2275), [#2274](https://github.com/vmware/terraform-provider-nsxt/pull/2274))
+* Guard against nil entries in inter-VRF routing block iterators ([#2273](https://github.com/vmware/terraform-provider-nsxt/pull/2273))
+* `resource/nsxt_policy_ipsec_vpn_dpd_profile`, `resource/nsxt_policy_ipsec_vpn_ike_profile`, `resource/nsxt_policy_ipsec_vpn_tunnel_profile`: Accept policy path on import ([#2255](https://github.com/vmware/terraform-provider-nsxt/pull/2255))
+* `resource/nsxt_policy_ipsec_vpn_session`: Suppress `psk` drift after import ([#2253](https://github.com/vmware/terraform-provider-nsxt/pull/2253))
+* `resource/nsxt_policy_tier0_gateway_interface`: Use `DiffSuppressFunc` for `transport_tunnels` locale-service path drift ([#2254](https://github.com/vmware/terraform-provider-nsxt/pull/2254))
+* `resource/nsxt_policy_gateway_route_map`: Fix perpetual drift from mutually exclusive matches ([#2236](https://github.com/vmware/terraform-provider-nsxt/pull/2236))
+* `resource/nsxt_policy_bgp_neighbor`: Suppress `password` drift after import ([#2237](https://github.com/vmware/terraform-provider-nsxt/pull/2237))
+* Fix `nsx_id` client type resolution in `getOrGenerateIDWithParent` ([#2238](https://github.com/vmware/terraform-provider-nsxt/pull/2238))
+* `resource/nsxt_policy_lb_http_application_profile`: Remove upper limit on `request_header_size` ([#2408](https://github.com/vmware/terraform-provider-nsxt/pull/2408))
+
+IMPROVEMENTS:
+
+* `resource/nsxt_policy_tier0_gateway`: Support `INTER_VRF_STATIC` and `TGW_STATIC` redistribution types ([#2365](https://github.com/vmware/terraform-provider-nsxt/pull/2365))
+* Overhaul the Bare Metal Server (BMS) guide and update examples throughout resource documentation ([#2324](https://github.com/vmware/terraform-provider-nsxt/pull/2324))
+* Upgrade dependencies, migrate to stdlib packages, and bump dependencies and Go version to fix CVEs and `govulncheck` findings; pin NSX API SDK version ([#2300](https://github.com/vmware/terraform-provider-nsxt/pull/2300), [#2234](https://github.com/vmware/terraform-provider-nsxt/pull/2234), [#2410](https://github.com/vmware/terraform-provider-nsxt/pull/2410), [#2411](https://github.com/vmware/terraform-provider-nsxt/pull/2411))
+
 ## 3.12.1 (September 10, 2026)
 
 BUG FIXES:
