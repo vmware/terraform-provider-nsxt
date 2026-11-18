@@ -755,6 +755,22 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining Tier1 id")
 	}
 
+	gatewayClient := cliTier1sClient(getSessionContext(d, m), getPolicyConnector(m))
+	if gatewayClient == nil {
+		return policyResourceNotSupportedError()
+	}
+	gateway, err := gatewayClient.Get(id)
+	if err != nil {
+		return handleDeleteError("Tier1", id, err)
+	}
+	if len(gateway.DhcpConfigPaths) > 0 {
+		// NSX requires DHCP to be detached before deleting the locale service.
+		gateway.DhcpConfigPaths = []string{}
+		if err := gatewayClient.Patch(id, gateway); err != nil {
+			return handleDeleteError("Tier1", id, err)
+		}
+	}
+
 	var infraChildren []*data.StructValue
 	converter := bindings.NewTypeConverter()
 	boolTrue := true
@@ -780,7 +796,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete Tier1 with ID %s", id)
-	err := policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
+	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Tier1", id, err)
 	}

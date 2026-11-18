@@ -232,29 +232,73 @@ func TestMockResourceNsxtPolicyTier1GatewayUpdate(t *testing.T) {
 }
 
 func TestMockResourceNsxtPolicyTier1GatewayDelete(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	_, mockInfraSDK, _, restore := setupT1GatewayMocks(t, ctrl)
-	defer restore()
-
-	t.Run("Delete success", func(t *testing.T) {
-		mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil)
-
-		res := resourceNsxtPolicyTier1Gateway()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
-		d.SetId(t1GwID)
-
-		err := resourceNsxtPolicyTier1GatewayDelete(d, newGoMockProviderClient())
-		require.NoError(t, err)
-	})
-
-	t.Run("Delete fails when ID is empty", func(t *testing.T) {
-		res := resourceNsxtPolicyTier1Gateway()
-		d := schema.TestResourceDataRaw(t, res.Schema, minimalT1GatewayData())
-
-		err := resourceNsxtPolicyTier1GatewayDelete(d, newGoMockProviderClient())
-		require.Error(t, err)
-	})
+	tests := []struct {
+		name        string
+		stateDHCP   bool
+		backendDHCP bool
+		emptyID     bool
+		unsupported bool
+		getErr      error
+		detachErr   error
+		deleteErr   error
+		wantErr     bool
+	}{
+		{name: "Delete without DHCP"},
+		{name: "Detach DHCP before delete", stateDHCP: true, backendDHCP: true},
+		{name: "Detach DHCP absent from state", backendDHCP: true},
+		{name: "DHCP already detached", stateDHCP: true},
+		{name: "Empty ID", emptyID: true, wantErr: true},
+		{name: "Unsupported client", unsupported: true, wantErr: true},
+		{name: "GET failure stops delete", getErr: vapiErrors.InvalidRequest{}, wantErr: true},
+		{name: "Missing gateway is success", getErr: vapiErrors.NotFound{}},
+		{name: "Detach failure stops delete", backendDHCP: true, detachErr: vapiErrors.InvalidRequest{}, wantErr: true},
+		{name: "Gateway disappears during detach", backendDHCP: true, detachErr: vapiErrors.NotFound{}},
+		{name: "Delete failure after detach", backendDHCP: true, deleteErr: vapiErrors.InvalidRequest{}, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockT1SDK, mockInfraSDK, _, restore := setupT1GatewayMocks(t, ctrl)
+			t.Cleanup(restore)
+			values := minimalT1GatewayData()
+			if tt.stateDHCP {
+				values["dhcp_config_path"] = "/infra/dhcp-server-configs/dhcp"
+			}
+			d := schema.TestResourceDataRaw(t, resourceNsxtPolicyTier1Gateway().Schema, values)
+			if !tt.emptyID {
+				d.SetId(t1GwID)
+			}
+			if tt.unsupported {
+				cliTier1sClient = func(_ utl.SessionContext, _ vapiProtocolClient.Connector) *cliinfra.Tier1ClientContext {
+					return nil
+				}
+			} else if !tt.emptyID {
+				gateway := t1GatewayAPIResponse()
+				if tt.backendDHCP {
+					gateway.DhcpConfigPaths = []string{"/infra/dhcp-server-configs/dhcp"}
+				}
+				calls := []any{
+					mockT1SDK.EXPECT().Get(t1GwID).Return(gateway, tt.getErr),
+				}
+				if tt.getErr == nil {
+					if tt.backendDHCP {
+						gateway.DhcpConfigPaths = []string{}
+						calls = append(calls, mockT1SDK.EXPECT().Patch(t1GwID, gateway).Return(tt.detachErr))
+					}
+					if tt.detachErr == nil {
+						calls = append(calls, mockInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(tt.deleteErr))
+					}
+				}
+				gomock.InOrder(calls...)
+			}
+			err := resourceNsxtPolicyTier1GatewayDelete(d, newGoMockProviderClient())
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }
 
 func TestUnitNsxt_tier1GatewayAdvRulesRoundTrip(t *testing.T) {
