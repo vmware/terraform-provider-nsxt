@@ -490,6 +490,21 @@ func TestUnitNsxt_getSpanFromSchemaZoneBasedEmptyZones(t *testing.T) {
 // rather than separate API objects, so they must be read alongside
 // bgp_config, not ignored.
 func TestUnitNsxt_getTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.T) {
+	redistribution, ok := resourceNsxtPolicyTransitGateway().Schema["redistribution_config"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	rule, ok := redistribution.Schema["rule"].Elem.(*schema.Resource)
+	require.True(t, ok)
+	types, ok := rule.Schema["types"].Elem.(*schema.Schema)
+	require.True(t, ok)
+	for _, value := range []string{"PUBLIC", "TGW_PRIVATE", "TGW_STATIC_ROUTE", "NETWORK_ATTACHMENT", "TGW_IPSEC_LOCAL_IP"} {
+		_, errs := types.ValidateFunc(value, "types")
+		require.Empty(t, errs, value)
+	}
+	for _, value := range []string{"CONNECTED_SUBNET", "network_attachment", "INVALID"} {
+		_, errs := types.ValidateFunc(value, "types")
+		require.NotEmpty(t, errs, value)
+	}
+
 	data := minimalTGWData()
 	data["bgp_config"] = minimalBgpConfigData()
 	data["advanced_config"] = []interface{}{
@@ -499,7 +514,7 @@ func TestUnitNsxt_getTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.
 		map[string]interface{}{
 			"rule": []interface{}{
 				map[string]interface{}{
-					"types":          []interface{}{"PUBLIC", "TGW_STATIC_ROUTE"},
+					"types":          []interface{}{"PUBLIC", "TGW_PRIVATE", "TGW_STATIC_ROUTE", "NETWORK_ATTACHMENT", "TGW_IPSEC_LOCAL_IP"},
 					"route_map_path": "",
 				},
 			},
@@ -516,7 +531,11 @@ func TestUnitNsxt_getTGWBgpConfigFromSchemaAdvancedAndRedistribution(t *testing.
 
 	require.NotNil(t, cfg.RouteRedistributionConfig)
 	require.Len(t, cfg.RouteRedistributionConfig.Rules, 1)
-	assert.Equal(t, []string{"PUBLIC", "TGW_STATIC_ROUTE"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
+	assert.Equal(t, []string{"PUBLIC", "TGW_PRIVATE", "TGW_STATIC_ROUTE", "NETWORK_ATTACHMENT", "TGW_IPSEC_LOCAL_IP"}, cfg.RouteRedistributionConfig.Rules[0].RouteRedistributionTypes)
+
+	child, err := initTGWChildBgpConfig(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, child)
 }
 
 func TestUnitNsxt_getTGWBgpConfigFromSchemaTagsAggregationAndRouteMapPath(t *testing.T) {
@@ -627,7 +646,7 @@ func TestMockResourceNsxtPolicyTransitGatewayAdvancedAndRedistributionConfig(t *
 		bgpResp.ForwardingUpTimer = &timer
 		bgpResp.RouteRedistributionConfig = &nsxModel.TransitGatewayRouteRedistributionConfig{
 			Rules: []nsxModel.TransitGatewayBgpRedistributionRule{
-				{RouteRedistributionTypes: []string{"PUBLIC", "TGW_STATIC_ROUTE"}},
+				{RouteRedistributionTypes: []string{"PUBLIC", "NETWORK_ATTACHMENT", "TGW_IPSEC_LOCAL_IP"}},
 			},
 		}
 
@@ -652,7 +671,7 @@ func TestMockResourceNsxtPolicyTransitGatewayAdvancedAndRedistributionConfig(t *
 		require.Len(t, redisList, 1)
 		rules := redisList[0].(map[string]interface{})["rule"].([]interface{})
 		require.Len(t, rules, 1)
-		assert.Equal(t, []interface{}{"PUBLIC", "TGW_STATIC_ROUTE"}, rules[0].(map[string]interface{})["types"])
+		assert.Equal(t, []interface{}{"PUBLIC", "NETWORK_ATTACHMENT", "TGW_IPSEC_LOCAL_IP"}, rules[0].(map[string]interface{})["types"])
 	})
 
 	t.Run("Read with no advanced or redistribution config sets empty lists", func(t *testing.T) {
