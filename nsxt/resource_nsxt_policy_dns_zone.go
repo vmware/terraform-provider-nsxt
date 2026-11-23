@@ -7,7 +7,6 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -151,6 +150,8 @@ func policyDnsZoneFromSchema(d *schema.ResourceData) model.DnsZone {
 		Tags:          tags,
 		DnsDomainName: &dnsDomain,
 		Ttl:           &ttl,
+		// NSX requires the SOA object; an empty object requests server defaults.
+		Soa: &model.DnsZoneSoa{},
 	}
 
 	obj.ResolutionScope = getStringListFromSchemaSet(d, "resolution_scope")
@@ -185,11 +186,7 @@ func policyDnsZoneFromSchema(d *schema.ResourceData) model.DnsZone {
 			nc := int64(v)
 			soa.NegativeCacheTtl = &nc
 		}
-		// Skip an all-zero-value Soa: sending it would override the
-		// server-computed defaults with an empty struct.
-		if !reflect.DeepEqual(soa, &model.DnsZoneSoa{}) {
-			obj.Soa = soa
-		}
+		obj.Soa = soa
 	}
 
 	return obj
