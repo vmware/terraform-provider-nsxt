@@ -7,6 +7,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -244,6 +245,39 @@ func TestMockResourceNsxtPolicyGatewayRouteMapDelete(t *testing.T) {
 	})
 }
 
+func TestUnitNsxt_RouteMapGlobalV6NextHop(t *testing.T) {
+	for _, value := range []bool{false, true} {
+		t.Run(fmt.Sprintf("%t", value), func(t *testing.T) {
+			res := resourceNsxtPolicyGatewayRouteMap()
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"entry": []interface{}{map[string]interface{}{
+					"set": []interface{}{map[string]interface{}{
+						"prefer_global_v6_next_hop": value,
+					}},
+				}},
+			})
+			entries, ok := d.Get("entry").([]interface{})
+			require.True(t, ok)
+			require.Len(t, entries, 1)
+			entry, ok := entries[0].(map[string]interface{})
+			require.True(t, ok)
+			obj, err := policyGatewayRouteMapBuildEntry(
+				d,
+				0,
+				entry,
+				true,
+			)
+			require.NoError(t, err)
+			require.NotNil(t, obj.Set)
+			assert.Equal(t, &value, obj.Set.PreferGlobalV6NextHop)
+
+			refreshed := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+			require.NoError(t, setRouteMapEntriesInSchema(refreshed, []nsxModel.RouteMapEntry{obj}, true))
+			assert.Equal(t, value, refreshed.Get("entry.0.set.0.prefer_global_v6_next_hop"))
+		})
+	}
+}
+
 func TestUnitNsxt_RouteMapCommunityMatching(t *testing.T) {
 	res := resourceNsxtPolicyGatewayRouteMap()
 	raw := map[string]interface{}{"entry": []interface{}{map[string]interface{}{
@@ -252,7 +286,12 @@ func TestUnitNsxt_RouteMapCommunityMatching(t *testing.T) {
 	}}}
 	d := schema.TestResourceDataRaw(t, res.Schema, raw)
 	entry := d.Get("entry").([]interface{})[0].(map[string]interface{})
-	obj, err := policyGatewayRouteMapBuildEntry(d, 0, entry)
+	obj, err := policyGatewayRouteMapBuildEntry(
+		d,
+		0,
+		entry,
+		true,
+	)
 	require.NoError(t, err)
 	require.Len(t, obj.CommunityListMatches, 1)
 	assert.Equal(t, "/infra/community-lists/list", *obj.CommunityListMatches[0].Criteria)
@@ -260,6 +299,11 @@ func TestUnitNsxt_RouteMapCommunityMatching(t *testing.T) {
 	assert.Equal(t, int64(100), *obj.Set.LocalPreference)
 	assert.Equal(t, int64(20), *obj.Set.Med)
 	entry["prefix_list_matches"] = schema.NewSet(schema.HashString, []interface{}{"/infra/prefix-lists/list"})
-	_, err = policyGatewayRouteMapBuildEntry(d, 0, entry)
+	_, err = policyGatewayRouteMapBuildEntry(
+		d,
+		0,
+		entry,
+		true,
+	)
 	require.ErrorContains(t, err, "mutually exclusive")
 }
