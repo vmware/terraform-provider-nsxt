@@ -942,3 +942,19 @@ func withImportIdempotencyChecks(steps []resource.TestStep) []resource.TestStep 
 	}
 	return expanded
 }
+
+func testAccGetSessionContextFromParentPath(m interface{}, parentPath string) tf_api.SessionContext {
+	var clientType tf_api.ClientType
+	projectID, vpcID := getContextDataFromParentPath(parentPath)
+	if projectID != "" {
+		clientType = tf_api.Multitenancy
+		if vpcID != "" {
+			clientType = tf_api.VPC
+		}
+	} else if isPolicyGlobalManager(m) {
+		clientType = tf_api.Global
+	} else {
+		clientType = tf_api.Local
+	}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType, FromGlobal: false}
+}
