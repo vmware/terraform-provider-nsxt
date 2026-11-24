@@ -125,7 +125,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 			return policyResourceNotSupportedError()
 		}
 		// Get all current locations
-		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
+		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("Domain", err)
 		}
@@ -253,7 +253,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	if dmClient == nil {
 		return policyResourceNotSupportedError()
 	}
-	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil)
+	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Domain", err)
 	}

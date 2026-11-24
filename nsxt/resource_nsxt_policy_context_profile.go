@@ -414,7 +414,7 @@ func listSystemAttributesWithKey(context utl.SessionContext, attributeKey *strin
 	if client == nil {
 		return policyContextProfileListResult, policyResourceNotSupportedError()
 	}
-	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
 
@@ -426,7 +426,7 @@ func listCustomAttributesWithKey(context utl.SessionContext, attributeKey *strin
 	if client == nil {
 		return policyContextProfileListResult, policyResourceNotSupportedError()
 	}
-	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
 

@@ -136,7 +136,7 @@ func (c Tier0InterfaceClientContext) Delete(tier0IdParam string, localeServicesI
 	return err
 }
 
-func (c Tier0InterfaceClientContext) List(tier0IdParam string, localeServicesIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.Tier0InterfaceListResult, error) {
+func (c Tier0InterfaceClientContext) List(tier0IdParam string, localeServicesIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.Tier0InterfaceListResult, error) {
 	var err error
 	var obj model0.Tier0InterfaceListResult
 
@@ -144,11 +144,11 @@ func (c Tier0InterfaceClientContext) List(tier0IdParam string, localeServicesIdP
 
 	case utl.Local:
 		client := c.Client.(client0.InterfacesClient)
-		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServicesIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.InterfacesClient)
-		gmObj, err := client.List(tier0IdParam, localeServicesIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier0IdParam, localeServicesIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

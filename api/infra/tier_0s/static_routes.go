@@ -136,7 +136,7 @@ func (c StaticRoutesClientContext) Delete(tier0IdParam string, routeIdParam stri
 	return err
 }
 
-func (c StaticRoutesClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.StaticRoutesListResult, error) {
+func (c StaticRoutesClientContext) List(tier0IdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.StaticRoutesListResult, error) {
 	var err error
 	var obj model0.StaticRoutesListResult
 
@@ -144,11 +144,11 @@ func (c StaticRoutesClientContext) List(tier0IdParam string, cursorParam *string
 
 	case utl.Local:
 		client := c.Client.(client0.StaticRoutesClient)
-		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.StaticRoutesClient)
-		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier0IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

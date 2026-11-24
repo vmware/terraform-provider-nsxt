@@ -81,7 +81,7 @@ func (c PrefixListClientContext) Get(tier0IdParam string, prefixListIdParam stri
 	return obj, err
 }
 
-func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PrefixListResult, error) {
+func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PrefixListResult, error) {
 	var err error
 	var obj model0.PrefixListResult
 
@@ -89,7 +89,7 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 
 	case utl.Global:
 		client := c.Client.(client0.PrefixListsClient)
-		gmObj, err := client.List(tier0IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier0IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -101,7 +101,7 @@ func (c PrefixListClientContext) List(tier0IdParam string, cursorParam *string, 
 
 	case utl.Local:
 		client := c.Client.(client1.PrefixListsClient)
-		obj, err = client.List(tier0IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

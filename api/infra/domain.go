@@ -66,7 +66,7 @@ func (c DomainClientContext) Get(domainIdParam string) (model0.Domain, error) {
 	return obj, err
 }
 
-func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainListResult, error) {
+func (c DomainClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainListResult, error) {
 	var err error
 	var obj model0.DomainListResult
 
@@ -74,7 +74,7 @@ func (c DomainClientContext) List(cursorParam *string, includeMarkForDeleteObjec
 
 	case utl.Global:
 		client := c.Client.(client0.DomainsClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

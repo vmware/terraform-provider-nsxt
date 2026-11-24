@@ -570,7 +570,7 @@ func (c segmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Resourc
 		return policyResourceNotSupportedError()
 	}
 	var err error
-	results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil, nil)
+	results, err = client.List(c.segmentId, c.portId, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf(errorMessage, c.portId, err)
 	}
@@ -664,7 +664,7 @@ func (c tier1SegmentPort) nsxtPolicySegmentPortDiscoveryProfileRead(d *schema.Re
 		return policyResourceNotSupportedError()
 	}
 	var err error
-	results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil, nil)
+	results, err = client.List(c.tier1GatewayId, c.ids.segmentId, c.ids.portId, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf(errorMessage, c.ids.portId, err)
 	}

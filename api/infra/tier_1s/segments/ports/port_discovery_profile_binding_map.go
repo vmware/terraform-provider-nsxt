@@ -92,7 +92,7 @@ func (c PortDiscoveryProfileBindingMapClientContext) Get(tier1IdParam string, se
 	return obj, err
 }
 
-func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, segmentIdParam string, portIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PortDiscoveryProfileBindingMapListResult, error) {
+func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, segmentIdParam string, portIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PortDiscoveryProfileBindingMapListResult, error) {
 	var err error
 	var obj model0.PortDiscoveryProfileBindingMapListResult
 
@@ -100,11 +100,11 @@ func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, s
 
 	case utl.Local:
 		client := c.Client.(client0.PortDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.PortDiscoveryProfileBindingMapsClient)
-		gmObj, err := client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -116,7 +116,7 @@ func (c PortDiscoveryProfileBindingMapClientContext) List(tier1IdParam string, s
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.PortDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, portIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

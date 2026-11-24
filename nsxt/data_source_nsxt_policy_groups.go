@@ -51,7 +51,7 @@ func dataSourceNsxtPolicyGroupsRead(d *schema.ResourceData, m interface{}) error
 	groupsMap := make(map[string]string)
 
 	for {
-		results, err := client.List(domainName, cursor, nil, nil, nil, nil, &boolFalse, nil)
+		results, err := client.List(domainName, cursor, nil, nil, nil, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return err
 		}

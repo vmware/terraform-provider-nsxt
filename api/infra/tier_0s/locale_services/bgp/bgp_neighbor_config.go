@@ -81,7 +81,7 @@ func (c BgpNeighborConfigClientContext) Get(tier0IdParam string, localeServiceId
 	return obj, err
 }
 
-func (c BgpNeighborConfigClientContext) List(tier0IdParam string, localeServiceIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.BgpNeighborConfigListResult, error) {
+func (c BgpNeighborConfigClientContext) List(tier0IdParam string, localeServiceIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.BgpNeighborConfigListResult, error) {
 	var err error
 	var obj model0.BgpNeighborConfigListResult
 
@@ -89,11 +89,11 @@ func (c BgpNeighborConfigClientContext) List(tier0IdParam string, localeServiceI
 
 	case utl.Local:
 		client := c.Client.(client0.NeighborsClient)
-		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.NeighborsClient)
-		gmObj, err := client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier0IdParam, localeServiceIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

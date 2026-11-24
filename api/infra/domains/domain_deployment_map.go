@@ -66,7 +66,7 @@ func (c DomainDeploymentMapClientContext) Get(domainIdParam string, domainDeploy
 	return obj, err
 }
 
-func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainDeploymentMapListResult, error) {
+func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DomainDeploymentMapListResult, error) {
 	var err error
 	var obj model0.DomainDeploymentMapListResult
 
@@ -74,7 +74,7 @@ func (c DomainDeploymentMapClientContext) List(domainIdParam string, cursorParam
 
 	case utl.Global:
 		client := c.Client.(client0.DomainDeploymentMapsClient)
-		gmObj, err := client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
