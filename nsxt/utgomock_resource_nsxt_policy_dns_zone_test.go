@@ -83,7 +83,12 @@ func TestMockResourceNsxtPolicyDnsZoneCreate(t *testing.T) {
 		notFoundErr := vapiErrors.NotFound{}
 		gomock.InOrder(
 			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID).Return(nsxModel.DnsZone{}, notFoundErr),
-			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID, gomock.Any()).Return(nil),
+			mockSDK.EXPECT().Patch(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID, gomock.Any()).DoAndReturn(
+				func(_ string, _ string, _ string, _ string, obj nsxModel.DnsZone) error {
+					require.NotNil(t, obj.Soa)
+					assert.Equal(t, &nsxModel.DnsZoneSoa{}, obj.Soa)
+					return nil
+				}),
 			mockSDK.EXPECT().Get(gomock.Any(), gomock.Any(), gomock.Any(), projectDnsZoneID).Return(projectDnsZoneAPIResponse(), nil),
 		)
 
@@ -267,7 +272,8 @@ func TestUnitNsxt_policyDnsZoneFromSchema(t *testing.T) {
 		assert.Equal(t, "example.com", *obj.DnsDomainName)
 		assert.EqualValues(t, 600, *obj.Ttl)
 		assert.ElementsMatch(t, []string{"/orgs/default/projects/proj1/vpcs/vpc1"}, obj.ResolutionScope)
-		assert.Nil(t, obj.Soa, "all-zero-value soa block should not be sent")
+		require.NotNil(t, obj.Soa)
+		assert.Equal(t, &nsxModel.DnsZoneSoa{}, obj.Soa)
 	})
 
 	t.Run("soa fields are converted when set", func(t *testing.T) {
