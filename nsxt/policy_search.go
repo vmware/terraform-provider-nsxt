@@ -298,9 +298,9 @@ func searchLMPolicyResources(connector client.Connector, query string, isGlobal 
 
 func searchMultitenancyResources(connector client.Connector, context utl.SessionContext, query string) ([]*data.StructValue, error) {
 	if len(context.VPCID) > 0 {
-		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s\\/vpcs\\/%s*", utl.DefaultOrgID, context.ProjectID, context.VPCID)
+		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s\\/vpcs\\/%s\\/*", utl.DefaultOrgID, context.ProjectID, context.VPCID)
 	} else {
-		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", utl.DefaultOrgID, context.ProjectID)
+		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s\\/*", utl.DefaultOrgID, context.ProjectID)
 	}
 	return searchLM(connector, query)
 }
