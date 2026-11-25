@@ -79,7 +79,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.Se
 	if client == nil {
 		return false, policyResourceNotSupportedError()
 	}
-	attrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil)
+	attrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return false, err
 	}

@@ -1188,7 +1188,7 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	results, err := client.List(segmentID, nil, nil, nil, nil, nil, nil)
+	results, err := client.List(segmentID, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf(errorMessage, segmentID, err)
 	}
@@ -1543,7 +1543,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 			if portsClient == nil {
 				return nil, "error", policyResourceNotSupportedError()
 			}
-			lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+			lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil, nil)
 			if err != nil {
 				return lmPorts, "error", logAPIError("Error listing segment ports", err)
 			}

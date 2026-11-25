@@ -141,7 +141,7 @@ func (c StructValueClientContext) Update(floodProtectionProfileIdParam string, f
 	return obj, err
 }
 
-func (c StructValueClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (lrmodel0.FloodProtectionProfileListResult, error) {
+func (c StructValueClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (lrmodel0.FloodProtectionProfileListResult, error) {
 	var err error
 	var obj lrmodel0.FloodProtectionProfileListResult
 
@@ -149,11 +149,11 @@ func (c StructValueClientContext) List(cursorParam *string, includeMarkForDelete
 
 	case utl.Local:
 		client := c.Client.(client0.FloodProtectionProfilesClient)
-		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.FloodProtectionProfilesClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -165,7 +165,7 @@ func (c StructValueClientContext) List(cursorParam *string, includeMarkForDelete
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.FloodProtectionProfilesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

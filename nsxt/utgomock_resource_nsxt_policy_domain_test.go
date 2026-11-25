@@ -100,7 +100,7 @@ func TestMockResourceNsxtPolicyDomainRead(t *testing.T) {
 			Revision:    &domainRevision,
 		}
 		mockDomainsSDK.EXPECT().Get(domainID).Return(gmDomain, nil)
-		mockDomainDeploymentMapsSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDomainDeploymentMapsSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			gm_model.DomainDeploymentMapListResult{
 				Results: []gm_model.DomainDeploymentMap{
 					{DisplayName: &domainSiteName},
@@ -208,7 +208,7 @@ func TestMockResourceNsxtPolicyDomainCreate(t *testing.T) {
 				Revision:    &domainRevision,
 			}, nil),
 		)
-		mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			gm_model.DomainDeploymentMapListResult{
 				Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}},
 			}, nil)
@@ -322,7 +322,7 @@ func TestMockNsxtSetDomainStructWithChildrenUpdate(t *testing.T) {
 		defer ctrl.Finish()
 		_, mockDM, restore := setupDomainMocks(ctrl)
 		defer restore()
-		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil,
 		)
 
@@ -340,7 +340,7 @@ func TestMockNsxtSetDomainStructWithChildrenUpdate(t *testing.T) {
 		_, mockDM, restore := setupDomainMocks(ctrl)
 		defer restore()
 		staleName := "stale-site"
-		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{
 				{DisplayName: &domainSiteName},
 				{DisplayName: &staleName},
@@ -361,7 +361,7 @@ func TestMockNsxtSetDomainStructWithChildrenUpdate(t *testing.T) {
 		defer ctrl.Finish()
 		_, mockDM, restore := setupDomainMocks(ctrl)
 		defer restore()
-		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+		mockDM.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 			gm_model.DomainDeploymentMapListResult{}, vapiErrors.InternalServerError{},
 		)
 
@@ -433,7 +433,7 @@ func TestMockResourceNsxtPolicyDomainUpdateSuccess(t *testing.T) {
 	t.Run("Update success", func(t *testing.T) {
 		gomock.InOrder(
 			// setDomainStructWithChildren's stale-location lookup.
-			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 				gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil),
 			mockGlobalInfraSDK.EXPECT().Patch(gomock.Any(), gomock.Any()).Return(nil),
 			// resourceNsxtPolicyDomainRead's Get + deployment map list.
@@ -442,7 +442,7 @@ func TestMockResourceNsxtPolicyDomainUpdateSuccess(t *testing.T) {
 				Path:        &domainPath,
 				Revision:    &domainRevision,
 			}, nil),
-			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
+			mockDMSDK.EXPECT().List(domainID, gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(
 				gm_model.DomainDeploymentMapListResult{Results: []gm_model.DomainDeploymentMap{{DisplayName: &domainSiteName}}}, nil),
 		)
 

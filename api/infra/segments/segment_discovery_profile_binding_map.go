@@ -157,7 +157,7 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) Update(infraSegmentIdPar
 	return obj, err
 }
 
-func (c SegmentDiscoveryProfileBindingMapClientContext) List(infraSegmentIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.SegmentDiscoveryProfileBindingMapListResult, error) {
+func (c SegmentDiscoveryProfileBindingMapClientContext) List(infraSegmentIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.SegmentDiscoveryProfileBindingMapListResult, error) {
 	var err error
 	var obj model0.SegmentDiscoveryProfileBindingMapListResult
 
@@ -165,11 +165,11 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) List(infraSegmentIdParam
 
 	case utl.Local:
 		client := c.Client.(client0.SegmentDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(infraSegmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(infraSegmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.SegmentDiscoveryProfileBindingMapsClient)
-		gmObj, err1 := client.List(infraSegmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err1 := client.List(infraSegmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err1 != nil {
 			return obj, err1
 		}
@@ -179,7 +179,7 @@ func (c SegmentDiscoveryProfileBindingMapClientContext) List(infraSegmentIdParam
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.SegmentDiscoveryProfileBindingMapsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, infraSegmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

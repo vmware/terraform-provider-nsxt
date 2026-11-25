@@ -37,7 +37,7 @@ func NewAttributesClient(sessionContext utl.SessionContext, connector vapiProtoc
 	return &AttributeClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c AttributeClientContext) List(attributeKeyParam *string, attributeSourceParam *string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PolicyContextProfileListResult, error) {
+func (c AttributeClientContext) List(attributeKeyParam *string, attributeSourceParam *string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PolicyContextProfileListResult, error) {
 	var err error
 	var obj model0.PolicyContextProfileListResult
 
@@ -45,11 +45,11 @@ func (c AttributeClientContext) List(attributeKeyParam *string, attributeSourceP
 
 	case utl.Local:
 		client := c.Client.(client0.AttributesClient)
-		obj, err = client.List(attributeKeyParam, attributeSourceParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(attributeKeyParam, attributeSourceParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.AttributesClient)
-		gmObj, err := client.List(attributeKeyParam, attributeSourceParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(attributeKeyParam, attributeSourceParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -61,7 +61,7 @@ func (c AttributeClientContext) List(attributeKeyParam *string, attributeSourceP
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.AttributesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, attributeKeyParam, attributeSourceParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, attributeKeyParam, attributeSourceParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

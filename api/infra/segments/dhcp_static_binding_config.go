@@ -141,7 +141,7 @@ func (c StructValueClientContext) Update(segmentIdParam string, bindingIdParam s
 	return obj, err
 }
 
-func (c StructValueClientContext) List(segmentIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (lrmodel0.DhcpStaticBindingConfigListResult, error) {
+func (c StructValueClientContext) List(segmentIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (lrmodel0.DhcpStaticBindingConfigListResult, error) {
 	var err error
 	var obj lrmodel0.DhcpStaticBindingConfigListResult
 
@@ -149,11 +149,11 @@ func (c StructValueClientContext) List(segmentIdParam string, cursorParam *strin
 
 	case utl.Local:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
-		obj, err = client.List(segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(segmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
-		gmObj, err := client.List(segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(segmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -165,7 +165,7 @@ func (c StructValueClientContext) List(segmentIdParam string, cursorParam *strin
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, segmentIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, segmentIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

@@ -206,7 +206,7 @@ func listTier1GatewayLocaleServices(context utl.SessionContext, connector client
 		return model.LocaleServicesListResult{}, policyResourceNotSupportedError()
 	}
 	markForDelete := false
-	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
+	return client.List(gwID, cursor, nil, &markForDelete, nil, nil, nil, nil)
 }
 
 func listPolicyTier1GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string) ([]model.LocaleServices, error) {

@@ -71,7 +71,7 @@ func getDefaultServicesInfo(connector vapiProtocolClient.Connector, isGlobal boo
 	servicesInfo := make(map[string]defaultServiceInfo)
 	var cursor *string
 	for {
-		defaultResults, err := defaultClient.List(cursor, nil, nil, nil, nil, nil, nil)
+		defaultResults, err := defaultClient.List(cursor, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func dataSourceNsxtPolicyServicesRead(d *schema.ResourceData, m interface{}) err
 		client := cliServicesClient(sessionContext, connector)
 		var cursor *string
 		for {
-			results, err := client.List(cursor, nil, nil, nil, nil, nil, nil)
+			results, err := client.List(cursor, nil, nil, nil, nil, nil, nil, nil)
 			if err != nil {
 				return err
 			}
@@ -135,7 +135,7 @@ func dataSourceNsxtPolicyServicesRead(d *schema.ResourceData, m interface{}) err
 		client := cliServicesClient(sessionContext, connector)
 		var cursor *string
 		for {
-			results, err := client.List(cursor, nil, nil, nil, nil, nil, nil)
+			results, err := client.List(cursor, nil, nil, nil, nil, nil, nil, nil)
 			if err != nil {
 				return err
 			}

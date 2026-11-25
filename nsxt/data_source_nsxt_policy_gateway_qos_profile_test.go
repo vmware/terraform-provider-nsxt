@@ -109,7 +109,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 			return policyResourceNotSupportedError()
 		}
 		// Find the object by name
-		objList, err := client.List(nil, nil, nil, nil, nil, nil)
+		objList, err := client.List(nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("GatewayQosProfile", err)
 		}

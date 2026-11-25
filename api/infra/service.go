@@ -159,7 +159,7 @@ func (c ServiceClientContext) Delete(serviceIdParam string) error {
 	return err
 }
 
-func (c ServiceClientContext) List(cursorParam *string, defaultServiceParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.ServiceListResult, error) {
+func (c ServiceClientContext) List(cursorParam *string, defaultServiceParam *bool, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.ServiceListResult, error) {
 	var err error
 	var obj model0.ServiceListResult
 
@@ -167,11 +167,11 @@ func (c ServiceClientContext) List(cursorParam *string, defaultServiceParam *boo
 
 	case utl.Local:
 		client := c.Client.(client0.ServicesClient)
-		obj, err = client.List(cursorParam, defaultServiceParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, defaultServiceParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.ServicesClient)
-		gmObj, err := client.List(cursorParam, defaultServiceParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, defaultServiceParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -183,7 +183,7 @@ func (c ServiceClientContext) List(cursorParam *string, defaultServiceParam *boo
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.ServicesClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, defaultServiceParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, defaultServiceParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

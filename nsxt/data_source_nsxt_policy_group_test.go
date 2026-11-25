@@ -152,7 +152,7 @@ func testAccDataSourceNsxtPolicyGroupDeleteByName(domain string, name string) er
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	objList, err := client.List(domain, nil, nil, nil, nil, nil, nil, nil)
+	objList, err := client.List(domain, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Group", err)
 	}
