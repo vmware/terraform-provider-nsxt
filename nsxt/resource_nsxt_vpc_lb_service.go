@@ -65,6 +65,12 @@ func resourceNsxtVpcLBService() *schema.Resource {
 				Optional:     true,
 				Default:      model.LBService_SIZE_SMALL,
 			},
+			"relax_scale_validation": {
+				Type:        schema.TypeBool,
+				Description: "Relax the scale validations of virtual servers, pools, pool members and rules for the Load Balancer Service. When not set, the value configured on NSX is preserved",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -107,12 +113,13 @@ func resourceNsxtVpcLBServiceCreate(d *schema.ResourceData, m interface{}) error
 	size := d.Get("size").(string)
 
 	obj := model.LBService{
-		DisplayName:   &displayName,
-		Description:   &description,
-		Tags:          tags,
-		Enabled:       &enabled,
-		ErrorLogLevel: &errorLogLevel,
-		Size:          &size,
+		DisplayName:          &displayName,
+		Description:          &description,
+		Tags:                 tags,
+		Enabled:              &enabled,
+		ErrorLogLevel:        &errorLogLevel,
+		Size:                 &size,
+		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
 	}
 
 	// Create the resource using PATCH
@@ -154,6 +161,9 @@ func resourceNsxtVpcLBServiceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("enabled", obj.Enabled)
 	d.Set("error_log_level", obj.ErrorLogLevel)
 	d.Set("size", obj.Size)
+	if obj.RelaxScaleValidation != nil {
+		d.Set("relax_scale_validation", obj.RelaxScaleValidation)
+	}
 
 	return nil
 }
@@ -178,12 +188,13 @@ func resourceNsxtVpcLBServiceUpdate(d *schema.ResourceData, m interface{}) error
 	size := d.Get("size").(string)
 
 	obj := model.LBService{
-		DisplayName:   &displayName,
-		Description:   &description,
-		Tags:          tags,
-		Enabled:       &enabled,
-		ErrorLogLevel: &errorLogLevel,
-		Size:          &size,
+		DisplayName:          &displayName,
+		Description:          &description,
+		Tags:                 tags,
+		Enabled:              &enabled,
+		ErrorLogLevel:        &errorLogLevel,
+		Size:                 &size,
+		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
 	}
 
 	// Update the resource using PATCH
