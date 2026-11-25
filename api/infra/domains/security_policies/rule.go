@@ -177,7 +177,7 @@ func (c RuleClientContext) Update(domainIdParam string, securityPolicyIdParam st
 	return obj, err
 }
 
-func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.RuleListResult, error) {
+func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.RuleListResult, error) {
 	var err error
 	var obj model0.RuleListResult
 
@@ -187,11 +187,11 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 		client := c.Client.(interface {
 			List(string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
 		})
-		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.RulesClient)
-		gmObj, err := client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, securityPolicyIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -205,7 +205,7 @@ func (c RuleClientContext) List(domainIdParam string, securityPolicyIdParam stri
 		client := c.Client.(interface {
 			List(string, string, string, string, *string, *bool, *bool, *string, *int64, *bool, *string) (model0.RuleListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, securityPolicyIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

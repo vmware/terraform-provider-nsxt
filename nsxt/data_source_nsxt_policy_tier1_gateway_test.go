@@ -96,7 +96,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 	}
 
 	// Find the object by name
-	objList, err := client.List(nil, nil, nil, nil, nil, nil)
+	objList, err := client.List(nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Tier1", err)
 	}

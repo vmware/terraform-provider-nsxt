@@ -37,7 +37,7 @@ func NewStateClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	return &SegmentConfigurationStateClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
-func (c SegmentConfigurationStateClientContext) Get(segmentsIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statsTypeParam *string, transportNodeIdParam *string) (model0.SegmentConfigurationState, error) {
+func (c SegmentConfigurationStateClientContext) Get(segmentsIdParam string, bgpNeighborTypeParam *string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statsTypeParam *string, transportNodeIdParam *string) (model0.SegmentConfigurationState, error) {
 	var obj model0.SegmentConfigurationState
 	var err error
 
@@ -45,14 +45,14 @@ func (c SegmentConfigurationStateClientContext) Get(segmentsIdParam string, curs
 
 	case utl.Local:
 		client := c.Client.(client0.StateClient)
-		obj, err = client.Get(segmentsIdParam, nil, cursorParam, edgePathParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
+		obj, err = client.Get(segmentsIdParam, bgpNeighborTypeParam, cursorParam, edgePathParam, enforcementPointPathParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.Global:
 		client := c.Client.(client1.StateClient)
-		gmObj, err1 := client.Get(segmentsIdParam, cursorParam, edgePathParam, enforcementPointPathParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
+		gmObj, err1 := client.Get(segmentsIdParam, bgpNeighborTypeParam, cursorParam, edgePathParam, enforcementPointPathParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
 		if err1 != nil {
 			return obj, err1
 		}
@@ -62,7 +62,7 @@ func (c SegmentConfigurationStateClientContext) Get(segmentsIdParam string, curs
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.StateClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentsIdParam, nil, cursorParam, edgePathParam, enforcementPointPathParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, segmentsIdParam, bgpNeighborTypeParam, cursorParam, edgePathParam, enforcementPointPathParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam, sourceParam, statsTypeParam, transportNodeIdParam)
 		if err != nil {
 			return obj, err
 		}

@@ -180,7 +180,7 @@ func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Conn
 			if client == nil {
 				return nil, policyResourceNotSupportedError()
 			}
-			ports, err = client.List(segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
+			ports, err = client.List(segmentID, cursor, nil, &boolFalse, nil, nil, &boolFalse, nil)
 		} else {
 			// fixed segments
 			client := cliT1SegmentsPortsClient(context, connector)

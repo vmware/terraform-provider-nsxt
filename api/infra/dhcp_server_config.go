@@ -159,7 +159,7 @@ func (c DhcpServerConfigClientContext) Delete(dhcpServerConfigIdParam string) er
 	return err
 }
 
-func (c DhcpServerConfigClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DhcpServerConfigListResult, error) {
+func (c DhcpServerConfigClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.DhcpServerConfigListResult, error) {
 	var err error
 	var obj model0.DhcpServerConfigListResult
 
@@ -167,11 +167,11 @@ func (c DhcpServerConfigClientContext) List(cursorParam *string, includeMarkForD
 
 	case utl.Local:
 		client := c.Client.(client0.DhcpServerConfigsClient)
-		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.DhcpServerConfigsClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -183,7 +183,7 @@ func (c DhcpServerConfigClientContext) List(cursorParam *string, includeMarkForD
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.DhcpServerConfigsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

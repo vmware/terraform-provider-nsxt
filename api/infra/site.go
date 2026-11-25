@@ -81,7 +81,7 @@ func (c SiteClientContext) Get(siteIdParam string) (model1.Site, error) {
 	return obj, err
 }
 
-func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model1.SiteListResult, error) {
+func (c SiteClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model1.SiteListResult, error) {
 	var err error
 	var obj model1.SiteListResult
 
@@ -89,7 +89,7 @@ func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjects
 
 	case utl.Local:
 		client := c.Client.(client0.SitesClient)
-		lmObj, err := client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		lmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -101,7 +101,7 @@ func (c SiteClientContext) List(cursorParam *string, includeMarkForDeleteObjects
 
 	case utl.Global:
 		client := c.Client.(client1.SitesClient)
-		obj, err = client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

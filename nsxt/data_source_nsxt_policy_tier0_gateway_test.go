@@ -89,7 +89,7 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 			return nil
 		}
 	} else {
-		objList, err := client.List(nil, nil, nil, nil, nil, nil)
+		objList, err := client.List(nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading Tier0s: %v", err)
 		}

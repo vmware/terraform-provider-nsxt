@@ -204,7 +204,7 @@ func (c SecurityPolicyClientContext) Delete(domainIdParam string, securityPolicy
 	return err
 }
 
-func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.SecurityPolicyListResult, error) {
+func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.SecurityPolicyListResult, error) {
 	var err error
 	var obj model0.SecurityPolicyListResult
 
@@ -214,11 +214,11 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 		client := c.Client.(interface {
 			List(string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.SecurityPoliciesClient)
-		gmObj, err := client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -232,13 +232,13 @@ func (c SecurityPolicyClientContext) List(domainIdParam string, cursorParam *str
 		client := c.Client.(interface {
 			List(string, string, string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(interface {
 			List(string, string, string, *string, *bool, *bool, *bool, *string, *int64, *bool, *string) (model0.SecurityPolicyListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, nil, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

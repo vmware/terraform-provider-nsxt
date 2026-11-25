@@ -59,7 +59,7 @@ func dataSourceNsxtPolicyBfdProfileRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	inc := false
-	objList, err := client.List(nil, &inc, nil, nil, nil, nil)
+	objList, err := client.List(nil, nil, &inc, nil, nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf("error listing BfdProfiles: %v", err)
 	}

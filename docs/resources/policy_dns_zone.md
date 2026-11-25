@@ -50,7 +50,7 @@ The following arguments are supported:
 * `dns_domain_name` - (Required, Force New) The domain name for this zone (e.g. `example.com`) or reverse-notation (e.g. `12.168.192.in-addr.arpa`). Immutable after creation.
 * `resolution_scope` - (Optional) Set of VPC policy paths within this project. When set and non-empty, only workloads in the specified VPCs can resolve this zone (split-horizon DNS). When unset or empty, all VPCs in the project can resolve the zone. A zone shared with other projects must have `resolution_scope` unset or empty.
 * `ttl` - (Optional) Default Time-To-Live in seconds for DNS records in this zone (30-86400). Default: `300`.
-* `soa` - (Optional) SOA (Start of Authority) record parameters. All sub-fields are optional and computed; omitted fields use system defaults.
+* `soa` - (Optional) SOA (Start of Authority) record parameters. All sub-fields are optional and computed; omitted fields use system defaults. When this block is omitted, the provider sends the required empty SOA object to NSX. NSX defaults `primary_nameserver` to `ns1.<dns_domain_name>` and `responsible_party` to `hostmaster.<dns_domain_name>`.
     * `primary_nameserver` - (Optional, Computed) FQDN of the primary nameserver. Must not end with a trailing dot.
     * `responsible_party` - (Optional, Computed) Zone administrator email in DNS format. Must not end with a trailing dot.
     * `serial_number` - (Optional, Computed) Zone serial number.

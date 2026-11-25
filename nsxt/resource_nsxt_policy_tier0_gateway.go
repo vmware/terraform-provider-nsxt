@@ -379,7 +379,7 @@ func getTier0AdvancedConfigSchema() *schema.Schema {
 func listGlobalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := cliTier0LocaleServicesClient(context, connector)
 	markForDelete := false
-	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
+	listResponse, err := client.List(gwID, cursor, nil, &markForDelete, nil, nil, nil, nil)
 	if err != nil {
 		return model.LocaleServicesListResult{}, err
 	}
@@ -395,7 +395,7 @@ func listGlobalManagerTier0GatewayLocaleServices(context utl.SessionContext, con
 func listLocalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := cliTier0LocaleServicesClient(context, connector)
 	markForDelete := false
-	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
+	return client.List(gwID, cursor, nil, &markForDelete, nil, nil, nil, nil)
 }
 
 func listPolicyTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string) ([]model.LocaleServices, error) {

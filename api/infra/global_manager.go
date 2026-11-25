@@ -60,7 +60,7 @@ func (c GlobalManagerClientContext) Get(globalManagerIdParam string) (model1.Glo
 	return obj, err
 }
 
-func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.GlobalManagerListResult, error) {
+func (c GlobalManagerClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.GlobalManagerListResult, error) {
 	var err error
 	var obj model0.GlobalManagerListResult
 
@@ -68,7 +68,7 @@ func (c GlobalManagerClientContext) List(cursorParam *string, includeMarkForDele
 
 	case utl.Global:
 		client := c.Client.(client0.GlobalManagersClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}

@@ -64,7 +64,12 @@ The following arguments are supported:
     * `forwarding_up_timer` - (Optional/Computed) Time in seconds the transit gateway waits before marking forwarding as active after a failover event. Valid range is `0` to `100`. Default is `5`.
 * `redistribution_config` - (Optional) Route redistribution configuration. Sent and read as part of the same BGP routing config object as `bgp_config` (same API object as `advanced_config`).
     * `rule` - (Required) List of redistribution rules. Minimum 1, maximum 5.
-        * `types` - (Required) List of route types to redistribute. Supported values: `PUBLIC` (public networks from connected VPC subnets, NAT rules, and VPC static routes), `TGW_PRIVATE` (transit gateway private networks; only redistributed to BGP neighbors whose centralized network attachment has `allow_private` set to `true`), `TGW_STATIC_ROUTE` (user-configured static routes on the transit gateway), `CONNECTED_SUBNET` (centralized network attachment interface subnets).
+        * `types` - (Required) List of route types to redistribute. Supported values:
+            * `PUBLIC` - Public networks from connected VPC subnets, NAT rules, and VPC static routes.
+            * `TGW_PRIVATE` - Transit gateway private networks. Only redistributed to BGP neighbors whose centralized network attachment has `private_network_attachment` set to `true`.
+            * `TGW_STATIC_ROUTE` - User-configured static routes on the transit gateway.
+            * `NETWORK_ATTACHMENT` - Centralized network attachment interface subnets.
+            * `TGW_IPSEC_LOCAL_IP` - Local endpoint IP configured for an IPSec VPN session.
         * `route_map_path` - (Optional) Policy path of a route map to apply for filtering routes in this rule. The route map must exist under the same transit gateway.
 * `bgp_config` - (Optional/Computed) BGP routing configuration. Applied in the same H-API transaction as the transit gateway (as a `ChildBgpRoutingConfig` child object). Read uses the BGP GET API (`/orgs/{org}/projects/{proj}/transit-gateways/{tgw}/bgp`).
     * `revision` - (Computed) Revision of the BGP config object.

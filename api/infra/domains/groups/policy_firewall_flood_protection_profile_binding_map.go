@@ -159,7 +159,7 @@ func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) Update(doma
 	return obj, err
 }
 
-func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) List(domainIdParam string, groupIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PolicyFirewallFloodProtectionProfileBindingMapListResult, error) {
+func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) List(domainIdParam string, groupIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PolicyFirewallFloodProtectionProfileBindingMapListResult, error) {
 	var err error
 	var obj model0.PolicyFirewallFloodProtectionProfileBindingMapListResult
 
@@ -167,11 +167,11 @@ func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) List(domain
 
 	case utl.Local:
 		client := c.Client.(client0.FirewallFloodProtectionProfileBindingMapsClient)
-		obj, err = client.List(domainIdParam, groupIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, groupIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.FirewallFloodProtectionProfileBindingMapsClient)
-		gmObj, err := client.List(domainIdParam, groupIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, groupIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -183,7 +183,7 @@ func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) List(domain
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.FirewallFloodProtectionProfileBindingMapsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, groupIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, groupIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

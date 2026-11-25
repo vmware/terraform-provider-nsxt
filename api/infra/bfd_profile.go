@@ -81,7 +81,7 @@ func (c BfdProfileClientContext) Get(bfdProfileIdParam string) (model0.BfdProfil
 	return obj, err
 }
 
-func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.BfdProfileListResult, error) {
+func (c BfdProfileClientContext) List(cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.BfdProfileListResult, error) {
 	var err error
 	var obj model0.BfdProfileListResult
 
@@ -89,7 +89,7 @@ func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteO
 
 	case utl.Global:
 		client := c.Client.(client0.BfdProfilesClient)
-		gmObj, err := client.List(cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -101,7 +101,7 @@ func (c BfdProfileClientContext) List(cursorParam *string, includeMarkForDeleteO
 
 	case utl.Local:
 		client := c.Client.(client1.BfdProfilesClient)
-		obj, err = client.List(cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

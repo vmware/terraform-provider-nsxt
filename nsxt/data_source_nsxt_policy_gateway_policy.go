@@ -55,7 +55,7 @@ func listGatewayPolicies(context utl.SessionContext, domain string, connector cl
 	total := 0
 
 	for {
-		policies, err := client.List(domain, cursor, nil, nil, nil, nil, &boolFalse, nil)
+		policies, err := client.List(domain, cursor, nil, nil, nil, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
 		}

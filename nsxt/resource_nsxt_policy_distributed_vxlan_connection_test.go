@@ -12,33 +12,33 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-// Each parallel test uses its own VNI and name to avoid pool-overlap conflicts.
+// L3 VNIs must lie outside the NSX default VNI pool (5000-75000), otherwise NSX rejects them (code 641266).
 var accTestPolicyDistributedVxlanConnectionCreateAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
 	"description":         "terraform created",
-	"l3_vni":              "5000",
+	"l3_vni":              "100000",
 	"route_distinguisher": "65000:5000",
 }
 
 var accTestPolicyDistributedVxlanConnectionUpdateAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
 	"description":         "terraform updated",
-	"l3_vni":              "5000",
+	"l3_vni":              "100000",
 	"route_distinguisher": "65000:5000",
 }
 
-// Separate VNI (6000) so _importBasic does not collide with _basic (VNI 5000).
+// Separate VNI (100002) so _importBasic does not collide with _basic (VNI 100000).
 var accTestPolicyDistributedVxlanConnectionImportAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
-	"l3_vni":              "6000",
+	"l3_vni":              "100002",
 	"route_distinguisher": "65000:6000",
 }
 
-// Separate VNI (5001) so _withRouteTarget does not collide with the other tests.
+// Separate VNI (100001) so _withRouteTarget does not collide with the other tests.
 var accTestPolicyDistributedVxlanConnectionWithRouteTargetAttributes = map[string]string{
 	"display_name":        getAccTestResourceName(),
 	"description":         "terraform created with route target",
-	"l3_vni":              "5001",
+	"l3_vni":              "100001",
 	"route_distinguisher": "65001:5001",
 }
 
@@ -265,7 +265,7 @@ data "nsxt_policy_distributed_vxlan_connection" "test" {
 }
 
 // testAccNsxtPolicyDistributedVxlanConnectionMinimalistic is used as step 3 of _basic
-// (same VNI 5000 as the create/update steps, minimal attributes).
+// (same VNI 100000 as the create/update steps, minimal attributes).
 func testAccNsxtPolicyDistributedVxlanConnectionMinimalistic() string {
 	attrMap := accTestPolicyDistributedVxlanConnectionCreateAttributes
 	return testAccNsxtPolicyDistributedVxlanConnectionRcTemplate() + fmt.Sprintf(`
@@ -290,7 +290,7 @@ data "nsxt_policy_distributed_vxlan_connection" "test" {
 }
 
 // testAccNsxtPolicyDistributedVxlanConnectionImportMinimalistic is used by _importBasic
-// and intentionally uses a different VNI (6000) to avoid parallel conflicts with _basic (VNI 5000).
+// and intentionally uses a different VNI (100002) to avoid conflicts with _basic (VNI 100000).
 func testAccNsxtPolicyDistributedVxlanConnectionImportMinimalistic() string {
 	attrMap := accTestPolicyDistributedVxlanConnectionImportAttributes
 	return testAccNsxtPolicyDistributedVxlanConnectionRcTemplate() + fmt.Sprintf(`

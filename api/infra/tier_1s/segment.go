@@ -173,7 +173,7 @@ func (c SegmentClientContext) Delete(tier1IdParam string, segmentIdParam string)
 	return err
 }
 
-func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, segmentTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.SegmentListResult, error) {
+func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, segmentTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model0.SegmentListResult, error) {
 	var err error
 	var obj model0.SegmentListResult
 
@@ -183,11 +183,11 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 		client := c.Client.(interface {
 			List(string, *string, *bool, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
 		})
-		obj, err = client.List(tier1IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(tier1IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.SegmentsClient)
-		gmObj, err := client.List(tier1IdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(tier1IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -201,7 +201,7 @@ func (c SegmentClientContext) List(tier1IdParam string, cursorParam *string, inc
 		client := c.Client.(interface {
 			List(string, string, string, *string, *bool, *bool, *string, *int64, *string, *bool, *string) (model0.SegmentListResult, error)
 		})
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, segmentTypeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

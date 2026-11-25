@@ -182,7 +182,7 @@ func (c GroupClientContext) Delete(domainIdParam string, groupIdParam string, fa
 	return err
 }
 
-func (c GroupClientContext) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, memberTypesParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.GroupListResult, error) {
+func (c GroupClientContext) List(domainIdParam string, cursorParam *string, includeConflictsParam *bool, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, memberTypesParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.GroupListResult, error) {
 	var err error
 	var obj model0.GroupListResult
 
@@ -190,11 +190,11 @@ func (c GroupClientContext) List(domainIdParam string, cursorParam *string, incl
 
 	case utl.Local:
 		client := c.Client.(client0.GroupsClient)
-		obj, err = client.List(domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.Global:
 		client := c.Client.(client1.GroupsClient)
-		gmObj, err := client.List(domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
+		gmObj, err := client.List(domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
 		if err != nil {
 			return obj, err
 		}
@@ -206,11 +206,11 @@ func (c GroupClientContext) List(domainIdParam string, cursorParam *string, incl
 
 	case utl.Multitenancy:
 		client := c.Client.(client2.GroupsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	case utl.VPC:
 		client := c.Client.(client3.GroupsClient)
-		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, nil, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeConflictsParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
