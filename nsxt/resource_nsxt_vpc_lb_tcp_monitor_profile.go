@@ -64,7 +64,7 @@ func resourceNsxtVpcLBTcpMonitorProfilePatch(d *schema.ResourceData, m interface
 	send := d.Get("send").(string)
 	fallCount := int64(d.Get("fall_count").(int))
 	interval := int64(d.Get("interval").(int))
-	monitorPort := int64(d.Get("monitor_port").(int))
+	monitorPort := getPolicyLbMonitorPortFromSchema(d)
 	riseCount := int64(d.Get("rise_count").(int))
 	timeout := int64(d.Get("timeout").(int))
 	resourceType := model.LBMonitorProfile_RESOURCE_TYPE_LBTCPMONITORPROFILE
@@ -77,7 +77,7 @@ func resourceNsxtVpcLBTcpMonitorProfilePatch(d *schema.ResourceData, m interface
 		Send:         &send,
 		FallCount:    &fallCount,
 		Interval:     &interval,
-		MonitorPort:  &monitorPort,
+		MonitorPort:  monitorPort,
 		RiseCount:    &riseCount,
 		Timeout:      &timeout,
 		ResourceType: resourceType,
