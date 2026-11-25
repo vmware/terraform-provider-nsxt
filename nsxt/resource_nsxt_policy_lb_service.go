@@ -73,8 +73,25 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 				Optional:     true,
 				Default:      model.LBService_SIZE_SMALL,
 			},
+			"relax_scale_validation": {
+				Type:        schema.TypeBool,
+				Description: "Relax the scale validations of virtual servers, pools, pool members and rules for the Load Balancer Service. When not set, the value configured on NSX is preserved",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
+}
+
+// getLBServiceRelaxScaleValidation returns the relax_scale_validation value to send to NSX,
+// or nil if the value is neither configured nor known from a previous read. Omitting the
+// field makes NSX reset it to its default, so Update must send back the value read from NSX.
+func getLBServiceRelaxScaleValidation(d *schema.ResourceData) *bool {
+	if v, ok := d.GetOkExists("relax_scale_validation"); ok {
+		relax := v.(bool)
+		return &relax
+	}
+	return nil
 }
 
 func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
@@ -118,13 +135,14 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 	}
 
 	obj := model.LBService{
-		DisplayName:      &displayName,
-		Description:      &description,
-		Tags:             tags,
-		ConnectivityPath: &connectivityPath,
-		Enabled:          &enabled,
-		ErrorLogLevel:    &errorLogLevel,
-		Size:             &size,
+		DisplayName:          &displayName,
+		Description:          &description,
+		Tags:                 tags,
+		ConnectivityPath:     &connectivityPath,
+		Enabled:              &enabled,
+		ErrorLogLevel:        &errorLogLevel,
+		Size:                 &size,
+		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
 	}
 
 	// Create the resource using PATCH
@@ -169,6 +187,9 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("enabled", obj.Enabled)
 	d.Set("error_log_level", obj.ErrorLogLevel)
 	d.Set("size", obj.Size)
+	if obj.RelaxScaleValidation != nil {
+		d.Set("relax_scale_validation", obj.RelaxScaleValidation)
+	}
 
 	return nil
 }
@@ -199,13 +220,14 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	}
 
 	obj := model.LBService{
-		DisplayName:      &displayName,
-		Description:      &description,
-		Tags:             tags,
-		ConnectivityPath: &connectivityPath,
-		Enabled:          &enabled,
-		ErrorLogLevel:    &errorLogLevel,
-		Size:             &size,
+		DisplayName:          &displayName,
+		Description:          &description,
+		Tags:                 tags,
+		ConnectivityPath:     &connectivityPath,
+		Enabled:              &enabled,
+		ErrorLogLevel:        &errorLogLevel,
+		Size:                 &size,
+		RelaxScaleValidation: getLBServiceRelaxScaleValidation(d),
 	}
 
 	// Update the resource using PATCH

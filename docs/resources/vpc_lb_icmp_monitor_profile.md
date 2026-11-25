@@ -1,0 +1,78 @@
+---
+subcategory: "VPC"
+page_title: "NSXT: nsxt_vpc_lb_icmp_monitor_profile"
+description: A resource to configure a VPC LBIcmpMonitorProfile.
+---
+
+# nsxt_vpc_lb_icmp_monitor_profile
+
+This resource provides a method for the management of a VPC LBIcmpMonitorProfile.
+
+This resource is applicable to NSX Policy Manager and is supported with NSX 9.0.0 onwards.
+
+## Example Usage
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_vpc" "demovpc" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "vpc1"
+}
+
+resource "nsxt_vpc_lb_icmp_monitor_profile" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
+  }
+  display_name = "test"
+  description  = "Terraform provisioned LBIcmpMonitorProfile"
+  data_length  = 2
+  fall_count   = 2
+  interval     = 2
+  rise_count   = 2
+  timeout      = 2
+
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `display_name` - (Required) Display name of the resource.
+* `description` - (Optional) Description of the resource.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Required) The context which the object belongs to. Requires a VPC context.
+    * `project_id` - (Required) The ID of the project which the object belongs to.
+    * `vpc_id` - (Required) The ID of the VPC which the object belongs to.
+* `data_length` - (Optional) The data size (in bytes) of the ICMP healthcheck packet.
+* `fall_count` - (Optional) Mark member status DOWN if the healthcheck fails consecutively for fall_count times.
+* `interval` - (Optional) Active healthchecks are initiated periodically, at a configurable interval (in seconds), to each member of the Group.
+* `rise_count` - (Optional) Bring a DOWN member UP if rise_count successive healthchecks succeed.
+* `timeout` - (Optional) Timeout specified in seconds. After a healthcheck is initiated, if it does not complete within a certain period, then the healthcheck is considered to be unsuccessful. Completing a healthcheck within timeout means establishing a connection (TCP or SSL), if applicable, sending the request and receiving the response, all within the configured timeout.
+
+## Attributes Reference
+
+In addition to arguments listed above, the following attributes are exported:
+
+* `id` - ID of the resource.
+* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `path` - The NSX path of the policy resource.
+
+## Importing
+
+An existing object can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://developer.hashicorp.com/terraform/cli/import
+
+```shell
+terraform import nsxt_vpc_lb_icmp_monitor_profile.test PATH
+```
+
+The above command imports the VPC LB icmp monitor profile named `test` with the policy path `PATH`, which must be a VPC path of the format `/orgs/[org]/projects/[project]/vpcs/[vpc]/vpc-lb-monitor-profiles/[id]`. The project and VPC context is derived from the path.
