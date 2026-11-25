@@ -72,28 +72,38 @@ func dataSourceNsxtVpcLBPersistenceProfileRead(d *schema.ResourceData, m interfa
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
-		objList, err := c.List(parents[0], parents[1], parents[2], nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("VPC LBPersistenceProfile", err)
-		}
-		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch, prefixMatch []model.LBPersistenceProfile
-		for _, objInList := range objList.Results {
-			profile, errs := converter.ConvertToGolang(objInList, model.LBPersistenceProfileBindingType())
-			if errs != nil {
-				return errs[0]
+		var cursor *string
+		for {
+			objList, err := c.List(parents[0], parents[1], parents[2], cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+			if err != nil {
+				return handleListError("VPC LBPersistenceProfile", err)
 			}
-			lbProfile := profile.(model.LBPersistenceProfile)
+			// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+			for _, objInList := range objList.Results {
+				profile, errs := converter.ConvertToGolang(objInList, model.LBPersistenceProfileBindingType())
+				if errs != nil {
+					return errs[0]
+				}
+				lbProfile := profile.(model.LBPersistenceProfile)
+				if !dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
+					continue
+				}
 
-			if objName != "" && lbProfile.DisplayName != nil && strings.HasPrefix(*lbProfile.DisplayName, objName) && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
-				prefixMatch = append(prefixMatch, lbProfile)
+				if objName != "" && lbProfile.DisplayName != nil && strings.HasPrefix(*lbProfile.DisplayName, objName) && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
+					prefixMatch = append(prefixMatch, lbProfile)
+				}
+				if objName != "" && lbProfile.DisplayName != nil && *lbProfile.DisplayName == objName && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
+					perfectMatch = append(perfectMatch, lbProfile)
+				}
+				if objName == "" && typeSet && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
+					// match only by type
+					perfectMatch = append(perfectMatch, lbProfile)
+				}
 			}
-			if lbProfile.DisplayName != nil && *lbProfile.DisplayName == objName && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
-				perfectMatch = append(perfectMatch, lbProfile)
-			}
-			if objName == "" && typeSet && dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(lbProfile, objType) {
-				// match only by type
-				perfectMatch = append(perfectMatch, lbProfile)
+			cursor = objList.Cursor
+			if cursor == nil || *cursor == "" {
+				break
 			}
 		}
 		if len(perfectMatch) > 0 {

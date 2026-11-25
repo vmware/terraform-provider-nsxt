@@ -69,30 +69,37 @@ func dataSourceNsxtVpcLBMonitorRead(d *schema.ResourceData, m interface{}) error
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
-		objList, err := c.List(parents[0], parents[1], parents[2], nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("VPC LBMonitor", err)
-		}
-		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.LBMonitorProfile
 		var prefixMatch []model.LBMonitorProfile
-		for _, objInList := range objList.Results {
-			obj, err := policyLbMonitorConvert(objInList, objType)
+		var cursor *string
+		for {
+			objList, err := c.List(parents[0], parents[1], parents[2], cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 			if err != nil {
-				return fmt.Errorf("Error while converting VPC LBMonitor %s: %v", objID, err)
+				return handleListError("VPC LBMonitor", err)
 			}
-			if obj == nil {
-				continue
+			// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+			for _, objInList := range objList.Results {
+				obj, err := policyLbMonitorConvert(objInList, objType)
+				if err != nil {
+					return fmt.Errorf("Error while converting VPC LBMonitor for name %q and type %s: %w", objName, objType, err)
+				}
+				if obj == nil {
+					continue
+				}
+				if objName != "" && obj.DisplayName != nil && strings.HasPrefix(*obj.DisplayName, objName) {
+					prefixMatch = append(prefixMatch, *obj)
+				}
+				if obj.DisplayName != nil && *obj.DisplayName == objName {
+					perfectMatch = append(perfectMatch, *obj)
+				}
+				if objName == "" && typeSet {
+					// match only by type
+					perfectMatch = append(perfectMatch, *obj)
+				}
 			}
-			if objName != "" && obj.DisplayName != nil && strings.HasPrefix(*obj.DisplayName, objName) {
-				prefixMatch = append(prefixMatch, *obj)
-			}
-			if obj.DisplayName != nil && *obj.DisplayName == objName {
-				perfectMatch = append(perfectMatch, *obj)
-			}
-			if objName == "" && typeSet {
-				// match only by type
-				perfectMatch = append(perfectMatch, *obj)
+			cursor = objList.Cursor
+			if cursor == nil || *cursor == "" {
+				break
 			}
 		}
 		if len(perfectMatch) > 0 {
