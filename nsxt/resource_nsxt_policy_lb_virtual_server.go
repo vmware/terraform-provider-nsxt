@@ -75,7 +75,7 @@ func resourceNsxtPolicyLBVirtualServer() *schema.Resource {
 		Update: resourceNsxtPolicyLBVirtualServerUpdate,
 		Delete: resourceNsxtPolicyLBVirtualServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceNsxtPolicyLBVirtualServerImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -1524,6 +1524,20 @@ func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model
 	}
 }
 
+func resourceNsxtPolicyLBVirtualServerImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	connector := getPolicyConnector(m)
+	client := infra.NewLbVirtualServersClient(connector)
+
+	obj, err := client.Get(d.Id())
+	if err != nil {
+		return nil, logAPIError("Error importing LBVirtualServer", err)
+	}
+
+	// Only an explicit import adopts rules that Terraform does not yet manage.
+	setPolicyLbRulesInSchema(d, obj.Rules)
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewLbVirtualServersClient(connector)
 
@@ -1656,25 +1670,9 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 	d.Set("log_significant_event_only", obj.LogSignificantEventOnly)
 	setPolicyAccessListControlInSchema(d, obj.AccessListControl)
 
-	/*
-		This needs some explanation: we introduced the "rule" attribute in a later version, but we don't want
-		to break existing virtual servers where the rules might have been defined manually.
-
-		As such, we don't want to change anything as long as the user doesn't define any "rule" section in the resource.
-
-		This, in turn, should also not trigger the "plan" phase for existing rules, so we also ignore any existing "live"
-		rules unless we find rules to also exist in the resource state.
-
-		However, during import operations, we need to read all existing rules from NSX-T to populate the state correctly.
-	*/
-	rules := d.Get("rule").([]interface{})
-	// Check if this is an import operation by looking at the ID in state
-	isImport := d.Id() != "" && len(rules) == 0 && len(obj.Rules) > 0
-
-	if isImport {
-		log.Printf("[DEBUG] Detected import for LB Virtual Server %s: empty state but NSX has %d rules", d.Id(), len(obj.Rules))
-	}
-	if len(rules) > 0 || isImport {
+	// Refresh only rules already managed by Terraform. The importer separately
+	// adopts existing rules; an ordinary refresh must leave unmanaged rules alone.
+	if _, ok := d.GetOk("rule"); ok {
 		setPolicyLbRulesInSchema(d, obj.Rules)
 	} else {
 		log.Printf("[INFO] Ignoring rules since the user did not specify them in configuration")
