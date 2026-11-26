@@ -11,11 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var ikeProfilePathExample = "/infra/ipsec-vpn-ike-profiles/[profile]"
+var cliIpsecVpnIkeProfilesClient = infra.NewIpsecVpnIkeProfilesClient
+var ikeProfilePathExample = getMultitenancyPathExample("/infra/ipsec-vpn-ike-profiles/[profile]")
 
 var iPSecVpnIkeProfileDhGroupsValues = []string{
 	model.IPSecVpnIkeProfile_DH_GROUPS_GROUP2,
@@ -66,6 +69,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(false, false, false),
 			"dh_groups": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
@@ -105,8 +109,8 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnIkeProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewIpsecVpnIkeProfilesClient(connector)
+func resourceNsxtPolicyIPSecVpnIkeProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -125,9 +129,13 @@ func resourceNsxtPolicyIPSecVpnIkeProfileCreate(d *schema.ResourceData, m interf
 	}
 
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnIkeProfileExists)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		return resourceNsxtPolicyIPSecVpnIkeProfileExists(sessionContext, id, connector)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -154,7 +162,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfileCreate(d *schema.ResourceData, m interf
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnIkeProfile with ID %s", id)
-	client := infra.NewIpsecVpnIkeProfilesClient(connector)
+	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("IPSecVpnIkeProfile", id, err)
@@ -174,7 +182,8 @@ func resourceNsxtPolicyIPSecVpnIkeProfileRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining IPSecVpnIkeProfile ID")
 	}
 
-	client := infra.NewIpsecVpnIkeProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IPSecVpnIkeProfile", id, err)
@@ -225,7 +234,8 @@ func resourceNsxtPolicyIPSecVpnIkeProfileUpdate(d *schema.ResourceData, m interf
 		SaLifeTime:           &saLifeTime,
 	}
 
-	client := infra.NewIpsecVpnIkeProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	err := client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("IPSecVpnIkeProfile", id, err)
@@ -241,7 +251,8 @@ func resourceNsxtPolicyIPSecVpnIkeProfileDelete(d *schema.ResourceData, m interf
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewIpsecVpnIkeProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnIkeProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {

@@ -29,6 +29,8 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) Policy context for this resource.
+    * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped service paths.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `local_address` - (Required) Local IPv4/v6 IP address.
 * `local_id` - (Optional) Local id for the local endpoint.
@@ -46,12 +48,25 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-An existing segment can be [imported][docs-import] into this resource, via the following command:
+An existing IPSec VPN Local Endpoint can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 ID
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 POLICY_PATH
 ```
 
-The above command imports the endpoint named `endpoint1` with the NSX ID `ID`.
+The above command imports the endpoint named `endpoint1` with the policy path `POLICY_PATH`.
+Note: a policy path is always required for import; a plain ID is not accepted.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 /infra/tier-1s/gw1/ipsec-vpn-services/svc1/local-endpoints/endpoint1
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.endpoint1 /orgs/default/projects/project1/infra/tier-1s/gw1/ipsec-vpn-services/svc1/local-endpoints/endpoint1
+```

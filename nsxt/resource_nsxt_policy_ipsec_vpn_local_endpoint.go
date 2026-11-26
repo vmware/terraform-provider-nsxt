@@ -15,12 +15,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
-	t0_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
-	t1_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
-	t1_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/ipsec_vpn_services"
+	tier0localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/locale_services/ipsec_vpn_services"
+	tier1ipsecvpnservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/ipsec_vpn_services"
+	tier1localeservicesipsec "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services/ipsec_vpn_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var cliTier0LocaleServiceIpsecVpnLocalEndpointsClient = tier0localeservicesipsec.NewLocalEndpointsClient
+var cliTier0IpsecVpnLocalEndpointsClient = tier0ipsecvpnservices.NewLocalEndpointsClient
+var cliTier1LocaleServiceIpsecVpnLocalEndpointsClient = tier1localeservicesipsec.NewLocalEndpointsClient
+var cliTier1IpsecVpnLocalEndpointsClient = tier1ipsecvpnservices.NewLocalEndpointsClient
 
 func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*metadata.ExtendedSchema {
 	schema := map[string]*metadata.ExtendedSchema{
@@ -30,6 +37,7 @@ func getIPSecVpnLocalEndpointCommonSchema(isTransitGateway bool) map[string]*met
 		"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 		"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 		"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+		"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 		"local_address": {
 			Schema: schema.Schema{
 				Type:         schema.TypeString,
@@ -92,9 +100,23 @@ type localEndpointClient struct {
 	gwID            string
 	localeServiceID string
 	serviceID       string
+	sessionContext  utl.SessionContext
 }
 
-func newLocalEndpointClient(servicePath string) (*localEndpointClient, error) {
+func getIPSecVpnLocalEndpointSessionContext(d *schema.ResourceData, m interface{}, servicePath string) utl.SessionContext {
+	sessionContext := getSessionContext(d, m)
+	if strings.HasPrefix(servicePath, "/orgs/") {
+		if sessionContext.ProjectID == "" {
+			sessionContext.ProjectID = extractProjectIDFromPolicyPath(servicePath)
+		}
+		if sessionContext.ProjectID != "" {
+			sessionContext.ClientType = utl.Multitenancy
+		}
+	}
+	return sessionContext
+}
+
+func newLocalEndpointClient(servicePath string, sessionContext utl.SessionContext) (*localEndpointClient, error) {
 	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
 	if err != nil {
 		return nil, err
@@ -105,24 +127,40 @@ func newLocalEndpointClient(servicePath string) (*localEndpointClient, error) {
 		gwID:            gwID,
 		localeServiceID: localeServiceID,
 		serviceID:       serviceID,
+		sessionContext:  sessionContext,
 	}, nil
 }
 
 func (c *localEndpointClient) Get(connector client.Connector, id string) (model.IPSecVpnLocalEndpoint, error) {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+			}
 			return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.serviceID, id)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		if c.sessionContext.ClientType == utl.Multitenancy {
+			return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN local endpoints")
+		}
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+		}
 		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+	if client == nil {
+		return model.IPSecVpnLocalEndpoint{}, fmt.Errorf("unsupported client type")
+	}
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
@@ -135,19 +173,34 @@ func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpn
 	var err error
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		} else {
-			client := t0_service.NewLocalEndpointsClient(connector)
+			client := cliTier0IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		}
 
 	} else {
 		if len(c.localeServiceID) > 0 {
-			client := t1_nested_service.NewLocalEndpointsClient(connector)
+			if c.sessionContext.ClientType == utl.Multitenancy {
+				return nil, fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN local endpoints")
+			}
+			client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		} else {
-			client := t1_service.NewLocalEndpointsClient(connector)
+			client := cliTier1IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return nil, fmt.Errorf("unsupported client type")
+			}
 			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
 		}
 	}
@@ -158,41 +211,80 @@ func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpn
 func (c *localEndpointClient) Patch(connector client.Connector, id string, obj model.IPSecVpnLocalEndpoint) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.serviceID, id, obj)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		if c.sessionContext.ClientType == utl.Multitenancy {
+			return fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN local endpoints")
+		}
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Patch(c.gwID, c.serviceID, id, obj)
 }
 
 func (c *localEndpointClient) Delete(connector client.Connector, id string) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
-			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			client := cliTier0LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+			if client == nil {
+				return fmt.Errorf("unsupported client type")
+			}
 			return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 		}
-		client := t0_service.NewLocalEndpointsClient(connector)
+		client := cliTier0IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.serviceID, id)
 
 	}
 	if len(c.localeServiceID) > 0 {
-		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		if c.sessionContext.ClientType == utl.Multitenancy {
+			return fmt.Errorf("project context is not supported for locale-service scoped IPSec VPN local endpoints")
+		}
+		client := cliTier1LocaleServiceIpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+		if client == nil {
+			return fmt.Errorf("unsupported client type")
+		}
 		return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
 	}
-	client := t1_service.NewLocalEndpointsClient(connector)
+	client := cliTier1IpsecVpnLocalEndpointsClient(c.sessionContext, connector)
+	if client == nil {
+		return fmt.Errorf("unsupported client type")
+	}
 	return client.Delete(c.gwID, c.serviceID, id)
 }
 
 func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector client.Connector, servicePath string) (bool, error) {
-	client, err := newLocalEndpointClient(servicePath)
+	// Used by acceptance tests and create flow; infer multitenancy from servicePath when applicable.
+	sessionContext := utl.SessionContext{ClientType: utl.Local}
+	if strings.HasPrefix(servicePath, "/orgs/") {
+		projectID := extractProjectIDFromPolicyPath(servicePath)
+		if projectID != "" {
+			sessionContext.ClientType = utl.Multitenancy
+			sessionContext.ProjectID = projectID
+		}
+	}
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
 	if err != nil {
 		return false, err
 	}
@@ -254,7 +346,22 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 
 	servicePath := d.Get("service_path").(string)
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnLocalEndpointExists(servicePath))
+	sessionContext := getIPSecVpnLocalEndpointSessionContext(d, m, servicePath)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		client, err := newLocalEndpointClient(servicePath, sessionContext)
+		if err != nil {
+			return false, err
+		}
+		_, err = client.Get(connector, id)
+		if err == nil {
+			return true, nil
+		}
+		if isNotFoundError(err) {
+			return false, nil
+		}
+		return false, logAPIError("Error retrieving resource", err)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -262,7 +369,7 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m int
 	obj := ipSecVpnLocalEndpointInitStruct(d)
 
 	log.Printf("[INFO] Creating IPSecVpnLocalEndpoint with ID %s", id)
-	client, err := newLocalEndpointClient(servicePath)
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
 	if err != nil {
 		return handleCreateError("IPSecVpnLocalEndpoint", id, err)
 	}
@@ -286,7 +393,8 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m inter
 	}
 
 	servicePath := d.Get("service_path").(string)
-	client, err := newLocalEndpointClient(servicePath)
+	sessionContext := getIPSecVpnLocalEndpointSessionContext(d, m, servicePath)
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
 	if err != nil {
 		return handleReadError(d, "IPSecVpnLocalEndpoint", id, err)
 	}
@@ -319,8 +427,8 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointUpdate(d *schema.ResourceData, m int
 	}
 
 	servicePath := d.Get("service_path").(string)
-
-	client, err := newLocalEndpointClient(servicePath)
+	sessionContext := getIPSecVpnLocalEndpointSessionContext(d, m, servicePath)
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
 	if err != nil {
 		return handleUpdateError("IPSecVpnLocalEndpoint", id, err)
 	}
@@ -345,7 +453,8 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointDelete(d *schema.ResourceData, m int
 	}
 
 	servicePath := d.Get("service_path").(string)
-	client, err := newLocalEndpointClient(servicePath)
+	sessionContext := getIPSecVpnLocalEndpointSessionContext(d, m, servicePath)
+	client, err := newLocalEndpointClient(servicePath, sessionContext)
 	if err != nil {
 		return handleUpdateError("IPSecVpnLocalEndpoint", id, err)
 	}
@@ -363,6 +472,7 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	importID := d.Id()
 	err := fmt.Errorf("VPN Local Endpoint Path expected, got %s", importID)
 	// path format example: /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/bbb/local-endpoints/ccc
+	// multitenancy path: /orgs/default/projects/proj-id/infra/tier-1s/aaa/ipsec-vpn-services/bbb/local-endpoints/ccc
 	s := strings.Split(importID, "/")
 	if len(s) < 8 {
 		return []*schema.ResourceData{d}, err
@@ -376,6 +486,12 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	}
 
 	d.Set("service_path", s[0])
+
+	if projectID := extractProjectIDFromPolicyPath(importID); projectID != "" {
+		ctxMap := make(map[string]interface{})
+		ctxMap["project_id"] = projectID
+		d.Set("context", []interface{}{ctxMap})
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

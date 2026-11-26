@@ -63,6 +63,8 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) Policy context for this resource.
+    * `project_id` - (Optional) Project ID for multitenancy. Applicable for Tier-1 project-scoped service paths.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ike_profile_path` - (Optional) Policy path referencing IKE profile. Note that if user wants to create session with `compliance_suite`, then this field should not be configured, the provider will use the default Profile for each compliance suite type.
 * `tunnel_profile_path` - (Optional) Policy path referencing Tunnel profile to be used. Note that if user wants to create session with `compliance_suite`, then this field should not be configured, the provider will use the default Profile for each compliance suite type.
@@ -109,7 +111,19 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://developer.hashicorp.com/terraform/cli/import
 
 ```shell
-terraform import nsxt_policy_ipsec_vpn_session.test PATH
+terraform import nsxt_policy_ipsec_vpn_session.test POLICY_PATH
 ```
 
-The above command imports IPSec VPN session named `test` that corresponds to NSX IPSec VPN session with policy path `PATH`.
+The above command imports the IPSec VPN session named `test` with the policy path `POLICY_PATH`.
+
+For example:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_session.test /infra/tier-1s/gw1/ipsec-vpn-services/svc1/sessions/session1
+```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_session.test /orgs/default/projects/project1/infra/tier-1s/gw1/ipsec-vpn-services/svc1/sessions/session1
+```

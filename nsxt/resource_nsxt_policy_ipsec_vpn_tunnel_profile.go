@@ -11,11 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var tunnelProfilePathExample = "/infra/ipsec-vpn-tunnel-profiles/[profile]"
+var cliIpsecVpnTunnelProfilesClient = infra.NewIpsecVpnTunnelProfilesClient
+var tunnelProfilePathExample = getMultitenancyPathExample("/infra/ipsec-vpn-tunnel-profiles/[profile]")
 
 var ipSecVpnTunnelProfileDfPolicyValues = []string{
 	model.IPSecVpnTunnelProfile_DF_POLICY_COPY,
@@ -69,6 +72,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(false, false, false),
 			"df_policy": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(ipSecVpnTunnelProfileDfPolicyValues, false),
@@ -113,8 +117,8 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnTunnelProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
+func resourceNsxtPolicyIPSecVpnTunnelProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -132,9 +136,13 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileCreate(d *schema.ResourceData, m int
 		return resourceNotSupportedError()
 	}
 	connector := getPolicyConnector(m)
+	sessionContext := getSessionContext(d, m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnTunnelProfileExists)
+	existsFunc := func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+		return resourceNsxtPolicyIPSecVpnTunnelProfileExists(sessionContext, id, connector)
+	}
+	id, err := getOrGenerateID(d, m, existsFunc)
 	if err != nil {
 		return err
 	}
@@ -163,7 +171,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPSecVpnTunnelProfile with ID %s", id)
-	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("IPSecVpnTunnelProfile", id, err)
@@ -183,7 +191,8 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileRead(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining IPSecVpnTunnelProfile ID")
 	}
 
-	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IPSecVpnTunnelProfile", id, err)
@@ -237,7 +246,8 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileUpdate(d *schema.ResourceData, m int
 		SaLifeTime:                  &saLifeTime,
 	}
 
-	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err := client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("IPSecVpnTunnelProfile", id, err)
@@ -253,7 +263,8 @@ func resourceNsxtPolicyIPSecVpnTunnelProfileDelete(d *schema.ResourceData, m int
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := cliIpsecVpnTunnelProfilesClient(sessionContext, connector)
 	err := client.Delete(id)
 
 	if err != nil {

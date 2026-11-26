@@ -30,6 +30,8 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) Policy context for this resource.
+    * `project_id` - (Optional) Project ID for multitenancy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ike_version` - (Optional) Internet Key Exchange(IKE) protocol version to be used, one of `IKE_V1`, `IKE_V2`, `IKE_FLEX`. `IKE_FLEX` will initiate IKE-V2 and respond to both `IKE_V1` and `IKE_V2`.
 * `encryption_algorithms` - (Required) Set of encryption algorithms to be used during IKE negotiation.
@@ -62,3 +64,11 @@ For example:
 ```shell
 terraform import nsxt_policy_ipsec_vpn_ike_profile.test /infra/ipsec-vpn-ike-profiles/my-ike-profile
 ```
+
+For multitenancy environments:
+
+```shell
+terraform import nsxt_policy_ipsec_vpn_ike_profile.test /orgs/default/projects/project1/infra/ipsec-vpn-ike-profiles/my-ike-profile
+```
+
+Note: for multitenancy projects only the policy path form is usable.
