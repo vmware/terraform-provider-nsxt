@@ -8,6 +8,7 @@ on:
       - '.github/workflows/fmt-check.yml'
   push:
     branches:
+      - main
       - master
       - 'branch_*'
       - 'release-*'
